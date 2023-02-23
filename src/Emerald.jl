@@ -1,0 +1,3 @@
+module Emerald
+
+end # module
