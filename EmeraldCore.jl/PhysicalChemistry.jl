@@ -1,7 +1,7 @@
 module PhysicalChemistry
 
 using ..Constant: CP_L, CP_V, GAS_R, K_BOLTZMANN, LH_V₀, PRESS_TRIPLE, R_V, T₂₅, T_TRIPLE, V_H₂O
-using ..NameSpace: AbstractTraceGas, TraceGasAir, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
+using ..Namespace: AbstractTraceGas, TraceGasAir, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
 
 
 #######################################################################################################################################################################################################

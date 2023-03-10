@@ -1,4 +1,4 @@
-module NameSpace
+module Namespace
 
 using LazyArtifacts
 

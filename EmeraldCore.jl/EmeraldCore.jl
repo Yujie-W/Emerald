@@ -10,5 +10,7 @@ include("EarthGeometry.jl"    )
 include("Optics.jl"           )
 include("PhysicalChemistry.jl")
 
+include("LeafOptics.jl")
+
 
 end
