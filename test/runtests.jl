@@ -1,3 +1,7 @@
 using Emerald
+using Test
 
-@test true
+
+@testset verbose = true "Emerald" begin
+    include("core.jl");
+end

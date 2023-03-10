@@ -1,5 +1,10 @@
 module Emerald
 
+export EmeraldCore
+export EmeraldMath
+export EmeraldIO
+export EmeraldTest
+
 
 # include the submodules
 include("../EmeraldIO.jl/EmeraldIO.jl")

@@ -92,3 +92,6 @@ soil_plant_air_continuum!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, M
 
     return nothing
 );
+
+# add an alias for soil_plant_air_continuum!
+spac! = soil_plant_air_continuum!;
