@@ -1,5 +1,7 @@
 module EmeraldCore
 
+using ..EmeraldIO
+
 
 include("Constant.jl" )
 include("Namespace.jl")
