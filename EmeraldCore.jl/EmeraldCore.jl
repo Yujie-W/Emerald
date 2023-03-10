@@ -17,6 +17,7 @@ include("Photosynthesis.jl" )
 include("Soil.jl"           )
 include("PlantHydraulics.jl")
 include("StomatalModels.jl" )
+include("SPAC.jl"           )
 
 
 end
