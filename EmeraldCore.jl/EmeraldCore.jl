@@ -9,6 +9,7 @@ include("Namespace.jl")
 
 include("EarthGeometry.jl"    )
 include("Optics.jl"           )
+include("Photosynthesis.jl"   )
 include("PhysicalChemistry.jl")
 
 include("CanopyOptics.jl")
