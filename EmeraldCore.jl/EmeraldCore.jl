@@ -9,12 +9,14 @@ include("Namespace.jl")
 
 include("EarthGeometry.jl"    )
 include("Optics.jl"           )
-include("Photosynthesis.jl"   )
 include("PhysicalChemistry.jl")
 
-include("CanopyOptics.jl")
-include("LeafOptics.jl"  )
-include("Soil.jl"        )
+include("Soil.jl")
+
+include("CanopyOptics.jl"   )
+include("LeafOptics.jl"     )
+include("Photosynthesis.jl" )
+include("PlantHydraulics.jl")
 
 
 end
