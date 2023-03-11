@@ -14,7 +14,7 @@ using GriddingMachine.Fetcher: ERA5SingleLevelsHourly, fetch_data!
 using ..EmeraldIO.Netcdf: read_nc, save_nc!
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Stats: nanmax, nanmean
-using ..EmeraldCore
+using ..EmeraldUtility.Email: send_email!
 
 # simulation settings
 RESULT_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/simulations";

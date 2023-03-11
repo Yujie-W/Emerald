@@ -28,12 +28,10 @@ function fetch_ERA5_data!(year::Int; notification::Bool = false)
     fetch_data!(_dts, year; vars=ERA5_LABELS, folder=_dir);
     @info "Finished downloading all the datasets!";
     if notification
-        #=
         send_email!("[ERA5 DATA STATUS] Downloading data for year $(year)",
                     "fluo@gps.caltech.edu",
                     "jesiner@gmail.com",
                     "ERA5 data downloading is finished for year $(year)!");
-        =#
     end;
 
     return nothing
@@ -85,12 +83,10 @@ regrid_ERA5!(year::Int, zoom::Int = 1; notification::Bool = false) = (
     regrid_ERA5!.(year, zoom, ERA5_LABELS, ERA5_LAYERS);
     @info "Finished regridding all the datasets!";
     if notification
-        #=
         send_email!("[ERA5 DATA STATUS] Regridding data for year $(year)",
                     "fluo@gps.caltech.edu",
                     "jesiner@gmail.com",
                     "ERA5 data regridding is finished for year $(year)!");
-        =#
     end;
 
     return nothing;
