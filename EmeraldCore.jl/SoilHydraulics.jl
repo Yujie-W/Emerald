@@ -1,4 +1,4 @@
-module Soil
+module SoilHydraulics
 
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 
