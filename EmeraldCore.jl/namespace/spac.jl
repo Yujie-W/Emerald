@@ -2,10 +2,8 @@
 #
 # Changes to this struct
 # General
-#     2022-May-25: toy SPAC system
-#     2022-May-25: use Root and Stem structures with temperatures
-#     2022-Jun-29: add AirLayer to SPAC
-#     2022-Jul-14: add Meteorology to SPAC
+#     2023-Mar-11: add new struct for memory cache
+#     2023-Mar-11: add new field temperature
 #
 #######################################################################################################################################################################################################
 """
@@ -18,9 +16,14 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACMemory{FT<:AbstractFloat}
+    "Chlorophyll content"
     chl::FT = -9999
+    "Leaf area index"
     lai::FT = -9999
+    "Vcmax25"
     vcm::FT = -9999
+    "Air temperature"
+    temperature::Vector{FT} = FT[]
 end
 
 

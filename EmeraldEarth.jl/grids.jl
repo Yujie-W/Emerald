@@ -1,3 +1,24 @@
+# CLM5 settings
+CLM5_PFTG = [0, 2.35, 2.35, 2.35, 4.12, 4.12, 4.45, 4.45, 4.45, 4.7, 4.7, 4.7, 2.22, 5.25, 1.62, 5.79, 5.79] .* sqrt(1000);
+CLM5_PFTS = ["not_vegetated",
+             "needleleaf_evergreen_temperate",
+             "needleleaf_evergreen_boreal",
+             "needleleaf_deciduous_boreal",
+             "broadleaf_evergreen_tropical",
+             "broadleaf_evergreen_temperate",
+             "broadleaf_deciduous_tropical",
+             "broadleaf_deciduous_temperate",
+             "broadleaf_deciduous_boreal",
+             "evergreen_shrub",
+             "deciduous_temperate_shrub",
+             "deciduous_boreal_shrub",
+             "c3_arctic_grass",
+             "c3_non-arctic_grass",
+             "c4_grass",
+             "c3_crop",
+             "c3_irrigated"];
+
+
 #######################################################################################################################################################################################################
 #
 # Changes to this function
@@ -15,6 +36,8 @@ Prepare a matrix of SPAC, given
 """
 function spac_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
     _ind_c3 = [2:14;16;17];
+    _ccs = read_csv("../data/CO2-1Y.csv");
+    _co2 = _ccs.MEAN[findfirst(_ccs.YEAR .== dts.year)];
 
     # create a matrix of SPAC
     @tinfo "Preparing a matrix of SPAC to work on...";
@@ -64,6 +87,11 @@ function spac_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
 
             # update the vcmax for C3 model
             update!(_spac; vcmax = dts.p_vcm[_ilon,_ilat,1], vcmax_expo = 0.3);
+
+            # sync the environmental conditions per layer for CO₂ concentration
+            for _alayer in _spac.AIR
+                update!(_alayer; f_CO₂ = _ccs.Mean[findfirst(_ccs.Year .== dts.year)]);
+            end;
 
             # initialize the spac
             initialize!(_spac);
