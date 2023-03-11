@@ -81,6 +81,12 @@ Base.@kwdef mutable struct LandDatasets{FT<:AbstractFloat}
     t_lm::Array{FT} = regrid(read_LUT(query_collection(tag_t_lm))[1], gz)
     "Stand PFT percentages `[%]`"
     t_pft::Array{FT} = regrid(read_LUT(query_collection(tag_t_pft))[1], gz)
+
+    # masks
+    "Mask for bare soil"
+    mask_soil::Matrix{Bool} = zeros(Bool, size(t_lm))
+    "Mask for SPAC"
+    mask_spac::Matrix{Bool} = zeros(Bool, size(t_lm))
 end
 
 """
@@ -155,10 +161,13 @@ function extend_data! end
 
 extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
     # determine where to fill based on land mask and lai
-    _mask_spac = zeros(Bool, size(dts.t_lm));
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
         if (dts.t_lm[_ilon,_ilat] > 0) && (nanmax(dts.p_lai[_ilon,_ilat,:]) > 0)
-            _mask_spac[_ilon,_ilat] = true;
+            dts.mask_spac[_ilon,_ilat] = true;
+            _mask_lai = isnan.(dts.p_lai[_ilon,_ilat,:]);
+            dts.p_lai[_ilon,_ilat,_mask_lai] .= 0;
+        elseif (dts.t_lm[_ilon,_ilat] > 0) && (nanmax(dts.p_lai[_ilon,_ilat,:]) == 0)
+            dts.mask_soil[_ilon,_ilat] = true;
             _mask_lai = isnan.(dts.p_lai[_ilon,_ilat,:]);
             dts.p_lai[_ilon,_ilat,_mask_lai] .= 0;
         end;
@@ -177,7 +186,7 @@ extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
                 end;
 
                 # fill the NaNs with nanmean of the rest
-                _mask_mean = _mask_spac .&& isnan.(_data);
+                _mask_mean = dts.mask_spac .&& isnan.(_data);
                 _data[_mask_mean] .= nanmean(_data);
             end;
         end;
@@ -232,163 +241,6 @@ extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat} = (
     _data_3x = [data; data; data];
     interpolate_data!.([_data_3x], (length(data)+1):(length(data)*2));
     data .= _data_3x[(length(data)+1):(length(data)*2)];
-
-    return nothing
-);
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2023-Mar-10: migrate from research repo to Emerald
-#
-#######################################################################################################################################################################################################
-"""
-
-    query_grid_info_filename(gm_tag::String, year::Int)
-    query_grid_info_filename(gm_tag::String, dts::LandDatasets)
-
-Return the file path to grid information, given
-- `gm_tag` Unique tag of GriddingMachine parameterization
-- `year` Year of simulations
-- `dts` `LandDatasets` type data to save
-
-"""
-function query_grid_info_filename end
-
-query_grid_info_filename(gm_tag::String, year::Int) = "$(SETUP_FOLDER)/grid_info_$(gm_tag)_$(year).jld2";
-
-query_grid_info_filename(gm_tag::String, dts::LandDatasets) = "$(SETUP_FOLDER)/grid_info_$(gm_tag)_$(dts.year).jld2";
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2023-Mar-10: migrate from research repo to Emerald
-#
-#######################################################################################################################################################################################################
-"""
-
-    prepare_grid_jld!(gm_tag::String, year::Int)
-    prepare_grid_jld!(gm_tag::String, dts::LandDatasets)
-
-Prepare the data used to run CliMA Land model, given
-- `gm_tag` Unique tag of GriddingMachine parameterization (needs to be supported in LandDatasets constructor function)
-- `year` Which year of data to read
-- `dts` `LandDatasets` type data to read
-
-"""
-function prepare_grid_jld! end
-
-prepare_grid_jld!(gm_tag::String, year::Int) = (
-    # if file exists, do nothing
-    _jld = query_grid_info_filename(gm_tag, year);
-    if isfile(_jld)
-        @info "File $(_jld) already exists!";
-        return nothing
-    end;
-
-    # save the file if the file does not exist
-    @info "Reading datasets for year $(year)...";
-    _dts = LandDatasets{Float64}(gm_tag, year);
-
-    prepare_grid_jld!(gm_tag, _dts);
-
-    return nothing
-);
-
-prepare_grid_jld!(gm_tag::String, dts::LandDatasets) = (
-    # if file exists, do nothing
-    _jld = query_grid_info_filename(gm_tag, dts);
-    _ccs = read_csv("../data/CO2-1Y.csv");
-    if isfile(_jld)
-        @info "File $(_jld) already exists!";
-        return nothing
-    end;
-
-    # combine lat and lon
-    _res    = 1 / dts.gz;
-    _lats   = collect(_res/2:_res:180) .- 90;
-    _lons   = collect(_res/2:_res:360) .- 180;
-    _ind_c3 = [2:14;16;17];
-    _ind_c4 = [15];
-    _dicts  = Dict{String,Any}[];
-    for _lat in _lats, _lon in _lons
-        _lat_ind = lat_ind(_lat; res=_res);
-        _lon_ind = lon_ind(_lon; res=_res);
-        _chls    = dts.p_chl[_lon_ind,_lat_ind,:];
-        _ci      = dts.p_ci[_lon_ind,_lat_ind,:];
-        _lais    = dts.p_lai[_lon_ind,_lat_ind,:];
-        _lma     = 1 / dts.p_sla[_lon_ind,_lat_ind,1] / 10;
-        _lmsk    = dts.t_lm[_lon_ind,_lat_ind,1];
-        _pfts    = dts.t_pft[_lon_ind,_lat_ind,:];
-        _scolor  = min(20, max(1, Int(floor(dts.s_cc[_lon_ind,_lat_ind,1]))));
-        _s_α     = dts.s_α[_lon_ind,_lat_ind,:];
-        _s_n     = dts.s_n[_lon_ind,_lat_ind,:];
-        _s_Θr    = dts.s_Θr[_lon_ind,_lat_ind,:];
-        _s_Θs    = dts.s_Θs[_lon_ind,_lat_ind,:];
-        _vcmax   = dts.p_vcm[_lon_ind,_lat_ind,:];
-        _zc      = dts.p_ch[_lon_ind,_lat_ind,1];
-
-        # gap fill the data for seasonal trends
-        extend_data!(_chls);
-        extend_data!(_ci);
-        extend_data!(_lais);
-        extend_data!(_vcmax);
-
-        # compute g1 for Medlyn model
-        _g1_c3_medlyn = CLM5_PFTG[_ind_c3]' * _pfts[_ind_c3] / sum(_pfts[_ind_c3]);
-        _g1_c4_medlyn = CLM5_PFTG[_ind_c4]' * _pfts[_ind_c4] / sum(_pfts[_ind_c4]);
-
-        # CO2 concentration
-        _co2 = _ccs.Mean[findfirst(_ccs.Year .== dts.year)];
-
-        # filter the data by input data
-        if (nanmax(_lais) > 0)      &&  # grid is vegetated
-           (nanmax(_chls) > 0)      &&  # chlorophyll content is known
-           (_lmsk > 0)              &&  # grid contains land
-           (!isnan(_scolor))        &&  # soil color is known
-           (all(.!isnan.(_vcmax)))  &&  # Vcmax is known
-           (!isnan(_zc))            &&  # Canopy height is not NaN
-           (!isnan(_lma))               # leaf mass per area is known
-            _dict = Dict{String,Any}("canopy_height"      => _zc,
-                                     "chlorophyll"        => _chls,
-                                     "clumping_index"     => _ci,
-                                     "co2_concentration"  => _co2,
-                                     "g1_medlyn_c3"       => _g1_c3_medlyn,
-                                     "g1_medlyn_c4"       => _g1_c4_medlyn,
-                                     "land_mask"          => _lmsk,
-                                     "latitude"           => _lat,
-                                     "latitude_index"     => _lat_ind,
-                                     "leaf_area_index"    => _lais,
-                                     "leaf_mass_per_area" => _lma,
-                                     "longitude"          => _lon,
-                                     "longitude_index"    => _lon_ind,
-                                     "pft_class"          => CLM5_PFTS,
-                                     "pft_g1_medlyn"      => CLM5_PFTG,
-                                     "pft_ratio"          => _pfts,
-                                     "soil_color"         => _scolor,
-                                     "soil_vg_n"          => _s_n,
-                                     "soil_vg_α"          => _s_α,
-                                     "soil_vg_Θr"         => _s_Θr,
-                                     "soil_vg_Θs"         => _s_Θs,
-                                     "spatial_resolution" => "$(dts.gz)X",
-                                     "vcmax"              => _vcmax,
-                                     "year"               => dts.year);
-            push!(_dicts, _dict)
-        end;
-    end;
-
-    # save the data to a new dictionary
-    _clima_land_dict = Dict{String,Any}(
-        "grid_info"             => _dicts,
-        "griddingmachine_tags"  => String[dts.tag_s_cc, dts.tag_s_α, dts.tag_s_n, dts.tag_s_Θr, dts.tag_s_Θs,
-                                          dts.tag_p_ch, dts.tag_p_chl, dts.tag_p_ci, dts.tag_p_lai, dts.tag_p_sla, dts.tag_p_vcm,
-                                          dts.tag_t_ele, dts.tag_t_lm, dts.tag_t_pft],
-    );
-    save(_jld, _clima_land_dict);
 
     return nothing
 );
