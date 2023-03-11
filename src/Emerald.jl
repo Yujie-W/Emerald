@@ -1,5 +1,7 @@
 module Emerald
 
+using Revise
+
 export EmeraldCore
 export EmeraldEarth
 export EmeraldMath

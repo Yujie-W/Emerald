@@ -1,6 +1,6 @@
 module Time
 
-using Dates: Date, DateTime, format, isleapyear, now
+using Dates: Date, DateTime, isleapyear
 
 # global constants
 const MDAYS_LEAP  = [0,31,60,91,121,152,182,213,244,274,305,335,366];

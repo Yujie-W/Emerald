@@ -36,7 +36,7 @@ Prepare a matrix of SPAC, given
 """
 function spac_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
     _ind_c3 = [2:14;16;17];
-    _ccs = read_csv("../data/CO2-1Y.csv");
+    _ccs = read_csv("$(@__DIR__)/../data/CO2-1Y.csv");
     _co2 = _ccs.MEAN[findfirst(_ccs.YEAR .== dts.year)];
 
     # create a matrix of SPAC
@@ -90,7 +90,7 @@ function spac_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
 
             # sync the environmental conditions per layer for CO₂ concentration
             for _alayer in _spac.AIR
-                update!(_alayer; f_CO₂ = _ccs.Mean[findfirst(_ccs.Year .== dts.year)]);
+                update!(_alayer; f_CO₂ = _co2);
             end;
 
             # initialize the spac
