@@ -1,5 +1,31 @@
 #######################################################################################################################################################################################################
 #
+# Changes to this struct
+# General
+#     2022-May-25: toy SPAC system
+#     2022-May-25: use Root and Stem structures with temperatures
+#     2022-Jun-29: add AirLayer to SPAC
+#     2022-Jul-14: add Meteorology to SPAC
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure that store memory information
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct SPACMemory{FT<:AbstractFloat}
+    chl::FT = -9999
+    lai::FT = -9999
+    vcm::FT = -9999
+end
+
+
+#######################################################################################################################################################################################################
+#
 # Changes to this type
 # General
 #     2022-May-25: add abstract type for soil-plant-air continuum
@@ -47,6 +73,8 @@ Base.@kwdef mutable struct MonoElementSPAC{FT<:AbstractFloat} <: AbstractSPACSys
     AIR::AirLayer{FT} = AirLayer{FT}()
     "Leaf system"
     LEAF::Leaf{FT} = Leaf{FT}()
+    "Memory cache"
+    MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Root system"
@@ -126,6 +154,8 @@ Base.@kwdef mutable struct MonoMLGrassSPAC{FT<:AbstractFloat} <: AbstractSPACSys
     CANOPY::HyperspectralMLCanopy{FT} = HyperspectralMLCanopy{FT}(DIM_LAYER = DIM_LAYER)
     "Leaf per layer"
     LEAVES::Vector{Leaves2D{FT}} = Leaves2D{FT}[Leaves2D{FT}() for _i in 1:DIM_LAYER]
+    "Memory cache"
+    MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Downwelling longwave radiation `[W m⁻²]`"
@@ -211,6 +241,8 @@ Base.@kwdef mutable struct MonoMLPalmSPAC{FT<:AbstractFloat} <: AbstractSPACSyst
     CANOPY::HyperspectralMLCanopy{FT} = HyperspectralMLCanopy{FT}(DIM_LAYER = DIM_LAYER)
     "Leaf per layer"
     LEAVES::Vector{Leaves2D{FT}} = Leaves2D{FT}[Leaves2D{FT}() for _i in 1:DIM_LAYER]
+    "Memory cache"
+    MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Downwelling longwave radiation `[W m⁻²]`"
@@ -300,6 +332,8 @@ Base.@kwdef mutable struct MonoMLTreeSPAC{FT<:AbstractFloat} <: AbstractSPACSyst
     CANOPY::HyperspectralMLCanopy{FT} = HyperspectralMLCanopy{FT}(DIM_LAYER = DIM_LAYER)
     "Leaf per layer"
     LEAVES::Vector{Leaves2D{FT}} = Leaves2D{FT}[Leaves2D{FT}() for _i in 1:DIM_LAYER]
+    "Memory cache"
+    MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Downwelling longwave radiation `[W m⁻²]`"
