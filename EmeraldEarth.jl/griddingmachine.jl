@@ -101,8 +101,9 @@ Constructor of LandDatasets, given
 LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
     @assert gm_tag in ["gm1", "gm2"] "Parameterization tag $(gm_tag) is not supported!";
 
+    @tinfo "Querying data from GriddingMachine...";
     if gm_tag == "gm1"
-        return LandDatasets{FT}(
+        _dts = LandDatasets{FT}(
                     gz         = 1,
                     year       = year,
                     tag_s_cc   = "SC_2X_1Y_V1",
@@ -119,8 +120,8 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
                     tag_t_ele  = "ELEV_4X_1Y_V1",
                     tag_t_lm   = "LM_4X_1Y_V1",
                     tag_t_pft  = "PFT_2X_1Y_V1")
-    elseif gm_tag == "gm2"
-        return LandDatasets{FT}(
+    else # gm_tag == "gm2"
+        _dts = LandDatasets{FT}(
                     gz         = 1,
                     year       = year,
                     tag_s_cc   = "SC_2X_1Y_V1",
@@ -138,6 +139,11 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
                     tag_t_lm   = "LM_4X_1Y_V1",
                     tag_t_pft  = "PFT_2X_1Y_V1")
     end;
+
+    @tinfo "Gap-filling data from GriddingMachine...";
+    extend_data!(_dts);
+
+    return _dts
 );
 
 
@@ -175,7 +181,7 @@ extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
 
     # iterate the fieldnames
     for _field in fieldnames(typeof(dts))
-        if !(_field in [:p_lai, :t_ele, :t_lm, :t_pft])
+        if !(_field in [:p_lai, :t_ele, :t_lm, :t_pft, :mask_soil, :mask_spac])
             _data = getfield(dts, _field);
             if _data isa Array
                 # extend the data first based on interpolations

@@ -11,9 +11,9 @@ using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaPar
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
 using ..Namespace: Leaf, LeafHydraulics, Leaves1D, Leaves2D, NonSteadyStateFlow, Root, RootHydraulics, Soil, SoilLayer, SteadyStateFlow, Stem, StemHydraulics
 using ..Namespace: MonoElementSPAC, MonoMLGrassSPAC, MonoMLPalmSPAC, MonoMLTreeSPAC
-using ..Soil: soil_θ, soil_ψ_25
+using ..SoilHydraulics: soil_θ, soil_ψ_25
 
-import ..Soil: relative_hydraulic_conductance
+import ..SoilHydraulics: relative_hydraulic_conductance
 
 
 # include functions

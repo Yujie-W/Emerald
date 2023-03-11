@@ -8,7 +8,7 @@ using ..Namespace: AirLayer, GCO₂Mode, MonoMLGrassSPAC, MonoMLPalmSPAC, MonoML
 using ..LeafOptics: leaf_spectra!
 using ..CanopyOptics: canopy_fluorescence!, canopy_radiation!, soil_albedo!
 using ..Photosynthesis: leaf_photosynthesis!
-using ..Soil: soil_budget!
+using ..SoilHydraulics: soil_budget!
 using ..PlantHydraulics: flow_out, plant_energy!, xylem_flow_profile!, xylem_pressure_profile!, β_factor
 using ..StomatalModels: stomatal_conductance!
 

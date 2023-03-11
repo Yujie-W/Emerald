@@ -8,7 +8,7 @@ using ..Namespace: MonoElementSPAC, MonoMLGrassSPAC, MonoMLPalmSPAC, MonoMLTreeS
 using ..Photosynthesis: leaf_photosynthesis!, ∂R∂T
 using ..PhysicalChemistry: latent_heat_vapor, relative_diffusive_coefficient, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..PlantHydraulics: relative_hydraulic_conductance, ∂E∂P
-using ..Soil: relative_hydraulic_conductance
+using ..SoilHydraulics: relative_hydraulic_conductance
 
 
 include("stomata/conductance.jl")

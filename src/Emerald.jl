@@ -1,9 +1,11 @@
 module Emerald
 
 export EmeraldCore
+export EmeraldEarth
 export EmeraldMath
 export EmeraldIO
 export EmeraldTest
+export EmeraldUtility
 
 
 # include the submodules
