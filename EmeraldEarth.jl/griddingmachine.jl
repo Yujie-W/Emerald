@@ -140,6 +140,7 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
 # Changes to this function
 # General
 #     2023-Mar-10: migrate from research repo to Emerald
+#     2023-Mar-11: add method to extend the LandDatasets
 #
 #######################################################################################################################################################################################################
 """
@@ -150,7 +151,42 @@ Gap fill the data linearly, given
 - `data` Input data
 
 """
-function extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat}
+function extend_data! end
+
+extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
+    # determine where to fill based on land mask and lai
+    _mask_spac = zeros(Bool, size(dts.t_lm));
+    for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
+        if (dts.t_lm[_ilon,_ilat] > 0) && (nanmax(dts.p_lai[_ilon,_ilat,:]) > 0)
+            _mask_spac[_ilon,_ilat] = true;
+            _mask_lai = isnan.(dts.p_lai[_ilon,_ilat,:]);
+            dts.p_lai[_ilon,_ilat,_mask_lai] .= 0;
+        end;
+    end;
+
+    # iterate the fieldnames
+    for _field in fieldnames(typeof(dts))
+        if !(_field in [:p_lai, :t_ele, :t_lm, :t_pft])
+            _data = getfield(dts, _field);
+            if _data isa Array
+                # extend the data first based on interpolations
+                for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
+                    _tmp = _data[_ilon,_ilat,:];
+                    extend_data!(_tmp);
+                    _data[_ilon,_ilat,:] .= _tmp;
+                end;
+
+                # fill the NaNs with nanmean of the rest
+                _mask_mean = _mask_spac .&& isnan.(_data);
+                _data[_mask_mean] .= nanmean(_data);
+            end;
+        end;
+    end;
+
+    return nothing
+);
+
+extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat} = (
     if sum(.!isnan.(data)) in [0, length(data)]
         return nothing
     end;
@@ -198,7 +234,7 @@ function extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat}
     data .= _data_3x[(length(data)+1):(length(data)*2)];
 
     return nothing
-end
+);
 
 
 #######################################################################################################################################################################################################
