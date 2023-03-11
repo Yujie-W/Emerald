@@ -266,7 +266,7 @@ prepare_grid_jld!(gm_tag::String, year::Int) = (
 prepare_grid_jld!(gm_tag::String, dts::LandDatasets) = (
     # if file exists, do nothing
     _jld = query_grid_info_filename(gm_tag, dts);
-    _ccs = read_csv(artifact"2021_land_gpp" * "/CO2.csv");
+    _ccs = read_csv("../data/CO2-1Y.csv");
     if isfile(_jld)
         @info "File $(_jld) already exists!";
         return nothing
