@@ -455,6 +455,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
 # General
 #     2022-Jun-29: add method for SPAC
 #     2022-Jul-28: update soil albedo at the very first step
+#     2023-Mar-11: run canopy optical properties and shortwave radiation only if solar zenith angle is lower than 89
 #
 #######################################################################################################################################################################################################
 """
@@ -469,9 +470,14 @@ canopy_radiation!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTre
     (; ANGLES, CANOPY, LEAVES, RAD_LW, RAD_SW, SOIL) = spac;
 
     soil_albedo!(CANOPY, SOIL);
-    canopy_optical_properties!(CANOPY, ANGLES);
-    canopy_optical_properties!(CANOPY, LEAVES, SOIL);
-    canopy_radiation!(CANOPY, LEAVES, RAD_SW, SOIL; APAR_CAR = LEAVES[1].APAR_CAR);
+    if ANGLES.sza < 89
+        canopy_optical_properties!(CANOPY, ANGLES);
+        canopy_optical_properties!(CANOPY, LEAVES, SOIL);
+        canopy_radiation!(CANOPY, LEAVES, RAD_SW, SOIL; APAR_CAR = LEAVES[1].APAR_CAR);
+    else
+        CANOPY.RADIATION.r_net_sw .= 0;
+        SOIL.ALBEDO.r_net_sw = 0;
+    end;
     canopy_radiation!(CANOPY, LEAVES, RAD_LW, SOIL);
 
     return nothing

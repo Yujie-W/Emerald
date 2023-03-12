@@ -16,7 +16,6 @@ using ..Optics: energy!, photon, photon!
 
 include("radiation/clumping.jl"      )
 include("radiation/coefficients.jl"  )
-include("radiation/constants.jl"     )
 include("radiation/fluorescence.jl"  )
 include("radiation/geometry.jl"      )
 include("radiation/inclination.jl"   )

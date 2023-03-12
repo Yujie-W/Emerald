@@ -9,6 +9,7 @@
 #     2022-Jun-29: use Leaves2D for the hyperspectral RT
 #     2022-Jun-29: use ϕ_f in Leaves2D
 #     2022-Jun-29: add method for SPAC
+#     2023-Mar-11: compute fluorescence only if solar zenith angle < 89
 #
 #######################################################################################################################################################################################################
 """
@@ -22,9 +23,13 @@ Updates canopy fluorescence, given
 function canopy_fluorescence! end
 
 canopy_fluorescence!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
-    (; CANOPY, LEAVES, Φ_PHOTON) = spac;
+    (; ANGLES, CANOPY, LEAVES, Φ_PHOTON) = spac;
 
-    canopy_fluorescence!(CANOPY, LEAVES; ϕ_photon = Φ_PHOTON);
+    if ANGLES.sza < 89
+        canopy_fluorescence!(CANOPY, LEAVES; ϕ_photon = Φ_PHOTON);
+    else
+        CANOPY.RADIATION.sif_obs .= 0;
+    end;
 
     return nothing
 );

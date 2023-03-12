@@ -7,11 +7,12 @@
 #######################################################################################################################################################################################################
 """
 
-    simulation!(mat_spac::Matrix)
+    simulation!(mat_spac::Matrix; threads::Int = 12)
     simulation!(spac::Union{Nothing,MonoMLTreeSPAC})
 
 Run simulations on SPAC, given
 - `mat_spac` Matrix of SPAC
+- `threads` Number of threadings
 - `spac` SPAC or nothing
 
 ---
@@ -22,19 +23,18 @@ dts = EmeraldEarth.LandDatasets{Float64}("gm2", 2020);
 mat = EmeraldEarth.spac_grids(dts);
 wd = EmeraldEarth.ERA5SingleLevelsDriver();
 @time EmeraldEarth.prescribe!(mat, dts, wd, 1);
-@time EmeraldEarth.global_simulation!(mat);
+@time EmeraldEarth.simulation!(mat);
 ```
 
 """
 function simulation! end
 
-simulation!(mat_spac::Matrix) = (
-    for _i in eachindex(mat_spac)
-        _spac = mat_spac[_i];
-        if _spac isa MonoMLTreeSPAC
-            simulation!(_spac);
-        end;
-    end;
+simulation!(mat_spac::Matrix; threads::Int = 12) = (
+    dynamic_workers!(threads);
+    @everywhere Base.MainInclude.eval(using Emerald.EmeraldEarth);
+
+    @tinfo "Running the global simulations in multiple threads...";
+    @showprogress pmap(simulation!, mat_spac);
     #run_time_step!.(mat_spac);
 
     return nothing
