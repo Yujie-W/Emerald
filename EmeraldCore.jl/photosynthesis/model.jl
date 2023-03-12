@@ -438,6 +438,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2022-Jul-13: redirect the wrapper function to the method at leaf level
 #     2023-Mar-11: only compute respiration rate if solar zenith angle >= 89
+#     2023-Mar-11: do nothing if LAI == 0
 #
 #######################################################################################################################################################################################################
 """
@@ -453,7 +454,11 @@ Updates leaf photosynthetic rates for SPAC, given
 leaf_photosynthesis!(spac::MonoElementSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat} = leaf_photosynthesis!(spac.LEAF, spac.AIR, mode);
 
 leaf_photosynthesis!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat} = (
-    (; AIR, ANGLES, LEAVES, LEAVES_INDEX) = spac;
+    (; AIR, ANGLES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+
+    if CANOPY.lai == 0
+        return nothing
+    end;
 
     _rd_only = ANGLES.sza < 89 ? false : true;
     for _i in eachindex(LEAVES)

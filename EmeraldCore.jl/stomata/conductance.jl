@@ -255,7 +255,11 @@ stomatal_conductance!(spac::MonoElementSPAC{FT}; β::FT = FT(1)) where {FT<:Abst
 );
 
 stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
-    (; AIR, LEAVES, LEAVES_INDEX) = spac;
+    (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+
+    if CANOPY.lai == 0
+        return nothing
+    end;
 
     for _i in eachindex(LEAVES_INDEX)
         stomatal_conductance!(LEAVES[_i], AIR[LEAVES_INDEX[_i]]; β = β);
@@ -296,6 +300,7 @@ stomatal_conductance!(leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) w
 #     2022-Jul-12: move ∂g∂t to another method
 #     2022-Jul-12: add method to update g for SPAC
 #     2022-Jul-26: limit g in range after updating stomatal conductance
+#     2023-Mar-11: do nothing if LAI == 0
 #
 #######################################################################################################################################################################################################
 """
@@ -317,7 +322,11 @@ stomatal_conductance!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFlo
 );
 
 stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, Δt::FT) where {FT<:AbstractFloat} = (
-    (; LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
+
+    if CANOPY.lai == 0
+        return nothing
+    end;
 
     for _leaves in LEAVES
         stomatal_conductance!(_leaves, Δt);
