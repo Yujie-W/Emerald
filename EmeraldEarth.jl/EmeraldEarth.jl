@@ -29,10 +29,11 @@ SETUP_FOLDER  = "/home/wyujie/DATASERVER/model/CLIMA/LAND/setups";
 # ERA5 settings
 ERA5_FOLDER = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels";
 
+
 include("ear5.jl"           )
 include("griddingmachine.jl")
 include("grids.jl"          )
-include("weather.jl"        )
+include("prescribe.jl"      )
 
 
 end # module
