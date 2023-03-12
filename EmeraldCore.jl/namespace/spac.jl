@@ -20,10 +20,10 @@ Base.@kwdef mutable struct SPACMemory{FT<:AbstractFloat}
     chl::FT = -9999
     "Leaf area index"
     lai::FT = -9999
+    "Temperature record for CLM T mean of 10 days"
+    tem::Vector{FT} = FT[]
     "Vcmax25"
     vcm::FT = -9999
-    "Air temperature"
-    temperature::Vector{FT} = FT[]
 end
 
 
@@ -57,6 +57,7 @@ abstract type AbstractSPACSystem{FT<:AbstractFloat} end
 #     2022-May-25: use Root and Stem structures with temperatures
 #     2022-Jun-29: add AirLayer to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
+#     2022-Mar-11: add MEMORY field
 #
 #######################################################################################################################################################################################################
 """
@@ -104,6 +105,7 @@ end
 #     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
+#     2022-Mar-11: add MEMORY and RAD_SW_REF fields
 #
 #######################################################################################################################################################################################################
 """
@@ -165,6 +167,8 @@ Base.@kwdef mutable struct MonoMLGrassSPAC{FT<:AbstractFloat} <: AbstractSPACSys
     RAD_LW::FT = 100
     "Downwelling shortwave radiation"
     RAD_SW::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
+    "Downwelling shortwave radiation reference spectrum"
+    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
     "Root hydraulic system"
     ROOTS::Vector{Root{FT}} = Root{FT}[Root{FT}() for _i in 1:DIM_ROOT]
     "Soil component"
@@ -191,6 +195,7 @@ end
 #     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
+#     2022-Mar-11: add MEMORY and RAD_SW_REF fields
 #
 #######################################################################################################################################################################################################
 """
@@ -252,6 +257,8 @@ Base.@kwdef mutable struct MonoMLPalmSPAC{FT<:AbstractFloat} <: AbstractSPACSyst
     RAD_LW::FT = 100
     "Downwelling shortwave radiation"
     RAD_SW::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
+    "Downwelling shortwave radiation reference spectrum"
+    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
     "Root hydraulic system"
     ROOTS::Vector{Root{FT}} = Root{FT}[Root{FT}() for _i in 1:DIM_ROOT]
     "Soil component"
@@ -280,6 +287,7 @@ end
 #     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
+#     2022-Mar-11: add MEMORY and RAD_SW_REF fields
 #
 #######################################################################################################################################################################################################
 """
@@ -343,6 +351,8 @@ Base.@kwdef mutable struct MonoMLTreeSPAC{FT<:AbstractFloat} <: AbstractSPACSyst
     RAD_LW::FT = 100
     "Downwelling shortwave radiation"
     RAD_SW::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
+    "Downwelling shortwave radiation reference spectrum"
+    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
     "Root hydraulic system"
     ROOTS::Vector{Root{FT}} = Root{FT}[Root{FT}() for _i in 1:DIM_ROOT]
     "Soil component"
