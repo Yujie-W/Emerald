@@ -16,6 +16,15 @@ ERA5_NETCDF = ["RAD_LW", "RAD_LW_CS", "RAD_DIR_CS", "RAD_CS", "CLOUD", "PRECIP"]
 #     2023-Mar-11: add the struct for ERA5 weather driver
 #
 #######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct for ERA5 Single Levels weather driver
+
+$(TYPEDFIELDS)
+
+"""
 Base.@kwdef struct ERA5SingleLevelsDriver
     "Atmospheric pressure"
     P_ATM::Tuple{String,String} = ("sp", "surface_pressure")
@@ -60,16 +69,19 @@ end
 #
 #######################################################################################################################################################################################################
 """
-"""
-function prescribe! end
 
-prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}},
-           dts::LandDatasets{FT},
-           wd::ERA5SingleLevelsDriver,
-           ind::Int;
-           leaf::Bool = true,
-           soil::Bool = true
-) where {FT<:AbstractFloat} = (
+    prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}}, dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+
+Prescribe plant and environmental conditions, given
+- `mat_spac` A matrix of SPAC
+- `dts` `LandDatasets` from GriddingMachine
+- `wd` `ERA5SingleLevelsDriver` weather driver
+- `ind` Index of data within a year
+- `leaf` Whether to prescribe leaf temperature from skin temperature, default is true
+- `soil` Whether to prescribe soil water and temperature conditions, default is true
+
+"""
+function prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}}, dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
     # prescribe air layer environments and radiation
     _wd_p_atm = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.P_ATM[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.P_ATM[1], ind);
     _wd_t_air = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_AIR[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_AIR[1], ind);
@@ -84,13 +96,20 @@ prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}},
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
         _spac = mat_spac[_ilon,_ilat];
         if _spac isa MonoMLTreeSPAC
+            # update air environment
             for _alayer in _spac.AIR
                 update!(_alayer; p_CO₂ = _alayer.f_CO₂ * 1e-6 * _wd_p_atm[_ilon,_ilat], t = _wd_t_air[_ilon,_ilat], vpd = _wd_vpd[_ilon,_ilat], wind = _wd_wind[_ilon,_ilat]);
             end;
+
+            # update shortwave radiation
             _in_dir = _spac.RAD_SW.e_direct' * _spac.CANOPY.WLSET.ΔΛ / 1000;
             _in_dif = _spac.RAD_SW.e_diffuse' * _spac.CANOPY.WLSET.ΔΛ / 1000;
             _spac.RAD_SW.e_direct  .= _spac.RAD_SW_REF.e_direct  .* _wd_s_dir[_ilon,_ilat] ./ _in_dir;
             _spac.RAD_SW.e_diffuse .= _spac.RAD_SW_REF.e_diffuse .* _wd_s_dif[_ilon,_ilat] ./ _in_dif;
+
+            # update solar zenith angle based on the time
+            _fdoy = (ind .- 0.5 .+ _spac.LONGITUDE / 15) ./ 24;
+            _spac.ANGLES.sza = min(88, solar_zenith_angle(_spac.LATITUDE, _fdoy));
         end;
     end;
 
@@ -129,7 +148,7 @@ prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}},
     end;
 
     # determine whether to update LAI, CHL, and CI
-    _iday = Int(floor(ind % 24)) + 1;
+    _iday = Int(floor(ind / 24)) + 1;
     _ichl = griddingmachine_data_index(size(dts.p_chl,3), dts.year, _iday);
     _icli = griddingmachine_data_index(size(dts.p_ci ,3), dts.year, _iday);
     _ilai = griddingmachine_data_index(size(dts.p_lai,3), dts.year, _iday);
@@ -142,28 +161,28 @@ prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}},
             _spac.CANOPY.Ω_A = dts.p_ci[_ilon,_ilat,_icli];
 
             # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
-            _trigger_lai::Bool = dts.p_lai[_ilon,_ilon,_ilai] != _spac.MEMORY.lai;
-            _trigger_vcm::Bool = dts.p_vcm[_ilon,_ilon,_ivcm] != _spac.MEMORY.vcm;
-            _trigger_chl::Bool = dts.p_chl[_ilon,_ilon,_ichl] != _spac.MEMORY.chl;
+            _trigger_lai::Bool = dts.p_lai[_ilon,_ilat,_ilai] != _spac.MEMORY.lai;
+            _trigger_vcm::Bool = dts.p_vcm[_ilon,_ilat,_ivcm] != _spac.MEMORY.vcm;
+            _trigger_chl::Bool = dts.p_chl[_ilon,_ilat,_ichl] != _spac.MEMORY.chl;
             if _trigger_lai
-                update!(_spac; lai = dts.p_lai[_ilon,_ilon,_ilai], vcmax_expo = 0.3);
-                _spac.MEMORY.lai = dts.p_lai[_ilon,_ilon,_ilai];
+                update!(_spac; lai = dts.p_lai[_ilon,_ilat,_ilai], vcmax_expo = 0.3);
+                _spac.MEMORY.lai = dts.p_lai[_ilon,_ilat,_ilai];
             end;
 
             if _trigger_vcm
-                update!(_spac; vcmax = dts.p_vcm[_ilon,_ilon,_ivcm], vcmax_expo = 0.3);
-                _spac.MEMORY.vcm = dts.p_vcm[_ilon,_ilon,_ivcm];
+                update!(_spac; vcmax = dts.p_vcm[_ilon,_ilat,_ivcm], vcmax_expo = 0.3);
+                _spac.MEMORY.vcm = dts.p_vcm[_ilon,_ilat,_ivcm];
             end;
 
             if _trigger_chl
-                update!(_spac; cab = dts.p_chl[_ilon,_ilon,_ichl], car = dts.p_chl[_ilon,_ilon,_ichl] / 7);
-                _spac.MEMORY.chl = dts.p_chl[_ilon,_ilon,_ichl];
+                update!(_spac; cab = dts.p_chl[_ilon,_ilat,_ichl], car = dts.p_chl[_ilon,_ilat,_ichl] / 7);
+                _spac.MEMORY.chl = dts.p_chl[_ilon,_ilat,_ichl];
             end;
         end;
     end;
 
     return nothing
-);
+end
 
 
 #######################################################################################################################################################################################################
@@ -174,6 +193,14 @@ prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}},
 #
 #######################################################################################################################################################################################################
 """
+
+    griddingmachine_data_index(n::Int, year::Int, d::Int)
+
+Return the index of data, given
+- `n` Number of GriddingMachine data time index
+- `year` Year
+- `d` Day number
+
 """
 function griddingmachine_data_index(n::Int, year::Int, d::Int)
     _bounds = [0,367];

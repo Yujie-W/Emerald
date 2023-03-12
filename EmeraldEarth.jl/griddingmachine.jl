@@ -157,9 +157,11 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
+    extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
     extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat}
 
 Gap fill the data linearly, given
+- `dts` LandDatasets struct
 - `data` Input data
 
 """
