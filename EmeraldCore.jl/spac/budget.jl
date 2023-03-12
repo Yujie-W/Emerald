@@ -80,7 +80,13 @@ end
 #######################################################################################################################################################################################################
 """
 
-    time_stepper!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, δt::FT; update::Bool = false, θ_on::Bool = true, t_on::Bool = true) where {FT<:AbstractFloat}
+    time_stepper!(
+                spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}},
+                δt::Number;
+                p_on::Bool = true,
+                t_on::Bool = true,
+                update::Bool = false,
+                θ_on::Bool = true) where {FT<:AbstractFloat}
     time_stepper!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; update::Bool = false) where {FT<:AbstractFloat}
 
 Move forward in time for SPAC with time stepper controller, given
@@ -96,7 +102,7 @@ function time_stepper! end
 
 time_stepper!(
             spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}},
-            δt::FT;
+            δt::Number;
             p_on::Bool = true,
             t_on::Bool = true,
             update::Bool = false,
@@ -105,7 +111,7 @@ time_stepper!(
     (; CANOPY, LEAVES, RAD_LW, SOIL) = spac;
 
     # run the update function until time elapses
-    _t_res = δt;
+    _t_res = FT(δt);
     while true
         _δt = adjusted_time(spac, _t_res; θ_on = θ_on, t_on = t_on);
 

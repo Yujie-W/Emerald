@@ -25,9 +25,15 @@ This function runs the model using the following steps:
 
 This function is supposed to have the highest hierarchy, and should support all SPAC types defined in EmeraldNamespace.jl. Note to update the water flow profile when initializing the SPAC.
 
-    soil_plant_air_continuum!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, δt::FT; update::Bool = false, θ_on::Bool = true, t_on::Bool = true) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(
+                spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}},
+                δt::Number;
+                p_on::Bool = true,
+                t_on::Bool = true,
+                update::Bool = false,
+                θ_on::Bool = true) where {FT<:AbstractFloat}
     soil_plant_air_continuum!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; update::Bool = false) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::Nothing, δt::FT; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(spac::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
     soil_plant_air_continuum!(spac::Nothing; update::Bool = false) where {FT<:AbstractFloat}
 
 Run SPAC model and move forward in time with time stepper controller, given
@@ -45,7 +51,7 @@ function soil_plant_air_continuum! end
 # TODO: add top soil evaporation
 soil_plant_air_continuum!(
             spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}},
-            δt::FT;
+            δt::Number;
             p_on::Bool = true,
             t_on::Bool = true,
             update::Bool = false,
@@ -55,7 +61,8 @@ soil_plant_air_continuum!(
     canopy_radiation!(spac);
 
     # 2. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
-    if p_on xylem_pressure_profile!(spac; update = update); end;
+    xylem_flow_profile!(spac);
+    xylem_pressure_profile!(spac; update = update);
 
     # 3. run photosynthesis model
     leaf_photosynthesis!(spac, GCO₂Mode());
@@ -80,7 +87,7 @@ soil_plant_air_continuum!(
     return nothing
 );
 
-soil_plant_air_continuum!(spac::Nothing, δt::FT; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = nothing;
+soil_plant_air_continuum!(spac::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) = nothing;
 
 soil_plant_air_continuum!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; update::Bool = false) where {FT<:AbstractFloat} = (
     # 1. run canopy RT
@@ -94,7 +101,7 @@ soil_plant_air_continuum!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, M
     return nothing
 );
 
-soil_plant_air_continuum!(spac::Nothing; update::Bool = false) where {FT<:AbstractFloat} = nothing;
+soil_plant_air_continuum!(spac::Nothing; update::Bool = false) = nothing;
 
 
 # add an alias for soil_plant_air_continuum!

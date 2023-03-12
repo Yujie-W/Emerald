@@ -109,7 +109,7 @@ function prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}}, dts::LandDa
 
             # update solar zenith angle based on the time
             _fdoy = (ind .- 0.5 .+ _spac.LONGITUDE / 15) ./ 24;
-            _spac.ANGLES.sza = min(88, solar_zenith_angle(_spac.LATITUDE, _fdoy));
+            _spac.ANGLES.sza = solar_zenith_angle(_spac.LATITUDE, _fdoy);
         end;
     end;
 
