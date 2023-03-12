@@ -175,7 +175,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves
         OPTICS.τ_dd .= 0;
         OPTICS.τ_lw .= 0;
         OPTICS.τ_sd .= 0;
-        OPTICS._τ_ss .= 0;
+        OPTICS._τ_ss = 0;
         canopy_optical_properties!(can, ALBEDO);
         OPTICS.ρ_lw[end] = ALBEDO.ρ_LW;
 
