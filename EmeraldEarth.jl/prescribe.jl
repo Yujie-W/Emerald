@@ -70,7 +70,7 @@ end
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}}, dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+    prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}, dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
 
 Prescribe plant and environmental conditions, given
 - `mat_spac` A matrix of SPAC
@@ -81,7 +81,7 @@ Prescribe plant and environmental conditions, given
 - `soil` Whether to prescribe soil water and temperature conditions, default is true
 
 """
-function prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}}, dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+function prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}, dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
     # prescribe air layer environments and radiation
     _wd_p_atm = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.P_ATM[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.P_ATM[1], ind);
     _wd_t_air = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_AIR[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_AIR[1], ind);

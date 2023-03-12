@@ -45,9 +45,9 @@ function spac_grids(dts::LandDatasets{FT}; threads::Int = 12) where {FT<:Abstrac
 
     # create a matrix of SPAC
     @tinfo "Preparing a matrix of SPAC to work on...";
-    _mat_spac = Matrix{Union{Nothing,MonoMLTreeSPAC}}(nothing, size(dts.t_lm));
+    _mat_spac = Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}(nothing, size(dts.t_lm));
     _params = [];
-    for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
+    for _ilon in axes(dts.t_lm,1), _ilat in 90:91 # _ilat in axes(dts.t_lm,2)
         if dts.mask_spac[_ilon,_ilat]
             push!(_params, [_ilon,_ilat]);
         end;

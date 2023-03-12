@@ -7,8 +7,8 @@
 #######################################################################################################################################################################################################
 """
 
-    simulation!(mat_spac::Matrix; threads::Int = 12)
-    simulation!(spac::Union{Nothing,MonoMLTreeSPAC})
+    simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}; threads::Int = 12) where {FT<:AbstractFloat}
+    simulation!(spac::Union{Nothing,MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
 
 Run simulations on SPAC, given
 - `mat_spac` Matrix of SPAC
@@ -23,25 +23,25 @@ dts = EmeraldEarth.LandDatasets{Float64}("gm2", 2020);
 mat = EmeraldEarth.spac_grids(dts; threads = 120);
 wdr = EmeraldEarth.ERA5SingleLevelsDriver();
 @time EmeraldEarth.prescribe!(mat, dts, wdr, 6);
-@time EmeraldEarth.simulation!(mat; threads = 120);
+@time mat = EmeraldEarth.simulation!(mat; threads = 120);
 ```
 
 """
 function simulation! end
 
-simulation!(mat_spac::Matrix; threads::Int = 12) = (
+simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}; threads::Int = 12) where {FT<:AbstractFloat} = (
     add_threads!(threads);
 
     @tinfo "Running the global simulations in multiple threads...";
-    @showprogress pmap(simulation!, mat_spac);
+    _spacs = @showprogress pmap(simulation!, mat_spac);
 
-    return nothing
+    return _spacs
 );
 
-simulation!(spac::Union{Nothing,MonoMLTreeSPAC}) = (
-    for _i in 1:30
-        soil_plant_air_continuum!(spac, 120; p_on = false, t_on = false, θ_on = false);
+simulation!(spac::Union{Nothing,MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+    for _i in 1:10
+        soil_plant_air_continuum!(spac, 360; p_on = false, t_on = false, θ_on = false);
     end;
 
-    return nothing
+    return spac
 );
