@@ -34,6 +34,7 @@ include("ear5.jl"           )
 include("griddingmachine.jl")
 include("grids.jl"          )
 include("prescribe.jl"      )
+include("simulation.jl"     )
 
 
 end # module
