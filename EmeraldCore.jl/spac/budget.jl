@@ -61,9 +61,9 @@ function adjusted_time(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, Mono
     _δt_5 = _δt_4;
     for _i in 1:DIM_LAYER
         for _∂g∂t in LEAVES[_i].∂g∂t_sunlit
-            _δt_5 = min(FT(0.01) / abs(_∂g∂t), _δt_5);
+            _δt_5 = min(FT(0.06) / abs(_∂g∂t), _δt_5);
         end;
-        _δt_5 = min(FT(0.01) / abs(LEAVES[_i].∂g∂t_shaded), _δt_5);
+        _δt_5 = min(FT(0.06) / abs(LEAVES[_i].∂g∂t_shaded), _δt_5);
     end;
 
     return (_δt_5, _δt_4, _δt_3, _δt_2, _δt_1)
