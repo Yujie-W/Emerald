@@ -30,12 +30,10 @@ wd = EmeraldEarth.ERA5SingleLevelsDriver();
 function simulation! end
 
 simulation!(mat_spac::Matrix; threads::Int = 12) = (
-    dynamic_workers!(threads);
-    @everywhere Base.MainInclude.eval(using Emerald.EmeraldEarth);
+    add_threads!(threads);
 
     @tinfo "Running the global simulations in multiple threads...";
     @showprogress pmap(simulation!, mat_spac);
-    #run_time_step!.(mat_spac);
 
     return nothing
 );

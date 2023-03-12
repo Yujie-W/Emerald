@@ -21,6 +21,7 @@ using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldUtility.Email: send_email!
 using ..EmeraldUtility.Log: @tinfo
+using ..EmeraldUtility.Threading: dynamic_workers!
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 
 # simulation settings

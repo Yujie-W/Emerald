@@ -455,7 +455,7 @@ leaf_photosynthesis!(spac::MonoElementSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mo
 leaf_photosynthesis!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat} = (
     (; AIR, ANGLES, LEAVES, LEAVES_INDEX) = spac;
 
-    _rd_only = ANGLES.sza < 89 : false : true;
+    _rd_only = ANGLES.sza < 89 ? false : true;
     for _i in eachindex(LEAVES)
         leaf_photosynthesis!(LEAVES[_i], AIR[LEAVES_INDEX[_i]], mode; rd_only = _rd_only);
     end;

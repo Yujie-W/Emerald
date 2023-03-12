@@ -36,8 +36,7 @@ Prepare a matrix of SPAC, given
 
 """
 function spac_grids(dts::LandDatasets{FT}; threads::Int = 12) where {FT<:AbstractFloat}
-    dynamic_workers!(threads);
-    @everywhere Base.MainInclude.eval(using Emerald.EmeraldEarth);
+    add_threads!(threads);
 
     # read some general data
     _ind_c3 = [2:14;16;17];
