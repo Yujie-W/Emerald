@@ -14,6 +14,7 @@ Add processors to run code in multiple threadings, given
 
 """
 function add_threads!(threads::Int = 12)
+    @tinfo "Adding $(threads) threadings...";
     dynamic_workers!(threads);
     @everywhere Base.MainInclude.eval(using Emerald.EmeraldEarth);
 

@@ -247,6 +247,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbed
 #     2022-Jun-10: update net lw radiation for leaves and soil
 #     2022-Jun-13: use DIM_LAYER instead of _end
 #     2022-Jun-29: use Leaves2D for the hyperspectral RT
+#     2023-Mar-11: add code to account for the case of LAI == 0
 # Bug fix:
 #     2022-Jul-15: sum by r_net_sw by the weights of sunlit and shaded fractions
 #     2022-Jul-27: use _ρ_dd, _ρ_sd, _τ_dd, and _τ_sd for leaf energy absorption (typo when refactoring the code)
@@ -270,6 +271,22 @@ Updates canopy radiation profiles for shortwave or longwave radiation, given
 canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; APAR_CAR::Bool = true) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, OPTICS, P_INCL, RADIATION, WLSET) = can;
     (; ALBEDO) = soil;
+
+    if can.lai == 0
+        for _i in 1:(DIM_LAYER+1)
+            RADIATION.e_direct[:,_i] .= rad.e_direct;
+            RADIATION.e_diffuse_down[:,_i] .= rad.e_diffuse;
+            RADIATION.e_diffuse_up[:,_i] .= 0;
+            RADIATION.e_v[:,_i] .= 0;
+        end;
+        RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
+        RADIATION.e_v[:,end] .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
+        RADIATION.e_o .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1) ./ FT(pi);
+        RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
+
+        return nothing
+    end;
+
     _ilai = can.lai * can.ci / DIM_LAYER;
     _tlai = can.lai / DIM_LAYER;
 
@@ -403,6 +420,16 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
 canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, OPTICS, RADIATION) = can;
     (; ALBEDO, LAYERS) = soil;
+
+    if can.lai == 0
+        _r_lw_soil = K_STEFAN(FT) * (1 - ALBEDO.ρ_LW) * LAYERS[1].t ^ 4;
+        RADIATION.r_lw .= 0;
+        RADIATION.r_net_lw .= 0;
+        RADIATION.r_lw_up .= rad * ALBEDO.ρ_LW + _r_lw_soil;
+        ALBEDO.r_net_lw = rad * (1 - ALBEDO.ρ_LW) - _r_lw_soil;
+
+        return nothing
+    end;
 
     # 1. compute longwave radiation out from the leaves and soil
     for _i in eachindex(leaves)

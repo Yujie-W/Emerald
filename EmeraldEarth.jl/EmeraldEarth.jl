@@ -3,7 +3,7 @@ module EmeraldEarth
 using LazyArtifacts
 
 using Dates: isleapyear
-using Distributed: @everywhere, addprocs, pmap, rmprocs, workers
+using Distributed: @everywhere, pmap
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
 

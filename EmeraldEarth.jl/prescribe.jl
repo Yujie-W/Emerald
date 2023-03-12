@@ -167,6 +167,9 @@ function prescribe!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC}}, dts::LandDa
             if _trigger_lai
                 update!(_spac; lai = dts.p_lai[_ilon,_ilat,_ilai], vcmax_expo = 0.3);
                 _spac.MEMORY.lai = dts.p_lai[_ilon,_ilat,_ilai];
+                if dts.p_lai[_ilon,_ilat,_ilai] == 0
+                    @warn "LAI is 0!";
+                end;
             end;
 
             if _trigger_vcm
