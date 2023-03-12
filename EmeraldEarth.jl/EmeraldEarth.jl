@@ -3,6 +3,7 @@ module EmeraldEarth
 using LazyArtifacts
 
 using Dates: isleapyear
+using Distributed: @everywhere, addprocs, pmap, rmprocs, workers
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
 
@@ -35,6 +36,7 @@ include("griddingmachine.jl")
 include("grids.jl"          )
 include("prescribe.jl"      )
 include("simulation.jl"     )
+include("threads.jl"        )
 
 
 end # module

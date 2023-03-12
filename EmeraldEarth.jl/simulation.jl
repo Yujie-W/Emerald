@@ -18,10 +18,10 @@ Run simulations on SPAC, given
 # Example
 ```julia
 using Emerald;
-dts = EmeraldEarth.LandDatasets{Float64}("gm2",2020);
+dts = EmeraldEarth.LandDatasets{Float64}("gm2", 2020);
 mat = EmeraldEarth.spac_grids(dts);
 wd = EmeraldEarth.ERA5SingleLevelsDriver();
-@time EmeraldEarth.prescribe!(mat,dts,wd,1);
+@time EmeraldEarth.prescribe!(mat, dts, wd, 1);
 @time EmeraldEarth.global_simulation!(mat);
 ```
 
