@@ -494,7 +494,7 @@ Updates canopy radiation profiles for shortwave and longwave radiation, given
 
 """
 canopy_radiation!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
-    (; ANGLES, CANOPY, LEAVES, RAD_LW, RAD_SW, SOIL) = spac;
+    (; ANGLES, CANOPY, DIM_LAYER, LEAVES, RAD_LW, RAD_SW, SOIL) = spac;
 
     soil_albedo!(CANOPY, SOIL);
     if ANGLES.sza < 89
@@ -504,6 +504,19 @@ canopy_radiation!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTre
     else
         CANOPY.RADIATION.r_net_sw .= 0;
         SOIL.ALBEDO.r_net_sw = 0;
+        CANOPY.RADIATION.par_in_diffuse = 0;
+        CANOPY.RADIATION.par_in_direct = 0;
+        CANOPY.RADIATION.par_in = 0;
+        CANOPY.RADIATION.par_shaded .= 0;
+        CANOPY.RADIATION.par_sunlit .= 0;
+        CANOPY.RADIATION.apar_shaded .= 0;
+        CANOPY.RADIATION.apar_sunlit .= 0;
+
+        for _i in 1:DIM_LAYER
+            # PPAR for leaves
+            LEAVES[_i].ppar_shaded = 0;
+            LEAVES[_i].ppar_sunlit .= 0;
+        end;
     end;
     canopy_radiation!(CANOPY, LEAVES, RAD_LW, SOIL);
 
