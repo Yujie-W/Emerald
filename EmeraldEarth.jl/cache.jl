@@ -59,8 +59,8 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    synchronize_cache!(gm_params::Nothing)
-    synchronize_cache!(gm_params::Dict{String,Any})
+    synchronize_cache!(gm_params::Nothing, wd_params::Nothing)
+    synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any})
 
 Synchronize SPAC parameters from,
 - `gm_params` Dict for GriddingMachine parameters, or nothing (if not land)
@@ -68,9 +68,9 @@ Synchronize SPAC parameters from,
 """
 function synchronize_cache! end
 
-synchronize_cache!(gm_params::Nothing) = (return nothing);
+synchronize_cache!(gm_params::Nothing, wd_params::Nothing) = nothing;
 
-synchronize_cache!(gm_params::Dict{String,Any}) = (
+synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}) = (
     FT = gm_params["FT"];
     _z_canopy = max(FT(0.1), gm_params["CANOPY_HEIGHT"]);
 
@@ -102,6 +102,12 @@ synchronize_cache!(gm_params::Dict{String,Any}) = (
         _leaves.SM.G1 = gm_params["MEDLYN_G1"];
     end;
 
+    # update environmental conditions
+    for _alayer in CACHE_SPAC.AIR
+        CACHE_SPAC.AIR.P_AIR = wd_params["P_ATM"];
+        update!(_alayer; t = wd_params["T_AIR"], vpd = wd_params["VPD"], wind = wd_params["WIND"]);
+    end;
+
     # sync the environmental conditions per layer for CO₂ concentration
     if !isnothing(gm_params["CO2"])
         for _alayer in CACHE_SPAC.AIR
@@ -109,5 +115,77 @@ synchronize_cache!(gm_params::Dict{String,Any}) = (
         end;
     end;
 
+    # update shortwave radiation
+    _in_dir = CACHE_SPAC.RAD_SW_REF.e_direct' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
+    _in_dif = CACHE_SPAC.RAD_SW_REF.e_diffuse' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
+    CACHE_SPAC.RAD_SW.e_direct  .= CACHE_SPAC.RAD_SW_REF.e_direct  .* wd_params["RAD_DIR"] ./ _in_dir;
+    CACHE_SPAC.RAD_SW.e_diffuse .= CACHE_SPAC.RAD_SW_REF.e_diffuse .* wd_params["RAD_DIF"] ./ _in_dif;
+
+    # update solar zenith angle based on the time
+    CACHE_SPAC.ANGLES.sza = solar_zenith_angle(CACHE_SPAC.LATITUDE, FT(wd_params["FDOY"]));
+
+    # prescribe soil water content
+    if "SWC" in keys(wd_params)
+        update!(CACHE_SPAC; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
+    end;
+
+    # prescribe leaf temperature from skin temperature
+    # TODO: add CACHE_SPAC.MEMORY.tem as prognostic variable
+    if "T_SKIN" in keys(wd_params)
+        push!(CACHE_SPAC.MEMORY.tem, wd_params["T_SKIN"]);
+        if length(CACHE_SPAC.MEMORY.tem) > 240 deleteat!(CACHE_SPAC.MEMORY.tem,1) end;
+        update!(CACHE_SPAC; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.MEMORY.tem));
+    end;
+
+    # synchronize LAI, CHL, and CI
+    _iday = Int(floor(wd_params["INDEX"] / 24)) + 1;
+    _chl = griddingmachine_data(length(gm_params["CHLOROPHYLL"]), gm_params["YEAR"], _iday);
+    _cli = griddingmachine_data(length(gm_params["CLUMPING"]), gm_params["YEAR"], _iday);
+    _lai = griddingmachine_data(length(gm_params["LAI"]), gm_params["YEAR"], _iday);
+    _vcm = griddingmachine_data(length(gm_params["VCMAX25"]), gm_params["YEAR"], _iday);
+
+    # update clumping index, LAI, Vcmax, and Chl
+    CACHE_SPAC.CANOPY.ci = _cli;
+    CACHE_SPAC.CANOPY.Ω_A = _cli;
+    update!(CACHE_SPAC; cab = _chl, car = _chl / 7, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
+
     return nothing
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Mar-11: add function to determine the day bounds of input GriddingMachine drivers
+#
+#######################################################################################################################################################################################################
+"""
+
+    griddingmachine_data_index(n::Int, year::Int, d::Int)
+
+Return the index of data, given
+- `n` Number of GriddingMachine data time index
+- `year` Year
+- `d` Day number
+
+"""
+function griddingmachine_data(data::Vector, year::Int, d::Int)
+    _bounds = [0,367];
+    _n = length(data);
+    if _n == 1
+        _bounds = [0,367]
+    elseif _n == 12
+        _bounds = isleapyear(year) ? MDAYS_LEAP : MDAYS;
+    elseif _n == 46
+        _bounds = [collect(0:8:361); 367]
+    elseif _n == 52
+        _bounds = [collect(0:7:361); 367]
+    else
+        @error "This temporal resolution is not supported: $(_n)!";
+    end
+
+    _ind = findfirst(d .<= _bounds) - 1
+
+    return data[_ind]
+end

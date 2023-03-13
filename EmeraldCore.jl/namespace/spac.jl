@@ -21,7 +21,7 @@ Base.@kwdef mutable struct SPACMemory{FT<:AbstractFloat}
     "Leaf area index"
     lai::FT = -9999
     "Temperature record for CLM T mean of 10 days"
-    tem::Vector{FT} = FT[]
+    tem::Vector{FT} = ones(FT, 240) .* NaN
     "Vcmax25"
     vcm::FT = -9999
 end

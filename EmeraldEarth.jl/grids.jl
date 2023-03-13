@@ -111,14 +111,15 @@ function weather_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::I
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
         if dts.mask_spac[_ilon,_ilat]
             _mat_wd[_ilon,_ilat] = Dict{String,Any}(
+                        "FDOY"    => (ind - 0.5 + ((_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180) / 15) / 24,
                         "INDEX"   => ind,
                         "P_ATM"   => _wd_p_atm[_ilon,_ilat],
                         "RAD_DIF" => _wd_s_dif[_ilon,_ilat],
                         "RAD_DIR" => _wd_s_dir[_ilon,_ilat],
                         "T_AIR"   => _wd_t_air[_ilon,_ilat],
-                        "UTC_DOY" => (ind .- 0.5 .+ ((_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180) / 15) ./ 24,
                         "VPD"     => _wd_vpd[_ilon,_ilat],
                         "WIND"    => _wd_wind[_ilon,_ilat],
+                        "YEAR"    => dts.year,
             );
         end;
     end;
