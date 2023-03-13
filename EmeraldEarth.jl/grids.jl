@@ -28,16 +28,13 @@ CLM5_PFTS = ["not_vegetated",
 #######################################################################################################################################################################################################
 """
 
-    spac_grids(dts::LandDatasets{FT}; threads::Int = 12) where {FT<:AbstractFloat}
+    spac_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
 
 Prepare a matrix of SPAC, given
 - `dts` `LandDatasets` type data struct
-- `threads` Number of threadings to use
 
 """
-function spac_grids(dts::LandDatasets{FT}; threads::Int = 12) where {FT<:AbstractFloat}
-    add_threads!(threads);
-
+function spac_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
     # read some general data
     _ind_c3 = [2:14;16;17];
     _ccs = read_csv("$(@__DIR__)/../data/CO2-1Y.csv");

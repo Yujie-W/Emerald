@@ -7,20 +7,23 @@
 #######################################################################################################################################################################################################
 """
 
-    simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}; threads::Int = 12) where {FT<:AbstractFloat}
+    simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}) where {FT<:AbstractFloat}
     simulation!(spac::Union{Nothing,MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
 
 Run simulations on SPAC, given
 - `mat_spac` Matrix of SPAC
-- `threads` Number of threadings
 - `spac` SPAC or nothing
 
 ---
 # Example
 ```julia
 using Emerald;
-dts = EmeraldEarth.LandDatasets{Float64}("gm2", 2020);
-mat = EmeraldEarth.spac_grids(dts; threads = 120);
+
+FT = Float64;
+EmeraldEarth.add_threads!(4, FT);
+
+dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
+mat = EmeraldEarth.spac_grids(dts);
 wdr = EmeraldEarth.ERA5SingleLevelsDriver();
 @time EmeraldEarth.prescribe!(mat, dts, wdr, 6);
 @time mat = EmeraldEarth.simulation!(mat; threads = 120);
@@ -29,9 +32,7 @@ wdr = EmeraldEarth.ERA5SingleLevelsDriver();
 """
 function simulation! end
 
-simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}; threads::Int = 12) where {FT<:AbstractFloat} = (
-    add_threads!(threads);
-
+simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}) where {FT<:AbstractFloat} = (
     @tinfo "Running the global simulations in multiple threads...";
     _spacs = @showprogress pmap(simulation!, mat_spac);
 
