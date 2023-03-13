@@ -20,30 +20,32 @@ Run simulations on SPAC, given
 using Emerald;
 
 FT = Float64;
-@time EmeraldEarth.add_threads!(4, FT);
+@time EmeraldEarth.add_threads!(20, FT);
 @time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
-@time mat = EmeraldEarth.spac_grids(dts);
+@time mat = EmeraldEarth.gm_grids(dts);
 @time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
-@time wdx = EmeraldEarth.weather_grids(dts, wdr, 6);
+@time wdx = EmeraldEarth.wd_grids(dts, wdr, 6);
 
-@time EmeraldEarth.prescribe!(mat, dts, wdr, 6);
-@time mat = EmeraldEarth.simulation!(mat; threads = 120);
+@time states = EmeraldEarth.simulation!(mat, wdx);
 ```
 
 """
 function simulation! end
 
-simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}) where {FT<:AbstractFloat} = (
+simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}) = (
     @tinfo "Running the global simulations in multiple threads...";
-    _spacs = @showprogress pmap(simulation!, mat_spac);
+    _states = @showprogress pmap(simulation!, gm_mat, wd_mat);
 
-    return _spacs
+    return _states
 );
 
-simulation!(spac::Union{Nothing,MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+simulation!(gm_params::Nothing, wd_params::Nothing) = nothing;
+
+simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}) = (
+    synchronize_cache!(gm_params, wd_params);
     for _i in 1:10
-        soil_plant_air_continuum!(spac, 360; p_on = false, t_on = false, θ_on = false);
+        soil_plant_air_continuum!(CACHE_SPAC, 360; p_on = false, t_on = false, θ_on = false);
     end;
 
-    return spac
+    return 1.0
 );

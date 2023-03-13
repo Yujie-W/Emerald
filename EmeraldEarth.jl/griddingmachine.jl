@@ -318,9 +318,10 @@ function gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
                         "SOIL_COLOR"    => min(20, max(1, Int(floor(dts.s_cc[_ilon,_ilat])))),
                         "SOIL_N"        => dts.s_n[_ilon,_ilat,:],
                         "SOIL_α"        => dts.s_α[_ilon,_ilat,:],
-                        "SOIL_Θr"       => dts.s_Θr[_ilon,_ilat,:],
-                        "SOIL_Θr"       => dts.s_Θr[_ilon,_ilat,:],
+                        "SOIL_ΘR"       => dts.s_Θr[_ilon,_ilat,:],
+                        "SOIL_ΘS"       => dts.s_Θs[_ilon,_ilat,:],
                         "VCMAX25"       => dts.p_vcm[_ilon,_ilat,:],
+                        "YEAR"          => dts.year,
             );
         end;
     end;

@@ -104,7 +104,7 @@ synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}) = (
 
     # update environmental conditions
     for _alayer in CACHE_SPAC.AIR
-        CACHE_SPAC.AIR.P_AIR = wd_params["P_ATM"];
+        _alayer.P_AIR = wd_params["P_ATM"];
         update!(_alayer; t = wd_params["T_AIR"], vpd = wd_params["VPD"], wind = wd_params["WIND"]);
     end;
 
@@ -139,10 +139,10 @@ synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}) = (
 
     # synchronize LAI, CHL, and CI
     _iday = Int(floor(wd_params["INDEX"] / 24)) + 1;
-    _chl = griddingmachine_data(length(gm_params["CHLOROPHYLL"]), gm_params["YEAR"], _iday);
-    _cli = griddingmachine_data(length(gm_params["CLUMPING"]), gm_params["YEAR"], _iday);
-    _lai = griddingmachine_data(length(gm_params["LAI"]), gm_params["YEAR"], _iday);
-    _vcm = griddingmachine_data(length(gm_params["VCMAX25"]), gm_params["YEAR"], _iday);
+    _chl = griddingmachine_data(gm_params["CHLOROPHYLL"], gm_params["YEAR"], _iday);
+    _cli = griddingmachine_data(gm_params["CLUMPING"], gm_params["YEAR"], _iday);
+    _lai = griddingmachine_data(gm_params["LAI"], gm_params["YEAR"], _iday);
+    _vcm = griddingmachine_data(gm_params["VCMAX25"], gm_params["YEAR"], _iday);
 
     # update clumping index, LAI, Vcmax, and Chl
     CACHE_SPAC.CANOPY.ci = _cli;
