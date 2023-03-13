@@ -82,6 +82,7 @@ synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}) = (
     global CACHE_SPAC;
     CACHE_SPAC.LATITUDE = gm_params["LATITUDE"];
     CACHE_SPAC.LONGITUDE = gm_params["LONGITUDE"];
+    CACHE_SPAC.ELEVATION = gm_params["ELEVATION"];
     CACHE_SPAC.Z .= [-2, _z_canopy/2, _z_canopy];
     CACHE_SPAC.Z_AIR .= collect(0:21) * _z_canopy / 20;
     CACHE_SPAC.SOIL.COLOR = gm_params["SOIL_COLOR"];

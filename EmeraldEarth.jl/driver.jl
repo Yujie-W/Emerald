@@ -209,7 +209,7 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
             end;
             # for soil water content, replace with NaN if the SWC <= 0.01
             if var_name in ["SWC_1", "SWC_2", "SWC_3", "SWC_4"]
-                _sub[_sub .<= 0.01] .= NaN;
+                _sub[_sub .<= 0] .= NaN;
             end;
             _matn[_ilon,size(_matn,2)+1-_ilat,_itim] = nanmean(_sub);
         end;

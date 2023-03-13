@@ -309,6 +309,7 @@ function gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
                         "CHLOROPHYLL"   => dts.p_chl[_ilon,_ilat,:],
                         "CLUMPING"      => dts.p_ci[_ilon,_ilat,:],
                         "CO2"           => _co2,
+                        "ELEVATION"     => dts.t_ele[_ilon,_ilat],
                         "FT"            => FT,
                         "LAI"           => dts.p_lai[_ilon,_ilat,:],
                         "LATITUDE"      => (_ilat - 0.5) * 180 / size(dts.t_lm,2) - 90,

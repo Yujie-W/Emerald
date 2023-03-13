@@ -25,8 +25,20 @@ FT = Float64;
 @time mat = EmeraldEarth.gm_grids(dts);
 @time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
 @time wdx = EmeraldEarth.wd_grids(dts, wdr, 6);
+@time sts = EmeraldEarth.simulation!(mat, wdx);
 
-@time states = EmeraldEarth.simulation!(mat, wdx);
+nansts = zeros(Bool, size(sts));
+for i in eachindex(sts)
+    if !isnothing(sts[i]) && isnan(sts[i])
+        nansts[i] = true;
+    end;
+end;
+@show sum(nansts);
+sts[isnothing.(sts)] .= NaN;
+heatmap(sts')
+
+EmeraldEarth.simulation!(mat[339,36], wdx[339,36])
+EmeraldEarth.simulation!(mat[296,120], wdx[296,120])
 ```
 
 """
@@ -47,5 +59,9 @@ simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}) = (
         soil_plant_air_continuum!(CACHE_SPAC, 360; p_on = false, t_on = false, θ_on = false);
     end;
 
-    return 1.0
+    # if wd_params["RAD_DIR"] > 500
+    #     @info "Debugging" CACHE_SPAC.LATITUDE CACHE_SPAC.LONGITUDE GPP(CACHE_SPAC) PPAR(CACHE_SPAC);
+    # end;
+
+    return GPP(CACHE_SPAC)
 );

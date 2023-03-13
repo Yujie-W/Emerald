@@ -15,7 +15,7 @@ using GriddingMachine.Fetcher: ERA5SingleLevelsHourly, fetch_data!
 using ..EmeraldCore.EarthGeometry: solar_zenith_angle
 using ..EmeraldCore.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, MonoMLTreeSPAC, Soil
 using ..EmeraldCore.PhysicalChemistry: saturation_vapor_pressure
-using ..EmeraldCore.SPAC: initialize!, soil_plant_air_continuum!, update!
+using ..EmeraldCore.SPAC: GPP, PPAR, initialize!, soil_plant_air_continuum!, update!
 using ..EmeraldIO.Netcdf: read_nc, save_nc!
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Stats: nanmax, nanmean
