@@ -20,10 +20,10 @@ Run simulations on SPAC, given
 using Emerald;
 
 FT = Float64;
-EmeraldEarth.add_threads!(4, FT);
+@time EmeraldEarth.add_threads!(4, FT);
+@time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
+@time mat = EmeraldEarth.spac_grids(dts);
 
-dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
-mat = EmeraldEarth.spac_grids(dts);
 wdr = EmeraldEarth.ERA5SingleLevelsDriver();
 @time EmeraldEarth.prescribe!(mat, dts, wdr, 6);
 @time mat = EmeraldEarth.simulation!(mat; threads = 120);
