@@ -63,6 +63,7 @@ soil_plant_air_continuum!(
     # 2. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac);
     xylem_pressure_profile!(spac; update = update);
+    stomatal_conductance_profile!(spac);
 
     # 3. run photosynthesis model
     leaf_photosynthesis!(spac, GCO₂Mode());

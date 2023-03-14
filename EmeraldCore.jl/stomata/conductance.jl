@@ -306,6 +306,7 @@ stomatal_conductance!(leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) w
 #     2022-Jul-12: add method to update g for SPAC
 #     2022-Jul-26: limit g in range after updating stomatal conductance
 #     2023-Mar-11: do nothing if LAI == 0
+#     2023-Mar-13: move some methods as stomatal_conductance_profile!
 #
 #######################################################################################################################################################################################################
 """
@@ -313,7 +314,7 @@ stomatal_conductance!(leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) w
     stomatal_conductance!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
     stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, Δt::FT) where {FT<:AbstractFloat}
 
-Update marginal stomatal conductance, given
+Update stomatal conductance for H₂O based on computed ∂g∂t, given
 - `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type struct
 - `Δt` Time step length `[s]`
 
@@ -343,6 +344,8 @@ stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoM
 stomatal_conductance!(leaf::Leaf{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     leaf.g_H₂O_s += leaf.∂g∂t * Δt;
     stomatal_conductance!(leaf);
+    limit_stomatal_conductance!(leaf);
+    stomatal_conductance_profile!(leaf);
 
     return nothing
 );
@@ -351,6 +354,8 @@ stomatal_conductance!(leaves::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} =
     leaves.g_H₂O_s[1] += leaves.∂g∂t[1] * Δt;
     leaves.g_H₂O_s[2] += leaves.∂g∂t[2] * Δt;
     stomatal_conductance!(leaves);
+    limit_stomatal_conductance!(leaves);
+    stomatal_conductance_profile!(leaves);
 
     return nothing
 );
@@ -361,30 +366,67 @@ stomatal_conductance!(leaves::Leaves2D{FT}, Δt::FT) where {FT<:AbstractFloat} =
         leaves.g_H₂O_s_sunlit[_i] += leaves.∂g∂t_sunlit[_i] * Δt;
     end;
     stomatal_conductance!(leaves);
+    limit_stomatal_conductance!(leaves);
+    stomatal_conductance_profile!(leaves);
 
     return nothing
 );
 
-stomatal_conductance!(leaf::Leaf{FT}) where {FT<:AbstractFloat} = (
-    limit_stomatal_conductance!(leaf);
 
+#######################################################################################################################################################################################################
+#
+# Changes to this method
+# General
+#     2023-Mar-13: add function to update stomatal conductance profile based on gs and gb
+#
+#######################################################################################################################################################################################################
+"""
+
+    stomatal_conductance_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat}
+    stomatal_conductance_profile!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+
+Update stomatal conductance for CO₂ based on that for H₂O, given
+- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type struct
+
+"""
+function stomatal_conductance_profile! end
+
+stomatal_conductance_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; LEAF) = spac;
+
+    stomatal_conductance_profile!(LEAF);
+
+    return nothing
+);
+
+stomatal_conductance_profile!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+    (; CANOPY, LEAVES) = spac;
+
+    if CANOPY.lai == 0
+        return nothing
+    end;
+
+    for _leaves in LEAVES
+        stomatal_conductance_profile!(_leaves);
+    end;
+
+    return nothing
+);
+
+stomatal_conductance_profile!(leaf::Leaf{FT}) where {FT<:AbstractFloat} = (
     leaf._g_CO₂ = 1 / (1 / leaf.g_CO₂_b + FT(1.6) / leaf.g_H₂O_s);
 
     return nothing
 );
 
-stomatal_conductance!(leaves::Leaves1D{FT}) where {FT<:AbstractFloat} = (
-    limit_stomatal_conductance!(leaves);
-
+stomatal_conductance_profile!(leaves::Leaves1D{FT}) where {FT<:AbstractFloat} = (
     leaves._g_CO₂[1] = 1 / (1 / leaves.g_CO₂_b[1] + FT(1.6) / leaves.g_H₂O_s[1]);
     leaves._g_CO₂[2] = 1 / (1 / leaves.g_CO₂_b[2] + FT(1.6) / leaves.g_H₂O_s[2]);
 
     return nothing
 );
 
-stomatal_conductance!(leaves::Leaves2D{FT}) where {FT<:AbstractFloat} = (
-    limit_stomatal_conductance!(leaves);
-
+stomatal_conductance_profile!(leaves::Leaves2D{FT}) where {FT<:AbstractFloat} = (
     leaves._g_CO₂_shaded = 1 / (1 / leaves.g_CO₂_b + FT(1.6) / leaves.g_H₂O_s_shaded);
     for _i in eachindex(leaves.g_H₂O_s_sunlit)
         leaves._g_CO₂_sunlit[_i] = 1 / (1 / leaves.g_CO₂_b + FT(1.6) / leaves.g_H₂O_s_sunlit[_i]);

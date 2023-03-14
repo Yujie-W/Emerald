@@ -370,6 +370,49 @@ Base.@kwdef mutable struct MonoMLTreeSPAC{FT<:AbstractFloat} <: AbstractSPACSyst
 end
 
 
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2022-Mar-13: add state struct to save
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct for states of monospecies tree SPAC system
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct MonoMLTreeSPACState{FT}
+    "Shaded leaf stomatal conductance for all layers"
+    gs_shaded::Vector{FT}
+    "Sunlit leaf stomatal conductance for all layers"
+    gs_sunlit::Array{FT,3}
+    "Temperature record for CLM T mean of 10 days (based on CLM setting)"
+    t_clm::Vector{FT}
+end
+
+MonoMLTreeSPACState{FT}(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; DIM_AZI, DIM_INCL, DIM_LAYER, LEAVES) = spac;
+
+    _gs_sunlit = zeros(FT, DIM_INCL, DIM_AZI, DIM_LAYER);
+    for _i in 1:DIM_LAYER
+        _gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
+    end;
+
+    return MonoMLTreeSPACState{FT}(
+                gs_shaded = [_leaves.g_H₂O_s_shaded for _leaves in LEAVES],
+                gs_sunlit = _gs_sunlit,
+                t_clm = spac.MEMORY.tem,
+    )
+);
+
+
 #=
 TODO: move it to SoilPlantAirContinuum.jl
 #######################################################################################################################################################################################################
