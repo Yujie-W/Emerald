@@ -398,9 +398,9 @@ Base.@kwdef mutable struct MonoMLTreeSPACState{FT}
 end
 
 MonoMLTreeSPACState{FT}(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_AZI, DIM_INCL, DIM_LAYER, LEAVES) = spac;
+    (; DIM_LAYER, LEAVES) = spac;
 
-    _gs_sunlit = zeros(FT, DIM_INCL, DIM_AZI, DIM_LAYER);
+    _gs_sunlit = zeros(FT, LEAVES[1].DIM_INCL, LEAVES[1].DIM_AZI, DIM_LAYER);
     for _i in 1:DIM_LAYER
         _gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
     end;

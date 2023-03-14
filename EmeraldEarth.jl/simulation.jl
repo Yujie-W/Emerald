@@ -25,7 +25,7 @@ FT = Float64;
 
 @time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
 @time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
-@time sts = Matrix{Nothing}(nothing, size(dts.t_lm));
+@time sts = Matrix{Union{Nothing,EmeraldCore.Namespace.MonoMLTreeSPACState{FT}}}(nothing, size(dts.t_lm));
 
 @time mat = EmeraldEarth.gm_grids(dts);
 @time wdx = EmeraldEarth.wd_grids(dts, wdr, 6);

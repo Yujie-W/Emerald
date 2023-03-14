@@ -72,7 +72,8 @@ Synchronize SPAC parameters from,
 - `state` `MonoMLTreeSPACState` for all state variables, or nothing
 
 """
-function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MonoMLTreeSPACState{FT}}) where {FT<:AbstractFloat}
+function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MonoMLTreeSPACState})
+    FT = gm_params["FT"];
     _z_canopy = max(FT(0.1), gm_params["CANOPY_HEIGHT"]);
 
     #
@@ -131,6 +132,13 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
         update!(CACHE_SPAC; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
     end;
 
+    # synchronize the state if state is not nothing, otherwise set all values to NaN (do thing before prescribing T_SKIN)
+    if !isnothing(state)
+        spac_state!(state, CACHE_SPAC);
+    else
+        CACHE_SPAC.MEMORY.tem .= NaN;
+    end;
+
     # prescribe leaf temperature from skin temperature
     # TODO: add CACHE_SPAC.MEMORY.tem as prognostic variable
     if "T_SKIN" in keys(wd_params)
@@ -150,11 +158,6 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     CACHE_SPAC.CANOPY.ci = _cli;
     CACHE_SPAC.CANOPY.Ω_A = _cli;
     update!(CACHE_SPAC; cab = _chl, car = _chl / 7, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
-
-    # synchronize the state if state is not nothing
-    if !isnothing
-        spac_state!(state, CACHE_SPAC);
-    end;
 
     return nothing
 end

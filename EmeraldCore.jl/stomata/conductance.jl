@@ -343,7 +343,6 @@ stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoM
 
 stomatal_conductance!(leaf::Leaf{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     leaf.g_H₂O_s += leaf.∂g∂t * Δt;
-    stomatal_conductance!(leaf);
     limit_stomatal_conductance!(leaf);
     stomatal_conductance_profile!(leaf);
 
@@ -353,7 +352,6 @@ stomatal_conductance!(leaf::Leaf{FT}, Δt::FT) where {FT<:AbstractFloat} = (
 stomatal_conductance!(leaves::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     leaves.g_H₂O_s[1] += leaves.∂g∂t[1] * Δt;
     leaves.g_H₂O_s[2] += leaves.∂g∂t[2] * Δt;
-    stomatal_conductance!(leaves);
     limit_stomatal_conductance!(leaves);
     stomatal_conductance_profile!(leaves);
 
@@ -365,7 +363,6 @@ stomatal_conductance!(leaves::Leaves2D{FT}, Δt::FT) where {FT<:AbstractFloat} =
     for _i in eachindex(leaves.g_H₂O_s_sunlit)
         leaves.g_H₂O_s_sunlit[_i] += leaves.∂g∂t_sunlit[_i] * Δt;
     end;
-    stomatal_conductance!(leaves);
     limit_stomatal_conductance!(leaves);
     stomatal_conductance_profile!(leaves);
 
