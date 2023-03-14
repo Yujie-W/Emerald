@@ -3,16 +3,17 @@
 # Changes to this function
 # General
 #     2023-Mar-11: add function to run the SPAC
+#     2023-Mar-13: add state mat as an input
 #
 #######################################################################################################################################################################################################
 """
 
-    simulation!(mat_spac::Matrix{Union{Nothing,MonoMLTreeSPAC{FT}}}) where {FT<:AbstractFloat}
-    simulation!(spac::Union{Nothing,MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MonoMLTreeSPACState{FT}}}) where {FT<:AbstractFloat}
 
 Run simulations on SPAC, given
-- `mat_spac` Matrix of SPAC
-- `spac` SPAC or nothing
+- `gm_mat` Matrix of GriddingMachine inputs
+- `wd_mat` Matrix of weather drivers
+- `state_mat` Matrix of state variable struct
 
 ---
 # Example
@@ -21,11 +22,14 @@ using Emerald;
 
 FT = Float64;
 @time EmeraldEarth.add_threads!(20, FT);
+
 @time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
-@time mat = EmeraldEarth.gm_grids(dts);
 @time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
+@time sts = Matrix{Nothing}(nothing, size(dts.t_lm));
+
+@time mat = EmeraldEarth.gm_grids(dts);
 @time wdx = EmeraldEarth.wd_grids(dts, wdr, 6);
-@time sts = EmeraldEarth.simulation!(mat, wdx);
+@time sts = EmeraldEarth.simulation!(mat, wdx, sts);
 
 nansts = zeros(Bool, size(sts));
 for i in eachindex(sts)
@@ -44,24 +48,25 @@ EmeraldEarth.simulation!(mat[296,120], wdx[296,120])
 """
 function simulation! end
 
-simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}) = (
+simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MonoMLTreeSPACState{FT}}}) where {FT<:AbstractFloat} = (
     @tinfo "Running the global simulations in multiple threads...";
-    _states = @showprogress pmap(simulation!, gm_mat, wd_mat);
+    _states = @showprogress pmap(simulation!, gm_mat, wd_mat, state_mat);
 
     return _states
 );
 
-simulation!(gm_params::Nothing, wd_params::Nothing) = nothing;
+simulation!(gm_params::Nothing, wd_params::Nothing, state::Nothing) = nothing;
 
-simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}) = (
-    synchronize_cache!(gm_params, wd_params);
+simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MonoMLTreeSPACState{FT}}) where {FT<:AbstractFloat} = (
+    synchronize_cache!(gm_params, wd_params, state);
     for _i in 1:10
         soil_plant_air_continuum!(CACHE_SPAC, 360; p_on = false, t_on = false, θ_on = false);
     end;
+    spac_state!(CACHE_SPAC, CACHE_STATE);
 
     # if wd_params["RAD_DIR"] > 500
     #     @info "Debugging" CACHE_SPAC.LATITUDE CACHE_SPAC.LONGITUDE GPP(CACHE_SPAC) PPAR(CACHE_SPAC);
     # end;
 
-    return GPP(CACHE_SPAC)
+    return CACHE_STATE
 );

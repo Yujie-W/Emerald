@@ -13,9 +13,9 @@ using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using GriddingMachine.Fetcher: ERA5SingleLevelsHourly, fetch_data!
 
 using ..EmeraldCore.EarthGeometry: solar_zenith_angle
-using ..EmeraldCore.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, MonoMLTreeSPAC, Soil
+using ..EmeraldCore.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, MonoMLTreeSPAC, MonoMLTreeSPACState, Soil
 using ..EmeraldCore.PhysicalChemistry: saturation_vapor_pressure
-using ..EmeraldCore.SPAC: GPP, PPAR, initialize!, soil_plant_air_continuum!, update!
+using ..EmeraldCore.SPAC: GPP, PPAR, initialize!, soil_plant_air_continuum!, spac_state!, update!
 using ..EmeraldIO.Netcdf: read_nc, save_nc!
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Stats: nanmax, nanmean
@@ -29,6 +29,7 @@ using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 RESULT_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/simulations";
 SETUP_FOLDER  = "/home/wyujie/DATASERVER/model/CLIMA/LAND/setups";
 CACHE_SPAC    = nothing;
+CACHE_STATE   = nothing;
 
 
 # ERA5 settings
