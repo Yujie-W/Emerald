@@ -29,7 +29,7 @@ FT = Float64;
 @time sts = Matrix{Union{Nothing,EmeraldCore.Namespace.MonoMLTreeSPACState{FT}}}(nothing, size(dts.t_lm));
 
 @time mat = EmeraldEarth.gm_grids(dts);
-@time wdx = EmeraldEarth.wd_grids(dts, wdr, 6);
+@time wdx = EmeraldEarth.wd_grids(dts, wds, 6);
 @time sts = EmeraldEarth.simulation!(mat, wdx, sts);
 
 nansts = zeros(Bool, size(sts));

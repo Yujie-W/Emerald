@@ -308,21 +308,25 @@ end
 # Changes to this function
 # General
 #     2023-Mar-13: add function to read weather driver per grid
+#     2023-Mar-13: add method to read weather driver per grid from preloaded drivers
 #
 #######################################################################################################################################################################################################
 """
 
     wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+    wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
 
 Prepare a matrix of weather driver data to feed SPAC, given
 - `dts` `LandDatasets` from GriddingMachine
-- `wd` `ERA5SingleLevelsDriver` weather driver
+- `wd` `ERA5SingleLevelsDriver` weather driver or preloaded dictionary
 - `ind` Index of data within a year
 - `leaf` Whether to prescribe leaf temperature from skin temperature, default is true
 - `soil` Whether to prescribe soil water and temperature conditions, default is true
 
 """
-function wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+function wd_grids end
+
+wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
     # create a matrix of GriddingMachine data
     @tinfo "Preparing a matrix of weather driver data to work on...";
     _mat_wd = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
@@ -384,4 +388,48 @@ function wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; l
     end;
 
     return _mat_wd
-end
+);
+
+wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
+    # create a matrix of GriddingMachine data
+    @tinfo "Preparing a matrix of weather driver data to work on...";
+    _mat_wd = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
+
+    # prescribe air layer environments and radiation
+    for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
+        if dts.mask_spac[_ilon,_ilat]
+            _mat_wd[_ilon,_ilat] = Dict{String,Any}(
+                        "FDOY"    => (ind - 0.5 + ((_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180) / 15) / 24,
+                        "INDEX"   => ind,
+                        "P_ATM"   => wd["P_ATM"][_ilon,_ilat,ind],
+                        "RAD_DIF" => wd["RAD_DIF"][_ilon,_ilat,ind],
+                        "RAD_DIR" => wd["RAD_DIR"][_ilon,_ilat,ind],
+                        "T_AIR"   => wd["T_AIR"][_ilon,_ilat,ind],
+                        "VPD"     => wd["VPD"][_ilon,_ilat,ind],
+                        "WIND"    => wd["WIND"][_ilon,_ilat,ind],
+                        "YEAR"    => dts.year,
+            );
+        end;
+    end;
+
+    # prescribe soil water content
+    if soil
+        for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
+            if dts.mask_spac[_ilon,_ilat]
+                _mat_wd[_ilon,_ilat]["SWC"] = (wd["SWC_1"][_ilon,_ilat,ind], wd["SWC_2"][_ilon,_ilat,ind], wd["SWC_3"][_ilon,_ilat,ind], wd["SWC_4"][_ilon,_ilat,ind]);
+                _mat_wd[_ilon,_ilat]["T_SOIL"] = (wd["T_S_1"][_ilon,_ilat,ind], wd["T_S_2"][_ilon,_ilat,ind], wd["T_S_3"][_ilon,_ilat,ind], wd["T_S_4"][_ilon,_ilat,ind]);
+            end;
+        end;
+    end;
+
+    # prescribe leaf temperature from skin temperature
+    if leaf
+        for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
+            if dts.mask_spac[_ilon,_ilat]
+                _mat_wd[_ilon,_ilat]["T_SKIN"] = max(wd["T_AIR"][_ilon,_ilat], wd["T_SKIN"][_ilon,_ilat]);
+            end;
+        end;
+    end;
+
+    return _mat_wd
+);
