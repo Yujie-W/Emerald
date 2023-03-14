@@ -16,7 +16,7 @@ using ..EmeraldCore.EarthGeometry: solar_zenith_angle
 using ..EmeraldCore.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, MonoMLTreeSPAC, MonoMLTreeSPACState, Soil
 using ..EmeraldCore.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldCore.SPAC: GPP, PPAR, initialize!, soil_plant_air_continuum!, spac_state!, update!
-using ..EmeraldIO.Netcdf: read_nc, save_nc!
+using ..EmeraldIO.Netcdf: append_nc!, create_nc!, grow_nc!, read_nc, save_nc!
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldUtility.Email: send_email!
@@ -39,6 +39,7 @@ ERA5_FOLDER = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels";
 include("griddingmachine.jl")
 include("driver.jl"         )
 include("cache.jl"          )
+include("save.jl"           )
 include("simulation.jl"     )
 include("threads.jl"        )
 

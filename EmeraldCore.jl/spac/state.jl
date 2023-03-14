@@ -18,7 +18,7 @@ Synchronize state variables from 1st to 2nd struct, given
 function spac_state! end
 
 spac_state!(spac::MonoMLTreeSPAC{FT}, state::MonoMLTreeSPACState{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, LEAVES, MEMORY) = spac;
+    (; CANOPY, DIM_LAYER, LEAVES, MEMORY) = spac;
 
     for _i in 1:DIM_LAYER
         state.gs_shaded[_i] = LEAVES[_i].g_H₂O_s_shaded;
@@ -26,6 +26,11 @@ spac_state!(spac::MonoMLTreeSPAC{FT}, state::MonoMLTreeSPACState{FT}) where {FT<
     end;
 
     state.t_clm .= MEMORY.tem;
+
+    # save the variables used for publications
+    state.gpp = GPP(spac);
+    state.tropomi_sif₆₈₃ = TROPOMI_SIF683(CANOPY);
+    state.tropomi_sif₇₄₀ = TROPOMI_SIF740(CANOPY);
 
     return nothing
 );

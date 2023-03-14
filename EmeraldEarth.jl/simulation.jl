@@ -24,13 +24,20 @@ FT = Float64;
 @time EmeraldEarth.add_threads!(20, FT);
 
 @time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
-@time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
-@time wds = EmeraldEarth.weather_drivers(dts, wdr);
-@time sts = Matrix{Union{Nothing,EmeraldCore.Namespace.MonoMLTreeSPACState{FT}}}(nothing, size(dts.t_lm));
-
 @time mat = EmeraldEarth.gm_grids(dts);
-@time wdx = EmeraldEarth.wd_grids(dts, wds, 6);
+@time sts = Matrix{Union{Nothing,EmeraldCore.Namespace.MonoMLTreeSPACState{FT}}}(nothing, size(dts.t_lm));
+@time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
+
+@time wds = EmeraldEarth.weather_drivers(dts, wdr);
+@time wdx = EmeraldEarth.wd_grids(dts, wds, 1);
+
+# for debugging use
+@time wdx = EmeraldEarth.wd_grids(dts, wdr, 1);
 @time sts = EmeraldEarth.simulation!(mat, wdx, sts);
+@time EmeraldEarth.save_simulations!("test.nc", sts, 1);
+@time wdx = EmeraldEarth.wd_grids(dts, wdr, 2);
+@time sts = EmeraldEarth.simulation!(mat, wdx, sts);
+@time EmeraldEarth.save_simulations!("test.nc", sts, 2);
 
 nansts = zeros(Bool, size(sts));
 for i in eachindex(sts)

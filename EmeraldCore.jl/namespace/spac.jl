@@ -389,12 +389,21 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct MonoMLTreeSPACState{FT}
+    # state variables
     "Shaded leaf stomatal conductance for all layers"
     gs_shaded::Vector{FT}
     "Sunlit leaf stomatal conductance for all layers"
     gs_sunlit::Array{FT,3}
     "Temperature record for CLM T mean of 10 days (based on CLM setting)"
     t_clm::Vector{FT}
+
+    # variables to save
+    "Gross primary productivity"
+    gpp::FT = 0
+    "TROPOMI SIF at 683 nm"
+    tropomi_sif₆₈₃::FT = 0
+    "TROPOMI SIF at 740 nm"
+    tropomi_sif₇₄₀::FT = 0
 end
 
 MonoMLTreeSPACState{FT}(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
