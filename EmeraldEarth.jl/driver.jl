@@ -228,6 +228,85 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 #
 # Changes to this function
 # General
+#     2023-Mar-13: add function to load all weather drivers a priori
+#
+#######################################################################################################################################################################################################
+"""
+
+    weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+
+Preload weather drivers, given
+- `dts` `LandDatasets` from GriddingMachine
+- `wd` `ERA5SingleLevelsDriver` weather driver
+- `leaf` Whether to prescribe leaf temperature from skin temperature, default is true
+- `soil` Whether to prescribe soil water and temperature conditions, default is true
+
+"""
+function weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+    # prescribe air layer environments and radiation
+    @tinfo "Preloading weather driver for atmospheric pressure...";
+    _wd_p_atm = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.P_ATM[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.P_ATM[1]);
+    @tinfo "Preloading weather driver for 2m air temperature...";
+    _wd_t_air = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_AIR[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_AIR[1]);
+    @tinfo "Preloading weather driver for 2m dew temperature...";
+    _wd_t_dew = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_DEW[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_DEW[1]);
+    @tinfo "Preloading weather driver for wind speed u...";
+    _wd_windu = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.WINDU[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.WINDU[1]);
+    @tinfo "Preloading weather driver for wind speed v...";
+    _wd_windv = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.WINDV[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.WINDV[1]);
+    @tinfo "Preloading weather driver for total radiation...";
+    _wd_s_all = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.S_ALL[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.S_ALL[1]);
+    @tinfo "Preloading weather driver for direct radiation...";
+    _wd_s_dir = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.S_DIR[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.S_DIR[1]);
+    _wd_s_dif = _wd_s_all .- _wd_s_dir;
+    _wd_vpd   = saturation_vapor_pressure.(_wd_t_air) .- saturation_vapor_pressure.(_wd_t_dew);
+    _wd_wind  = sqrt.(_wd_windu .^ 2 .+ _wd_windv .^ 2);
+
+    # create a dict for the drivers
+    _drivers = Dict{String,Any}(
+                "P_ATM"   => _wd_p_atm,
+                "RAD_DIF" => _wd_s_dif,
+                "RAD_DIR" => _wd_s_dir,
+                "T_AIR"   => _wd_t_air,
+                "VPD"     => _wd_vpd,
+                "WIND"    => _wd_wind,
+                "YEAR"    => dts.year,
+    );
+
+    # prescribe soil water content
+    if soil
+        @tinfo "Preloading weather drivers for soil water content at layer 1...";
+        _drivers["SWC_1"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.SWC_1[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.SWC_1[1]);
+        @tinfo "Preloading weather drivers for soil water content at layer 2...";
+        _drivers["SWC_2"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.SWC_2[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.SWC_2[1]);
+        @tinfo "Preloading weather drivers for soil water content at layer 3...";
+        _drivers["SWC_3"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.SWC_3[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.SWC_3[1]);
+        @tinfo "Preloading weather drivers for soil water content at layer 4...";
+        _drivers["SWC_4"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.SWC_4[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.SWC_4[1]);
+        @tinfo "Preloading weather drivers for soil temperature at layer 1...";
+        _drivers["T_S_1"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_S_1[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_S_1[1]);
+        @tinfo "Preloading weather drivers for soil temperature at layer 2...";
+        _drivers["T_S_2"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_S_2[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_S_2[1]);
+        @tinfo "Preloading weather drivers for soil temperature at layer 3...";
+        _drivers["T_S_3"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_S_3[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_S_3[1]);
+        @tinfo "Preloading weather drivers for soil temperature at layer 4...";
+        _drivers["T_S_4"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_S_4[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_S_4[1]);
+    end;
+
+    # prescribe leaf temperature from skin temperature
+    if leaf
+        @tinfo "Preloading weather drivers for skin temperature...";
+        _drivers["T_SKIN"] = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_SKN[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_SKN[1]);
+    end;
+
+    return _drivers
+end
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2023-Mar-13: add function to read weather driver per grid
 #
 #######################################################################################################################################################################################################
