@@ -33,7 +33,7 @@ function leaf_spectra! end
 #     2020-Mar-30: account for carotenoid absorption as PPAR as well as chlorophyll
 #     2020-Mar-31: use 40° rather than 59° for _τ_α calculation (following PROSPECT-D)
 #     2021-Aug-07: replace function `expint` with that from SpecialFunctions
-#     2021-Oct-21: add α to input parameters so that one can roll back to 50° for _τ_α calculation
+#     2021-Oct-21: add α to input parameters so that one can roll back to 59° for _τ_α calculation
 #     2021-Nov-29: separate HyperspectralAbsorption as constant struct
 #     2022-Jan-13: use LeafBiophysics directly in the function rather than Leaf
 #     2022-Jun-15: rename LeafBiophysics to HyperspectralLeafBiophysics to be more descriptive
