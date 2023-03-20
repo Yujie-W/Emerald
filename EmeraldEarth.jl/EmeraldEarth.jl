@@ -37,6 +37,7 @@ ERA5_FOLDER = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels";
 
 
 include("griddingmachine.jl")
+include("era5.jl"           )
 include("driver.jl"         )
 include("cache.jl"          )
 include("save.jl"           )
