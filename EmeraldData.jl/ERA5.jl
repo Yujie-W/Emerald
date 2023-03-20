@@ -256,16 +256,16 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 #######################################################################################################################################################################################################
 """
 
-    weather_driver_file(wd_tag::String, dict::Dict{String,Any}; displaying::Bool = true, appending::Bool = false)
+    weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
 
 Return the input weather driver file path, given
 - `wd_tag` Weather driver version tag
 - `dict` Dictionary that store grid information
-- `displaying` If true, display information about the NetCDF file
 - `appending` If true, always check whether there are new fields to add
+- `displaying` If true, display information about the NetCDF file
 
 """
-function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; displaying::Bool = true, appending::Bool = false)
+function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
     # which index of data to read
     _gz      = dict["RESO_SPACE"]
     _lat_ind = dict["LAT_INDEX"];

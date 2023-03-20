@@ -168,14 +168,16 @@ end
 # Changes to this function
 # General
 #     2023-Mar-11: add function to determine the day bounds of input GriddingMachine drivers
+# TODO:
+#     Generalize this function in EmeraldMath or EmeraldUtility
 #
 #######################################################################################################################################################################################################
 """
 
-    griddingmachine_data_index(n::Int, year::Int, d::Int)
+    griddingmachine_data(data::Vector, year::Int, d::Int)
 
 Return the index of data, given
-- `n` Number of GriddingMachine data time index
+- `data` Time series of input data
 - `year` Year
 - `d` Day number
 
