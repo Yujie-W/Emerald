@@ -2,7 +2,7 @@
 #
 # Changes to the function
 # General
-#     2022-Jul-15: add method for MonoMLTreeSPAC
+#     2022-Jul-15: add method for MultiLayerSPAC
 #     2022-Jul-15: rename function to plant_energy! to be more accurate (ready to add other organs other leaf)
 #     2022-Jul-15: add root, trunk, branch energy budgets
 #     2022-Jul-26: add leaf LMA to the denominator
@@ -22,13 +22,13 @@ function plant_energy! end
 
 """
 
-    plant_energy!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    plant_energy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Compute the marginal energy increase in spac, given
-- `spac` `MonoMLTreeSPAC` type SPAC
+- `spac` `MultiLayerSPAC` type SPAC
 
 """
-plant_energy!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+plant_energy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; AIR, BRANCHES, CANOPY, DIM_LAYER, DIM_ROOT, LEAVES, LEAVES_INDEX, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # loop through the roots
@@ -74,14 +74,14 @@ plant_energy!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
 
 """
 
-    plant_energy!(spac::MonoMLTreeSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+    plant_energy!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
 
 Compute the marginal energy increase in spac, given
-- `spac` `MonoMLTreeSPAC` type SPAC
+- `spac` `MultiLayerSPAC` type SPAC
 - `δt` Time step
 
 """
-plant_energy!(spac::MonoMLTreeSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
+plant_energy!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
     (; BRANCHES, DIM_LAYER, DIM_ROOT, LEAVES, ROOTS, TRUNK) = spac;
 
     # update the temperature for roots

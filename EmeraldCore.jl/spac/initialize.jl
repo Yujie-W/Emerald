@@ -8,15 +8,15 @@
 #######################################################################################################################################################################################################
 """
 
-    initialize!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    initialize!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Initialize the SPAC, given
-- `spac` `MonoMLTreeSPAC` SPAC
+- `spac` `MultiLayerSPAC` SPAC
 
 """
 function initialize! end
 
-initialize!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+initialize!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
 
     # make sure leaf area index setup is correct

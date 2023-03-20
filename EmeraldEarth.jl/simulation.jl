@@ -8,7 +8,7 @@
 #######################################################################################################################################################################################################
 """
 
-    simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MonoMLTreeSPACState{FT}}}) where {FT<:AbstractFloat}
+    simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}) where {FT<:AbstractFloat}
 
 Run simulations on SPAC, given
 - `gm_mat` Matrix of GriddingMachine inputs
@@ -25,7 +25,7 @@ FT = Float64;
 
 @time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
 @time mat = EmeraldEarth.gm_grids(dts);
-@time sts = Matrix{Union{Nothing,EmeraldCore.Namespace.MonoMLTreeSPACState{FT}}}(nothing, size(dts.t_lm));
+@time sts = Matrix{Union{Nothing,EmeraldCore.Namespace.MultiLayerSPACState{FT}}}(nothing, size(dts.t_lm));
 @time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
 
 @time wds = EmeraldEarth.weather_drivers(dts, wdr);
@@ -56,7 +56,7 @@ EmeraldEarth.simulation!(mat[296,120], wdx[296,120])
 """
 function simulation! end
 
-simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MonoMLTreeSPACState{FT}}}) where {FT<:AbstractFloat} = (
+simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}) where {FT<:AbstractFloat} = (
     @tinfo "Running the global simulations in multiple threads...";
     _states = @showprogress pmap(simulation!, gm_mat, wd_mat, state_mat);
 
@@ -65,7 +65,7 @@ simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Unio
 
 simulation!(gm_params::Nothing, wd_params::Nothing, state::Nothing) = nothing;
 
-simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MonoMLTreeSPACState{FT}}) where {FT<:AbstractFloat} = (
+simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState{FT}}) where {FT<:AbstractFloat} = (
     synchronize_cache!(gm_params, wd_params, state);
     for _i in 1:10
         soil_plant_air_continuum!(CACHE_SPAC, 360; p_on = false, t_on = false, θ_on = false);

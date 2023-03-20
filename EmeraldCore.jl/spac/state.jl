@@ -7,17 +7,17 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_state!(spac::MonoMLTreeSPAC{FT}, state::MonoMLTreeSPACState{FT}) where {FT<:AbstractFloat}
-    spac_state!(state::MonoMLTreeSPACState{FT}, spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<:AbstractFloat}
+    spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Synchronize state variables from 1st to 2nd struct, given
-- `spac` `MonoMLTreeSPAC` struct for SPAC
-- `state` `MonoMLTreeSPACState` struct for states
+- `spac` `MultiLayerSPAC` struct for SPAC
+- `state` `MultiLayerSPACState` struct for states
 
 """
 function spac_state! end
 
-spac_state!(spac::MonoMLTreeSPAC{FT}, state::MonoMLTreeSPACState{FT}) where {FT<:AbstractFloat} = (
+spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES, MEMORY) = spac;
 
     for _i in 1:DIM_LAYER
@@ -35,7 +35,7 @@ spac_state!(spac::MonoMLTreeSPAC{FT}, state::MonoMLTreeSPACState{FT}) where {FT<
     return nothing
 );
 
-spac_state!(state::MonoMLTreeSPACState{FT}, spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, LEAVES, MEMORY) = spac;
 
     for _i in 1:DIM_LAYER

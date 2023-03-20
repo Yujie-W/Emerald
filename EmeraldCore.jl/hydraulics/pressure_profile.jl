@@ -507,10 +507,10 @@ xylem_pressure_profile!(hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T:
 """
 
     xylem_pressure_profile!(spac::MonoElementSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat}
-    xylem_pressure_profile!(spac::MonoMLTreeSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat}
+    xylem_pressure_profile!(spac::MultiLayerSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat}
 
 Update xylem pressure profile (flow profile needs to be updated a priori), given
-- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type spac
+- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type spac
 - `update` If true, update xylem cavitation legacy
 
 """
@@ -533,7 +533,7 @@ xylem_pressure_profile!(spac::MonoElementSPAC{FT}; update::Bool = true) where {F
     return nothing
 );
 
-xylem_pressure_profile!(spac::MonoMLTreeSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(spac::MultiLayerSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat} = (
     (; BRANCHES, DIM_ROOT, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # update water potential from SOIL

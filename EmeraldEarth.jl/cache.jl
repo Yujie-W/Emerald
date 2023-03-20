@@ -19,7 +19,7 @@ function initialize_cache!(FT)
 
     # create a SPAC to work on
     _z_canopy = FT(10);
-    CACHE_SPAC = MonoMLTreeSPAC{FT}(
+    CACHE_SPAC = MultiLayerSPAC{FT}(
                 DIM_AIR      = 25,
                 DIM_LAYER    = 10,
                 DIM_ROOT     = 4,
@@ -48,7 +48,7 @@ function initialize_cache!(FT)
     initialize!(CACHE_SPAC);
 
     # create a state struct based on the spac
-    CACHE_STATE = MonoMLTreeSPACState{FT}(CACHE_SPAC);
+    CACHE_STATE = MultiLayerSPACState{FT}(CACHE_SPAC);
 
     return nothing
 end;
@@ -64,15 +64,15 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MonoMLTreeSPACState{FT}}) where {FT<:AbstractFloat}
+    synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState{FT}}) where {FT<:AbstractFloat}
 
 Synchronize SPAC parameters from,
 - `gm_params` Dict for GriddingMachine parameters
 - `wd_params` Dict for weather drivers
-- `state` `MonoMLTreeSPACState` for all state variables, or nothing
+- `state` `MultiLayerSPACState` for all state variables, or nothing
 
 """
-function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MonoMLTreeSPACState})
+function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState})
     FT = gm_params["FT"];
     _z_canopy = max(FT(0.1), gm_params["CANOPY_HEIGHT"]);
 

@@ -17,15 +17,15 @@
 #######################################################################################################################################################################################################
 """
 
-    canopy_fluorescence!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    canopy_fluorescence!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Updates canopy fluorescence, given
-- `spac` `MonoMLTreeSPAC` type SPAC
+- `spac` `MultiLayerSPAC` type SPAC
 
 """
 function canopy_fluorescence! end
 
-canopy_fluorescence!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+canopy_fluorescence!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, LEAVES, Φ_PHOTON) = spac;
 
     if (ANGLES.sza < 89)

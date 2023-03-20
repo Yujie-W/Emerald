@@ -421,10 +421,10 @@ xylem_flow_profile!(mode::NonSteadyStateFlow, f_out::FT) where {FT<:AbstractFloa
 """
 
     xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
-    xylem_flow_profile!(spac::MonoMLTreeSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
+    xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
 
 Update flow profiles for the soil-plant-air continuum (set up leaf flow rate from stomatal conductance first), given
-- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type SPAC system
+- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type SPAC system
 - `Δt` Time step length
 
 """
@@ -448,7 +448,7 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat
     return nothing
 );
 
-xylem_flow_profile!(spac::MonoMLTreeSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # 0. update leaf flow or f_out from stomatal conductance
@@ -485,7 +485,7 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-xylem_flow_profile!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; AIR, CANOPY, DIM_LAYER, LEAVES, LEAVES_INDEX) = spac;
 
     for _i in eachindex(LEAVES)

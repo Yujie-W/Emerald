@@ -76,7 +76,7 @@ update!(air::AirLayer{FT};
 
 """
 
-    update!(spac::MonoMLTreeSPAC{FT};
+    update!(spac::MultiLayerSPAC{FT};
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
             lai::Union{Number,Nothing} = nothing,
@@ -101,7 +101,7 @@ Update the physiological parameters of the SPAC, given
 -`vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
 
 """
-update!(spac::MonoMLTreeSPAC{FT};
+update!(spac::MultiLayerSPAC{FT};
         cab::Union{Number,Nothing} = nothing,
         car::Union{Number,Nothing} = nothing,
         lai::Union{Number,Nothing} = nothing,

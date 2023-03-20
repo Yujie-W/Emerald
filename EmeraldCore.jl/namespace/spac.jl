@@ -41,7 +41,7 @@ $(TYPEDEF)
 
 Hierarchy of AbstractSPACSystem:
 - [`MonoElementSPAC`](@ref)
-- [`MonoMLTreeSPAC`](@ref)
+- [`MultiLayerSPAC`](@ref)
 
 """
 abstract type AbstractSPACSystem{FT<:AbstractFloat} end
@@ -99,7 +99,7 @@ end
 #     2022-May-25: SPAC system for monospecies tree
 #     2022-May-25: use Root and Stem structures with temperatures
 #     2022-May-31: rename _qs to _fs
-#     2022-Jun-29: rename struct to MonoMLTreeSPAC, and use Leaves2D
+#     2022-Jun-29: rename struct to MultiLayerSPAC, and use Leaves2D
 #     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
@@ -117,7 +117,7 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MonoMLTreeSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
     # dimensions
     "Dimension of air layers"
     DIM_AIR::Int = 25
@@ -204,7 +204,7 @@ Struct for states of monospecies tree SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MonoMLTreeSPACState{FT}
+Base.@kwdef mutable struct MultiLayerSPACState{FT}
     # state variables
     "Shaded leaf stomatal conductance for all layers"
     gs_shaded::Vector{FT}
@@ -222,7 +222,7 @@ Base.@kwdef mutable struct MonoMLTreeSPACState{FT}
     tropomi_sif₇₄₀::FT = 0
 end
 
-MonoMLTreeSPACState{FT}(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, LEAVES) = spac;
 
     _gs_sunlit = zeros(FT, LEAVES[1].DIM_INCL, LEAVES[1].DIM_AZI, DIM_LAYER);
@@ -230,7 +230,7 @@ MonoMLTreeSPACState{FT}(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
         _gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
     end;
 
-    return MonoMLTreeSPACState{FT}(
+    return MultiLayerSPACState{FT}(
                 gs_shaded = [_leaves.g_H₂O_s_shaded for _leaves in LEAVES],
                 gs_sunlit = _gs_sunlit,
                 t_clm = deepcopy(spac.MEMORY.tem),
@@ -249,14 +249,14 @@ TODO: move it to SoilPlantAirContinuum.jl
 #     2022-May-31: rename _qs to _fs
 #     2022-May-31: add steady state mode option to input options
 #     2022-Jun-15: fix documentation
-#     2022-Jun-29: rename struct to MonoMLTreeSPAC, and use Leaves2D
+#     2022-Jun-29: rename struct to MultiLayerSPAC, and use Leaves2D
 #     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add area to constructor function
 #
 #######################################################################################################################################################################################################
 """
 
-    MonoMLTreeSPAC{FT}(
+    MultiLayerSPAC{FT}(
                 psm::String,
                 area::Number = 100,
                 wls::WaveLengthSet{FT} = WaveLengthSet{FT}();
@@ -277,10 +277,10 @@ Construct a SPAC system for monospecies tree system, given
 ---
 # Examples
 ```julia
-spac = MonoMLTreeSPAC{Float64}("C3");
+spac = MultiLayerSPAC{Float64}("C3");
 ```
 """
-MonoMLTreeSPAC{FT}(
+MultiLayerSPAC{FT}(
             psm::String,
             area::Number = 100,
             wls::WaveLengthSet{FT} = WaveLengthSet{FT}();
@@ -392,7 +392,7 @@ MonoMLTreeSPAC{FT}(
     _rad_sw = HyperspectralRadiation{FT}();
 
     # return plant
-    return MonoMLTreeSPAC{FT}(
+    return MultiLayerSPAC{FT}(
                 _airs,              # AIR
                 _angles,            # ANGLES
                 _branches,          # BRANCHES

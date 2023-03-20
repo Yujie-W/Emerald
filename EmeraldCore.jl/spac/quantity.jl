@@ -7,15 +7,15 @@
 #######################################################################################################################################################################################################
 """
 
-    BETA(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    BETA(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Return the average beta factor for
-- `spac` `MonoMLTreeSPAC` SPAC
+- `spac` `MultiLayerSPAC` SPAC
 
 """
 function BETA end
 
-BETA(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+BETA(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, LEAVES) = spac;
 
     # compute the mean beta
@@ -37,15 +37,15 @@ BETA(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    CNPP(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    CNPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Return the canopy net primary productivity per ground area, given
-- `spac` `MonoMLTreeSPAC` SPAC
+- `spac` `MultiLayerSPAC` SPAC
 
 """
 function CNPP end
 
-CNPP(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+CNPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES) = spac;
 
     # compute GPP
@@ -68,15 +68,15 @@ CNPP(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    GPP(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    GPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Return the gross primary productivity per ground area, given
-- `spac` `MonoMLTreeSPAC` SPAC
+- `spac` `MultiLayerSPAC` SPAC
 
 """
 function GPP end
 
-GPP(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+GPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES) = spac;
 
     # compute GPP
@@ -99,15 +99,15 @@ GPP(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    PPAR(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    PPAR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Return the canopy integrated PPAR per ground area, given
-- `spac` `MonoMLTreeSPAC` SPAC
+- `spac` `MultiLayerSPAC` SPAC
 
 """
 function PPAR end
 
-PPAR(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+PPAR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES) = spac;
 
     # compute GPP
@@ -130,15 +130,15 @@ PPAR(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    T_VEG(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
+    T_VEG(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Return the transpiration rate per ground area, given
-- `spac` `MonoMLTreeSPAC` SPAC
+- `spac` `MultiLayerSPAC` SPAC
 
 """
 function T_VEG end
 
-T_VEG(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
+T_VEG(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES) = spac;
 
     # compute transpiration rate
