@@ -1,11 +1,13 @@
 module ERA5
 
+using DataFrames: DataFrame
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
 
 using GriddingMachine.Fetcher: ERA5SingleLevelsHourly, fetch_data!
 
-using ..EmeraldIO.Netcdf: read_nc, save_nc!
+using ..EmeraldCore.PhysicalChemistry: saturation_vapor_pressure
+using ..EmeraldIO.Netcdf: append_nc!, read_nc, save_nc!, varname_nc
 using ..EmeraldMath.Stats: nanmean
 using ..EmeraldUtility.Email: send_email!
 
@@ -42,6 +44,10 @@ ERA5_LAYERS = [
             "u10", "v10", "d2m", "t2m",
             "msdwlwrf", "msdwlwrfcs", "msdrswrf", "msdrswrfcs", "msdwswrf", "msdwswrfcs",
             "skt", "stl1", "stl2", "stl3", "stl4", "sp", "tcc", "tp", "swvl1", "swvl2", "swvl3", "swvl4"];
+ERA5_NETCDF = [
+            "WIND_X", "WIND_Y", "T_DEW", "T_AIR",
+            "RAD_LW", "RAD_LW_CS", "RAD_DIR", "RAD_DIR_CS", "RAD", "RAD_CS",
+            "T_LEAF", "T_SOIL_1", "T_SOIL_2", "T_SOIL_3", "T_SOIL_4", "P_ATM", "CLOUD", "PRECIP", "SWC_1", "SWC_2", "SWC_3", "SWC_4"];
 
 
 #######################################################################################################################################################################################################
@@ -245,6 +251,7 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 # Changes to this function
 # General
 #     2023-Mar-20: move function from ClimaLand-0.2
+#     2023-Mar-20: add code to read weather driver for a single grid
 #
 #######################################################################################################################################################################################################
 """
@@ -262,14 +269,72 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; displaying:
     # which index of data to read
     _gz      = dict["RESO_SPACE"]
     _lat_ind = dict["LAT_INDEX"];
+    _lon     = dict["LONGITUDE"];
     _lon_ind = dict["LON_INDEX"];
     _year    = dict["YEAR"];
 
     # folders that stores the input data
     @assert isdir(DRIVER_FOLDER) "Weather driver folder $(DRIVER_FOLDER) does not exist...";
     _nc_name = "weather_driver_$(wd_tag)_$(_year)_$(_lat_ind)_$(_lon_ind)_$(_gz).nc";
+    _nc_path = "$(DRIVER_FOLDER)/$(_year)/$(_nc_name)";
 
-    return "$(DRIVER_FOLDER)/$(_year)/$(_nc_name)"
+    # if file exists and appending is false
+    if isfile(_nc_path) && !appending
+        if displaying
+            @info "$(_nc_path) exists, doing nothing...";
+        end;
+
+        return _nc_path
+    end;
+
+    # if file exists and appending is true
+    if isfile(_nc_path) && !appending
+        if displaying
+            @info "$(_nc_path) exists, adding new fields...";
+        end;
+
+        _existed_varnames = varname_nc(_nc_path);
+        for _i in eachindex(ERA5_LABELS)
+            if !(ERA5_NETCDF[_i] in _existed_varnames)
+                _nc_var = "$(ERA5_FOLDER)/reprocessed/$(ERA5_LABELS[_i])_SL_$(_year)_$(_gz).nc";
+                _nc_vec = read_nc(_nc_var, ERA5_LAYERS[_i], _lon_ind, _lat_ind);
+                append_nc!(_nc_path, ERA5_NETCDF[_i], _nc_vec, Dict{String,String}("longname" => ERA5_LABELS[_i] * "_SL"), ["ind"]);
+            end;
+        end;
+
+        return _nc_path
+    end;
+
+    # if file does not exist
+    if displaying
+        @info "$(_nc_path) does not exist, generating file now...";
+    end;
+
+    # function to create DataFrame columns
+    @inline function add_col!(df::DataFrame, label::String, layer::String, var_name::String)
+        _nc_var = "$(ERA5_FOLDER)/reprocessed/$(label)_SL_$(_year)_$(_gz).nc";
+        df[!, var_name] = read_nc(_nc_var, layer, _lon_ind, _lat_ind);
+
+        return _nc_path;
+    end;
+
+    # add data into DataFrame
+    _tz = _lon / 15;
+    _df = DataFrame();
+    add_col!.([_df], ERA5_LABELS, ERA5_LAYERS, ERA5_NETCDF);
+
+    _df[!,"FDOY"   ] = (collect(eachindex(_df.P_ATM)) .- 0.5 .+ _tz) ./ 24;
+    _df[!,"WIND"   ] = sqrt.( _df.WIND_X .^ 2 .+ _df.WIND_Y .^2 );
+    _df[!,"RAD_DIF"] = _df.RAD .- _df.RAD_DIR;
+    _df[!,"VPD"    ] = saturation_vapor_pressure.(_df.T_AIR) .- saturation_vapor_pressure.(_df.T_DEW);
+    _var_attrs = Dict{String,String}[[Dict{String,String}("longname" => ERA5_LABELS[_i] * "_SL") for _i in eachindex(ERA5_LABELS)];
+                                     Dict{String,String}("longname" => "Day of year");
+                                     Dict{String,String}("longname" => "Wind speed");
+                                     Dict{String,String}("longname" => "Diffuse radiation");
+                                     Dict{String,String}("longname" => "Vapor pressure deficit")];
+    save_nc!(_nc_path, _df, [ERA5_NETCDF; "FDOY"; "WIND"; "RAD_DIF"; "VPD"], _var_attrs);
+
+    return _nc_path
 end
 
 

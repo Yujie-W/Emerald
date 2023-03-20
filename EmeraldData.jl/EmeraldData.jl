@@ -1,5 +1,6 @@
 module EmeraldData
 
+using ..EmeraldCore
 using ..EmeraldIO
 using ..EmeraldMath
 using ..EmeraldUtility
