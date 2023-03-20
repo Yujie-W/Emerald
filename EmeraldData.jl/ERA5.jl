@@ -1,4 +1,16 @@
+module ERA5
+
+using ProgressMeter: @showprogress
+
+using GriddingMachine.Fetcher: ERA5SingleLevelsHourly, fetch_data!
+
+using ..EmeraldIO.Netcdf: read_nc, save_nc!
+using ..EmeraldMath.Stats: nanmean
+using ..EmeraldUtility.Email: send_email!
+
+
 # ERA5 settings
+ERA5_FOLDER = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels";
 ERA5_LABELS = [
             "10m_u_component_of_wind",
             "10m_v_component_of_wind",
@@ -170,3 +182,6 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 
     return nothing;
 );
+
+
+end # module

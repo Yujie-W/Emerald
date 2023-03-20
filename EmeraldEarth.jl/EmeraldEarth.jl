@@ -10,16 +10,15 @@ using ProgressMeter: @showprogress
 using GriddingMachine.Blender: regrid
 using GriddingMachine.Collector: query_collection
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
-using GriddingMachine.Fetcher: ERA5SingleLevelsHourly, fetch_data!
 
 using ..EmeraldCore.EarthGeometry: solar_zenith_angle
 using ..EmeraldCore.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, MonoMLTreeSPAC, MonoMLTreeSPACState, Soil
 using ..EmeraldCore.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldCore.SPAC: GPP, PPAR, initialize!, soil_plant_air_continuum!, spac_state!, update!
-using ..EmeraldIO.Netcdf: append_nc!, create_nc!, grow_nc!, read_nc, save_nc!
+using ..EmeraldData.ERA5: ERA5_FOLDER
+using ..EmeraldIO.Netcdf: append_nc!, create_nc!, grow_nc!, read_nc
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Stats: nanmax, nanmean
-using ..EmeraldUtility.Email: send_email!
 using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Threading: dynamic_workers!
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
@@ -32,12 +31,7 @@ CACHE_SPAC    = nothing;
 CACHE_STATE   = nothing;
 
 
-# ERA5 settings
-ERA5_FOLDER = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels";
-
-
 include("griddingmachine.jl")
-include("era5.jl"           )
 include("driver.jl"         )
 include("cache.jl"          )
 include("save.jl"           )
