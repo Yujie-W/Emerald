@@ -10,6 +10,9 @@ using ..EmeraldMath.Stats: nanmean
 using ..EmeraldUtility.Email: send_email!
 
 
+# CliMA Land settings
+DRIVER_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/drivers";
+
 # ERA5 settings
 ERA5_FOLDER = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels";
 ERA5_LABELS = [
@@ -235,6 +238,39 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 
     return nothing;
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Mar-20: move function from ClimaLand-0.2
+#
+#######################################################################################################################################################################################################
+"""
+
+    weather_driver_file(wd_tag::String, dict::Dict{String,Any}; displaying::Bool = true, appending::Bool = false)
+
+Return the input weather driver file path, given
+- `wd_tag` Weather driver version tag
+- `dict` Dictionary that store grid information
+- `displaying` If true, display information about the NetCDF file
+- `appending` If true, always check whether there are new fields to add
+
+"""
+function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; displaying::Bool = true, appending::Bool = false)
+    # which index of data to read
+    _gz      = dict["RESO_SPACE"]
+    _lat_ind = dict["LAT_INDEX"];
+    _lon_ind = dict["LON_INDEX"];
+    _year    = dict["YEAR"];
+
+    # folders that stores the input data
+    @assert isdir(DRIVER_FOLDER) "Weather driver folder $(DRIVER_FOLDER) does not exist...";
+    _nc_name = "weather_driver_$(wd_tag)_$(_year)_$(_lat_ind)_$(_lon_ind)_$(_gz).nc";
+
+    return "$(DRIVER_FOLDER)/$(_year)/$(_nc_name)"
+end
 
 
 end # module
