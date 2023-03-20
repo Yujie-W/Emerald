@@ -17,7 +17,8 @@ include("../EmeraldTest.jl/EmeraldTest.jl")
 include("../EmeraldUtility.jl/EmeraldUtility.jl")
 include("../EmeraldVisualization.jl/EmeraldVisualization.jl")
 
-include("../EmeraldCore.jl/EmeraldCore.jl"  )
+include("../EmeraldCore.jl/EmeraldCore.jl")
+include("../EmeraldFrontier.jl/EmeraldFrontier.jl")
 include("../EmeraldEarth.jl/EmeraldEarth.jl")
 
 
