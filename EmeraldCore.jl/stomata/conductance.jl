@@ -244,10 +244,10 @@ function stomatal_conductance! end
 """
 
     stomatal_conductance!(spac::MonoElementSPAC{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
-    stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; β::FT = FT(1)) where {FT<:AbstractFloat}
+    stomatal_conductance!(spac::MonoMLTreeSPAC{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
 
 Update marginal stomatal conductance, given
-- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type struct
+- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type struct
 - `β` Tuning factor
 
 """
@@ -259,7 +259,7 @@ stomatal_conductance!(spac::MonoElementSPAC{FT}; β::FT = FT(1)) where {FT<:Abst
     return nothing
 );
 
-stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+stomatal_conductance!(spac::MonoMLTreeSPAC{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
     (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
     if CANOPY.lai == 0
@@ -312,10 +312,10 @@ stomatal_conductance!(leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) w
 """
 
     stomatal_conductance!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
-    stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, Δt::FT) where {FT<:AbstractFloat}
+    stomatal_conductance!(spac::MonoMLTreeSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
 
 Update stomatal conductance for H₂O based on computed ∂g∂t, given
-- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type struct
+- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type struct
 - `Δt` Time step length `[s]`
 
 """
@@ -327,7 +327,7 @@ stomatal_conductance!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFlo
     return nothing
 );
 
-stomatal_conductance!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, Δt::FT) where {FT<:AbstractFloat} = (
+stomatal_conductance!(spac::MonoMLTreeSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES) = spac;
 
     if CANOPY.lai == 0
@@ -380,10 +380,10 @@ stomatal_conductance!(leaves::Leaves2D{FT}, Δt::FT) where {FT<:AbstractFloat} =
 """
 
     stomatal_conductance_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat}
-    stomatal_conductance_profile!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    stomatal_conductance_profile!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
 
 Update stomatal conductance for CO₂ based on that for H₂O, given
-- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type struct
+- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type struct
 
 """
 function stomatal_conductance_profile! end
@@ -396,7 +396,7 @@ stomatal_conductance_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloa
     return nothing
 );
 
-stomatal_conductance_profile!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+stomatal_conductance_profile!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES) = spac;
 
     if CANOPY.lai == 0

@@ -54,8 +54,6 @@ function β_factor end
 """
 This function updates the beta factor for SPAC if empirical models are used. The method is meant to support all SPAC defined in EmeraldNamespace.jl:
 - `MonoElementSPAC`
-- `MonoMLGrassSPAC`
-- `MonoMLPalmSPAC`
 - `MonoMLTreeSPAC`
 
 """
@@ -130,16 +128,16 @@ Update the beta factor for the LEAF component in SPAC, given
 
 """
 
-    β_factor!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    β_factor!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
 
 Update the β factor for the LEAVES component in SPAC, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type SPAC
+- `spac` `MonoMLTreeSPAC` type SPAC
 
 Note that if the β function is based on Kleaf or Pleaf, β factor is taken as that of leaf; if the β function is based on Ksoil, Psoil, or Θ, β is taken as the average weighted by flow rate in each
     root.
 
 """
-β_factor!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+β_factor!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; LEAVES, ROOTS, SOIL) = spac;
 
     for _i in eachindex(LEAVES)

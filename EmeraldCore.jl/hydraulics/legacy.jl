@@ -14,23 +14,17 @@
 """
 
     clear_legacy!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat}
-    clear_legacy!(spac::MonoMLGrassSPAC{FT}) where {FT<:AbstractFloat}
-    clear_legacy!(spac::MonoMLPalmSPAC{FT}) where {FT<:AbstractFloat}
     clear_legacy!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
     clear_legacy!(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT<:AbstractFloat}
     clear_legacy!(organ::Leaves1D{FT}) where {FT<:AbstractFloat}
 
 Clear the legacy for hydraulic organ or system, given
-- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type structure
+- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type structure
 - `organ` `Leaf`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type structure
 """
 function clear_legacy! end
 
 clear_legacy!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (clear_legacy!(spac.LEAF); clear_legacy!(spac.ROOT); clear_legacy!(spac.STEM););
-
-clear_legacy!(spac::MonoMLGrassSPAC{FT}) where {FT<:AbstractFloat} = (clear_legacy!.(spac.ROOTS); clear_legacy!.(spac.LEAVES););
-
-clear_legacy!(spac::MonoMLPalmSPAC{FT}) where {FT<:AbstractFloat} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.LEAVES););
 
 clear_legacy!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
 

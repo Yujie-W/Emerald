@@ -8,15 +8,15 @@
 #######################################################################################################################################################################################################
 """
 
-    initialize!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    initialize!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
 
 Initialize the SPAC, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` SPAC
+- `spac` `MonoMLTreeSPAC` SPAC
 
 """
 function initialize! end
 
-initialize!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+initialize!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
 
     # make sure leaf area index setup is correct

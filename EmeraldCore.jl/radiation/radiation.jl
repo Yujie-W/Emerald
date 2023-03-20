@@ -487,13 +487,13 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    canopy_radiation!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
 
 Updates canopy radiation profiles for shortwave and longwave radiation, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, `MonoMLTreeSPAC` type SPAC
+- `spac` `MonoMLTreeSPAC` type SPAC
 
 """
-canopy_radiation!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+canopy_radiation!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, DIM_LAYER, LEAVES, RAD_LW, RAD_SW, SOIL) = spac;
 
     soil_albedo!(CANOPY, SOIL);

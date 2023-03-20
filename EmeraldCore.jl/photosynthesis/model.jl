@@ -434,7 +434,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
 # Changes to this method
 # General
 #     2022-Jun-29: add method for MonoElementSPAC
-#     2022-Jun-29: add method for MonoMLGrassSPAC, MonoMLPalmSPAC, MonoMLTreeSPAC
+#     2022-Jun-29: add method for MonoMLTreeSPAC
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2022-Jul-13: redirect the wrapper function to the method at leaf level
 #     2023-Mar-11: only compute respiration rate if solar zenith angle >= 89
@@ -444,16 +444,16 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
 """
 
     leaf_photosynthesis!(spac::MonoElementSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat}
-    leaf_photosynthesis!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat}
+    leaf_photosynthesis!(spac::MonoMLTreeSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat}
 
 Updates leaf photosynthetic rates for SPAC, given
-- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type SPAC
+- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type SPAC
 - `mode` `GCO₂Mode` or `PCO₂Mode`
 
 """
 leaf_photosynthesis!(spac::MonoElementSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat} = leaf_photosynthesis!(spac.LEAF, spac.AIR, mode);
 
-leaf_photosynthesis!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat} = (
+leaf_photosynthesis!(spac::MonoMLTreeSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT<:AbstractFloat} = (
     (; AIR, ANGLES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
     if CANOPY.lai == 0

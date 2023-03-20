@@ -17,15 +17,15 @@
 #######################################################################################################################################################################################################
 """
 
-    canopy_fluorescence!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    canopy_fluorescence!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
 
 Updates canopy fluorescence, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, `MonoMLTreeSPAC` type SPAC
+- `spac` `MonoMLTreeSPAC` type SPAC
 
 """
 function canopy_fluorescence! end
 
-canopy_fluorescence!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+canopy_fluorescence!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, LEAVES, Φ_PHOTON) = spac;
 
     if (ANGLES.sza < 89)

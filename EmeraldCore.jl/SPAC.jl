@@ -4,7 +4,7 @@ using Statistics: mean
 
 using ..Constant: CP_L, CP_L_MOL, T₀, ρ_H₂O
 using ..PhysicalChemistry: saturation_vapor_pressure
-using ..Namespace: AirLayer, GCO₂Mode, MonoMLGrassSPAC, MonoMLPalmSPAC, MonoMLTreeSPAC, MonoMLTreeSPACState
+using ..Namespace: AirLayer, GCO₂Mode, MonoMLTreeSPAC, MonoMLTreeSPACState
 using ..LeafOptics: leaf_spectra!
 using ..CanopyOptics: TROPOMI_SIF683, TROPOMI_SIF740, canopy_fluorescence!, canopy_radiation!, soil_albedo!
 using ..Photosynthesis: leaf_photosynthesis!

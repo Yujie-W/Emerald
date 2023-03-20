@@ -13,16 +13,16 @@
 #######################################################################################################################################################################################################
 """
 
-    adjusted_time(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+    function adjusted_time(spac::MonoMLTreeSPAC{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
 
 Return adjusted time that soil does not over saturate or drain, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` SPAC
+- `spac` `MonoMLTreeSPAC` SPAC
 - `δt` Time step
 - `t_on` If true, plant energy budget is on (set false to run sensitivity analysis or prescribing mode)
 - `θ_on` If true, soil water budget is on (set false to run sensitivity analysis or prescribing mode)
 
 """
-function adjusted_time(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+function adjusted_time(spac::MonoMLTreeSPAC{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
     (; DIM_LAYER, LEAVES, SOIL) = spac;
 
     _δt_1 = δt;
@@ -84,17 +84,11 @@ end
 #######################################################################################################################################################################################################
 """
 
-    time_stepper!(
-                spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}},
-                δt::Number;
-                p_on::Bool = true,
-                t_on::Bool = true,
-                update::Bool = false,
-                θ_on::Bool = true) where {FT<:AbstractFloat}
-    time_stepper!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; update::Bool = false) where {FT<:AbstractFloat}
+    time_stepper!(spac::MonoMLTreeSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
+    time_stepper!(spac::MonoMLTreeSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat}
 
 Move forward in time for SPAC with time stepper controller, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` SPAC
+- `spac` `MonoMLTreeSPAC` SPAC
 - `δt` Time step (if not given, solve for steady state solution)
 - `p_on` If true, plant hydraulic flow and pressure profiles will be updated
 - `t_on` If true, plant energy budget is on (set false to run sensitivity analysis or prescribing mode)
@@ -104,14 +98,7 @@ Move forward in time for SPAC with time stepper controller, given
 """
 function time_stepper! end
 
-time_stepper!(
-            spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}},
-            δt::Number;
-            p_on::Bool = true,
-            t_on::Bool = true,
-            update::Bool = false,
-            θ_on::Bool = true
-) where {FT<:AbstractFloat} = (
+time_stepper!(spac::MonoMLTreeSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES, RAD_LW, SOIL) = spac;
 
     # run the update function until time elapses
@@ -152,7 +139,7 @@ time_stepper!(
     return nothing
 );
 
-time_stepper!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}; update::Bool = false) where {FT<:AbstractFloat} = (
+time_stepper!(spac::MonoMLTreeSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES, RAD_LW, SOIL) = spac;
 
     # run the update function until the gpp is stable

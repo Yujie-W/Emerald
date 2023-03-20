@@ -3,7 +3,7 @@ module SoilHydraulics
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 
 using ..Constant: CP_L, CP_L_MOL, M_H₂O, Λ_THERMAL_H₂O, ρ_H₂O, ρg_MPa
-using ..Namespace: MonoMLGrassSPAC, MonoMLPalmSPAC, MonoMLTreeSPAC, NonSteadyStateFlow, Root, SteadyStateFlow, VanGenuchten
+using ..Namespace: MonoMLTreeSPAC, NonSteadyStateFlow, Root, SteadyStateFlow, VanGenuchten
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity
 
 import ..Namespace: BrooksCorey
@@ -245,13 +245,13 @@ function soil_budget! end
 
 """
 
-    soil_budget!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    soil_budget!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
 
 Update the marginal increase of soil water content and energy per layer, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` SPAC
+- `spac` `MonoMLTreeSPAC` SPAC
 
 """
-soil_budget!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+soil_budget!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; METEO, ROOTS, ROOTS_INDEX, SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
@@ -311,14 +311,14 @@ soil_budget!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC
 
 """
 
-    soil_budget!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, δt::FT) where {FT<:AbstractFloat}
+    soil_budget!(spac::MonoMLTreeSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
 
 Run soil water and energy budget, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` SPAC
+- `spac` `MonoMLTreeSPAC` SPAC
 - `δt` Time step
 
 """
-soil_budget!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}, δt::FT) where {FT<:AbstractFloat} = (
+soil_budget!(spac::MonoMLTreeSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
     (; SOIL) = spac;
 
     # run the time step

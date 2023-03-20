@@ -4,7 +4,7 @@ using SpecialFunctions: expint
 
 using ..Constant: M_H₂O, ρ_H₂O
 using ..Namespace: HyperspectralAbsorption, HyperspectralRadiation, HyperspectralLeafBiophysics, WaveLengthSet
-using ..Namespace: MonoMLGrassSPAC, MonoMLPalmSPAC, MonoMLTreeSPAC
+using ..Namespace: MonoMLTreeSPAC
 using ..Optics: average_transmittance, energy, energy!, photon, photon!
 
 
@@ -301,18 +301,18 @@ leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_p
 #
 # Changes made to this method
 # General
-#     2022-Jun-29: add method for MonoMLGrassSPAC, MonoMLPalmSPAC, and MonoMLTreeSPAC
+#     2022-Jun-29: add method for MonoMLTreeSPAC
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat}
+    leaf_spectra!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat}
 
 Update leaf reflectance and transmittance for SPAC, given
-- `spac` `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type SPAC
+- `spac` `MonoMLTreeSPAC` type SPAC
 
 """
-leaf_spectra!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+leaf_spectra!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES) = spac;
 
     for _leaf in LEAVES

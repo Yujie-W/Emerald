@@ -507,12 +507,10 @@ xylem_pressure_profile!(hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T:
 """
 
     xylem_pressure_profile!(spac::MonoElementSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat}
-    xylem_pressure_profile!(spac::MonoMLGrassSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat}
-    xylem_pressure_profile!(spac::MonoMLPalmSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat}
     xylem_pressure_profile!(spac::MonoMLTreeSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat}
 
 Update xylem pressure profile (flow profile needs to be updated a priori), given
-- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type spac
+- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type spac
 - `update` If true, update xylem cavitation legacy
 
 """
@@ -528,70 +526,6 @@ xylem_pressure_profile!(spac::MonoElementSPAC{FT}; update::Bool = true) where {F
     xylem_pressure_profile!(STEM; update = update);
     LEAF.HS.p_ups = STEM.HS.p_dos;
     xylem_pressure_profile!(LEAF; update = update);
-
-    # update the β factor for empirical models
-    β_factor!(spac);
-
-    return nothing
-);
-
-xylem_pressure_profile!(spac::MonoMLGrassSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat} = (
-    (; DIM_ROOT, LEAVES, ROOTS, ROOTS_INDEX, SOIL) = spac;
-
-    # update water potential from SOIL
-    for _i in eachindex(ROOTS_INDEX)
-        ROOTS[_i].HS.p_ups = soil_ψ_25(SOIL.LAYERS[ROOTS_INDEX[_i]].VC, SOIL.LAYERS[ROOTS_INDEX[_i]].θ) * relative_surface_tension(SOIL.LAYERS[ROOTS_INDEX[_i]].t);
-    end;
-
-    # update the profile in roots
-    _p_mean::FT = 0;
-    for _i in eachindex(ROOTS_INDEX)
-        _root = ROOTS[_i];
-        _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
-        xylem_pressure_profile!(_root, _slayer; update = update);
-        _p_mean += _root.HS.p_dos;
-    end;
-    _p_mean /= DIM_ROOT;
-
-    # update the profile in leaves
-    for _leaf in LEAVES
-        _leaf.HS.p_ups = _p_mean;
-        xylem_pressure_profile!(_leaf; update = update);
-    end;
-
-    # update the β factor for empirical models
-    β_factor!(spac);
-
-    return nothing
-);
-
-xylem_pressure_profile!(spac::MonoMLPalmSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat} = (
-    (; DIM_ROOT, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
-
-    # update water potential from SOIL
-    for _i in eachindex(ROOTS_INDEX)
-        ROOTS[_i].HS.p_ups = soil_ψ_25(SOIL.LAYERS[ROOTS_INDEX[_i]].VC, SOIL.LAYERS[ROOTS_INDEX[_i]].θ) * relative_surface_tension(SOIL.LAYERS[ROOTS_INDEX[_i]].t);
-    end;
-
-    # update the profile in roots
-    _p_mean::FT = 0;
-    for _i in eachindex(ROOTS_INDEX)
-        _root = ROOTS[_i];
-        _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
-        xylem_pressure_profile!(_root, _slayer; update = update);
-        _p_mean += _root.HS.p_dos;
-    end;
-    _p_mean /= DIM_ROOT;
-
-    # update the profile in trunk
-    TRUNK.HS.p_ups = _p_mean;
-    xylem_pressure_profile!(TRUNK; update = update);
-
-    # update the profile in leaf
-    for _leaf in LEAVES
-        _leaf.HS.p_ups = TRUNK.HS.p_dos;
-        xylem_pressure_profile!(_leaf; update = update);
-    end;
 
     # update the β factor for empirical models
     β_factor!(spac);

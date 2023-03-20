@@ -421,12 +421,10 @@ xylem_flow_profile!(mode::NonSteadyStateFlow, f_out::FT) where {FT<:AbstractFloa
 """
 
     xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
-    xylem_flow_profile!(spac::MonoMLGrassSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
-    xylem_flow_profile!(spac::MonoMLPalmSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
     xylem_flow_profile!(spac::MonoMLTreeSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
 
 Update flow profiles for the soil-plant-air continuum (set up leaf flow rate from stomatal conductance first), given
-- `spac` `MonoElementSPAC`, `MonoMLGrassSPAC`, `MonoMLPalmSPAC`, or `MonoMLTreeSPAC` type SPAC system
+- `spac` `MonoElementSPAC` or `MonoMLTreeSPAC` type SPAC system
 - `Δt` Time step length
 
 """
@@ -446,41 +444,6 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat
     # 3. set up root flow rate and profile
     xylem_flow_profile!(ROOT.HS.FLOW, flow_in(STEM));
     xylem_flow_profile!(ROOT, Δt);
-
-    return nothing
-);
-
-xylem_flow_profile!(spac::MonoMLGrassSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
-    (; LEAVES, ROOTS, ROOTS_INDEX, SOIL) = spac;
-
-    # 0. update leaf flow or f_out from stomatal conductance
-    xylem_flow_profile!(spac);
-
-    # 1. update the leaf flow profile
-    xylem_flow_profile!.(LEAVES, Δt);
-
-    # 2. set up root flow rate and profile
-    _f_sum = flow_in(LEAVES);
-    xylem_flow_profile!(ROOTS, ROOTS_INDEX, SOIL, spac._fs, spac._ks, spac._ps, _f_sum, Δt);
-
-    return nothing
-);
-
-xylem_flow_profile!(spac::MonoMLPalmSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
-    (; LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
-
-    # 0. update leaf flow or f_out from stomatal conductance
-    xylem_flow_profile!(spac);
-
-    # 1. update the leaf flow profile
-    xylem_flow_profile!.(LEAVES, Δt);
-
-    # 2. set up trunk flow rate and profile
-    xylem_flow_profile!(TRUNK.HS.FLOW, flow_in(LEAVES));
-    xylem_flow_profile!(TRUNK, Δt);
-
-    # 3. set up root flow rate and profile
-    xylem_flow_profile!(ROOTS, ROOTS_INDEX, SOIL, spac._fs, spac._ks, spac._ps, flow_in(TRUNK), Δt);
 
     return nothing
 );
@@ -522,7 +485,7 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-xylem_flow_profile!(spac::Union{MonoMLGrassSPAC{FT}, MonoMLPalmSPAC{FT}, MonoMLTreeSPAC{FT}}) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MonoMLTreeSPAC{FT}) where {FT<:AbstractFloat} = (
     (; AIR, CANOPY, DIM_LAYER, LEAVES, LEAVES_INDEX) = spac;
 
     for _i in eachindex(LEAVES)
