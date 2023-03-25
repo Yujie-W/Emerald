@@ -74,6 +74,7 @@ CLM5_PFTS = ["not_vegetated",
 # Changes to this function
 # General
 #     2023-Mar-25: add function to get dict so as to create a spac
+#     2023-Mar-25: add three more fields to use ERA weather driver
 #
 #######################################################################################################################################################################################################
 """
@@ -106,10 +107,13 @@ function gm_dict(dts::GriddingMachineLabels, lat::Number, lon::Number)
                         "ELEVATION"     => read_LUT(query_collection(dts.tag_t_ele), lat, lon)[1],
                         "FT"            => Float64,
                         "LAI"           => _lais,
+                        "LAT_INDEX"     => lat_ind(lat; res = 1),
                         "LATITUDE"      => lat,
                         "LMA"           => 1 / 10 / read_LUT(query_collection(dts.tag_p_sla), lat, lon)[1],
+                        "LON_INDEX"     => lon_ind(lon; res = 1),
                         "LONGITUDE"     => lon,
                         "MEDLYN_G1"     => _g1,
+                        "RESO_SPACE"    => "1X",
                         "SOIL_COLOR"    => min(20, max(1, Int(floor(read_LUT(query_collection(dts.tag_s_cc), lat, lon)[1])))),
                         "SOIL_N"        => read_LUT(query_collection(dts.tag_s_n), lat, lon)[1],
                         "SOIL_α"        => read_LUT(query_collection(dts.tag_s_α), lat, lon)[1],

@@ -3,26 +3,17 @@
 # Changes to this function
 # General
 #     2023-Mar-20: add function to create data from dict
-#     2023-Mar-25: add method to read dict data from GriddingMachine
 #
 #######################################################################################################################################################################################################
 """
 
-    spac(year::Int, lat::Number, lon::Number)
     spac(gm_dict::Dict)
 
 Create a SPAC, given
-- `year` Which year of GriddingMachine data to read
-- `lat` Latitude
-- `lon` Longitude
-- `dict` Dictionary of GriddingMachine data in a grid
+- `gm_dict` Dictionary of GriddingMachine data in a grid
 
 """
-function spac end
-
-spac(year::Int, lat::Number, lon::Number) = spac(gm_dict(GriddingMachineLabels(year = year), lat, lon));
-
-spac(gm_dict::Dict) = (
+function spac(gm_dict::Dict)
     FT = gm_dict["FT"];
     # read in canopy height
     _z_canopy   = max(FT(0.1), gm_dict["CANOPY_HEIGHT"]);
@@ -75,4 +66,4 @@ spac(gm_dict::Dict) = (
     initialize!(_spac);
 
     return _spac
-);
+end
