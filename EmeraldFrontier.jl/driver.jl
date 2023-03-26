@@ -17,7 +17,7 @@ Prepare weather driver dataframe to feed SPAC, given
 
 """
 function weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
-    _nc_wd = weather_driver_file(wd_tag, gm_dict;  appending = appending, displaying = displaying);
+    _nc_wd = weather_driver_file(wd_tag, gm_dict; appending = appending, displaying = displaying)[1];
     _df_wd = read_nc(_nc_wd);
 
     #

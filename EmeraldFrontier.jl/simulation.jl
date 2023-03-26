@@ -89,18 +89,77 @@ end
 #
 # Changes to this function
 # General
-#     2023-Mar-25: add function to try the
+#     2023-Mar-25: move function from ClimaLand-0.2
+#     2023-Mar-25: set reflectance based value to NaN at night
 #
 #######################################################################################################################################################################################################
+"""
+"""
 function simulation! end
 
-simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = false) = (
+simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = false, saving::Bool = false) = (
     _spac = spac(gm_dict);
-    _wd = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
+    _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
+    _wdfr = eachrow(_wdf);
 
-    for _i in 1:10
-        soil_plant_air_continuum!(_spac, 360; p_on = false, t_on = false, θ_on = false);
+    # iterate through the time steps
+    for _dfr in _wdfr
+        simulation!(_spac, _dfr);
     end;
+
+    # save simulation results to hard drive
+    if saving
+        _in_name = weather_driver_file(wd_tag, gm_dict)[2];
+        _df_name = _in_name[1:end-2] * "simulation" * ".nc";
+        save_nc!(_df_name, _wdf[:, DF_VARIABLES]);
+    end;
+
+    return nothing
+);
+
+simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, δt::Number = 3600) where {FT<:AbstractFloat} = (
+    # read the data out of dataframe row to reduce memory allocation
+    _df_dif::FT = dfr.RAD_DIF;
+    _df_dir::FT = dfr.RAD_DIR;
+
+    # prescribe parameters
+    prescribe!(spac, dfr);
+
+    # run the model
+    for _ in 1:n_step
+        soil_plant_air_continuum!(spac, δt / n_step; p_on = false, t_on = false, θ_on = false);
+    end;
+
+    # calculate the SIF if there is sunlight
+    if _df_dir + _df_dif >= 10
+        dfr.BLUE   = MODIS_BLUE(spac.CANOPY);
+        dfr.EVI    = MODIS_EVI(spac.CANOPY);
+        dfr.NDVI   = MODIS_NDVI(spac.CANOPY);
+        dfr.NIR    = MODIS_NIR(spac.CANOPY);
+        dfr.NIRvI  = MODIS_NIRv(spac.CANOPY);
+        dfr.NIRvR  = MODIS_NIRvR(spac.CANOPY);
+        dfr.PAR    = spac.CANOPY.RADIATION.par_in;
+        dfr.PPAR   = PPAR(spac);
+        dfr.RED    = MODIS_RED(spac.CANOPY);
+        dfr.SIF683 = TROPOMI_SIF683(spac.CANOPY);
+        dfr.SIF740 = TROPOMI_SIF740(spac.CANOPY);
+        dfr.SIF757 = OCO2_SIF759(spac.CANOPY);
+        dfr.SIF771 = OCO2_SIF770(spac.CANOPY);
+    else
+        dfr.BLUE   = NaN;
+        dfr.EVI    = NaN;
+        dfr.NDVI   = NaN;
+        dfr.NIR    = NaN;
+        dfr.NIRvI  = NaN;
+        dfr.NIRvR  = NaN;
+        dfr.RED    = NaN;
+    end;
+
+    # save the total flux into the DataFrame
+    dfr.BETA  = BETA(spac);
+    dfr.F_CO2 = CNPP(spac);
+    dfr.F_GPP = GPP(spac);
+    dfr.F_H2O = T_VEG(spac);
 
     return nothing
 );

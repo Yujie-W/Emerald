@@ -258,7 +258,7 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 
     weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
 
-Return the input weather driver file path, given
+Return the input weather driver file path and name, given
 - `wd_tag` Weather driver version tag
 - `dict` Dictionary that store grid information
 - `appending` If true, always check whether there are new fields to add
@@ -284,7 +284,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
             @info "$(_nc_path) exists, doing nothing...";
         end;
 
-        return _nc_path
+        return _nc_path, _nc_name
     end;
 
     # if file exists and appending is true
@@ -302,7 +302,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
             end;
         end;
 
-        return _nc_path
+        return _nc_path, _nc_name
     end;
 
     # if file does not exist
@@ -315,7 +315,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
         _nc_var = "$(ERA5_FOLDER)/reprocessed/$(label)_SL_$(_year)_$(_gz).nc";
         df[!, var_name] = read_nc(_nc_var, layer, _lon_ind, _lat_ind);
 
-        return _nc_path;
+        return _nc_path, _nc_name
     end;
 
     # add data into DataFrame
@@ -334,7 +334,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
                                      Dict{String,String}("longname" => "Vapor pressure deficit")];
     save_nc!(_nc_path, _df, [ERA5_NETCDF; "FDOY"; "WIND"; "RAD_DIF"; "VPD"], _var_attrs);
 
-    return _nc_path
+    return _nc_path, _nc_name
 end
 
 
