@@ -3,6 +3,7 @@ module EmeraldFrontier
 using DataFrames: DataFrameRow
 using Dates: isleapyear
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
+using ProgressMeter: @showprogress
 
 using GriddingMachine.Collector: query_collection
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT

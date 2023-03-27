@@ -14,7 +14,7 @@ Structure to save labels from GriddingMachine (year must be provided)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct GriddingMachineLabels{FT<:AbstractFloat}
+Base.@kwdef mutable struct GriddingMachineLabels
     "Which year do the datasets apply (when applicable)"
     year::Int
     "GriddingMachine.jl tag for soil color class"
@@ -100,6 +100,7 @@ function gm_dict(dts::GriddingMachineLabels, lat::Number, lon::Number)
             _g1 = isnan(_g) ? nanmean(CLM5_PFTG[_ind_c3]) : _g;
 
             return Dict{String,Any}(
+                        "C3C4"          => "C3",
                         "CANOPY_HEIGHT" => read_LUT(query_collection(dts.tag_p_ch), lat, lon)[1],
                         "CHLOROPHYLL"   => read_LUT(query_collection(dts.tag_p_chl), lat, lon)[1],
                         "CLUMPING"      => read_LUT(query_collection(dts.tag_p_ci), lat, lon)[1],

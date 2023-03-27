@@ -39,8 +39,8 @@ function spac(gm_dict::Dict)
         _spac.SOIL.LAYERS[_i].VC.α = gm_dict["SOIL_α"][_i];
         _spac.SOIL.LAYERS[_i].VC.N = gm_dict["SOIL_N"][_i];
         _spac.SOIL.LAYERS[_i].VC.M = 1 - 1 / _spac.SOIL.LAYERS[_i].VC.N;
-        _spac.SOIL.LAYERS[_i].VC.Θ_RES = gm_dict["SOIL_Θr"][_i];
-        _spac.SOIL.LAYERS[_i].VC.Θ_SAT = gm_dict["SOIL_Θs"][_i];
+        _spac.SOIL.LAYERS[_i].VC.Θ_RES = gm_dict["SOIL_ΘR"][_i];
+        _spac.SOIL.LAYERS[_i].VC.Θ_SAT = gm_dict["SOIL_ΘS"][_i];
     end;
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)

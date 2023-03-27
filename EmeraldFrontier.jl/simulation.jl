@@ -17,7 +17,7 @@ Prescribe traits and environmental conditions, given
 function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow) where {FT<:AbstractFloat}
     # read the data out of dataframe row to reduce memory allocation
     _df_atm::FT = dfr.P_ATM;
-    _df_chl::FT = dfr.Chlorophyll;
+    _df_chl::FT = dfr.CHLOROPHYLL;
     _df_cli::FT = dfr.CI;
     _df_co2::FT = dfr.CO2;
     _df_dif::FT = dfr.RAD_DIF;
@@ -34,7 +34,7 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow) where {FT<:Abst
     _df_ts2::FT = dfr.T_SOIL_2;
     _df_ts3::FT = dfr.T_SOIL_3;
     _df_ts4::FT = dfr.T_SOIL_4;
-    _df_vcm::FT = dfr.Vcmax;
+    _df_vcm::FT = dfr.VCMAX25;
     _df_vpd::FT = dfr.VPD;
     _df_wnd::FT = dfr.WIND;
 
@@ -103,7 +103,8 @@ simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, 
     _wdfr = eachrow(_wdf);
 
     # iterate through the time steps
-    for _dfr in _wdfr
+    #@showprogress for _dfr in _wdfr
+    for _dfr in _wdfr[4001:4300]
         simulation!(_spac, _dfr);
     end;
 
@@ -114,7 +115,7 @@ simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, 
         save_nc!(_df_name, _wdf[:, DF_VARIABLES]);
     end;
 
-    return nothing
+    return _wdf
 );
 
 simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, δt::Number = 3600) where {FT<:AbstractFloat} = (
@@ -123,10 +124,10 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, δt::
     _df_dir::FT = dfr.RAD_DIR;
 
     # prescribe parameters
-    prescribe!(spac, dfr);
+    @time prescribe!(spac, dfr);
 
     # run the model
-    for _ in 1:n_step
+    @time for _ in 1:n_step
         soil_plant_air_continuum!(spac, δt / n_step; p_on = false, t_on = false, θ_on = false);
     end;
 

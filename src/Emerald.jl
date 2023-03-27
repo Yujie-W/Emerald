@@ -4,6 +4,7 @@ using Revise
 
 export EmeraldCore
 export EmeraldEarth
+export EmeraldFrontier
 export EmeraldMath
 export EmeraldIO
 export EmeraldTest
