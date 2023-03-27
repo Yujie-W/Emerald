@@ -7,14 +7,16 @@
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow) where {FT<:AbstractFloat}
+    prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
 
 Prescribe traits and environmental conditions, given
 - `spac` `MultiLayerSPAC` type SPAC
 - `dfr` `DataFrameRow` type weather driver
+- `t_on` If true, plant energy budget is on, do not prescribe the temperatures
+- `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
-function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow) where {FT<:AbstractFloat}
+function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
     # read the data out of dataframe row to reduce memory allocation
     _df_atm::FT = dfr.P_ATM;
     _df_chl::FT = dfr.CHLOROPHYLL;
@@ -39,9 +41,16 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow) where {FT<:Abst
     _df_wnd::FT = dfr.WIND;
 
     # adjust optimum t based on 10 day moving average skin temperature, prescribe soil water contents and leaf temperature (for version B1 only)
+    # TODO: do something here for _df_tlf (use mean of all layers ?)
     push!(spac.MEMORY.tem, _df_tlf);
     if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
-    update!(spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4), t_clm = nanmean(spac.MEMORY.tem), t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
+    if !t_on
+        update!(spac; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
+    end;
+    if !θ_on
+        update!(spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
+    end;
+    update!(spac; t_clm = nanmean(spac.MEMORY.tem));
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
     _trigger_lai::Bool = !isnan(_df_lai) && (_df_lai != spac.MEMORY.lai);
@@ -97,15 +106,15 @@ end
 """
 function simulation! end
 
-simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = false, saving::Bool = false) = (
+simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = false, p_on::Bool = true, saving::Bool = false, t_on::Bool = true, θ_on::Bool = true) = (
     _spac = spac(gm_dict);
     _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
     _wdfr = eachrow(_wdf);
 
     # iterate through the time steps
     #@showprogress for _dfr in _wdfr
-    for _dfr in _wdfr[4001:4300]
-        simulation!(_spac, _dfr);
+    for _dfr in _wdfr[4001:4024]
+        simulation!(_spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
     # save simulation results to hard drive
@@ -115,21 +124,27 @@ simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, 
         save_nc!(_df_name, _wdf[:, DF_VARIABLES]);
     end;
 
-    return _wdf
+    return _wdf[4001:4024,:]
 );
 
-simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, δt::Number = 3600) where {FT<:AbstractFloat} = (
+simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on::Bool = true, t_on::Bool = true, δt::Number = 3600, θ_on::Bool = true) where {FT<:AbstractFloat} = (
     # read the data out of dataframe row to reduce memory allocation
     _df_dif::FT = dfr.RAD_DIF;
     _df_dir::FT = dfr.RAD_DIR;
 
     # prescribe parameters
-    @time prescribe!(spac, dfr);
+    @time prescribe!(spac, dfr; t_on = t_on, θ_on = θ_on);
 
     # run the model
     @time for _ in 1:n_step
-        soil_plant_air_continuum!(spac, δt / n_step; p_on = false, t_on = false, θ_on = false);
+        soil_plant_air_continuum!(spac, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
+
+    #=
+    _tsoil = [_layer.t for _layer in spac.SOIL.LAYERS];
+    _tleaf = [_layer.t for _layer in spac.LEAVES];
+    @info "Temperature information" spac.METEO.rain nanmean(_tsoil) nanmean(_tleaf);
+    =#
 
     # calculate the SIF if there is sunlight
     if _df_dir + _df_dif >= 10
@@ -164,3 +179,7 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, δt::
 
     return nothing
 );
+
+#=
+using Emerald; wdtag="wd1"; gmdict=EmeraldFrontier.gm_dict(EmeraldFrontier.GriddingMachineLabels(year=2019),35.1,115.2); df=EmeraldFrontier.simulation!(wdtag,gmdict);
+=#

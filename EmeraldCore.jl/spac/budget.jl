@@ -43,8 +43,8 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     _δt_3 = _δt_2;
     if t_on
         for _i in 1:SOIL.DIM_SOIL
-            _∂T∂t = abs(SOIL.LAYERS[_i].∂e∂t / (SOIL.LAYERS[_i].CP * SOIL.LAYERS[_i].ρ + SOIL.LAYERS[_i].θ * ρ_H₂O(FT) * CP_L(FT)));
-            _δt_3 = min(1 / _∂T∂t, _δt_3);
+            _∂T∂t = SOIL.LAYERS[_i].∂e∂t / (SOIL.LAYERS[_i].CP * SOIL.LAYERS[_i].ρ + SOIL.LAYERS[_i].θ * ρ_H₂O(FT) * CP_L(FT));
+            _δt_3 = min(1 / abs(_∂T∂t), _δt_3);
         end;
     end;
 
@@ -52,8 +52,8 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     _δt_4 = _δt_3;
     if t_on
         for _i in 1:DIM_LAYER
-            _∂T∂t = abs(LEAVES[_i].∂e∂t / (LEAVES[_i].CP * LEAVES[_i].BIO.lma * 10 + CP_L_MOL(FT) * LEAVES[_i].HS.v_storage));
-            _δt_4 = min(1 / _∂T∂t, _δt_4);
+            _∂T∂t = LEAVES[_i].∂e∂t / (LEAVES[_i].CP * LEAVES[_i].BIO.lma * 10 + CP_L_MOL(FT) * LEAVES[_i].HS.v_storage);
+            _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
         end;
     end;
 
@@ -130,7 +130,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bo
         end;
 
         # if total count exceeds 100
-        if (_count > 100) && (_δt < 0.1) && (_t_res > 10)
+        if (_count > 1000) && (_δt < 0.01) && (_t_res > 10)
             @info "Number of steppers exceeds 100, breaking..." spac.LATITUDE spac.LONGITUDE spac.CANOPY.lai _t_res _δts;
             break;
         end;
