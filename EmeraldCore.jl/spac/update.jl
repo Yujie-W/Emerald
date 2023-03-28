@@ -171,7 +171,7 @@ update!(spac::MultiLayerSPAC{FT};
     if !isnothing(t_leaf)
         for _leaf in LEAVES
             _leaf.t = t_leaf;
-            _leaf.e = (_leaf.CP * _leaf.BIO.lma * 10 + _leaf.HS.v_storage * CP_L_MOL(FT)) * t;
+            _leaf.e = (_leaf.CP * _leaf.BIO.lma * 10 + _leaf.HS.v_storage * CP_L_MOL(FT)) * _leaf.t;
         end;
     end;
 

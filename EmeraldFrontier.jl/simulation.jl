@@ -109,11 +109,19 @@ end
 #     2023-Mar-25: move function from ClimaLand-0.2
 #     2023-Mar-25: set reflectance based value to NaN at night
 #     2023-Mar-27: add p_on, t_on, and θ_on options as in spac! function
+#     2023-Mar-28: if option saving is false, return the simulated result dataframe
 #
 #######################################################################################################################################################################################################
 """
 
-    simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = false, p_on::Bool = true, saving::Bool = false, t_on::Bool = true, θ_on::Bool = true)
+    simulation!(wd_tag::String,
+                gm_dict::Dict{String,Any};
+                appending::Bool = false,
+                displaying::Bool = false,
+                p_on::Bool = true,
+                saving::Union{Nothing,String} = nothing,
+                t_on::Bool = true,
+                θ_on::Bool = true)
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
@@ -121,14 +129,21 @@ Run simulation on site level, given
 - `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
 - `displaying` If true, displaying information regarding the steps
 - `p_on` If true, plant hydraulic flow and pressure profiles will be updated
-- `saving` If true, save the simulations as a Netcdf file in the working directory (TODO: make it a union of Bool and String for folder to save the simulations)
+- `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
 - `t_on` If true, plant energy budget is on, do not prescribe the temperatures
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
 function simulation! end
 
-simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = false, p_on::Bool = true, saving::Bool = false, t_on::Bool = true, θ_on::Bool = true) = (
+simulation!(wd_tag::String,
+            gm_dict::Dict{String,Any};
+            appending::Bool = false,
+            displaying::Bool = false,
+            p_on::Bool = true,
+            saving::Union{Nothing,String} = nothing,
+            t_on::Bool = true,
+            θ_on::Bool = true) = (
     _spac = spac(gm_dict);
     _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
     _wdfr = eachrow(_wdf);
@@ -140,13 +155,13 @@ simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, 
     end;
 
     # save simulation results to hard drive
-    if saving
-        _in_name = weather_driver_file(wd_tag, gm_dict)[2];
-        _df_name = _in_name[1:end-2] * "simulation" * ".nc";
-        save_nc!(_df_name, _wdf[:, DF_VARIABLES]);
+    if !isnothing(saving)
+        save_nc!(saving, _wdf[:, DF_VARIABLES]);
+
+        return nothing
     end;
 
-    return nothing
+    return _wdf
 );
 
 simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on::Bool = true, t_on::Bool = true, δt::Number = 3600, θ_on::Bool = true) where {FT<:AbstractFloat} = (
@@ -161,21 +176,6 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on:
     for _ in 1:n_step
         soil_plant_air_continuum!(spac, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
-
-    #=
-    _tsoil = [_layer.t for _layer in spac.SOIL.LAYERS];
-    _troot = [_layer.t for _layer in spac.ROOTS];
-    _ttrnk = spac.TRUNK.t;
-    _tstem = [_layer.t for _layer in spac.BRANCHES];
-    _tleaf = [_layer.t for _layer in spac.LEAVES];
-    @info "Temperature information" spac.METEO.rain nanmean(_tsoil) nanmean(_tleaf) nanmean(_tstem);
-    @show _tsoil;
-    @show _troot;
-    @show _ttrnk;
-    @show _tstem;
-    @show _tleaf;
-    sleep(0.05);
-    =#
 
     # calculate the SIF if there is sunlight
     if _df_dir + _df_dif >= 10
@@ -210,7 +210,3 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on:
 
     return nothing
 );
-
-#=
-using Emerald; wdtag="wd1"; gmdict=EmeraldFrontier.gm_dict(EmeraldFrontier.GriddingMachineLabels(year=2019),35.1,115.2); df=EmeraldFrontier.simulation!(wdtag,gmdict;appending=true);
-=#
