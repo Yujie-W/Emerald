@@ -9,6 +9,7 @@ using GriddingMachine.Collector: query_collection
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 
 using ..EmeraldCore.CanopyOptics: MODIS_BLUE, MODIS_EVI, MODIS_NDVI, MODIS_NIR, MODIS_NIRv, MODIS_NIRvR, MODIS_RED, OCO2_SIF759, OCO2_SIF770, TROPOMI_SIF683, TROPOMI_SIF740
+using ..EmeraldCore.Constant: M_H₂O, ρ_H₂O
 using ..EmeraldCore.EarthGeometry: solar_zenith_angle
 using ..EmeraldCore.Namespace: MultiLayerSPAC, Soil
 using ..EmeraldCore.SPAC: BETA, CNPP, GPP, PPAR, T_VEG, initialize!, soil_plant_air_continuum!, update!

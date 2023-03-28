@@ -27,6 +27,7 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = tr
     _df_dir::FT = dfr.RAD_DIR;
     _df_doy::FT = dfr.FDOY;
     _df_lai::FT = dfr.LAI;
+    _df_pcp::FT = dfr.PRECIP;
     _df_sw1::FT = dfr.SWC_1;
     _df_sw2::FT = dfr.SWC_2;
     _df_sw3::FT = dfr.SWC_3;
@@ -41,18 +42,23 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = tr
     _df_vpd::FT = dfr.VPD;
     _df_wnd::FT = dfr.WIND;
 
-    # adjust optimum t based on 10 day moving average skin temperature, prescribe soil water contents and leaf temperature (for version B1 only)
-    # TODO: do something here for _df_tlf (use mean of all layers ?)
+    # adjust optimum t based on 10 day moving average skin temperature
     _tleaf = t_on ? nanmean([_layer.t for _layer in spac.LEAVES]) : _df_tlf;
     push!(spac.MEMORY.tem, _tleaf);
     if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
+    update!(spac; t_clm = nanmean(spac.MEMORY.tem));
+
+    # prescribe soil water contents and leaf temperature (for version B1 only)
     if !t_on
         update!(spac; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
     end;
     if !θ_on
         update!(spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
     end;
-    update!(spac; t_clm = nanmean(spac.MEMORY.tem));
+
+    # prescribe the precipitation related parameters
+    spac.METEO.rain = _df_pcp * ρ_H₂O() / M_H₂O() / 3600;
+    spac.METEO.t_precip = _df_tar;
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
     _trigger_lai::Bool = !isnan(_df_lai) && (_df_lai != spac.MEMORY.lai);
@@ -106,6 +112,19 @@ end
 #
 #######################################################################################################################################################################################################
 """
+
+    simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = false, p_on::Bool = true, saving::Bool = false, t_on::Bool = true, θ_on::Bool = true)
+
+Run simulation on site level, given
+- `wd_tag` Weather drive tag such as `wd1`
+- `gm_dict` GriddingMachine dict for site information
+- `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
+- `displaying` If true, displaying information regarding the steps
+- `p_on` If true, plant hydraulic flow and pressure profiles will be updated
+- `saving` If true, save the simulations as a Netcdf file in the working directory (TODO: make it a union of Bool and String for folder to save the simulations)
+- `t_on` If true, plant energy budget is on, do not prescribe the temperatures
+- `θ_on` If true, soil water budget is on, do not prescribe soil water contents
+
 """
 function simulation! end
 
@@ -193,5 +212,5 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on:
 );
 
 #=
-using Emerald; wdtag="wd1"; gmdict=EmeraldFrontier.gm_dict(EmeraldFrontier.GriddingMachineLabels(year=2019),35.1,115.2); df=EmeraldFrontier.simulation!(wdtag,gmdict);
+using Emerald; wdtag="wd1"; gmdict=EmeraldFrontier.gm_dict(EmeraldFrontier.GriddingMachineLabels(year=2019),35.1,115.2); df=EmeraldFrontier.simulation!(wdtag,gmdict;appending=true);
 =#

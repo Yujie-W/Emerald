@@ -55,6 +55,7 @@ ERA5_NETCDF = [
 # Changes to this struct
 # General
 #     2023-Mar-11: add the struct for ERA5 weather driver
+#     2023-Mar-11: add field W_TOT for precipitation
 #
 #######################################################################################################################################################################################################
 """
@@ -95,6 +96,8 @@ Base.@kwdef struct ERA5SingleLevelsDriver
     T_S_4::Tuple{String,String} = ("stl4", "soil_temperature_level_4")
     "Skin temperature"
     T_SKN::Tuple{String,String} = ("skt", "skin_temperature")
+    "Total precipitation in m"
+    W_TOT::Tuple{String,String} = ("tp", "total_precipitation")
     "Wind speed"
     WINDU::Tuple{String,String} = ("u10", "10m_u_component_of_wind")
     "Wind speed"
