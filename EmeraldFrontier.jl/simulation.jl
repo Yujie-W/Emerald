@@ -2,7 +2,8 @@
 #
 # Changes to this function
 # General
-#     2023-Mar-25: add function to try the
+#     2023-Mar-25: add function to prescribe parameters from weather drivers
+#     2023-Mar-27: prescribe T only if t_on is true, prescribe SWC only is θ_on is true
 #
 #######################################################################################################################################################################################################
 """
@@ -42,7 +43,8 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = tr
 
     # adjust optimum t based on 10 day moving average skin temperature, prescribe soil water contents and leaf temperature (for version B1 only)
     # TODO: do something here for _df_tlf (use mean of all layers ?)
-    push!(spac.MEMORY.tem, _df_tlf);
+    _tleaf = t_on ? nanmean([_layer.t for _layer in spac.LEAVES]) : _df_tlf;
+    push!(spac.MEMORY.tem, _tleaf);
     if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
     if !t_on
         update!(spac; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
@@ -100,6 +102,7 @@ end
 # General
 #     2023-Mar-25: move function from ClimaLand-0.2
 #     2023-Mar-25: set reflectance based value to NaN at night
+#     2023-Mar-27: add p_on, t_on, and θ_on options as in spac! function
 #
 #######################################################################################################################################################################################################
 """
@@ -112,8 +115,8 @@ simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, 
     _wdfr = eachrow(_wdf);
 
     # iterate through the time steps
-    #@showprogress for _dfr in _wdfr
-    for _dfr in _wdfr[4001:4024]
+    #for _dfr in _wdfr
+    @showprogress for _dfr in _wdfr
         simulation!(_spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
@@ -124,7 +127,7 @@ simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, 
         save_nc!(_df_name, _wdf[:, DF_VARIABLES]);
     end;
 
-    return _wdf[4001:4024,:]
+    return nothing
 );
 
 simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on::Bool = true, t_on::Bool = true, δt::Number = 3600, θ_on::Bool = true) where {FT<:AbstractFloat} = (
@@ -133,17 +136,26 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on:
     _df_dir::FT = dfr.RAD_DIR;
 
     # prescribe parameters
-    @time prescribe!(spac, dfr; t_on = t_on, θ_on = θ_on);
+    prescribe!(spac, dfr; t_on = t_on, θ_on = θ_on);
 
     # run the model
-    @time for _ in 1:n_step
+    for _ in 1:n_step
         soil_plant_air_continuum!(spac, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
     #=
     _tsoil = [_layer.t for _layer in spac.SOIL.LAYERS];
+    _troot = [_layer.t for _layer in spac.ROOTS];
+    _ttrnk = spac.TRUNK.t;
+    _tstem = [_layer.t for _layer in spac.BRANCHES];
     _tleaf = [_layer.t for _layer in spac.LEAVES];
-    @info "Temperature information" spac.METEO.rain nanmean(_tsoil) nanmean(_tleaf);
+    @info "Temperature information" spac.METEO.rain nanmean(_tsoil) nanmean(_tleaf) nanmean(_tstem);
+    @show _tsoil;
+    @show _troot;
+    @show _ttrnk;
+    @show _tstem;
+    @show _tleaf;
+    sleep(0.05);
     =#
 
     # calculate the SIF if there is sunlight

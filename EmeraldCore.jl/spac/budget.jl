@@ -9,6 +9,7 @@
 #     2022-Aug-31: add controller for leaf stomatal conductance
 #     2022-Sep-07: remove soil oversaturation controller, and add a Δθ <= 0.01 controller
 #     2022-Oct-22: add option t_on to enable/disable soil and leaf energy budgets
+#     2023-Mar-27: add controller for trunk and branch temperatures
 #
 #######################################################################################################################################################################################################
 """
@@ -23,7 +24,7 @@ Return adjusted time that soil does not over saturate or drain, given
 
 """
 function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
-    (; DIM_LAYER, LEAVES, SOIL) = spac;
+    (; BRANCHES, DIM_LAYER, LEAVES, SOIL, TRUNK) = spac;
 
     _δt_1 = δt;
 
@@ -48,25 +49,41 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
         end;
     end;
 
-    # make sure leaf temperatures do not change more than 1 K per time step
+    # make sure trunk temperatures do not change more than 1 K per time step
     _δt_4 = _δt_3;
+    if t_on
+        _∂T∂t = TRUNK.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.HS.v_storage));
+        _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
+    end;
+
+    # make sure branch stem temperatures do not change more than 1 K per time step
+    _δt_5 = _δt_4;
+    if t_on
+        for _i in 1:DIM_LAYER
+            _∂T∂t = BRANCHES[_i].∂e∂t / (CP_L_MOL(FT) * sum(BRANCHES[_i].HS.v_storage));
+            _δt_5 = min(1 / abs(_∂T∂t), _δt_5);
+        end;
+    end;
+
+    # make sure leaf temperatures do not change more than 1 K per time step
+    _δt_6 = _δt_5;
     if t_on
         for _i in 1:DIM_LAYER
             _∂T∂t = LEAVES[_i].∂e∂t / (LEAVES[_i].CP * LEAVES[_i].BIO.lma * 10 + CP_L_MOL(FT) * LEAVES[_i].HS.v_storage);
-            _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
+            _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
         end;
     end;
 
     # make sure leaf stomatal conductances do not change more than 0.01 mol m⁻² s⁻¹
-    _δt_5 = _δt_4;
+    _δt_7 = _δt_6;
     for _i in 1:DIM_LAYER
         for _∂g∂t in LEAVES[_i].∂g∂t_sunlit
-            _δt_5 = min(FT(0.06) / abs(_∂g∂t), _δt_5);
+            _δt_7 = min(FT(0.06) / abs(_∂g∂t), _δt_7);
         end;
-        _δt_5 = min(FT(0.06) / abs(LEAVES[_i].∂g∂t_shaded), _δt_5);
+        _δt_7 = min(FT(0.06) / abs(LEAVES[_i].∂g∂t_shaded), _δt_7);
     end;
 
-    return (_δt_5, _δt_4, _δt_3, _δt_2, _δt_1)
+    return (_δt_7, _δt_6, _δt_5, _δt_4, _δt_3, _δt_2, _δt_1)
 end
 
 

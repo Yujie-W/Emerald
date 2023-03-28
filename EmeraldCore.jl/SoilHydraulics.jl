@@ -232,6 +232,8 @@ relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where 
 #     2022-Jun-16: move time stepper controller to SoilPlantAirContinuum.jl
 #     2022-Jul-26: fix the unit of rain, mass flow, and root extraction (all in mol s⁻¹)
 #     2022-Sep-07: allow soil water oversaturation
+# Bug fixes
+#     2023-Mar-27: fix a typo when updating e per layer (should use ΔZ per layer rather than the first layer)
 #
 #######################################################################################################################################################################################################
 """
@@ -324,7 +326,7 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
     # run the time step
     for _i in 1:SOIL.DIM_SOIL
         SOIL.LAYERS[_i].θ += SOIL.LAYERS[_i].∂θ∂t * δt;
-        SOIL.LAYERS[_i].e += SOIL.LAYERS[_i].∂e∂t * δt / SOIL.LAYERS[1].ΔZ;
+        SOIL.LAYERS[_i].e += SOIL.LAYERS[_i].∂e∂t * δt / SOIL.LAYERS[_i].ΔZ;
     end;
 
     # compute surface runoff

@@ -9,6 +9,9 @@
 #     2022-Jul-27: fix the NaN temperature issue related to grass
 #     2022-Jul-27: fix the unit issue related to CP and mol to kg
 #     2022-Jul-27: rescale leaf energy absorption from per groud area to per leaf area
+#     2023-Mar-27: rodo the energy balance related to water transport by make a statement of whether the flow is positive or negative
+# Bug fixes
+#     2023-Mar-27: fix a typo in 1:DIM_ROOT (was typed as DIM_ROOT)
 #
 #######################################################################################################################################################################################################
 """
@@ -33,21 +36,40 @@ plant_energy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 
     # loop through the roots
     TRUNK.∂e∂t = 0;
-    for _i in DIM_ROOT
-        ROOTS[_i].∂e∂t  = 0;
-        ROOTS[_i].∂e∂t -= flow_out(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].t;
-        ROOTS[_i].∂e∂t += flow_in(ROOTS[_i]) * CP_L_MOL(FT) * SOIL.LAYERS[ROOTS_INDEX[_i]].t;
-        TRUNK.∂e∂t     += flow_out(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].t;
+    for _i in 1:DIM_ROOT
+        ROOTS[_i].∂e∂t = 0;
+        if flow_in(ROOTS[_i]) >= 0
+            ROOTS[_i].∂e∂t += flow_in(ROOTS[_i]) * CP_L_MOL(FT) * SOIL.LAYERS[ROOTS_INDEX[_i]].t;
+        else
+            ROOTS[_i].∂e∂t += flow_in(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].t;
+        end;
+        if flow_out(ROOTS[_i]) >= 0
+            ROOTS[_i].∂e∂t -= flow_out(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].t;
+            TRUNK.∂e∂t     += flow_out(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].t;
+        else
+            ROOTS[_i].∂e∂t -= flow_out(ROOTS[_i]) * CP_L_MOL(FT) * TRUNK.t;
+            TRUNK.∂e∂t     += flow_out(ROOTS[_i]) * CP_L_MOL(FT) * TRUNK.t;
+        end;
     end;
-
-    # loop through the roots
-    TRUNK.∂e∂t -= flow_out(TRUNK) * CP_L_MOL(FT) * TRUNK.t;
 
     # loop through the branches
     for _i in 1:DIM_LAYER
-        BRANCHES[_i].∂e∂t  = 0;
-        BRANCHES[_i].∂e∂t -= flow_out(BRANCHES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].t;
-        BRANCHES[_i].∂e∂t += flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * TRUNK.t;
+        BRANCHES[_i].∂e∂t = 0;
+        LEAVES[_i].∂e∂t   = 0;
+        if flow_in(BRANCHES[_i]) >= 0
+            TRUNK.∂e∂t        -= flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * TRUNK.t;
+            BRANCHES[_i].∂e∂t += flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * TRUNK.t;
+        else
+            TRUNK.∂e∂t        -= flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].t;
+            BRANCHES[_i].∂e∂t += flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].t;
+        end;
+        if flow_out(BRANCHES[_i]) >= 0
+            BRANCHES[_i].∂e∂t -= flow_out(BRANCHES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].t;
+            LEAVES[_i].∂e∂t   += flow_in(LEAVES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].t;
+        else
+            BRANCHES[_i].∂e∂t -= flow_out(BRANCHES[_i]) * CP_L_MOL(FT) * LEAVES[_i].t;
+            LEAVES[_i].∂e∂t   += flow_in(LEAVES[_i]) * CP_L_MOL(FT) * LEAVES[_i].t;
+        end;
     end;
 
     # loop through the leaves
@@ -63,7 +85,6 @@ plant_energy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
             LEAVES[_i].∂e∂t += (CANOPY.RADIATION.r_net_sw[DIM_LAYER+1-_i] + CANOPY.RADIATION.r_net_lw[DIM_LAYER+1-_i]) / (CANOPY.lai / DIM_LAYER);
             LEAVES[_i].∂e∂t -= flow_out(LEAVES[_i]) * M_H₂O(FT) * latent_heat_vapor(LEAVES[_i].t);
             LEAVES[_i].∂e∂t -= flow_out(LEAVES[_i]) * CP_L_MOL(FT) * LEAVES[_i].t;
-            LEAVES[_i].∂e∂t += flow_in(LEAVES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].t;
             LEAVES[_i].∂e∂t -= 2 * _g_be * CP_D_MOL(FT) * (LEAVES[_i].t - AIR[LEAVES_INDEX[_i]].t);
         end;
     end;
