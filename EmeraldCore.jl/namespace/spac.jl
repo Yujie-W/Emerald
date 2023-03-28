@@ -103,7 +103,8 @@ end
 #     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
-#     2022-Mar-11: add MEMORY and RAD_SW_REF fields
+#     2023-Mar-11: add MEMORY and RAD_SW_REF fields
+#     2023-Mar-28: add field _root_connection
 #
 #######################################################################################################################################################################################################
 """
@@ -183,6 +184,8 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSyst
     _ks::Vector{FT} = zeros(FT, DIM_ROOT)
     "Pressure for each root layer at given flow"
     _ps::Vector{FT} = zeros(FT, DIM_ROOT)
+    "Whether there is any root connected to soil"
+    _root_connection::Bool = true
 end
 
 

@@ -10,12 +10,14 @@
 #     2022-Oct-22: add option t_on to enable/disable soil and leaf energy budgets
 #     2022-Nov-18: add option p_on to enable/disable plant flow and pressure profiles
 #     2023-Mar-11: add method for a SPAC == nothing
+#     2023-Mar-28: if no root is connected, set LAI = 0
+#     2023-Mar-28: run PlantHydraulics as the first step
 #
 #######################################################################################################################################################################################################
 """
 This function runs the model using the following steps:
+- Run hydraulic model, and determine whether to set LAI = 0
 - Run canopy RT model
-- Run hydraulic model
 - Run photosynthesis model
 - Run canopy fluorescence model
 - Run soil water and energy budget (calculate ∂Θ∂t and ∂e∂t only)
@@ -44,15 +46,20 @@ function soil_plant_air_continuum! end
 # TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
 # TODO: add top soil evaporation
 soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = (
-    # 1. run canopy RT
-    canopy_radiation!(spac);
-
-    # 2. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
+    # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
-    stomatal_conductance_profile!(spac);
+    if !spac._root_connection
+        update!(spac; lai = 0);
+
+        return nothing
+    end;
+
+    # 2. run canopy RT
+    canopy_radiation!(spac);
 
     # 3. run photosynthesis model
+    stomatal_conductance_profile!(spac);
     leaf_photosynthesis!(spac, GCO₂Mode());
 
     # 4. run canopy fluorescence
@@ -78,10 +85,19 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = tr
 soil_plant_air_continuum!(spac::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) = nothing;
 
 soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
-    # 1. run canopy RT
+    # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
+    xylem_flow_profile!(spac, FT(0));
+    xylem_pressure_profile!(spac; update = update);
+    if !spac._root_connection
+        update!(spac; lai = 0);
+
+        return nothing
+    end;
+
+    # 2. run canopy RT
     canopy_radiation!(spac);
 
-    # 2. update the prognostic variables (except for soil water and temperature)
+    # 3. update the prognostic variables (except for soil water and temperature)
     time_stepper!(spac; update = update);
 
     # save the result at this stage for the results at the steady state

@@ -10,6 +10,7 @@
 #     2022-May-25: add method for Leaf, Root, and Stem
 #     2022-May-25: add method for MonoElementSPAC (without partitioning)
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
+#     2023-Mar-28: set p_ups of root to p_crit of root if disconnected
 # To do
 #     TODO: add method for NonSteadyStateFlow
 #
@@ -538,7 +539,13 @@ xylem_pressure_profile!(spac::MultiLayerSPAC{FT}; update::Bool = true) where {FT
 
     # update water potential from SOIL
     for _i in eachindex(ROOTS_INDEX)
-        ROOTS[_i].HS.p_ups = soil_ψ_25(SOIL.LAYERS[ROOTS_INDEX[_i]].VC, SOIL.LAYERS[ROOTS_INDEX[_i]].θ) * relative_surface_tension(SOIL.LAYERS[ROOTS_INDEX[_i]].t);
+        _root = ROOTS[_i];
+        _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
+        if _root._isconnected
+            _root.HS.p_ups = soil_ψ_25(_slayer.VC, _slayer.θ) * relative_surface_tension(_slayer.t);
+        else
+            _root.HS.p_ups = critical_pressure(_root.HS.VC) * relative_surface_tension(_root.t);
+        end;
     end;
 
     # update the profile in roots

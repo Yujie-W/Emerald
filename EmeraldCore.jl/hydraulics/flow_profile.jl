@@ -225,6 +225,7 @@ root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{
 #     2022-Oct-20: fix a bug in flow profile counter (does not impact simulation)
 #     2022-Oct-21: add a second solver to fix the case when root_pk does not work
 #     2023-Mar-28: if root is disconnected, do not update its flow profile
+#     2023-Mar-28: if no root is connected to soil, set all flow to 0
 #
 #######################################################################################################################################################################################################
 """
@@ -317,15 +318,6 @@ xylem_flow_profile!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::Non
 );
 
 
-#
-#
-#
-#
-# TODO: do something for disconnected roots
-#
-#
-#
-#
 """
 
     xylem_flow_profile!(roots::Vector{Root{FT}}, soil::Soil{FT}, cache_f::Vector{FT}, cache_k::Vector{FT}, cache_p::Vector{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat}
@@ -341,14 +333,16 @@ Partition root flow rates at different layers for known total flow rate out, giv
 - `Δt` Time step length
 
 """
-xylem_flow_profile!(roots::Vector{Root{FT}}, roots_index::Vector{Int}, soil::Soil{FT}, cache_f::Vector{FT}, cache_k::Vector{FT}, cache_p::Vector{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat} = (
+    (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
+
     # very first step here: if soil is too dry, disconnect root from soil
     _connected = 0;
-    for _i in eachindex(roots_index)
-        _root = roots[_i];
-        _slayer = soil.LAYERS[roots_index[_i]];
+    for _i in eachindex(ROOTS_INDEX)
+        _root = ROOTS[_i];
+        _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
         _ψ_soil = soil_ψ_25(_slayer.VC, _slayer.θ) * relative_surface_tension(_slayer.t);
-        _p_crit = critical_pressure(_root.VC) * relative_surface_tension(_root.t);
+        _p_crit = critical_pressure(_root.HS.VC) * relative_surface_tension(_root.t);
         if _ψ_soil <= _p_crit
             disconnect!(_root);
         else
@@ -358,51 +352,58 @@ xylem_flow_profile!(roots::Vector{Root{FT}}, roots_index::Vector{Int}, soil::Soi
     end;
 
     # if all roots are disconnected, set all flows to 0
-    if _connected == 0
+    if _connected > 0
+        spac._root_connection = true;
+    else
+        spac._root_connection = false;
+        disconnect!(TRUNK);
+        disconnect!.(BRANCHES);
+        disconnect!.(LEAVES);
+
         return nothing
     end;
 
     # update root buffer rates to get an initial guess (flow rate not changing now as time step is set to 0)
-    xylem_flow_profile!.(roots, FT(0));
+    xylem_flow_profile!.(ROOTS, FT(0));
 
     # recalculate the flow profiles to make sure sum are the same as f_sum
     _use_second_solver = false;
     for _count in 1:20
         # sync the values to ks, ps, and qs
-        for _i in eachindex(roots_index)
-            _root = roots[_i];
-            _slayer = soil.LAYERS[roots_index[_i]];
+        for _i in eachindex(ROOTS_INDEX)
+            _root = ROOTS[_i];
+            _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
             if _root._isconnected
-                xylem_flow_profile!(_root.HS.FLOW, cache_f[_i]);
+                xylem_flow_profile!(_root.HS.FLOW, spac.cache_f[_i]);
             else
-                cache_f[_i] = 0;
+                spac.cache_f[_i] = 0;
             end;
-            cache_p[_i],cache_k[_i] = root_pk(_root, _slayer);
+            spac.cache_p[_i],spac.cache_k[_i] = root_pk(_root, _slayer);
         end;
 
         # use ps and ks to compute the Δf to adjust
-        _pm = nanmean(cache_p);
-        for _i in eachindex(roots_index)
-            _root = roots[_i];
+        _pm = nanmean(spac.cache_p);
+        for _i in eachindex(ROOTS_INDEX)
+            _root = ROOTS[_i];
             if _root._isconnected
-                cache_f[_i] -= (_pm - cache_p[_i]) * cache_k[_i];
+                spac.cache_f[_i] -= (_pm - spac.cache_p[_i]) * spac.cache_k[_i];
             else
-                cache_f[_i] = 0;
+                spac.cache_f[_i] = 0;
             end;
         end;
 
         # adjust the fs so that sum(fs) = f_sum
-        _f_diff = sum(cache_f) - f_sum;
-        if (abs(_f_diff) < FT(1e-6)) && (nanmax(cache_p) - nanmin(cache_p) < 1e-4)
+        _f_diff = sum(spac.cache_f) - f_sum;
+        if (abs(_f_diff) < FT(1e-6)) && (nanmax(spac.cache_p) - nanmin(spac.cache_p) < 1e-4)
             break
         end;
-        _k_sum  = sum(cache_k);
-        for _i in eachindex(roots_index)
-            _root = roots[_i];
+        _k_sum  = sum(spac.cache_k);
+        for _i in eachindex(ROOTS_INDEX)
+            _root = ROOTS[_i];
             if _root._isconnected
-                cache_f[_i] -= _f_diff * cache_k[1] / _k_sum;
+                spac.cache_f[_i] -= _f_diff * spac.cache_k[1] / _k_sum;
             else
-                cache_f[_i] = 0;
+                spac.cache_f[_i] = 0;
             end;
         end;
 
@@ -414,10 +415,10 @@ xylem_flow_profile!(roots::Vector{Root{FT}}, roots_index::Vector{Int}, soil::Soi
     # use second solver to solve for the flow rates (when SWC differs alot among layers)
     if _use_second_solver
         @inline diff_p_root(ind::Int, e::FT, p::FT) where {FT<:AbstractFloat} = (
-            _root = roots[ind];
-            _slayer = soil.LAYERS[roots_index[ind]];
+            _root = ROOTS[ind];
+            _slayer = SOIL.LAYERS[ROOTS_INDEX[ind]];
             if _root._isconnected
-                xylem_flow_profile!(roots[ind].HS.FLOW, e);
+                xylem_flow_profile!(ROOTS[ind].HS.FLOW, e);
             end;
             (_p,_) = root_pk(_root, _slayer);
 
@@ -426,8 +427,8 @@ xylem_flow_profile!(roots::Vector{Root{FT}}, roots_index::Vector{Int}, soil::Soi
 
         @inline diff_e_root(p::FT) where {FT<:AbstractFloat} = (
             _sum::FT = 0;
-            for _i in eachindex(roots_index)
-                _root = roots[_i];
+            for _i in eachindex(ROOTS_INDEX)
+                _root = ROOTS[_i];
                 if _root._isconnected
                     _f(e) = diff_p_root(_i, e, p);
                     _tol = SolutionTolerance{FT}(1e-8, 50);
@@ -444,32 +445,32 @@ xylem_flow_profile!(roots::Vector{Root{FT}}, roots_index::Vector{Int}, soil::Soi
         _met = NewtonBisectionMethod{FT}(x_min = -1000, x_max = 1000, x_ini = 0);
         _p_r = find_zero(diff_e_root, _met, _tol);
 
-        for _i in eachindex(roots_index)
-            _root = roots[_i];
-            _slayer = soil.LAYERS[roots_index[_i]];
+        for _i in eachindex(ROOTS_INDEX)
+            _root = ROOTS[_i];
+            _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
 
             if _root._isconnected
                 _f(e) = diff_p_root(_i, e, _p_r);
                 _tol = SolutionTolerance{FT}(1e-8, 50);
                 _met = NewtonBisectionMethod{FT}(x_min = -1000, x_max = 1000, x_ini = 0);
-                cache_f[_i] = find_zero(_f, _met, _tol);
-                xylem_flow_profile!(roots[_i].HS.FLOW, cache_f[_i]);
+                spac.cache_f[_i] = find_zero(_f, _met, _tol);
+                xylem_flow_profile!(ROOTS[_i].HS.FLOW, spac.cache_f[_i]);
             else
-                cache_f[_i] = 0;
+                spac.cache_f[_i] = 0;
             end;
 
-            cache_p[_i],cache_k[_i] = root_pk(_root, _slayer);
+            spac.cache_p[_i],spac.cache_k[_i] = root_pk(_root, _slayer);
         end;
     end;
 
     # update root buffer rates again
-    for _i in eachindex(roots_index)
-        _root = roots[_i];
+    for _i in eachindex(ROOTS_INDEX)
+        _root = ROOTS[_i];
         if _root._isconnected
-            xylem_flow_profile!(roots[_i].HS.FLOW, cache_f[_i]);
+            xylem_flow_profile!(ROOTS[_i].HS.FLOW, spac.cache_f[_i]);
         end;
     end;
-    xylem_flow_profile!.(roots, Δt);
+    xylem_flow_profile!.(ROOTS, Δt);
 
     return nothing
 );
@@ -529,7 +530,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
     xylem_flow_profile!(TRUNK, Δt);
 
     # 4. set up root flow rate and profile
-    xylem_flow_profile!(ROOTS, ROOTS_INDEX, SOIL, spac._fs, spac._ks, spac._ps, flow_in(TRUNK), Δt);
+    xylem_flow_profile!(spac, flow_in(TRUNK), Δt);
 
     return nothing
 );
