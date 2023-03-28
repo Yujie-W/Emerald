@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2023-Mar-20: move function from ClimaLand-0.2
+#     2023-Mar-28: add simulated swc and temperatures into dataframe so as to output
 #
 #######################################################################################################################################################################################################
 """
@@ -54,6 +55,9 @@ function weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bo
     # add the fields to store outputs
     for _label in DF_VARIABLES
         _df_wd[!,_label] .= 0.0;
+    end;
+    for _label in DF_SIMULATIONS
+        _df_wd[!,_label] .= NaN;
     end;
 
     return _df_wd

@@ -110,6 +110,8 @@ end
 #     2023-Mar-25: set reflectance based value to NaN at night
 #     2023-Mar-27: add p_on, t_on, and θ_on options as in spac! function
 #     2023-Mar-28: if option saving is false, return the simulated result dataframe
+#     2023-Mar-28: add option selection to run part of the whole year simulations
+#     2023-Mar-28: save swcs and temperatures based on t_on and θ_on
 #
 #######################################################################################################################################################################################################
 """
@@ -120,6 +122,7 @@ end
                 displaying::Bool = false,
                 p_on::Bool = true,
                 saving::Union{Nothing,String} = nothing,
+                selection = :,
                 t_on::Bool = true,
                 θ_on::Bool = true)
 
@@ -130,6 +133,7 @@ Run simulation on site level, given
 - `displaying` If true, displaying information regarding the steps
 - `p_on` If true, plant hydraulic flow and pressure profiles will be updated
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
+- `selection` Run selection of data, default is : (namely 1:end)
 - `t_on` If true, plant energy budget is on, do not prescribe the temperatures
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
@@ -142,6 +146,7 @@ simulation!(wd_tag::String,
             displaying::Bool = false,
             p_on::Bool = true,
             saving::Union{Nothing,String} = nothing,
+            selection = :,
             t_on::Bool = true,
             θ_on::Bool = true) = (
     _spac = spac(gm_dict);
@@ -149,14 +154,13 @@ simulation!(wd_tag::String,
     _wdfr = eachrow(_wdf);
 
     # iterate through the time steps
-    #for _dfr in _wdfr
-    @showprogress for _dfr in _wdfr
+    @showprogress for _dfr in _wdfr[selection]
         simulation!(_spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
     # save simulation results to hard drive
     if !isnothing(saving)
-        save_nc!(saving, _wdf[:, DF_VARIABLES]);
+        save_nc!(saving, _wdf[selection, DF_VARIABLES]);
 
         return nothing
     end;
@@ -177,7 +181,7 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on:
         soil_plant_air_continuum!(spac, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
-    # calculate the SIF if there is sunlight
+    # save the SIF and reflectance if there is sunlight
     if _df_dir + _df_dif >= 10
         dfr.BLUE   = MODIS_BLUE(spac.CANOPY);
         dfr.EVI    = MODIS_EVI(spac.CANOPY);
@@ -200,6 +204,24 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on:
         dfr.NIRvI  = NaN;
         dfr.NIRvR  = NaN;
         dfr.RED    = NaN;
+    end;
+
+    # save water contents and temperatures based on t_on and θ_on
+    if θ_on
+        dfr.MOD_SWC_1 = spac.SOIL.LAYERS[1].θ;
+        dfr.MOD_SWC_2 = spac.SOIL.LAYERS[2].θ;
+        dfr.MOD_SWC_3 = spac.SOIL.LAYERS[3].θ;
+        dfr.MOD_SWC_4 = spac.SOIL.LAYERS[4].θ;
+    end;
+    if t_on
+        _tleaf = [_leaf.t for _leaf in spac.LEAVES];
+        dfr.MOD_T_L_MAX  = nanmax(_tleaf);
+        dfr.MOD_T_L_MEAN = nanmean(_tleaf);
+        dfr.MOD_T_L_MIN  = nanmin(_tleaf);
+        dfr.MOD_T_S_1    = spac.SOIL.LAYERS[1].t;
+        dfr.MOD_T_S_2    = spac.SOIL.LAYERS[2].t;
+        dfr.MOD_T_S_3    = spac.SOIL.LAYERS[3].t;
+        dfr.MOD_T_S_4    = spac.SOIL.LAYERS[4].t;
     end;
 
     # save the total flux into the DataFrame

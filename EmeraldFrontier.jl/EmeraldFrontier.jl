@@ -16,12 +16,13 @@ using ..EmeraldCore.SPAC: BETA, CNPP, GPP, PPAR, T_VEG, initialize!, soil_plant_
 using ..EmeraldData.ERA5: weather_driver_file
 using ..EmeraldIO.Netcdf: read_nc, save_nc!
 using ..EmeraldIO.Text: read_csv
-using ..EmeraldMath.Stats: nanmax, nanmean
+using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 using ..EmeraldUtility.Time: month_days
 
 
 # Netcdf settings for output
-DF_VARIABLES  = ["F_H2O", "F_CO2", "F_GPP", "BETA", "SIF683", "SIF740", "SIF757", "SIF771", "RED", "BLUE", "NIR", "NDVI", "EVI", "NIRvI", "NIRvR", "PAR", "PPAR"];
+DF_SIMULATIONS = ["MOD_SWC_1", "MOD_SWC_2", "MOD_SWC_3", "MOD_SWC_4", "MOD_T_L_MAX", "MOD_T_L_MEAN", "MOD_T_L_MIN", "MOD_T_S_1", "MOD_T_S_2", "MOD_T_S_3", "MOD_T_S_4"];
+DF_VARIABLES   = ["F_H2O", "F_CO2", "F_GPP", "BETA", "SIF683", "SIF740", "SIF757", "SIF771", "RED", "BLUE", "NIR", "NDVI", "EVI", "NIRvI", "NIRvR", "PAR", "PPAR"];
 
 
 include("driver.jl"         )
