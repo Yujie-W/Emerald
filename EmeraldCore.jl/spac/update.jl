@@ -29,6 +29,8 @@ function update! end
 #     2022-Oct-19: add method to prescribe t_soil profile
 #     2022-Nov-21: fix a bug related to Vcmax profile (no global simulations are impacted)
 #     2022-Nov-22: add option to change CO₂ partial pressure through ppm
+#     2023-Mar-28: fix a typo when updating t_soil
+#     2023-Mar-28: update total energy in soil and leaf when prescribing swc and temperature
 #
 #######################################################################################################################################################################################################
 """
@@ -142,14 +144,18 @@ update!(spac::MultiLayerSPAC{FT};
     # prescribe soil water content
     if !isnothing(swcs)
         for _i in eachindex(swcs)
-            SOIL.LAYERS[_i].θ = swcs[_i];
+            _slayer = SOIL.LAYERS[_i];
+            _slayer.θ = swcs[_i];
+            _slayer.e = (_slayer.CP * _slayer.ρ + _slayer.θ * CP_L() * ρ_H₂O()) * _slayer.t;
         end;
     end;
 
     # prescribe soil temperature
-    if !isnothing(swcs)
-        for _i in eachindex(swcs)
-            SOIL.LAYERS[_i].t = t_soils[_i];
+    if !isnothing(t_soils)
+        for _i in eachindex(t_soils)
+            _slayer = SOIL.LAYERS[_i];
+            _slayer.t = t_soils[_i];
+            _slayer.e = (_slayer.CP * _slayer.ρ + _slayer.θ * CP_L() * ρ_H₂O()) * _slayer.t;
         end;
     end;
 
@@ -165,6 +171,7 @@ update!(spac::MultiLayerSPAC{FT};
     if !isnothing(t_leaf)
         for _leaf in LEAVES
             _leaf.t = t_leaf;
+            _leaf.e = (_leaf.CP * _leaf.BIO.lma * 10 + _leaf.HS.v_storage * CP_L_MOL(FT)) * t;
         end;
     end;
 
