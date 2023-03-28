@@ -47,6 +47,7 @@ function β_factor end
 #     2022-Oct-19: fix sm.Β to sm.β
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
 #     2022-Nov-18: use root K to weigh the beta among root layers
+#     2023-Mar-27: weigh the beta among root layers only if flow rate is positive (if all flows are negative, beta = 1)
 # Bug fixes
 #     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaves, β, β.PARAM_X) as I forgot to write β_factor! before `()`
 #
@@ -163,16 +164,27 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 );
 
 β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT<:AbstractFloat} = (
+    # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
+    _sumf = 0;
     for _i in eachindex(roots)
         _f_st = relative_surface_tension(roots[_i].t);
         _beta = β_factor(β.FUNC, soil.LAYERS[_i].VC, roots[_i].HS.p_ups / _f_st);
-        _kmax = roots[_i].HS.AREA * roots[_i].HS.K_X / roots[_i].HS.L;
+        _f_in = flow_in(roots[_i]);
+        _kmax = _f_in > 0 ? roots[_i].HS.AREA * roots[_i].HS.K_X / roots[_i].HS.L : 0;
         _norm += _beta * _kmax;
         _deno += _kmax;
+        _sumf += _f_in;
     end;
-    β.β₁ = _norm / _deno;
+
+    if _deno > 0
+        β.β₁ = _norm / _deno;
+    elseif _sumf < 0
+        β.β₁ = 1
+    else
+        β.β₁ = eps(FT);
+    end;
 
     return nothing
 );
@@ -186,31 +198,53 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 );
 
 β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT<:AbstractFloat} = (
+    # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
+    _sumf = 0;
     for _i in eachindex(roots)
         _f_st = relative_surface_tension(roots[_i].t);
         _beta = β_factor(β.FUNC, roots[_i].HS.p_ups / _f_st);
-        _kmax = roots[_i].HS.AREA * roots[_i].HS.K_X / roots[_i].HS.L;
+        _f_in = flow_in(roots[_i]);
+        _kmax = _f_in > 0 ? roots[_i].HS.AREA * roots[_i].HS.K_X / roots[_i].HS.L : 0;
         _norm += _beta * _kmax;
         _deno += _kmax;
+        _sumf += _f_in;
     end;
-    β.β₁ = _norm / _deno;
+
+    if _deno > 0
+        β.β₁ = _norm / _deno;
+    elseif _sumf < 0
+        β.β₁ = 1
+    else
+        β.β₁ = eps(FT);
+    end;
 
     return nothing
 );
 
 β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT<:AbstractFloat} = (
+    # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
+    _sumf = 0;
     for _i in eachindex(roots)
         _f_st = relative_surface_tension(roots[_i].t);
         _beta = β_factor(β.FUNC, soil_θ(soil.LAYERS[_i].VC, roots[_i].HS.p_ups / _f_st));
-        _kmax = roots[_i].HS.AREA * roots[_i].HS.K_X / roots[_i].HS.L;
+        _f_in = flow_in(roots[_i]);
+        _kmax = _f_in > 0 ? roots[_i].HS.AREA * roots[_i].HS.K_X / roots[_i].HS.L : 0;
         _norm += _beta * _kmax;
         _deno += _kmax;
+        _sumf += _f_in;
     end;
-    β.β₁ = _norm / _deno;
+
+    if _deno > 0
+        β.β₁ = _norm / _deno;
+    elseif _sumf < 0
+        β.β₁ = 1
+    else
+        β.β₁ = eps(FT);
+    end;
 
     return nothing
 );
