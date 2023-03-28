@@ -9,9 +9,8 @@
 #     2022-Jul-27: fix the NaN temperature issue related to grass
 #     2022-Jul-27: fix the unit issue related to CP and mol to kg
 #     2022-Jul-27: rescale leaf energy absorption from per groud area to per leaf area
-#     2023-Mar-27: rodo the energy balance related to water transport by make a statement of whether the flow is positive or negative
-# Bug fixes
 #     2023-Mar-27: fix a typo in 1:DIM_ROOT (was typed as DIM_ROOT)
+#     2023-Mar-27: rodo the energy balance related to water transport by make a statement of whether the flow is positive or negative
 #
 #######################################################################################################################################################################################################
 """

@@ -78,7 +78,7 @@ extinction_coefficient(lia::FT) where {FT<:AbstractFloat} = (
 #     2022-Jun-07: add relative azimuth angle control
 #     2022-Jun-07: return _Co, _Cs, _So, _Ss as well
 #     2022-Jun-16: make this a method for extinction_coefficient
-# Bug fixes:
+# Bug fixes
 #     2023-Mar-16: adjust _sb and _sf if negative value appears
 # Sources
 #     Verhoef (1998) Theory of radiative transfer models applied in optical remote sensing of vegetation canopies. Chapter 7

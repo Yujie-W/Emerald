@@ -248,7 +248,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbed
 #     2022-Jun-13: use DIM_LAYER instead of _end
 #     2022-Jun-29: use Leaves2D for the hyperspectral RT
 #     2023-Mar-11: add code to account for the case of LAI == 0
-# Bug fix:
+# Bug fixes
 #     2022-Jul-15: sum by r_net_sw by the weights of sunlit and shaded fractions
 #     2022-Jul-27: use _ρ_dd, _ρ_sd, _τ_dd, and _τ_sd for leaf energy absorption (typo when refactoring the code)
 #     2022-Aug-30: fix par, apar, and ppar issues

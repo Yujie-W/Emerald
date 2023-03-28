@@ -26,7 +26,7 @@ function empirical_equation end
 #     2022-Jul-07: add method for LeuningSM
 #     2022-Jul-07: add method for MedlynSM
 #     2022-Oct-20: add a max controller to make sure vpd is at least 1 Pa
-# Bug fix:
+# Bug fixes
 #     2022-Jul-07: add the factor 1.6 for Medlyn model
 #
 #######################################################################################################################################################################################################

@@ -11,7 +11,7 @@
 #     2022-Jun-29: add method for SPAC
 #     2023-Mar-11: compute fluorescence only if solar zenith angle < 89
 #     2023-Mar-11: add code to account for the case of LAI == 0
-# Bug fix
+# Bug fixes
 #     2023-Mar-16: ddb ddf to dob and dof for observed SIF
 #
 #######################################################################################################################################################################################################

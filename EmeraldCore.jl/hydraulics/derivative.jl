@@ -27,7 +27,7 @@ function ∂E∂P end
 ∂E∂P(lf::Leaves1D{FT}, flow::FT, ind::Int; δe::FT = FT(1e-7)) where {FT<:AbstractFloat} = ∂E∂P(lf.HS, flow, lf.t[ind]; δe = δe);
 
 ∂E∂P(hs::LeafHydraulics{FT}, flow::FT, t::FT; δe::FT = FT(1e-7)) where {FT<:AbstractFloat} = (
-    @assert δe != 0 "pm must not be 0";
+    @assert δe != 0 "δe must not be 0";
 
     _p1 = xylem_end_pressure(hs, flow, t);
     _p2 = xylem_end_pressure(hs, flow + δe, t);

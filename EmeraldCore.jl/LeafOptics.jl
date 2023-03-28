@@ -32,6 +32,7 @@ function leaf_spectra! end
 # General
 #     2020-Mar-30: account for carotenoid absorption as PPAR as well as chlorophyll
 #     2020-Mar-31: use 40° rather than 59° for _τ_α calculation (following PROSPECT-D)
+#     2021-Aug-06: If bio.CBC and bio.PRO are not zero, they are accounted for twice in bio.LMA, thus the spectrum from LMA need to subtract the contribution from CBC and PRO
 #     2021-Aug-07: replace function `expint` with that from SpecialFunctions
 #     2021-Oct-21: add α to input parameters so that one can roll back to 59° for _τ_α calculation
 #     2021-Nov-29: separate HyperspectralAbsorption as constant struct
@@ -40,8 +41,6 @@ function leaf_spectra! end
 #     2022-Jul-22: add lwc to function variable list
 #     2022-Jul-28: run leaf_spectra! only if lwc differs from _v_storage
 #     2022-Aug-17: add option reabsorb to function to enable/disable SIF reabsorption
-# Bug fix
-#     2021-Aug-06: If bio.CBC and bio.PRO are not zero, they are accounted for twice in bio.LMA, thus the spectrum from LMA need to subtract the contribution from CBC and PRO
 # To do
 #     TODO: add References for this methods
 #
