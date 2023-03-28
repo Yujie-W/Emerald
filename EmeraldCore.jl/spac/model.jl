@@ -48,7 +48,7 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = tr
     canopy_radiation!(spac);
 
     # 2. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
-    xylem_flow_profile!(spac);
+    xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
     stomatal_conductance_profile!(spac);
 

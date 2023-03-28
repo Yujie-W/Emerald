@@ -3,6 +3,7 @@ module PlantHydraulics
 using Statistics: mean
 
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
+using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 
 using ..Constant: CP_D_MOL, CP_L_MOL, GAS_R, M_H₂O, T₂₅, ρg_MPa
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
@@ -25,6 +26,7 @@ include("hydraulics/flow_profile.jl"     )
 include("hydraulics/legacy.jl"           )
 include("hydraulics/pressure_profile.jl" )
 include("hydraulics/pressure_volume.jl"  )
+include("hydraulics/root_connection.jl"  )
 include("hydraulics/target_flow.jl"      )
 include("hydraulics/vulnerability.jl"    )
 

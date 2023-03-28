@@ -31,4 +31,8 @@ Base.@kwdef mutable struct Root{FT<:AbstractFloat}
     e::FT = sum(HS.v_storage) * CP_L_MOL(FT) * t
     "Marginal increase in energy `[W]`"
     ∂e∂t::FT = 0
+
+    # Cache variable
+    "Whether root is connected to soil"
+    _isconnected::Bool = true
 end
