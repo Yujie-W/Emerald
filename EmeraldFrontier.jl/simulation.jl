@@ -160,7 +160,7 @@ simulation!(wd_tag::String,
 
     # save simulation results to hard drive
     if !isnothing(saving)
-        save_nc!(saving, _wdf[selection,:]);
+        save_nc!(saving, _wdf[selection,2:end]);
 
         return nothing
     end;
