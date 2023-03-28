@@ -374,36 +374,36 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
             _root = ROOTS[_i];
             _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
             if _root._isconnected
-                xylem_flow_profile!(_root.HS.FLOW, spac.cache_f[_i]);
+                xylem_flow_profile!(_root.HS.FLOW, spac._fs[_i]);
             else
-                spac.cache_f[_i] = 0;
+                spac._fs[_i] = 0;
             end;
-            spac.cache_p[_i],spac.cache_k[_i] = root_pk(_root, _slayer);
+            spac._ps[_i],spac._ks[_i] = root_pk(_root, _slayer);
         end;
 
         # use ps and ks to compute the Δf to adjust
-        _pm = nanmean(spac.cache_p);
+        _pm = nanmean(spac._ps);
         for _i in eachindex(ROOTS_INDEX)
             _root = ROOTS[_i];
             if _root._isconnected
-                spac.cache_f[_i] -= (_pm - spac.cache_p[_i]) * spac.cache_k[_i];
+                spac._fs[_i] -= (_pm - spac._ps[_i]) * spac._ks[_i];
             else
-                spac.cache_f[_i] = 0;
+                spac._fs[_i] = 0;
             end;
         end;
 
         # adjust the fs so that sum(fs) = f_sum
-        _f_diff = sum(spac.cache_f) - f_sum;
-        if (abs(_f_diff) < FT(1e-6)) && (nanmax(spac.cache_p) - nanmin(spac.cache_p) < 1e-4)
+        _f_diff = sum(spac._fs) - f_sum;
+        if (abs(_f_diff) < FT(1e-6)) && (nanmax(spac._ps) - nanmin(spac._ps) < 1e-4)
             break
         end;
-        _k_sum  = sum(spac.cache_k);
+        _k_sum  = sum(spac._ks);
         for _i in eachindex(ROOTS_INDEX)
             _root = ROOTS[_i];
             if _root._isconnected
-                spac.cache_f[_i] -= _f_diff * spac.cache_k[1] / _k_sum;
+                spac._fs[_i] -= _f_diff * spac._ks[1] / _k_sum;
             else
-                spac.cache_f[_i] = 0;
+                spac._fs[_i] = 0;
             end;
         end;
 
@@ -453,13 +453,13 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
                 _f(e) = diff_p_root(_i, e, _p_r);
                 _tol = SolutionTolerance{FT}(1e-8, 50);
                 _met = NewtonBisectionMethod{FT}(x_min = -1000, x_max = 1000, x_ini = 0);
-                spac.cache_f[_i] = find_zero(_f, _met, _tol);
-                xylem_flow_profile!(ROOTS[_i].HS.FLOW, spac.cache_f[_i]);
+                spac._fs[_i] = find_zero(_f, _met, _tol);
+                xylem_flow_profile!(ROOTS[_i].HS.FLOW, spac._fs[_i]);
             else
-                spac.cache_f[_i] = 0;
+                spac._fs[_i] = 0;
             end;
 
-            spac.cache_p[_i],spac.cache_k[_i] = root_pk(_root, _slayer);
+            spac._ps[_i],spac._ks[_i] = root_pk(_root, _slayer);
         end;
     end;
 
@@ -467,7 +467,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
     for _i in eachindex(ROOTS_INDEX)
         _root = ROOTS[_i];
         if _root._isconnected
-            xylem_flow_profile!(ROOTS[_i].HS.FLOW, spac.cache_f[_i]);
+            xylem_flow_profile!(ROOTS[_i].HS.FLOW, spac._fs[_i]);
         end;
     end;
     xylem_flow_profile!.(ROOTS, Δt);
