@@ -4,6 +4,7 @@
 # General
 #     2023-Mar-25: add function to prescribe parameters from weather drivers
 #     2023-Mar-27: prescribe T only if t_on is true, prescribe SWC only is θ_on is true
+#     2023-Mar-29: prescribe longwave radiation as well
 #
 #######################################################################################################################################################################################################
 """
@@ -27,6 +28,7 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = tr
     _df_dir::FT = dfr.RAD_DIR;
     _df_doy::FT = dfr.FDOY;
     _df_lai::FT = dfr.LAI;
+    _df_lwr::FT = dfr.RAD_LW;
     _df_pcp::FT = dfr.PRECIP;
     _df_sw1::FT = dfr.SWC_1;
     _df_sw2::FT = dfr.SWC_2;
@@ -89,11 +91,12 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = tr
         update!(_alayer; f_CO₂ = _df_co2, t = _df_tar, vpd = _df_vpd, wind = _df_wnd);
     end;
 
-    # update shortwave radiation
+    # update downward shortwave and longwave radiation
     _in_dir = spac.RAD_SW_REF.e_direct' * spac.CANOPY.WLSET.ΔΛ / 1000;
     _in_dif = spac.RAD_SW_REF.e_diffuse' * spac.CANOPY.WLSET.ΔΛ / 1000;
     spac.RAD_SW.e_direct  .= spac.RAD_SW_REF.e_direct  .* _df_dir ./ _in_dir;
     spac.RAD_SW.e_diffuse .= spac.RAD_SW_REF.e_diffuse .* _df_dif ./ _in_dif;
+    spac.RAD_LW = _df_lwr;
 
     # update solar zenith angle based on the time
     spac.ANGLES.sza = solar_zenith_angle(spac.LATITUDE, FT(_df_doy));

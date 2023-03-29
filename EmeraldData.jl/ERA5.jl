@@ -56,18 +56,21 @@ ERA5_NETCDF = [
 # General
 #     2023-Mar-11: add the struct for ERA5 weather driver
 #     2023-Mar-11: add field W_TOT for precipitation
+#     2023-Mar-29: add field L_RAD for longwave radiation
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct for ERA5 Single Levels weather driver
+Struct for ERA5 Single Levels weather driver to use in EmeraldEarth
 
 $(TYPEDFIELDS)
 
 """
 Base.@kwdef struct ERA5SingleLevelsDriver
+    "Downward longwave radiation"
+    L_RAD::Tuple{String,String} = ("msdwlwrf", "mean_surface_downward_long_wave_radiation_flux")
     "Atmospheric pressure"
     P_ATM::Tuple{String,String} = ("sp", "surface_pressure")
     "Direct shortwave radiation"

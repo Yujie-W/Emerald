@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2023-Mar-13: add function to load all weather drivers a priori
+#     2023-Mar-29: prescribe longwave radiation as well
 #
 #######################################################################################################################################################################################################
 """
@@ -28,9 +29,11 @@ function weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf
     _wd_windu = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.WINDU[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.WINDU[1]);
     @tinfo "Preloading weather driver for wind speed v...";
     _wd_windv = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.WINDV[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.WINDV[1]);
-    @tinfo "Preloading weather driver for total radiation...";
+    @tinfo "Preloading weather driver for longwave radiation...";
+    _wd_l_all = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.L_RAD[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.L_RAD[1]);
+    @tinfo "Preloading weather driver for total shortwave radiation...";
     _wd_s_all = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.S_ALL[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.S_ALL[1]);
-    @tinfo "Preloading weather driver for direct radiation...";
+    @tinfo "Preloading weather driver for direct shortwave radiation...";
     _wd_s_dir = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.S_DIR[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.S_DIR[1]);
     _wd_s_dif = _wd_s_all .- _wd_s_dir;
     _wd_vpd   = saturation_vapor_pressure.(_wd_t_air) .- saturation_vapor_pressure.(_wd_t_dew);
@@ -41,6 +44,7 @@ function weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf
                 "P_ATM"   => _wd_p_atm,
                 "RAD_DIF" => _wd_s_dif,
                 "RAD_DIR" => _wd_s_dir,
+                "RAD_LW"  => _wd_l_all,
                 "T_AIR"   => _wd_t_air,
                 "VPD"     => _wd_vpd,
                 "WIND"    => _wd_wind,
@@ -83,6 +87,7 @@ end
 # General
 #     2023-Mar-13: add function to read weather driver per grid
 #     2023-Mar-13: add method to read weather driver per grid from preloaded drivers
+#     2023-Mar-29: prescribe longwave radiation as well
 #
 #######################################################################################################################################################################################################
 """
@@ -111,6 +116,7 @@ wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool
     _wd_t_dew = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_DEW[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_DEW[1], ind);
     _wd_windu = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.WINDU[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.WINDU[1], ind);
     _wd_windv = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.WINDV[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.WINDV[1], ind);
+    _wd_l_all = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.L_RAD[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.L_RAD[1], ind);
     _wd_s_all = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.S_ALL[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.S_ALL[1], ind);
     _wd_s_dir = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.S_DIR[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.S_DIR[1], ind);
     _wd_s_dif = _wd_s_all .- _wd_s_dir;
@@ -124,6 +130,7 @@ wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool
                         "P_ATM"   => _wd_p_atm[_ilon,_ilat],
                         "RAD_DIF" => _wd_s_dif[_ilon,_ilat],
                         "RAD_DIR" => _wd_s_dir[_ilon,_ilat],
+                        "RAD_LW"  => _wd_l_all[_ilon,_ilat],
                         "T_AIR"   => _wd_t_air[_ilon,_ilat],
                         "VPD"     => _wd_vpd[_ilon,_ilat],
                         "WIND"    => _wd_wind[_ilon,_ilat],
@@ -178,6 +185,7 @@ wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = tru
                         "P_ATM"   => wd["P_ATM"][_ilon,_ilat,ind],
                         "RAD_DIF" => wd["RAD_DIF"][_ilon,_ilat,ind],
                         "RAD_DIR" => wd["RAD_DIR"][_ilon,_ilat,ind],
+                        "RAD_LW"  => wd["RAD_LW"][_ilon,_ilat,ind],
                         "T_AIR"   => wd["T_AIR"][_ilon,_ilat,ind],
                         "VPD"     => wd["VPD"][_ilon,_ilat,ind],
                         "WIND"    => wd["WIND"][_ilon,_ilat,ind],
