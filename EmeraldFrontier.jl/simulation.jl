@@ -115,6 +115,7 @@ end
 #     2023-Mar-28: if option saving is false, return the simulated result dataframe
 #     2023-Mar-28: add option selection to run part of the whole year simulations
 #     2023-Mar-28: save swcs and temperatures based on t_on and θ_on
+#     2023-Mar-29: add option to load initialial state from weather driver
 #
 #######################################################################################################################################################################################################
 """
@@ -123,6 +124,7 @@ end
                 gm_dict::Dict{String,Any};
                 appending::Bool = false,
                 displaying::Bool = false,
+                initialial_state::Union{Nothing,Bool} = true,
                 p_on::Bool = true,
                 saving::Union{Nothing,String} = nothing,
                 selection = :,
@@ -134,6 +136,7 @@ Run simulation on site level, given
 - `gm_dict` GriddingMachine dict for site information
 - `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
 - `displaying` If true, displaying information regarding the steps
+- `initialial_state` Initial state of spac: if is a bool, load the first data from the weather driver
 - `p_on` If true, plant hydraulic flow and pressure profiles will be updated
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
 - `selection` Run selection of data, default is : (namely 1:end)
@@ -147,6 +150,7 @@ simulation!(wd_tag::String,
             gm_dict::Dict{String,Any};
             appending::Bool = false,
             displaying::Bool = false,
+            initialial_state::Union{Nothing,Bool} = true,
             p_on::Bool = true,
             saving::Union{Nothing,String} = nothing,
             selection = :,
@@ -155,6 +159,11 @@ simulation!(wd_tag::String,
     _spac = spac(gm_dict);
     _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
     _wdfr = eachrow(_wdf);
+
+    # initialize spac based on initialial_state
+    if initialial_state isa Bool
+        prescribe!(_spac, _wdfr[1]; t_on = false, θ_on = false);
+    end;
 
     # iterate through the time steps
     @showprogress for _dfr in _wdfr[selection]
