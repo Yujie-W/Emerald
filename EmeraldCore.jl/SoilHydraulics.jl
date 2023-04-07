@@ -233,6 +233,7 @@ relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where 
 #     2022-Jul-26: fix the unit of rain, mass flow, and root extraction (all in mol s⁻¹)
 #     2022-Sep-07: allow soil water oversaturation
 #     2023-Mar-27: fix a typo when updating e per layer (should use ΔZ per layer rather than the first layer)
+#     2023-Apr-07: fix a typo when updating water content in saturated soil layers
 #
 #######################################################################################################################################################################################################
 """
@@ -289,7 +290,7 @@ soil_budget!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 
         # if both layers are oversaturated, move the oversaturated part from lower layer to upper layer
         if (SOIL.LAYERS[_i].θ >= SOIL.LAYERS[_i].VC.Θ_SAT) && (SOIL.LAYERS[_i+1].θ > SOIL.LAYERS[_i+1].VC.Θ_SAT)
-            SOIL._q[_i] = (SOIL.LAYERS[_i+1].θ - SOIL.LAYERS[_i+1].VC.Θ_SAT) * LAYERS[_i+1].ΔZ * ρ_H₂O(FT) / M_H₂O(FT);
+            SOIL._q[_i] = -1 * (SOIL.LAYERS[_i+1].θ - SOIL.LAYERS[_i+1].VC.Θ_SAT) * LAYERS[_i+1].ΔZ * ρ_H₂O(FT) / M_H₂O(FT);
         end;
 
         LAYERS[_i  ].∂θ∂t -= SOIL._q[_i] * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[_i].ΔZ;
