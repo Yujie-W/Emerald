@@ -61,6 +61,7 @@ end
 #     2021-Sep-30: add constructor function
 #     2022-Jul-13: remove a constructor method
 #     2022-Oct-19: make struct mutable
+#     2023-Apr-08: add another dataset for van Genuchten parameters
 # Sources
 #     Cosby et al. (1984) A statistical exploration of the relationships of soil moisture characteristics to the physical properties of soils
 #
@@ -106,6 +107,7 @@ Constructor for [`VanGenuchten`](@ref), given
 
 """
 VanGenuchten{FT}(name::String) where {FT<:AbstractFloat} = (
+    #=
     # Parameters from Loam soil
     _p = [ 367.3476, 1.56, 0.43, 0.078, exp(-0.32) * 0.0254 / 3600];
 
@@ -134,6 +136,40 @@ VanGenuchten{FT}(name::String) where {FT<:AbstractFloat} = (
         _p = [  51.0205, 1.09, 0.36, 0.070, exp(-0.72) * 0.0254 / 3600];
     elseif name=="Clay"
         _p = [  81.6328, 1.09, 0.38, 0.068, exp(-0.86) * 0.0254 / 3600];    # K from Light clay in Cosby et al. (1984)
+    else
+        @warn "Soil type $(name) not recognized, use Loam instead.";
+        name = "Loam";
+    end;
+    =#
+    # https://structx.com/Soil_Properties_007.html
+    # Parameters from Loam soil
+    _p = [ 367.3476, 1.56, 0.43, 0.078, 7.19e-6];
+
+    # switch name
+    if name=="Sand"
+        _p = [1479.5945, 2.68, 0.43, 0.045, 1.76e-4];
+    elseif name=="Loamy Sand"
+        _p = [1265.3084, 2.28, 0.41, 0.057, 1.56e-4];
+    elseif name=="Sandy Loam"
+        _p = [ 765.3075, 1.89, 0.41, 0.065, 3.45e-5];
+    elseif name=="Loam"
+        _p = [ 367.3476, 1.56, 0.43, 0.078, 6.94e-6];
+    elseif name=="Sandy Clay Loam"
+        _p = [ 602.0419, 1.48, 0.39, 0.100, 6.31e-6];
+    elseif name=="Silt Loam"
+        _p = [ 204.0820, 1.41, 0.45, 0.067, 7.19e-6];
+    elseif name=="Silt"
+        _p = [ 163.2656, 1.37, 0.46, 0.034, 7.19e-6];
+    elseif name=="Clay Loam"
+        _p = [ 193.8779, 1.31, 0.41, 0.095, 2.45e-6];
+    elseif name=="Silty Clay Loam"
+        _p = [ 102.0410, 1.23, 0.43, 0.089, 1.70e-6];
+    elseif name== "Sandy Clay"
+        _p = [ 275.5107, 1.23, 0.38, 0.100, 2.17e-6];
+    elseif name=="Silty Clay"
+        _p = [  51.0205, 1.09, 0.36, 0.070, 1.02e-6];
+    elseif name=="Clay"
+        _p = [  81.6328, 1.09, 0.38, 0.068, 1.28e-6];
     else
         @warn "Soil type $(name) not recognized, use Loam instead.";
         name = "Loam";

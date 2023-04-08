@@ -28,19 +28,19 @@ for i in 1:10
     EmeraldCore.SPAC.spac!(spac, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_fout = spac.METEO.rain - soil_water_flow;
+    soil_water_fout = spac.METEO.rain * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) - soil_water_flow;
     root_water_flow = sum([EmeraldCore.SoilHydraulics.root_sink(rlayer) for rlayer in spac.ROOTS]) * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
     leaf_water_flow = EmeraldCore.SPAC.T_VEG(spac) * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT);
     @info "Debugging" soil_water_flow soil_water_fout root_water_flow leaf_water_flow spac.SOIL.runoff;
     #@info "Total water is" tswc [slayer.θ for slayer in spac.SOIL.LAYERS];
 end;
 
-spac.METEO.rain = 10;
+spac.METEO.rain = 1;
 for i in 1:10
     EmeraldCore.SPAC.spac!(spac, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_fout = spac.METEO.rain - soil_water_flow;
+    soil_water_fout = spac.METEO.rain * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) - soil_water_flow;
     root_water_flow = sum([EmeraldCore.SoilHydraulics.root_sink(rlayer) for rlayer in spac.ROOTS]) * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
     leaf_water_flow = EmeraldCore.SPAC.T_VEG(spac) * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT);
     @info "Debugging" soil_water_flow soil_water_fout root_water_flow leaf_water_flow spac.SOIL.runoff;
@@ -49,14 +49,14 @@ end;
 
 spac.RAD_SW.e_direct .= 0;
 spac.RAD_SW.e_diffuse .= 0;
-spac.METEO.rain = 10;
+spac.METEO.rain = 1;
 for i in 1:10
     EmeraldCore.SPAC.spac!(spac, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
+    soil_water_fout = spac.METEO.rain * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) - soil_water_flow;
     root_water_flow = sum([EmeraldCore.SoilHydraulics.root_sink(rlayer) for rlayer in spac.ROOTS]) * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
     leaf_water_flow = EmeraldCore.SPAC.T_VEG(spac) * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT);
-    @info "Debugging" soil_water_flow root_water_flow leaf_water_flow;
-    #@info "Total water is" tswc [slayer.θ for slayer in spac.SOIL.LAYERS];
-    @info "Runoff" spac.SOIL.runoff;
+    @info "Debugging" soil_water_flow soil_water_fout root_water_flow leaf_water_flow spac.SOIL.runoff;
+    @info "SWC per layer" [slayer.θ for slayer in spac.SOIL.LAYERS];
 end;

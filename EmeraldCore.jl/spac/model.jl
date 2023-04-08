@@ -12,6 +12,7 @@
 #     2023-Mar-11: add method for a SPAC == nothing
 #     2023-Mar-28: if no root is connected, set LAI = 0
 #     2023-Mar-28: run PlantHydraulics as the first step
+#     2023-Apr-08: set runoff to 0 at the beginning of each time interval
 #
 #######################################################################################################################################################################################################
 """
@@ -46,6 +47,9 @@ function soil_plant_air_continuum! end
 # TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
 # TODO: add top soil evaporation
 soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = (
+    # 0. set total runoff to 0 so as to accumulate with sub-timestep
+    spac.SOIL.runoff = 0;
+
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
@@ -85,6 +89,9 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = tr
 soil_plant_air_continuum!(spac::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) = nothing;
 
 soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
+    # 0. set total runoff to 0 so as to accumulate with sub-timestep
+    spac.SOIL.runoff = 0;
+
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
