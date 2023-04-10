@@ -344,7 +344,7 @@ Base.@kwdef mutable struct LeafHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
     # General information of the hydraulic system
     "Leaf area `[m²]`"
     AREA::FT = 1500
-    "Maximal extra-xylary hydraulic conductance `[mol s⁻¹ MPa⁻¹ m⁻²]`"
+    "Maximal extra-xylary hydraulic conductance per leaf area `[mol s⁻¹ MPa⁻¹ m⁻²]`"
     K_OX::FT = 100
     "Maximal leaf xylem hydraulic conductance per leaf area `[mol s⁻¹ MPa⁻¹ m⁻²]`"
     K_SLA::FT = 0.04
@@ -489,9 +489,9 @@ Base.@kwdef mutable struct StemHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
     DIM_XYLEM::Int = 5
 
     # General information of the hydraulic system
-    "Root cross-section area `[m²]`"
+    "Xylem cross-section area `[m²]`"
     AREA::FT = 1
-    "Maximal xylem hydraulic conductivity (per root depth) `[mol s⁻¹ MPa⁻¹ m⁻²]`"
+    "Maximal xylem hydraulic conductivity (per xylem area per length) `[mol s⁻¹ MPa⁻¹ m⁻²]`"
     K_X::FT = 25
     "Length `[m]`"
     L::FT = 1
