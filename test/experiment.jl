@@ -16,11 +16,12 @@ df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection
 using Emerald;
 
 FT = Float64;
+config = EmeraldCore.Namespace.SPACConfiguration{FT}();
 spac = EmeraldCore.Namespace.MultiLayerSPAC{FT}();
 for slayer in spac.SOIL.LAYERS
     slayer.θ = 0.35;
 end;
-EmeraldCore.SPAC.initialize!(spac);
+EmeraldCore.SPAC.initialize!(spac, config);
 spac.METEO.rad_lw = 300;
 
 spac.METEO.rain = 0;

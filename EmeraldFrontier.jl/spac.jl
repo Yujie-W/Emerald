@@ -7,14 +7,14 @@
 #######################################################################################################################################################################################################
 """
 
-    spac(gm_dict::Dict)
+    spac(gm_dict::Dict, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
 
 Create a SPAC, given
 - `gm_dict` Dictionary of GriddingMachine data in a grid
+- `config` Configurations for SPAC
 
 """
-function spac(gm_dict::Dict)
-    FT = gm_dict["FT"];
+function spac(gm_dict::Dict, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
     # read in canopy height
     _z_canopy   = max(FT(0.1), gm_dict["CANOPY_HEIGHT"]);
     _Δz         = _z_canopy / 20;
@@ -60,10 +60,10 @@ function spac(gm_dict::Dict)
     end;
 
     # update the vcmax for C3 model
-    update!(_spac; vcmax = nanmean(gm_dict["VCMAX25"]), vcmax_expo = 0.3);
+    update!(_spac, config; vcmax = nanmean(gm_dict["VCMAX25"]), vcmax_expo = 0.3);
 
     # initialize the spac
-    initialize!(_spac);
+    initialize!(_spac, config);
 
     return _spac
 end

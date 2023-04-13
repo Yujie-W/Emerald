@@ -49,14 +49,14 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     _tleaf = t_on ? nanmean([_layer.t for _layer in spac.LEAVES]) : _df_tlf;
     push!(spac.MEMORY.tem, _tleaf);
     if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
-    update!(spac; t_clm = nanmean(spac.MEMORY.tem));
+    update!(spac, config; t_clm = nanmean(spac.MEMORY.tem));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
     if !t_on
-        update!(spac; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
+        update!(spac, config; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
     end;
     if !θ_on
-        update!(spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
+        update!(spac, config; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
     end;
 
     # prescribe the precipitation related parameters
@@ -68,17 +68,17 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.MEMORY.vcm);
     _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.MEMORY.chl);
     if _trigger_lai
-        update!(spac; lai = _df_lai, vcmax_expo = 0.3);
+        update!(spac, config; lai = _df_lai, vcmax_expo = 0.3);
         spac.MEMORY.lai = _df_lai;
     end;
 
     if _trigger_vcm
-        update!(spac; vcmax = _df_vcm, vcmax_expo = 0.3);
+        update!(spac, config; vcmax = _df_vcm, vcmax_expo = 0.3);
         spac.MEMORY.vcm = _df_vcm;
     end;
 
     if _trigger_chl
-        update!(spac; cab = _df_chl, car = _df_chl / 7);
+        update!(spac, config; cab = _df_chl, car = _df_chl / 7);
         spac.MEMORY.chl = _df_chl;
     end;
 
@@ -159,7 +159,7 @@ simulation!(wd_tag::String,
             t_on::Bool = true,
             θ_on::Bool = true) = (
     _config = spac_config(gm_dict);
-    _spac = spac(gm_dict);
+    _spac = spac(gm_dict, _config);
     _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
     _wdfr = eachrow(_wdf);
 

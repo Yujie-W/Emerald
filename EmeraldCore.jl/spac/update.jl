@@ -78,7 +78,8 @@ update!(air::AirLayer{FT};
 
 """
 
-    update!(spac::MultiLayerSPAC{FT};
+    update!(spac::MultiLayerSPAC{FT},
+            config::SPACConfiguration{FT};
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
             lai::Union{Number,Nothing} = nothing,
@@ -92,6 +93,7 @@ update!(air::AirLayer{FT};
 
 Update the physiological parameters of the SPAC, given
 - `spac` Soil plant air continuum
+- `config` Configuration for `MultiLayerSPAC`
 - `cab` Chlorophyll content. Optional, default is nothing
 - `car` Carotenoid content. Optional, default is nothing
 - `lai` Leaf area index. Optional, default is nothing
@@ -103,7 +105,8 @@ Update the physiological parameters of the SPAC, given
 -`vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
 
 """
-update!(spac::MultiLayerSPAC{FT};
+update!(spac::MultiLayerSPAC{FT},
+        config::SPACConfiguration{FT};
         cab::Union{Number,Nothing} = nothing,
         car::Union{Number,Nothing} = nothing,
         lai::Union{Number,Nothing} = nothing,
@@ -130,7 +133,7 @@ update!(spac::MultiLayerSPAC{FT};
         end;
     end;
     if !isnothing(cab) || !isnothing(car)
-        leaf_spectra!(spac);
+        leaf_spectra!(spac, config);
     end;
 
     # update LAI

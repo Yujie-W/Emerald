@@ -71,13 +71,13 @@ soil_plant_air_continuum!(
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
     if !spac._root_connection
-        update!(spac; lai = 0);
+        update!(spac, config; lai = 0);
 
         return nothing
     end;
 
     # 2. run canopy RT
-    canopy_radiation!(spac);
+    canopy_radiation!(spac, config);
 
     # 3. run photosynthesis model
     stomatal_conductance_profile!(spac);
@@ -113,13 +113,13 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
     if !spac._root_connection
-        update!(spac; lai = 0);
+        update!(spac, config; lai = 0);
 
         return nothing
     end;
 
     # 2. run canopy RT
-    canopy_radiation!(spac);
+    canopy_radiation!(spac, config);
 
     # 3. update the prognostic variables (except for soil water and temperature)
     time_stepper!(spac, config; update = update);

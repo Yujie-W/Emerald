@@ -47,7 +47,7 @@ function initialize_cache!(FT)
     end;
 
     # initialize the spac
-    initialize!(CACHE_SPAC);
+    initialize!(CACHE_SPAC, CACHE_CONFIG);
 
     # create a state struct based on the spac
     CACHE_STATE = MultiLayerSPACState{FT}(CACHE_SPAC);
@@ -134,7 +134,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
 
     # prescribe soil water content
     if "SWC" in keys(wd_params)
-        update!(CACHE_SPAC; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
+        update!(CACHE_SPAC, CACHE_CONFIG; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
     end;
 
     # synchronize the state if state is not nothing, otherwise set all values to NaN (do thing before prescribing T_SKIN)
@@ -149,7 +149,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     if "T_SKIN" in keys(wd_params)
         push!(CACHE_SPAC.MEMORY.tem, wd_params["T_SKIN"]);
         if length(CACHE_SPAC.MEMORY.tem) > 240 deleteat!(CACHE_SPAC.MEMORY.tem,1) end;
-        update!(CACHE_SPAC; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.MEMORY.tem));
+        update!(CACHE_SPAC, CACHE_CONFIG; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.MEMORY.tem));
     end;
 
     # synchronize LAI, CHL, and CI
@@ -162,7 +162,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     # update clumping index, LAI, Vcmax, and Chl
     CACHE_SPAC.CANOPY.ci = _cli;
     CACHE_SPAC.CANOPY.Ω_A = _cli;
-    update!(CACHE_SPAC; cab = _chl, car = _chl / 7, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
+    update!(CACHE_SPAC, CACHE_CONFIG; cab = _chl, car = _chl / 7, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
 
     return nothing
 end
