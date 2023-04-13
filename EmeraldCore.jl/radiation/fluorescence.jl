@@ -11,22 +11,25 @@
 #     2022-Jun-29: add method for SPAC
 #     2023-Mar-11: compute fluorescence only if solar zenith angle < 89
 #     2023-Mar-11: add code to account for the case of LAI == 0
+#     2023-Apr-13: add config to function call
 # Bug fixes
 #     2023-Mar-16: ddb ddf to dob and dof for observed SIF
 #
 #######################################################################################################################################################################################################
 """
 
-    canopy_fluorescence!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}) where {FT<:AbstractFloat}
 
 Updates canopy fluorescence, given
 - `spac` `MultiLayerSPAC` type SPAC
+- `config` Configuration for `MultiLayerSPAC`
 
 """
 function canopy_fluorescence! end
 
-canopy_fluorescence!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; ANGLES, CANOPY, LEAVES, Φ_PHOTON) = spac;
+canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+    (; ANGLES, CANOPY, LEAVES) = spac;
+    (; Φ_PHOTON) = config;
 
     if (ANGLES.sza < 89)
         canopy_fluorescence!(CANOPY, LEAVES; ϕ_photon = Φ_PHOTON);

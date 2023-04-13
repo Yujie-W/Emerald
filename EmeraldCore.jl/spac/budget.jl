@@ -97,12 +97,13 @@ end
 #     2022-Sep-07: add method to solve for steady state solution
 #     2022-Oct-22: add option t_on to enable/disable soil and leaf energy budgets
 #     2022-Nov-18: add option p_on to enable/disable plant flow and pressure profiles
+#     2023-Apr-13: add config to function call to steady state function
 #
 #######################################################################################################################################################################################################
 """
 
     time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
-    time_stepper!(spac::MultiLayerSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat}
+    time_stepper!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
 
 Move forward in time for SPAC with time stepper controller, given
 - `spac` `MultiLayerSPAC` SPAC
@@ -111,6 +112,7 @@ Move forward in time for SPAC with time stepper controller, given
 - `t_on` If true, plant energy budget is on (set false to run sensitivity analysis or prescribing mode)
 - `update` If true, update leaf xylem legacy effect
 - `θ_on` If true, soil water budget is on (set false to run sensitivity analysis or prescribing mode)
+- `config` Configuration for `MultiLayerSPAC`
 
 """
 function time_stepper! end
@@ -156,7 +158,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bo
     return nothing
 );
 
-time_stepper!(spac::MultiLayerSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
+time_stepper!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES, RAD_LW, SOIL) = spac;
 
     # run the update function until the gpp is stable
@@ -190,7 +192,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}; update::Bool = false) where {FT<:Abstrac
     end;
 
     # run canopy fluorescence
-    canopy_fluorescence!(spac);
+    canopy_fluorescence!(spac, config);
 
     return nothing
 );

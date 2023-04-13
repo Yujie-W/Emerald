@@ -10,7 +10,7 @@ using ..Constant: K_STEFAN
 using ..Namespace: BroadbandRadiation, BroadbandSLCanopy, BroadbandSoilAlbedo
 using ..Namespace: HyperspectralMLCanopy, HyperspectralRadiation, HyperspectralSoilAlbedo
 using ..Namespace: Leaves1D, Leaves2D, Soil, SunSensorGeometry, VerhoefLIDF
-using ..Namespace: MultiLayerSPAC
+using ..Namespace: MultiLayerSPAC, MultiLayerSPACConfiguration
 using ..Optics: energy!, photon, photon!
 
 

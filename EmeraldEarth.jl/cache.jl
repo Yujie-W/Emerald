@@ -4,6 +4,7 @@
 # General
 #     2023-Mar-13: add function to initialize the CACHE_SPAC
 #     2023-Mar-13: initialize CACHE_STATE at the same time
+#     2023-Mar-13: initialize CACHE_CONFIG at the same time
 #
 #######################################################################################################################################################################################################
 """
@@ -15,10 +16,11 @@ Initialize the global parameter `CACHE_SPAC`, given
 
 """
 function initialize_cache!(FT)
-    global CACHE_SPAC, CACHE_STATE;
+    global CACHE_CONFIG, CACHE_SPAC, CACHE_STATE;
 
     # create a SPAC to work on
     _z_canopy = FT(10);
+    CACHE_CONFIG = MultiLayerSPACConfiguration{FT}();
     CACHE_SPAC = MultiLayerSPAC{FT}(
                 DIM_AIR      = 25,
                 DIM_LAYER    = 10,

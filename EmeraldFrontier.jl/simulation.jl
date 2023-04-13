@@ -116,6 +116,7 @@ end
 #     2023-Mar-28: add option selection to run part of the whole year simulations
 #     2023-Mar-28: save swcs and temperatures based on t_on and θ_on
 #     2023-Mar-29: add option to load initialial state from weather driver
+#     2023-Apr-13: add spac config to function call
 #
 #######################################################################################################################################################################################################
 """
@@ -156,6 +157,7 @@ simulation!(wd_tag::String,
             selection = :,
             t_on::Bool = true,
             θ_on::Bool = true) = (
+    _config = spac_config(gm_dict);
     _spac = spac(gm_dict);
     _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
     _wdfr = eachrow(_wdf);
@@ -167,7 +169,7 @@ simulation!(wd_tag::String,
 
     # iterate through the time steps
     @showprogress for _dfr in _wdfr[selection]
-        simulation!(_spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+        simulation!(_spac, _config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
     # save simulation results to hard drive
@@ -180,7 +182,15 @@ simulation!(wd_tag::String,
     return _wdf
 );
 
-simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on::Bool = true, t_on::Bool = true, δt::Number = 3600, θ_on::Bool = true) where {FT<:AbstractFloat} = (
+simulation!(spac::MultiLayerSPAC{FT},
+            config::MultiLayerSPACConfiguration{FT},
+            dfr::DataFrameRow;
+            n_step::Int = 10,
+            p_on::Bool = true,
+            t_on::Bool = true,
+            δt::Number = 3600,
+            θ_on::Bool = true
+) where {FT<:AbstractFloat} = (
     # read the data out of dataframe row to reduce memory allocation
     _df_dif::FT = dfr.RAD_DIF;
     _df_dir::FT = dfr.RAD_DIR;
@@ -190,7 +200,7 @@ simulation!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; n_step::Int = 10, p_on:
 
     # run the model
     for _ in 1:n_step
-        soil_plant_air_continuum!(spac, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
+        soil_plant_air_continuum!(spac, config, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
     # save the SIF and reflectance if there is sunlight

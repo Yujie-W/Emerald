@@ -4,6 +4,7 @@
 # General
 #     2023-Mar-11: add function to run the SPAC
 #     2023-Mar-13: add state mat as an input
+#     2023-Apr-13: add CACHE_CONFIG in function
 #
 #######################################################################################################################################################################################################
 """
@@ -67,8 +68,8 @@ simulation!(gm_params::Nothing, wd_params::Nothing, state::Nothing) = nothing;
 
 simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState{FT}}) where {FT<:AbstractFloat} = (
     synchronize_cache!(gm_params, wd_params, state);
-    for _i in 1:10
-        soil_plant_air_continuum!(CACHE_SPAC, 360; p_on = false, t_on = false, θ_on = false);
+    for _ in 1:10
+        soil_plant_air_continuum!(CACHE_SPAC, CACHE_CONFIG, 360; p_on = false, t_on = false, θ_on = false);
     end;
     spac_state!(CACHE_SPAC, CACHE_STATE);
 

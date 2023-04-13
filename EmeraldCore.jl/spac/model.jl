@@ -12,6 +12,7 @@
 #     2023-Mar-11: add method for a SPAC == nothing
 #     2023-Mar-28: if no root is connected, set LAI = 0
 #     2023-Mar-28: run PlantHydraulics as the first step
+#     2023-Apr-13: add config to function call
 #
 #######################################################################################################################################################################################################
 """
@@ -27,13 +28,21 @@ This function runs the model using the following steps:
 
 This function is supposed to have the highest hierarchy, and should support all SPAC types defined in EmeraldNamespace.jl. Note to update the water flow profile when initializing the SPAC.
 
-    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::Nothing; update::Bool = false) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(
+                spac::MultiLayerSPAC{FT},
+                config::MultiLayerSPACConfiguration{FT},
+                δt::Number;
+                p_on::Bool = true,
+                t_on::Bool = true,
+                update::Bool = false,
+                θ_on::Bool = true) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(spac::Nothing, config::Nothing; update::Bool = false) where {FT<:AbstractFloat}
 
 Run SPAC model and move forward in time with time stepper controller, given
 - `spac` `MultiLayerSPAC` SPAC, or nothing
+- `config` Configuration for `MultiLayerSPAC`
 - `δt` Time step (if not given, solve for steady state solution)
 - `p_on` If true, plant hydraulic flow and pressure profiles will be updated
 - `t_on` If true, plant energy budget is on (set false to run sensitivity analysis or prescribing mode)
@@ -45,7 +54,7 @@ function soil_plant_air_continuum! end
 
 # TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
 # TODO: add top soil evaporation
-soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = (
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
@@ -63,7 +72,7 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = tr
     leaf_photosynthesis!(spac, GCO₂Mode());
 
     # 4. run canopy fluorescence
-    canopy_fluorescence!(spac);
+    canopy_fluorescence!(spac, config);
 
     # save the result at this stage for the results at the beginning of this time step
 
@@ -82,9 +91,9 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = tr
     return nothing
 );
 
-soil_plant_air_continuum!(spac::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) = nothing;
+soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) = nothing;
 
-soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
@@ -98,14 +107,14 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}; update::Bool = false) where 
     canopy_radiation!(spac);
 
     # 3. update the prognostic variables (except for soil water and temperature)
-    time_stepper!(spac; update = update);
+    time_stepper!(spac, config; update = update);
 
     # save the result at this stage for the results at the steady state
 
     return nothing
 );
 
-soil_plant_air_continuum!(spac::Nothing; update::Bool = false) = nothing;
+soil_plant_air_continuum!(spac::Nothing, config::Nothing; update::Bool = false) = nothing;
 
 
 # add an alias for soil_plant_air_continuum!
