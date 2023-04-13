@@ -29,7 +29,8 @@ include("namespace/leaf.jl"  )
 include("namespace/root.jl"  )
 include("namespace/stem.jl"  )
 
-include("namespace/spac.jl")
+include("namespace/config.jl")
+include("namespace/spac.jl"  )
 
 
 end

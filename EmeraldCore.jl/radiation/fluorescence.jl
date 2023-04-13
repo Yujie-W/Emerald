@@ -18,7 +18,7 @@
 #######################################################################################################################################################################################################
 """
 
-    canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}) where {FT<:AbstractFloat}
+    canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
 
 Updates canopy fluorescence, given
 - `spac` `MultiLayerSPAC` type SPAC
@@ -27,7 +27,7 @@ Updates canopy fluorescence, given
 """
 function canopy_fluorescence! end
 
-canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, LEAVES) = spac;
     (; Φ_PHOTON) = config;
 

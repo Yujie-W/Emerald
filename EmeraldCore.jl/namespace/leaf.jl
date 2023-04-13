@@ -780,6 +780,7 @@ abstract type AbstractLeaf{FT<:AbstractFloat} end
 #     2022-Jul-28: move field _t to PSM
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
+#     2023-Apr-13: move field APAR_CAR to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -794,10 +795,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
-    # General model information
-    "Whether APAR absorbed by carotenoid is counted as PPAR"
-    APAR_CAR::Bool = true
-
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -960,6 +957,7 @@ end
 #     2022-Jul-28: move field _t to PSM
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
+#     2023-Apr-13: move field APAR_CAR to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -980,10 +978,6 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     DIM_AZI::Int = 36
     "Dimension of inclination angles"
     DIM_INCL::Int = 9
-
-    # General model information
-    "Whether APAR absorbed by carotenoid is counted as PPAR"
-    APAR_CAR::Bool = true
 
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"

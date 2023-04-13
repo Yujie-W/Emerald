@@ -104,7 +104,7 @@ end
 """
 
     time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
-    time_stepper!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
+    time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
 
 Move forward in time for SPAC with time stepper controller, given
 - `spac` `MultiLayerSPAC` SPAC
@@ -159,7 +159,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bo
     return nothing
 );
 
-time_stepper!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
+time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES, METEO, SOIL) = spac;
 
     # run the update function until the gpp is stable

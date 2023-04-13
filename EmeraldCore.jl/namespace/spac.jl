@@ -105,7 +105,7 @@ end
 #     2022-Aug-30: remove LHA and WLSET
 #     2023-Mar-11: add MEMORY and RAD_SW_REF fields
 #     2023-Mar-28: add field _root_connection
-#     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF to MultiLayerSPACConfiguration
+#     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF to SPACConfiguration
 #     2023-Apr-13: move RAD_LW and RAD_SW to Meteorology
 #
 #######################################################################################################################################################################################################
@@ -178,36 +178,6 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSyst
     _ps::Vector{FT} = zeros(FT, DIM_ROOT)
     "Whether there is any root connected to soil"
     _root_connection::Bool = true
-end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2023-Apr-13: add state struct to save SPAC configurations
-#     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Global configuration of SPAC system
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct MultiLayerSPACConfiguration{FT}
-    # General model information
-    "Whether to convert energy to photons when computing fluorescence"
-    Φ_PHOTON::Bool = true
-
-    # Embedded structures
-    "Downwelling shortwave radiation reference spectrum"
-    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
 end
 
 

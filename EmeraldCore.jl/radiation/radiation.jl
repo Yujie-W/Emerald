@@ -248,6 +248,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbed
 #     2022-Jun-13: use DIM_LAYER instead of _end
 #     2022-Jun-29: use Leaves2D for the hyperspectral RT
 #     2023-Mar-11: add code to account for the case of LAI == 0
+#     2023-Apr-13: rename option APAR_car to apar_car
 # Bug fixes
 #     2022-Jul-15: sum by r_net_sw by the weights of sunlit and shaded fractions
 #     2022-Jul-27: use _ρ_dd, _ρ_sd, _τ_dd, and _τ_sd for leaf energy absorption (typo when refactoring the code)
@@ -257,7 +258,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbed
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; APAR_CAR::Bool = true) where {FT<:AbstractFloat}
+    canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
     canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat}
 
 Updates canopy radiation profiles for shortwave or longwave radiation, given
@@ -265,10 +266,10 @@ Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `leaves` Vector of `Leaves2D`
 - `rad` Incoming shortwave or longwave radiation
 - `soil` Bottom soil boundary layer
-- `APAR_CAR` Whether carotenoid absorption is counted in PPAR, default is true
+- `apar_car` Whether carotenoid absorption is counted in PPAR, default is true
 
 """
-canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; APAR_CAR::Bool = true) where {FT<:AbstractFloat} = (
+canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; apar_car::Bool = true) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, OPTICS, P_INCL, RADIATION, WLSET) = can;
     (; ALBEDO) = soil;
 
@@ -383,7 +384,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
     for _i in 1:DIM_LAYER
-        _α_apar = APAR_CAR ? view(leaves[_i].BIO.α_cabcar,WLSET.IΛ_PAR) : view(leaves[_i].BIO.α_cab,WLSET.IΛ_PAR);
+        _α_apar = apar_car ? view(leaves[_i].BIO.α_cabcar,WLSET.IΛ_PAR) : view(leaves[_i].BIO.α_cab,WLSET.IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(WLSET.Λ_PAR, view(RADIATION.e_sum_diffuse,WLSET.IΛ_PAR,_i)) .* 1000;
@@ -488,20 +489,22 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
 
 Updates canopy radiation profiles for shortwave and longwave radiation, given
 - `spac` `MultiLayerSPAC` type SPAC
+- `config` Configurations of spac model
 
 """
-canopy_radiation!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, DIM_LAYER, LEAVES, METEO, SOIL) = spac;
+    (; APAR_CAR) = config;
 
     soil_albedo!(CANOPY, SOIL);
     if ANGLES.sza < 89
         canopy_optical_properties!(CANOPY, ANGLES);
         canopy_optical_properties!(CANOPY, LEAVES, SOIL);
-        canopy_radiation!(CANOPY, LEAVES, METEO.rad_sw, SOIL; APAR_CAR = LEAVES[1].APAR_CAR);
+        canopy_radiation!(CANOPY, LEAVES, METEO.rad_sw, SOIL; apar_car = APAR_CAR);
     else
         CANOPY.RADIATION.r_net_sw .= 0;
         SOIL.ALBEDO.r_net_sw = 0;

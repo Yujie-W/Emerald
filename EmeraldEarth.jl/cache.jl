@@ -20,7 +20,7 @@ function initialize_cache!(FT)
 
     # create a SPAC to work on
     _z_canopy = FT(10);
-    CACHE_CONFIG = MultiLayerSPACConfiguration{FT}();
+    CACHE_CONFIG = SPACConfiguration{FT}();
     CACHE_SPAC = MultiLayerSPAC{FT}(
                 DIM_AIR      = 25,
                 DIM_LAYER    = 10,

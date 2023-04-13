@@ -4,7 +4,7 @@ using SpecialFunctions: expint
 
 using ..Constant: M_H₂O, ρ_H₂O
 using ..Namespace: HyperspectralAbsorption, HyperspectralRadiation, HyperspectralLeafBiophysics, WaveLengthSet
-using ..Namespace: MultiLayerSPAC
+using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..Optics: average_transmittance, energy, energy!, photon, photon!
 
 
@@ -41,6 +41,7 @@ function leaf_spectra! end
 #     2022-Jul-22: add lwc to function variable list
 #     2022-Jul-28: run leaf_spectra! only if lwc differs from _v_storage
 #     2022-Aug-17: add option reabsorb to function to enable/disable SIF reabsorption
+#     2023-Apr-13: rename option APAR_CAR to apar_car
 # To do
 #     TODO: add References for this methods
 #
@@ -52,7 +53,7 @@ function leaf_spectra! end
                 wls::WaveLengthSet{FT},
                 lha::HyperspectralAbsorption{FT},
                 lwc::FT;
-                APAR_car::Bool = true,
+                apar_car::Bool = true,
                 reabsorb::Bool = true,
                 α::FT = FT(40)
     ) where {FT<:AbstractFloat}
@@ -62,7 +63,7 @@ Update leaf reflectance and transmittance spectra, and fluorescence spectrum mat
 - `wls` `WaveLengthSet` type struct that contain wave length bins
 - `lha` `HyperspectralAbsorption` type struct that contains absorption characteristic curves
 - `lwc` Leaf water content `[mol m⁻²]`
-- `APAR_car` If true, carotenoid absorption is accounted for in PPAR, default is `true`
+- `apar_car` If true, carotenoid absorption is accounted for in PPAR, default is `true`
 - `reabsorb` If true, SIF reabsorption is enabled; otherwise, mat_b and mat_f should be based on the case with no reabsorption
 - `α` Optimum angle of incidence (default is 40° as in PROSPECT-D, SCOPE uses 59°)
 
@@ -72,8 +73,8 @@ wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
 lha = EmeraldNamespace.HyperspectralAbsorption{Float64}();
 leaf_spectra!(bio, wls, lha, 50.0);
-leaf_spectra!(bio, wls, lha, 50.0; APAR_car=false);
-leaf_spectra!(bio, wls, lha, 50.0; APAR_car=false, α=59.0);
+leaf_spectra!(bio, wls, lha, 50.0; apar_car=false);
+leaf_spectra!(bio, wls, lha, 50.0; apar_car=false, α=59.0);
 ```
 
 """
@@ -82,7 +83,7 @@ leaf_spectra!(
             wls::WaveLengthSet{FT},
             lha::HyperspectralAbsorption{FT},
             lwc::FT;
-            APAR_car::Bool = true,
+            apar_car::Bool = true,
             reabsorb::Bool = true,
             α::FT = FT(40)
 ) where {FT<:AbstractFloat} = (
@@ -187,7 +188,7 @@ leaf_spectra!(
             bio._k[_i] = (bio._a[_i] - 1) / (bio._a[_i] + 1) * log(bio._b[_i]);
         end;
     end;
-    bio._k_chl .= (APAR_car ? bio.α_cabcar : bio.α_cab) .* bio._k;
+    bio._k_chl .= (apar_car ? bio.α_cabcar : bio.α_cab) .* bio._k;
 
     # indices of WLE and WLF within wlp
     _ϵ = FT(2) ^ -NDUB;
@@ -301,21 +302,24 @@ leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_p
 # Changes made to this method
 # General
 #     2022-Jun-29: add method for MultiLayerSPAC
+#     2023-Apr-13: add config to function call
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
 
 Update leaf reflectance and transmittance for SPAC, given
 - `spac` `MultiLayerSPAC` type SPAC
+- `config` Configurations of spac model
 
 """
-leaf_spectra!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES) = spac;
+    (; APAR_CAR) = config;
 
     for _leaf in LEAVES
-        leaf_spectra!(_leaf.BIO, CANOPY.WLSET, CANOPY.LHA, _leaf.HS.v_storage; APAR_car = _leaf.APAR_CAR);
+        leaf_spectra!(_leaf.BIO, CANOPY.WLSET, CANOPY.LHA, _leaf.HS.v_storage; apar_car = APAR_CAR);
     end;
 
     return nothing
@@ -330,17 +334,18 @@ leaf_spectra!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 #     2022-Jan-13: use LeafBiophysics directly in the function rather than Leaf
 #     2022-Jun-15: rename LeafBiophysics to HyperspectralLeafBiophysics to be more descriptive
 #     2022-Jun-27: refactor the function to return PAR, APAR, and PPAR
+#     2023-Apr-13: rename option APAR_CAR to apar_car
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; APAR_car::Bool = true) where {FT<:AbstractFloat}
+    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
 
 Return leaf level PAR, APAR, and PPAR, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
 - `wls` `WaveLengthSet` type struct that contains wave length bins
 - `rad` `HyperspectralRadiation` type struct that contains incoming radiation information
-- `APAR_car` If true (default), account carotenoid absorption as PPAR; otherwise, PPAR is only by chlorophyll
+- `apar_car` If true (default), account carotenoid absorption as PPAR; otherwise, PPAR is only by chlorophyll
 
 ---
 # Examples
@@ -349,15 +354,15 @@ wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
 rad = EmeraldNamespace.HyperspectralRadiation{Float64}();
 par,apar,ppar = leaf_PAR(bio, wls, rad);
-par,apar,ppar = leaf_PAR(bio, wls, rad; APAR_car=false);
+par,apar,ppar = leaf_PAR(bio, wls, rad; apar_car=false);
 ```
 
 """
-function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; APAR_car::Bool = true) where {FT<:AbstractFloat}
+function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
     (; IΛ_PAR, ΔΛ_PAR, Λ_PAR) = wls;
 
     # PPAR absorption feature (after APAR is computed)
-    _α_ppar = (APAR_car ? view(bio.α_cabcar, IΛ_PAR) : view(bio.α_cab, IΛ_PAR));
+    _α_ppar = (apar_car ? view(bio.α_cabcar, IΛ_PAR) : view(bio.α_cab, IΛ_PAR));
 
     # PAR, APAR, and PPAR energy from direct and diffuse light
     _e_par_dir   = view(rad.e_direct , IΛ_PAR);

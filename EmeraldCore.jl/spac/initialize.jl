@@ -5,19 +5,21 @@
 #     2022-Jun-27: add function to initialize SPAC
 #     2022-Jun-27: add leaf area controller to make sure soil and leaf areas are consistent with leaf area index
 #     2023-Mar-27: initialize soil and leaf e as well (because T, SWC may be changed)
+#     2023-Apr-13: add config to function call
 #
 #######################################################################################################################################################################################################
 """
 
-    initialize!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
 
 Initialize the SPAC, given
 - `spac` `MultiLayerSPAC` SPAC
+- `config` Configurations of spac model
 
 """
 function initialize! end
 
-initialize!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
@@ -32,7 +34,7 @@ initialize!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     end;
 
     # initialize leaf level spectra
-    leaf_spectra!(spac);
+    leaf_spectra!(spac, config);
 
     # initialize stomatal conductance
     stomatal_conductance!(spac, FT(0));

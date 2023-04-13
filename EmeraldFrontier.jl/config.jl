@@ -16,5 +16,5 @@ Create a SPAC configuration struct, given
 function spac_config(gm_dict::Dict)
     FT = gm_dict["FT"];
 
-    return MultiLayerSPACConfiguration{FT}();
+    return SPACConfiguration{FT}();
 end

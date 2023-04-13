@@ -31,13 +31,13 @@ This function is supposed to have the highest hierarchy, and should support all 
 
     soil_plant_air_continuum!(
                 spac::MultiLayerSPAC{FT},
-                config::MultiLayerSPACConfiguration{FT},
+                config::SPACConfiguration{FT},
                 δt::Number;
                 p_on::Bool = true,
                 t_on::Bool = true,
                 update::Bool = false,
                 θ_on::Bool = true) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
     soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
     soil_plant_air_continuum!(spac::Nothing, config::Nothing; update::Bool = false) where {FT<:AbstractFloat}
 
@@ -57,7 +57,7 @@ function soil_plant_air_continuum! end
 # TODO: add top soil evaporation
 soil_plant_air_continuum!(
             spac::MultiLayerSPAC{FT},
-            config::MultiLayerSPACConfiguration{FT},
+            config::SPACConfiguration{FT},
             δt::Number;
             p_on::Bool = true,
             t_on::Bool = true,
@@ -105,7 +105,7 @@ soil_plant_air_continuum!(
 
 soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) = nothing;
 
-soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
 
