@@ -2,19 +2,15 @@
 #
 # Changes to this function
 # General
-#     2022-Jun-09: migrate the function from CanopyLayers
-#     2022-Jun-09: rename function to canopy_radiation!
+#     2023-Apr-13: name the method to shortwave_radiation! to be more specific
 #
 #######################################################################################################################################################################################################
 """
-This function updates canopy radiation profiles. The supported methods are to
-- Update shortwave radiation profile for broadband or hyperspectral canopy
-- Updates soil shortwave radiation profiles
-- Update longwave radation profile for broadband or hyperspectral canopy
-- Update radiation profile for SPAC
+
+Run short wave radiation.
 
 """
-function canopy_radiation! end
+function shortwave_radiation! end
 
 
 #######################################################################################################################################################################################################
@@ -25,25 +21,22 @@ function canopy_radiation! end
 #     2022-Jun-21: make par and apar per leaf area
 #     2022-Jun-21: redo the mean rates by weighing them by sunlit fraction
 #     2022-Jun-25: finalize the soil shortwave reflection
-#     2022-Jun-25: clean the calculations
-#     2022-Jun-25: add method for longwave radation for two leaf RT
 #     2022-Jun-29: use Leaves1D for the broadband RT
-#     2022-Jun-29: use sunlit and shaded temperatures for the longwave out
+#     2023-Apr-13: name the method to shortwave_radiation! to be more specific
 #
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
-    canopy_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat}
+    shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
 
-Updates shortwave or longwave radiation profiles, given
-- `can` `HyperspectralMLCanopy` type struct
+Updates shortwave radiation profiles for BroadbandSLCanopy, given
+- `can` `BroadbandSLCanopy` type struct
 - `leaf` `Leaves1D` type struct
-- `rad` Broadband shortwave or longwave radiation
+- `rad` Broadband shortwave radiation
 - `soil` `Soil` type struct
 
 """
-canopy_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
     (; RADIATION) = can;
     (; BIO) = leaf;
     (; ALBEDO) = soil;
@@ -133,62 +126,6 @@ canopy_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::Broadband
     return nothing
 );
 
-canopy_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
-    (; RADIATION) = can;
-    (; BIO) = leaf;
-    (; ALBEDO, LAYERS) = soil;
-
-    # theory for longwave radiation reaching soil
-    #     soil_lw_in_solar = rad * τ_diffuse(LAI)
-    #     soil_lw_in_sunlit(x) = ϵσT⁴(sunlit) * τ_direct(LAI-x)
-    #     soil_lw_in_shaded(x) = ϵσT⁴(shaded) * τ_diffuse(LAI-x)
-    #     soil_in_all = ∫(soil_lw_in_sunlit + soil_lw_in_shaded) + soil_lw_in_solar
-    #
-    # theory for longwave radiation reaching leaves
-    #     leaf_lw_in_solar = rad * τ_diffuse(x)
-    #     leaf_lw_in_soil = soil_out * τ_diffuse(LAI-x)
-
-    # when the radiation is from top to buttom
-    @inline shaded_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
-        return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
-    );
-    @inline sunlit_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
-        return (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
-    );
-
-    # when the radiation is from bottom to top
-    @inline shaded_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
-        return exp(-sqrt(α) * k * can.ci * can.lai) / (RADIATION.k_direct + sqrt(α) * k) * (exp((RADIATION.k_direct + sqrt(α) * k) * can.ci * can.lai) - 1)
-    );
-    @inline sunlit_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
-        return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - shaded_integral_down(k, α)
-    );
-
-    # longwave radiation reaching soil and the canopy (averaged)
-    _soil_lw_in_solar  = rad * exp(-sqrt(BIO.ϵ_LW) * RADIATION.k_diffuse * can.ci * can.lai);
-    _soil_lw_in_sunlit = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[1] ^ 4 * sunlit_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
-    _soil_lw_in_shaded = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[2] ^ 4 * shaded_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
-    _soil_lw_in        = _soil_lw_in_solar + _soil_lw_in_sunlit + _soil_lw_in_shaded;
-    _soil_lw_out       = _soil_lw_in * ALBEDO.ρ_LW + (1 - ALBEDO.ρ_LW) * K_STEFAN(FT) + LAYERS[1].t ^ 4;
-    ALBEDO.r_net_lw    = _soil_lw_in - _soil_lw_out;
-
-    # lognwave radiation reaching sunlit and shaded leaves
-    _shaded_in_solar  = rad * shaded_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
-    _sunlit_in_solar  = rad * sunlit_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
-    _shaded_in_soil   = _soil_lw_out * shaded_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
-    _sunlit_in_soil   = _soil_lw_out * sunlit_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
-
-    # lognwave radiation out from sunlit and shaded leaves
-    _shaded_out_solar = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[1] ^ 4 * shaded_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
-    _sunlit_out_solar = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[2] ^ 4 * sunlit_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
-
-    # net radiation in-out for sunlit and shaded leaves for shortwave radation
-    RADIATION.r_net_shaded += (_shaded_in_solar + _shaded_in_soil - _shaded_out_solar - _soil_lw_in_shaded) * BIO.ϵ_LW / RADIATION.lai_shaded;
-    RADIATION.r_net_shaded += (_sunlit_in_solar + _sunlit_in_soil - _sunlit_out_solar - _soil_lw_in_sunlit) * BIO.ϵ_LW / RADIATION.lai_sunlit;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -196,19 +133,20 @@ canopy_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil:
 # General
 #     2022-Jun-14: make method work with broadband soil albedo struct
 #     2022-Jun-14: allow method to use broadband PAR and NIR soil albedo values
+#     2023-Apr-13: name the method to shortwave_radiation! to be more specific
 #
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat}
-    canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat}
+    shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat}
+    shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat}
 
 Updates soil shortwave radiation profiles, given
 - `can` `HyperspectralMLCanopy` type struct
 - `albedo` `BroadbandSoilAlbedo` or `HyperspectralSoilAlbedo` type soil albedo
 
 """
-canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, OPTICS, RADIATION, WLSET) = can;
 
     OPTICS._tmp_vec_λ[WLSET.IΛ_PAR] .= view(RADIATION.e_direct,WLSET.IΛ_PAR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[1]);
@@ -224,7 +162,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT
     return nothing
 );
 
-canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, RADIATION, WLSET) = can;
 
     albedo.e_net_direct .= view(RADIATION.e_direct,:,DIM_LAYER+1) .* (1 .- albedo.ρ_sw);
@@ -243,12 +181,11 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbed
 #     2022-Jun-10: rename PAR/APAR to APAR/PPAR to be more accurate
 #     2022-Jun-10: add PAR calculation (before absorption)
 #     2022-Jun-10: compute shortwave net radiation
-#     2022-Jun-10: migrate the function thermal_fluxes! from CanopyLayers
-#     2022-Jun-10: update net lw radiation for leaves and soil
 #     2022-Jun-13: use DIM_LAYER instead of _end
 #     2022-Jun-29: use Leaves2D for the hyperspectral RT
 #     2023-Mar-11: add code to account for the case of LAI == 0
 #     2023-Apr-13: rename option APAR_car to apar_car
+#     2023-Apr-13: name the method to shortwave_radiation! to be more specific
 # Bug fixes
 #     2022-Jul-15: sum by r_net_sw by the weights of sunlit and shaded fractions
 #     2022-Jul-27: use _ρ_dd, _ρ_sd, _τ_dd, and _τ_sd for leaf energy absorption (typo when refactoring the code)
@@ -258,18 +195,17 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbed
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
-    canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat}
+    shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
 
-Updates canopy radiation profiles for shortwave or longwave radiation, given
+Updates canopy radiation profiles for shortwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct
 - `leaves` Vector of `Leaves2D`
-- `rad` Incoming shortwave or longwave radiation
+- `rad` Incoming shortwave radiation
 - `soil` Bottom soil boundary layer
 - `apar_car` Whether carotenoid absorption is counted in PPAR, default is true
 
 """
-canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; apar_car::Bool = true) where {FT<:AbstractFloat} = (
+shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}; apar_car::Bool = true) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, OPTICS, P_INCL, RADIATION, WLSET) = can;
     (; ALBEDO) = soil;
 
@@ -371,7 +307,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
         RADIATION.r_net_sw[_i] = _Σ_shaded * (1 - OPTICS.p_sunlit[_i]) + _Σ_sunlit * OPTICS.p_sunlit[_i];
     end;
 
-    canopy_radiation!(can, ALBEDO);
+    shortwave_radiation!(can, ALBEDO);
 
     # 5. compute top-of-canopy and leaf level PAR, APAR, and PPAR per ground area
     RADIATION._par_shaded .= photon.(WLSET.Λ_PAR, view(rad.e_diffuse,WLSET.IΛ_PAR)) .* 1000;
@@ -418,7 +354,122 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
     return nothing
 );
 
-canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2022-Apr-13: move method of canopy_radiation! to longwave_radiation!
+#
+#######################################################################################################################################################################################################
+"""
+
+Update long wave radiation profiles for canopy.
+
+"""
+function longwave_radiation! end
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this method
+# General
+#     2022-Jun-25: add method for longwave radation for two leaf RT
+#     2022-Jun-29: use Leaves1D for the broadband RT
+#     2022-Jun-29: use sunlit and shaded temperatures for the longwave out
+#     2022-Apr-13: fix a typoe of r_net_sunlit
+#
+#######################################################################################################################################################################################################
+"""
+
+    longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat}
+
+Updates longwave radiation profiles, given
+- `can` `BroadbandSLCanopy` type struct
+- `leaf` `Leaves1D` type struct
+- `rad` Longwave radiation
+- `soil` `Soil` type struct
+
+"""
+longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+    (; RADIATION) = can;
+    (; BIO) = leaf;
+    (; ALBEDO, LAYERS) = soil;
+
+    # theory for longwave radiation reaching soil
+    #     soil_lw_in_solar = rad * τ_diffuse(LAI)
+    #     soil_lw_in_sunlit(x) = ϵσT⁴(sunlit) * τ_direct(LAI-x)
+    #     soil_lw_in_shaded(x) = ϵσT⁴(shaded) * τ_diffuse(LAI-x)
+    #     soil_in_all = ∫(soil_lw_in_sunlit + soil_lw_in_shaded) + soil_lw_in_solar
+    #
+    # theory for longwave radiation reaching leaves
+    #     leaf_lw_in_solar = rad * τ_diffuse(x)
+    #     leaf_lw_in_soil = soil_out * τ_diffuse(LAI-x)
+
+    # when the radiation is from top to buttom
+    @inline shaded_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
+        return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
+    );
+    @inline sunlit_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
+        return (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
+    );
+
+    # when the radiation is from bottom to top
+    @inline shaded_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
+        return exp(-sqrt(α) * k * can.ci * can.lai) / (RADIATION.k_direct + sqrt(α) * k) * (exp((RADIATION.k_direct + sqrt(α) * k) * can.ci * can.lai) - 1)
+    );
+    @inline sunlit_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
+        return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - shaded_integral_down(k, α)
+    );
+
+    # longwave radiation reaching soil and the canopy (averaged)
+    _soil_lw_in_solar  = rad * exp(-sqrt(BIO.ϵ_LW) * RADIATION.k_diffuse * can.ci * can.lai);
+    _soil_lw_in_sunlit = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[1] ^ 4 * sunlit_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
+    _soil_lw_in_shaded = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[2] ^ 4 * shaded_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
+    _soil_lw_in        = _soil_lw_in_solar + _soil_lw_in_sunlit + _soil_lw_in_shaded;
+    _soil_lw_out       = _soil_lw_in * ALBEDO.ρ_LW + (1 - ALBEDO.ρ_LW) * K_STEFAN(FT) + LAYERS[1].t ^ 4;
+    ALBEDO.r_net_lw    = _soil_lw_in - _soil_lw_out;
+
+    # lognwave radiation reaching sunlit and shaded leaves
+    _shaded_in_solar  = rad * shaded_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
+    _sunlit_in_solar  = rad * sunlit_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
+    _shaded_in_soil   = _soil_lw_out * shaded_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
+    _sunlit_in_soil   = _soil_lw_out * sunlit_integral_down(RADIATION.k_diffuse, BIO.ϵ_LW);
+
+    # lognwave radiation out from sunlit and shaded leaves
+    _shaded_out_solar = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[1] ^ 4 * shaded_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
+    _sunlit_out_solar = BIO.ϵ_LW * K_STEFAN(FT) * leaf.t[2] ^ 4 * sunlit_integral_top(RADIATION.k_diffuse, BIO.ϵ_LW);
+
+    # net radiation in-out for sunlit and shaded leaves for shortwave radation
+    RADIATION.r_net_shaded += (_shaded_in_solar + _shaded_in_soil - _shaded_out_solar - _soil_lw_in_shaded) * BIO.ϵ_LW / RADIATION.lai_shaded;
+    RADIATION.r_net_sunlit += (_sunlit_in_solar + _sunlit_in_soil - _sunlit_out_solar - _soil_lw_in_sunlit) * BIO.ϵ_LW / RADIATION.lai_sunlit;
+
+    return nothing
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this method
+# General
+#     2022-Jun-10: migrate the function thermal_fluxes! from CanopyLayers
+#     2022-Jun-10: update net lw radiation for leaves and soil
+#     2022-Jun-29: use Leaves2D for the hyperspectral RT
+#     2023-Mar-11: add code to account for the case of LAI == 0
+#
+#######################################################################################################################################################################################################
+"""
+
+    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat}
+
+Updates canopy radiation profiles for shortwave or longwave radiation, given
+- `can` `HyperspectralMLCanopy` type struct
+- `leaves` Vector of `Leaves2D`
+- `rad` Incoming longwave radiation
+- `soil` Bottom soil boundary layer
+
+"""
+longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, OPTICS, RADIATION) = can;
     (; ALBEDO, LAYERS) = soil;
 
@@ -479,6 +530,22 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
 
 #######################################################################################################################################################################################################
 #
+# Changes to this function
+# General
+#     2022-Jun-09: migrate the function from CanopyLayers
+#     2022-Jun-09: rename function to canopy_radiation!
+#
+#######################################################################################################################################################################################################
+"""
+
+Run shortwave and longwave radiation.
+
+"""
+function canopy_radiation! end
+
+
+#######################################################################################################################################################################################################
+#
 # Changes to this method
 # General
 #     2022-Jun-29: add method for SPAC
@@ -504,7 +571,7 @@ canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where
     if ANGLES.sza < 89
         canopy_optical_properties!(CANOPY, ANGLES);
         canopy_optical_properties!(CANOPY, LEAVES, SOIL);
-        canopy_radiation!(CANOPY, LEAVES, METEO.rad_sw, SOIL; apar_car = APAR_CAR);
+        shortwave_radiation!(CANOPY, LEAVES, METEO.rad_sw, SOIL; apar_car = APAR_CAR);
     else
         CANOPY.RADIATION.r_net_sw .= 0;
         SOIL.ALBEDO.r_net_sw = 0;
@@ -522,7 +589,7 @@ canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where
             LEAVES[_i].ppar_sunlit .= 0;
         end;
     end;
-    canopy_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
+    longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
 
     return nothing
 );

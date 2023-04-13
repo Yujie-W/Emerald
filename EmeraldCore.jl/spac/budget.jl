@@ -139,7 +139,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bo
 
         # if _t_res > 0 rerun the budget functions (shortwave radiation not included) and etc., else break
         if _t_res > 0
-            if t_on canopy_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL); end;
+            if t_on longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL); end;
             if p_on xylem_pressure_profile!(spac; update = update); end;
             leaf_photosynthesis!(spac, GCO₂Mode());
             if θ_on soil_budget!(spac); end;
@@ -167,7 +167,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
     _gpp_last = -1;
     while true
         # compute the dxdt (not shortwave radiation simulation)
-        canopy_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
+        longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
         xylem_pressure_profile!(spac; update = update);
         leaf_photosynthesis!(spac, GCO₂Mode());
         soil_budget!(spac);
