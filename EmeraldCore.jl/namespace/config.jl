@@ -5,7 +5,7 @@
 #     2023-Apr-13: add state struct to save SPAC configurations
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
 #     2023-Apr-13: move APAR_CAR from leaf structs
-#     2023-Apr-13: move LHA from HyperspectralMLCanopy
+#     2023-Apr-13: move LHA and WLSET from HyperspectralMLCanopy
 #
 #######################################################################################################################################################################################################
 """
@@ -45,4 +45,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
+    "Wave length set used to paramertize other variables"
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
 end

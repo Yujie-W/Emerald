@@ -315,11 +315,11 @@ Update leaf reflectance and transmittance for SPAC, given
 
 """
 leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
-    (; CANOPY, LEAVES) = spac;
-    (; APAR_CAR, LHA) = config;
+    (; LEAVES) = spac;
+    (; APAR_CAR, LHA, WLSET) = config;
 
     for _leaf in LEAVES
-        leaf_spectra!(_leaf.BIO, CANOPY.WLSET, LHA, _leaf.HS.v_storage; apar_car = APAR_CAR);
+        leaf_spectra!(_leaf.BIO, WLSET, LHA, _leaf.HS.v_storage; apar_car = APAR_CAR);
     end;
 
     return nothing

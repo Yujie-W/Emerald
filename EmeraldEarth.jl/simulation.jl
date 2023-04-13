@@ -71,7 +71,7 @@ simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Uni
     for _ in 1:10
         soil_plant_air_continuum!(CACHE_SPAC, CACHE_CONFIG, 360; p_on = false, t_on = false, θ_on = false);
     end;
-    spac_state!(CACHE_SPAC, CACHE_STATE);
+    spac_state!(CACHE_SPAC, CACHE_STATE, CACHE_CONFIG);
 
     # if wd_params["RAD_DIR"] > 500
     #     @info "Debugging" CACHE_SPAC.LATITUDE CACHE_SPAC.LONGITUDE GPP(CACHE_SPAC) PPAR(CACHE_SPAC);

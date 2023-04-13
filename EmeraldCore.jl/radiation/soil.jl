@@ -30,22 +30,24 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #     2022-Jun-14: add method to update broadband or hyperspectral soil albedo
 #     2022-Jul-27: use albedo.α_CLM from ClimaCache v1.1.1, and remove option clm
 #     2022-Jul-27: add albedo._θ control to HyperspectralSoilAlbedo method (fitting required)
+#     2023-Apr-13: add wls to function call
 #
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
+    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
 
 Updates lower soil boundary reflectance, given
 - `can` `HyperspectralMLCanopy` type struct
 - `soil` `Soil` type struct
+- `wls` `WaveLengthSet` that contains wavelength information
 
 """
 function soil_albedo! end
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = soil_albedo!(can, soil, soil.ALBEDO);
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = soil_albedo!(can, soil, soil.ALBEDO, wls);
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
@@ -66,9 +68,9 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSo
     return nothing
 );
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = can;
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
     (; COLOR, LAYERS) = soil;
+    (; IΛ_NIR, IΛ_PAR) = wls;
     @assert 1 <= COLOR <=20;
 
     # if the change of swc is lower than 0.01, do nothing
@@ -89,22 +91,22 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::Hyperspectr
 
     # if fitting is disabled, use broadband directly
     if !albedo.FITTING
-        albedo.ρ_sw[WLSET.IΛ_PAR] .= _par;
-        albedo.ρ_sw[WLSET.IΛ_NIR] .= _nir;
+        albedo.ρ_sw[IΛ_PAR] .= _par;
+        albedo.ρ_sw[IΛ_NIR] .= _nir;
 
         return nothing
     end;
 
     # make an initial guess of the weights
-    albedo._ρ_sw[WLSET.IΛ_PAR] .= _par;
-    albedo._ρ_sw[WLSET.IΛ_NIR] .= _nir;
+    albedo._ρ_sw[IΛ_PAR] .= _par;
+    albedo._ρ_sw[IΛ_NIR] .= _nir;
     albedo._weight .= pinv(albedo.MAT_ρ) * albedo._ρ_sw;
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT<:AbstractFloat} = (
         mul!(albedo._ρ_sw, albedo.MAT_ρ, x);
-        albedo._tmp_vec_nir .= abs.(view(albedo._ρ_sw,WLSET.IΛ_NIR) .- _nir);
-        _diff = ( mean( view(albedo._ρ_sw,WLSET.IΛ_PAR) ) - _par ) ^ 2 + mean( albedo._tmp_vec_nir ) ^ 2;
+        albedo._tmp_vec_nir .= abs.(view(albedo._ρ_sw,IΛ_NIR) .- _nir);
+        _diff = ( mean( view(albedo._ρ_sw,IΛ_PAR) ) - _par ) ^ 2 + mean( albedo._tmp_vec_nir ) ^ 2;
 
         return -_diff
     );
