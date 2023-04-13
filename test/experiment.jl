@@ -1,5 +1,5 @@
 #
-# Experiment of whether to prescribe water and energy related parameters
+# Experiment of whether to prescribe water and energy related parameters (already in runtests)
 #
 using Emerald;
 
@@ -21,7 +21,7 @@ for slayer in spac.SOIL.LAYERS
     slayer.θ = 0.35;
 end;
 EmeraldCore.SPAC.initialize!(spac);
-spac.RAD_LW = 300;
+spac.METEO.rad_lw = 300;
 
 spac.METEO.rain = 0;
 for i in 1:10
@@ -47,8 +47,8 @@ for i in 1:10
     #@info "Total water is" tswc [slayer.θ for slayer in spac.SOIL.LAYERS];
 end;
 
-spac.RAD_SW.e_direct .= 0;
-spac.RAD_SW.e_diffuse .= 0;
+spac.METEO.rad_sw.e_direct .= 0;
+spac.METEO.rad_sw.e_diffuse .= 0;
 spac.METEO.rain = 1;
 for i in 1:10
     EmeraldCore.SPAC.spac!(spac, FT(360));

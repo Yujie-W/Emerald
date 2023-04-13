@@ -5,11 +5,12 @@
 #     2023-Mar-25: add function to prescribe parameters from weather drivers
 #     2023-Mar-27: prescribe T only if t_on is true, prescribe SWC only is θ_on is true
 #     2023-Mar-29: prescribe longwave radiation as well
+#     2023-Apr-13: add spac config to function call
 #
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+    prescribe!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
 
 Prescribe traits and environmental conditions, given
 - `spac` `MultiLayerSPAC` type SPAC
@@ -18,7 +19,7 @@ Prescribe traits and environmental conditions, given
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
-function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+function prescribe!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
     # read the data out of dataframe row to reduce memory allocation
     _df_atm::FT = dfr.P_ATM;
     _df_chl::FT = dfr.CHLOROPHYLL;
@@ -92,11 +93,11 @@ function prescribe!(spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = tr
     end;
 
     # update downward shortwave and longwave radiation
-    _in_dir = spac.RAD_SW_REF.e_direct' * spac.CANOPY.WLSET.ΔΛ / 1000;
-    _in_dif = spac.RAD_SW_REF.e_diffuse' * spac.CANOPY.WLSET.ΔΛ / 1000;
-    spac.RAD_SW.e_direct  .= spac.RAD_SW_REF.e_direct  .* _df_dir ./ _in_dir;
-    spac.RAD_SW.e_diffuse .= spac.RAD_SW_REF.e_diffuse .* _df_dif ./ _in_dif;
-    spac.RAD_LW = _df_lwr;
+    _in_dir = config.RAD_SW_REF.e_direct' * spac.CANOPY.WLSET.ΔΛ / 1000;
+    _in_dif = config.RAD_SW_REF.e_diffuse' * spac.CANOPY.WLSET.ΔΛ / 1000;
+    spac.METEO.rad_sw.e_direct  .= config.RAD_SW_REF.e_direct  .* _df_dir ./ _in_dir;
+    spac.METEO.rad_sw.e_diffuse .= config.RAD_SW_REF.e_diffuse .* _df_dif ./ _in_dif;
+    spac.METEO.rad_lw = _df_lwr;
 
     # update solar zenith angle based on the time
     spac.ANGLES.sza = solar_zenith_angle(spac.LATITUDE, FT(_df_doy));
@@ -164,7 +165,7 @@ simulation!(wd_tag::String,
 
     # initialize spac based on initialial_state
     if initialial_state isa Bool
-        prescribe!(_spac, _wdfr[1]; t_on = false, θ_on = false);
+        prescribe!(_spac, _config, _wdfr[1]; t_on = false, θ_on = false);
     end;
 
     # iterate through the time steps
@@ -196,7 +197,7 @@ simulation!(spac::MultiLayerSPAC{FT},
     _df_dir::FT = dfr.RAD_DIR;
 
     # prescribe parameters
-    prescribe!(spac, dfr; t_on = t_on, θ_on = θ_on);
+    prescribe!(spac, config, dfr; t_on = t_on, θ_on = θ_on);
 
     # run the model
     for _ in 1:n_step

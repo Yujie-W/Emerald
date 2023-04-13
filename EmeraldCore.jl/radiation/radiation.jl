@@ -483,6 +483,7 @@ canopy_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, 
 #     2022-Jun-29: add method for SPAC
 #     2022-Jul-28: update soil albedo at the very first step
 #     2023-Mar-11: run canopy optical properties and shortwave radiation only if solar zenith angle is lower than 89
+#     2023-Apr-13: sw and lw radiation moved to METEO
 #
 #######################################################################################################################################################################################################
 """
@@ -494,13 +495,13 @@ Updates canopy radiation profiles for shortwave and longwave radiation, given
 
 """
 canopy_radiation!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; ANGLES, CANOPY, DIM_LAYER, LEAVES, RAD_LW, RAD_SW, SOIL) = spac;
+    (; ANGLES, CANOPY, DIM_LAYER, LEAVES, METEO, SOIL) = spac;
 
     soil_albedo!(CANOPY, SOIL);
     if ANGLES.sza < 89
         canopy_optical_properties!(CANOPY, ANGLES);
         canopy_optical_properties!(CANOPY, LEAVES, SOIL);
-        canopy_radiation!(CANOPY, LEAVES, RAD_SW, SOIL; APAR_CAR = LEAVES[1].APAR_CAR);
+        canopy_radiation!(CANOPY, LEAVES, METEO.rad_sw, SOIL; APAR_CAR = LEAVES[1].APAR_CAR);
     else
         CANOPY.RADIATION.r_net_sw .= 0;
         SOIL.ALBEDO.r_net_sw = 0;
@@ -518,7 +519,7 @@ canopy_radiation!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
             LEAVES[_i].ppar_sunlit .= 0;
         end;
     end;
-    canopy_radiation!(CANOPY, LEAVES, RAD_LW, SOIL);
+    canopy_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
 
     return nothing
 );

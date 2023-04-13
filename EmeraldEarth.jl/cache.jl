@@ -63,6 +63,7 @@ end;
 #     2023-Mar-13: add function to initialize the CACHE_SPAC
 #     2023-Mar-13: add step to synchronize state variables into CACHE_SPAC
 #     2023-Mar-29: prescribe longwave radiation as well
+#     2023-Apr-13: re-wire RAD_SW_REF to CACHE_CONFIG
 #
 #######################################################################################################################################################################################################
 """
@@ -122,11 +123,11 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     end;
 
     # update shortwave and longwave radiation
-    _in_dir = CACHE_SPAC.RAD_SW_REF.e_direct' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
-    _in_dif = CACHE_SPAC.RAD_SW_REF.e_diffuse' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
-    CACHE_SPAC.RAD_SW.e_direct  .= CACHE_SPAC.RAD_SW_REF.e_direct  .* wd_params["RAD_DIR"] ./ _in_dir;
-    CACHE_SPAC.RAD_SW.e_diffuse .= CACHE_SPAC.RAD_SW_REF.e_diffuse .* wd_params["RAD_DIF"] ./ _in_dif;
-    CACHE_SPAC.RAD_LW = wd_params["RAD_LW"];
+    _in_dir = CACHE_CONFIG.RAD_SW_REF.e_direct' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
+    _in_dif = CACHE_CONFIG.RAD_SW_REF.e_diffuse' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
+    CACHE_SPAC.METEO.rad_sw.e_direct  .= CACHE_CONFIG.RAD_SW_REF.e_direct  .* wd_params["RAD_DIR"] ./ _in_dir;
+    CACHE_SPAC.METEO.rad_sw.e_diffuse .= CACHE_CONFIG.RAD_SW_REF.e_diffuse .* wd_params["RAD_DIF"] ./ _in_dif;
+    CACHE_SPAC.METEO.rad_lw = wd_params["RAD_LW"];
 
     # update solar zenith angle based on the time
     CACHE_SPAC.ANGLES.sza = solar_zenith_angle(CACHE_SPAC.LATITUDE, FT(wd_params["FDOY"]));

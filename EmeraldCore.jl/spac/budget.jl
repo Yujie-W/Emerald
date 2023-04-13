@@ -98,6 +98,7 @@ end
 #     2022-Oct-22: add option t_on to enable/disable soil and leaf energy budgets
 #     2022-Nov-18: add option p_on to enable/disable plant flow and pressure profiles
 #     2023-Apr-13: add config to function call to steady state function
+#     2023-Apr-13: sw and lw radiation moved to METEO
 #
 #######################################################################################################################################################################################################
 """
@@ -118,7 +119,7 @@ Move forward in time for SPAC with time stepper controller, given
 function time_stepper! end
 
 time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = (
-    (; CANOPY, LEAVES, RAD_LW, SOIL) = spac;
+    (; CANOPY, LEAVES, METEO, SOIL) = spac;
 
     # run the update function until time elapses
     _count = 0;
@@ -138,7 +139,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bo
 
         # if _t_res > 0 rerun the budget functions (shortwave radiation not included) and etc., else break
         if _t_res > 0
-            if t_on canopy_radiation!(CANOPY, LEAVES, RAD_LW, SOIL); end;
+            if t_on canopy_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL); end;
             if p_on xylem_pressure_profile!(spac; update = update); end;
             leaf_photosynthesis!(spac, GCO₂Mode());
             if θ_on soil_budget!(spac); end;
@@ -159,14 +160,14 @@ time_stepper!(spac::MultiLayerSPAC{FT}, δt::Number; p_on::Bool = true, t_on::Bo
 );
 
 time_stepper!(spac::MultiLayerSPAC{FT}, config::MultiLayerSPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
-    (; CANOPY, LEAVES, RAD_LW, SOIL) = spac;
+    (; CANOPY, LEAVES, METEO, SOIL) = spac;
 
     # run the update function until the gpp is stable
     _count = 0;
     _gpp_last = -1;
     while true
         # compute the dxdt (not shortwave radiation simulation)
-        canopy_radiation!(CANOPY, LEAVES, RAD_LW, SOIL);
+        canopy_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
         xylem_pressure_profile!(spac; update = update);
         leaf_photosynthesis!(spac, GCO₂Mode());
         soil_budget!(spac);
