@@ -234,6 +234,7 @@ relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where 
 #     2022-Sep-07: allow soil water oversaturation
 #     2023-Mar-27: fix a typo when updating e per layer (should use ΔZ per layer rather than the first layer)
 #     2023-Apr-07: fix a typo when updating water content in saturated soil layers
+#     2023-Apr-08: make runoff a cumulative value within a time interval
 #
 #######################################################################################################################################################################################################
 """
@@ -330,14 +331,14 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
     end;
 
     # compute surface runoff
-    SOIL.runoff = 0;
     if SOIL.LAYERS[1].θ > SOIL.LAYERS[1].VC.Θ_SAT
         # compute top soil temperature and top soil energy out due to runoff
-        _cp = SOIL.LAYERS[1].CP * SOIL.LAYERS[1].ρ + SOIL.LAYERS[1].θ * ρ_H₂O(FT) * CP_L(FT) + SOIL.runoff / SOIL.LAYERS[1].ΔZ * CP_L_MOL(FT);
+        _cp = SOIL.LAYERS[1].CP * SOIL.LAYERS[1].ρ + SOIL.LAYERS[1].θ * ρ_H₂O(FT) * CP_L(FT);
         _t  = SOIL.LAYERS[1].e / _cp;
-        SOIL.runoff = (SOIL.LAYERS[1].θ - SOIL.LAYERS[1].VC.Θ_SAT) * SOIL.LAYERS[1].ΔZ * ρ_H₂O(FT) / M_H₂O(FT);
+        _runoff = (SOIL.LAYERS[1].θ - SOIL.LAYERS[1].VC.Θ_SAT) * SOIL.LAYERS[1].ΔZ * ρ_H₂O(FT) / M_H₂O(FT);
         SOIL.LAYERS[1].θ = SOIL.LAYERS[1].VC.Θ_SAT;
-        SOIL.LAYERS[1].e -= SOIL.runoff / SOIL.LAYERS[1].ΔZ * CP_L_MOL(FT) * _t;
+        SOIL.LAYERS[1].e -= _runoff / SOIL.LAYERS[1].ΔZ * CP_L_MOL(FT) * _t;
+        SOIL.runoff += _runoff;
     end;
 
     # update soil temperature at each layer (top layer t will be same as _t above)
