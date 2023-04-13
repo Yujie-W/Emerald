@@ -540,6 +540,7 @@ end
 #     2022-Jun-16: remove some cache variables
 #     2022-Jul-22: remove field APAR_CAR
 #     2022-Aug-30: add field LHA (moved from spac)
+#     2023-Apr-13: move LHA to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -567,8 +568,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     HOT_SPOT::FT = 0.05
 
     # Embedded structures
-    "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "Leaf inclination angle distribution function algorithm"
     LIDF::Union{VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
     "Wave length set used to paramertize other variables"

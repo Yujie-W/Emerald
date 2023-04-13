@@ -5,6 +5,7 @@
 #     2023-Apr-13: add state struct to save SPAC configurations
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
 #     2023-Apr-13: move APAR_CAR from leaf structs
+#     2023-Apr-13: move LHA from HyperspectralMLCanopy
 #
 #######################################################################################################################################################################################################
 """
@@ -40,6 +41,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     Φ_PHOTON::Bool = true
 
     # Embedded structures
+    "Hyperspectral absorption features of different leaf components"
+    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
 end
