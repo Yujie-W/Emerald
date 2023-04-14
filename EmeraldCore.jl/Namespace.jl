@@ -12,13 +12,15 @@ const LAND_2017 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2017.n
 const LAND_2021 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2021.nc";
 
 
-include("namespace/air.jl"      )
-include("namespace/colimit.jl"  )
-include("namespace/geometry.jl" )
-include("namespace/kinetics.jl" )
-include("namespace/radiation.jl")
-include("namespace/stomata.jl"  )
-include("namespace/trace.jl"    )
+include("namespace/air.jl"       )
+include("namespace/colimit.jl"   )
+include("namespace/geometry.jl"  )
+include("namespace/kinetics.jl"  )
+include("namespace/pigments.jl"  )
+include("namespace/radiation.jl" )
+include("namespace/stomata.jl"   )
+include("namespace/trace.jl"     )
+include("namespace/wavelength.jl")
 
 include("namespace/config.jl"     )
 include("namespace/meteorology.jl")

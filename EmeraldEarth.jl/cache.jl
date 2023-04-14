@@ -21,7 +21,7 @@ function initialize_cache!(FT)
     # create a SPAC to work on
     _z_canopy = FT(10);
     CACHE_CONFIG = SPACConfiguration{FT}();
-    CACHE_SPAC = MultiLayerSPAC{FT}(
+    CACHE_SPAC = MultiLayerSPAC{FT,CACHE_CONFIG.DIM_NIR,CACHE_CONFIG.DIM_WL,CACHE_CONFIG.DIM_XYLEM}(
                 DIM_AIR      = 25,
                 DIM_LAYER    = 10,
                 DIM_ROOT     = 4,
@@ -31,7 +31,7 @@ function initialize_cache!(FT)
                 ROOTS_INDEX  = collect(1:4),
                 Z            = [-2, _z_canopy/2, _z_canopy],
                 Z_AIR        = collect(0:21) * _z_canopy / 20,
-                SOIL         = Soil{FT}(DIM_SOIL = 4, ZS = [0, -0.1, -0.35, -1, -3]));
+                SOIL         = Soil{FT,CACHE_CONFIG.DIM_NIR,CACHE_CONFIG.DIM_WL}(DIM_SOIL = 4, ZS = [0, -0.1, -0.35, -1, -3]));
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
     for _organ in [CACHE_SPAC.LEAVES; CACHE_SPAC.BRANCHES; CACHE_SPAC.TRUNK; CACHE_SPAC.ROOTS]

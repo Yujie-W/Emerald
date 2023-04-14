@@ -70,7 +70,7 @@ Struct for simplest SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MonoElementSPAC{FT,DIM_XYLEM} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MonoElementSPAC{FT,DIM_NIR,DIM_WL,DIM_XYLEM} <: AbstractSPACSystem{FT}
     # Embedded structures
     "Air conditions"
     AIR::AirLayer{FT} = AirLayer{FT}()
@@ -83,7 +83,7 @@ Base.@kwdef mutable struct MonoElementSPAC{FT,DIM_XYLEM} <: AbstractSPACSystem{F
     "Root system"
     ROOT::Root{FT,DIM_XYLEM} = Root{FT,DIM_XYLEM}()
     "Soil component"
-    SOIL::Soil{FT} = Soil{FT}(ZS = FT[0, -1])
+    SOIL::Soil{FT,DIM_NIR,DIM_WL} = Soil{FT,DIM_NIR,DIM_WL}(ZS = FT[0, -1])
     "Stem system"
     STEM::Stem{FT,DIM_XYLEM} = Stem{FT,DIM_XYLEM}()
 
@@ -124,7 +124,7 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_WL,DIM_XYLEM} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_NIR,DIM_WL,DIM_XYLEM} <: AbstractSPACSystem{FT}
     # dimensions
     "Dimension of air layers"
     DIM_AIR::Int = 25
@@ -169,7 +169,7 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_WL,DIM_XYLEM} <: AbstractSPACSy
     "Root hydraulic system"
     ROOTS::Vector{Root{FT,DIM_XYLEM}} = Root{FT,DIM_XYLEM}[Root{FT,DIM_XYLEM}() for _i in 1:DIM_ROOT]
     "Soil component"
-    SOIL::Soil{FT} = Soil{FT}()
+    SOIL::Soil{FT,DIM_NIR,DIM_WL} = Soil{FT,DIM_NIR,DIM_WL}()
     "Trunk hydraulic system"
     TRUNK::Stem{FT,DIM_XYLEM} = Stem{FT,DIM_XYLEM}()
 
@@ -184,7 +184,7 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_WL,DIM_XYLEM} <: AbstractSPACSy
     _root_connection::Bool = true
 end
 
-MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIM_WL,config.DIM_XYLEM}();
+MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIM_NIR,config.DIM_WL,config.DIM_XYLEM}();
 
 
 #######################################################################################################################################################################################################

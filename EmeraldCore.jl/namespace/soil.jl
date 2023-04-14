@@ -266,17 +266,7 @@ Structure for hyperspectral soil albedo
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT} <: AbstractSoilAlbedo{FT}
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
-
-    # Dimensions
-    "Number of wavelength bins for NIR"
-    DIM_NIR::Int = 79
-    "Number of wavelength bins"
-    DIM_WL::Int = 114
-
+Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT,DIM_NIR,DIM_WL} <: AbstractSoilAlbedo{FT}
     # General model information
     "Whether to use CLM soil albedo scheme"
     α_CLM::Bool = false
@@ -410,7 +400,7 @@ Structure for Soil
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Soil{FT}
+Base.@kwdef mutable struct Soil{FT,DIM_NIR,DIM_WL}
     # Dimensions
     "Dimension of soil layers"
     DIM_SOIL::Int = 5
@@ -425,7 +415,7 @@ Base.@kwdef mutable struct Soil{FT}
 
     # Embedded structures
     "Albedo related structure"
-    ALBEDO::Union{BroadbandSoilAlbedo{FT}, HyperspectralSoilAlbedo{FT}} = HyperspectralSoilAlbedo{FT}()
+    ALBEDO::Union{BroadbandSoilAlbedo{FT}, HyperspectralSoilAlbedo{FT}} = HyperspectralSoilAlbedo{FT,DIM_NIR,DIM_WL}()
     "Soil layers"
     LAYERS::Vector{SoilLayer{FT}} = SoilLayer{FT}[SoilLayer{FT}(VC = VanGenuchten{FT}("Loam"), ZS = ZS[_i:_i+1]) for _i in 1:length(ZS)-1]
 
