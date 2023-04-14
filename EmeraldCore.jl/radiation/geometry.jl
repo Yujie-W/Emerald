@@ -35,8 +35,9 @@ Updates canopy optical properties (extinction coefficients for direct and diffus
 - `angles` `SunSensorGeometry` type struct
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
-    (; DIM_LAYER, HOT_SPOT, OPTICS, P_INCL, Θ_AZI) = can;
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT,DIMS}, angles::SunSensorGeometry{FT}) where {FT,DIMS} = (
+    (; HOT_SPOT, OPTICS, P_INCL, Θ_AZI) = can;
+    (; DIM_CANOPY) = DIMS;
 
     if can.lai == 0
         return nothing
@@ -76,11 +77,11 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeom
     OPTICS._abs_fs_fo .= abs.(OPTICS._fs_fo);
 
     # 3. update the viewing fraction ps, po, pso, and p_sunlit
-    _fac_s = (1 - exp(-OPTICS.ks * can.ci * can.lai / DIM_LAYER)) / (OPTICS.ks * can.ci * can.lai / DIM_LAYER);
-    _fac_o = (1 - exp(-OPTICS.ko * can.ci * can.lai / DIM_LAYER)) / (OPTICS.ko * can.ci * can.lai / DIM_LAYER);
+    _fac_s = (1 - exp(-OPTICS.ks * can.ci * can.lai / DIM_CANOPY)) / (OPTICS.ks * can.ci * can.lai / DIM_CANOPY);
+    _fac_o = (1 - exp(-OPTICS.ko * can.ci * can.lai / DIM_CANOPY)) / (OPTICS.ko * can.ci * can.lai / DIM_CANOPY);
     OPTICS.po .= exp.(can._x_bnds .* OPTICS.ko .* can.ci .* can.lai) .* _fac_o;
     OPTICS.ps .= exp.(can._x_bnds .* OPTICS.ks .* can.ci .* can.lai) .* _fac_s;
-    OPTICS.p_sunlit .= (view(OPTICS.ps,1:DIM_LAYER) .+ view(OPTICS.ps,2:DIM_LAYER+1)) ./ 2;
+    OPTICS.p_sunlit .= (view(OPTICS.ps,1:DIM_CANOPY) .+ view(OPTICS.ps,2:DIM_CANOPY+1)) ./ 2;
 
     _dso = sqrt( tand(angles.sza) ^ 2 + tand(angles.vza) ^ 2 - 2 * tand(angles.sza) * tand(angles.vza) * cosd(angles.vaa - angles.saa) );
     @inline _pdf(x::FT) where {FT} = (
@@ -97,7 +98,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeom
     );
 
     for _i in eachindex(can._x_bnds)
-        OPTICS.pso[_i] = quadgk(_pdf, can._x_bnds[_i] - FT(1)/DIM_LAYER, can._x_bnds[_i]; rtol = 1e-2)[1] * DIM_LAYER;
+        OPTICS.pso[_i] = quadgk(_pdf, can._x_bnds[_i] - FT(1)/DIM_CANOPY, can._x_bnds[_i]; rtol = 1e-2)[1] * DIM_CANOPY;
     end;
 
     return nothing
@@ -169,10 +170,11 @@ Updates canopy optical properties (scattering coefficient matrices), given
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT} = (
-    (; DIM_LAYER, OPTICS) = can;
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT,DIMS}, leaves::Vector{<:Leaves2D{FT,DIMS}}, soil::Soil{FT,DIMS}, wls::WaveLengthSet{FT,DIMS}) where {FT,DIMS} = (
+    (; OPTICS) = can;
     (; ALBEDO) = soil;
-    @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";
+    (; DIM_CANOPY) = DIMS;
+    @assert length(leaves) == DIM_CANOPY "Number of leaves must be equal to the canopy layers!";
 
     if can.lai == 0
         OPTICS.ρ_dd .= 0;
@@ -188,7 +190,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leav
         return nothing
     end;
 
-    _ilai = can.lai * can.ci / DIM_LAYER;
+    _ilai = can.lai * can.ci / DIM_CANOPY;
 
     # 1. update the scattering coefficients for different layers
     for _i in eachindex(leaves)
@@ -211,7 +213,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leav
     # 3. update the effective reflectance per layer
     canopy_optical_properties!(can, ALBEDO, wls);
 
-    for _i in DIM_LAYER:-1:1
+    for _i in DIM_CANOPY:-1:1
         _r_dd__ = view(OPTICS._ρ_dd,:,_i  );    # reflectance without correction
         _r_dd_i = view(OPTICS.ρ_dd ,:,_i  );    # reflectance of the upper boundary (i)
         _r_dd_j = view(OPTICS.ρ_dd ,:,_i+1);    # reflectance of the lower boundary (i+1)
@@ -244,7 +246,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leav
     # 5. update the effective longwave reflectance and transmittance
     OPTICS.ρ_lw[end] = ALBEDO.ρ_LW;
 
-    for _i in DIM_LAYER:-1:1
+    for _i in DIM_CANOPY:-1:1
         _dnorm = 1 - OPTICS._ρ_lw[_i] * OPTICS.ρ_lw[_i+1];
 
         OPTICS.τ_lw[_i] = OPTICS._τ_lw[_i] / _dnorm;                                                    # it, then rescale

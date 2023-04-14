@@ -8,21 +8,23 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT}
-    spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    spac_state!(spac::MultiLayerSPAC{FT,DIMS}, state::MultiLayerSPACState{FT,DIMS}, config::SPACConfiguration{FT}) where {FT,DIMS}
+    spac_state!(state::MultiLayerSPACState{FT,DIMS}, spac::MultiLayerSPAC{FT,DIMS}) where {FT,DIMS}
 
 Synchronize state variables from 1st to 2nd struct, given
 - `spac` `MultiLayerSPAC` struct for SPAC
 - `state` `MultiLayerSPACState` struct for states
+- `config` Configurations for SPAC
 
 """
 function spac_state! end
 
-spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}, config::SPACConfiguration{FT}) where {FT} = (
-    (; CANOPY, DIM_LAYER, LEAVES, MEMORY) = spac;
+spac_state!(spac::MultiLayerSPAC{FT,DIMS}, state::MultiLayerSPACState{FT,DIMS}, config::SPACConfiguration{FT}) where {FT,DIMS} = (
+    (; CANOPY, LEAVES, MEMORY) = spac;
     (; WLSET) = config;
+    (; DIM_CANOPY) = DIMS;
 
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         state.gs_shaded[_i] = LEAVES[_i].g_H₂O_s_shaded;
         state.gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
     end;
@@ -37,10 +39,11 @@ spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}, config::SP
     return nothing
 );
 
-spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; DIM_LAYER, LEAVES, MEMORY) = spac;
+spac_state!(state::MultiLayerSPACState{FT,DIMS}, spac::MultiLayerSPAC{FT,DIMS}) where {FT,DIMS} = (
+    (; LEAVES, MEMORY) = spac;
+    (; DIM_CANOPY) = DIMS;
 
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         LEAVES[_i].g_H₂O_s_shaded = state.gs_shaded[_i];
         LEAVES[_i].g_H₂O_s_sunlit .= state.gs_sunlit[:,:,_i];
     end;

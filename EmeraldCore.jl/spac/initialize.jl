@@ -19,8 +19,9 @@ Initialize the SPAC, given
 """
 function initialize! end
 
-initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} = (
-    (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
+initialize!(spac::MultiLayerSPAC{FT,DIMS}, config::SPACConfiguration{FT}) where {FT,DIMS} = (
+    (; CANOPY, LEAVES, SOIL) = spac;
+    (; DIM_CANOPY) = DIMS;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
     for _slayer in SOIL.LAYERS
@@ -29,7 +30,7 @@ initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} 
 
     # make sure leaf area index setup and energy are correct
     for _clayer in LEAVES
-        _clayer.HS.AREA = SOIL.AREA * CANOPY.lai / DIM_LAYER;
+        _clayer.HS.AREA = SOIL.AREA * CANOPY.lai / DIM_CANOPY;
         _clayer.e = (_clayer.CP * _clayer.BIO.lma * 10 + _clayer.HS.v_storage * CP_L_MOL(FT)) * _clayer.t;
     end;
 

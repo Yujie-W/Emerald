@@ -23,15 +23,16 @@ Return adjusted time that soil does not over saturate or drain, given
 - `θ_on` If true, soil water budget is on (set false to run sensitivity analysis or prescribing mode)
 
 """
-function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT}
-    (; BRANCHES, DIM_LAYER, LEAVES, SOIL, TRUNK) = spac;
+function adjusted_time(spac::MultiLayerSPAC{FT,DIMS}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT,DIMS}
+    (; BRANCHES, LEAVES, SOIL, TRUNK) = spac;
+    (; DIM_CANOPY, DIM_SOIL) = DIMS;
 
     _δt_1 = δt;
 
     # make sure each layer does not drain (allow for oversaturation), and θ change is less than 0.01
     _δt_2 = _δt_1;
     if θ_on
-        for _i in 1:SOIL.DIM_SOIL
+        for _i in 1:DIM_SOIL
             _δt_2 = min(FT(0.01) / abs(SOIL.LAYERS[_i].∂θ∂t), _δt_2);
             if SOIL.LAYERS[_i].∂θ∂t < 0
                 _δt_dra = (SOIL.LAYERS[_i].VC.Θ_RES - SOIL.LAYERS[_i].θ) / SOIL.LAYERS[_i].∂θ∂t;
@@ -43,7 +44,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     # make sure soil temperatures do not change more than 1 K per time step
     _δt_3 = _δt_2;
     if t_on
-        for _i in 1:SOIL.DIM_SOIL
+        for _i in 1:DIM_SOIL
             _∂T∂t = SOIL.LAYERS[_i].∂e∂t / (SOIL.LAYERS[_i].CP * SOIL.LAYERS[_i].ρ + SOIL.LAYERS[_i].θ * ρ_H₂O(FT) * CP_L(FT));
             _δt_3 = min(1 / abs(_∂T∂t), _δt_3);
         end;
@@ -59,7 +60,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     # make sure branch stem temperatures do not change more than 1 K per time step
     _δt_5 = _δt_4;
     if t_on
-        for _i in 1:DIM_LAYER
+        for _i in 1:DIM_CANOPY
             _∂T∂t = BRANCHES[_i].∂e∂t / (CP_L_MOL(FT) * sum(BRANCHES[_i].HS.v_storage));
             _δt_5 = min(1 / abs(_∂T∂t), _δt_5);
         end;
@@ -68,7 +69,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     # make sure leaf temperatures do not change more than 1 K per time step
     _δt_6 = _δt_5;
     if t_on
-        for _i in 1:DIM_LAYER
+        for _i in 1:DIM_CANOPY
             _∂T∂t = LEAVES[_i].∂e∂t / (LEAVES[_i].CP * LEAVES[_i].BIO.lma * 10 + CP_L_MOL(FT) * LEAVES[_i].HS.v_storage);
             _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
         end;
@@ -76,7 +77,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
 
     # make sure leaf stomatal conductances do not change more than 0.01 mol m⁻² s⁻¹
     _δt_7 = _δt_6;
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         for _∂g∂t in LEAVES[_i].∂g∂t_sunlit
             _δt_7 = min(FT(0.06) / abs(_∂g∂t), _δt_7);
         end;

@@ -147,16 +147,17 @@ Updates soil shortwave radiation profiles, given
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
-    (; DIM_LAYER, OPTICS, RADIATION) = can;
+shortwave_radiation!(can::HyperspectralMLCanopy{FT,DIMS}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT,DIMS} = (
+    (; OPTICS, RADIATION) = can;
     (; IΛ_NIR, IΛ_PAR, ΔΛ) = wls;
+    (; DIM_CANOPY) = DIMS;
 
-    OPTICS._tmp_vec_λ[IΛ_PAR] .= view(RADIATION.e_direct,IΛ_PAR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[1]);
-    OPTICS._tmp_vec_λ[IΛ_NIR] .= view(RADIATION.e_direct,IΛ_NIR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[2]);
+    OPTICS._tmp_vec_λ[IΛ_PAR] .= view(RADIATION.e_direct,IΛ_PAR,DIM_CANOPY+1) .* (1 .- albedo.ρ_sw[1]);
+    OPTICS._tmp_vec_λ[IΛ_NIR] .= view(RADIATION.e_direct,IΛ_NIR,DIM_CANOPY+1) .* (1 .- albedo.ρ_sw[2]);
     albedo.e_net_direct = OPTICS._tmp_vec_λ' * ΔΛ / 1000;
 
-    OPTICS._tmp_vec_λ[IΛ_PAR] .= view(RADIATION.e_diffuse_down,IΛ_PAR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[1]);
-    OPTICS._tmp_vec_λ[IΛ_NIR] .= view(RADIATION.e_diffuse_down,IΛ_NIR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[2]);
+    OPTICS._tmp_vec_λ[IΛ_PAR] .= view(RADIATION.e_diffuse_down,IΛ_PAR,DIM_CANOPY+1) .* (1 .- albedo.ρ_sw[1]);
+    OPTICS._tmp_vec_λ[IΛ_NIR] .= view(RADIATION.e_diffuse_down,IΛ_NIR,DIM_CANOPY+1) .* (1 .- albedo.ρ_sw[2]);
     albedo.e_net_diffuse = OPTICS._tmp_vec_λ' * ΔΛ / 1000;
 
     albedo.r_net_sw = albedo.e_net_direct + albedo.e_net_diffuse;
@@ -164,12 +165,13 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo
     return nothing
 );
 
-shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
-    (; DIM_LAYER, RADIATION) = can;
+shortwave_radiation!(can::HyperspectralMLCanopy{FT,DIMS}, albedo::HyperspectralSoilAlbedo{FT,DIMS}, wls::WaveLengthSet{FT,DIMS}) where {FT,DIMS} = (
+    (; RADIATION) = can;
     (; ΔΛ) = wls;
+    (; DIM_CANOPY) = DIMS;
 
-    albedo.e_net_direct .= view(RADIATION.e_direct,:,DIM_LAYER+1) .* (1 .- albedo.ρ_sw);
-    albedo.e_net_diffuse .= view(RADIATION.e_diffuse_down,:,DIM_LAYER+1) .* (1 .- albedo.ρ_sw);
+    albedo.e_net_direct .= view(RADIATION.e_direct,:,DIM_CANOPY+1) .* (1 .- albedo.ρ_sw);
+    albedo.e_net_diffuse .= view(RADIATION.e_diffuse_down,:,DIM_CANOPY+1) .* (1 .- albedo.ρ_sw);
     albedo.r_net_sw = (albedo.e_net_direct' * ΔΛ + albedo.e_net_diffuse' * ΔΛ) / 1000;
 
     return nothing
@@ -184,7 +186,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAl
 #     2022-Jun-10: rename PAR/APAR to APAR/PPAR to be more accurate
 #     2022-Jun-10: add PAR calculation (before absorption)
 #     2022-Jun-10: compute shortwave net radiation
-#     2022-Jun-13: use DIM_LAYER instead of _end
+#     2022-Jun-13: use DIM_CANOPY instead of _end
 #     2022-Jun-29: use Leaves2D for the hyperspectral RT
 #     2023-Mar-11: add code to account for the case of LAI == 0
 #     2023-Apr-13: rename option APAR_car to apar_car
@@ -217,40 +219,42 @@ Updates canopy radiation profiles for shortwave radiation, given
 
 """
 shortwave_radiation!(
-            can::HyperspectralMLCanopy{FT},
-            leaves::Vector{<:Leaves2D{FT}},
-            rad::HyperspectralRadiation{FT},
-            soil::Soil{FT},
-            wls::WaveLengthSet{FT};
+            can::HyperspectralMLCanopy{FT,DIMS},
+            leaves::Vector{<:Leaves2D{FT,DIMS}},
+            rad::HyperspectralRadiation{FT,DIMS},
+            soil::Soil{FT,DIMS},
+            wls::WaveLengthSet{FT,DIMS};
             apar_car::Bool = true
-) where {FT} = (
-    (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
+) where {FT,DIMS} = (
+    (; OPTICS, P_INCL, RADIATION) = can;
     (; ALBEDO) = soil;
     (; IΛ_PAR, ΔΛ, ΔΛ_PAR, Λ_PAR) = wls;
+    (; DIM_CANOPY) = DIMS;
 
     if can.lai == 0
-        for _i in 1:(DIM_LAYER+1)
+        for _i in 1:(DIM_CANOPY+1)
             RADIATION.e_direct[:,_i] .= rad.e_direct;
             RADIATION.e_diffuse_down[:,_i] .= rad.e_diffuse;
             RADIATION.e_diffuse_up[:,_i] .= 0;
             RADIATION.e_v[:,_i] .= 0;
         end;
-        RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
-        RADIATION.e_v[:,end] .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
-        RADIATION.e_o .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1) ./ FT(pi);
+        RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_CANOPY+1) .* view(RADIATION.e_direct,:,DIM_CANOPY+1) .+
+                                         view(OPTICS.ρ_dd,:,DIM_CANOPY+1) .* view(RADIATION.e_diffuse_down,:,DIM_CANOPY+1);
+        RADIATION.e_v[:,end] .= view(RADIATION.e_diffuse_up,:,DIM_CANOPY+1);
+        RADIATION.e_o .= view(RADIATION.e_diffuse_up,:,DIM_CANOPY+1) ./ FT(pi);
         RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
 
         return nothing
     end;
 
-    _ilai = can.lai * can.ci / DIM_LAYER;
-    _tlai = can.lai / DIM_LAYER;
+    _ilai = can.lai * can.ci / DIM_CANOPY;
+    _tlai = can.lai / DIM_CANOPY;
 
     # 1. update upward and downward direct and diffuse radiation profiles
     RADIATION.e_direct[:,1] .= rad.e_direct;
     RADIATION.e_diffuse_down[:,1] .= rad.e_diffuse;
 
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         _e_d_i = view(RADIATION.e_diffuse_down,:,_i  );     # downward diffuse radiation at upper boundary
         _e_d_j = view(RADIATION.e_diffuse_down,:,_i+1);     # downward diffuse radiation at lower boundary
         _e_s_i = view(RADIATION.e_direct      ,:,_i  );     # direct radiation at upper boundary
@@ -268,10 +272,10 @@ shortwave_radiation!(
         _e_u_i .= _r_sd_i .* _e_s_i .+ _r_dd_i .* _e_d_i;
     end;
 
-    RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
+    RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_CANOPY+1) .* view(RADIATION.e_direct,:,DIM_CANOPY+1) .+ view(OPTICS.ρ_dd,:,DIM_CANOPY+1) .* view(RADIATION.e_diffuse_down,:,DIM_CANOPY+1);
 
     # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         _a_s_i = view(RADIATION.e_net_direct  ,:,_i  );     # net absorbed direct radiation
         _a_d_i = view(RADIATION.e_net_diffuse ,:,_i  );     # net absorbed diffuse radiation
         _e_d_i = view(RADIATION.e_diffuse_down,:,_i  );     # downward diffuse radiation at upper boundary
@@ -294,7 +298,7 @@ shortwave_radiation!(
     end;
 
     # 3. compute the spectra at the observer direction
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         _e_d_i = view(RADIATION.e_diffuse_down,:,_i);   # downward diffuse radiation at upper boundary
         _e_u_i = view(RADIATION.e_diffuse_up  ,:,_i);   # upward diffuse radiation at upper boundary
         _e_v_i = view(RADIATION.e_v,:,_i);
@@ -309,7 +313,7 @@ shortwave_radiation!(
         _e_v_i .+= OPTICS.pso[_i] .* _so__i .* rad.e_direct;
         _e_v_i .*= _ilai;
     end;
-    RADIATION.e_v[:,end] .= OPTICS.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
+    RADIATION.e_v[:,end] .= OPTICS.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_CANOPY+1);
 
     for _i in eachindex(RADIATION.e_o)
         RADIATION.e_o[_i] = sum(view(RADIATION.e_v,_i,:)) / FT(pi);
@@ -318,7 +322,7 @@ shortwave_radiation!(
     RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
 
     # 4. compute net absorption for leaves and soil
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         _Σ_shaded = view(RADIATION.e_net_diffuse,:,_i)' * ΔΛ / 1000 / _tlai;
         _Σ_sunlit = view(RADIATION.e_net_direct ,:,_i)' * ΔΛ / 1000 / _tlai;
         RADIATION.r_net_sw_shaded[_i] = _Σ_shaded;
@@ -338,7 +342,7 @@ shortwave_radiation!(
     mul!(OPTICS._tmp_vec_azi, OPTICS._abs_fs', P_INCL);
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         _α_apar = apar_car ? view(leaves[_i].BIO.α_cabcar,IΛ_PAR) : view(leaves[_i].BIO.α_cab,IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
@@ -488,9 +492,10 @@ Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `soil` Bottom soil boundary layer
 
 """
-longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT} = (
-    (; DIM_LAYER, OPTICS, RADIATION) = can;
+longwave_radiation!(can::HyperspectralMLCanopy{FT,DIMS}, leaves::Vector{<:Leaves2D{FT,DIMS}}, rad::FT, soil::Soil{FT,DIMS}) where {FT,DIMS} = (
+    (; OPTICS, RADIATION) = can;
     (; ALBEDO, LAYERS) = soil;
+    (; DIM_CANOPY) = DIMS;
 
     if can.lai == 0
         _r_lw_soil = K_STEFAN(FT) * (1 - ALBEDO.ρ_LW) * LAYERS[1].t ^ 4;
@@ -512,7 +517,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT
     # 2. account for the longwave emission from bottom to up
     RADIATION._r_emit_up[end] = _r_lw_soil;
 
-    for _i in DIM_LAYER:-1:1
+    for _i in DIM_CANOPY:-1:1
         _r__ = OPTICS._ρ_lw[_i];
         _r_j = OPTICS.ρ_lw[_i+1];
         _t__ = OPTICS._τ_lw[_i];
@@ -526,7 +531,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT
     # 3. account for the longwave emission from up to bottom
     RADIATION.r_lw_down[1] = rad;
 
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         _r_i = OPTICS.ρ_lw[_i];
         _t_i = OPTICS.τ_lw[_i];
 
@@ -537,7 +542,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT
     RADIATION.r_lw_up[end] = RADIATION.r_lw_down[end] * ALBEDO.ρ_LW + _r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         RADIATION.r_net_lw[_i] = (RADIATION.r_lw_down[_i] + RADIATION.r_lw_up[_i+1]) * (1 - OPTICS._ρ_lw[_i] - OPTICS._τ_lw[_i]) - 2 * RADIATION.r_lw[_i];
     end;
 
@@ -583,9 +588,10 @@ Updates canopy radiation profiles for shortwave and longwave radiation, given
 - `config` Configurations of spac model
 
 """
-canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} = (
-    (; ANGLES, CANOPY, DIM_LAYER, LEAVES, METEO, SOIL) = spac;
+canopy_radiation!(spac::MultiLayerSPAC{FT,DIMS}, config::SPACConfiguration{FT}) where {FT,DIMS} = (
+    (; ANGLES, CANOPY, LEAVES, METEO, SOIL) = spac;
     (; APAR_CAR, MAT_ρ, WLSET) = config;
+    (; DIM_CANOPY) = DIMS;
 
     soil_albedo!(CANOPY, SOIL, WLSET, MAT_ρ);
     if ANGLES.sza < 89
@@ -603,7 +609,7 @@ canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where
         CANOPY.RADIATION.apar_shaded .= 0;
         CANOPY.RADIATION.apar_sunlit .= 0;
 
-        for _i in 1:DIM_LAYER
+        for _i in 1:DIM_CANOPY
             # PPAR for leaves
             LEAVES[_i].ppar_shaded = 0;
             LEAVES[_i].ppar_sunlit .= 0;

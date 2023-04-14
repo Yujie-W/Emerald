@@ -30,8 +30,9 @@ Compute the marginal energy increase in spac, given
 - `spac` `MultiLayerSPAC` type SPAC
 
 """
-plant_energy!(spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; AIR, BRANCHES, CANOPY, DIM_LAYER, DIM_ROOT, LEAVES, LEAVES_INDEX, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
+plant_energy!(spac::MultiLayerSPAC{FT,DIMS}) where {FT,DIMS} = (
+    (; AIR, BRANCHES, CANOPY, LEAVES, LEAVES_INDEX, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
+    (; DIM_CANOPY, DIM_ROOT) = DIMS;
 
     # loop through the roots
     TRUNK.∂e∂t = 0;
@@ -52,7 +53,7 @@ plant_energy!(spac::MultiLayerSPAC{FT}) where {FT} = (
     end;
 
     # loop through the branches
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         BRANCHES[_i].∂e∂t = 0;
         LEAVES[_i].∂e∂t   = 0;
         if flow_in(BRANCHES[_i]) >= 0
@@ -73,15 +74,15 @@ plant_energy!(spac::MultiLayerSPAC{FT}) where {FT} = (
 
     # loop through the leaves
     if CANOPY.lai == 0
-        for _i in 1:DIM_LAYER
+        for _i in 1:DIM_CANOPY
             LEAVES[_i].∂e∂t  = 0;
         end;
     else
-        for _i in 1:DIM_LAYER
+        for _i in 1:DIM_CANOPY
             _g_be = FT(1.4) * FT(0.135) * sqrt(AIR[LEAVES_INDEX[_i]].wind / (FT(0.72) * LEAVES[_i].WIDTH));
 
             LEAVES[_i].∂e∂t  = 0;
-            LEAVES[_i].∂e∂t += (CANOPY.RADIATION.r_net_sw[DIM_LAYER+1-_i] + CANOPY.RADIATION.r_net_lw[DIM_LAYER+1-_i]) / (CANOPY.lai / DIM_LAYER);
+            LEAVES[_i].∂e∂t += (CANOPY.RADIATION.r_net_sw[DIM_CANOPY+1-_i] + CANOPY.RADIATION.r_net_lw[DIM_CANOPY+1-_i]) / (CANOPY.lai / DIM_CANOPY);
             LEAVES[_i].∂e∂t -= flow_out(LEAVES[_i]) * M_H₂O(FT) * latent_heat_vapor(LEAVES[_i].t);
             LEAVES[_i].∂e∂t -= flow_out(LEAVES[_i]) * CP_L_MOL(FT) * LEAVES[_i].t;
             LEAVES[_i].∂e∂t -= 2 * _g_be * CP_D_MOL(FT) * (LEAVES[_i].t - AIR[LEAVES_INDEX[_i]].t);
@@ -101,8 +102,9 @@ Compute the marginal energy increase in spac, given
 - `δt` Time step
 
 """
-plant_energy!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
-    (; BRANCHES, DIM_LAYER, DIM_ROOT, LEAVES, ROOTS, TRUNK) = spac;
+plant_energy!(spac::MultiLayerSPAC{FT,DIMS}, δt::FT) where {FT,DIMS} = (
+    (; BRANCHES, LEAVES, ROOTS, TRUNK) = spac;
+    (; DIM_CANOPY, DIM_ROOT) = DIMS;
 
     # update the temperature for roots
     for _i in 1:DIM_ROOT
@@ -115,7 +117,7 @@ plant_energy!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
     TRUNK.t  = TRUNK.e / (CP_L_MOL(FT) * sum(TRUNK.HS.v_storage));
 
     # update the temperature for branches and leaves
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         BRANCHES[_i].e += BRANCHES[_i].∂e∂t * δt;
         BRANCHES[_i].t  = BRANCHES[_i].e / (CP_L_MOL(FT) * sum(BRANCHES[_i].HS.v_storage));
         LEAVES[_i].e   += LEAVES[_i].∂e∂t * δt;

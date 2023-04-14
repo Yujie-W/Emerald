@@ -16,7 +16,7 @@ df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection
 using Emerald;
 
 FT = Float64;
-config = EmeraldCore.Namespace.SPACConfiguration{FT}();
+config = EmeraldCore.Namespace.SPACConfiguration{FT}(20);
 spac = EmeraldCore.Namespace.MultiLayerSPAC{FT,config.DIM_WL,config.DIM_XYLEM}();
 for slayer in spac.SOIL.LAYERS
     slayer.θ = 0.35;

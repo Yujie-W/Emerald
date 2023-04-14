@@ -112,8 +112,9 @@ root_pk(root::Root{FT}, slayer::SoilLayer{FT}) where {FT} = root._isconnected ? 
 
 root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, T::FT) where {FT} = root_pk(hs, slayer, hs.FLOW, T);
 
-root_pk(hs::RootHydraulics{FT,DIM_XYLEM}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT,DIM_XYLEM} = (
+root_pk(hs::RootHydraulics{FT,DIMS}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT,DIMS} = (
     (; AREA, K_RHIZ, K_X, L, ΔH) = hs;
+    (; DIM_XYLEM) = DIMS;
 
     _k_max = AREA * K_X / L;
     _f_st = relative_surface_tension(T);
@@ -154,8 +155,9 @@ root_pk(hs::RootHydraulics{FT,DIM_XYLEM}, slayer::SoilLayer{FT}, mode::SteadySta
     return _p_end, 1/_r_all
 );
 
-root_pk(hs::RootHydraulics{FT,DIM_XYLEM}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT,DIM_XYLEM} = (
+root_pk(hs::RootHydraulics{FT,DIMS}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT,DIMS} = (
     (; AREA, K_RHIZ, K_X, L, ΔH) = hs;
+    (; DIM_XYLEM) = DIMS;
 
     _k_max = AREA * K_X / L;
     _f_st = relative_surface_tension(T);
@@ -290,8 +292,9 @@ xylem_flow_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT,1}, T::F
     return nothing
 );
 
-xylem_flow_profile!(hs::Union{RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}, mode::NonSteadyStateFlow{FT,DIM_XYLEM}, T::FT, Δt::FT) where {FT,DIM_XYLEM} = (
+xylem_flow_profile!(hs::Union{RootHydraulics{FT,DIMS}, StemHydraulics{FT,DIMS}}, mode::NonSteadyStateFlow{FT,DIMS}, T::FT, Δt::FT) where {FT,DIMS} = (
     (; PVC, V_MAXIMUM) = hs;
+    (; DIM_XYLEM) = DIMS;
 
     _f_vis = relative_viscosity(T);
 
@@ -543,11 +546,12 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT} = (
     return nothing
 );
 
-xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; AIR, CANOPY, DIM_LAYER, LEAVES, LEAVES_INDEX) = spac;
+xylem_flow_profile!(spac::MultiLayerSPAC{FT,DIMS}) where {FT,DIMS} = (
+    (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+    (; DIM_CANOPY) = DIMS;
 
     for _i in eachindex(LEAVES)
-        _p_sl = CANOPY.OPTICS.p_sunlit[DIM_LAYER + 1 - _i];
+        _p_sl = CANOPY.OPTICS.p_sunlit[DIM_CANOPY + 1 - _i];
 
         _g_sh = 1 / (1 /LEAVES[_i].g_H₂O_s_shaded + 1 / (FT(1.35) * LEAVES[_i].g_CO₂_b));
         _g_sl = 0;

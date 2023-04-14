@@ -15,6 +15,7 @@ Create a SPAC configuration struct, given
 """
 function spac_config(gm_dict::Dict)
     FT = gm_dict["FT"];
+    _config = SPACConfiguration{FT}(10);
 
-    return SPACConfiguration{FT}();
+    return _config
 end

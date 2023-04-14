@@ -9,7 +9,7 @@
 #######################################################################################################################################################################################################
 """
 
-    simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}) where {FT}
+    simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{<:Union{Nothing,MultiLayerSPACState{FT}}}) where {FT}
 
 Run simulations on SPAC, given
 - `gm_mat` Matrix of GriddingMachine inputs
@@ -57,7 +57,7 @@ EmeraldEarth.simulation!(mat[296,120], wdx[296,120])
 """
 function simulation! end
 
-simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}) where {FT} = (
+simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}}, wd_mat::Matrix{Union{Nothing,Dict{String,Any}}}, state_mat::Matrix{<:Union{Nothing,MultiLayerSPACState{FT}}}) where {FT} = (
     @tinfo "Running the global simulations in multiple threads...";
     _states = @showprogress pmap(simulation!, gm_mat, wd_mat, state_mat);
 

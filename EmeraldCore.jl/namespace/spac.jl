@@ -197,14 +197,14 @@ Struct for states of monospecies tree SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MultiLayerSPACState{FT}
+Base.@kwdef mutable struct MultiLayerSPACState{FT,DIMS}
     # state variables
     "Shaded leaf stomatal conductance for all layers"
-    gs_shaded::Vector{FT}
+    gs_shaded::Vector{FT} = zeros(FT, DIMS.DIM_CANOPY)
     "Sunlit leaf stomatal conductance for all layers"
-    gs_sunlit::Array{FT,3}
+    gs_sunlit::Array{FT,3} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI, DIMS.DIM_CANOPY)
     "Temperature record for CLM T mean of 10 days (based on CLM setting)"
-    t_clm::Vector{FT}
+    t_clm::Vector{FT} = ones(FT, DIMS.DIM_HISTORY)
 
     # variables to save
     "Gross primary productivity"
@@ -214,18 +214,3 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     "TROPOMI SIF at 740 nm"
     tropomi_sif₇₄₀::FT = 0
 end
-
-MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; DIM_LAYER, LEAVES) = spac;
-
-    _gs_sunlit = zeros(FT, LEAVES[1].DIM_INCL, LEAVES[1].DIM_AZI, DIM_LAYER);
-    for _i in 1:DIM_LAYER
-        _gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
-    end;
-
-    return MultiLayerSPACState{FT}(
-                gs_shaded = [_leaves.g_H₂O_s_shaded for _leaves in LEAVES],
-                gs_sunlit = _gs_sunlit,
-                t_clm = deepcopy(spac.MEMORY.tem),
-    )
-);

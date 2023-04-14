@@ -24,20 +24,21 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct SPACConfiguration{FT}
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
+    DATASET::String
 
     # Constants
     "Wavelength limits for NIR `[nm]`"
-    WL_NIR::Vector{FT} = FT[700, 2500]
+    WL_NIR::Vector{FT}
     "Wavelength limits for PAR `[nm]`"
-    WL_PAR::Vector{FT} = FT[400, 750]
+    WL_PAR::Vector{FT}
     "Wavelength limits for SIF emission `[nm]`"
-    WL_SIF::Vector{FT} = FT[640, 850]
+    WL_SIF::Vector{FT}
     "Wavelength limits for SIF excitation `[nm]`"
-    WL_SIFE::Vector{FT} = FT[400, 750]
+    WL_SIFE::Vector{FT}
 
     # Dimensions
-    DIMS::SPACDimension = SPACDimension(DATASET, WL_NIR, WL_PAR, WL_SIF, WL_SIFE)
+    "Dimensions of teh SPAC setup"
+    DIMS::SPACDimension
 
     # Wavelength information
     "Wave length set used to paramertize other variables"
@@ -61,3 +62,30 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT,DIMS}(DATASET)
 end
+
+SPACConfiguration{FT}(ncanopy::Int) where {FT} = (
+    _λ_nir  = FT[700, 2500];
+    _λ_par  = FT[400, 750];
+    _λ_sif  = FT[640, 850];
+    _λ_sife = FT[400, 750];
+
+    _λ = read_nc(LAND_2021, "WL");
+
+    _dims = SPACDimension(
+                DIM_CANOPY = ncanopy,
+                DIM_NIR    = length(findall(_λ_nir[1]  .<= _λ .<= _λ_nir[2])),
+                DIM_PAR    = length(findall(_λ_par[1]  .<= _λ .<= _λ_par[2])),
+                DIM_SIF    = length(findall(_λ_sif[1]  .<= _λ .<= _λ_sif[2])),
+                DIM_SIFE   = length(findall(_λ_sife[1] .<= _λ .<= _λ_sife[2])),
+                DIM_WL     = length(_λ),
+    );
+
+    return SPACConfiguration{FT}(
+                DATASET = LAND_2021,
+                WL_NIR  = _λ_nir,
+                WL_PAR  = _λ_par,
+                WL_SIF  = _λ_sif,
+                WL_SIFE = _λ_sife,
+                DIMS    = _dims,
+    )
+);

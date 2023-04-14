@@ -105,7 +105,7 @@ Update the physiological parameters of the SPAC, given
 -`vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
 
 """
-update!(spac::MultiLayerSPAC{FT},
+update!(spac::MultiLayerSPAC{FT,DIMS},
         config::SPACConfiguration{FT};
         cab::Union{Number,Nothing} = nothing,
         car::Union{Number,Nothing} = nothing,
@@ -116,8 +116,9 @@ update!(spac::MultiLayerSPAC{FT},
         t_soils::Union{Tuple,Nothing} = nothing,
         vcmax::Union{Number,Nothing} = nothing,
         vcmax_expo::Union{Number,Nothing} = nothing
-) where {FT} = (
-    (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
+) where {FT,DIMS} = (
+    (; CANOPY, LEAVES, SOIL) = spac;
+    (; DIM_CANOPY) = DIMS;
 
     # update chlorophyll and carotenoid contents (and )
     if !isnothing(cab)
@@ -139,8 +140,8 @@ update!(spac::MultiLayerSPAC{FT},
     # update LAI
     if !isnothing(lai)
         CANOPY.lai = lai;
-        for _i in 1:DIM_LAYER
-            LEAVES[_i].HS.AREA = SOIL.AREA * CANOPY.lai / DIM_LAYER;
+        for _i in 1:DIM_CANOPY
+            LEAVES[_i].HS.AREA = SOIL.AREA * CANOPY.lai / DIM_CANOPY;
         end;
     end;
 
@@ -185,8 +186,8 @@ update!(spac::MultiLayerSPAC{FT},
 
     # update Vcmax profile if lai or vcmax is given
     if !isnothing(vcmax) || !isnothing(lai)
-        for _i in 2:DIM_LAYER
-            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * CANOPY.lai * ((_i - 1) / DIM_LAYER));
+        for _i in 2:DIM_CANOPY
+            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * CANOPY.lai * ((_i - 1) / DIM_CANOPY));
             LEAVES[_i].PSM.v_cmax25 = LEAVES[1].PSM.v_cmax25 * _scaling;
             LEAVES[_i].PSM.j_max25 = LEAVES[1].PSM.v_cmax25 * 1.67 * _scaling;
             LEAVES[_i].PSM.r_d25 = LEAVES[1].PSM.v_cmax25 * 0.015 * _scaling;

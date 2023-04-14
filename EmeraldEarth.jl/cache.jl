@@ -20,18 +20,15 @@ function initialize_cache!(FT)
 
     # create a SPAC to work on
     _z_canopy = FT(10);
-    CACHE_CONFIG = SPACConfiguration{FT}();
-    CACHE_SPAC = MultiLayerSPAC{FT,CACHE_CONFIG.DIM_NIR,CACHE_CONFIG.DIM_WL,CACHE_CONFIG.DIM_XYLEM}(
-                DIM_AIR      = 25,
-                DIM_LAYER    = 10,
-                DIM_ROOT     = 4,
+    CACHE_CONFIG = SPACConfiguration{FT}(10);
+    CACHE_SPAC = MultiLayerSPAC{FT,CACHE_CONFIG.DIMS}(
                 LATITUDE     = 0,
                 LONGITUDE    = 0,
                 LEAVES_INDEX = collect(11:20),
                 ROOTS_INDEX  = collect(1:4),
                 Z            = [-2, _z_canopy/2, _z_canopy],
                 Z_AIR        = collect(0:21) * _z_canopy / 20,
-                SOIL         = Soil{FT,CACHE_CONFIG.DIM_NIR,CACHE_CONFIG.DIM_WL}(DIM_SOIL = 4, ZS = [0, -0.1, -0.35, -1, -3]));
+                SOIL         = Soil{FT,CACHE_CONFIG.DIMS}(ZS = [0, -0.1, -0.35, -1, -3]));
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
     for _organ in [CACHE_SPAC.LEAVES; CACHE_SPAC.BRANCHES; CACHE_SPAC.TRUNK; CACHE_SPAC.ROOTS]
@@ -50,7 +47,7 @@ function initialize_cache!(FT)
     initialize!(CACHE_SPAC, CACHE_CONFIG);
 
     # create a state struct based on the spac
-    CACHE_STATE = MultiLayerSPACState{FT}(CACHE_SPAC);
+    CACHE_STATE = MultiLayerSPACState{FT,CACHE_CONFIG.DIMS}();
 
     return nothing
 end;

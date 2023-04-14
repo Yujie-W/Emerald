@@ -20,6 +20,7 @@ include("namespace/kinetics.jl" )   # no dims
 include("namespace/stomata.jl"  )   # no dims
 include("namespace/trace.jl"    )   # no dims
 
+include("namespace/canopy.jl"    )  # rely on dims
 include("namespace/pigments.jl"  )  # rely on dims
 include("namespace/radiation.jl" )  # rely on dims
 include("namespace/wavelength.jl")  # rely on dims
@@ -30,7 +31,6 @@ include("namespace/meteorology.jl") # rely on radiation
 include("namespace/soil.jl" )       # rely on config (constructor)
 include("namespace/xylem.jl")       # rely on config (constructor)
 
-include("namespace/canopy.jl")
 include("namespace/leaf.jl"  )      # rely on xylem
 include("namespace/root.jl"  )      # rely on xylem
 include("namespace/stem.jl"  )      # rely on xylem

@@ -21,17 +21,14 @@ function spac(gm_dict::Dict, config::SPACConfiguration{FT}) where {FT}
     _air_bounds = _Δz .* collect(0:21);
 
     # create a SPAC to work on
-    _spac = MultiLayerSPAC{FT,config.DIM_NIR,config.DIM_WL,config.DIM_XYLEM}(
-                DIM_AIR      = 25,
-                DIM_LAYER    = 10,
-                DIM_ROOT     = 4,
+    _spac = MultiLayerSPAC{FT,config.DIMS}(
                 LATITUDE     = gm_dict["LATITUDE"],
                 LONGITUDE    = gm_dict["LONGITUDE"],
                 LEAVES_INDEX = collect(11:20),
                 ROOTS_INDEX  = collect(1:4),
                 Z            = [-2, _z_canopy/2, _z_canopy],
                 Z_AIR        = _air_bounds,
-                SOIL         = Soil{FT,config.DIM_NIR,config.DIM_WL}(DIM_SOIL = 4, COLOR = gm_dict["SOIL_COLOR"], ZS = [0, -0.1, -0.35, -1, -3]));
+                SOIL         = Soil{FT,config.DIMS}(COLOR = gm_dict["SOIL_COLOR"], ZS = [0, -0.1, -0.35, -1, -3]));
 
     # update soil type information per layer
     for _i in eachindex(_spac.SOIL.LAYERS)

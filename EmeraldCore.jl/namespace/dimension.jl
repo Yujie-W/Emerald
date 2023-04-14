@@ -23,6 +23,8 @@ Base.@kwdef struct SPACDimension
     DIM_AZI::Int = 36
     "Dimension of canopy layers"
     DIM_CANOPY::Int = 20
+    "Dimension of temperature history"
+    DIM_HISTORY::Int = 240
     "Dimension of inclination angles"
     DIM_INCL::Int = 9
     "Number of wavelength bins for NIR"
@@ -42,15 +44,3 @@ Base.@kwdef struct SPACDimension
     "Dimension of xylem elements"
     DIM_XYLEM::Int = 5
 end
-
-SPACDimension(dset::String, wl_nir::Vector{FT}, wl_par::Vector{FT}, wl_sif::Vector{FT}, wl_sife::Vector{FT}) where {FT} = (
-    _λ = read_nc(dset, "WL");
-
-    return SPACDimension(
-                DIM_NIR  = length(findall(wl_nir[1]  .<= _λ .<= wl_nir[2])),
-                DIM_PAR  = length(findall(wl_par[1]  .<= _λ .<= wl_par[2])),
-                DIM_SIF  = length(findall(wl_sif[1]  .<= _λ .<= wl_sif[2])),
-                DIM_SIFE = length(findall(wl_sife[1] .<= _λ .<= wl_sife[2])),
-                DIM_WL   = length(_λ),
-    )
-);

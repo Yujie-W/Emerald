@@ -40,15 +40,16 @@ canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) wh
     return nothing
 );
 
-canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT}}, wls::WaveLengthSet{FT}; ϕ_photon::Bool = true) where {FT} = (
-    (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
+canopy_fluorescence!(can::HyperspectralMLCanopy{FT,DIMS}, leaves::Vector{<:Leaves2D{FT,DIMS}}, wls::WaveLengthSet{FT,DIMS}; ϕ_photon::Bool = true) where {FT,DIMS} = (
+    (; OPTICS, P_INCL, RADIATION) = can;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
+    (; DIM_CANOPY) = DIMS;
 
     if can.lai == 0
         RADIATION.sif_obs .= 0;
     end;
 
-    _ilai = can.lai * can.ci / DIM_LAYER;
+    _ilai = can.lai * can.ci / DIM_CANOPY;
 
     # function to weight matrices by inclination angles
     @inline lidf_weight(mat_0, mat_1) = (
@@ -59,7 +60,7 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{F
     );
 
     # 1. compute SIF emissions for different layers
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         OPTICS._mat⁺ .= (leaves[_i].BIO.mat_b .+ leaves[_i].BIO.mat_f) ./ 2;
         OPTICS._mat⁻ .= (leaves[_i].BIO.mat_b .- leaves[_i].BIO.mat_f) ./ 2;
 
@@ -140,7 +141,7 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{F
     # 2. account for the SIF emission from bottom to up
     RADIATION._s_emit_up[:,end] .= 0;
 
-    for _i in DIM_LAYER:-1:1
+    for _i in DIM_CANOPY:-1:1
         _r__ = view(OPTICS._ρ_dd,IΛ_SIF,_i  );  # reflectance without correction
         _r_j = view(OPTICS.ρ_dd ,IΛ_SIF,_i+1);  # reflectance of the upper boundary (i) for SIF
         _t_i = view(OPTICS.τ_dd ,IΛ_SIF,_i  );  # transmittance of the layer (i) for SIF
@@ -160,7 +161,7 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{F
     # 3. account for the SIF emission from up to bottom
     RADIATION.sif_down[:,1] .= 0;
 
-    for _i in 1:DIM_LAYER
+    for _i in 1:DIM_CANOPY
         _r_i = view(OPTICS.ρ_dd,IΛ_SIF,_i);   # reflectance of the layer (i) for SIF
         _t_i = view(OPTICS.τ_dd,IΛ_SIF,_i);   # transmittance of the layer (i) for SIF
 
@@ -175,20 +176,20 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{F
         _a_u_i .= _a_d_i .* _r_i .+ _s_u_i;
     end;
 
-    RADIATION.sif_up[:,end] .= view(RADIATION.sif_down,:,DIM_LAYER+1) .* view(OPTICS.ρ_dd,IΛ_SIF,DIM_LAYER+1) .+ view(RADIATION._s_emit_up,:,DIM_LAYER+1);
+    RADIATION.sif_up[:,end] .= view(RADIATION.sif_down,:,DIM_CANOPY+1) .* view(OPTICS.ρ_dd,IΛ_SIF,DIM_CANOPY+1) .+ view(RADIATION._s_emit_up,:,DIM_CANOPY+1);
 
     # 4. compute SIF from the observer direction
-    OPTICS._tmp_vec_layer .= (view(OPTICS.pso,1:DIM_LAYER) .+ view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* _ilai ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(OPTICS.pso,1:DIM_CANOPY) .+ view(OPTICS.pso,2:DIM_CANOPY+1)) ./ 2 .* _ilai ./ FT(pi);
     mul!(RADIATION.sif_obs_sunlit, RADIATION._sif_obs_sunlit, OPTICS._tmp_vec_layer);
 
-    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1) .- view(OPTICS.pso,1:DIM_LAYER) .- view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* _ilai ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_CANOPY) .+ view(OPTICS.po,2:DIM_CANOPY+1) .- view(OPTICS.pso,1:DIM_CANOPY) .- view(OPTICS.pso,2:DIM_CANOPY+1)) ./ 2 .* _ilai ./ FT(pi);
     mul!(RADIATION.sif_obs_shaded, RADIATION._sif_obs_shaded, OPTICS._tmp_vec_layer);
 
-    RADIATION._sif_obs_scatter .= view(OPTICS.σ_dob,IΛ_SIF,:) .* view(RADIATION.sif_down,:,1:DIM_LAYER) .+ view(OPTICS.σ_dof,IΛ_SIF,:) .* view(RADIATION.sif_up,:,1:DIM_LAYER);
-    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1)) ./ 2 .* _ilai ./ FT(pi);
+    RADIATION._sif_obs_scatter .= view(OPTICS.σ_dob,IΛ_SIF,:) .* view(RADIATION.sif_down,:,1:DIM_CANOPY) .+ view(OPTICS.σ_dof,IΛ_SIF,:) .* view(RADIATION.sif_up,:,1:DIM_CANOPY);
+    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_CANOPY) .+ view(OPTICS.po,2:DIM_CANOPY+1)) ./ 2 .* _ilai ./ FT(pi);
     mul!(RADIATION.sif_obs_scatter, RADIATION._sif_obs_scatter, OPTICS._tmp_vec_layer);
 
-    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* OPTICS.po[end] ./ FT(pi);
+    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_CANOPY+1) .* OPTICS.po[end] ./ FT(pi);
 
     RADIATION.sif_obs .= RADIATION.sif_obs_sunlit .+ RADIATION.sif_obs_shaded .+ RADIATION.sif_obs_scatter .+ RADIATION.sif_obs_soil;
 
