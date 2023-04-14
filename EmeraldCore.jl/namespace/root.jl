@@ -4,6 +4,7 @@
 # General
 #     2022-May-25: add Root structure
 #     2022-Jul-15: add fields e, ∂e∂t
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -17,7 +18,7 @@ Structure to save root parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Root{FT}
+Base.@kwdef mutable struct Root{FT,DIM_XYLEM}
     # Embedded structures
     "[`RootHydraulics`](@ref) type root hydraulic system"
     HS::RootHydraulics{FT,DIM_XYLEM} = RootHydraulics{FT,DIM_XYLEM}()

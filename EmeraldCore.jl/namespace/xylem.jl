@@ -235,6 +235,7 @@ abstract type AbstractFlowProfile{FT} end
 #     2022-May-31: remove unneeded variables from struct
 #     2022-May-31: add field: f_sum
 #     2022-Jul-19: add dimension control to struct
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -321,6 +322,7 @@ abstract type AbstractHydraulicSystem{FT} end
 #     2022-Jun-13: use Union instead of Abstract... for type definition
 #     2022-Jul-07: add e_crit as a field
 #     2022-Jul-19: add dimension control to struct
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -397,6 +399,7 @@ LeafHydraulics(config::SPACConfiguration{FT}) where {FT} = (
 #     2022-Jun-13: use Union instead of Abstract... for type definition
 #     2022-Jul-19: add dimension control to struct
 #     2022-Oct-20: remove field SH (use that in SOIL in the future)
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -470,6 +473,7 @@ RootHydraulics(config::SPACConfiguration{FT}) where {FT} = RootHydraulics{FT,con
 #     2022-May-27: move flow rates to a field FLOW
 #     2022-Jun-13: use Union instead of Abstract... for type definition
 #     2022-Jul-19: add dimension control to struct
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """

@@ -5,6 +5,7 @@
 #     2022-May-25: add Stem structure
 #     2022-Jul-15: add fields e, ∂e∂t
 #     2022-Jul-19: use kwdef for the constructor
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -18,7 +19,7 @@ Structure to save stem parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Stem{FT}
+Base.@kwdef mutable struct Stem{FT,DIM_XYLEM}
     # Embedded structures
     "[`StemHydraulics`](@ref) type stem hydraulic system"
     HS::StemHydraulics{FT,DIM_XYLEM} = StemHydraulics{FT,DIM_XYLEM}()

@@ -56,6 +56,7 @@ abstract type AbstractSPACSystem{FT} end
 #     2022-Jun-29: add AirLayer to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Mar-11: add MEMORY field
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -69,27 +70,29 @@ Struct for simplest SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MonoElementSPAC{FT} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MonoElementSPAC{FT,DIM_XYLEM} <: AbstractSPACSystem{FT}
     # Embedded structures
     "Air conditions"
     AIR::AirLayer{FT} = AirLayer{FT}()
     "Leaf system"
-    LEAF::Leaf{FT} = Leaf{FT}()
+    LEAF::Leaf{FT,DIM_XYLEM} = Leaf{FT,DIM_XYLEM}()
     "Memory cache"
     MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Root system"
-    ROOT::Root{FT} = Root{FT}()
+    ROOT::Root{FT,DIM_XYLEM} = Root{FT,DIM_XYLEM}()
     "Soil component"
     SOIL::Soil{FT} = Soil{FT}(ZS = FT[0, -1])
     "Stem system"
-    STEM::Stem{FT} = Stem{FT}()
+    STEM::Stem{FT,DIM_XYLEM} = Stem{FT,DIM_XYLEM}()
 
     # Cache variables
     "Relative hydraulic conductance"
     _krs::Vector{FT} = ones(FT, 4)
 end
+
+MonoElementSPAC(config::SPACConfiguration{FT}) where {FT} = MonoElementSPAC{FT,config.DIM_XYLEM}();
 
 
 #######################################################################################################################################################################################################
@@ -107,6 +110,7 @@ end
 #     2023-Mar-28: add field _root_connection
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF to SPACConfiguration
 #     2023-Apr-13: move RAD_LW and RAD_SW to Meteorology
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -120,7 +124,7 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MultiLayerSPAC{FT} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_XYLEM} <: AbstractSPACSystem{FT}
     # dimensions
     "Dimension of air layers"
     DIM_AIR::Int = 25
@@ -153,21 +157,21 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT} <: AbstractSPACSystem{FT}
     "Sun sensor geometry"
     ANGLES::SunSensorGeometry{FT} = SunSensorGeometry{FT}()
     "Branch hydraulic system"
-    BRANCHES::Vector{Stem{FT}} = Stem{FT}[Stem{FT}() for _i in 1:DIM_LAYER]
+    BRANCHES::Vector{Stem{FT,DIM_XYLEM}} = Stem{FT,DIM_XYLEM}[Stem{FT,DIM_XYLEM}() for _i in 1:DIM_LAYER]
     "Canopy used for radiation calculations"
     CANOPY::HyperspectralMLCanopy{FT} = HyperspectralMLCanopy{FT}(DIM_LAYER = DIM_LAYER)
     "Leaf per layer"
-    LEAVES::Vector{Leaves2D{FT}} = Leaves2D{FT}[Leaves2D{FT}() for _i in 1:DIM_LAYER]
+    LEAVES::Vector{Leaves2D{FT,DIM_XYLEM}} = Leaves2D{FT,DIM_XYLEM}[Leaves2D{FT,DIM_XYLEM}() for _i in 1:DIM_LAYER]
     "Memory cache"
     MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Root hydraulic system"
-    ROOTS::Vector{Root{FT}} = Root{FT}[Root{FT}() for _i in 1:DIM_ROOT]
+    ROOTS::Vector{Root{FT,DIM_XYLEM}} = Root{FT,DIM_XYLEM}[Root{FT,DIM_XYLEM}() for _i in 1:DIM_ROOT]
     "Soil component"
     SOIL::Soil{FT} = Soil{FT}()
     "Trunk hydraulic system"
-    TRUNK::Stem{FT} = Stem{FT}()
+    TRUNK::Stem{FT,DIM_XYLEM} = Stem{FT,DIM_XYLEM}()
 
     # Cache variables
     "Flow rate per root layer"
@@ -179,6 +183,8 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT} <: AbstractSPACSystem{FT}
     "Whether there is any root connected to soil"
     _root_connection::Bool = true
 end
+
+MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIM_XYLEM}();
 
 
 #######################################################################################################################################################################################################

@@ -148,14 +148,14 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, sm::AbstractStomataModel{FT}) where {FT,DIM_XYLEM} = nothing;
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT,DIM_XYLEM} =
     β_factor!(roots, soil, leaves, sm.β);
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soil, leaves, β, β.PARAM_X);
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, β::BetaFunction{FT}) where {FT,DIM_XYLEM} = β_factor!(roots, soil, leaves, β, β.PARAM_X);
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT,DIM_XYLEM} = (
     _f_st = relative_surface_tension(leaves.t);
 
     β.β₁ = β_factor(β.FUNC, leaves.HS.VC, leaves.HS._p_element[end] / _f_st);
@@ -163,7 +163,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT,DIM_XYLEM} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
@@ -189,7 +189,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT,DIM_XYLEM} = (
     _f_st = relative_surface_tension(leaves.t);
 
     β.β₁ = β_factor(β.FUNC, leaves.HS._p_element[end] / _f_st);
@@ -197,7 +197,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT,DIM_XYLEM} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
@@ -223,7 +223,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
+β_factor!(roots::Vector{Root{FT,DIM_XYLEM}}, soil::Soil{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT,DIM_XYLEM} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;

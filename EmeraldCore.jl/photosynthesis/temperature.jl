@@ -171,9 +171,9 @@ photosystem_temperature_dependence!(psm::C4VJPModel{FT}, prc::VJPReactionCenter{
 #######################################################################################################################################################################################################
 """
 
-    ∂R∂T(leaf::Leaf{FT}) where {FT}
-    ∂R∂T(leaves::Leaves1D{FT}) where {FT}
-    ∂R∂T(leaves::Leaves2D{FT}) where {FT}
+    ∂R∂T(leaf::Leaf{FT,DIM_XYLEM}) where {FT,DIM_XYLEM}
+    ∂R∂T(leaves::Leaves1D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM}
+    ∂R∂T(leaves::Leaves2D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM}
 
 Return the marginal increase in respiration rate per temperature, given
 - `leaf` `Leaf` type leaf
@@ -182,11 +182,11 @@ Return the marginal increase in respiration rate per temperature, given
 """
 function ∂R∂T end
 
-∂R∂T(leaf::Leaf{FT}) where {FT} = ∂R∂T(leaf.PSM, leaf.t);
+∂R∂T(leaf::Leaf{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = ∂R∂T(leaf.PSM, leaf.t);
 
-∂R∂T(leaves::Leaves1D{FT}) where {FT} = ∂R∂T(leaves.PSM, leaves.t[1]);
+∂R∂T(leaves::Leaves1D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = ∂R∂T(leaves.PSM, leaves.t[1]);
 
-∂R∂T(leaves::Leaves2D{FT}) where {FT} = ∂R∂T(leaves.PSM, leaves.t);
+∂R∂T(leaves::Leaves2D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = ∂R∂T(leaves.PSM, leaves.t);
 
 ∂R∂T(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}, t::FT) where {FT} = ∂R∂T(psm.TD_R, psm.r_d25, t);
 

@@ -128,7 +128,7 @@ MultiLayerSPAC{FT}(
     end;
 
     # create leaves from bottom canopy (trunk) to top canopy
-    _leaves = [Leaves2D{FT}(psm, wls) for _i in 1:_n_canopy];
+    _leaves = [Leaves2D{FT,DIM_XYLEM}(psm, wls) for _i in 1:_n_canopy];
     for _leaf in _leaves
         _leaf.HS.AREA = 1500 / _n_canopy;
     end;

@@ -360,7 +360,7 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    root_sink(root::Root{FT}) where {FT}
+    root_sink(root::Root)
 
 Return root water update, given
 - `root` `Root` type struct that may contain non- and steady state flow
@@ -368,11 +368,11 @@ Return root water update, given
 """
 function root_sink end
 
-root_sink(root::Root{FT}) where {FT} = root_sink(root.HS.FLOW);
+root_sink(root::Root) = root_sink(root.HS.FLOW);
 
-root_sink(mode::SteadyStateFlow{FT}) where {FT} = mode.flow;
+root_sink(mode::SteadyStateFlow) = mode.flow;
 
-root_sink(mode::NonSteadyStateFlow{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = mode.f_in;
+root_sink(mode::NonSteadyStateFlow) = mode.f_in;
 
 
 end # module

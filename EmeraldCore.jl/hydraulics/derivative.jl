@@ -10,8 +10,8 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂E∂P(lf::Union{Leaf{FT}, Leaves2D{FT}}, flow::FT; δe::FT = FT(1e-7)) where {FT}
-    ∂E∂P(lf::Leaves1D{FT}, flow::FT, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂E∂P(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, flow::FT; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM}
+    ∂E∂P(lf::Leaves1D{FT,DIM_XYLEM}, flow::FT, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM}
 
 Return the marginal hydraulic conductance, given
 - `lf` `Leaf`, `Leaves1D`, or `Leaves2D` type struct
@@ -22,9 +22,9 @@ Return the marginal hydraulic conductance, given
 """
 function ∂E∂P end
 
-∂E∂P(lf::Union{Leaf{FT}, Leaves2D{FT}}, flow::FT; δe::FT = FT(1e-7)) where {FT} = ∂E∂P(lf.HS, flow, lf.t; δe = δe);
+∂E∂P(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, flow::FT; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = ∂E∂P(lf.HS, flow, lf.t; δe = δe);
 
-∂E∂P(lf::Leaves1D{FT}, flow::FT, ind::Int; δe::FT = FT(1e-7)) where {FT} = ∂E∂P(lf.HS, flow, lf.t[ind]; δe = δe);
+∂E∂P(lf::Leaves1D{FT,DIM_XYLEM}, flow::FT, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = ∂E∂P(lf.HS, flow, lf.t[ind]; δe = δe);
 
 ∂E∂P(hs::LeafHydraulics{FT,DIM_XYLEM}, flow::FT, t::FT; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     @assert δe != 0 "δe must not be 0";

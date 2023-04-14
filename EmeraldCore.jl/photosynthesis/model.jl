@@ -31,8 +31,8 @@ function leaf_photosynthesis! end
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(lf::Union{Leaf{FT}, Leaves2D{FT}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT}
-    leaf_photosynthesis!(lf::Leaves1D{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT}
+    leaf_photosynthesis!(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT,DIM_XYLEM}
+    leaf_photosynthesis!(lf::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT,DIM_XYLEM}
 
 Updates leaf photosynthetic rates based on CO₂ partial pressure (for StomataModels.jl temporary use), given
 - `lf` `Leaf`, `Leaves1D`, or `Leaves2D` type structure that stores biophysical, reaction center, and photosynthesis model structures
@@ -42,7 +42,7 @@ Updates leaf photosynthetic rates based on CO₂ partial pressure (for StomataMo
 - `t` Leaf temperature in `[K]`
 
 """
-leaf_photosynthesis!(lf::Union{Leaf{FT}, Leaves2D{FT}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT} = (
+leaf_photosynthesis!(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = lf;
 
     photosystem_temperature_dependence!(PSM, PRC, air, t);
@@ -55,7 +55,7 @@ leaf_photosynthesis!(lf::Union{Leaf{FT}, Leaves2D{FT}}, air::AirLayer{FT}, g_lc:
     return nothing
 );
 
-leaf_photosynthesis!(lf::Leaves1D{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT} = (
+leaf_photosynthesis!(lf::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = lf;
 
     photosystem_temperature_dependence!(PSM, PRC, air, t);
@@ -79,7 +79,7 @@ leaf_photosynthesis!(lf::Leaves1D{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t:
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT}
+    leaf_photosynthesis!(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT,DIM_XYLEM}
 
 Updates leaf photosynthetic rates based on CO₂ partial pressure or CO₂ conductance, given
 - `lf` `Leaf`, `Leaves1D`, or `Leaves2D` type structure that stores biophysical, reaction center, and photosynthesis model structures
@@ -88,42 +88,42 @@ Updates leaf photosynthetic rates based on CO₂ partial pressure or CO₂ condu
 - `rd_only` Whether to compute respiration rate only
 
 """
-leaf_photosynthesis!(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT} =
+leaf_photosynthesis!(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT,DIM_XYLEM} =
     leaf_photosynthesis!(lf, air, mode, lf.SM; rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}},
+            lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             sm::AbstractStomataModel{FT};
             rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(lf, air, mode, FT(1); rd_only = rd_only);
+) where {FT,DIM_XYLEM} = leaf_photosynthesis!(lf, air, mode, FT(1); rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}},
+            lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}};
             rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(lf, air, mode, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
+) where {FT,DIM_XYLEM} = leaf_photosynthesis!(lf, air, mode, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}},
+            lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             β::BetaFunction{FT},
             param_y::BetaParameterG1;
             rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(lf, air, mode, FT(1); rd_only = rd_only);
+) where {FT,DIM_XYLEM} = leaf_photosynthesis!(lf, air, mode, FT(1); rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}},
+            lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             β::BetaFunction{FT},
             param_y::BetaParameterVcmax;
             rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(lf, air, mode, β.β₁; rd_only = rd_only);
+) where {FT,DIM_XYLEM} = leaf_photosynthesis!(lf, air, mode, β.β₁; rd_only = rd_only);
 
 
 #######################################################################################################################################################################################################
@@ -151,12 +151,12 @@ leaf_photosynthesis!(
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
-    leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
-    leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
-    leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
-    leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
-    leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
+    leaf_photosynthesis!(leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM}
+    leaf_photosynthesis!(leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM}
+    leaf_photosynthesis!(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM}
+    leaf_photosynthesis!(leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM}
+    leaf_photosynthesis!(leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM}
+    leaf_photosynthesis!(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM}
 
 Updates leaf photosynthetic rates (this method not meant for public usage, use it with caution), given
 - `leaf` `Leaf` type structure that stores biophysical, reaction center, and photosynthesis model structures
@@ -167,7 +167,7 @@ Updates leaf photosynthetic rates (this method not meant for public usage, use i
 - `rd_only` Whether to compute respiration rate only
 
 """
-leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = leaf;
 
     if rd_only
@@ -195,7 +195,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT
     return nothing
 );
 
-leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = leaves;
 
     if rd_only
@@ -231,7 +231,7 @@ leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
     return nothing
 );
 
-leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = leaves;
 
     if rd_only
@@ -284,7 +284,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
     return nothing
 );
 
-leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = leaf;
 
     if rd_only
@@ -320,7 +320,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
     return nothing
 );
 
-leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = leaves;
 
     if rd_only
@@ -361,7 +361,7 @@ leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
     return nothing
 );
 
-leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT,DIM_XYLEM} = (
     (; PRC, PSM) = leaves;
 
     if rd_only

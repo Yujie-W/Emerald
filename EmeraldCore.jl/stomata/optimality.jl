@@ -14,10 +14,10 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
-    ∂A∂E(leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int) where {FT}
-    ∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}) where {FT}
-    ∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int) where {FT}
+    ∂A∂E(leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}) where {FT,DIM_XYLEM}
+    ∂A∂E(leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int) where {FT}
+    ∂A∂E(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}) where {FT}
+    ∂A∂E(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int) where {FT}
 
 Return the partial derivative of A per E, given
 - `leaf` `Leaf` type leaf
@@ -28,7 +28,7 @@ Return the partial derivative of A per E, given
 """
 function ∂A∂E end
 
-∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+∂A∂E(leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = (
     (; P_AIR) = air;
 
     # compute the A and E at the current setting
@@ -48,7 +48,7 @@ function ∂A∂E end
     return (_a2 - _a1) / (_e2 - _e1)
 );
 
-∂A∂E(leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int) where {FT} = (
+∂A∂E(leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int) where {FT,DIM_XYLEM} = (
     (; P_AIR) = air;
 
     # compute the A and E at the current setting
@@ -68,7 +68,7 @@ function ∂A∂E end
     return (_a2 - _a1) / (_e2 - _e1)
 );
 
-∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = (
+∂A∂E(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = (
     (; P_AIR) = air;
 
     # compute the A and E at the current setting
@@ -88,7 +88,7 @@ function ∂A∂E end
     return (_a2 - _a1) / (_e2 - _e1)
 );
 
-∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int) where {FT} = (
+∂A∂E(leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int) where {FT,DIM_XYLEM} = (
     (; P_AIR) = air;
 
     # compute the A and E at the current setting
@@ -118,7 +118,7 @@ function ∂A∂E end
 #######################################################################################################################################################################################################
 """
 
-    ∂R∂E(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT}
+    ∂R∂E(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}) where {FT}
 
 Returns the marginal increase in leaf respiration rate per transpiration rate, given
 - `lf` `Leaf`, `Leaves1D`, or `Leaves2D` type leaf
@@ -127,9 +127,9 @@ Returns the marginal increase in leaf respiration rate per transpiration rate, g
 """
 function ∂R∂E end
 
-∂R∂E(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT} = ∂R∂E(lf.SM, lf, air);
+∂R∂E(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = ∂R∂E(lf.SM, lf, air);
 
-∂R∂E(sm::WangSM{FT}, lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT} = ∂R∂T(lf) * ∂T∂E(lf, air, sm.f_view);
+∂R∂E(sm::WangSM{FT}, lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = ∂R∂T(lf) * ∂T∂E(lf, air, sm.f_view);
 
 
 #######################################################################################################################################################################################################
@@ -141,7 +141,7 @@ function ∂R∂E end
 #######################################################################################################################################################################################################
 """
 
-    ∂T∂E(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}, f_view::FT) where {FT}
+    ∂T∂E(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM}
 
 Returns the marginal increase in leaf temperature per transpiration rate, given
 - `lf` `Leaf`, `Leaves1D`, or `Leaves2D` type leaf
@@ -151,19 +151,19 @@ Returns the marginal increase in leaf temperature per transpiration rate, given
 """
 function ∂T∂E end
 
-∂T∂E(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(lf.BIO, lf, air, f_view);
+∂T∂E(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM} = ∂T∂E(lf.BIO, lf, air, f_view);
 
-∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, bio.ϵ_LW);
+∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, bio.ϵ_LW);
 
-∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, 1 - bio.τ_LW);
+∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, 1 - bio.τ_LW);
 
-∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaves.t[1], leaves.WIDTH, air.wind, bio.ϵ_LW);
+∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM} = ∂T∂E(f_view, leaves.t[1], leaves.WIDTH, air.wind, bio.ϵ_LW);
 
-∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaves.t[1], leaves.WIDTH, air.wind, 1 - bio.τ_LW);
+∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM} = ∂T∂E(f_view, leaves.t[1], leaves.WIDTH, air.wind, 1 - bio.τ_LW);
 
-∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, bio.ϵ_LW);
+∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, bio.ϵ_LW);
 
-∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, 1 - bio.τ_LW);
+∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, f_view::FT) where {FT,DIM_XYLEM} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, 1 - bio.τ_LW);
 
 ∂T∂E(f_view::FT, t::FT, width::FT, wind::FT, ϵ::FT) where {FT} = (
     _λ = latent_heat_vapor(t) * M_H₂O(FT);
@@ -206,11 +206,11 @@ function ∂Θ∂E end
 #######################################################################################################################################################################################################
 """
 
-    ∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM}
+    ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM}
+    ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM}
+    ∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM}
+    ∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM}
 
 Return the marginal risk for stomatal opening, given
 - `sm` `AndereggSM`, `EllerSM`, `SperrySM`, `WangSM`, or `Wang2SM` type optimality model
@@ -219,7 +219,7 @@ Return the marginal risk for stomatal opening, given
 - `δe` Incremental flow rate to compute ∂E∂P
 
 """
-∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A, B) = sm;
     (; HS) = leaf;
     (; P_AIR) = air;
@@ -234,7 +234,7 @@ Return the marginal risk for stomatal opening, given
     return (-2 * A * HS._p_element[end] + B) / _∂E∂P
 );
 
-∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaf;
     (; P_AIR) = air;
 
@@ -250,7 +250,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * leaf.a_net / _∂E∂P_1
 );
 
-∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaf;
     (; P_AIR) = air;
 
@@ -274,7 +274,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * _am / _∂E∂P_m
 );
 
-∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaf;
     (; P_AIR) = air;
 
@@ -286,7 +286,7 @@ Return the marginal risk for stomatal opening, given
     return leaf.a_net / max(eps(FT), (HS._e_crit - _e))
 );
 
-∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A) = sm;
     (; HS) = leaf;
     (; P_AIR) = air;
@@ -315,11 +315,11 @@ Return the marginal risk for stomatal opening, given
 #######################################################################################################################################################################################################
 """
 
-    ∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
 
 Return the marginal risk for stomatal opening, given
 - `sm` `AndereggSM`, `EllerSM`, `SperrySM`, `WangSM`, or `Wang2SM` type optimality model
@@ -329,7 +329,7 @@ Return the marginal risk for stomatal opening, given
 - `δe` Incremental flow rate to compute ∂E∂P
 
 """
-∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A, B) = sm;
     (; HS, HS2) = leaves;
     (; P_AIR) = air;
@@ -346,7 +346,7 @@ Return the marginal risk for stomatal opening, given
     return (-2 * A * _hs._p_element[end] + B) / _∂E∂P
 );
 
-∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS, HS2) = leaves;
     (; P_AIR) = air;
 
@@ -362,7 +362,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * leaves.a_net[ind] / _∂E∂P_1
 );
 
-∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS, HS2) = leaves;
     (; P_AIR) = air;
 
@@ -388,7 +388,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * _am / _∂E∂P_m
 );
 
-∂Θ∂E(sm::WangSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::WangSM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS, HS2) = leaves;
     (; P_AIR) = air;
 
@@ -402,7 +402,7 @@ Return the marginal risk for stomatal opening, given
     return leaves.a_net[ind] / max(eps(FT), (HS._e_crit - _e))
 );
 
-∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A) = sm;
     (; HS, HS2) = leaves;
     (; P_AIR) = air;
@@ -433,11 +433,11 @@ Return the marginal risk for stomatal opening, given
 #######################################################################################################################################################################################################
 """
 
-    ∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
 
 Return the marginal risk for stomatal opening, given
 - `sm` `AndereggSM`, `EllerSM`, `SperrySM`, `WangSM`, or `Wang2SM` type optimality model
@@ -446,7 +446,7 @@ Return the marginal risk for stomatal opening, given
 - `δe` Incremental flow rate to compute ∂E∂P
 
 """
-∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A, B) = sm;
     (; HS) = leaves;
     (; P_AIR) = air;
@@ -461,7 +461,7 @@ Return the marginal risk for stomatal opening, given
     return (-2 * A * HS._p_element[end] + B) / _∂E∂P
 );
 
-∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaves;
     (; P_AIR) = air;
 
@@ -477,7 +477,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * leaves.a_net_shaded / _∂E∂P_1
 );
 
-∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaves;
     (; P_AIR) = air;
 
@@ -501,7 +501,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * _am / _∂E∂P_m
 );
 
-∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaves;
     (; P_AIR) = air;
 
@@ -513,7 +513,7 @@ Return the marginal risk for stomatal opening, given
     return leaves.a_net_shaded / max(eps(FT), (HS._e_crit - _e))
 );
 
-∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A) = sm;
     (; HS) = leaves;
     (; P_AIR) = air;
@@ -543,11 +543,11 @@ Return the marginal risk for stomatal opening, given
 #######################################################################################################################################################################################################
 """
 
-    ∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
+    ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
 
 Return the marginal risk for stomatal opening, given
 - `sm` `AndereggSM`, `EllerSM`, `SperrySM`, `WangSM`, or `Wang2SM` type optimality model
@@ -556,7 +556,7 @@ Return the marginal risk for stomatal opening, given
 - `δe` Incremental flow rate to compute ∂E∂P
 
 """
-∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::AndereggSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A, B) = sm;
     (; HS) = leaves;
     (; P_AIR) = air;
@@ -571,7 +571,7 @@ Return the marginal risk for stomatal opening, given
     return (-2 * A * HS._p_element[end] + B) / _∂E∂P
 );
 
-∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::EllerSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaves;
     (; P_AIR) = air;
 
@@ -587,7 +587,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * leaves.a_net_sunlit[ind] / _∂E∂P_1
 );
 
-∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::SperrySM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaves;
     (; P_AIR) = air;
 
@@ -611,7 +611,7 @@ Return the marginal risk for stomatal opening, given
     return _∂K∂E * _am / _∂E∂P_m
 );
 
-∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; HS) = leaves;
     (; P_AIR) = air;
 
@@ -623,7 +623,7 @@ Return the marginal risk for stomatal opening, given
     return leaves.a_net_sunlit[ind] / max(eps(FT), (HS._e_crit - _e))
 );
 
-∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
+∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT,DIM_XYLEM} = (
     (; A) = sm;
     (; HS) = leaves;
     (; P_AIR) = air;
@@ -665,16 +665,16 @@ function ∂Θₙ∂E end
 #######################################################################################################################################################################################################
 """
 
-    ∂Θₙ∂E(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT}
+    ∂Θₙ∂E(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}) where {FT,DIM_XYLEM}
 
 Return the ∂Θ∂E for nocturnal stomatal opening, given
 - `lf` `Leaf`, `Leaves1D`, or `Leaves2D` type leaf
 - `air` `AirLayer` type environmental conditions
 
 """
-∂Θₙ∂E(lf::Union{Leaf{FT}, Leaves1D{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(lf.SM, lf, air);
+∂Θₙ∂E(lf::Union{Leaf{FT,DIM_XYLEM}, Leaves1D{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = ∂Θₙ∂E(lf.SM, lf, air);
 
-∂Θₙ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+∂Θₙ∂E(sm::WangSM{FT}, leaf::Leaf{FT,DIM_XYLEM}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = (
     (; F_FITNESS) = sm;
     (; HS) = leaf;
     (; P_AIR) = air;
@@ -690,7 +690,7 @@ Return the ∂Θ∂E for nocturnal stomatal opening, given
     return _a / max(eps(FT), (HS._e_crit - _e)) * F_FITNESS
 );
 
-∂Θₙ∂E(sm::WangSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}) where {FT} = (
+∂Θₙ∂E(sm::WangSM{FT}, leaves::Leaves1D{FT,DIM_XYLEM}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = (
     (; F_FITNESS) = sm;
     (; HS) = leaves;
     (; P_AIR) = air;
@@ -706,7 +706,7 @@ Return the ∂Θ∂E for nocturnal stomatal opening, given
     return _a / max(eps(FT), (HS._e_crit - _e)) * F_FITNESS
 );
 
-∂Θₙ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = (
+∂Θₙ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT,DIM_XYLEM}, air::AirLayer{FT}) where {FT,DIM_XYLEM} = (
     (; F_FITNESS) = sm;
     (; HS) = leaves;
     (; P_AIR) = air;

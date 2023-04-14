@@ -781,6 +781,7 @@ abstract type AbstractLeaf{FT} end
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
 #     2023-Apr-13: move field APAR_CAR to SPACConfiguration
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -794,7 +795,7 @@ Structure to save leaf parameters. This structure is meant for leaf level resear
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaf{FT} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaf{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -850,6 +851,8 @@ Base.@kwdef mutable struct Leaf{FT} <: AbstractLeaf{FT}
     _p_CO₂_s::FT = 0
 end
 
+Leaf(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaf{FT,config.DIM_XYLEM}();
+
 
 #######################################################################################################################################################################################################
 #
@@ -867,6 +870,7 @@ end
 #     2022-Jul-19: remove field p_H₂O_sat
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -880,7 +884,7 @@ Structure to save leaf parameters for a single canopy layer. This structure is m
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaves1D{FT} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaves1D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -938,6 +942,8 @@ Base.@kwdef mutable struct Leaves1D{FT} <: AbstractLeaf{FT}
     _p_CO₂_s::Vector{FT} = FT[0, 0]
 end
 
+Leaves1D(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaves1D{FT,config.DIM_XYLEM}();
+
 
 #######################################################################################################################################################################################################
 #
@@ -958,6 +964,7 @@ end
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
 #     2023-Apr-13: move field APAR_CAR to SPACConfiguration
+#     2023-Apr-13: add DIM_XYLEM to struct type
 #
 #######################################################################################################################################################################################################
 """
@@ -972,7 +979,7 @@ Structure to save leaf parameters for a single canopy layer. This structure is m
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaves2D{FT} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaves2D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     # Dimensions
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
@@ -1053,3 +1060,5 @@ Base.@kwdef mutable struct Leaves2D{FT} <: AbstractLeaf{FT}
     "Leaf surface CO₂ partial pressure for sunlit leaves `[Pa]`"
     _p_CO₂_s_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
 end
+
+Leaves2D(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaves2D{FT,config.DIM_XYLEM}();
