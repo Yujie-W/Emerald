@@ -19,7 +19,7 @@ function critical_flow end
 
 """
 
-    critical_flow(hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat}
+    critical_flow(hs::LeafHydraulics{FT,DIM_XYLEM}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT,DIM_XYLEM}
 
 Return the critical flow rate that triggers a given amount of loss of conductance, given
 - `hs` `LeafHydraulics` type struct
@@ -28,7 +28,7 @@ Return the critical flow rate that triggers a given amount of loss of conductanc
 - `kr` Reference conductance, default is 0.001
 
 """
-critical_flow(hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+critical_flow(hs::LeafHydraulics{FT,DIM_XYLEM}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT,DIM_XYLEM} = (
     (; K_SLA, VC) = hs;
 
     # compute the misc variables
@@ -66,14 +66,14 @@ critical_flow(hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.00
 
 """
 
-    critical_flow(spac::MonoElementSPAC{FT}, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat}
+    critical_flow(spac::MonoElementSPAC{FT}, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT}
 
 Return the critical flow rate that triggers a given amount of loss of conductance, given
 - `spac` `MonoElementSPAC` type struct
 - `ini` Initial guess
 - `kr` Reference conductance, default is 0.001
 """
-critical_flow(spac::MonoElementSPAC{FT}, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+critical_flow(spac::MonoElementSPAC{FT}, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT} = (
     (; LEAF, ROOT, STEM) = spac;
 
     # read out the conductances

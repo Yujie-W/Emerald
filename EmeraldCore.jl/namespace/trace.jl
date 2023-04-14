@@ -15,7 +15,7 @@
 $(TYPEDEF)
 
 """
-abstract type AbstractTrace{FT<:AbstractFloat} end
+abstract type AbstractTrace{FT} end
 
 
 """
@@ -30,7 +30,7 @@ The gas can be either the target trace molecule (e.g., when computing diffusive 
 $(TYPEDEF)
 
 """
-abstract type AbstractTraceGas{FT<:AbstractFloat} <: AbstractTrace{FT} end
+abstract type AbstractTraceGas{FT} <: AbstractTrace{FT} end
 
 
 """
@@ -42,7 +42,7 @@ The liquid can be either the medium for gas (e.g., when computing diffusive coef
 $(TYPEDEF)
 
 """
-abstract type AbstractTraceLiquid{FT<:AbstractFloat} <: AbstractTrace{FT} end
+abstract type AbstractTraceLiquid{FT} <: AbstractTrace{FT} end
 
 
 """
@@ -52,7 +52,7 @@ $(TYPEDEF)
 Identity trace label for air.
 
 """
-struct TraceGasAir{FT<:AbstractFloat} <: AbstractTraceGas{FT} end
+struct TraceGasAir{FT} <: AbstractTraceGas{FT} end
 
 
 """
@@ -66,7 +66,7 @@ Identity trace label for gas phase CO₂.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct TraceGasCO₂{FT<:AbstractFloat} <: AbstractTraceGas{FT}
+Base.@kwdef struct TraceGasCO₂{FT} <: AbstractTraceGas{FT}
     # related to diffusive coefficient in air
     "Diffusive coefficient in air in `[m² s⁻¹]`"
     d_air::FT = 2.82e-5 / 1.6
@@ -92,7 +92,7 @@ Identity trace label for gas phase H₂O.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct TraceGasH₂O{FT<:AbstractFloat} <: AbstractTraceGas{FT}
+Base.@kwdef struct TraceGasH₂O{FT} <: AbstractTraceGas{FT}
     # related to diffusive coefficient in air
     "Diffusive coefficient in air in `[m² s⁻¹]`"
     d_air::FT = 2.82e-5
@@ -110,7 +110,7 @@ Identity trace label for gas phase N₂.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct TraceGasN₂{FT<:AbstractFloat} <: AbstractTraceGas{FT}
+Base.@kwdef struct TraceGasN₂{FT} <: AbstractTraceGas{FT}
     # related to diffusive coefficient in liquid water
     "Hydrodynamic radius of the solute in `[m]`"
     a_298::FT = 1.90e-10
@@ -132,7 +132,7 @@ Identity trace label for gas phase O₂.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct TraceGasO₂{FT<:AbstractFloat} <: AbstractTraceGas{FT}
+Base.@kwdef struct TraceGasO₂{FT} <: AbstractTraceGas{FT}
     # related to diffusive coefficient in air
     "Diffusive coefficient in air in `[m² s⁻¹]`"
     d_air::FT = 1.76e-5
@@ -154,7 +154,7 @@ Identity trace label for liquid phase H₂O.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct TraceLiquidH₂O{FT<:AbstractFloat} <: AbstractTraceLiquid{FT}
+Base.@kwdef struct TraceLiquidH₂O{FT} <: AbstractTraceLiquid{FT}
     # Surface tension related
     # γ = γ_k * (1-T/γ_T_c)^γ_exp * [1 - γ_cor*(1-T/γ_T_c)]
     "Surface tension coefficient correction"

@@ -18,7 +18,7 @@ const FAC = 1e-9 / (H_PLANCK() * LIGHT_SPEED() * AVOGADRO());
 #######################################################################################################################################################################################################
 """
 
-    average_transmittance(α::FT, nr::FT) where {FT<:AbstractFloat}
+    average_transmittance(α::FT, nr::FT) where {FT}
 
 Return the average transmittance of isotropic radiation across an interface between two dielectrics, given
 - `α` angle of incidence
@@ -29,7 +29,7 @@ Return the average transmittance of isotropic radiation across an interface betw
 - Allen (1973) Transmission of isotropic light across a dielectric surface in two and three dimensions. Journal of the Optical Society of America 63(6): 664-666.
 
 """
-function average_transmittance(α::FT, nr::FT) where {FT<:AbstractFloat}
+function average_transmittance(α::FT, nr::FT) where {FT}
     @assert 0 < α <= 90;
 
     # some shortcuts to avoid overly comlicated equation
@@ -77,14 +77,14 @@ end
 #######################################################################################################################################################################################################
 """
 
-    photon(λ::FT, E::FT) where {FT<:AbstractFloat}
+    photon(λ::FT, E::FT) where {FT}
 
 Return the number of moles of photons, given
 - `λ` Wave length in `[nm]`, converted to `[m]` by FAC
 - `E` Joules of energy
 
 """
-function photon(λ::FT, E::FT) where {FT<:AbstractFloat}
+function photon(λ::FT, E::FT) where {FT}
     return E * λ * FT(FAC)
 end
 
@@ -100,8 +100,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    photon!(λ::Vector{FT}, E::Vector{FT}, phot::Vector{FT}) where {FT<:AbstractFloat}
-    photon!(λ::Vector{FT}, E::Vector{FT}) where {FT<:AbstractFloat}
+    photon!(λ::Vector{FT}, E::Vector{FT}, phot::Vector{FT}) where {FT}
+    photon!(λ::Vector{FT}, E::Vector{FT}) where {FT}
 
 Compute and save the number of moles of photons, given
 - `λ` Wave length in `[nm]`, converted to `[m]` by FAC
@@ -111,9 +111,9 @@ Compute and save the number of moles of photons, given
 """
 function photon! end
 
-photon!(λ::Vector{FT}, E::Vector{FT}, phot::Vector{FT}) where {FT<:AbstractFloat} = (phot .= photon.(λ, E); return nothing);
+photon!(λ::Vector{FT}, E::Vector{FT}, phot::Vector{FT}) where {FT} = (phot .= photon.(λ, E); return nothing);
 
-photon!(λ::Vector{FT}, E::Vector{FT}) where {FT<:AbstractFloat} = (E .*= λ .* FT(FAC); return nothing);
+photon!(λ::Vector{FT}, E::Vector{FT}) where {FT} = (E .*= λ .* FT(FAC); return nothing);
 
 
 #######################################################################################################################################################################################################
@@ -125,14 +125,14 @@ photon!(λ::Vector{FT}, E::Vector{FT}) where {FT<:AbstractFloat} = (E .*= λ .* 
 #######################################################################################################################################################################################################
 """
 
-    energy(λ::FT, phot::FT) where {FT<:AbstractFloat}
+    energy(λ::FT, phot::FT) where {FT}
 
 Return the energy, given
 - `λ` Wave length in `[nm]`, converted to `[m]` by FAC
 - `phot` Number of moles of photon
 
 """
-function energy(λ::FT, phot::FT) where {FT<:AbstractFloat}
+function energy(λ::FT, phot::FT) where {FT}
     return phot / (λ * FT(FAC))
 end
 
@@ -148,8 +148,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    energy!(λ::Vector{FT}, phot::Vector{FT}, E::Vector{FT}) where {FT<:AbstractFloat}
-    energy!(λ::Vector{FT}, phot::Vector{FT}) where {FT<:AbstractFloat}
+    energy!(λ::Vector{FT}, phot::Vector{FT}, E::Vector{FT}) where {FT}
+    energy!(λ::Vector{FT}, phot::Vector{FT}) where {FT}
 
 Compute and save the number of moles of photons, given
 - `λ` Wave length in `[nm]`, converted to `[m]` by FAC
@@ -159,9 +159,9 @@ Compute and save the number of moles of photons, given
 """
 function energy! end
 
-energy!(λ::Vector{FT}, phot::Vector{FT}, E::Vector{FT}) where {FT<:AbstractFloat} = (E .= energy.(λ, phot); return nothing);
+energy!(λ::Vector{FT}, phot::Vector{FT}, E::Vector{FT}) where {FT} = (E .= energy.(λ, phot); return nothing);
 
-energy!(λ::Vector{FT}, phot::Vector{FT}) where {FT<:AbstractFloat} = (phot ./= λ .* FT(FAC); return nothing);
+energy!(λ::Vector{FT}, phot::Vector{FT}) where {FT} = (phot ./= λ .* FT(FAC); return nothing);
 
 
 end # module

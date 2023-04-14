@@ -18,10 +18,10 @@
 #######################################################################################################################################################################################################
 """
 
-    flow_in(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT<:AbstractFloat}
-    flow_in(organ::Leaves1D{FT}) where {FT<:AbstractFloat}
-    flow_in(organs::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat}
-    flow_in(organs::Vector{Stem{FT}}) where {FT<:AbstractFloat}
+    flow_in(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT}
+    flow_in(organ::Leaves1D{FT}) where {FT}
+    flow_in(organs::Vector{Leaves2D{FT}}) where {FT}
+    flow_in(organs::Vector{Stem{FT}}) where {FT}
 
 Return the flow rate, given
 - `organ` `Leaf`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type struct
@@ -30,11 +30,11 @@ Return the flow rate, given
 """
 function flow_in end
 
-flow_in(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT<:AbstractFloat} = flow_in(organ.HS);
+flow_in(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT} = flow_in(organ.HS);
 
-flow_in(organ::Leaves1D{FT}) where {FT<:AbstractFloat} = (flow_in(organ.HS), flow_in(organ.HS2));
+flow_in(organ::Leaves1D{FT}) where {FT} = (flow_in(organ.HS), flow_in(organ.HS2));
 
-flow_in(organs::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
+flow_in(organs::Vector{Leaves2D{FT}}) where {FT} = (
     _f_sum::FT = 0;
     for _i in eachindex(organs)
         _f_sum += flow_in(organs[_i]) * organs[_i].HS.AREA;
@@ -43,7 +43,7 @@ flow_in(organs::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
     return _f_sum
 );
 
-flow_in(organs::Vector{Stem{FT}}) where {FT<:AbstractFloat} = (
+flow_in(organs::Vector{Stem{FT}}) where {FT} = (
     _f_sum::FT = 0;
     for _i in eachindex(organs)
         _f_sum += flow_in(organs[_i]);
@@ -52,11 +52,11 @@ flow_in(organs::Vector{Stem{FT}}) where {FT<:AbstractFloat} = (
     return _f_sum
 );
 
-flow_in(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}) where {FT<:AbstractFloat} = flow_in(hs.FLOW);
+flow_in(hs::Union{LeafHydraulics{FT,DIM_XYLEM}, RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM} = flow_in(hs.FLOW);
 
-flow_in(mode::SteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.flow;
+flow_in(mode::SteadyStateFlow{FT}) where {FT} = mode.flow;
 
-flow_in(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_in;
+flow_in(mode::NonSteadyStateFlow{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = mode.f_in;
 
 
 #######################################################################################################################################################################################################
@@ -69,7 +69,7 @@ flow_in(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_in;
 #######################################################################################################################################################################################################
 """
 
-    flow_out(lf::Union{Leaf{FT}, Leaves2D{FT}}) where {FT<:AbstractFloat}
+    flow_out(lf::Union{Leaf{FT}, Leaves2D{FT}}) where {FT}
 
 Return the net flow that escape from the leaf, given
 - `lf` `Leaf`, `Leaves2D`, `Root`, or `Stem` type organ
@@ -77,11 +77,11 @@ Return the net flow that escape from the leaf, given
 """
 function flow_out end
 
-flow_out(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT<:AbstractFloat} = flow_out(organ.HS.FLOW);
+flow_out(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT} = flow_out(organ.HS.FLOW);
 
-flow_out(mode::SteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.flow;
+flow_out(mode::SteadyStateFlow{FT}) where {FT} = mode.flow;
 
-flow_out(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_out;
+flow_out(mode::NonSteadyStateFlow{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = mode.f_out;
 
 
 #######################################################################################################################################################################################################
@@ -99,7 +99,7 @@ flow_out(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_out;
 #######################################################################################################################################################################################################
 """
 
-    root_pk(root::Root{FT}) where {FT<:AbstractFloat}
+    root_pk(root::Root{FT}) where {FT}
 
 Return the root end pressure and total hydraulic conductance to find solution of flow rates in all roots, given
 - `root` `Root` type struct
@@ -107,12 +107,12 @@ Return the root end pressure and total hydraulic conductance to find solution of
 """
 function root_pk end
 
-root_pk(root::Root{FT}, slayer::SoilLayer{FT}) where {FT<:AbstractFloat} = root._isconnected ? root_pk(root.HS, slayer, root.t) : (FT(NaN), FT(0));
+root_pk(root::Root{FT}, slayer::SoilLayer{FT}) where {FT} = root._isconnected ? root_pk(root.HS, slayer, root.t) : (FT(NaN), FT(0));
 
-root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, T::FT) where {FT<:AbstractFloat} = root_pk(hs, slayer, hs.FLOW, T);
+root_pk(hs::RootHydraulics{FT,DIM_XYLEM}, slayer::SoilLayer{FT}, T::FT) where {FT,DIM_XYLEM} = root_pk(hs, slayer, hs.FLOW, T);
 
-root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
-    (; AREA, DIM_XYLEM, K_RHIZ, K_X, L, ΔH) = hs;
+root_pk(hs::RootHydraulics{FT,DIM_XYLEM}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT,DIM_XYLEM} = (
+    (; AREA, K_RHIZ, K_X, L, ΔH) = hs;
 
     _k_max = AREA * K_X / L;
     _f_st = relative_surface_tension(T);
@@ -153,8 +153,8 @@ root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}
     return _p_end, 1/_r_all
 );
 
-root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
-    (; AREA, DIM_XYLEM, K_RHIZ, K_X, L, ΔH) = hs;
+root_pk(hs::RootHydraulics{FT,DIM_XYLEM}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT,DIM_XYLEM}, T::FT) where {FT,DIM_XYLEM} = (
+    (; AREA, K_RHIZ, K_X, L, ΔH) = hs;
 
     _k_max = AREA * K_X / L;
     _f_st = relative_surface_tension(T);
@@ -240,20 +240,20 @@ function xylem_flow_profile! end
 
 """
 
-    xylem_flow_profile!(organ::Union{Leaf{FT}, Leaves2D{FT}, Stem{FT}}, Δt::FT) where {FT<:AbstractFloat}
-    xylem_flow_profile!(organ::Root{FT}, Δt::FT) where {FT<:AbstractFloat}
-    xylem_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat}
+    xylem_flow_profile!(organ::Union{Leaf{FT}, Leaves2D{FT}, Stem{FT}}, Δt::FT) where {FT}
+    xylem_flow_profile!(organ::Root{FT}, Δt::FT) where {FT}
+    xylem_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT}
 
 Update organ flow rate profile after setting up the flow rate out, given
 - `organ` `Leaf`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type struct
 - `Δt` Time step length
 
 """
-xylem_flow_profile!(organ::Union{Leaf{FT}, Leaves2D{FT}, Stem{FT}}, Δt::FT) where {FT<:AbstractFloat} = xylem_flow_profile!(organ.HS, organ.t, Δt);
+xylem_flow_profile!(organ::Union{Leaf{FT}, Leaves2D{FT}, Stem{FT}}, Δt::FT) where {FT} = xylem_flow_profile!(organ.HS, organ.t, Δt);
 
-xylem_flow_profile!(organ::Root{FT}, Δt::FT) where {FT<:AbstractFloat} = organ._isconnected ? xylem_flow_profile!(organ.HS, organ.t, Δt) : nothing;
+xylem_flow_profile!(organ::Root{FT}, Δt::FT) where {FT} = organ._isconnected ? xylem_flow_profile!(organ.HS, organ.t, Δt) : nothing;
 
-xylem_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT} = (
     (; HS, HS2) = organ;
 
     xylem_flow_profile!(HS, organ.t[1], Δt);
@@ -262,11 +262,11 @@ xylem_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-xylem_flow_profile!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}, T::FT, Δt::FT) where {FT<:AbstractFloat} = xylem_flow_profile!(hs, hs.FLOW, T, Δt);
+xylem_flow_profile!(hs::Union{LeafHydraulics{FT,DIM_XYLEM}, RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}, T::FT, Δt::FT) where {FT,DIM_XYLEM} = xylem_flow_profile!(hs, hs.FLOW, T, Δt);
 
-xylem_flow_profile!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}, mode::SteadyStateFlow{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = nothing;
+xylem_flow_profile!(hs::Union{LeafHydraulics{FT,DIM_XYLEM}, RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}, mode::SteadyStateFlow{FT}, T::FT, Δt::FT) where {FT,DIM_XYLEM} = nothing;
 
-xylem_flow_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(hs::LeafHydraulics{FT,DIM_XYLEM}, mode::NonSteadyStateFlow{FT,1}, T::FT, Δt::FT) where {FT,DIM_XYLEM} = (
     (; PVC, V_MAXIMUM) = hs;
 
     _f_vis = relative_viscosity(T);
@@ -289,8 +289,8 @@ xylem_flow_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT,
     return nothing
 );
 
-xylem_flow_profile!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::NonSteadyStateFlow{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = (
-    (; DIM_XYLEM, PVC, V_MAXIMUM) = hs;
+xylem_flow_profile!(hs::Union{RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}, mode::NonSteadyStateFlow{FT,DIM_XYLEM}, T::FT, Δt::FT) where {FT,DIM_XYLEM} = (
+    (; PVC, V_MAXIMUM) = hs;
 
     _f_vis = relative_viscosity(T);
 
@@ -320,7 +320,7 @@ xylem_flow_profile!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::Non
 
 """
 
-    xylem_flow_profile!(roots::Vector{Root{FT}}, soil::Soil{FT}, cache_f::Vector{FT}, cache_k::Vector{FT}, cache_p::Vector{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat}
+    xylem_flow_profile!(roots::Vector{Root{FT}}, soil::Soil{FT}, cache_f::Vector{FT}, cache_k::Vector{FT}, cache_p::Vector{FT}, f_sum::FT, Δt::FT) where {FT}
 
 Partition root flow rates at different layers for known total flow rate out, given
 - `roots` Vector of `Root` in a multiple roots system
@@ -333,7 +333,7 @@ Partition root flow rates at different layers for known total flow rate out, giv
 - `Δt` Time step length
 
 """
-xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT} = (
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # very first step here: if soil is too dry, disconnect root from soil
@@ -414,7 +414,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
 
     # use second solver to solve for the flow rates (when SWC differs alot among layers)
     if _use_second_solver
-        @inline diff_p_root(ind::Int, e::FT, p::FT) where {FT<:AbstractFloat} = (
+        @inline diff_p_root(ind::Int, e::FT, p::FT) where {FT} = (
             _root = ROOTS[ind];
             _slayer = SOIL.LAYERS[ROOTS_INDEX[ind]];
             if _root._isconnected
@@ -425,7 +425,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
             return _p - p
         );
 
-        @inline diff_e_root(p::FT) where {FT<:AbstractFloat} = (
+        @inline diff_e_root(p::FT) where {FT} = (
             _sum::FT = 0;
             for _i in eachindex(ROOTS_INDEX)
                 _root = ROOTS[_i];
@@ -475,22 +475,22 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
     return nothing
 );
 
-xylem_flow_profile!(mode::SteadyStateFlow, flow::FT) where {FT<:AbstractFloat} = (mode.flow = flow; return nothing);
+xylem_flow_profile!(mode::SteadyStateFlow, flow::FT) where {FT} = (mode.flow = flow; return nothing);
 
-xylem_flow_profile!(mode::NonSteadyStateFlow, f_out::FT) where {FT<:AbstractFloat} = (mode.f_out = f_out; mode._f_element .= f_out .- mode._f_sum; return nothing);
+xylem_flow_profile!(mode::NonSteadyStateFlow, f_out::FT) where {FT} = (mode.f_out = f_out; mode._f_element .= f_out .- mode._f_sum; return nothing);
 
 
 """
 
-    xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
-    xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
+    xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT}
+    xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
 
 Update flow profiles for the soil-plant-air continuum (set up leaf flow rate from stomatal conductance first), given
 - `spac` `MonoElementSPAC` or `MultiLayerSPAC` type SPAC system
 - `Δt` Time step length
 
 """
-xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT} = (
     (; LEAF, ROOT, STEM) = spac;
 
     # 0. update leaf flow or f_out from stomatal conductance
@@ -510,7 +510,7 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat
     return nothing
 );
 
-xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # 0. update leaf flow or f_out from stomatal conductance
@@ -535,7 +535,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
     return nothing
 );
 
-xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT} = (
     (; AIR, LEAF) = spac;
 
     # update the
@@ -547,7 +547,7 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; AIR, CANOPY, DIM_LAYER, LEAVES, LEAVES_INDEX) = spac;
 
     for _i in eachindex(LEAVES)

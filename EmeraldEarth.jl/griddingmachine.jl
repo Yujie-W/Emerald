@@ -14,7 +14,7 @@ Structure to save gridded datasets from GriddingMachine
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct LandDatasets{FT<:AbstractFloat}
+Base.@kwdef mutable struct LandDatasets{FT}
     "Spatial resolution zoom factor, resolution is 1/gz °"
     gz::Int
     "Which year do the datasets apply (when applicable)"
@@ -91,14 +91,14 @@ end
 
 """
 
-    LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat}
+    LandDatasets{FT}(gm_tag::String, year::Int) where {FT}
 
 Constructor of LandDatasets, given
 - `gm_tag` Unique tag of GriddingMachine parameterization
 - `year` year of simulations
 
 """
-LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
+LandDatasets{FT}(gm_tag::String, year::Int) where {FT} = (
     @assert gm_tag in ["gm1", "gm2"] "Parameterization tag $(gm_tag) is not supported!";
 
     @tinfo "Querying data from GriddingMachine...";
@@ -157,8 +157,8 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
-    extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat}
+    extend_data!(dts::LandDatasets{FT}) where {FT}
+    extend_data!(data::Union{FT, Vector{FT}}) where {FT}
 
 Gap fill the data linearly, given
 - `dts` LandDatasets struct
@@ -167,7 +167,7 @@ Gap fill the data linearly, given
 """
 function extend_data! end
 
-extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
+extend_data!(dts::LandDatasets{FT}) where {FT} = (
     # determine where to fill based on land mask and lai
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
         if (dts.t_lm[_ilon,_ilat] > 0) && (nanmax(dts.p_lai[_ilon,_ilat,:]) > 0)
@@ -203,12 +203,12 @@ extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat} = (
+extend_data!(data::Union{FT, Vector{FT}}) where {FT} = (
     if sum(.!isnan.(data)) in [0, length(data)]
         return nothing
     end;
 
-    @inline find_last_number(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
+    @inline find_last_number(vec_in::Vector{FT}, ind::Int) where {FT} = (
         _x = ind;
         _y = vec_in[ind];
         for _i in ind:-1:1
@@ -222,7 +222,7 @@ extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat} = (
         return _x, _y
     );
 
-    @inline find_next_number(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
+    @inline find_next_number(vec_in::Vector{FT}, ind::Int) where {FT} = (
         _x = ind;
         _y = vec_in[ind];
         for _i in ind:1:length(vec_in)
@@ -236,7 +236,7 @@ extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat} = (
         return _x, _y
     );
 
-    @inline interpolate_data!(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
+    @inline interpolate_data!(vec_in::Vector{FT}, ind::Int) where {FT} = (
         if isnan(vec_in[ind])
             (_x1,_y1) = find_last_number(vec_in, ind);
             (_x2,_y2) = find_next_number(vec_in, ind);
@@ -284,13 +284,13 @@ CLM5_PFTS = ["not_vegetated",
 #######################################################################################################################################################################################################
 """
 
-    gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
+    gm_grids(dts::LandDatasets{FT}) where {FT}
 
 Prepare a matrix of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct
 
 """
-function gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
+function gm_grids(dts::LandDatasets{FT}) where {FT}
     # read some general data
     _ind_c3 = [2:14;16;17];
     _ccs = read_csv("$(@__DIR__)/../data/CO2-1Y.csv");

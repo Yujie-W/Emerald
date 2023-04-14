@@ -17,10 +17,10 @@ Structure to save root parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Root{FT<:AbstractFloat}
+Base.@kwdef mutable struct Root{FT}
     # Embedded structures
     "[`RootHydraulics`](@ref) type root hydraulic system"
-    HS::RootHydraulics{FT} = RootHydraulics{FT}()
+    HS::RootHydraulics{FT,DIM_XYLEM} = RootHydraulics{FT,DIM_XYLEM}()
 
     # Prognostic variables (not used for ∂y∂t)
     "Current temperature `[K]`"

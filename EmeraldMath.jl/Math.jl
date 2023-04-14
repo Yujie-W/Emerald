@@ -12,15 +12,15 @@ module Math
 #######################################################################################################################################################################################################
 """
 
-    numerical∫(f::Vector{FT}, Δx::Vector{FT}) where {FT<:AbstractFloat}
-    numerical∫(f::Vector{FT}, Δx::FT) where {FT<:AbstractFloat}
+    numerical∫(f::Vector{FT}, Δx::Vector{FT}) where {FT}
+    numerical∫(f::Vector{FT}, Δx::FT) where {FT}
 
 Return the intergal of given
 - `f` f(x) for each x
 - `Δx` Δx for x
 
-    numerical∫(f::Function, x_min::FT, x_max::FT, n::Int) where {FT<:AbstractFloat}
-    numerical∫(f::Function, x_min::FT, x_max::FT, x_tol::FT = sqrt(eps(FT)), y_tol::FT = sqrt(eps(FT))) where {FT<:AbstractFloat}
+    numerical∫(f::Function, x_min::FT, x_max::FT, n::Int) where {FT}
+    numerical∫(f::Function, x_min::FT, x_max::FT, x_tol::FT = sqrt(eps(FT)), y_tol::FT = sqrt(eps(FT))) where {FT}
 
 Return the integral of given
 - `f` A function
@@ -33,7 +33,7 @@ Return the integral of given
 """
 function numerical∫ end
 
-numerical∫(f::Vector{FT}, Δx::Vector{FT}) where {FT<:AbstractFloat} = (
+numerical∫(f::Vector{FT}, Δx::Vector{FT}) where {FT} = (
     if length(Δx) == length(f)
         return f' * Δx
     end;
@@ -43,9 +43,9 @@ numerical∫(f::Vector{FT}, Δx::Vector{FT}) where {FT<:AbstractFloat} = (
     return view(f,1:N)' * view(Δx,1:N)
 );
 
-numerical∫(f::Vector{FT}, Δx::FT) where {FT<:AbstractFloat} = sum(f) * abs(Δx);
+numerical∫(f::Vector{FT}, Δx::FT) where {FT} = sum(f) * abs(Δx);
 
-numerical∫(f::Function, x_min::FT, x_max::FT, n::Int) where {FT<:AbstractFloat} = (
+numerical∫(f::Function, x_min::FT, x_max::FT, n::Int) where {FT} = (
     _sum = 0;
     _dx  = (x_max - x_min) / n;
     for _i in 1:n
@@ -56,7 +56,7 @@ numerical∫(f::Function, x_min::FT, x_max::FT, n::Int) where {FT<:AbstractFloat
     return _sum * _dx
 );
 
-numerical∫(f::Function, x_min::FT, x_max::FT, x_tol::FT = sqrt(eps(FT)), y_tol::FT = sqrt(eps(FT))) where {FT<:AbstractFloat} = (
+numerical∫(f::Function, x_min::FT, x_max::FT, x_tol::FT = sqrt(eps(FT)), y_tol::FT = sqrt(eps(FT))) where {FT} = (
     @assert y_tol > 0;
 
     # _sum_0: sum before halfing steps (_N), _sum_N: sum after halfing steps
@@ -89,7 +89,7 @@ numerical∫(f::Function, x_min::FT, x_max::FT, x_tol::FT = sqrt(eps(FT)), y_tol
 #######################################################################################################################################################################################################
 """
 
-    lower_quadratic(a::FT, b::FT, c::FT) where {FT<:AbstractFloat}
+    lower_quadratic(a::FT, b::FT, c::FT) where {FT}
 
 Return the lower quadratic solution or NaN, given
 - `a` Parameter in `a*x^2 + b*x + c = 0`
@@ -97,7 +97,7 @@ Return the lower quadratic solution or NaN, given
 - `c` Parameter in `a*x^2 + b*x + c = 0`
 
 """
-function lower_quadratic(a::FT, b::FT, c::FT) where {FT<:AbstractFloat}
+function lower_quadratic(a::FT, b::FT, c::FT) where {FT}
     discr = b^2 - 4*a*c;
 
     if (discr >= 0) && (a > 0)
@@ -112,7 +112,7 @@ end
 
 """
 
-    upper_quadratic(a::FT, b::FT, c::FT) where {FT<:AbstractFloat}
+    upper_quadratic(a::FT, b::FT, c::FT) where {FT}
 
 Return the upper quadratic solution or NaN, given
 - `a` Parameter in `a*x^2 + b*x + c = 0`
@@ -120,7 +120,7 @@ Return the upper quadratic solution or NaN, given
 - `c` Parameter in `a*x^2 + b*x + c = 0`
 
 """
-function upper_quadratic(a::FT, b::FT, c::FT) where {FT<:AbstractFloat}
+function upper_quadratic(a::FT, b::FT, c::FT) where {FT}
     discr = b^2 - 4*a*c;
 
     if (discr >= 0) && (a > 0)

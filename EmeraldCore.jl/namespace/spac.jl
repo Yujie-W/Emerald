@@ -15,7 +15,7 @@ Structure that store memory information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SPACMemory{FT<:AbstractFloat}
+Base.@kwdef mutable struct SPACMemory{FT}
     "Chlorophyll content"
     chl::FT = -9999
     "Leaf area index"
@@ -44,7 +44,7 @@ Hierarchy of AbstractSPACSystem:
 - [`MultiLayerSPAC`](@ref)
 
 """
-abstract type AbstractSPACSystem{FT<:AbstractFloat} end
+abstract type AbstractSPACSystem{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -69,7 +69,7 @@ Struct for simplest SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MonoElementSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MonoElementSPAC{FT} <: AbstractSPACSystem{FT}
     # Embedded structures
     "Air conditions"
     AIR::AirLayer{FT} = AirLayer{FT}()
@@ -120,7 +120,7 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MultiLayerSPAC{FT} <: AbstractSPACSystem{FT}
     # dimensions
     "Dimension of air layers"
     DIM_AIR::Int = 25
@@ -217,7 +217,7 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     tropomi_sif₇₄₀::FT = 0
 end
 
-MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; DIM_LAYER, LEAVES) = spac;
 
     _gs_sunlit = zeros(FT, LEAVES[1].DIM_INCL, LEAVES[1].DIM_AZI, DIM_LAYER);

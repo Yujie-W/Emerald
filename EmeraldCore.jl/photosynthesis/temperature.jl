@@ -9,10 +9,10 @@
 #######################################################################################################################################################################################################
 """
 
-    temperature_correction(td::Arrhenius{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat}
-    temperature_correction(td::ArrheniusPeak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat}
-    temperature_correction(td::Q10{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat}
-    temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat}
+    temperature_correction(td::Arrhenius{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
+    temperature_correction(td::ArrheniusPeak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
+    temperature_correction(td::Q10{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
+    temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
 
 Return the correction ratio for a temperature dependent variable, given
 - `td` `Arrhenius`, `ArrheniusPeak`, `Q10`, or `Q10Peak` type temperature dependency struture
@@ -22,9 +22,9 @@ Return the correction ratio for a temperature dependent variable, given
 """
 function temperature_correction end
 
-temperature_correction(td::Arrhenius{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat} = exp( td.ΔHA / GAS_R(FT) * (1/t_ref - 1/t) );
+temperature_correction(td::Arrhenius{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = exp( td.ΔHA / GAS_R(FT) * (1/t_ref - 1/t) );
 
-temperature_correction(td::ArrheniusPeak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat} = (
+temperature_correction(td::ArrheniusPeak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = (
     (; ΔHA, ΔHD, ΔSV) = td;
 
     # _f_a: activation correction, _f_b: de-activation correction
@@ -34,9 +34,9 @@ temperature_correction(td::ArrheniusPeak{FT}, t::FT; t_ref::FT = td.T_REF) where
     return _f_a * _f_b
 );
 
-temperature_correction(td::Q10{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat} = td.Q_10 ^ ( (t - t_ref) / 10 );
+temperature_correction(td::Q10{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = td.Q_10 ^ ( (t - t_ref) / 10 );
 
-temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat} = (
+temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = (
     (; ΔHD, ΔSV) = td;
 
     # _f_a: activation correction, _f_b: de-activation correction
@@ -58,7 +58,7 @@ temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT<:
 #######################################################################################################################################################################################################
 """
 
-    temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat}
+    temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
 
 Return the temperature corrected value, given
 - `td` `Arrhenius`, `ArrheniusPeak`, `Q10`, or `Q10Peak` type temperature dependency struture
@@ -66,7 +66,7 @@ Return the temperature corrected value, given
 - `t_ref` Reference temperature in `K`, default is `td.T_REF` (298.15 K)
 
 """
-function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT<:AbstractFloat}
+function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
     return td.VAL_REF * temperature_correction(td, t; t_ref=t_ref)
 end
 
@@ -84,9 +84,9 @@ end
 #######################################################################################################################################################################################################
 """
 
-    photosystem_temperature_dependence!(psm::C3CytochromeModel{FT}, air::AirLayer{FT}, t::FT) where {FT<:AbstractFloat}
-    photosystem_temperature_dependence!(psm::C3VJPModel{FT}, air::AirLayer{FT}, t::FT) where {FT<:AbstractFloat}
-    photosystem_temperature_dependence!(psm::C4VJPModel{FT}, air::AirLayer{FT}, t::FT) where {FT<:AbstractFloat}
+    photosystem_temperature_dependence!(psm::C3CytochromeModel{FT}, air::AirLayer{FT}, t::FT) where {FT}
+    photosystem_temperature_dependence!(psm::C3VJPModel{FT}, air::AirLayer{FT}, t::FT) where {FT}
+    photosystem_temperature_dependence!(psm::C4VJPModel{FT}, air::AirLayer{FT}, t::FT) where {FT}
 
 Update the temperature dependencies of C3 photosynthesis model, given
 - `psm` `C3CytochromeModel`, `C3VJPModel`, or `C4VJPModel` structure for photosynthesis model
@@ -96,7 +96,7 @@ Update the temperature dependencies of C3 photosynthesis model, given
 """
 function photosystem_temperature_dependence! end
 
-photosystem_temperature_dependence!(psm::C3CytochromeModel{FT}, prc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT<:AbstractFloat} = (
+photosystem_temperature_dependence!(psm::C3CytochromeModel{FT}, prc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     if psm._t == t
         return nothing
     end;
@@ -117,7 +117,7 @@ photosystem_temperature_dependence!(psm::C3CytochromeModel{FT}, prc::CytochromeR
     return nothing
 );
 
-photosystem_temperature_dependence!(psm::C3VJPModel{FT}, prc::VJPReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT<:AbstractFloat} = (
+photosystem_temperature_dependence!(psm::C3VJPModel{FT}, prc::VJPReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     if psm._t == t
         return nothing
     end;
@@ -140,7 +140,7 @@ photosystem_temperature_dependence!(psm::C3VJPModel{FT}, prc::VJPReactionCenter{
     return nothing
 );
 
-photosystem_temperature_dependence!(psm::C4VJPModel{FT}, prc::VJPReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT<:AbstractFloat} = (
+photosystem_temperature_dependence!(psm::C4VJPModel{FT}, prc::VJPReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     if psm._t == t
         return nothing
     end;
@@ -171,9 +171,9 @@ photosystem_temperature_dependence!(psm::C4VJPModel{FT}, prc::VJPReactionCenter{
 #######################################################################################################################################################################################################
 """
 
-    ∂R∂T(leaf::Leaf{FT}) where {FT<:AbstractFloat}
-    ∂R∂T(leaves::Leaves1D{FT}) where {FT<:AbstractFloat}
-    ∂R∂T(leaves::Leaves2D{FT}) where {FT<:AbstractFloat}
+    ∂R∂T(leaf::Leaf{FT}) where {FT}
+    ∂R∂T(leaves::Leaves1D{FT}) where {FT}
+    ∂R∂T(leaves::Leaves2D{FT}) where {FT}
 
 Return the marginal increase in respiration rate per temperature, given
 - `leaf` `Leaf` type leaf
@@ -182,17 +182,17 @@ Return the marginal increase in respiration rate per temperature, given
 """
 function ∂R∂T end
 
-∂R∂T(leaf::Leaf{FT}) where {FT<:AbstractFloat} = ∂R∂T(leaf.PSM, leaf.t);
+∂R∂T(leaf::Leaf{FT}) where {FT} = ∂R∂T(leaf.PSM, leaf.t);
 
-∂R∂T(leaves::Leaves1D{FT}) where {FT<:AbstractFloat} = ∂R∂T(leaves.PSM, leaves.t[1]);
+∂R∂T(leaves::Leaves1D{FT}) where {FT} = ∂R∂T(leaves.PSM, leaves.t[1]);
 
-∂R∂T(leaves::Leaves2D{FT}) where {FT<:AbstractFloat} = ∂R∂T(leaves.PSM, leaves.t);
+∂R∂T(leaves::Leaves2D{FT}) where {FT} = ∂R∂T(leaves.PSM, leaves.t);
 
-∂R∂T(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}, t::FT) where {FT<:AbstractFloat} = ∂R∂T(psm.TD_R, psm.r_d25, t);
+∂R∂T(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}, t::FT) where {FT} = ∂R∂T(psm.TD_R, psm.r_d25, t);
 
-∂R∂T(td::Arrhenius{FT}, r_ref::FT, t::FT) where {FT<:AbstractFloat} = r_ref * exp(td.ΔHA / GAS_R(FT) * (1/td.T_REF - 1/t)) * td.ΔHA / (GAS_R(FT) * t ^ 2);
+∂R∂T(td::Arrhenius{FT}, r_ref::FT, t::FT) where {FT} = r_ref * exp(td.ΔHA / GAS_R(FT) * (1/td.T_REF - 1/t)) * td.ΔHA / (GAS_R(FT) * t ^ 2);
 
-∂R∂T(td::ArrheniusPeak{FT}, r_ref::FT, t::FT) where {FT<:AbstractFloat} = (
+∂R∂T(td::ArrheniusPeak{FT}, r_ref::FT, t::FT) where {FT} = (
     (; T_REF, ΔHA, ΔHD, ΔSV) = td;
 
     # _f_a: activation correction, _f_b: de-activation correction
@@ -206,9 +206,9 @@ function ∂R∂T end
     return r_ref * (_f_a′ * _f_b + _f_a * _f_b′)
 );
 
-∂R∂T(td::Q10{FT}, r_ref::FT, t::FT) where {FT<:AbstractFloat} = r_ref * log(td.Q_10) * td.Q_10 ^ ( (t - td.T_REF) / 10) / 10;
+∂R∂T(td::Q10{FT}, r_ref::FT, t::FT) where {FT} = r_ref * log(td.Q_10) * td.Q_10 ^ ( (t - td.T_REF) / 10) / 10;
 
-∂R∂T(td::Q10Peak{FT}, r_ref::FT, t::FT) where {FT<:AbstractFloat} = (
+∂R∂T(td::Q10Peak{FT}, r_ref::FT, t::FT) where {FT} = (
     (; T_REF, ΔHD, ΔSV) = td;
 
     # _f_a: activation correction, _f_b: de-activation correction

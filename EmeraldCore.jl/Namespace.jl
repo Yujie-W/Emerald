@@ -17,18 +17,19 @@ include("namespace/colimit.jl"  )
 include("namespace/geometry.jl" )
 include("namespace/kinetics.jl" )
 include("namespace/radiation.jl")
-include("namespace/soil.jl"     )
 include("namespace/stomata.jl"  )
 include("namespace/trace.jl"    )
-include("namespace/xylem.jl"    )
 
 include("namespace/config.jl"     )
 include("namespace/meteorology.jl")
-include("namespace/leaf.jl"       )
-include("namespace/root.jl"       )
-include("namespace/stem.jl"       )
+
+include("namespace/xylem.jl")
 
 include("namespace/canopy.jl")
+include("namespace/leaf.jl"  )
+include("namespace/root.jl"  )
+include("namespace/soil.jl"  )
+include("namespace/stem.jl"  )
 
 include("namespace/spac.jl"  )
 

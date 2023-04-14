@@ -8,8 +8,8 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<:AbstractFloat}
-    spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT}
+    spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Synchronize state variables from 1st to 2nd struct, given
 - `spac` `MultiLayerSPAC` struct for SPAC
@@ -18,7 +18,7 @@ Synchronize state variables from 1st to 2nd struct, given
 """
 function spac_state! end
 
-spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}, config::SPACConfiguration{FT}) where {FT} = (
     (; CANOPY, DIM_LAYER, LEAVES, MEMORY) = spac;
     (; WLSET) = config;
 
@@ -37,7 +37,7 @@ spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}, config::SP
     return nothing
 );
 
-spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; DIM_LAYER, LEAVES, MEMORY) = spac;
 
     for _i in 1:DIM_LAYER

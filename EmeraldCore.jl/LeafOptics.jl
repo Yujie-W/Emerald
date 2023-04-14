@@ -56,7 +56,7 @@ function leaf_spectra! end
                 apar_car::Bool = true,
                 reabsorb::Bool = true,
                 α::FT = FT(40)
-    ) where {FT<:AbstractFloat}
+    ) where {FT}
 
 Update leaf reflectance and transmittance spectra, and fluorescence spectrum matrices, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
@@ -86,7 +86,7 @@ leaf_spectra!(
             apar_car::Bool = true,
             reabsorb::Bool = true,
             α::FT = FT(40)
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     # if leaf water content is the same as the historical value, do nothing
     if lwc == bio._v_storage
         return nothing
@@ -265,7 +265,7 @@ leaf_spectra!(
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT<:AbstractFloat}
+    leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT}
 
 Update leaf reflectance and transmittance (e.g., prescribe broadband PAR and NIR values), given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
@@ -283,7 +283,7 @@ leaf_spectra!(bio, wls, 0.1, 0.45, 0.05, 0.25);
 ```
 
 """
-leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT<:AbstractFloat} = (
+leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT} = (
     (; IΛ_NIR, IΛ_PAR) = wls;
 
     bio.ρ_sw[IΛ_PAR] .= ρ_par;
@@ -307,14 +307,14 @@ leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_p
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
+    leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT}
 
 Update leaf reflectance and transmittance for SPAC, given
 - `spac` `MultiLayerSPAC` type SPAC
 - `config` Configurations of spac model
 
 """
-leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} = (
     (; LEAVES) = spac;
     (; APAR_CAR, LHA, WLSET) = config;
 
@@ -339,7 +339,7 @@ leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT
 #######################################################################################################################################################################################################
 """
 
-    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
+    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT}
 
 Return leaf level PAR, APAR, and PPAR, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
@@ -358,7 +358,7 @@ par,apar,ppar = leaf_PAR(bio, wls, rad; apar_car=false);
 ```
 
 """
-function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
+function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT}
     (; IΛ_PAR, ΔΛ_PAR, Λ_PAR) = wls;
 
     # PPAR absorption feature (after APAR is computed)
@@ -406,7 +406,7 @@ end
 #######################################################################################################################################################################################################
 """
 
-    leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT<:AbstractFloat}
+    leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT}
 
 Return the leaf level SIF at backward and forward directions, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
@@ -426,7 +426,7 @@ sif_b,sif_f = leaf_SIF(bio, wls, rad, 0.01; ϕ_photon=false);
 ```
 
 """
-function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT<:AbstractFloat}
+function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT}
     (; IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
 
     # calculate the excitation energy and photons

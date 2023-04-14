@@ -26,16 +26,16 @@ function light_limited_rate! end
 #######################################################################################################################################################################################################
 """
 
-    light_limited_rate!(psm::Union{C3CytochromeModel{FT}, C4VJPModel{FT}}) where {FT<:AbstractFloat}
-    light_limited_rate!(psm::C3VJPModel{FT}) where {FT<:AbstractFloat}
+    light_limited_rate!(psm::Union{C3CytochromeModel{FT}, C4VJPModel{FT}}) where {FT}
+    light_limited_rate!(psm::C3VJPModel{FT}) where {FT}
 
 Update the electron transport limited photosynthetic rate, given
 - `psm` `C3CytochromeModel`, `C3VJPModel`, or `C4VJPModel` structure for C3 photosynthesis model
 
 """
-light_limited_rate!(psm::Union{C3CytochromeModel{FT}, C4VJPModel{FT}}) where {FT<:AbstractFloat} = (psm._a_j = psm._j_pot * psm._e_to_c; return nothing);
+light_limited_rate!(psm::Union{C3CytochromeModel{FT}, C4VJPModel{FT}}) where {FT} = (psm._a_j = psm._j_pot * psm._e_to_c; return nothing);
 
-light_limited_rate!(psm::C3VJPModel{FT}) where {FT<:AbstractFloat} = (psm._a_j = psm._j * psm._e_to_c; return nothing);
+light_limited_rate!(psm::C3VJPModel{FT}) where {FT} = (psm._a_j = psm._j * psm._e_to_c; return nothing);
 
 
 #######################################################################################################################################################################################################
@@ -53,9 +53,9 @@ light_limited_rate!(psm::C3VJPModel{FT}) where {FT<:AbstractFloat} = (psm._a_j =
 #######################################################################################################################################################################################################
 """
 
-    light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat}
-    light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat}
-    light_limited_rate!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat}
+    light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
+    light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
+    light_limited_rate!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
 
 Update the electron transport limited photosynthetic rate in conductance mode, given
 - `psm` `C3CytochromeModel`, `C3VJPModel`, or `C4VJPModel` structure for C3 photosynthesis model
@@ -65,7 +65,7 @@ Update the electron transport limited photosynthetic rate in conductance mode, g
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     (; EFF_1, EFF_2) = psm;
 
     _eff_a = 1 - psm._η_l / psm._η_c;
@@ -91,7 +91,7 @@ light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}
     return nothing
 );
 
-light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     _a = psm._j;
     _b = psm._j * psm._γ_star;
     _c = psm.EFF_1;
@@ -110,4 +110,4 @@ light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLaye
     return nothing
 );
 
-light_limited_rate!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (psm._a_j = psm._j_pot * psm._e_to_c; return nothing);
+light_limited_rate!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm._a_j = psm._j_pot * psm._e_to_c; return nothing);

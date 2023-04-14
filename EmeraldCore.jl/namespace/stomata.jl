@@ -78,7 +78,7 @@ Struct to tune G1 or Vcmax based on leaf hydraulic conductance
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BetaFunction{FT<:AbstractFloat}
+Base.@kwdef mutable struct BetaFunction{FT}
     # General model information
     "Function to turn variables to β tuning factor"
     FUNC::Function = (x -> x)
@@ -118,7 +118,7 @@ Hierarchy of AbstractStomataModel:
 - [`Wang2SM`](@ref)
 
 """
-abstract type AbstractStomataModel{FT<:AbstractFloat} end
+abstract type AbstractStomataModel{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -143,7 +143,7 @@ where K is ``\\dfrac{∂E}{∂P}``.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct AndereggSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct AndereggSM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Quadratic equation parameter `[μmol m⁻² s⁻¹ MPa⁻²]`"
     A::FT = 0.5
@@ -177,7 +177,7 @@ gs = g0 + g1 ⋅ RH ⋅ \\dfrac{A}{Cs}
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BallBerrySM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct BallBerrySM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Minimal stomatal conductance `[mol m⁻² s⁻¹]`"
     G0::FT = 0.025
@@ -207,7 +207,7 @@ Empty struct for Eller stomatal model. The equation used for Eller type model is
 ```
 where K is ``\\dfrac{∂E}{∂P}``.
 """
-Base.@kwdef mutable struct EllerSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct EllerSM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
@@ -238,7 +238,7 @@ gs = g0 + g1 ⋅ \\dfrac{k_{leaf}}{k_{max}} ⋅ \\dfrac{A}{Ci}.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct GentineSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct GentineSM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Minimal stomatal conductance `[mol m⁻² s⁻¹]`"
     G0::FT = 0.025
@@ -274,7 +274,7 @@ gs = g0 + g1 ⋅ \\dfrac{A}{Cs - Γ^{*}} ⋅ \\dfrac{1}{1 + \\dfrac{VPD}{d0}}
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct LeuningSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct LeuningSM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Fitting parameter of d/d0 below the fraction, same unit as vpd `[Pa]`"
     D0::FT = 3000
@@ -312,7 +312,7 @@ gs = g0 + 1.6 ⋅ \\left( 1 + \\dfrac{g1}{\\sqrt{VPD}} \\right) ⋅ \\dfrac{A}{C
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MedlynSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct MedlynSM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Minimal stomatal conductance `[mol m⁻² s⁻¹]`"
     G0::FT = 0.025
@@ -342,7 +342,7 @@ Empty struct for Sperry stomatal model. The equation used for Sperry type model 
 ```
 where K is ``\\dfrac{∂E}{∂P}``.
 """
-Base.@kwdef mutable struct SperrySM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct SperrySM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
@@ -366,7 +366,7 @@ Empty struct for Wang stomatal model. The equation used for Wang type model is
 \\dfrac{∂Θ}{∂E} = \\dfrac{A}{E_{crit} - E}
 ```
 """
-Base.@kwdef mutable struct WangSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct WangSM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Fitness factor"
     F_FITNESS::FT = 0.1
@@ -403,7 +403,7 @@ where K is ``\\dfrac{∂E}{∂P}``.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Wang2SM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
+Base.@kwdef mutable struct Wang2SM{FT} <: AbstractStomataModel{FT}
     # General model information
     "Quadratic equation parameter `[MPa⁻²]`"
     A::FT = 0.1

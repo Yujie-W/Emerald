@@ -7,7 +7,7 @@
 #######################################################################################################################################################################################################
 """
 
-    next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, stepping::Bool) where {FT<:AbstractFloat}
+    next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, stepping::Bool) where {FT}
 
 Determine the next points to simulate, given
 - `f` Function to find peak
@@ -16,7 +16,7 @@ Determine the next points to simulate, given
 - `stepping` Optional. If true, save the optimization steps to the history field in method struct
 
 """
-function next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, stepping::Bool) where {FT<:AbstractFloat}
+function next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, stepping::Bool) where {FT}
     _x1,_x2,_x3,_y1,_y2,_y3 = xy;
     # if the curve if flat, do nothing
     if _y1==_y2==_y3
@@ -96,11 +96,11 @@ end
 #######################################################################################################################################################################################################
 """
 
-    find_peak(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat}
-    find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; stepping::Bool = false) where {FT<:AbstractFloat}
-    find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT<:AbstractFloat}
-    find_peak(f::Function, ms::ReduceStepMethod{FT}, tol::SolutionTolerance{FT}; stepping::Bool = false) where {FT<:AbstractFloat}
-    find_peak(f::Function, ms::ReduceStepMethodND{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT<:AbstractFloat}
+    find_peak(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT}
+    find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; stepping::Bool = false) where {FT}
+    find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT}
+    find_peak(f::Function, ms::ReduceStepMethod{FT}, tol::SolutionTolerance{FT}; stepping::Bool = false) where {FT}
+    find_peak(f::Function, ms::ReduceStepMethodND{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT}
 
 Find the solution that the y is maximum, given
 - `f` A function to solve
@@ -111,7 +111,7 @@ Find the solution that the y is maximum, given
 """
 function find_peak end
 
-find_peak(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_peak(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT} = (
     # create matrix to store data
     (; history, x_max, x_min, xy) = ms;
     xy[1,1] = x_min;
@@ -139,7 +139,7 @@ find_peak(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}
     return xy[_indy,1]
 );
 
-find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; stepping::Bool = false) where {FT} = (
     (; N, cen_x, con_x, exp_x, history, ref_x, simplex, x_inis) = ms;
     _nX = N;
     _nS = N + 1;
@@ -236,7 +236,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
     return view(simplex[1], 1:_nX)
 );
 
-find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT} = (
     (; cen_x, con_x, exp_x, history, ref_x, simplex, x_inis) = ms;
     _nX = ms.N;
     _nS = ms.N + 1;
@@ -338,7 +338,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
     return view(simplex[1], 1:_nX)
 );
 
-find_peak(f::Function, ms::ReduceStepMethod{FT}, tol::SolutionTolerance{FT}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_peak(f::Function, ms::ReduceStepMethod{FT}, tol::SolutionTolerance{FT}; stepping::Bool = false) where {FT} = (
     # count iterations
     count_all = 0;
 
@@ -392,7 +392,7 @@ find_peak(f::Function, ms::ReduceStepMethod{FT}, tol::SolutionTolerance{FT}; ste
     return tar_x
 );
 
-find_peak(f::Function, ms::ReduceStepMethodND{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_peak(f::Function, ms::ReduceStepMethodND{FT}, tol::SolutionToleranceND{FT}; stepping::Bool = false) where {FT} = (
     # define the initial step
     (; x_maxs, x_mins, x_targ, x_temp, Δ_oper, Δjd) = ms;
 

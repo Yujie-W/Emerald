@@ -39,7 +39,7 @@ function read_spectrum end
 #######################################################################################################################################################################################################
 """
 
-    read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT<:AbstractFloat}
+    read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT}
 
 Return the spectrum value at target wavelength bin, given
 - `x` X-axis of the spectrum
@@ -47,7 +47,7 @@ Return the spectrum value at target wavelength bin, given
 - `target` Target x value
 
 """
-read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT<:AbstractFloat} = (
+read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
     @assert length(x) == length(y) "Dimensions of provided spectrum x and y must match!";
     @assert x[1] <= target <= x[end] "Target wavelength must be within the range provided spectum!";
 
@@ -73,7 +73,7 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT<:AbstractFloat
 #######################################################################################################################################################################################################
 """
 
-    read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT<:AbstractFloat}
+    read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT}
 
 Return the spectrum value at target wavelength bin, given
 - `x` X-axis of the spectrum
@@ -83,7 +83,7 @@ Return the spectrum value at target wavelength bin, given
 - `steps` The incremental Δx is `(x₂ - x₁) / steps`
 
 """
-read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT<:AbstractFloat} = (
+read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT} = (
     _ys = 0;
     _δx = (x₂ - x₁) / steps;
     for _i in 1:(steps+1)
@@ -120,14 +120,14 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) 
 #######################################################################################################################################################################################################
 """
 
-    MODIS_BLUE(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_BLUE(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return blue band reflectance for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_BLUE(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_BLUE(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ) = wls;
 
@@ -137,14 +137,14 @@ end
 
 """
 
-    MODIS_EVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_EVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return EVI for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_EVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_EVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     _blue = MODIS_BLUE(can, wls);
     _red  = MODIS_RED(can, wls);
     _nir  = MODIS_NIR(can, wls);
@@ -155,14 +155,14 @@ end
 
 """
 
-    MODIS_EVI2(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_EVI2(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return EVI2 for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_EVI2(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_EVI2(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     _red = MODIS_RED(can, wls);
     _nir = MODIS_NIR(can, wls);
 
@@ -172,14 +172,14 @@ end
 
 """
 
-    MODIS_LSWI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_LSWI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return LSWI for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_LSWI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_LSWI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ) = wls;
 
@@ -192,14 +192,14 @@ end
 
 """
 
-    MODIS_NDVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_NDVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return NDVI for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_NDVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_NDVI(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     _red = MODIS_RED(can, wls);
     _nir = MODIS_NIR(can, wls);
 
@@ -209,14 +209,14 @@ end
 
 """
 
-    MODIS_NIR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_NIR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return near infrared band reflectance for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_NIR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_NIR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ) = wls;
 
@@ -226,14 +226,14 @@ end
 
 """
 
-    MODIS_NIRv(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_NIRv(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return NIRv for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_NIRv(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_NIRv(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     _red = MODIS_RED(can, wls);
     _nir = MODIS_NIR(can, wls);
 
@@ -243,14 +243,14 @@ end
 
 """
 
-    MODIS_NIRvR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_NIRvR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return NIRv radiance for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_NIRvR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_NIRvR(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ) = wls;
 
@@ -262,14 +262,14 @@ end
 
 """
 
-    MODIS_RED(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    MODIS_RED(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return red band reflectance for MODIS setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function MODIS_RED(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function MODIS_RED(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ) = wls;
 
@@ -279,14 +279,14 @@ end
 
 """
 
-    OCO2_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    OCO2_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 759 nm for OCO2 setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function OCO2_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function OCO2_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 
@@ -296,14 +296,14 @@ end
 
 """
 
-    OCO2_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    OCO2_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 770 nm for OCO2 setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function OCO2_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function OCO2_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 
@@ -313,14 +313,14 @@ end
 
 """
 
-    OCO3_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    OCO3_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 759 nm for OCO3 setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function OCO3_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function OCO3_SIF759(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 
@@ -330,14 +330,14 @@ end
 
 """
 
-    OCO3_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    OCO3_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 770 nm for OCO3 setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function OCO3_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function OCO3_SIF770(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 
@@ -347,14 +347,14 @@ end
 
 """
 
-    TROPOMI_SIF683(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF683(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 682.5 nm for TROPOMI setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function TROPOMI_SIF683(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function TROPOMI_SIF683(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 
@@ -364,14 +364,14 @@ end
 
 """
 
-    TROPOMI_SIF740(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF740(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 740 nm for TROPOMI setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function TROPOMI_SIF740(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function TROPOMI_SIF740(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 
@@ -381,14 +381,14 @@ end
 
 """
 
-    TROPOMI_SIF747(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF747(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 746.5 nm for TROPOMI setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function TROPOMI_SIF747(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function TROPOMI_SIF747(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 
@@ -398,14 +398,14 @@ end
 
 """
 
-    TROPOMI_SIF751(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF751(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Return SIF @ 750.5 nm for TROPOMI setup, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-function TROPOMI_SIF751(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+function TROPOMI_SIF751(can::HyperspectralMLCanopy{FT}, wls::WaveLengthSet{FT}) where {FT}
     (; RADIATION) = can;
     (; Λ_SIF) = wls;
 

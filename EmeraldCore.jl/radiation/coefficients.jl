@@ -24,14 +24,14 @@ function extinction_coefficient end
 #######################################################################################################################################################################################################
 """
 
-    extinction_coefficient(sza::FT, lia::FT) where {FT<:AbstractFloat}
+    extinction_coefficient(sza::FT, lia::FT) where {FT}
 
 Return the extinction coefficient for direct radiation, given
 - `sza` Solar zenith angle in `°`
 - `lia` Leaf inclination angle in `°`
 
 """
-extinction_coefficient(sza::FT, lia::FT) where {FT<:AbstractFloat} = (
+extinction_coefficient(sza::FT, lia::FT) where {FT} = (
     _π = FT(pi);
 
     _Cs = cosd(lia) * cosd(sza);
@@ -52,13 +52,13 @@ extinction_coefficient(sza::FT, lia::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    extinction_coefficient(lia::FT) where {FT<:AbstractFloat}
+    extinction_coefficient(lia::FT) where {FT}
 
 Return the extinction coefficient for diffuse radiation (unifrom 18 average angles from 2.5° to 87.5°), given
 - `sza` Solar zenith angle in `°`
 
 """
-extinction_coefficient(lia::FT) where {FT<:AbstractFloat} = (
+extinction_coefficient(lia::FT) where {FT} = (
     # compute the mean extinction coefficient for diffuse solar radiation from 18 angles
     _kd::FT = 0;
     for _sza in 0:5:89
@@ -86,7 +86,7 @@ extinction_coefficient(lia::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    extinction_coefficient(sza::FT, vza::FT, raa::FT, lia::FT) where {FT<:AbstractFloat}
+    extinction_coefficient(sza::FT, vza::FT, raa::FT, lia::FT) where {FT}
 
 Return the extinction and scattering coefficients (extinction coefficients from solar and viewing directions, and scattering coefficients for backward and forward directions, and some sin and cos
     products: _Co, _Cs, _So, _Ss), given
@@ -96,7 +96,7 @@ Return the extinction and scattering coefficients (extinction coefficients from 
 - `lia` Leaf inclination angle in `°`
 
 """
-extinction_coefficient(sza::FT, vza::FT, raa::FT, lia::FT) where {FT<:AbstractFloat} = (
+extinction_coefficient(sza::FT, vza::FT, raa::FT, lia::FT) where {FT} = (
     _π = FT(pi);
 
     # 1. compute the extinction coefficients (_ks for direct solar flux Es, _ko for flux-equivalent radiance Eo)
@@ -166,14 +166,14 @@ function extinction_scattering_coefficients! end
 #######################################################################################################################################################################################################
 """
 
-    extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
+    extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
 
 Update the extinction and scattering coefficients, given
 - `can` `BroadbandSLCanopy` type canopy
 - `angles` `SunSensorGeometry` type angles
 
 """
-extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
+extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
     (; P_INCL, RADIATION, Θ_INCL) = can;
 
     # the extinction coefficients for direct radiation at different inclination angles
@@ -198,14 +198,14 @@ extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSenso
 #######################################################################################################################################################################################################
 """
 
-    extinction_scattering_coefficients!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
+    extinction_scattering_coefficients!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
 
 Update the extinction and scattering coefficients, given
 - `can` `HyperspectralMLCanopy` type canopy
 - `angles` `SunSensorGeometry` type angles
 
 """
-extinction_scattering_coefficients!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
+extinction_scattering_coefficients!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
     (; OPTICS, Θ_INCL) = can;
 
     for _i in eachindex(Θ_INCL)

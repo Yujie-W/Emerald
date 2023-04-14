@@ -14,7 +14,7 @@ Hierarchy of AbstractRadiation:
 - [`HyperspectralRadiation`](@ref)
 
 """
-abstract type AbstractRadiation{FT<:AbstractFloat} end
+abstract type AbstractRadiation{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -36,7 +36,7 @@ Structure that stores broadband radiation information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BroadbandRadiation{FT<:AbstractFloat} <: AbstractRadiation{FT}
+Base.@kwdef mutable struct BroadbandRadiation{FT} <: AbstractRadiation{FT}
     # prognostic variables that change with time
     "Diffuse radiation from NIR region `[W m⁻²]`"
     e_diffuse_nir::FT = 0
@@ -70,10 +70,10 @@ Structure that stores hyperspectral radiation information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralRadiation{FT<:AbstractFloat} <: AbstractRadiation{FT}
+Base.@kwdef mutable struct HyperspectralRadiation{FT} <: AbstractRadiation{FT}
     # Prognostic variables
     "Diffuse radiation `[mW m⁻² nm⁻¹]`"
     e_diffuse::Vector{FT} = read_nc(LAND_2021, "E_DIFF")
     "Direct radiation `[mW m⁻² nm⁻¹]`"
     e_direct::Vector{FT} = read_nc(LAND_2021, "E_DIR")
-endz
+end

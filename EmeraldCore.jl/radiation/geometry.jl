@@ -28,14 +28,14 @@ function canopy_optical_properties! end
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
 
 Updates canopy optical properties (extinction coefficients for direct and diffuse light) based on the SAIL model, given
 - `can` `HyperspectralMLCanopy` type struct
 - `angles` `SunSensorGeometry` type struct
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
     (; DIM_LAYER, HOT_SPOT, OPTICS, P_INCL, Θ_AZI) = can;
 
     if can.lai == 0
@@ -83,7 +83,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeom
     OPTICS.p_sunlit .= (view(OPTICS.ps,1:DIM_LAYER) .+ view(OPTICS.ps,2:DIM_LAYER+1)) ./ 2;
 
     _dso = sqrt( tand(angles.sza) ^ 2 + tand(angles.vza) ^ 2 - 2 * tand(angles.sza) * tand(angles.vza) * cosd(angles.vaa - angles.saa) );
-    @inline _pdf(x::FT) where {FT<:AbstractFloat} = (
+    @inline _pdf(x::FT) where {FT} = (
         _Σk = OPTICS.ko + OPTICS.ks;
         _Πk = OPTICS.ko * OPTICS.ks;
         _cl = can.ci * can.lai;
@@ -115,8 +115,8 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeom
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT}
+    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -124,7 +124,7 @@ Updates lower soil boundary reflectance, given
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; OPTICS) = can;
     (; IΛ_NIR, IΛ_PAR) = wls;
 
@@ -136,7 +136,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoil
     return nothing
 );
 
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; OPTICS) = can;
 
     OPTICS.ρ_dd[:,end] .= albedo.ρ_sw;
@@ -160,7 +160,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::Hyperspectral
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Updates canopy optical properties (scattering coefficient matrices), given
 - `can` `HyperspectralMLCanopy` type struct
@@ -169,7 +169,7 @@ Updates canopy optical properties (scattering coefficient matrices), given
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; DIM_LAYER, OPTICS) = can;
     (; ALBEDO) = soil;
     @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";

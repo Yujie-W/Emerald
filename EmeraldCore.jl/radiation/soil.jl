@@ -35,7 +35,7 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -45,9 +45,9 @@ Updates lower soil boundary reflectance, given
 """
 function soil_albedo! end
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = soil_albedo!(can, soil, soil.ALBEDO, wls);
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT} = soil_albedo!(can, soil, soil.ALBEDO, wls);
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
@@ -68,7 +68,7 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSo
     return nothing
 );
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; COLOR, LAYERS) = soil;
     (; IΛ_NIR, IΛ_PAR) = wls;
     @assert 1 <= COLOR <=20;
@@ -103,7 +103,7 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::Hyperspectr
     albedo._weight .= pinv(albedo.MAT_ρ) * albedo._ρ_sw;
 
     # function to solve for weights
-    @inline _fit(x::Vector{FT}) where {FT<:AbstractFloat} = (
+    @inline _fit(x::Vector{FT}) where {FT} = (
         mul!(albedo._ρ_sw, albedo.MAT_ρ, x);
         albedo._tmp_vec_nir .= abs.(view(albedo._ρ_sw,IΛ_NIR) .- _nir);
         _diff = ( mean( view(albedo._ρ_sw,IΛ_PAR) ) - _par ) ^ 2 + mean( albedo._tmp_vec_nir ) ^ 2;

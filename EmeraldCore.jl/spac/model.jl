@@ -36,10 +36,10 @@ This function is supposed to have the highest hierarchy, and should support all 
                 p_on::Bool = true,
                 t_on::Bool = true,
                 update::Bool = false,
-                θ_on::Bool = true) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::Nothing, config::Nothing; update::Bool = false) where {FT<:AbstractFloat}
+                θ_on::Bool = true) where {FT}
+    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT}
+    soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT}
+    soil_plant_air_continuum!(spac::Nothing, config::Nothing; update::Bool = false) where {FT}
 
 Run SPAC model and move forward in time with time stepper controller, given
 - `spac` `MultiLayerSPAC` SPAC, or nothing
@@ -63,7 +63,7 @@ soil_plant_air_continuum!(
             t_on::Bool = true,
             update::Bool = false,
             θ_on::Bool = true
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
 
@@ -105,7 +105,7 @@ soil_plant_air_continuum!(
 
 soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) = nothing;
 
-soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
 

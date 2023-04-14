@@ -16,10 +16,10 @@
 #######################################################################################################################################################################################################
 """
 
-    critical_pressure(vc::ComplexVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat}
-    critical_pressure(vc::LogisticVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat}
-    critical_pressure(vc::PowerVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat}
-    critical_pressure(vc::WeibullVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat}
+    critical_pressure(vc::ComplexVC{FT}, kr::FT = FT(0.001)) where {FT}
+    critical_pressure(vc::LogisticVC{FT}, kr::FT = FT(0.001)) where {FT}
+    critical_pressure(vc::PowerVC{FT}, kr::FT = FT(0.001)) where {FT}
+    critical_pressure(vc::WeibullVC{FT}, kr::FT = FT(0.001)) where {FT}
 
 Return the critical xylem water pressure at 25 °C that triggers a given amount of loss of conductance, given
 - `vc` `ComplexVC`, `LogisticVC`, `PowerVC`, or `WeibullVC` type struct
@@ -28,13 +28,13 @@ Return the critical xylem water pressure at 25 °C that triggers a given amount 
 """
 function critical_pressure end
 
-critical_pressure(vc::LogisticVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = log(kr / (vc.A + 1 - kr * vc.A)) / vc.B;
+critical_pressure(vc::LogisticVC{FT}, kr::FT = FT(0.001)) where {FT} = log(kr / (vc.A + 1 - kr * vc.A)) / vc.B;
 
-critical_pressure(vc::PowerVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = -1 * ((1 - kr) / (kr * vc.A)) ^ (1 / vc.B);
+critical_pressure(vc::PowerVC{FT}, kr::FT = FT(0.001)) where {FT} = -1 * ((1 - kr) / (kr * vc.A)) ^ (1 / vc.B);
 
-critical_pressure(vc::WeibullVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = -1 * (-1 * log(kr)) ^ (1 / vc.C) * vc.B;
+critical_pressure(vc::WeibullVC{FT}, kr::FT = FT(0.001)) where {FT} = -1 * (-1 * log(kr)) ^ (1 / vc.C) * vc.B;
 
-critical_pressure(vc::ComplexVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+critical_pressure(vc::ComplexVC{FT}, kr::FT = FT(0.001)) where {FT} = (
     (; VCS) = vc;
 
     _p_crit::FT = 0;

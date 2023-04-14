@@ -23,7 +23,7 @@ Structure that stores air layer information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
+Base.@kwdef mutable struct AirLayer{FT}
     # Location and geometry of the air layer
     "Mean height of the layer `[m]`"
     Z::FT = 0.5

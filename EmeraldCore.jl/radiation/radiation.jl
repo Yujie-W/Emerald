@@ -27,7 +27,7 @@ function shortwave_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
+    shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT}
 
 Updates shortwave radiation profiles for BroadbandSLCanopy, given
 - `can` `BroadbandSLCanopy` type struct
@@ -36,7 +36,7 @@ Updates shortwave radiation profiles for BroadbandSLCanopy, given
 - `soil` `Soil` type struct
 
 """
-shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT} = (
     (; RADIATION) = can;
     (; BIO) = leaf;
     (; ALBEDO) = soil;
@@ -67,18 +67,18 @@ shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::Broadb
     #
 
     # when the radiation is from top to buttom
-    @inline shaded_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline shaded_integral_top(k::FT, α::FT) where {FT} = (
         return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
     );
-    @inline sunlit_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline sunlit_integral_top(k::FT, α::FT) where {FT} = (
         return (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
     );
 
     # when the radiation is from bottom to top
-    @inline shaded_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline shaded_integral_down(k::FT, α::FT) where {FT} = (
         return exp(-sqrt(α) * k * can.ci * can.lai) / (RADIATION.k_direct + sqrt(α) * k) * (exp((RADIATION.k_direct + sqrt(α) * k) * can.ci * can.lai) - 1)
     );
-    @inline sunlit_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline sunlit_integral_down(k::FT, α::FT) where {FT} = (
         return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - shaded_integral_down(k, α)
     );
 
@@ -138,8 +138,8 @@ shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::Broadb
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
-    shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat}
+    shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT}
+    shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Updates soil shortwave radiation profiles, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -147,7 +147,7 @@ Updates soil shortwave radiation profiles, given
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
+shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; DIM_LAYER, OPTICS, RADIATION) = can;
     (; IΛ_NIR, IΛ_PAR, ΔΛ) = wls;
 
@@ -164,7 +164,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo
     return nothing
 );
 
-shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT<:AbstractFloat} = (
+shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; DIM_LAYER, RADIATION) = can;
     (; ΔΛ) = wls;
 
@@ -205,7 +205,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAl
                 soil::Soil{FT},
                 wls::WaveLengthSet{FT};
                 apar_car::Bool = true
-    ) where {FT<:AbstractFloat}
+    ) where {FT}
 
 Updates canopy radiation profiles for shortwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -223,7 +223,7 @@ shortwave_radiation!(
             soil::Soil{FT},
             wls::WaveLengthSet{FT};
             apar_car::Bool = true
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
     (; ALBEDO) = soil;
     (; IΛ_PAR, ΔΛ, ΔΛ_PAR, Λ_PAR) = wls;
@@ -401,7 +401,7 @@ function longwave_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat}
+    longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT}
 
 Updates longwave radiation profiles, given
 - `can` `BroadbandSLCanopy` type struct
@@ -410,7 +410,7 @@ Updates longwave radiation profiles, given
 - `soil` `Soil` type struct
 
 """
-longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT} = (
     (; RADIATION) = can;
     (; BIO) = leaf;
     (; ALBEDO, LAYERS) = soil;
@@ -426,18 +426,18 @@ longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soi
     #     leaf_lw_in_soil = soil_out * τ_diffuse(LAI-x)
 
     # when the radiation is from top to buttom
-    @inline shaded_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline shaded_integral_top(k::FT, α::FT) where {FT} = (
         return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
     );
-    @inline sunlit_integral_top(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline sunlit_integral_top(k::FT, α::FT) where {FT} = (
         return (1 - exp(-(sqrt(α) * k + RADIATION.k_direct) * can.ci * can.lai)) / (sqrt(α) * k + RADIATION.k_direct)
     );
 
     # when the radiation is from bottom to top
-    @inline shaded_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline shaded_integral_down(k::FT, α::FT) where {FT} = (
         return exp(-sqrt(α) * k * can.ci * can.lai) / (RADIATION.k_direct + sqrt(α) * k) * (exp((RADIATION.k_direct + sqrt(α) * k) * can.ci * can.lai) - 1)
     );
-    @inline sunlit_integral_down(k::FT, α::FT) where {FT<:AbstractFloat} = (
+    @inline sunlit_integral_down(k::FT, α::FT) where {FT} = (
         return (1 - exp(-sqrt(α) * k * can.ci * can.lai)) / (sqrt(α) * k * can.ci) - shaded_integral_down(k, α)
     );
 
@@ -479,7 +479,7 @@ longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soi
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat}
+    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -488,7 +488,7 @@ Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `soil` Bottom soil boundary layer
 
 """
-longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT} = (
     (; DIM_LAYER, OPTICS, RADIATION) = can;
     (; ALBEDO, LAYERS) = soil;
 
@@ -576,14 +576,14 @@ function canopy_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
+    canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave and longwave radiation, given
 - `spac` `MultiLayerSPAC` type SPAC
 - `config` Configurations of spac model
 
 """
-canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} = (
     (; ANGLES, CANOPY, DIM_LAYER, LEAVES, METEO, SOIL) = spac;
     (; APAR_CAR, WLSET) = config;
 

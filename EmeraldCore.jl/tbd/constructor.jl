@@ -24,7 +24,7 @@ TODO: move it to SoilPlantAirContinuum.jl
                 zss::Vector = collect(0:-0.25:-2),
                 zas::Vector = collect(0:0.5:13),
                 ssm::Bool = true
-    ) where {FT<:AbstractFloat}
+    ) where {FT}
 
 Construct a SPAC system for monospecies tree system, given
 - `psm` Photosynthesis model, must be C3, C4, or C3Cytochrome (note: there are C4 shrubs)
@@ -48,7 +48,7 @@ MultiLayerSPAC{FT}(
             zss::Vector = collect(0:-0.25:-2),
             zas::Vector = collect(0:0.5:13),
             ssm::Bool = true
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     @assert psm in ["C3", "C4", "C3Cytochrome"] "Photosynthesis model must be within [C3, C4, C3CytochromeModel]";
 
     # determine how many layers of roots

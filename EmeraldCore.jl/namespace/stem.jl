@@ -18,10 +18,10 @@ Structure to save stem parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Stem{FT<:AbstractFloat}
+Base.@kwdef mutable struct Stem{FT}
     # Embedded structures
     "[`StemHydraulics`](@ref) type stem hydraulic system"
-    HS::StemHydraulics{FT} = StemHydraulics{FT}()
+    HS::StemHydraulics{FT,DIM_XYLEM} = StemHydraulics{FT,DIM_XYLEM}()
 
     # Prognostic variables (not used for ∂y∂t)
     "Current temperature"

@@ -17,7 +17,7 @@ Hierarchy of AbstractXylemVC:
 - [`ComplexVC`](@ref)
 
 """
-abstract type AbstractXylemVC{FT<:AbstractFloat} end
+abstract type AbstractXylemVC{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -38,7 +38,7 @@ Modified logistic function for vulnerability curve
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct LogisticVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
+Base.@kwdef mutable struct LogisticVC{FT} <: AbstractXylemVC{FT}
     # General model information
     "Multiplier to exponential component"
     A::FT = 1
@@ -65,7 +65,7 @@ Power function for vulnerability curve
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct PowerVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
+Base.@kwdef mutable struct PowerVC{FT} <: AbstractXylemVC{FT}
     # General model information
     "Multiplier to power component `[MPa⁻ᵇ]`"
     A::FT = 1
@@ -92,7 +92,7 @@ Weibull cumulative distribution function for vulnerability curve
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct WeibullVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
+Base.@kwdef mutable struct WeibullVC{FT} <: AbstractXylemVC{FT}
     # General model information
     "Numerator in the exponential component `[MPa]`"
     B::FT = 2
@@ -119,7 +119,7 @@ A complex struct for segmented vulnerability curve such as dual Weibull function
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct ComplexVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
+Base.@kwdef mutable struct ComplexVC{FT} <: AbstractXylemVC{FT}
     # General model information
     "Percentages of each VC component"
     PS::Vector{FT} = FT[0.5, 0.5]
@@ -144,7 +144,7 @@ Hierarchy of AbstractPVCurve:
 - [`SegmentedPVCurve`](@ref)
 
 """
-abstract type AbstractPVCurve{FT<:AbstractFloat} end
+abstract type AbstractPVCurve{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -165,7 +165,7 @@ Struct that contains information for linear PV curve
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct LinearPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{FT}
+Base.@kwdef mutable struct LinearPVCurve{FT} <: AbstractPVCurve{FT}
     # General model information
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
     K_REFILL::FT = 1e4
@@ -193,7 +193,7 @@ Struct that contains information for segmented PV curve
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SegmentedPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{FT}
+Base.@kwdef mutable struct SegmentedPVCurve{FT} <: AbstractPVCurve{FT}
     # General model information
     "n_o / maximum V `[mol m⁻³]`"
     C_ALL::FT = 300
@@ -224,7 +224,7 @@ Hierarchy of AbstractFlowProfile:
 - [`SteadyStateFlow`](@ref)
 
 """
-abstract type AbstractFlowProfile{FT<:AbstractFloat} end
+abstract type AbstractFlowProfile{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -248,11 +248,7 @@ Struct that contains stem hydraulic system flow rates at non-steady state
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct NonSteadyStateFlow{FT<:AbstractFloat} <: AbstractFlowProfile{FT}
-    # Dimensions
-    "Dimension of capaciatance elements"
-    DIM_CAPACITY::Int = 1
-
+Base.@kwdef mutable struct NonSteadyStateFlow{FT,DIM_CAPACITY} <: AbstractFlowProfile{FT}
     # Diagnostic variables
     "Flow rate into the organ `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
     f_in::FT = 0
@@ -267,6 +263,8 @@ Base.@kwdef mutable struct NonSteadyStateFlow{FT<:AbstractFloat} <: AbstractFlow
     "Vector of sum buffer water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
     _f_sum::Vector{FT} = zeros(FT, DIM_CAPACITY)
 end
+
+NonSteadyStateFlow(FT, n::Int) = NonSteadyStateFlow{FT,n}();
 
 
 #######################################################################################################################################################################################################
@@ -287,7 +285,7 @@ Struct that contains stem hydraulic system flow rates at steady state
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SteadyStateFlow{FT<:AbstractFloat} <: AbstractFlowProfile{FT}
+Base.@kwdef mutable struct SteadyStateFlow{FT} <: AbstractFlowProfile{FT}
     # Diagnostic variables
     "Flow rate through the organ `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
     flow::FT = 0
@@ -311,7 +309,7 @@ Hierarchy of AbstractHydraulicSystem:
 - [`StemHydraulics`](@ref)
 
 """
-abstract type AbstractHydraulicSystem{FT<:AbstractFloat} end
+abstract type AbstractHydraulicSystem{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -336,11 +334,7 @@ Struct that contains leaf hydraulic system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct LeafHydraulics{FT<:AbstractFloat} <: AbstractHydraulicSystem{FT}
-    # Dimensions
-    "Dimension of xylem slices"
-    DIM_XYLEM::Int = 5
-
+Base.@kwdef mutable struct LeafHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSystem{FT}
     # General information of the hydraulic system
     "Leaf area `[m²]`"
     AREA::FT = 1500
@@ -353,7 +347,7 @@ Base.@kwdef mutable struct LeafHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
 
     # Embedded structures
     "Flow profile"
-    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT}} = SteadyStateFlow{FT}()
+    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,1}} = SteadyStateFlow{FT}()
     "Pressure volume curve for storage"
     PVC::Union{LinearPVCurve{FT}, SegmentedPVCurve{FT}} = SegmentedPVCurve{FT}()
     "Vulnerability curve"
@@ -384,6 +378,14 @@ Base.@kwdef mutable struct LeafHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
     _p_storage::FT = 0
 end
 
+LeafHydraulics(config::SPACConfiguration{FT}) where {FT} = (
+    if config.STEADY_STATE_HS
+        return LeafHydraulics{FT,config.DIM_XYLEM}()
+    else
+        return LeafHydraulics{FT,config.DIM_XYLEM}(FLOW = NonSteadyStateFlow(FT,1))
+    end;
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -408,11 +410,7 @@ Struct that contains root hydraulic system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct RootHydraulics{FT<:AbstractFloat} <: AbstractHydraulicSystem{FT}
-    # Dimensions
-    "Dimension of xylem slices"
-    DIM_XYLEM::Int = 5
-
+Base.@kwdef mutable struct RootHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSystem{FT}
     # General information of the hydraulic system
     "Root cross-section area `[m²]`"
     AREA::FT = 1
@@ -429,7 +427,7 @@ Base.@kwdef mutable struct RootHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
 
     # Embedded structures
     "Flow profile"
-    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT}} = SteadyStateFlow{FT}()
+    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,DIM_XYLEM}} = SteadyStateFlow{FT}()
     "Pressure volume curve for storage"
     PVC::Union{LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
     "Vulnerability curve"
@@ -460,6 +458,8 @@ Base.@kwdef mutable struct RootHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
     _p_storage::Vector{FT} = zeros(FT, DIM_XYLEM)
 end
 
+RootHydraulics(config::SPACConfiguration{FT}) where {FT} = RootHydraulics{FT,config.DIM_XYLEM}();
+
 
 #######################################################################################################################################################################################################
 #
@@ -483,11 +483,7 @@ Struct that contains stem hydraulic system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct StemHydraulics{FT<:AbstractFloat} <: AbstractHydraulicSystem{FT}
-    # Dimensions
-    "Dimension of xylem slices"
-    DIM_XYLEM::Int = 5
-
+Base.@kwdef mutable struct StemHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSystem{FT}
     # General information of the hydraulic system
     "Xylem cross-section area `[m²]`"
     AREA::FT = 1
@@ -502,7 +498,7 @@ Base.@kwdef mutable struct StemHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
 
     # Embedded structures
     "Flow profile"
-    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT}} = SteadyStateFlow{FT}()
+    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,DIM_XYLEM}} = SteadyStateFlow{FT}()
     "Pressure volume curve for storage"
     PVC::Union{LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
     "Vulnerability curve"
@@ -528,3 +524,5 @@ Base.@kwdef mutable struct StemHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
     "Pressure of storage per element"
     _p_storage::Vector{FT} = zeros(FT, DIM_XYLEM)
 end
+
+StemHydraulics(config::SPACConfiguration{FT}) where {FT} = StemHydraulics{FT,config.DIM_XYLEM}();

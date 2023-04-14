@@ -7,7 +7,7 @@
 #######################################################################################################################################################################################################
 """
 
-    save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number) where {FT<:AbstractFloat}
+    save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number) where {FT}
 
 Save the simulation results to netcdf file, given
 - `filename` Path of the netcdf file
@@ -15,7 +15,7 @@ Save the simulation results to netcdf file, given
 - `doy` Day of year as a float
 
 """
-function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number) where {FT<:AbstractFloat}
+function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number) where {FT}
     # read results from matrix of states
     @inline get_value(state::Union{Nothing,MultiLayerSPACState}, fn::Symbol) = (
         return isnothing(state) ? NaN32 : Float32(getfield(state, fn));

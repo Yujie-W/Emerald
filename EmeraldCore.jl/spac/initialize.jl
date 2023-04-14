@@ -10,7 +10,7 @@
 #######################################################################################################################################################################################################
 """
 
-    initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
+    initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT}
 
 Initialize the SPAC, given
 - `spac` `MultiLayerSPAC` SPAC
@@ -19,7 +19,7 @@ Initialize the SPAC, given
 """
 function initialize! end
 
-initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} = (
     (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content

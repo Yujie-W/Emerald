@@ -19,7 +19,7 @@ Structure that stores sun sensor geometry information.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SunSensorGeometry{FT<:AbstractFloat}
+Base.@kwdef mutable struct SunSensorGeometry{FT}
     # General site information
     "Hill facing azimuth angle `[°]`, 0 for North, 180 for south"
     HAA::FT = 0

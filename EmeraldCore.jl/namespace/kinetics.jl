@@ -15,7 +15,7 @@ Hierarchy of AbstractTemperatureDependency:
 - [`Q10`](@ref)
 
 """
-abstract type AbstractTemperatureDependency{FT<:AbstractFloat} end
+abstract type AbstractTemperatureDependency{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -40,7 +40,7 @@ Y_1 = Y_0 \\cdot \\exp \\left( \\dfrac{H_a}{R T_0} - \\dfrac{H_a}{R T_1} \\right
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Arrhenius{FT<:AbstractFloat} <: AbstractTemperatureDependency{FT}
+Base.@kwdef mutable struct Arrhenius{FT} <: AbstractTemperatureDependency{FT}
     # General model information
     "Reference temperature `[K]`"
     T_REF::FT
@@ -75,7 +75,7 @@ Y_1 = Y_0 \\cdot \\exp \\left( \\dfrac{H_a}{R T_0} - \\dfrac{H_a}{R T_1} \\right
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct ArrheniusPeak{FT<:AbstractFloat} <: AbstractTemperatureDependency{FT}
+Base.@kwdef mutable struct ArrheniusPeak{FT} <: AbstractTemperatureDependency{FT}
     # General model information
     "Reference temperature `[K]`"
     T_REF::FT
@@ -112,7 +112,7 @@ Y_1 = Y_0 \\cdot Q_{10} ^ \\dfrac{T_1 - T_0}{10}
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Q10{FT<:AbstractFloat} <: AbstractTemperatureDependency{FT}
+Base.@kwdef mutable struct Q10{FT} <: AbstractTemperatureDependency{FT}
     # General model information
     "Power of Q10 correction"
     Q_10::FT
@@ -146,7 +146,7 @@ Y_1 = Y_0 \\cdot Q_{10} ^ \\dfrac{T_1 - T_0}{10}
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Q10Peak{FT<:AbstractFloat} <: AbstractTemperatureDependency{FT}
+Base.@kwdef mutable struct Q10Peak{FT} <: AbstractTemperatureDependency{FT}
     # General model information
     "Power of Q10 correction"
     Q_10::FT

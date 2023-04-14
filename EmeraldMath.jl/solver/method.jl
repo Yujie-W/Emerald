@@ -12,7 +12,7 @@ Abstract type of the ConstrainedRootSolvers methods
 $(TYPEDEF)
 
 """
-abstract type AbstractCRSMethod{FT<:AbstractFloat} end
+abstract type AbstractCRSMethod{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -33,7 +33,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BisectionMethod{FT<:AbstractFloat} <: AbstractCRSMethod{FT}
+Base.@kwdef mutable struct BisectionMethod{FT} <: AbstractCRSMethod{FT}
     "lower bound"
     x_min::FT = 0
     "upper bound"
@@ -65,7 +65,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct NelderMeadMethod{FT<:AbstractFloat} <: AbstractCRSMethod{FT}
+Base.@kwdef mutable struct NelderMeadMethod{FT} <: AbstractCRSMethod{FT}
     "Number of parameters to optimize"
     N::Int = 2
     "Initial values"
@@ -107,7 +107,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct NewtonBisectionMethod{FT<:AbstractFloat} <: AbstractCRSMethod{FT}
+Base.@kwdef mutable struct NewtonBisectionMethod{FT} <: AbstractCRSMethod{FT}
     "Lower bound"
     x_min::FT = 0
     "Upper bound"
@@ -139,7 +139,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct NewtonRaphsonMethod{FT<:AbstractFloat} <: AbstractCRSMethod{FT}
+Base.@kwdef mutable struct NewtonRaphsonMethod{FT} <: AbstractCRSMethod{FT}
     "Initial guess"
     x_ini::FT
 
@@ -167,7 +167,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct ReduceStepMethod{FT<:AbstractFloat} <: AbstractCRSMethod{FT}
+Base.@kwdef mutable struct ReduceStepMethod{FT} <: AbstractCRSMethod{FT}
     "Lower bound"
     x_min::FT = 0
     "Upper bound"
@@ -202,7 +202,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct ReduceStepMethodND{FT<:AbstractFloat} <: AbstractCRSMethod{FT}
+Base.@kwdef mutable struct ReduceStepMethodND{FT} <: AbstractCRSMethod{FT}
     "Lower bound"
     x_mins::Vector{FT} = zeros(FT,2)
     "Upper bound"

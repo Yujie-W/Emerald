@@ -68,7 +68,7 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState{FT}}) where {FT<:AbstractFloat}
+    synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState{FT}}) where {FT}
 
 Synchronize SPAC parameters from,
 - `gm_params` Dict for GriddingMachine parameters

@@ -14,7 +14,7 @@ Hierarchy of AbstractSoilVC:
 - [`VanGenuchten`](@ref)
 
 """
-abstract type AbstractSoilVC{FT<:AbstractFloat} end
+abstract type AbstractSoilVC{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -36,7 +36,7 @@ Brooks Corey soil parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BrooksCorey{FT<:AbstractFloat} <:AbstractSoilVC{FT}
+Base.@kwdef mutable struct BrooksCorey{FT} <:AbstractSoilVC{FT}
     # General model information
     "Maximum soil hydraulic conductivity at 25 °C `[mol m⁻¹ s⁻¹ MPa⁻¹]`"
     K_MAX::FT
@@ -77,7 +77,7 @@ van Genuchten soil parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct VanGenuchten{FT<:AbstractFloat} <:AbstractSoilVC{FT}
+Base.@kwdef mutable struct VanGenuchten{FT} <:AbstractSoilVC{FT}
     # General model information
     "Maximum soil hydraulic conductivity at 25 °C `[mol m⁻¹ s⁻¹ MPa⁻¹]`"
     K_MAX::FT
@@ -100,13 +100,13 @@ end
 
 """
 
-    VanGenuchten{FT}(name::String) where {FT<:AbstractFloat}
+    VanGenuchten{FT}(name::String) where {FT}
 
 Constructor for [`VanGenuchten`](@ref), given
 - `name` Soil type name, need to be Sand, Loamy Sand, Sandy Loam, Loam (default), Sandy Clay Loam, Silt Loam, Silt, Clay Loam, Silty Clay Loam, Sandy Clay, Silty Clay, and Clay.
 
 """
-VanGenuchten{FT}(name::String) where {FT<:AbstractFloat} = (
+VanGenuchten{FT}(name::String) where {FT} = (
     #=
     # Parameters from Loam soil
     _p = [ 367.3476, 1.56, 0.43, 0.078, exp(-0.32) * 0.0254 / 3600];
@@ -196,7 +196,7 @@ Hierarchy of AbstractSoilAlbedo:
 - [`HyperspectralSoilAlbedo`](@ref)
 
 """
-abstract type AbstractSoilAlbedo{FT<:AbstractFloat} end
+abstract type AbstractSoilAlbedo{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -219,7 +219,7 @@ Structure for broadband soil albedo
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BroadbandSoilAlbedo{FT<:AbstractFloat} <: AbstractSoilAlbedo{FT}
+Base.@kwdef mutable struct BroadbandSoilAlbedo{FT} <: AbstractSoilAlbedo{FT}
     # Constants
     "Reflectance for longwave radiation"
     ρ_LW::FT = 0.06
@@ -265,7 +265,7 @@ Structure for hyperspectral soil albedo
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT<:AbstractFloat} <: AbstractSoilAlbedo{FT}
+Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT} <: AbstractSoilAlbedo{FT}
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
@@ -334,7 +334,7 @@ Structure for soil layer
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SoilLayer{FT<:AbstractFloat}
+Base.@kwdef mutable struct SoilLayer{FT}
     # Constants
     "Specific heat capacity of soil `[J K⁻¹ kg⁻¹]`"
     CP::FT = 760
@@ -411,7 +411,7 @@ Structure for Soil
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Soil{FT<:AbstractFloat}
+Base.@kwdef mutable struct Soil{FT}
     # Dimensions
     "Dimension of soil layers"
     DIM_SOIL::Int = 5

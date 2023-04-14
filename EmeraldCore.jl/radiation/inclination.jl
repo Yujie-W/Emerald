@@ -7,7 +7,7 @@
 #######################################################################################################################################################################################################
 """
 
-    lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat}
+    lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT}
 
 Return the cumulative distribution frequency, given
 - `lidf` `VerhoefLIDF` type algorithm
@@ -16,7 +16,7 @@ Return the cumulative distribution frequency, given
 """
 function lidf_cdf end
 
-lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
+lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT} = (
     (; A, B) = lidf;
 
     if A >= 1
@@ -51,7 +51,7 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::VerhoefLIDF{FT}) where {FT<:AbstractFloat}
+    inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::VerhoefLIDF{FT}) where {FT}
 
 Update the frequency of leaf inclination angles, given
 - `can` `HyperspectralMLCanopy` type multiple layer canopy
@@ -60,7 +60,7 @@ Update the frequency of leaf inclination angles, given
 """
 function inclination_angles! end
 
-inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::VerhoefLIDF{FT}) where {FT<:AbstractFloat} = (
+inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::VerhoefLIDF{FT}) where {FT} = (
     (; Θ_INCL_BNDS) = can;
 
     for _i in eachindex(can.P_INCL)

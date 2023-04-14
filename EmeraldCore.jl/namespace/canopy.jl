@@ -26,7 +26,7 @@ Structure for Verhoef LIDF algorithm
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloat}
+Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT}
     # Dimensions
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
@@ -201,7 +201,7 @@ Hierarchy of AbstractCanopy:
 - [`HyperspectralMLCanopyRadiationProfile`](@ref)
 
 """
-abstract type AbstractCanopyRadiationProfile{FT<:AbstractFloat} end
+abstract type AbstractCanopyRadiationProfile{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -226,7 +226,7 @@ Structure to store canopy radiation profiles
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BroadbandSLCanopyRadiationProfile{FT<:AbstractFloat} <: AbstractCanopyRadiationProfile{FT}
+Base.@kwdef mutable struct BroadbandSLCanopyRadiationProfile{FT} <: AbstractCanopyRadiationProfile{FT}
     # dimensions
     "Dimension of inclination angles"
     DIM_INCL::Int = 9
@@ -288,7 +288,7 @@ Structure to store canopy radiation profiles
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFloat} <: AbstractCanopyRadiationProfile{FT}
+Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT} <: AbstractCanopyRadiationProfile{FT}
     # Dimensions
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
@@ -424,7 +424,7 @@ Hierarchy of AbstractLIDFAlgorithm:
 - [`VerhoefLIDF`](@ref)
 
 """
-abstract type AbstractLIDFAlgorithm{FT<:AbstractFloat} end
+abstract type AbstractLIDFAlgorithm{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -447,7 +447,7 @@ Structure for Verhoef LIDF algorithm
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct VerhoefLIDF{FT<:AbstractFloat} <: AbstractLIDFAlgorithm{FT}
+Base.@kwdef mutable struct VerhoefLIDF{FT} <: AbstractLIDFAlgorithm{FT}
     # General model information
     "Leaf inclination angle distribution function parameter a"
     A::FT = 0
@@ -472,7 +472,7 @@ Hierarchy of AbstractCanopy:
 - [`HyperspectralMLCanopy`](@ref)
 
 """
-abstract type AbstractCanopy{FT<:AbstractFloat} end
+abstract type AbstractCanopy{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -498,7 +498,7 @@ Structure to save single layer broadband canopy parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BroadbandSLCanopy{FT<:AbstractFloat} <: AbstractCanopy{FT}
+Base.@kwdef mutable struct BroadbandSLCanopy{FT} <: AbstractCanopy{FT}
     # Dimensions
     "Dimension of inclination angles"
     DIM_INCL::Int = 9
@@ -554,7 +554,7 @@ Structure to save multiple layer hyperspectral canopy parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractCanopy{FT}
+Base.@kwdef mutable struct HyperspectralMLCanopy{FT} <: AbstractCanopy{FT}
     # Dimensions
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
@@ -577,17 +577,17 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
                 DIM_AZI = DIM_AZI,
                 DIM_INCL = DIM_INCL,
                 DIM_LAYER = DIM_LAYER,
-                DIM_SIF = WLSET.DIM_SIF,
-                DIM_SIFE = WLSET.DIM_SIFE,
-                DIM_WL = WLSET.DIM_WL)
+                DIM_SIF = length(WLSET.Λ_SIF),
+                DIM_SIFE = length(WLSET.Λ_SIFE),
+                DIM_WL = length(WLSET.Λ))
     "Canopy radiation profiles"
     RADIATION::HyperspectralMLCanopyRadiationProfile{FT} = HyperspectralMLCanopyRadiationProfile{FT}(
                 DIM_AZI = DIM_AZI,
                 DIM_INCL = DIM_INCL,
                 DIM_LAYER = DIM_LAYER,
-                DIM_PAR = WLSET.DIM_PAR,
-                DIM_SIF = WLSET.DIM_SIF,
-                DIM_WL = WLSET.DIM_WL)
+                DIM_PAR = length(WLSET.IΛ_PAR),
+                DIM_SIF = length(WLSET.Λ_SIF),
+                DIM_WL = length(WLSET.Λ))
 
     # Geometry information
     "Inclination angle distribution"

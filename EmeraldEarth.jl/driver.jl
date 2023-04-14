@@ -8,7 +8,7 @@
 #######################################################################################################################################################################################################
 """
 
-    weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+    weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf::Bool = true, soil::Bool = true) where {FT}
 
 Preload weather drivers, given
 - `dts` `LandDatasets` from GriddingMachine
@@ -17,7 +17,7 @@ Preload weather drivers, given
 - `soil` Whether to prescribe soil water and temperature conditions, default is true
 
 """
-function weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+function weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf::Bool = true, soil::Bool = true) where {FT}
     # prescribe air layer environments and radiation
     @tinfo "Preloading weather driver for atmospheric pressure...";
     _wd_p_atm = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.P_ATM[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.P_ATM[1]);
@@ -92,8 +92,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
-    wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+    wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT}
+    wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT}
 
 Prepare a matrix of weather driver data to feed SPAC, given
 - `dts` `LandDatasets` from GriddingMachine
@@ -105,7 +105,7 @@ Prepare a matrix of weather driver data to feed SPAC, given
 """
 function wd_grids end
 
-wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
+wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT} = (
     # create a matrix of GriddingMachine data
     @tinfo "Preparing a matrix of weather driver data to work on...";
     _mat_wd = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
@@ -171,7 +171,7 @@ wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool
     return _mat_wd
 );
 
-wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
+wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT} = (
     # create a matrix of GriddingMachine data
     @tinfo "Preparing a matrix of weather driver data to work on...";
     _mat_wd = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));

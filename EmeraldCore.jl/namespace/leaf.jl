@@ -14,7 +14,7 @@ Hierarchy of AbstractLeafBiophysics:
 - [`HyperspectralLeafBiophysics`](@ref)
 
 """
-abstract type AbstractLeafBiophysics{FT<:AbstractFloat} end
+abstract type AbstractLeafBiophysics{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -38,7 +38,7 @@ Struct that contains leaf biophysical traits used to run leaf reflectance and tr
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct BroadbandLeafBiophysics{FT<:AbstractFloat} <: AbstractLeafBiophysics{FT}
+Base.@kwdef mutable struct BroadbandLeafBiophysics{FT} <: AbstractLeafBiophysics{FT}
     # General information of leaf biophysics
     "Broadband absorption fraction at the NIR region"
     α_NIR::FT = 0.2
@@ -81,7 +81,7 @@ Struct that contains leaf biophysical traits used to run leaf reflectance and tr
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralLeafBiophysics{FT<:AbstractFloat} <: AbstractLeafBiophysics{FT}
+Base.@kwdef mutable struct HyperspectralLeafBiophysics{FT} <: AbstractLeafBiophysics{FT}
     # Dimensions
     "Dimension of SIF wave length bins"
     DIM_SIF::Int = 29
@@ -223,7 +223,7 @@ Hierarchy of `AbstractPhotosynthesisModel`:
 - [`C4VJPModel`](@ref)
 
 """
-abstract type AbstractPhotosynthesisModel{FT<:AbstractFloat} end
+abstract type AbstractPhotosynthesisModel{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -254,7 +254,7 @@ Structure that stores C3 Cytochrome photosynthesis system information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3CytochromeModel{FT<:AbstractFloat} <: AbstractPhotosynthesisModel{FT}
+Base.@kwdef mutable struct C3CytochromeModel{FT} <: AbstractPhotosynthesisModel{FT}
     # General model information
     "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
     EFF_1::FT = 4
@@ -367,7 +367,7 @@ Structure that stores C3 photosynthesis system information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3VJPModel{FT<:AbstractFloat} <: AbstractPhotosynthesisModel{FT}
+Base.@kwdef mutable struct C3VJPModel{FT} <: AbstractPhotosynthesisModel{FT}
     # General model information
     "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
     EFF_1::FT = 4
@@ -468,7 +468,7 @@ Structure that stores C4 photosynthesis system information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C4VJPModel{FT<:AbstractFloat} <: AbstractPhotosynthesisModel{FT}
+Base.@kwdef mutable struct C4VJPModel{FT} <: AbstractPhotosynthesisModel{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
     COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
@@ -576,7 +576,7 @@ Structure that stores van der Tol et al. (2014) fluorescence model parameters.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct VanDerTolFluorescenceModel{FT<:AbstractFloat}
+Base.@kwdef mutable struct VanDerTolFluorescenceModel{FT}
     # General model information
     "Fitting parameter K_0"
     K_0::FT = 5.01
@@ -613,7 +613,7 @@ Hierarchy of the `AbstractReactionCenter`
 - [`CytochromeReactionCenter`](@ref)
 
 """
-abstract type AbstractReactionCenter{FT<:AbstractFloat} end
+abstract type AbstractReactionCenter{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -637,7 +637,7 @@ Structure that stores reaction center information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct VJPReactionCenter{FT<:AbstractFloat} <:AbstractReactionCenter{FT}
+Base.@kwdef mutable struct VJPReactionCenter{FT} <:AbstractReactionCenter{FT}
     # Constant coefficients
     "Fraction of absorbed light used by PSII ETR"
     F_PSII::FT = 0.5
@@ -708,7 +708,7 @@ Structure that stores reaction center information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct CytochromeReactionCenter{FT<:AbstractFloat} <:AbstractReactionCenter{FT}
+Base.@kwdef mutable struct CytochromeReactionCenter{FT} <:AbstractReactionCenter{FT}
     # Constant coefficients
     "Fraction of absorbed light used by PSI ETR"
     F_PSI::FT = 0.41 / (0.41 + 0.44)
@@ -758,7 +758,7 @@ Hierarchy of the `AbstractLeaf`
 - [`Leaves2D`](@ref)
 
 """
-abstract type AbstractLeaf{FT<:AbstractFloat} end
+abstract type AbstractLeaf{FT} end
 
 
 #######################################################################################################################################################################################################
@@ -794,7 +794,7 @@ Structure to save leaf parameters. This structure is meant for leaf level resear
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaf{FT} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -807,7 +807,7 @@ Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "[`AbstractLeafBiophysics`](@ref) type leaf biophysical parameters"
     BIO::Union{BroadbandLeafBiophysics{FT}, HyperspectralLeafBiophysics{FT}} = HyperspectralLeafBiophysics{FT}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    HS::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -880,7 +880,7 @@ Structure to save leaf parameters for a single canopy layer. This structure is m
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaves1D{FT} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -893,9 +893,9 @@ Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "[`BroadbandLeafBiophysics`](@ref) type leaf biophysical parameters"
     BIO::BroadbandLeafBiophysics{FT} = BroadbandLeafBiophysics{FT}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    HS::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system used for other calculations (say sunlit and shaded leaf partitioning)"
-    HS2::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    HS2::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -972,7 +972,7 @@ Structure to save leaf parameters for a single canopy layer. This structure is m
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaves2D{FT} <: AbstractLeaf{FT}
     # Dimensions
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
@@ -991,7 +991,7 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "[`HyperspectralLeafBiophysics`](@ref) type leaf biophysical parameters"
     BIO::HyperspectralLeafBiophysics{FT} = HyperspectralLeafBiophysics{FT}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    HS::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"

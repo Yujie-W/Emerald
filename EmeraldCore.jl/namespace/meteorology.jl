@@ -19,7 +19,7 @@ Structure that stores meteorological information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Meteorology{FT<:AbstractFloat}
+Base.@kwdef mutable struct Meteorology{FT}
     # Prognostic variables
     "Downwelling longwave radiation `[W m⁻²]`"
     rad_lw::FT = 100

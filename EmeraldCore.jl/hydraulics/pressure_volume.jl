@@ -11,8 +11,8 @@
 #######################################################################################################################################################################################################
 """
 
-    xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat}
-    xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat}
+    xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, T::FT) where {FT}
+    xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, T::FT) where {FT}
 
 Return the xylem water pressure in MPa, given
 - `pv` `LinearPVCurve` or `SegmentedPVCurve` type pressure volume curve
@@ -22,9 +22,9 @@ Return the xylem water pressure in MPa, given
 """
 function xylem_pressure end
 
-xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat} = (rvol - 1) / pv.SLOPE;
+xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, T::FT) where {FT} = (rvol - 1) / pv.SLOPE;
 
-xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, T::FT) where {FT} = (
     (; C_ALL, RWC_APO, RWC_TLP, ϵ_BULK) = pv;
 
     if rvol > RWC_TLP
@@ -51,8 +51,8 @@ xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFlo
 #######################################################################################################################################################################################################
 """
 
-    capacitance_buffer(pvc::LinearPVCurve{FT}) where {FT<:AbstractFloat}
-    capacitance_buffer(pvc::SegmentedPVCurve{FT}) where {FT<:AbstractFloat}
+    capacitance_buffer(pvc::LinearPVCurve{FT}) where {FT}
+    capacitance_buffer(pvc::SegmentedPVCurve{FT}) where {FT}
 
 Return the relative capacictance buffer rate, given
 - `pv` `LinearPVCurve` or `SegmentedPVCurve` type pressure volume curve
@@ -60,6 +60,6 @@ Return the relative capacictance buffer rate, given
 """
 function capacitance_buffer end
 
-capacitance_buffer(pvc::LinearPVCurve{FT}) where {FT<:AbstractFloat} = pvc.K_REFILL;
+capacitance_buffer(pvc::LinearPVCurve{FT}) where {FT} = pvc.K_REFILL;
 
-capacitance_buffer(pvc::SegmentedPVCurve{FT}) where {FT<:AbstractFloat} = pvc.K_REFILL * (1 - pvc.RWC_APO);
+capacitance_buffer(pvc::SegmentedPVCurve{FT}) where {FT} = pvc.K_REFILL * (1 - pvc.RWC_APO);

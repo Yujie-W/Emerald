@@ -20,12 +20,12 @@ import ..Namespace: BrooksCorey
 #######################################################################################################################################################################################################
 """
 
-    BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT<:AbstractFloat}
+    BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT}
 
 A constructor for BrooksCorey to create BrooksCorey type soil from VanGenuchten type, given
 - `vg` `VanGenuchten` type soil water retention curve
 """
-BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT<:AbstractFloat} = (
+BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT} = (
     _bc = BrooksCorey{FT}(K_MAX = vg.K_MAX, B = 1, TYPE = vg.TYPE, Ψ_SAT = 0.001, Θ_SAT = vg.Θ_SAT, Θ_RES = vg.Θ_RES);
 
     # generate data to fit
@@ -64,8 +64,8 @@ BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    soil_ψ_25(bc::BrooksCorey{FT}, θ::FT; oversaturation::Bool = false) where {FT<:AbstractFloat}
-    soil_ψ_25(vg::VanGenuchten{FT}, θ::FT; oversaturation::Bool = false) where {FT<:AbstractFloat}
+    soil_ψ_25(bc::BrooksCorey{FT}, θ::FT; oversaturation::Bool = false) where {FT}
+    soil_ψ_25(vg::VanGenuchten{FT}, θ::FT; oversaturation::Bool = false) where {FT}
 
 Return the soil metric potential, given
 - `bc` or `vg` `BrooksCorey` or `VanGenuchten` type structure
@@ -75,7 +75,7 @@ Return the soil metric potential, given
 """
 function soil_ψ_25 end
 
-soil_ψ_25(bc::BrooksCorey{FT}, θ::FT; oversaturation::Bool = false) where {FT<:AbstractFloat} = (
+soil_ψ_25(bc::BrooksCorey{FT}, θ::FT; oversaturation::Bool = false) where {FT} = (
     (; B, Ψ_SAT, Θ_RES, Θ_SAT) = bc;
 
     # calculate effective θ
@@ -89,7 +89,7 @@ soil_ψ_25(bc::BrooksCorey{FT}, θ::FT; oversaturation::Bool = false) where {FT<
     return -Ψ_SAT / (_θ_e ^ B)
 );
 
-soil_ψ_25(vg::VanGenuchten{FT}, θ::FT; oversaturation::Bool = false) where {FT<:AbstractFloat} = (
+soil_ψ_25(vg::VanGenuchten{FT}, θ::FT; oversaturation::Bool = false) where {FT} = (
     (; M, N, α, Θ_RES, Θ_SAT) = vg;
 
     # calculate effective θ
@@ -113,8 +113,8 @@ soil_ψ_25(vg::VanGenuchten{FT}, θ::FT; oversaturation::Bool = false) where {FT
 #######################################################################################################################################################################################################
 """
 
-    soil_θ(bc::BrooksCorey{FT}, ψ_25::FT) where {FT<:AbstractFloat}
-    soil_θ(vg::VanGenuchten{FT}, ψ_25::FT) where {FT<:AbstractFloat}
+    soil_θ(bc::BrooksCorey{FT}, ψ_25::FT) where {FT}
+    soil_θ(vg::VanGenuchten{FT}, ψ_25::FT) where {FT}
 
 Return the soil water content, given
 - `bc` or `vg` `BrooksCorey` or `VanGenuchten` type structure
@@ -123,7 +123,7 @@ Return the soil water content, given
 """
 function soil_θ end
 
-soil_θ(bc::BrooksCorey{FT}, ψ_25::FT) where {FT<:AbstractFloat} = (
+soil_θ(bc::BrooksCorey{FT}, ψ_25::FT) where {FT} = (
     (; B, Ψ_SAT, Θ_RES, Θ_SAT) = bc;
 
     if ψ_25 >= 0
@@ -133,7 +133,7 @@ soil_θ(bc::BrooksCorey{FT}, ψ_25::FT) where {FT<:AbstractFloat} = (
     return (-Ψ_SAT/ψ_25) ^ (1/B) * (Θ_SAT - Θ_RES) + Θ_RES
 );
 
-soil_θ(vg::VanGenuchten{FT}, ψ_25::FT) where {FT<:AbstractFloat} = (
+soil_θ(vg::VanGenuchten{FT}, ψ_25::FT) where {FT} = (
     (; M, N, α, Θ_RES, Θ_SAT) = vg;
 
     if ψ_25 >= 0
@@ -159,10 +159,10 @@ soil_θ(vg::VanGenuchten{FT}, ψ_25::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    relative_hydraulic_conductance(bc::BrooksCorey{FT}, θ::FT) where {FT<:AbstractFloat}
-    relative_hydraulic_conductance(bc::BrooksCorey{FT}, ψ::Bool, ψ_25::FT) where {FT<:AbstractFloat}
-    relative_hydraulic_conductance(vg::VanGenuchten{FT}, θ::FT) where {FT<:AbstractFloat}
-    relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where {FT<:AbstractFloat}
+    relative_hydraulic_conductance(bc::BrooksCorey{FT}, θ::FT) where {FT}
+    relative_hydraulic_conductance(bc::BrooksCorey{FT}, ψ::Bool, ψ_25::FT) where {FT}
+    relative_hydraulic_conductance(vg::VanGenuchten{FT}, θ::FT) where {FT}
+    relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where {FT}
 
 Return the relative hydraulic conductance of the soil, given
 - `bc` or `vg` `BrooksCorey` or `VanGenuchten` type structure
@@ -173,7 +173,7 @@ Return the relative hydraulic conductance of the soil, given
 """
 function relative_hydraulic_conductance end
 
-relative_hydraulic_conductance(bc::BrooksCorey{FT}, θ::FT) where {FT<:AbstractFloat} = (
+relative_hydraulic_conductance(bc::BrooksCorey{FT}, θ::FT) where {FT} = (
     (; B, Θ_RES, Θ_SAT) = bc;
 
     _θ_e = min(1, max(eps(FT), (θ - Θ_RES) / (Θ_SAT - Θ_RES)));
@@ -181,7 +181,7 @@ relative_hydraulic_conductance(bc::BrooksCorey{FT}, θ::FT) where {FT<:AbstractF
     return max(eps(FT), _θ_e ^ (2 * B + 3))
 );
 
-relative_hydraulic_conductance(bc::BrooksCorey{FT}, ψ::Bool, ψ_25::FT) where {FT<:AbstractFloat} = (
+relative_hydraulic_conductance(bc::BrooksCorey{FT}, ψ::Bool, ψ_25::FT) where {FT} = (
     (; B, Ψ_SAT) = bc;
 
     # if the potential > 0, return 1
@@ -194,7 +194,7 @@ relative_hydraulic_conductance(bc::BrooksCorey{FT}, ψ::Bool, ψ_25::FT) where {
     return max(eps(FT), _θ_e ^ (2 * B + 3))
 );
 
-relative_hydraulic_conductance(vg::VanGenuchten{FT}, θ::FT) where {FT<:AbstractFloat} = (
+relative_hydraulic_conductance(vg::VanGenuchten{FT}, θ::FT) where {FT} = (
     (; M, N, Θ_RES, Θ_SAT) = vg;
 
     _θ_e = min(1, max(eps(FT), (θ - Θ_RES) / (Θ_SAT - Θ_RES)));
@@ -202,7 +202,7 @@ relative_hydraulic_conductance(vg::VanGenuchten{FT}, θ::FT) where {FT<:Abstract
     return max(eps(FT), sqrt(_θ_e) * (1 - (1 - _θ_e ^ (1 / M)) ^ M)^2)
 );
 
-relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where {FT<:AbstractFloat} = (
+relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where {FT} = (
     (; M, N, α) = vg;
 
     # if the potential > 0, return 1
@@ -248,13 +248,13 @@ function soil_budget! end
 
 """
 
-    soil_budget!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    soil_budget!(spac::MultiLayerSPAC{FT}) where {FT}
 
 Update the marginal increase of soil water content and energy per layer, given
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-soil_budget!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+soil_budget!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; METEO, ROOTS, ROOTS_INDEX, SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
@@ -314,14 +314,14 @@ soil_budget!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 
 """
 
-    soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+    soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
 
 Run soil water and energy budget, given
 - `spac` `MultiLayerSPAC` SPAC
 - `δt` Time step
 
 """
-soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
+soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
     (; SOIL) = spac;
 
     # run the time step
@@ -360,7 +360,7 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    root_sink(root::Root{FT}) where {FT<:AbstractFloat}
+    root_sink(root::Root{FT}) where {FT}
 
 Return root water update, given
 - `root` `Root` type struct that may contain non- and steady state flow
@@ -368,11 +368,11 @@ Return root water update, given
 """
 function root_sink end
 
-root_sink(root::Root{FT}) where {FT<:AbstractFloat} = root_sink(root.HS.FLOW);
+root_sink(root::Root{FT}) where {FT} = root_sink(root.HS.FLOW);
 
-root_sink(mode::SteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.flow;
+root_sink(mode::SteadyStateFlow{FT}) where {FT} = mode.flow;
 
-root_sink(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_in;
+root_sink(mode::NonSteadyStateFlow{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = mode.f_in;
 
 
 end # module

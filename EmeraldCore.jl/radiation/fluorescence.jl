@@ -18,7 +18,7 @@
 #######################################################################################################################################################################################################
 """
 
-    canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
+    canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT}
 
 Updates canopy fluorescence, given
 - `spac` `MultiLayerSPAC` type SPAC
@@ -27,7 +27,7 @@ Updates canopy fluorescence, given
 """
 function canopy_fluorescence! end
 
-canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} = (
     (; ANGLES, CANOPY, LEAVES) = spac;
     (; WLSET, Φ_PHOTON) = config;
 
@@ -40,7 +40,7 @@ canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) wh
     return nothing
 );
 
-canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, wls::WaveLengthSet{FT}; ϕ_photon::Bool = true) where {FT<:AbstractFloat} = (
+canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, wls::WaveLengthSet{FT}; ϕ_photon::Bool = true) where {FT} = (
     (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
 

@@ -25,7 +25,7 @@ Immutable struct that contains leaf biophysical traits used to run leaf reflecti
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct HyperspectralAbsorption{FT<:AbstractFloat}
+Base.@kwdef struct HyperspectralAbsorption{FT}
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
@@ -78,7 +78,7 @@ Immutable structure that stores wave length information.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct WaveLengthSet{FT<:AbstractFloat}
+Base.@kwdef struct WaveLengthSet{FT}
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
@@ -109,18 +109,6 @@ Base.@kwdef struct WaveLengthSet{FT<:AbstractFloat}
     "Indicies of Λ_SIFE in Λ"
     IΛ_SIFE::Vector{Int} = findall( WL_SIFE[1] .<= Λ .<= WL_SIFE[2] )
 
-    # Dimensions
-    "Number of wavelength bins for NIR"
-    DIM_NIR::Int = length(IΛ_NIR)
-    "Number of wavelength bins for PAR"
-    DIM_PAR::Int = length(IΛ_PAR)
-    "Number of wavelength bins for SIF"
-    DIM_SIF::Int = length(IΛ_SIF)
-    "Number of wavelength bins for SIFE"
-    DIM_SIFE::Int = length(IΛ_SIFE)
-    "Number of wavelength bins"
-    DIM_WL::Int = length(Λ)
-
     # Constants based on the ones above
     "Differential wavelength `[nm]`"
     ΔΛ::Vector{FT} = Λ_UPPER .- Λ_LOWER
@@ -145,6 +133,7 @@ end
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
 #     2023-Apr-13: move APAR_CAR from leaf structs
 #     2023-Apr-13: move LHA and WLSET from HyperspectralMLCanopy
+#     2023-Apr-13: add fields DIM_* and STEADY_STATE_HS
 #
 #######################################################################################################################################################################################################
 """
@@ -159,23 +148,11 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
-    # Dimensions
-    "Dimension of azimuth angles"
-    DIM_AZI::Int = 36
-    "Dimension of inclination angles"
-    DIM_INCL::Int = 9
-    "Dimension of canopy layers"
-    DIM_LAYER::Int = 20
-    "Dimension of SIF wave length bins"
-    DIM_SIF::Int = 29
-    "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int = 45
-    "Dimension of short wave length bins"
-    DIM_WL::Int = 114
-
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
     APAR_CAR::Bool = true
+    "Whether to use steady state plant hydraulic system"
+    STEADY_STATE_HS::Bool = true
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
 
@@ -186,4 +163,28 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
     "Wave length set used to paramertize other variables"
     WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
+
+    # Dimensions
+    "Dimension of azimuth angles"
+    DIM_AZI::Int = 36
+    "Dimension of canopy layers"
+    DIM_CANOPY::Int = 20
+    "Dimension of inclination angles"
+    DIM_INCL::Int = 9
+    "Number of wavelength bins for NIR"
+    DIM_NIR::Int = length(WLSET.IΛ_NIR)
+    "Number of wavelength bins for PAR"
+    DIM_PAR::Int = length(WLSET.IΛ_PAR)
+    "Dimension of root layers"
+    DIM_ROOT::Int = 4
+    "Dimension of SIF wave length bins"
+    DIM_SIF::Int = length(WLSET.Λ_SIF)
+    "Dimension of SIF excitation wave length bins"
+    DIM_SIFE::Int = length(WLSET.Λ_SIFE)
+    "Dimension of soil layers"
+    DIM_SOIL::Int = 4
+    "Dimension of short wave length bins"
+    DIM_WL::Int = length(WLSET.Λ)
+    "Dimension of xylem elements"
+    DIM_XYLEM::Int = 5
 end
