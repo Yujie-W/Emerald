@@ -252,6 +252,7 @@ end
 #     2022-Jun-14: add wls in constructor function and remove n_λ
 #     2022-Jul-22: rename Ρ (greek) to ρ
 #     2022-Jul-27: add field α_CLM, _θ
+#     2023-Apr-13: move MAT_ρ to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -283,8 +284,6 @@ Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT} <: AbstractSoilAlbedo{FT}
     FITTING::Bool = true
 
     # Constants
-    "A matrix of characteristic curves"
-    MAT_ρ::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
     "Reflectance for longwave radiation"
     ρ_LW::FT = 0.06
 

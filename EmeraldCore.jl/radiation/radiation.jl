@@ -585,9 +585,9 @@ Updates canopy radiation profiles for shortwave and longwave radiation, given
 """
 canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT} = (
     (; ANGLES, CANOPY, DIM_LAYER, LEAVES, METEO, SOIL) = spac;
-    (; APAR_CAR, WLSET) = config;
+    (; APAR_CAR, MAT_ρ, WLSET) = config;
 
-    soil_albedo!(CANOPY, SOIL, WLSET);
+    soil_albedo!(CANOPY, SOIL, WLSET, MAT_ρ);
     if ANGLES.sza < 89
         canopy_optical_properties!(CANOPY, ANGLES);
         canopy_optical_properties!(CANOPY, LEAVES, SOIL, WLSET);

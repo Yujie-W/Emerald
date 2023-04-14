@@ -154,6 +154,7 @@ WaveLengthSet{FT}(dset::String) where {FT} =  (
 #     2023-Apr-13: move APAR_CAR from leaf structs
 #     2023-Apr-13: move LHA and WLSET from HyperspectralMLCanopy
 #     2023-Apr-13: add fields DIM_* and STEADY_STATE_HS
+#     2023-Apr-13: move MAT_ρ from HyperspectralSoilAlbedo
 #
 #######################################################################################################################################################################################################
 """
@@ -172,6 +173,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
 
+    # Wavelength information
+    "Wave length set used to paramertize other variables"
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET)
+
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
     APAR_CAR::Bool = true
@@ -179,10 +184,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     STEADY_STATE_HS::Bool = true
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
-
-    # Wavelength information
-    "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET)
 
     # Dimensions
     "Dimension of azimuth angles"
@@ -207,6 +208,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_WL::Int = length(WLSET.Λ)
     "Dimension of xylem elements"
     DIM_XYLEM::Int = 5
+
+    # Vectors
+    "A matrix of characteristic curves"
+    MAT_ρ::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
 
     # Embedded structures
     "Hyperspectral absorption features of different leaf components"

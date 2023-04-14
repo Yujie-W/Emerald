@@ -35,19 +35,20 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT}
+    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `can` `HyperspectralMLCanopy` type struct
 - `soil` `Soil` type struct
 - `wls` `WaveLengthSet` that contains wavelength information
+- `mat_ρ` Soil albedo characteristic curves
 
 """
 function soil_albedo! end
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT} = soil_albedo!(can, soil, soil.ALBEDO, wls);
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT} = soil_albedo!(can, soil, soil.ALBEDO, wls, mat_ρ);
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT} = (
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
@@ -68,7 +69,7 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSo
     return nothing
 );
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}) where {FT} = (
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT} = (
     (; COLOR, LAYERS) = soil;
     (; IΛ_NIR, IΛ_PAR) = wls;
     @assert 1 <= COLOR <=20;
@@ -100,11 +101,11 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::Hyperspectr
     # make an initial guess of the weights
     albedo._ρ_sw[IΛ_PAR] .= _par;
     albedo._ρ_sw[IΛ_NIR] .= _nir;
-    albedo._weight .= pinv(albedo.MAT_ρ) * albedo._ρ_sw;
+    albedo._weight .= pinv(mat_ρ) * albedo._ρ_sw;
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT} = (
-        mul!(albedo._ρ_sw, albedo.MAT_ρ, x);
+        mul!(albedo._ρ_sw, mat_ρ, x);
         albedo._tmp_vec_nir .= abs.(view(albedo._ρ_sw,IΛ_NIR) .- _nir);
         _diff = ( mean( view(albedo._ρ_sw,IΛ_PAR) ) - _par ) ^ 2 + mean( albedo._tmp_vec_nir ) ^ 2;
 
@@ -118,7 +119,7 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::Hyperspectr
     albedo._weight .= _sol;
 
     # update vectors in soil
-    mul!(albedo.ρ_sw, albedo.MAT_ρ, albedo._weight);
+    mul!(albedo.ρ_sw, mat_ρ, albedo._weight);
 
     # update the albedo._θ to avoid calling this function too many times
     albedo._θ = LAYERS[1].θ;
