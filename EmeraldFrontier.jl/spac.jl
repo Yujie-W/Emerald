@@ -21,7 +21,7 @@ function spac(gm_dict::Dict, config::SPACConfiguration{FT}) where {FT}
     _air_bounds = _Δz .* collect(0:21);
 
     # create a SPAC to work on
-    _spac = MultiLayerSPAC{FT,config.DIM_XYLEM}(
+    _spac = MultiLayerSPAC{FT,config.DIM_WL,config.DIM_XYLEM}(
                 DIM_AIR      = 25,
                 DIM_LAYER    = 10,
                 DIM_ROOT     = 4,

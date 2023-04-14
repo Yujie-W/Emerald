@@ -124,7 +124,7 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_XYLEM} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_WL,DIM_XYLEM} <: AbstractSPACSystem{FT}
     # dimensions
     "Dimension of air layers"
     DIM_AIR::Int = 25
@@ -165,7 +165,7 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_XYLEM} <: AbstractSPACSystem{FT
     "Memory cache"
     MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
-    METEO::Meteorology{FT} = Meteorology{FT}()
+    METEO::Meteorology{FT,DIM_WL} = Meteorology{FT,DIM_WL}()
     "Root hydraulic system"
     ROOTS::Vector{Root{FT,DIM_XYLEM}} = Root{FT,DIM_XYLEM}[Root{FT,DIM_XYLEM}() for _i in 1:DIM_ROOT]
     "Soil component"
@@ -184,7 +184,7 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_XYLEM} <: AbstractSPACSystem{FT
     _root_connection::Bool = true
 end
 
-MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIM_XYLEM}();
+MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIM_WL,config.DIM_XYLEM}();
 
 
 #######################################################################################################################################################################################################
@@ -223,7 +223,7 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     tropomi_sif₇₄₀::FT = 0
 end
 
-MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
+MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; DIM_LAYER, LEAVES) = spac;
 
     _gs_sunlit = zeros(FT, LEAVES[1].DIM_INCL, LEAVES[1].DIM_AZI, DIM_LAYER);

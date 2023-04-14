@@ -20,8 +20,8 @@
 
     flow_in(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT}
     flow_in(organ::Leaves1D{FT}) where {FT}
-    flow_in(organs::Vector{Leaves2D{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM}
-    flow_in(organs::Vector{Stem{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM}
+    flow_in(organs::Vector{<:Leaves2D{FT}}) where {FT}
+    flow_in(organs::Vector{<:Stem{FT}}) where {FT}
 
 Return the flow rate, given
 - `organ` `Leaf`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type struct
@@ -34,7 +34,7 @@ flow_in(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT} = f
 
 flow_in(organ::Leaves1D{FT}) where {FT} = (flow_in(organ.HS), flow_in(organ.HS2));
 
-flow_in(organs::Vector{Leaves2D{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM} = (
+flow_in(organs::Vector{<:Leaves2D{FT}}) where {FT} = (
     _f_sum::FT = 0;
     for _i in eachindex(organs)
         _f_sum += flow_in(organs[_i]) * organs[_i].HS.AREA;
@@ -43,7 +43,7 @@ flow_in(organs::Vector{Leaves2D{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM} = (
     return _f_sum
 );
 
-flow_in(organs::Vector{Stem{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM} = (
+flow_in(organs::Vector{<:Stem{FT}}) where {FT} = (
     _f_sum::FT = 0;
     for _i in eachindex(organs)
         _f_sum += flow_in(organs[_i]);
@@ -473,7 +473,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT} = (
 
 xylem_flow_profile!(mode::SteadyStateFlow{FT}, flow::FT) where {FT} = (mode.flow = flow; return nothing);
 
-xylem_flow_profile!(mode::NonSteadyStateFlow{FT,DIM_CAPACITY}, f_out::FT) where {FT,DIM_CAPACITY} = (mode.f_out = f_out; mode._f_element .= f_out .- mode._f_sum; return nothing);
+xylem_flow_profile!(mode::NonSteadyStateFlow{FT}, f_out::FT) where {FT} = (mode.f_out = f_out; mode._f_element .= f_out .- mode._f_sum; return nothing);
 
 
 """

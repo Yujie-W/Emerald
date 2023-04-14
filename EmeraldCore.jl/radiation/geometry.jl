@@ -160,7 +160,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::Hyperspectral
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT,DIM_XYLEM}
+    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT}
 
 Updates canopy optical properties (scattering coefficient matrices), given
 - `can` `HyperspectralMLCanopy` type struct
@@ -169,7 +169,7 @@ Updates canopy optical properties (scattering coefficient matrices), given
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT,DIM_XYLEM} = (
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT} = (
     (; DIM_LAYER, OPTICS) = can;
     (; ALBEDO) = soil;
     @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";

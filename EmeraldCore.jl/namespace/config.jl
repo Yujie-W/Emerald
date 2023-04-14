@@ -28,7 +28,7 @@ $(TYPEDFIELDS)
 Base.@kwdef struct HyperspectralAbsorption{FT}
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
+    DATASET::String
 
     # Constant features
     "Specific absorption coefficients of anthocynanin `[-]`"
@@ -81,7 +81,7 @@ $(TYPEDFIELDS)
 Base.@kwdef struct WaveLengthSet{FT}
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
+    DATASET::String
 
     # Constants
     "Wavelength limits for NIR `[nm]`"
@@ -148,6 +148,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
+    # File path to the Netcdf dataset
+    "File path to the Netcdf dataset"
+    DATASET::String = LAND_2021
+
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
     APAR_CAR::Bool = true
@@ -156,13 +160,9 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
 
-    # Embedded structures
-    "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
-    "Downwelling shortwave radiation reference spectrum"
-    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
+    # Wavelength information
     "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET = DATASET)
 
     # Dimensions
     "Dimension of azimuth angles"
@@ -187,4 +187,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_WL::Int = length(WLSET.Λ)
     "Dimension of xylem elements"
     DIM_XYLEM::Int = 5
+
+    # Embedded structures
+    "Hyperspectral absorption features of different leaf components"
+    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}(DATASET = DATASET)
+    "Downwelling shortwave radiation reference spectrum"
+    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT,DIM_WL}(DATASET)
 end

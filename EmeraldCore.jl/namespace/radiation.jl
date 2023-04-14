@@ -57,6 +57,7 @@ end
 #     2021-Oct-22: add a constructor to define the structure from wavelength sets and prescribed wave shape
 #     2022-Jun-15: change the order of variables
 #     2022-Jul-20: use kwdef for the constructor
+#     2022-Apr-14: add DIM_WL to radiation
 #
 #######################################################################################################################################################################################################
 """
@@ -70,10 +71,12 @@ Structure that stores hyperspectral radiation information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralRadiation{FT} <: AbstractRadiation{FT}
+Base.@kwdef struct HyperspectralRadiation{FT,DIM_WL} <: AbstractRadiation{FT}
     # Prognostic variables
     "Diffuse radiation `[mW m⁻² nm⁻¹]`"
-    e_diffuse::Vector{FT} = read_nc(LAND_2021, "E_DIFF")
+    e_diffuse::Vector{FT} = zeros(FT,DIM_WL)
     "Direct radiation `[mW m⁻² nm⁻¹]`"
-    e_direct::Vector{FT} = read_nc(LAND_2021, "E_DIR")
+    e_direct::Vector{FT} = zeros(FT,DIM_WL)
 end
+
+HyperspectralRadiation{FT,DIM_WL}(dset::String) where {FT,DIM_WL} = HyperspectralRadiation{FT,DIM_WL}(read_nc(dset, "E_DIFF"), read_nc(dset, "E_DIR"));

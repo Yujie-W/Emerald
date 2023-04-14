@@ -200,12 +200,12 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAl
 
     shortwave_radiation!(
                 can::HyperspectralMLCanopy{FT},
-                leaves::Vector{Leaves2D{FT,DIM_XYLEM}},
+                leaves::Vector{<:Leaves2D{FT}},
                 rad::HyperspectralRadiation{FT},
                 soil::Soil{FT},
                 wls::WaveLengthSet{FT};
                 apar_car::Bool = true
-    ) where {FT,DIM_XYLEM}
+    ) where {FT}
 
 Updates canopy radiation profiles for shortwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -218,12 +218,12 @@ Updates canopy radiation profiles for shortwave radiation, given
 """
 shortwave_radiation!(
             can::HyperspectralMLCanopy{FT},
-            leaves::Vector{Leaves2D{FT,DIM_XYLEM}},
+            leaves::Vector{<:Leaves2D{FT}},
             rad::HyperspectralRadiation{FT},
             soil::Soil{FT},
             wls::WaveLengthSet{FT};
             apar_car::Bool = true
-) where {FT,DIM_XYLEM} = (
+) where {FT} = (
     (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
     (; ALBEDO) = soil;
     (; IΛ_PAR, ΔΛ, ΔΛ_PAR, Λ_PAR) = wls;
@@ -479,7 +479,7 @@ longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soi
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, rad::FT, soil::Soil{FT}) where {FT,DIM_XYLEM}
+    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -488,7 +488,7 @@ Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `soil` Bottom soil boundary layer
 
 """
-longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, rad::FT, soil::Soil{FT}) where {FT,DIM_XYLEM} = (
+longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{<:Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT} = (
     (; DIM_LAYER, OPTICS, RADIATION) = can;
     (; ALBEDO, LAYERS) = soil;
 
