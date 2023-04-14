@@ -554,15 +554,7 @@ Structure to save multiple layer hyperspectral canopy parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralMLCanopy{FT} <: AbstractCanopy{FT}
-    # Dimensions
-    "Dimension of azimuth angles"
-    DIM_AZI::Int = 36
-    "Dimension of inclination angles"
-    DIM_INCL::Int = 9
-    "Dimension of canopy layers"
-    DIM_LAYER::Int = 20
-
+Base.@kwdef mutable struct HyperspectralMLCanopy{FT,DIMS} <: AbstractCanopy{FT}
     # General model information
     "Hot spot parameter"
     HOT_SPOT::FT = 0.05
@@ -570,34 +562,32 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT} <: AbstractCanopy{FT}
     # Embedded structures TODO: remove WLSET once DIMs are removed
     "Leaf inclination angle distribution function algorithm"
     LIDF::Union{VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
-    "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(LAND_2021)
     "Canopy optical properties"
     OPTICS::HyperspectralMLCanopyOpticalProperty{FT} = HyperspectralMLCanopyOpticalProperty{FT}(
-                DIM_AZI = DIM_AZI,
-                DIM_INCL = DIM_INCL,
-                DIM_LAYER = DIM_LAYER,
-                DIM_SIF = length(WLSET.Λ_SIF),
-                DIM_SIFE = length(WLSET.Λ_SIFE),
-                DIM_WL = length(WLSET.Λ))
+                DIM_AZI = DIMS.DIM_AZI,
+                DIM_INCL = DIMS.DIM_INCL,
+                DIM_LAYER = DIMS.DIM_CANOPY,
+                DIM_SIF = DIMS.DIM_SIF,
+                DIM_SIFE = DIMS.DIM_SIFE,
+                DIM_WL = DIMS.DIM_WL)
     "Canopy radiation profiles"
     RADIATION::HyperspectralMLCanopyRadiationProfile{FT} = HyperspectralMLCanopyRadiationProfile{FT}(
-                DIM_AZI = DIM_AZI,
-                DIM_INCL = DIM_INCL,
-                DIM_LAYER = DIM_LAYER,
-                DIM_PAR = length(WLSET.IΛ_PAR),
-                DIM_SIF = length(WLSET.Λ_SIF),
-                DIM_WL = length(WLSET.Λ))
+                DIM_AZI = DIMS.DIM_AZI,
+                DIM_INCL = DIMS.DIM_INCL,
+                DIM_LAYER = DIMS.DIM_CANOPY,
+                DIM_SIF = DIMS.DIM_SIF,
+                DIM_SIFE = DIMS.DIM_SIFE,
+                DIM_WL = DIMS.DIM_WL)
 
     # Geometry information
     "Inclination angle distribution"
-    P_INCL::Vector{FT} = ones(FT, DIM_INCL) ./ DIM_INCL
+    P_INCL::Vector{FT} = ones(FT, DIMS.DIM_INCL) ./ DIMS.DIM_INCL
     "Mean azimuth angles `[°]`"
-    Θ_AZI::Vector{FT} = collect(FT, range(0, 360; length=DIM_AZI+1))[1:end-1] .+ 360 / DIM_AZI / 2
+    Θ_AZI::Vector{FT} = collect(FT, range(0, 360; length=DIMS.DIM_AZI+1))[1:end-1] .+ 360 / DIMS.DIM_AZI / 2
     "Bounds of inclination angles `[°]`"
-    Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ]
+    Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIMS.DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIMS.DIM_INCL+1))[2:end] ]
     "Mean inclination angles `[°]`"
-    Θ_INCL::Vector{FT} = [ (Θ_INCL_BNDS[_i,1] + Θ_INCL_BNDS[_i,2]) / 2 for _i in 1:DIM_INCL ]
+    Θ_INCL::Vector{FT} = [ (Θ_INCL_BNDS[_i,1] + Θ_INCL_BNDS[_i,2]) / 2 for _i in 1:DIMS.DIM_INCL ]
     "Clumping structure a"
     Ω_A::FT = 1
     "Clumping structure b"
@@ -611,7 +601,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT} <: AbstractCanopy{FT}
 
     # Cache variables
     "Ones with the length of Θ_AZI"
-    _1_AZI::Vector{FT} = ones(FT, DIM_AZI)
+    _1_AZI::Vector{FT} = ones(FT, DIMS.DIM_AZI)
     "Cosine of Θ_AZI"
     _COS_Θ_AZI::Vector{FT} = cosd.(Θ_AZI)
     "Square of cosine of Θ_INCL"
@@ -619,5 +609,5 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT} <: AbstractCanopy{FT}
     "Square of cosine of Θ_INCL at different azimuth angles"
     _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * _1_AZI'
     "Cache for level boundary locations"
-    _x_bnds::Vector{FT} = collect(FT, range(0, -1; length=DIM_LAYER+1))
+    _x_bnds::Vector{FT} = collect(FT, range(0, -1; length=DIMS.DIM_CANOPY+1))
 end

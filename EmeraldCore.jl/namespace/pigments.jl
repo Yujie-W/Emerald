@@ -26,7 +26,7 @@ Immutable struct that contains leaf biophysical traits used to run leaf reflecti
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct HyperspectralAbsorption{FT,DIM_WL}
+Base.@kwdef struct HyperspectralAbsorption{FT<:AbstractFloat,DIMS}
     # Constant features
     "Specific absorption coefficients of anthocynanin `[-]`"
     K_ANT::Vector{FT}
@@ -52,8 +52,8 @@ Base.@kwdef struct HyperspectralAbsorption{FT,DIM_WL}
     NR::Vector{FT}
 end
 
-HyperspectralAbsorption{FT,DIM_WL}(dset::String) where {FT,DIM_WL} = (
-    return HyperspectralAbsorption{FT,DIM_WL}(
+HyperspectralAbsorption{FT,DIMS}(dset::String) where {FT,DIMS} = (
+    return HyperspectralAbsorption{FT,DIMS}(
                 K_ANT   = read_nc(dset, "K_ANT"),
                 K_BROWN = read_nc(dset, "K_BROWN"),
                 K_CAB   = read_nc(dset, "K_CAB"),

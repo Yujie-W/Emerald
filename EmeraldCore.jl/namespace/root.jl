@@ -18,10 +18,10 @@ Structure to save root parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Root{FT,DIM_XYLEM}
+Base.@kwdef mutable struct Root{FT,DIMS}
     # Embedded structures
     "[`RootHydraulics`](@ref) type root hydraulic system"
-    HS::RootHydraulics{FT,DIM_XYLEM} = RootHydraulics{FT,DIM_XYLEM}()
+    HS::RootHydraulics{FT,DIMS} = RootHydraulics{FT,DIMS}()
 
     # Prognostic variables (not used for ∂y∂t)
     "Current temperature `[K]`"
@@ -37,3 +37,5 @@ Base.@kwdef mutable struct Root{FT,DIM_XYLEM}
     "Whether root is connected to soil"
     _isconnected::Bool = true
 end
+
+Root(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Root{FT,config.DIMS}();

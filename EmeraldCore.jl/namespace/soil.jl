@@ -266,7 +266,7 @@ Structure for hyperspectral soil albedo
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT,DIM_NIR,DIM_WL} <: AbstractSoilAlbedo{FT}
+Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT,DIMS} <: AbstractSoilAlbedo{FT}
     # General model information
     "Whether to use CLM soil albedo scheme"
     α_CLM::Bool = false
@@ -279,23 +279,23 @@ Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT,DIM_NIR,DIM_WL} <: Abstrac
 
     # Diagnostic variables
     "Net diffuse radiation at top soil `[mW m⁻² nm⁻¹]`"
-    e_net_diffuse::Vector{FT} = zeros(FT, DIM_WL)
+    e_net_diffuse::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Net direct radiation at top soil `[mW m⁻² nm⁻¹]`"
-    e_net_direct::Vector{FT} = zeros(FT, DIM_WL)
+    e_net_direct::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Net longwave energy absorption `[W m⁻²]`"
     r_net_lw::FT = 0
     "Net shortwave energy absorption `[W m⁻²]`"
     r_net_sw::FT = 0
     "Reflectance for shortwave radiation"
-    ρ_sw::Vector{FT} = zeros(FT, DIM_WL)
+    ρ_sw::Vector{FT} = zeros(FT, DIMS.DIM_WL)
 
     # Cache variables
     "Cache variable with length of NIR"
-    _tmp_vec_nir::Vector{FT} = zeros(FT, DIM_NIR)
+    _tmp_vec_nir::Vector{FT} = zeros(FT, DIMS.DIM_NIR)
     "Weights of the four characteristic curves"
     _weight::Vector{FT} = zeros(FT, 4)
     "Cache variable to store ρ_PAR and ρ_NIR (a segmented curve)"
-    _ρ_sw::Vector{FT} = zeros(FT, DIM_WL)
+    _ρ_sw::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Last soil moisture used to compute albedo"
     _θ::FT = 0
 end
@@ -400,11 +400,7 @@ Structure for Soil
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Soil{FT,DIM_NIR,DIM_WL}
-    # Dimensions
-    "Dimension of soil layers"
-    DIM_SOIL::Int = 5
-
+Base.@kwdef mutable struct Soil{FT,DIMS}
     # General information
     "Total area of the soil `[m²]`"
     AREA::FT = 100
@@ -415,7 +411,7 @@ Base.@kwdef mutable struct Soil{FT,DIM_NIR,DIM_WL}
 
     # Embedded structures
     "Albedo related structure"
-    ALBEDO::Union{BroadbandSoilAlbedo{FT}, HyperspectralSoilAlbedo{FT}} = HyperspectralSoilAlbedo{FT,DIM_NIR,DIM_WL}()
+    ALBEDO::Union{BroadbandSoilAlbedo{FT}, HyperspectralSoilAlbedo{FT,DIMS}} = HyperspectralSoilAlbedo{FT,DIMS}()
     "Soil layers"
     LAYERS::Vector{SoilLayer{FT}} = SoilLayer{FT}[SoilLayer{FT}(VC = VanGenuchten{FT}("Loam"), ZS = ZS[_i:_i+1]) for _i in 1:length(ZS)-1]
 
@@ -425,15 +421,17 @@ Base.@kwdef mutable struct Soil{FT,DIM_NIR,DIM_WL}
 
     # Cache variables
     "Soil hydraulic conductance between layers per area `[mol m⁻² s⁻¹ MPa⁻¹]`"
-    _k::Vector{FT} = zeros(FT, DIM_SOIL - 1)
+    _k::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
     "Flux between layers per area `[mol m⁻² s⁻¹]`"
-    _q::Vector{FT} = zeros(FT, DIM_SOIL - 1)
+    _q::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
     "Thermal flux between layers per area `[mol m⁻² s⁻¹]`"
-    _q_thermal::Vector{FT} = zeros(FT, DIM_SOIL - 1)
+    _q_thermal::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
     "Soil temperature difference between layers `[MPa]`"
-    _δt::Vector{FT} = zeros(FT, DIM_SOIL - 1)
+    _δt::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
     "Soil metric potential difference between layers `[MPa]`"
-    _δψ::Vector{FT} = zeros(FT, DIM_SOIL - 1)
+    _δψ::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
     "Soil thermal conductance between layers per area `[W m⁻² K⁻¹]`"
-    _λ_thermal::Vector{FT} = zeros(FT, DIM_SOIL - 1)
+    _λ_thermal::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
 end
+
+Soil(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Soil{FT,config.DIMS}();

@@ -70,29 +70,29 @@ Struct for simplest SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MonoElementSPAC{FT,DIM_NIR,DIM_WL,DIM_XYLEM} <: AbstractSPACSystem{FT}
+Base.@kwdef mutable struct MonoElementSPAC{FT,DIMS} <: AbstractSPACSystem{FT}
     # Embedded structures
     "Air conditions"
     AIR::AirLayer{FT} = AirLayer{FT}()
     "Leaf system"
-    LEAF::Leaf{FT,DIM_XYLEM} = Leaf{FT,DIM_XYLEM}()
+    LEAF::Leaf{FT,DIMS} = Leaf{FT,DIMS}()
     "Memory cache"
     MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Root system"
-    ROOT::Root{FT,DIM_XYLEM} = Root{FT,DIM_XYLEM}()
+    ROOT::Root{FT,DIMS} = Root{FT,DIMS}()
     "Soil component"
-    SOIL::Soil{FT,DIM_NIR,DIM_WL} = Soil{FT,DIM_NIR,DIM_WL}(ZS = FT[0, -1])
+    SOIL::Soil{FT,DIMS} = Soil{FT,DIMS}(ZS = FT[0, -1])
     "Stem system"
-    STEM::Stem{FT,DIM_XYLEM} = Stem{FT,DIM_XYLEM}()
+    STEM::Stem{FT,DIMS} = Stem{FT,DIMS}()
 
     # Cache variables
     "Relative hydraulic conductance"
     _krs::Vector{FT} = ones(FT, 4)
 end
 
-MonoElementSPAC(config::SPACConfiguration{FT}) where {FT} = MonoElementSPAC{FT,config.DIM_XYLEM}();
+MonoElementSPAC(config::SPACConfiguration{FT}) where {FT} = MonoElementSPAC{FT,config.DIMS}();
 
 
 #######################################################################################################################################################################################################
@@ -124,20 +124,12 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_NIR,DIM_WL,DIM_XYLEM} <: AbstractSPACSystem{FT}
-    # dimensions
-    "Dimension of air layers"
-    DIM_AIR::Int = 25
-    "Dimension of canopy layers"
-    DIM_LAYER::Int = 20
-    "Dimension of root layers"
-    DIM_ROOT::Int = 5
-
+Base.@kwdef mutable struct MultiLayerSPAC{FT,DIMS} <: AbstractSPACSystem{FT}
     # Geometry information
     "Corresponding air layer per canopy layer"
-    LEAVES_INDEX::Vector{Int} = collect(Int, 1:DIM_LAYER)
+    LEAVES_INDEX::Vector{Int} = collect(Int, 1:DIMS.DIM_CANOPY)
     "Corresponding soil layer per root layer"
-    ROOTS_INDEX::Vector{Int} = collect(Int, 1:DIM_ROOT)
+    ROOTS_INDEX::Vector{Int} = collect(Int, 1:DIMS.DIM_ROOT)
     "Depth and height information `[m]`"
     Z::Vector{FT} = FT[-1, 6, 12]
     "Air boundaries `[m]`"
@@ -153,38 +145,38 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT,DIM_NIR,DIM_WL,DIM_XYLEM} <: Abstra
 
     # Embedded structures
     "Air for each layer (more than canopy layer)"
-    AIR::Vector{AirLayer{FT}} = AirLayer{FT}[AirLayer{FT}() for _i in 1:DIM_AIR]
+    AIR::Vector{AirLayer{FT}} = AirLayer{FT}[AirLayer{FT}() for _i in 1:DIMS.DIM_AIR]
     "Sun sensor geometry"
     ANGLES::SunSensorGeometry{FT} = SunSensorGeometry{FT}()
     "Branch hydraulic system"
-    BRANCHES::Vector{Stem{FT,DIM_XYLEM}} = Stem{FT,DIM_XYLEM}[Stem{FT,DIM_XYLEM}() for _i in 1:DIM_LAYER]
+    BRANCHES::Vector{Stem{FT,DIMS}} = Stem{FT,DIMS}[Stem{FT,DIMS}() for _i in 1:DIMS.DIM_CANOPY]
     "Canopy used for radiation calculations"
-    CANOPY::HyperspectralMLCanopy{FT} = HyperspectralMLCanopy{FT}(DIM_LAYER = DIM_LAYER)
+    CANOPY::HyperspectralMLCanopy{FT,DIMS} = HyperspectralMLCanopy{FT,DIMS}()
     "Leaf per layer"
-    LEAVES::Vector{Leaves2D{FT,DIM_XYLEM}} = Leaves2D{FT,DIM_XYLEM}[Leaves2D{FT,DIM_XYLEM}() for _i in 1:DIM_LAYER]
+    LEAVES::Vector{Leaves2D{FT,DIMS}} = Leaves2D{FT,DIMS}[Leaves2D{FT,DIMS}() for _i in 1:DIMS.DIM_CANOPY]
     "Memory cache"
     MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
-    METEO::Meteorology{FT,DIM_WL} = Meteorology{FT,DIM_WL}()
+    METEO::Meteorology{FT,DIMS} = Meteorology{FT,DIMS}()
     "Root hydraulic system"
-    ROOTS::Vector{Root{FT,DIM_XYLEM}} = Root{FT,DIM_XYLEM}[Root{FT,DIM_XYLEM}() for _i in 1:DIM_ROOT]
+    ROOTS::Vector{Root{FT,DIMS}} = Root{FT,DIMS}[Root{FT,DIMS}() for _i in 1:DIMS.DIM_ROOT]
     "Soil component"
-    SOIL::Soil{FT,DIM_NIR,DIM_WL} = Soil{FT,DIM_NIR,DIM_WL}()
+    SOIL::Soil{FT,DIMS} = Soil{FT,DIMS}()
     "Trunk hydraulic system"
-    TRUNK::Stem{FT,DIM_XYLEM} = Stem{FT,DIM_XYLEM}()
+    TRUNK::Stem{FT,DIMS} = Stem{FT,DIMS}()
 
     # Cache variables
     "Flow rate per root layer"
-    _fs::Vector{FT} = zeros(FT, DIM_ROOT)
+    _fs::Vector{FT} = zeros(FT, DIMS.DIM_ROOT)
     "Conductances for each root layer at given flow"
-    _ks::Vector{FT} = zeros(FT, DIM_ROOT)
+    _ks::Vector{FT} = zeros(FT, DIMS.DIM_ROOT)
     "Pressure for each root layer at given flow"
-    _ps::Vector{FT} = zeros(FT, DIM_ROOT)
+    _ps::Vector{FT} = zeros(FT, DIMS.DIM_ROOT)
     "Whether there is any root connected to soil"
     _root_connection::Bool = true
 end
 
-MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIM_NIR,config.DIM_WL,config.DIM_XYLEM}();
+MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIMS}();
 
 
 #######################################################################################################################################################################################################

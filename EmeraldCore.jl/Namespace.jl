@@ -12,26 +12,28 @@ const LAND_2017 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2017.n
 const LAND_2021 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2021.nc";
 
 
-include("namespace/air.jl"       )
-include("namespace/colimit.jl"   )
-include("namespace/geometry.jl"  )
-include("namespace/kinetics.jl"  )
-include("namespace/pigments.jl"  )
-include("namespace/radiation.jl" )
-include("namespace/stomata.jl"   )
-include("namespace/trace.jl"     )
-include("namespace/wavelength.jl")
+include("namespace/air.jl"      )   # no dims
+include("namespace/colimit.jl"  )   # no dims
+include("namespace/dimension.jl")   # define dims
+include("namespace/geometry.jl" )   # no dims
+include("namespace/kinetics.jl" )   # no dims
+include("namespace/stomata.jl"  )   # no dims
+include("namespace/trace.jl"    )   # no dims
 
-include("namespace/config.jl"     )
-include("namespace/meteorology.jl")
+include("namespace/pigments.jl"  )  # rely on dims
+include("namespace/radiation.jl" )  # rely on dims
+include("namespace/wavelength.jl")  # rely on dims
 
-include("namespace/xylem.jl")
+include("namespace/config.jl"     ) # rely on pigments, radiation, and wavelength
+include("namespace/meteorology.jl") # rely on radiation
+
+include("namespace/soil.jl" )       # rely on config (constructor)
+include("namespace/xylem.jl")       # rely on config (constructor)
 
 include("namespace/canopy.jl")
-include("namespace/leaf.jl"  )
-include("namespace/root.jl"  )
-include("namespace/soil.jl"  )
-include("namespace/stem.jl"  )
+include("namespace/leaf.jl"  )      # rely on xylem
+include("namespace/root.jl"  )      # rely on xylem
+include("namespace/stem.jl"  )      # rely on xylem
 
 include("namespace/spac.jl")
 

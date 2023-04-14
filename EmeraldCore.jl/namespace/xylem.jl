@@ -221,6 +221,7 @@ $(TYPEDEF)
 
 Hierarchy of AbstractFlowProfile:
 - [`NonSteadyStateFlow`](@ref)
+- [`NonSteadyStateFlowLeaf`](@ref)
 - [`SteadyStateFlow`](@ref)
 
 """
@@ -242,14 +243,14 @@ abstract type AbstractFlowProfile{FT} end
 
 $(TYPEDEF)
 
-Struct that contains stem hydraulic system flow rates at non-steady state
+Struct that contains stem and root hydraulic system flow rates at non-steady state
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct NonSteadyStateFlow{FT,DIM_CAPACITY} <: AbstractFlowProfile{FT}
+Base.@kwdef mutable struct NonSteadyStateFlow{FT,DIMS} <: AbstractFlowProfile{FT}
     # Diagnostic variables
     "Flow rate into the organ `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
     f_in::FT = 0
@@ -258,14 +259,47 @@ Base.@kwdef mutable struct NonSteadyStateFlow{FT,DIM_CAPACITY} <: AbstractFlowPr
 
     # Cache variables
     "Vector of xylem water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
-    _f_element::Vector{FT} = zeros(FT, DIM_CAPACITY)
+    _f_element::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Vector of buffer water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
-    _f_buffer::Vector{FT} = zeros(FT, DIM_CAPACITY)
+    _f_buffer::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Vector of sum buffer water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
-    _f_sum::Vector{FT} = zeros(FT, DIM_CAPACITY)
+    _f_sum::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
 end
 
-NonSteadyStateFlow(FT, n::Int) = NonSteadyStateFlow{FT,n}();
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2023-Apr-14: add a specific struct for Leaf
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains leaf hydraulic system flow rates at non-steady state
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct NonSteadyStateFlowLeaf{FT} <: AbstractFlowProfile{FT}
+    # Diagnostic variables
+    "Flow rate into the organ `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
+    f_in::FT = 0
+    "Flow rate out of the organ `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
+    f_out::FT = 0
+
+    # Cache variables
+    "Vector of xylem water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
+    _f_element::FT = 0
+    "Vector of buffer water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
+    _f_buffer::FT = 0
+    "Vector of sum buffer water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
+    _f_sum::FT = 0
+end
 
 
 #######################################################################################################################################################################################################
@@ -336,7 +370,7 @@ Struct that contains leaf hydraulic system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct LeafHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSystem{FT}
+Base.@kwdef mutable struct LeafHydraulics{FT,DIMS} <: AbstractHydraulicSystem{FT}
     # General information of the hydraulic system
     "Leaf area `[m²]`"
     AREA::FT = 1500
@@ -349,7 +383,7 @@ Base.@kwdef mutable struct LeafHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
 
     # Embedded structures
     "Flow profile"
-    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,1}} = SteadyStateFlow{FT}()
+    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlowLeaf{FT}} = SteadyStateFlow{FT}()
     "Pressure volume curve for storage"
     PVC::Union{LinearPVCurve{FT}, SegmentedPVCurve{FT}} = SegmentedPVCurve{FT}()
     "Vulnerability curve"
@@ -357,7 +391,7 @@ Base.@kwdef mutable struct LeafHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
 
     # Prognostic variables (used for ∂y∂t)
     "Vector of xylem water pressure history (normalized to 298.15 K) `[MPa]`"
-    p_history::Vector{FT} = zeros(FT, DIM_XYLEM)
+    p_history::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Current capaciatance at Ψ_leaf `[mol m⁻²]`"
     v_storage::FT = V_MAXIMUM
 
@@ -371,20 +405,20 @@ Base.@kwdef mutable struct LeafHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
     "Critical flow rate `[mol s⁻¹ m⁻²]`"
     _e_crit::FT = 0
     "Vector of leaf kr history per element `[-]`"
-    _k_history::Vector{FT} = ones(FT, DIM_XYLEM)
+    _k_history::Vector{FT} = ones(FT, DIMS.DIM_XYLEM)
     "Leaf xylem water pressure at the downstream end of leaf xylem `[MPa]`"
     _p_dos::FT = 0
     "Vector of xylem water pressure `[MPa]`"
-    _p_element::Vector{FT} = zeros(FT, DIM_XYLEM)
+    _p_element::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Pressure of storage"
     _p_storage::FT = 0
 end
 
 LeafHydraulics(config::SPACConfiguration{FT}) where {FT} = (
     if config.STEADY_STATE_HS
-        return LeafHydraulics{FT,config.DIM_XYLEM}()
+        return LeafHydraulics{FT,config.DIMS}()
     else
-        return LeafHydraulics{FT,config.DIM_XYLEM}(FLOW = NonSteadyStateFlow(FT,1))
+        return LeafHydraulics{FT,config.DIMS}(FLOW = NonSteadyStateFlowLeaf{FT}())
     end;
 );
 
@@ -413,7 +447,7 @@ Struct that contains root hydraulic system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct RootHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSystem{FT}
+Base.@kwdef mutable struct RootHydraulics{FT,DIMS} <: AbstractHydraulicSystem{FT}
     # General information of the hydraulic system
     "Root cross-section area `[m²]`"
     AREA::FT = 1
@@ -424,13 +458,13 @@ Base.@kwdef mutable struct RootHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
     "Length `[m]`"
     L::FT = 1
     "Maximal storage per element `[mol]`"
-    V_MAXIMUM::Vector{FT} = AREA * L / DIM_XYLEM * 6000 * ones(FT, DIM_XYLEM)
+    V_MAXIMUM::Vector{FT} = AREA * L / DIMS.DIM_XYLEM * 6000 * ones(FT, DIMS.DIM_XYLEM)
     "Root z difference `[m]`"
     ΔH::FT = 1
 
     # Embedded structures
     "Flow profile"
-    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,DIM_XYLEM}} = SteadyStateFlow{FT}()
+    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,DIMS}} = SteadyStateFlow{FT}()
     "Pressure volume curve for storage"
     PVC::Union{LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
     "Vulnerability curve"
@@ -438,7 +472,7 @@ Base.@kwdef mutable struct RootHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
 
     # Prognostic variables (used for ∂y∂t)
     "Vector of xylem water pressure history (normalized to 298.15 K) `[MPa]`"
-    p_history::Vector{FT} = zeros(FT, DIM_XYLEM)
+    p_history::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Storage per element `[mol]`"
     v_storage::Vector{FT} = V_MAXIMUM .* 1
 
@@ -452,16 +486,22 @@ Base.@kwdef mutable struct RootHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
 
     # Cache variables
     "Vector of leaf kr history per element"
-    _k_history::Vector{FT} = ones(FT, DIM_XYLEM)
+    _k_history::Vector{FT} = ones(FT, DIMS.DIM_XYLEM)
     "Vector of xylem water pressure `[MPa]`"
-    _p_element::Vector{FT} = zeros(FT, DIM_XYLEM)
+    _p_element::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Xylem-rhizosphere interface water pressure `[MPa]`"
     _p_rhiz::FT = 0
     "Pressure of storage per element `[MPa]`"
-    _p_storage::Vector{FT} = zeros(FT, DIM_XYLEM)
+    _p_storage::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
 end
 
-RootHydraulics(config::SPACConfiguration{FT}) where {FT} = RootHydraulics{FT,config.DIM_XYLEM}();
+RootHydraulics(config::SPACConfiguration{FT}) where {FT} = (
+    if config.STEADY_STATE_HS
+        return RootHydraulics{FT,config.DIMS}()
+    else
+        return RootHydraulics{FT,config.DIMS}(FLOW = NonSteadyStateFlow{FT,config.DIMS}())
+    end;
+);
 
 
 #######################################################################################################################################################################################################
@@ -487,7 +527,7 @@ Struct that contains stem hydraulic system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct StemHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSystem{FT}
+Base.@kwdef mutable struct StemHydraulics{FT,DIMS} <: AbstractHydraulicSystem{FT}
     # General information of the hydraulic system
     "Xylem cross-section area `[m²]`"
     AREA::FT = 1
@@ -496,13 +536,13 @@ Base.@kwdef mutable struct StemHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
     "Length `[m]`"
     L::FT = 1
     "Maximal storage per element `[mol]`"
-    V_MAXIMUM::Vector{FT} = AREA * L / DIM_XYLEM * 6000 * ones(FT, DIM_XYLEM)
+    V_MAXIMUM::Vector{FT} = AREA * L / DIMS.DIM_XYLEM * 6000 * ones(FT, DIMS.DIM_XYLEM)
     "Root z difference `[m]`"
     ΔH::FT = 1
 
     # Embedded structures
     "Flow profile"
-    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,DIM_XYLEM}} = SteadyStateFlow{FT}()
+    FLOW::Union{SteadyStateFlow{FT}, NonSteadyStateFlow{FT,DIMS}} = SteadyStateFlow{FT}()
     "Pressure volume curve for storage"
     PVC::Union{LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
     "Vulnerability curve"
@@ -510,7 +550,7 @@ Base.@kwdef mutable struct StemHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
 
     # Prognostic variables (used for ∂y∂t)
     "Vector of xylem water pressure history (normalized to 298.15 K) `[MPa]`"
-    p_history::Vector{FT} = zeros(FT, DIM_XYLEM)
+    p_history::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Storage per element `[mol]`"
     v_storage::Vector{FT} = V_MAXIMUM .* 1
 
@@ -522,11 +562,17 @@ Base.@kwdef mutable struct StemHydraulics{FT,DIM_XYLEM} <: AbstractHydraulicSyst
 
     # Cache variables
     "Vector of leaf kr history per element"
-    _k_history::Vector{FT} = ones(FT, DIM_XYLEM)
+    _k_history::Vector{FT} = ones(FT, DIMS.DIM_XYLEM)
     "Vector of xylem water pressure `[MPa]`"
-    _p_element::Vector{FT} = zeros(FT, DIM_XYLEM)
+    _p_element::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
     "Pressure of storage per element"
-    _p_storage::Vector{FT} = zeros(FT, DIM_XYLEM)
+    _p_storage::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
 end
 
-StemHydraulics(config::SPACConfiguration{FT}) where {FT} = StemHydraulics{FT,config.DIM_XYLEM}();
+StemHydraulics(config::SPACConfiguration{FT}) where {FT} = (
+    if config.STEADY_STATE_HS
+        return StemHydraulics{FT,config.DIMS}()
+    else
+        return StemHydraulics{FT,config.DIMS}(FLOW = NonSteadyStateFlow{FT,config.DIMS}())
+    end;
+);

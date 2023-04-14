@@ -21,16 +21,8 @@ Immutable structure that stores wave length information.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct WaveLengthSet{FT,DIM_WL}
+Base.@kwdef struct WaveLengthSet{FT,DIMS}
     # Constants
-    "Wavelength limits for NIR `[nm]`"
-    WL_NIR::Vector{FT} = FT[700, 2500]
-    "Wavelength limits for PAR `[nm]`"
-    WL_PAR::Vector{FT} = FT[400, 750]
-    "Wavelength limits for SIF emission `[nm]`"
-    WL_SIF::Vector{FT} = FT[640, 850]
-    "Wavelength limits for SIF excitation `[nm]`"
-    WL_SIFE::Vector{FT} = FT[400, 750]
     "Wavelength (bins) `[nm]`"
     Λ::Vector{FT}
     "Lower boundary wavelength `[nm]`"
@@ -40,13 +32,13 @@ Base.@kwdef struct WaveLengthSet{FT,DIM_WL}
 
     # Indices
     "Indicies of Λ_NIR in Λ"
-    IΛ_NIR::Vector{Int} = findall( WL_NIR[1] .<= Λ .<= WL_NIR[2] )
+    IΛ_NIR::Vector{Int}
     "Indicies of Λ_PAR in Λ"
-    IΛ_PAR::Vector{Int} = findall( WL_PAR[1] .<= Λ .<= WL_PAR[2] )
+    IΛ_PAR::Vector{Int}
     "Indicies of Λ_SIF in Λ"
-    IΛ_SIF::Vector{Int} = findall( WL_SIF[1] .<= Λ .<= WL_SIF[2] )
+    IΛ_SIF::Vector{Int}
     "Indicies of Λ_SIFE in Λ"
-    IΛ_SIFE::Vector{Int} = findall( WL_SIFE[1] .<= Λ .<= WL_SIFE[2] )
+    IΛ_SIFE::Vector{Int}
 
     # Constants based on the ones above
     "Differential wavelength `[nm]`"
@@ -63,12 +55,16 @@ Base.@kwdef struct WaveLengthSet{FT,DIM_WL}
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
 end
 
-WaveLengthSet{FT}(dset::String) where {FT} =  (
-    _nwl = size_nc(dset, "WL");
+WaveLengthSet{FT,DIMS}(dset::String, wl_nir::Vector{FT}, wl_par::Vector{FT}, wl_sif::Vector{FT}, wl_sife::Vector{FT}) where {FT,DIMS} =  (
+    _λ = read_nc(dset, "WL");
 
-    return WaveLengthSet{FT,_nwl}(
-                Λ       = read_nc(dset, "WL"),
+    return WaveLengthSet{FT,DIMS}(
+                Λ       = _λ,
                 Λ_LOWER = read_nc(dset, "WL_LOWER"),
                 Λ_UPPER = read_nc(dset, "WL_UPPER"),
+                IΛ_NIR  = findall(wl_nir[1]  .<= _λ .<= wl_nir[2]),
+                IΛ_PAR  = findall(wl_par[1]  .<= _λ .<= wl_par[2]),
+                IΛ_SIF  = findall(wl_sif[1]  .<= _λ .<= wl_sif[2]),
+                IΛ_SIFE = findall(wl_sife[1] .<= _λ .<= wl_sife[2]),
     )
 );

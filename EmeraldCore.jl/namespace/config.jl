@@ -2,50 +2,6 @@
 #
 # Changes to this struct
 # General
-#     2023-Apr-13: move all dimensions here
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Global configuration of SPAC system
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef struct SPACDimension
-    "Dimension of azimuth angles"
-    DIM_AZI::Int = 36
-    "Dimension of canopy layers"
-    DIM_CANOPY::Int = 20
-    "Dimension of inclination angles"
-    DIM_INCL::Int = 9
-    "Number of wavelength bins for NIR"
-    DIM_NIR::Int
-    "Number of wavelength bins for PAR"
-    DIM_PAR::Int
-    "Dimension of root layers"
-    DIM_ROOT::Int = 4
-    "Dimension of SIF wave length bins"
-    DIM_SIF::Int
-    "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int
-    "Dimension of soil layers"
-    DIM_SOIL::Int = 4
-    "Dimension of short wave length bins"
-    DIM_WL::Int
-    "Dimension of xylem elements"
-    DIM_XYLEM::Int = 5
-end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
 #     2023-Apr-13: add state struct to save SPAC configurations
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
 #     2023-Apr-13: move APAR_CAR from leaf structs
@@ -70,9 +26,22 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
 
+    # Constants
+    "Wavelength limits for NIR `[nm]`"
+    WL_NIR::Vector{FT} = FT[700, 2500]
+    "Wavelength limits for PAR `[nm]`"
+    WL_PAR::Vector{FT} = FT[400, 750]
+    "Wavelength limits for SIF emission `[nm]`"
+    WL_SIF::Vector{FT} = FT[640, 850]
+    "Wavelength limits for SIF excitation `[nm]`"
+    WL_SIFE::Vector{FT} = FT[400, 750]
+
+    # Dimensions
+    DIMS::SPACDimension = SPACDimension(DATASET, WL_NIR, WL_PAR, WL_SIF, WL_SIFE)
+
     # Wavelength information
     "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET)
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT,DIMS}(DATASET, WL_NIR, WL_PAR, WL_SIF, WL_SIFE)
 
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
@@ -82,37 +51,13 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
 
-    # Dimensions
-    "Dimension of azimuth angles"
-    DIM_AZI::Int = 36
-    "Dimension of canopy layers"
-    DIM_CANOPY::Int = 20
-    "Dimension of inclination angles"
-    DIM_INCL::Int = 9
-    "Number of wavelength bins for NIR"
-    DIM_NIR::Int = length(WLSET.IΛ_NIR)
-    "Number of wavelength bins for PAR"
-    DIM_PAR::Int = length(WLSET.IΛ_PAR)
-    "Dimension of root layers"
-    DIM_ROOT::Int = 4
-    "Dimension of SIF wave length bins"
-    DIM_SIF::Int = length(WLSET.Λ_SIF)
-    "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int = length(WLSET.Λ_SIFE)
-    "Dimension of soil layers"
-    DIM_SOIL::Int = 4
-    "Dimension of short wave length bins"
-    DIM_WL::Int = length(WLSET.Λ)
-    "Dimension of xylem elements"
-    DIM_XYLEM::Int = 5
-
     # Vectors
     "A matrix of characteristic curves"
     MAT_ρ::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
 
     # Embedded structures
     "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT,DIM_WL}(DATASET)
+    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT,DIMS}(DATASET)
     "Downwelling shortwave radiation reference spectrum"
-    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT,DIM_WL}(DATASET)
+    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT,DIMS}(DATASET)
 end

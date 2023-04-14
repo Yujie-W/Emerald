@@ -19,12 +19,12 @@ Structure that stores meteorological information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Meteorology{FT,DIM_WL}
+Base.@kwdef mutable struct Meteorology{FT,DIMS}
     # Prognostic variables
     "Downwelling longwave radiation `[W m⁻²]`"
     rad_lw::FT = 100
     "Downwelling shortwave radiation"
-    rad_sw::HyperspectralRadiation{FT,DIM_WL} = HyperspectralRadiation{FT,DIM_WL}()
+    rad_sw::HyperspectralRadiation{FT,DIMS} = HyperspectralRadiation{FT,DIMS}()
     "Precipitation in form of rain (before interception) `[mol m⁻²]`"
     rain::FT = 0
     "Precipitation in form of snow (before interception) `[mol m⁻²]`"

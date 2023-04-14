@@ -81,15 +81,7 @@ Struct that contains leaf biophysical traits used to run leaf reflectance and tr
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralLeafBiophysics{FT} <: AbstractLeafBiophysics{FT}
-    # Dimensions
-    "Dimension of SIF wave length bins"
-    DIM_SIF::Int = 29
-    "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int = 45
-    "Dimension of short wave length bins"
-    DIM_WL::Int = 114
-
+Base.@kwdef mutable struct HyperspectralLeafBiophysics{FT,DIMS} <: AbstractLeafBiophysics{FT}
     # General information of leaf biophysics
     "Leaf mesophyll structural parameter that describes mesophyll reflectance and transmittance"
     MESOPHYLL_N::FT = 1.4
@@ -120,88 +112,88 @@ Base.@kwdef mutable struct HyperspectralLeafBiophysics{FT} <: AbstractLeafBiophy
 
     # Diagnostic variables
     "Specific absorption coefficients of all materials"
-    k_all::Vector{FT} = zeros(FT, DIM_WL)
+    k_all::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Fluorescence excitation matrix backwards `[-]`"
-    mat_b::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
+    mat_b::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
     "Fluorescence excitation matrix forwards `[-]`"
-    mat_f::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
+    mat_f::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
     "Relative absorption by Chlorophyll `[-]`"
-    α_cab::Vector{FT} = zeros(FT, DIM_WL)
+    α_cab::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Relative absorption by Chlorophyll+Carotenoid `[-]`"
-    α_cabcar::Vector{FT} = zeros(FT, DIM_WL)
+    α_cabcar::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Shortwave absorption, 1 .- ρ_sw .- τ_sw  `[-]`"
-    α_sw::Vector{FT} = zeros(FT, DIM_WL)
+    α_sw::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Shortwave leaf reflectance `[-]`"
-    ρ_sw::Vector{FT} = zeros(FT, DIM_WL)
+    ρ_sw::Vector{FT} = zeros(FT, DIMS.DIM_WL)
     "Shortwave leaf transmission `[-]`"
-    τ_sw::Vector{FT} = zeros(FT, DIM_WL)
+    τ_sw::Vector{FT} = zeros(FT, DIMS.DIM_WL)
 
     # Cache variables
     "Leaf water content history used to compute leaf spectra `[mol m⁻²]`"
     _v_storage::FT = 0
 
     # Cache variables to speed up leaf_spectra!
-    _a::Vector{FT} = zeros(FT, DIM_WL)
-    _a²::Vector{FT} = zeros(FT, DIM_WL)
-    _b::Vector{FT} = zeros(FT, DIM_WL)
-    _bⁿ⁻¹::Vector{FT} = zeros(FT, DIM_WL)
-    _b²ⁿ⁻²::Vector{FT} = zeros(FT, DIM_WL)
-    _d::Vector{FT} = zeros(FT, DIM_WL)
-    _denom::Vector{FT} = zeros(FT, DIM_WL)
-    _k::Vector{FT} = zeros(FT, DIM_WL)
-    _k_chl::Vector{FT} = zeros(FT, DIM_WL)
-    _s::Vector{FT} = zeros(FT, DIM_WL)
-    _tt1::Vector{FT} = zeros(FT, DIM_WL)
-    _tt2::Vector{FT} = zeros(FT, DIM_WL)
-    _z::Vector{FT} = zeros(FT, DIM_WL)
+    _a::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _a²::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _b::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _bⁿ⁻¹::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _b²ⁿ⁻²::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _d::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _denom::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _k::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _k_chl::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _s::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _tt1::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _tt2::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _z::Vector{FT} = zeros(FT, DIMS.DIM_WL)
 
-    _ρ::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ²::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ_b::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ_bottom::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ_sub::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ_top::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ_α::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ₁₂::Vector{FT} = zeros(FT, DIM_WL)
-    _ρ₂₁::Vector{FT} = zeros(FT, DIM_WL)
-    _τ::Vector{FT} = zeros(FT, DIM_WL)
-    _τ²::Vector{FT} = zeros(FT, DIM_WL)
-    _τ_bottom::Vector{FT} = zeros(FT, DIM_WL)
-    _τ_sub::Vector{FT} = zeros(FT, DIM_WL)
-    _τ_top::Vector{FT} = zeros(FT, DIM_WL)
-    _τ_α::Vector{FT} = zeros(FT, DIM_WL)
-    _τ₁₂::Vector{FT} = zeros(FT, DIM_WL)
-    _τ₂₁::Vector{FT} = zeros(FT, DIM_WL)
+    _ρ::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ²::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ_b::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ_bottom::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ_sub::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ_top::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ_α::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ₁₂::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _ρ₂₁::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ²::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ_bottom::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ_sub::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ_top::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ_α::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ₁₂::Vector{FT} = zeros(FT, DIMS.DIM_WL)
+    _τ₂₁::Vector{FT} = zeros(FT, DIMS.DIM_WL)
 
-    _1_e::Matrix{FT} = ones(FT, 1, DIM_SIFE)
-    _1_f::Matrix{FT} = ones(FT, DIM_SIF, 1);
-    _a₁₁::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _a₁₂::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _a₂₁::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _a₂₂::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _m_xe::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _m_xf::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _m_ye::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _m_yf::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _ma::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _mb::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _mat_b::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _mat_b_n::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _mat_f::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _mat_f_n::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _sigmoid::Matrix{FT} = zeros(FT, DIM_SIF, DIM_SIFE)
-    _x_e::Vector{FT} = zeros(FT, DIM_SIFE)
-    _x_f::Vector{FT} = zeros(FT, DIM_SIF)
-    _z_e::Vector{FT} = zeros(FT, DIM_SIFE)
-    _z_f::Vector{FT} = zeros(FT, DIM_SIF)
-    _ρ_e::Vector{FT} = zeros(FT, DIM_SIFE)
-    _ρ_e_n::Vector{FT} = zeros(FT, DIM_SIFE)
-    _ρ_f::Vector{FT} = zeros(FT, DIM_SIF)
-    _ρ_f_n::Vector{FT} = zeros(FT, DIM_SIF)
-    _τ_e::Vector{FT} = zeros(FT, DIM_SIFE)
-    _τ_e_n::Vector{FT} = zeros(FT, DIM_SIFE)
-    _τ_f::Vector{FT} = zeros(FT, DIM_SIF)
-    _τ_f_n::Vector{FT} = zeros(FT, DIM_SIF)
+    _1_e::Matrix{FT} = ones(FT, 1, DIMS.DIM_SIFE)
+    _1_f::Matrix{FT} = ones(FT, DIMS.DIM_SIF, 1);
+    _a₁₁::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _a₁₂::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _a₂₁::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _a₂₂::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _m_xe::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _m_xf::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _m_ye::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _m_yf::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _ma::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _mb::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _mat_b::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _mat_b_n::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _mat_f::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _mat_f_n::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _sigmoid::Matrix{FT} = zeros(FT, DIMS.DIM_SIF, DIMS.DIM_SIFE)
+    _x_e::Vector{FT} = zeros(FT, DIMS.DIM_SIFE)
+    _x_f::Vector{FT} = zeros(FT, DIMS.DIM_SIF)
+    _z_e::Vector{FT} = zeros(FT, DIMS.DIM_SIFE)
+    _z_f::Vector{FT} = zeros(FT, DIMS.DIM_SIF)
+    _ρ_e::Vector{FT} = zeros(FT, DIMS.DIM_SIFE)
+    _ρ_e_n::Vector{FT} = zeros(FT, DIMS.DIM_SIFE)
+    _ρ_f::Vector{FT} = zeros(FT, DIMS.DIM_SIF)
+    _ρ_f_n::Vector{FT} = zeros(FT, DIMS.DIM_SIF)
+    _τ_e::Vector{FT} = zeros(FT, DIMS.DIM_SIFE)
+    _τ_e_n::Vector{FT} = zeros(FT, DIMS.DIM_SIFE)
+    _τ_f::Vector{FT} = zeros(FT, DIMS.DIM_SIF)
+    _τ_f_n::Vector{FT} = zeros(FT, DIMS.DIM_SIF)
 end
 
 
@@ -795,7 +787,7 @@ Structure to save leaf parameters. This structure is meant for leaf level resear
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaf{FT,DIM_XYLEM} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaf{FT,DIMS} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -806,9 +798,9 @@ Base.@kwdef mutable struct Leaf{FT,DIM_XYLEM} <: AbstractLeaf{FT}
 
     # Embedded structures
     "[`AbstractLeafBiophysics`](@ref) type leaf biophysical parameters"
-    BIO::Union{BroadbandLeafBiophysics{FT}, HyperspectralLeafBiophysics{FT}} = HyperspectralLeafBiophysics{FT}()
+    BIO::Union{BroadbandLeafBiophysics{FT}, HyperspectralLeafBiophysics{FT,DIMS}} = HyperspectralLeafBiophysics{FT,DIMS}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
+    HS::LeafHydraulics{FT,DIMS} = LeafHydraulics{FT,DIMS}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -851,7 +843,7 @@ Base.@kwdef mutable struct Leaf{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     _p_CO₂_s::FT = 0
 end
 
-Leaf(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaf{FT,config.DIM_XYLEM}();
+Leaf(config::SPACConfiguration{FT}) where {FT} = Leaf{FT,config.DIMS}();
 
 
 #######################################################################################################################################################################################################
@@ -884,7 +876,7 @@ Structure to save leaf parameters for a single canopy layer. This structure is m
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaves1D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaves1D{FT,DIMS} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -897,9 +889,9 @@ Base.@kwdef mutable struct Leaves1D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     "[`BroadbandLeafBiophysics`](@ref) type leaf biophysical parameters"
     BIO::BroadbandLeafBiophysics{FT} = BroadbandLeafBiophysics{FT}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
+    HS::LeafHydraulics{FT,DIMS} = LeafHydraulics{FT,DIMS}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system used for other calculations (say sunlit and shaded leaf partitioning)"
-    HS2::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
+    HS2::LeafHydraulics{FT,DIMS} = LeafHydraulics{FT,DIMS}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -942,7 +934,7 @@ Base.@kwdef mutable struct Leaves1D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     _p_CO₂_s::Vector{FT} = FT[0, 0]
 end
 
-Leaves1D(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaves1D{FT,config.DIM_XYLEM}();
+Leaves1D(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaves1D{FT,config.DIMS}();
 
 
 #######################################################################################################################################################################################################
@@ -979,13 +971,7 @@ Structure to save leaf parameters for a single canopy layer. This structure is m
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaves2D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
-    # Dimensions
-    "Dimension of azimuth angles"
-    DIM_AZI::Int = 36
-    "Dimension of inclination angles"
-    DIM_INCL::Int = 9
-
+Base.@kwdef mutable struct Leaves2D{FT,DIMS} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -996,9 +982,9 @@ Base.@kwdef mutable struct Leaves2D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
 
     # Embedded structures
     "[`HyperspectralLeafBiophysics`](@ref) type leaf biophysical parameters"
-    BIO::HyperspectralLeafBiophysics{FT} = HyperspectralLeafBiophysics{FT}()
+    BIO::HyperspectralLeafBiophysics{FT,DIMS} = HyperspectralLeafBiophysics{FT,DIMS}()
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT,DIM_XYLEM} = LeafHydraulics{FT,DIM_XYLEM}()
+    HS::LeafHydraulics{FT,DIMS} = LeafHydraulics{FT,DIMS}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -1012,7 +998,7 @@ Base.@kwdef mutable struct Leaves2D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     "Absorbed photosynthetically active radiation used for photosynthesis for shaded leaves `[μmol m⁻² s⁻¹]`"
     ppar_shaded::FT = 200
     "Absorbed photosynthetically active radiation used for photosynthesis for sunlit leaves `[μmol m⁻² s⁻¹]`"
-    ppar_sunlit::Matrix{FT} = 1000 .* ones(FT, DIM_INCL, DIM_AZI)
+    ppar_sunlit::Matrix{FT} = 1000 .* ones(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
     "Current leaf temperature `[K]`"
     t::FT = T₂₅()
 
@@ -1022,27 +1008,27 @@ Base.@kwdef mutable struct Leaves2D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     "Stomatal conductance to water vapor for shaded leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_shaded::FT = 0.01
     "Stomatal conductance to water vapor for sunlit leaves `[mol m⁻² s⁻¹]`"
-    g_H₂O_s_sunlit::Matrix{FT} = FT(0.01) .* ones(FT, DIM_INCL, DIM_AZI)
+    g_H₂O_s_sunlit::Matrix{FT} = FT(0.01) .* ones(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
     "Marginal increase in energy `[W m⁻²]`"
     ∂e∂t::FT = 0
     "Marginal increase of conductance per time for shaded leaves `[mol m⁻² s⁻²]`"
     ∂g∂t_shaded::FT = 0
     "Marginal increase of conductance per timefor sunlit leaves `[mol m⁻² s⁻²]`"
-    ∂g∂t_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    ∂g∂t_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
 
     # Diagnostic variables
     "Gross photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_gross_shaded::FT = 0
     "Gross photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
-    a_gross_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    a_gross_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
     "Net photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_net_shaded::FT = 0
     "Net photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
-    a_net_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    a_net_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
     "Fluorescence quantum yield for shaded leaves `[-]`"
     ϕ_f_shaded::FT = 0
     "Fluorescence quantum yield for sunlit leaves `[-]`"
-    ϕ_f_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    ϕ_f_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
 
     # Cache variables
     "Combined specific heat capacity of leaf per area `[J K⁻¹ m⁻²]`"
@@ -1050,15 +1036,15 @@ Base.@kwdef mutable struct Leaves2D{FT,DIM_XYLEM} <: AbstractLeaf{FT}
     "Total leaf diffusive conductance to CO₂ for shaded leaves `[mol m⁻² s⁻¹]`"
     _g_CO₂_shaded::FT = 0
     "Total leaf diffusive conductance to CO₂ for sunlit leaves `[mol m⁻² s⁻¹]`"
-    _g_CO₂_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    _g_CO₂_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
     "Leaf internal CO₂ partial pressure for shaded leaves `[Pa]`"
     _p_CO₂_i_shaded::FT = 0
     "Leaf internal CO₂ partial pressure for sunlit leaves `[Pa]`"
-    _p_CO₂_i_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    _p_CO₂_i_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
     "Leaf surface CO₂ partial pressure for shaded leaves `[Pa]`"
     _p_CO₂_s_shaded::FT = 0
     "Leaf surface CO₂ partial pressure for sunlit leaves `[Pa]`"
-    _p_CO₂_s_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    _p_CO₂_s_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
 end
 
-Leaves2D(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaves2D{FT,config.DIM_XYLEM}();
+Leaves2D(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Leaves2D{FT,config.DIMS}();
