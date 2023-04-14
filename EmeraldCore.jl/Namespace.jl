@@ -4,7 +4,7 @@ using LazyArtifacts
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
-using ..EmeraldIO.Netcdf: read_nc
+using ..EmeraldIO.Netcdf: read_nc, size_nc
 
 using ..Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O, ρg_MPa
 

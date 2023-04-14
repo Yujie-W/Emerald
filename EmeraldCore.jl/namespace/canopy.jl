@@ -571,7 +571,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT} <: AbstractCanopy{FT}
     "Leaf inclination angle distribution function algorithm"
     LIDF::Union{VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
     "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET = LAND_2021)
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(LAND_2021)
     "Canopy optical properties"
     OPTICS::HyperspectralMLCanopyOpticalProperty{FT} = HyperspectralMLCanopyOpticalProperty{FT}(
                 DIM_AZI = DIM_AZI,

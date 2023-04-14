@@ -12,6 +12,7 @@
 #     2021-Nov-24: tease apart the characteristic absorption curves to HyperspectralAbsorption
 #     2022-Jul-20: use kwdef for the constructor
 #     2022-Jul-20: add field DATASET to struct
+#     2022-Apr-14: add DIM_WL to HyperspectralAbsorption type
 #
 #######################################################################################################################################################################################################
 """
@@ -25,35 +26,47 @@ Immutable struct that contains leaf biophysical traits used to run leaf reflecti
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct HyperspectralAbsorption{FT}
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String
-
+Base.@kwdef struct HyperspectralAbsorption{FT,DIM_WL}
     # Constant features
     "Specific absorption coefficients of anthocynanin `[-]`"
-    K_ANT::Vector{FT} = read_nc(DATASET, "K_ANT")
+    K_ANT::Vector{FT}
     "Specific absorption coefficients of senescent material (brown pigments) `[-]`"
-    K_BROWN::Vector{FT} = read_nc(DATASET, "K_BROWN")
+    K_BROWN::Vector{FT}
     "Specific absorption coefficients of chlorophyll a and b `[-]`"
-    K_CAB::Vector{FT} = read_nc(DATASET, "K_CAB")
+    K_CAB::Vector{FT}
     "Specific absorption coefficients of violaxanthin carotenoid `[-]`"
-    K_CAR_V::Vector{FT} = read_nc(DATASET, "K_CAR_V")
+    K_CAR_V::Vector{FT}
     "Specific absorption coefficients of zeaxanthin carotenoid `[-]`"
-    K_CAR_Z::Vector{FT} = read_nc(DATASET, "K_CAR_Z")
+    K_CAR_Z::Vector{FT}
     "Specific absorption coefficients of carbon-based constituents `[-]`"
-    K_CBC::Vector{FT} = read_nc(DATASET, "K_CBC")
+    K_CBC::Vector{FT}
     "Specific absorption coefficients of water `[-]`"
-    K_H₂O::Vector{FT} = read_nc(DATASET, "K_H₂O")
+    K_H₂O::Vector{FT}
     "Specific absorption coefficients of dry matter `[-]`"
-    K_LMA::Vector{FT} = read_nc(DATASET, "K_LMA")
+    K_LMA::Vector{FT}
     "Specific absorption coefficients of protein `[-]`"
-    K_PRO::Vector{FT} = read_nc(DATASET, "K_PRO")
+    K_PRO::Vector{FT}
     "Specific absorption coefficients of PS I and II `[-]`"
-    K_PS::Vector{FT} = read_nc(DATASET, "K_PS")
+    K_PS::Vector{FT}
     "Refractive index `[-]`"
-    NR::Vector{FT} = read_nc(DATASET, "NR")
+    NR::Vector{FT}
 end
+
+HyperspectralAbsorption{FT,DIM_WL}(dset::String) where {FT,DIM_WL} = (
+    return HyperspectralAbsorption{FT,DIM_WL}(
+                K_ANT   = read_nc(dset, "K_ANT"),
+                K_BROWN = read_nc(dset, "K_BROWN"),
+                K_CAB   = read_nc(dset, "K_CAB"),
+                K_CAR_V = read_nc(dset, "K_CAR_V"),
+                K_CAR_Z = read_nc(dset, "K_CAR_Z"),
+                K_CBC   = read_nc(dset, "K_CBC"),
+                K_H₂O   = read_nc(dset, "K_H₂O"),
+                K_LMA   = read_nc(dset, "K_LMA"),
+                K_PRO   = read_nc(dset, "K_PRO"),
+                K_PS    = read_nc(dset, "K_PS"),
+                NR      = read_nc(dset, "NR")
+    )
+);
 
 
 #######################################################################################################################################################################################################
@@ -65,6 +78,7 @@ end
 #     2021-Oct-19: sort variable to prognostic and dignostic catergories
 #     2022-Jul-20: use kwdef for the constructor
 #     2022-Jul-20: add field DATASET to struct
+#     2022-Apr-14: add DIM_WL to WaveLengthSet type
 #
 #######################################################################################################################################################################################################
 """
@@ -78,11 +92,7 @@ Immutable structure that stores wave length information.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct WaveLengthSet{FT}
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String
-
+Base.@kwdef struct WaveLengthSet{FT,DIM_WL}
     # Constants
     "Wavelength limits for NIR `[nm]`"
     WL_NIR::Vector{FT} = FT[700, 2500]
@@ -93,11 +103,11 @@ Base.@kwdef struct WaveLengthSet{FT}
     "Wavelength limits for SIF excitation `[nm]`"
     WL_SIFE::Vector{FT} = FT[400, 750]
     "Wavelength (bins) `[nm]`"
-    Λ::Vector{FT} = read_nc(DATASET, "WL")
+    Λ::Vector{FT}
     "Lower boundary wavelength `[nm]`"
-    Λ_LOWER::Vector{FT} = read_nc(DATASET, "WL_LOWER")
+    Λ_LOWER::Vector{FT}
     "Upper boundary wavelength `[nm]`"
-    Λ_UPPER::Vector{FT} = read_nc(DATASET, "WL_UPPER")
+    Λ_UPPER::Vector{FT}
 
     # Indices
     "Indicies of Λ_NIR in Λ"
@@ -123,6 +133,16 @@ Base.@kwdef struct WaveLengthSet{FT}
     "Wavelength bins for SIF excitation `[nm]`"
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
 end
+
+WaveLengthSet{FT}(dset::String) where {FT} =  (
+    _nwl = size_nc(dset, "WL");
+
+    return WaveLengthSet{FT,_nwl}(
+                Λ       = read_nc(dset, "WL"),
+                Λ_LOWER = read_nc(dset, "WL_LOWER"),
+                Λ_UPPER = read_nc(dset, "WL_UPPER"),
+    )
+);
 
 
 #######################################################################################################################################################################################################
@@ -162,7 +182,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
 
     # Wavelength information
     "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET = DATASET)
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET)
 
     # Dimensions
     "Dimension of azimuth angles"
@@ -190,7 +210,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
 
     # Embedded structures
     "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}(DATASET = DATASET)
+    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT,DIM_WL}(DATASET)
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT,DIM_WL}(DATASET)
 end
