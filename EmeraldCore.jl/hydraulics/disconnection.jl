@@ -8,9 +8,9 @@
 #######################################################################################################################################################################################################
 """
 
-    disconnect!(organ::Union{Leaf{FT,DIM_XYLEM},Leaves2D{FT,DIM_XYLEM},Stem{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM}
-    disconnect!(organ::Leaves1D{FT,DIM_XYLEM}) where {FT}
-    disconnect!(organ::Root{FT,DIM_XYLEM}) where {FT,DIM_XYLEM}
+    disconnect!(organ::Union{Leaf{FT},Leaves2D{FT},Stem{FT}}) where {FT}
+    disconnect!(organ::Leaves1D{FT}) where {FT}
+    disconnect!(organ::Root{FT}) where {FT}
 
 Disconnect root from soil (and set othes' flow to 0), given
 - `organ` Root, stem, or leaf
@@ -18,27 +18,27 @@ Disconnect root from soil (and set othes' flow to 0), given
 """
 function disconnect! end
 
-disconnect!(organ::Union{Leaf{FT,DIM_XYLEM},Leaves2D{FT,DIM_XYLEM},Stem{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM} = (
+disconnect!(organ::Union{Leaf{FT},Leaves2D{FT},Stem{FT}}) where {FT} = (
     disconnect!(organ.HS, organ.HS.FLOW);
 
     return nothing
 );
 
-disconnect!(organ::Leaves1D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
+disconnect!(organ::Leaves1D{FT}) where {FT} = (
     disconnect!(organ.HS1, organ.HS1.FLOW);
     disconnect!(organ.HS2, organ.HS2.FLOW);
 
     return nothing
 );
 
-disconnect!(organ::Root{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
+disconnect!(organ::Root{FT}) where {FT} = (
     organ._isconnected = false;
     disconnect!(organ.HS, organ.HS.FLOW);
 
     return nothing
 );
 
-disconnect!(hs::LeafHydraulics{FT,DIM_XYLEM}, mode::NonSteadyStateFlow{FT,1}) where {FT,DIM_XYLEM} = (
+disconnect!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT,1}) where {FT} = (
     # update the pressure
     hs.p_leaf = hs._p_storage;
 
@@ -52,7 +52,7 @@ disconnect!(hs::LeafHydraulics{FT,DIM_XYLEM}, mode::NonSteadyStateFlow{FT,1}) wh
     return nothing
 );
 
-disconnect!(hs::Union{RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}, mode::NonSteadyStateFlow{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
+disconnect!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::NonSteadyStateFlow{FT}) where {FT} = (
     # update the pressure
     hs._p_element .= hs._p_storage;
 
@@ -66,7 +66,7 @@ disconnect!(hs::Union{RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}
     return nothing
 );
 
-disconnect!(hs::Union{LeafHydraulics{FT,DIM_XYLEM}, RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}, mode::SteadyStateFlow{FT}) where {FT,DIM_XYLEM} = (
+disconnect!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}, mode::SteadyStateFlow{FT}) where {FT} = (
     mode.flow = 0;
 
     return nothing

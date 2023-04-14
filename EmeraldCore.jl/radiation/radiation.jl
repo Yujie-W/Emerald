@@ -27,7 +27,7 @@ function shortwave_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT,DIM_XYLEM}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT}
+    shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT}
 
 Updates shortwave radiation profiles for BroadbandSLCanopy, given
 - `can` `BroadbandSLCanopy` type struct
@@ -36,7 +36,7 @@ Updates shortwave radiation profiles for BroadbandSLCanopy, given
 - `soil` `Soil` type struct
 
 """
-shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT,DIM_XYLEM}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT,DIM_XYLEM} = (
+shortwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::BroadbandRadiation{FT}, soil::Soil{FT}) where {FT} = (
     (; RADIATION) = can;
     (; BIO) = leaf;
     (; ALBEDO) = soil;
@@ -205,7 +205,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAl
                 soil::Soil{FT},
                 wls::WaveLengthSet{FT};
                 apar_car::Bool = true
-    ) where {FT}
+    ) where {FT,DIM_XYLEM}
 
 Updates canopy radiation profiles for shortwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -401,7 +401,7 @@ function longwave_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT,DIM_XYLEM}, rad::FT, soil::Soil{FT}) where {FT}
+    longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT}
 
 Updates longwave radiation profiles, given
 - `can` `BroadbandSLCanopy` type struct
@@ -410,7 +410,7 @@ Updates longwave radiation profiles, given
 - `soil` `Soil` type struct
 
 """
-longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT,DIM_XYLEM}, rad::FT, soil::Soil{FT}) where {FT,DIM_XYLEM} = (
+longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT}, rad::FT, soil::Soil{FT}) where {FT} = (
     (; RADIATION) = can;
     (; BIO) = leaf;
     (; ALBEDO, LAYERS) = soil;
@@ -479,7 +479,7 @@ longwave_radiation!(can::BroadbandSLCanopy{FT}, leaf::Leaves1D{FT,DIM_XYLEM}, ra
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, rad::FT, soil::Soil{FT}) where {FT}
+    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, rad::FT, soil::Soil{FT}) where {FT,DIM_XYLEM}
 
 Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct

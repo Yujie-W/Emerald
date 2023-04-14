@@ -15,8 +15,8 @@
 
     clear_legacy!(spac::MonoElementSPAC{FT}) where {FT}
     clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT}
-    clear_legacy!(organ::Union{Leaf{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}, Root{FT,DIM_XYLEM}, Stem{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM}
-    clear_legacy!(organ::Leaves1D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM}
+    clear_legacy!(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT}
+    clear_legacy!(organ::Leaves1D{FT}) where {FT}
 
 Clear the legacy for hydraulic organ or system, given
 - `spac` `MonoElementSPAC` or `MultiLayerSPAC` type structure
@@ -28,8 +28,8 @@ clear_legacy!(spac::MonoElementSPAC{FT}) where {FT} = (clear_legacy!(spac.LEAF);
 
 clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
 
-clear_legacy!(organ::Union{Leaf{FT,DIM_XYLEM}, Leaves2D{FT,DIM_XYLEM}, Root{FT,DIM_XYLEM}, Stem{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM} = clear_legacy!(organ.HS);
+clear_legacy!(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT} = clear_legacy!(organ.HS);
 
-clear_legacy!(organ::Leaves1D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (clear_legacy!(organ.HS); clear_legacy!(organ.HS2););
+clear_legacy!(organ::Leaves1D{FT}) where {FT} = (clear_legacy!(organ.HS); clear_legacy!(organ.HS2););
 
-clear_legacy!(hs::Union{LeafHydraulics{FT,DIM_XYLEM}, RootHydraulics{FT,DIM_XYLEM}, StemHydraulics{FT,DIM_XYLEM}}) where {FT,DIM_XYLEM} = (hs._k_history .= 1; hs.p_history .= 0; return nothing);
+clear_legacy!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}) where {FT} = (hs._k_history .= 1; hs.p_history .= 0; return nothing);

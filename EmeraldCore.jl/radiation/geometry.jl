@@ -160,7 +160,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::Hyperspectral
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT}
+    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT,DIM_XYLEM}}, soil::Soil{FT}, wls::WaveLengthSet{FT}) where {FT,DIM_XYLEM}
 
 Updates canopy optical properties (scattering coefficient matrices), given
 - `can` `HyperspectralMLCanopy` type struct

@@ -12,9 +12,9 @@
 #######################################################################################################################################################################################################
 """
 
-    limit_stomatal_conductance!(leaf::Leaf{FT,DIM_XYLEM}) where {FT,DIM_XYLEM}
-    limit_stomatal_conductance!(leaves::Leaves1D{FT,DIM_XYLEM}) where {FT}
-    limit_stomatal_conductance!(leaves::Leaves2D{FT,DIM_XYLEM}) where {FT}
+    limit_stomatal_conductance!(leaf::Leaf{FT}) where {FT}
+    limit_stomatal_conductance!(leaves::Leaves1D{FT}) where {FT}
+    limit_stomatal_conductance!(leaves::Leaves2D{FT}) where {FT}
 
 Limit stomatal conductance for H₂O for
 - `leaf` `Leaf` type struct
@@ -23,7 +23,7 @@ Limit stomatal conductance for H₂O for
 """
 function limit_stomatal_conductance! end
 
-limit_stomatal_conductance!(leaf::Leaf{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
+limit_stomatal_conductance!(leaf::Leaf{FT}) where {FT} = (
     (; G_LIMITS) = leaf;
 
     _ratio = relative_diffusive_coefficient(leaf.t);
@@ -43,7 +43,7 @@ limit_stomatal_conductance!(leaf::Leaf{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
     return nothing
 );
 
-limit_stomatal_conductance!(leaves::Leaves1D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
+limit_stomatal_conductance!(leaves::Leaves1D{FT}) where {FT} = (
     (; G_LIMITS) = leaves;
 
     _ratio_sunlit = relative_diffusive_coefficient(leaves.t[1]);
@@ -72,7 +72,7 @@ limit_stomatal_conductance!(leaves::Leaves1D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM}
     return nothing
 );
 
-limit_stomatal_conductance!(leaves::Leaves2D{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
+limit_stomatal_conductance!(leaves::Leaves2D{FT}) where {FT} = (
     (; G_LIMITS) = leaves;
 
     _ratio = relative_diffusive_coefficient(leaves.t);

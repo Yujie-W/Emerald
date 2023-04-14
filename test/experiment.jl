@@ -17,7 +17,7 @@ using Emerald;
 
 FT = Float64;
 config = EmeraldCore.Namespace.SPACConfiguration{FT}();
-spac = EmeraldCore.Namespace.MultiLayerSPAC{FT}();
+spac = EmeraldCore.Namespace.MultiLayerSPAC{FT,DIM_XYLEM}();
 for slayer in spac.SOIL.LAYERS
     slayer.θ = 0.35;
 end;

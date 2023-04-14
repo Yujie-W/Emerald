@@ -14,7 +14,7 @@
 #######################################################################################################################################################################################################
 """
 
-    function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT}
+    adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT}
 
 Return adjusted time that soil does not over saturate or drain, given
 - `spac` `MultiLayerSPAC` SPAC

@@ -223,7 +223,7 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     tropomi_sif₇₄₀::FT = 0
 end
 
-MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
+MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT,DIM_XYLEM}) where {FT,DIM_XYLEM} = (
     (; DIM_LAYER, LEAVES) = spac;
 
     _gs_sunlit = zeros(FT, LEAVES[1].DIM_INCL, LEAVES[1].DIM_AZI, DIM_LAYER);

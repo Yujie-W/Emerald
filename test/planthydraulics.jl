@@ -1,7 +1,7 @@
 @testset verbose = true "PlantHydraulics" begin
     FT = Float64;
-    spac = EmeraldCore.Namespace.MultiLayerSPAC{FT}();
     config = EmeraldCore.Namespace.SPACConfiguration{FT}();
+    spac = EmeraldCore.Namespace.MultiLayerSPAC(config);
     EmeraldCore.SPAC.initialize!(spac, config);
     @time EmeraldCore.SPAC.spac!(spac, config, FT(1));
 
