@@ -567,7 +567,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     "Hot spot parameter"
     HOT_SPOT::FT = 0.05
 
-    # Embedded structures
+    # Embedded structures TODO: remove WLSET once DIMs are removed
     "Leaf inclination angle distribution function algorithm"
     LIDF::Union{VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
     "Wave length set used to paramertize other variables"

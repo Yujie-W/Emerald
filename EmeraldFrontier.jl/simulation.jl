@@ -206,19 +206,19 @@ simulation!(spac::MultiLayerSPAC{FT},
 
     # save the SIF and reflectance if there is sunlight
     if _df_dir + _df_dif >= 10
-        dfr.BLUE   = MODIS_BLUE(spac.CANOPY);
-        dfr.EVI    = MODIS_EVI(spac.CANOPY);
-        dfr.NDVI   = MODIS_NDVI(spac.CANOPY);
-        dfr.NIR    = MODIS_NIR(spac.CANOPY);
-        dfr.NIRvI  = MODIS_NIRv(spac.CANOPY);
-        dfr.NIRvR  = MODIS_NIRvR(spac.CANOPY);
+        dfr.BLUE   = MODIS_BLUE(spac.CANOPY, config.WLSET);
+        dfr.EVI    = MODIS_EVI(spac.CANOPY, config.WLSET);
+        dfr.NDVI   = MODIS_NDVI(spac.CANOPY, config.WLSET);
+        dfr.NIR    = MODIS_NIR(spac.CANOPY, config.WLSET);
+        dfr.NIRvI  = MODIS_NIRv(spac.CANOPY, config.WLSET);
+        dfr.NIRvR  = MODIS_NIRvR(spac.CANOPY, config.WLSET);
         dfr.PAR    = spac.CANOPY.RADIATION.par_in;
         dfr.PPAR   = PPAR(spac);
-        dfr.RED    = MODIS_RED(spac.CANOPY);
-        dfr.SIF683 = TROPOMI_SIF683(spac.CANOPY);
-        dfr.SIF740 = TROPOMI_SIF740(spac.CANOPY);
-        dfr.SIF757 = OCO2_SIF759(spac.CANOPY);
-        dfr.SIF771 = OCO2_SIF770(spac.CANOPY);
+        dfr.RED    = MODIS_RED(spac.CANOPY, config.WLSET);
+        dfr.SIF683 = TROPOMI_SIF683(spac.CANOPY, config.WLSET);
+        dfr.SIF740 = TROPOMI_SIF740(spac.CANOPY, config.WLSET);
+        dfr.SIF757 = OCO2_SIF759(spac.CANOPY, config.WLSET);
+        dfr.SIF771 = OCO2_SIF770(spac.CANOPY, config.WLSET);
     else
         dfr.BLUE   = NaN;
         dfr.EVI    = NaN;
