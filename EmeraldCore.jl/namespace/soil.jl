@@ -434,4 +434,4 @@ Base.@kwdef mutable struct Soil{FT,DIMS}
     _λ_thermal::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
 end
 
-Soil(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Soil{FT,config.DIMS}();
+Soil(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Soil{FT,DIMS}();

@@ -92,7 +92,7 @@ Base.@kwdef mutable struct MonoElementSPAC{FT,DIMS} <: AbstractSPACSystem{FT}
     _krs::Vector{FT} = ones(FT, 4)
 end
 
-MonoElementSPAC(config::SPACConfiguration{FT}) where {FT} = MonoElementSPAC{FT,config.DIMS}();
+MonoElementSPAC(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = MonoElementSPAC{FT,DIMS}();
 
 
 #######################################################################################################################################################################################################
@@ -176,7 +176,7 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT,DIMS} <: AbstractSPACSystem{FT}
     _root_connection::Bool = true
 end
 
-MultiLayerSPAC(config::SPACConfiguration{FT}) where {FT} = MultiLayerSPAC{FT,config.DIMS}();
+MultiLayerSPAC(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = MultiLayerSPAC{FT,DIMS}();
 
 
 #######################################################################################################################################################################################################

@@ -14,11 +14,13 @@ const LAND_2021 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2021.n
 
 include("namespace/air.jl"      )   # no dims
 include("namespace/colimit.jl"  )   # no dims
-include("namespace/dimension.jl")   # define dims
+include("namespace/general.jl"  )   # no dims
 include("namespace/geometry.jl" )   # no dims
 include("namespace/kinetics.jl" )   # no dims
 include("namespace/stomata.jl"  )   # no dims
 include("namespace/trace.jl"    )   # no dims
+
+include("namespace/dimension.jl")   # rely on general
 
 include("namespace/canopy.jl"    )  # rely on dims
 include("namespace/pigments.jl"  )  # rely on dims
@@ -35,7 +37,7 @@ include("namespace/leaf.jl"  )      # rely on xylem
 include("namespace/root.jl"  )      # rely on xylem
 include("namespace/stem.jl"  )      # rely on xylem
 
-include("namespace/spac.jl")
+include("namespace/spac.jl")        # rely on all above
 
 
 end

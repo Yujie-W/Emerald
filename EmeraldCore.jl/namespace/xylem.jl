@@ -414,11 +414,11 @@ Base.@kwdef mutable struct LeafHydraulics{FT,DIMS} <: AbstractHydraulicSystem{FT
     _p_storage::FT = 0
 end
 
-LeafHydraulics(config::SPACConfiguration{FT}) where {FT} = (
+LeafHydraulics(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = (
     if config.STEADY_STATE_HS
-        return LeafHydraulics{FT,config.DIMS}()
+        return LeafHydraulics{FT,DIMS}()
     else
-        return LeafHydraulics{FT,config.DIMS}(FLOW = NonSteadyStateFlowLeaf{FT}())
+        return LeafHydraulics{FT,DIMS}(FLOW = NonSteadyStateFlowLeaf{FT}())
     end;
 );
 
@@ -495,11 +495,11 @@ Base.@kwdef mutable struct RootHydraulics{FT,DIMS} <: AbstractHydraulicSystem{FT
     _p_storage::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
 end
 
-RootHydraulics(config::SPACConfiguration{FT}) where {FT} = (
+RootHydraulics(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = (
     if config.STEADY_STATE_HS
-        return RootHydraulics{FT,config.DIMS}()
+        return RootHydraulics{FT,DIMS}()
     else
-        return RootHydraulics{FT,config.DIMS}(FLOW = NonSteadyStateFlow{FT,config.DIMS}())
+        return RootHydraulics{FT,DIMS}(FLOW = NonSteadyStateFlow{FT,DIMS}())
     end;
 );
 
@@ -569,10 +569,10 @@ Base.@kwdef mutable struct StemHydraulics{FT,DIMS} <: AbstractHydraulicSystem{FT
     _p_storage::Vector{FT} = zeros(FT, DIMS.DIM_XYLEM)
 end
 
-StemHydraulics(config::SPACConfiguration{FT}) where {FT} = (
+StemHydraulics(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = (
     if config.STEADY_STATE_HS
-        return StemHydraulics{FT,config.DIMS}()
+        return StemHydraulics{FT,DIMS}()
     else
-        return StemHydraulics{FT,config.DIMS}(FLOW = NonSteadyStateFlow{FT,config.DIMS}())
+        return StemHydraulics{FT,DIMS}(FLOW = NonSteadyStateFlow{FT,DIMS}())
     end;
 );

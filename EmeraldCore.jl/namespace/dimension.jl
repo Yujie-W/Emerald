@@ -44,3 +44,16 @@ Base.@kwdef struct SPACDimension
     "Dimension of xylem elements"
     DIM_XYLEM::Int = 5
 end
+
+SPACDimension(gcf::GeneralConfiguration, ncanopy::Int = 20) = (
+    _λ = read_nc(gcf.DATASET, "WL");
+
+    return SPACDimension(
+                DIM_CANOPY = ncanopy,
+                DIM_NIR    = length(findall(gcf.WL_NIR[1]  .<= _λ .<= gcf.WL_NIR[2])),
+                DIM_PAR    = length(findall(gcf.WL_PAR[1]  .<= _λ .<= gcf.WL_PAR[2])),
+                DIM_SIF    = length(findall(gcf.WL_SIF[1]  .<= _λ .<= gcf.WL_SIF[2])),
+                DIM_SIFE   = length(findall(gcf.WL_SIFE[1] .<= _λ .<= gcf.WL_SIFE[2])),
+                DIM_WL     = length(_λ),
+    );
+);

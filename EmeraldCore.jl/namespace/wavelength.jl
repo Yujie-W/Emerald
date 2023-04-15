@@ -55,16 +55,16 @@ Base.@kwdef struct WaveLengthSet{FT,DIMS}
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
 end
 
-WaveLengthSet{FT,DIMS}(dset::String, wl_nir::Vector{FT}, wl_par::Vector{FT}, wl_sif::Vector{FT}, wl_sife::Vector{FT}) where {FT,DIMS} =  (
-    _λ = read_nc(dset, "WL");
+WaveLengthSet{FT,DIMS}(gcf::GeneralConfiguration) where {FT,DIMS} =  (
+    _λ = read_nc(gcf.DATASET, "WL");
 
     return WaveLengthSet{FT,DIMS}(
                 Λ       = _λ,
-                Λ_LOWER = read_nc(dset, "WL_LOWER"),
-                Λ_UPPER = read_nc(dset, "WL_UPPER"),
-                IΛ_NIR  = findall(wl_nir[1]  .<= _λ .<= wl_nir[2]),
-                IΛ_PAR  = findall(wl_par[1]  .<= _λ .<= wl_par[2]),
-                IΛ_SIF  = findall(wl_sif[1]  .<= _λ .<= wl_sif[2]),
-                IΛ_SIFE = findall(wl_sife[1] .<= _λ .<= wl_sife[2]),
+                Λ_LOWER = read_nc(gcf.DATASET, "WL_LOWER"),
+                Λ_UPPER = read_nc(gcf.DATASET, "WL_UPPER"),
+                IΛ_NIR  = findall(gcf.WL_NIR[1]  .<= _λ .<= gcf.WL_NIR[2]),
+                IΛ_PAR  = findall(gcf.WL_PAR[1]  .<= _λ .<= gcf.WL_PAR[2]),
+                IΛ_SIF  = findall(gcf.WL_SIF[1]  .<= _λ .<= gcf.WL_SIF[2]),
+                IΛ_SIFE = findall(gcf.WL_SIFE[1] .<= _λ .<= gcf.WL_SIFE[2]),
     )
 );

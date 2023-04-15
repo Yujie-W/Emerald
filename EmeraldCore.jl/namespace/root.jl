@@ -38,4 +38,4 @@ Base.@kwdef mutable struct Root{FT,DIMS}
     _isconnected::Bool = true
 end
 
-Root(config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = Root{FT,config.DIMS}();
+Root(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Root{FT,DIMS}();
