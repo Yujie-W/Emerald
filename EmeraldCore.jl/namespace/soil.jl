@@ -433,5 +433,3 @@ Base.@kwdef mutable struct Soil{FT,DIMS}
     "Soil thermal conductance between layers per area `[W m⁻² K⁻¹]`"
     _λ_thermal::Vector{FT} = zeros(FT, DIMS.DIM_SOIL - 1)
 end
-
-Soil(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Soil{FT,DIMS}();

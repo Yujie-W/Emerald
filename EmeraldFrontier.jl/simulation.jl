@@ -158,8 +158,8 @@ simulation!(wd_tag::String,
             selection = :,
             t_on::Bool = true,
             θ_on::Bool = true) = (
-    _config = spac_config(gm_dict);
-    _spac = spac(gm_dict, _config);
+    (_config,_dims) = spac_config_dims(gm_dict);
+    _spac = spac(gm_dict, _config,_dims);
     _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
     _wdfr = eachrow(_wdf);
 

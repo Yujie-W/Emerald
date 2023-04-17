@@ -843,8 +843,6 @@ Base.@kwdef mutable struct Leaf{FT,DIMS} <: AbstractLeaf{FT}
     _p_CO₂_s::FT = 0
 end
 
-Leaf(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Leaf{FT,DIMS}();
-
 
 #######################################################################################################################################################################################################
 #
@@ -933,8 +931,6 @@ Base.@kwdef mutable struct Leaves1D{FT,DIMS} <: AbstractLeaf{FT}
     "Leaf surface CO₂ partial pressure `[Pa]`"
     _p_CO₂_s::Vector{FT} = FT[0, 0]
 end
-
-Leaves1D(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Leaves1D{FT,DIMS}();
 
 
 #######################################################################################################################################################################################################
@@ -1046,5 +1042,3 @@ Base.@kwdef mutable struct Leaves2D{FT,DIMS} <: AbstractLeaf{FT}
     "Leaf surface CO₂ partial pressure for sunlit leaves `[Pa]`"
     _p_CO₂_s_sunlit::Matrix{FT} = zeros(FT, DIMS.DIM_INCL, DIMS.DIM_AZI)
 end
-
-Leaves2D(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Leaves2D{FT,DIMS}();

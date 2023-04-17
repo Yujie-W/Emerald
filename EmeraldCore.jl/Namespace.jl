@@ -3,7 +3,7 @@ module Namespace
 using LazyArtifacts
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
-using StaticArrays: SVector
+using StaticArrays: MVector, SMatrix, SVector
 
 using ..EmeraldIO.Netcdf: read_nc, size_nc
 

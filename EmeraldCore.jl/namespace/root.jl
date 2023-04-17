@@ -37,5 +37,3 @@ Base.@kwdef mutable struct Root{FT,DIMS}
     "Whether root is connected to soil"
     _isconnected::Bool = true
 end
-
-Root(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Root{FT,DIMS}();

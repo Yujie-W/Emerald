@@ -35,7 +35,7 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT}
+    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}, mat_ρ::Union{Matrix{FT},SMatrix}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `can` `HyperspectralMLCanopy` type struct
@@ -46,9 +46,9 @@ Updates lower soil boundary reflectance, given
 """
 function soil_albedo! end
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT} = soil_albedo!(can, soil, soil.ALBEDO, wls, mat_ρ);
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, wls::WaveLengthSet{FT}, mat_ρ::Union{Matrix{FT},SMatrix}) where {FT} = soil_albedo!(can, soil, soil.ALBEDO, wls, mat_ρ);
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT} = (
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}, wls::WaveLengthSet{FT}, mat_ρ::Union{Matrix{FT},SMatrix}) where {FT} = (
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
@@ -69,7 +69,7 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSo
     return nothing
 );
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}, mat_ρ::Matrix{FT}) where {FT} = (
+soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}, wls::WaveLengthSet{FT}, mat_ρ::Union{Matrix{FT},SMatrix{DIM_WL}}) where {FT,DIM_WL} = (
     (; COLOR, LAYERS) = soil;
     (; IΛ_NIR, IΛ_PAR) = wls;
     @assert 1 <= COLOR <=20;

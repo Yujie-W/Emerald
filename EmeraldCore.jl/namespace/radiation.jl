@@ -71,12 +71,12 @@ Structure that stores hyperspectral radiation information
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct HyperspectralRadiation{FT,DIMS} <: AbstractRadiation{FT}
+Base.@kwdef struct HyperspectralRadiation{FT,DIM_WL} <: AbstractRadiation{FT}
     # Prognostic variables
     "Diffuse radiation `[mW m⁻² nm⁻¹]`"
-    e_diffuse::Vector{FT} = zeros(FT,DIMS.DIM_WL)
+    e_diffuse::MVector{DIM_WL,FT} = zeros(FT,DIM_WL)
     "Direct radiation `[mW m⁻² nm⁻¹]`"
-    e_direct::Vector{FT} = zeros(FT,DIMS.DIM_WL)
+    e_direct::MVector{DIM_WL,FT} = zeros(FT,DIM_WL)
 end
 
-HyperspectralRadiation{FT,DIMS}(dset::String) where {FT,DIMS} = HyperspectralRadiation{FT,DIMS}(read_nc(dset, "E_DIFF"), read_nc(dset, "E_DIR"));
+HyperspectralRadiation{FT,DIM_WL}(dset::String) where {FT,DIM_WL} = HyperspectralRadiation{FT,DIM_WL}(read_nc(dset, "E_DIFF"), read_nc(dset, "E_DIR"));

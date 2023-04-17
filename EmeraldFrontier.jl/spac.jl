@@ -14,21 +14,21 @@ Create a SPAC, given
 - `config` Configurations for SPAC
 
 """
-function spac(gm_dict::Dict, config::SPACConfiguration{FT,DIMS}) where {FT,DIMS}
+function spac(gm_dict::Dict, config::SPACConfiguration{FT}, dims::SPACDimension) where {FT}
     # read in canopy height
     _z_canopy   = max(FT(0.1), gm_dict["CANOPY_HEIGHT"]);
     _Δz         = _z_canopy / 20;
     _air_bounds = _Δz .* collect(0:21);
 
     # create a SPAC to work on
-    _spac = MultiLayerSPAC{FT,DIMS}(
+    _spac = MultiLayerSPAC{FT,dims}(
                 LATITUDE     = gm_dict["LATITUDE"],
                 LONGITUDE    = gm_dict["LONGITUDE"],
                 LEAVES_INDEX = collect(11:20),
                 ROOTS_INDEX  = collect(1:4),
                 Z            = [-2, _z_canopy/2, _z_canopy],
                 Z_AIR        = _air_bounds,
-                SOIL         = Soil{FT,DIMS}(COLOR = gm_dict["SOIL_COLOR"], ZS = [0, -0.1, -0.35, -1, -3]));
+                SOIL         = Soil{FT,dims}(COLOR = gm_dict["SOIL_COLOR"], ZS = [0, -0.1, -0.35, -1, -3]));
 
     # update soil type information per layer
     for _i in eachindex(_spac.SOIL.LAYERS)

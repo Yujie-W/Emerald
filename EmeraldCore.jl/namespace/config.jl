@@ -21,10 +21,10 @@ Global configuration of SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct SPACConfiguration{FT,DIMS}
+Base.@kwdef struct SPACConfiguration{FT,DIM_NIR,DIM_PAR,DIM_SIF,DIM_SIFE,DIM_WL}#,SIZE_WL4}
     # Wavelength information
     "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT}
+    WLSET::WaveLengthSet{FT,DIM_NIR,DIM_PAR,DIM_SIF,DIM_SIFE,DIM_WL}
 
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
@@ -36,20 +36,20 @@ Base.@kwdef struct SPACConfiguration{FT,DIMS}
 
     # Vectors
     "A matrix of characteristic curves"
-    MAT_ρ::Matrix{FT}
+    MAT_ρ::Matrix{FT}#SMatrix{DIM_WL,4,FT,SIZE_WL4}
 
     # Embedded structures
     "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT,DIMS}
+    LHA::HyperspectralAbsorption{FT,DIM_WL}
     "Downwelling shortwave radiation reference spectrum"
-    RAD_SW_REF::HyperspectralRadiation{FT,DIMS}
+    RAD_SW_REF::HyperspectralRadiation{FT,DIM_WL}
 end
 
-SPACConfiguration{FT,DIMS}(gcf::GeneralConfiguration) where {FT,DIMS} = (
-    return SPACConfiguration{FT,DIMS}(
-                WLSET      = WaveLengthSet{FT}(gcf,DIMS),
+SPACConfiguration{FT}(gcf::GeneralConfiguration, dims::SPACDimension) where {FT} = (
+    return SPACConfiguration{FT,dims.DIM_NIR,dims.DIM_PAR,dims.DIM_SIF,dims.DIM_SIFE,dims.DIM_WL}(#,dims.DIM_WL*4}(
+                WLSET      = WaveLengthSet{FT}(gcf, dims),
                 MAT_ρ      = FT[read_nc(gcf.DATASET, "GSV_1") read_nc(gcf.DATASET, "GSV_2") read_nc(gcf.DATASET, "GSV_3") read_nc(gcf.DATASET, "GSV_4")],
-                LHA        = HyperspectralAbsorption{FT,DIMS}(gcf.DATASET),
-                RAD_SW_REF = HyperspectralRadiation{FT,DIMS}(gcf.DATASET),
+                LHA        = HyperspectralAbsorption{FT,dims.DIM_WL}(gcf.DATASET),
+                RAD_SW_REF = HyperspectralRadiation{FT,dims.DIM_WL}(gcf.DATASET),
     )
 );

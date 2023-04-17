@@ -221,7 +221,7 @@ Updates canopy radiation profiles for shortwave radiation, given
 shortwave_radiation!(
             can::HyperspectralMLCanopy{FT,DIMS},
             leaves::Vector{<:Leaves2D{FT,DIMS}},
-            rad::HyperspectralRadiation{FT,DIMS},
+            rad::HyperspectralRadiation{FT},
             soil::Soil{FT,DIMS},
             wls::WaveLengthSet{FT};
             apar_car::Bool = true

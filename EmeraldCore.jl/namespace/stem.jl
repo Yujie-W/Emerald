@@ -34,5 +34,3 @@ Base.@kwdef mutable struct Stem{FT,DIMS}
     "Marginal increase in energy `[W]`"
     ∂e∂t::FT = 0
 end
-
-Stem(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = Stem{FT,DIMS}();

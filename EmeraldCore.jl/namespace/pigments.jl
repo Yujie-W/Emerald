@@ -26,34 +26,34 @@ Immutable struct that contains leaf biophysical traits used to run leaf reflecti
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct HyperspectralAbsorption{FT<:AbstractFloat,DIMS}
+Base.@kwdef struct HyperspectralAbsorption{FT,DIM_WL}
     # Constant features
     "Specific absorption coefficients of anthocynanin `[-]`"
-    K_ANT::Vector{FT}
+    K_ANT::SVector{DIM_WL,FT}
     "Specific absorption coefficients of senescent material (brown pigments) `[-]`"
-    K_BROWN::Vector{FT}
+    K_BROWN::SVector{DIM_WL,FT}
     "Specific absorption coefficients of chlorophyll a and b `[-]`"
-    K_CAB::Vector{FT}
+    K_CAB::SVector{DIM_WL,FT}
     "Specific absorption coefficients of violaxanthin carotenoid `[-]`"
-    K_CAR_V::Vector{FT}
+    K_CAR_V::SVector{DIM_WL,FT}
     "Specific absorption coefficients of zeaxanthin carotenoid `[-]`"
-    K_CAR_Z::Vector{FT}
+    K_CAR_Z::SVector{DIM_WL,FT}
     "Specific absorption coefficients of carbon-based constituents `[-]`"
-    K_CBC::Vector{FT}
+    K_CBC::SVector{DIM_WL,FT}
     "Specific absorption coefficients of water `[-]`"
-    K_H₂O::Vector{FT}
+    K_H₂O::SVector{DIM_WL,FT}
     "Specific absorption coefficients of dry matter `[-]`"
-    K_LMA::Vector{FT}
+    K_LMA::SVector{DIM_WL,FT}
     "Specific absorption coefficients of protein `[-]`"
-    K_PRO::Vector{FT}
+    K_PRO::SVector{DIM_WL,FT}
     "Specific absorption coefficients of PS I and II `[-]`"
-    K_PS::Vector{FT}
+    K_PS::SVector{DIM_WL,FT}
     "Refractive index `[-]`"
-    NR::Vector{FT}
+    NR::SVector{DIM_WL,FT}
 end
 
-HyperspectralAbsorption{FT,DIMS}(dset::String) where {FT,DIMS} = (
-    return HyperspectralAbsorption{FT,DIMS}(
+HyperspectralAbsorption{FT,DIM_WL}(dset::String) where {FT,DIM_WL} = (
+    return HyperspectralAbsorption{FT,DIM_WL}(
                 K_ANT   = read_nc(dset, "K_ANT"),
                 K_BROWN = read_nc(dset, "K_BROWN"),
                 K_CAB   = read_nc(dset, "K_CAB"),

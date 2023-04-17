@@ -92,7 +92,7 @@ Base.@kwdef mutable struct MonoElementSPAC{FT,DIMS} <: AbstractSPACSystem{FT}
     _krs::Vector{FT} = ones(FT, 4)
 end
 
-MonoElementSPAC(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = MonoElementSPAC{FT,DIMS}();
+MonoElementSPAC(config::SPACConfiguration{FT}, dims::SPACDimension) where {FT} = MonoElementSPAC{FT,dims}();
 
 
 #######################################################################################################################################################################################################
@@ -175,8 +175,6 @@ Base.@kwdef mutable struct MultiLayerSPAC{FT,DIMS} <: AbstractSPACSystem{FT}
     "Whether there is any root connected to soil"
     _root_connection::Bool = true
 end
-
-MultiLayerSPAC(config::SPACConfiguration{FT,DIMS}) where {FT,DIMS} = MultiLayerSPAC{FT,DIMS}();
 
 
 #######################################################################################################################################################################################################
