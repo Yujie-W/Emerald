@@ -39,7 +39,7 @@ function read_spectrum end
 #######################################################################################################################################################################################################
 """
 
-    read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT}
+    read_spectrum(x::Union{SVector,Vector{FT}}, y::Union{SVector,Vector{FT}}, target::FT) where {FT}
 
 Return the spectrum value at target wavelength bin, given
 - `x` X-axis of the spectrum
@@ -47,7 +47,7 @@ Return the spectrum value at target wavelength bin, given
 - `target` Target x value
 
 """
-read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
+read_spectrum(x::Union{SVector,Vector{FT}}, y::Union{SVector,Vector{FT}}, target::FT) where {FT} = (
     @assert length(x) == length(y) "Dimensions of provided spectrum x and y must match!";
     @assert x[1] <= target <= x[end] "Target wavelength must be within the range provided spectum!";
 
@@ -73,7 +73,7 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT}
+    read_spectrum(x::Union{SVector,Vector{FT}}, y::Union{SVector,Vector{FT}}, x₁::FT, x₂::FT; steps::Int = 2) where {FT}
 
 Return the spectrum value at target wavelength bin, given
 - `x` X-axis of the spectrum
@@ -83,7 +83,7 @@ Return the spectrum value at target wavelength bin, given
 - `steps` The incremental Δx is `(x₂ - x₁) / steps`
 
 """
-read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT} = (
+read_spectrum(x::Union{SVector,Vector{FT}}, y::Union{SVector,Vector{FT}}, x₁::FT, x₂::FT; steps::Int = 2) where {FT} = (
     _ys = 0;
     _δx = (x₂ - x₁) / steps;
     for _i in 1:(steps+1)

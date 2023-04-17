@@ -170,7 +170,7 @@ Updates canopy optical properties (scattering coefficient matrices), given
 - `wls` `WaveLengthSet` that contains wavelength information
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT,DIMS}, leaves::Vector{<:Leaves2D{FT,DIMS}}, soil::Soil{FT,DIMS}, wls::WaveLengthSet{FT,DIMS}) where {FT,DIMS} = (
+canopy_optical_properties!(can::HyperspectralMLCanopy{FT,DIMS}, leaves::Vector{<:Leaves2D{FT,DIMS}}, soil::Soil{FT,DIMS}, wls::WaveLengthSet{FT}) where {FT,DIMS} = (
     (; OPTICS) = can;
     (; ALBEDO) = soil;
     (; DIM_CANOPY) = DIMS;

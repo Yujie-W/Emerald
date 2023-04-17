@@ -1,5 +1,7 @@
 module Optics
 
+using StaticArrays: SVector
+
 using ..Constant: AVOGADRO, H_PLANCK, LIGHT_SPEED
 
 
@@ -100,8 +102,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    photon!(λ::Vector{FT}, E::Vector{FT}, phot::Vector{FT}) where {FT}
-    photon!(λ::Vector{FT}, E::Vector{FT}) where {FT}
+    photon!(λ::Union{SVector,Vector{FT}}, E::Vector{FT}, phot::Vector{FT}) where {FT}
+    photon!(λ::Union{SVector,Vector{FT}}, E::Vector{FT}) where {FT}
 
 Compute and save the number of moles of photons, given
 - `λ` Wave length in `[nm]`, converted to `[m]` by FAC
@@ -111,9 +113,9 @@ Compute and save the number of moles of photons, given
 """
 function photon! end
 
-photon!(λ::Vector{FT}, E::Vector{FT}, phot::Vector{FT}) where {FT} = (phot .= photon.(λ, E); return nothing);
+photon!(λ::Union{SVector,Vector{FT}}, E::Vector{FT}, phot::Vector{FT}) where {FT} = (phot .= photon.(λ, E); return nothing);
 
-photon!(λ::Vector{FT}, E::Vector{FT}) where {FT} = (E .*= λ .* FT(FAC); return nothing);
+photon!(λ::Union{SVector,Vector{FT}}, E::Vector{FT}) where {FT} = (E .*= λ .* FT(FAC); return nothing);
 
 
 #######################################################################################################################################################################################################
@@ -148,8 +150,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    energy!(λ::Vector{FT}, phot::Vector{FT}, E::Vector{FT}) where {FT}
-    energy!(λ::Vector{FT}, phot::Vector{FT}) where {FT}
+    energy!(λ::Union{SVector,Vector{FT}}, phot::Vector{FT}, E::Vector{FT}) where {FT}
+    energy!(λ::Union{SVector,Vector{FT}}, phot::Vector{FT}) where {FT}
 
 Compute and save the number of moles of photons, given
 - `λ` Wave length in `[nm]`, converted to `[m]` by FAC
@@ -159,9 +161,9 @@ Compute and save the number of moles of photons, given
 """
 function energy! end
 
-energy!(λ::Vector{FT}, phot::Vector{FT}, E::Vector{FT}) where {FT} = (E .= energy.(λ, phot); return nothing);
+energy!(λ::Union{SVector,Vector{FT}}, phot::Vector{FT}, E::Vector{FT}) where {FT} = (E .= energy.(λ, phot); return nothing);
 
-energy!(λ::Vector{FT}, phot::Vector{FT}) where {FT} = (phot ./= λ .* FT(FAC); return nothing);
+energy!(λ::Union{SVector,Vector{FT}}, phot::Vector{FT}) where {FT} = (phot ./= λ .* FT(FAC); return nothing);
 
 
 end # module

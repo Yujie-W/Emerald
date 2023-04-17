@@ -21,10 +21,10 @@ Global configuration of SPAC system
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SPACConfiguration{FT,DIMS}
+Base.@kwdef struct SPACConfiguration{FT,DIMS}
     # Wavelength information
     "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT,DIMS}
+    WLSET::WaveLengthSet{FT}
 
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
@@ -47,7 +47,7 @@ end
 
 SPACConfiguration{FT,DIMS}(gcf::GeneralConfiguration) where {FT,DIMS} = (
     return SPACConfiguration{FT,DIMS}(
-                WLSET      = WaveLengthSet{FT,DIMS}(gcf),
+                WLSET      = WaveLengthSet{FT}(gcf,DIMS),
                 MAT_ρ      = FT[read_nc(gcf.DATASET, "GSV_1") read_nc(gcf.DATASET, "GSV_2") read_nc(gcf.DATASET, "GSV_3") read_nc(gcf.DATASET, "GSV_4")],
                 LHA        = HyperspectralAbsorption{FT,DIMS}(gcf.DATASET),
                 RAD_SW_REF = HyperspectralRadiation{FT,DIMS}(gcf.DATASET),

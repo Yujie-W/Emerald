@@ -40,7 +40,7 @@ canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) wh
     return nothing
 );
 
-canopy_fluorescence!(can::HyperspectralMLCanopy{FT,DIMS}, leaves::Vector{<:Leaves2D{FT,DIMS}}, wls::WaveLengthSet{FT,DIMS}; ϕ_photon::Bool = true) where {FT,DIMS} = (
+canopy_fluorescence!(can::HyperspectralMLCanopy{FT,DIMS}, leaves::Vector{<:Leaves2D{FT,DIMS}}, wls::WaveLengthSet{FT}; ϕ_photon::Bool = true) where {FT,DIMS} = (
     (; OPTICS, P_INCL, RADIATION) = can;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
     (; DIM_CANOPY) = DIMS;

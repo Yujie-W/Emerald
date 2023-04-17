@@ -21,44 +21,44 @@ Immutable structure that stores wave length information.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct WaveLengthSet{FT,DIMS}
+Base.@kwdef struct WaveLengthSet{FT,DIM_NIR,DIM_PAR,DIM_SIF,DIM_SIFE,DIM_WL}
     # Constants
     "Wavelength (bins) `[nm]`"
-    Λ::Vector{FT}
+    Λ::SVector{DIM_WL,FT}
     "Lower boundary wavelength `[nm]`"
-    Λ_LOWER::Vector{FT}
+    Λ_LOWER::SVector{DIM_WL,FT}
     "Upper boundary wavelength `[nm]`"
-    Λ_UPPER::Vector{FT}
+    Λ_UPPER::SVector{DIM_WL,FT}
 
     # Indices
     "Indicies of Λ_NIR in Λ"
-    IΛ_NIR::Vector{Int}
+    IΛ_NIR::SVector{DIM_NIR,Int}
     "Indicies of Λ_PAR in Λ"
-    IΛ_PAR::Vector{Int}
+    IΛ_PAR::SVector{DIM_PAR,Int}
     "Indicies of Λ_SIF in Λ"
-    IΛ_SIF::Vector{Int}
+    IΛ_SIF::SVector{DIM_SIF,Int}
     "Indicies of Λ_SIFE in Λ"
-    IΛ_SIFE::Vector{Int}
+    IΛ_SIFE::SVector{DIM_SIFE,Int}
 
     # Constants based on the ones above
     "Differential wavelength `[nm]`"
-    ΔΛ::Vector{FT} = Λ_UPPER .- Λ_LOWER
+    ΔΛ::SVector{DIM_WL,FT} = Λ_UPPER .- Λ_LOWER
     "Differential wavelength for PAR `[nm]`"
-    ΔΛ_PAR::Vector{FT} = ΔΛ[IΛ_PAR]
+    ΔΛ_PAR::SVector{DIM_PAR,FT} = ΔΛ[IΛ_PAR]
     "Differential wavelength for SIF excitation `[nm]`"
-    ΔΛ_SIFE::Vector{FT} = ΔΛ[IΛ_SIFE]
+    ΔΛ_SIFE::SVector{DIM_SIFE,FT} = ΔΛ[IΛ_SIFE]
     "Wavelength bins for PAR `[nm]`"
-    Λ_PAR::Vector{FT} = Λ[IΛ_PAR]
+    Λ_PAR::SVector{DIM_PAR,FT} = Λ[IΛ_PAR]
     "Wavelength bins for SIF `[nm]`"
-    Λ_SIF::Vector{FT} = Λ[IΛ_SIF]
+    Λ_SIF::SVector{DIM_SIF,FT} = Λ[IΛ_SIF]
     "Wavelength bins for SIF excitation `[nm]`"
-    Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
+    Λ_SIFE::SVector{DIM_SIFE,FT} = Λ[IΛ_SIFE]
 end
 
-WaveLengthSet{FT,DIMS}(gcf::GeneralConfiguration) where {FT,DIMS} =  (
+WaveLengthSet{FT}(gcf::GeneralConfiguration, dims::SPACDimension) where {FT} =  (
     _λ = read_nc(gcf.DATASET, "WL");
 
-    return WaveLengthSet{FT,DIMS}(
+    return WaveLengthSet{FT,dims.DIM_NIR,dims.DIM_PAR,dims.DIM_SIF,dims.DIM_SIFE,dims.DIM_WL}(
                 Λ       = _λ,
                 Λ_LOWER = read_nc(gcf.DATASET, "WL_LOWER"),
                 Λ_UPPER = read_nc(gcf.DATASET, "WL_UPPER"),

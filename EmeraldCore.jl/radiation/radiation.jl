@@ -165,7 +165,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT,DIMS}, albedo::BroadbandSoilA
     return nothing
 );
 
-shortwave_radiation!(can::HyperspectralMLCanopy{FT,DIMS}, albedo::HyperspectralSoilAlbedo{FT,DIMS}, wls::WaveLengthSet{FT,DIMS}) where {FT,DIMS} = (
+shortwave_radiation!(can::HyperspectralMLCanopy{FT,DIMS}, albedo::HyperspectralSoilAlbedo{FT,DIMS}, wls::WaveLengthSet{FT}) where {FT,DIMS} = (
     (; RADIATION) = can;
     (; ΔΛ) = wls;
     (; DIM_CANOPY) = DIMS;
@@ -223,7 +223,7 @@ shortwave_radiation!(
             leaves::Vector{<:Leaves2D{FT,DIMS}},
             rad::HyperspectralRadiation{FT,DIMS},
             soil::Soil{FT,DIMS},
-            wls::WaveLengthSet{FT,DIMS};
+            wls::WaveLengthSet{FT};
             apar_car::Bool = true
 ) where {FT,DIMS} = (
     (; OPTICS, P_INCL, RADIATION) = can;

@@ -2,6 +2,7 @@ module CanopyOptics
 
 using LinearAlgebra: mul!, pinv
 using QuadGK: quadgk
+using StaticArrays: SVector
 using Statistics: mean
 
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
