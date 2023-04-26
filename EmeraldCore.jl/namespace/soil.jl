@@ -418,7 +418,7 @@ Base.@kwdef mutable struct Soil{FT<:AbstractFloat}
 
     # General information
     "Total area of the soil `[m²]`"
-    AREA::FT = 100
+    AREA::FT = 500
     "Color class as in CLM"
     COLOR::Int = 1
     "Soil layers boundaries"

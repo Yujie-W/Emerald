@@ -36,7 +36,7 @@ for i in 1:10
     #@info "Total water is" tswc [slayer.θ for slayer in spac.SOIL.LAYERS];
 end;
 
-spac.METEO.rain = 1;
+spac.METEO.rain = 0.01;
 for i in 1:10
     EmeraldCore.SPAC.spac!(spac, config, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
@@ -50,7 +50,7 @@ end;
 
 spac.METEO.rad_sw.e_direct .= 0;
 spac.METEO.rad_sw.e_diffuse .= 0;
-spac.METEO.rain = 1;
+spac.METEO.rain = 0.01;
 for i in 1:10
     EmeraldCore.SPAC.spac!(spac, config, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
