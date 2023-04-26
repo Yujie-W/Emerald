@@ -176,7 +176,7 @@ VanGenuchten{FT}(name::String) where {FT<:AbstractFloat} = (
     end;
 
     # return a new struct
-    return VanGenuchten{FT}(K_MAX = _p[5] * ρ_H₂O() / M_H₂O() / ρg_MPa(), N = _p[2], TYPE = name, α = _p[1], Θ_RES = _p[4], Θ_SAT = _p[3])
+    return VanGenuchten{FT}(K_MAX = _p[5] / GRAVITY() * 1e6 / M_H₂O(), N = _p[2], TYPE = name, α = _p[1], Θ_RES = _p[4], Θ_SAT = _p[3])
 );
 
 

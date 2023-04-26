@@ -26,7 +26,7 @@ spac.METEO.rad_lw = 300;
 
 spac.METEO.rain = 0;
 for i in 1:10
-    EmeraldCore.SPAC.spac!(spac, FT(360));
+    EmeraldCore.SPAC.spac!(spac, config, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_fout = spac.METEO.rain * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) - soil_water_flow;
@@ -38,7 +38,7 @@ end;
 
 spac.METEO.rain = 1;
 for i in 1:10
-    EmeraldCore.SPAC.spac!(spac, FT(360));
+    EmeraldCore.SPAC.spac!(spac, config, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_fout = spac.METEO.rain * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) - soil_water_flow;
@@ -52,7 +52,7 @@ spac.METEO.rad_sw.e_direct .= 0;
 spac.METEO.rad_sw.e_diffuse .= 0;
 spac.METEO.rain = 1;
 for i in 1:10
-    EmeraldCore.SPAC.spac!(spac, FT(360));
+    EmeraldCore.SPAC.spac!(spac, config, FT(360));
     tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
     soil_water_fout = spac.METEO.rain * EmeraldCore.Constant.M_H₂O(FT) / EmeraldCore.Constant.ρ_H₂O(FT) - soil_water_flow;

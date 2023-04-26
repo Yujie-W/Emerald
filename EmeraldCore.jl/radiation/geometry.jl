@@ -24,6 +24,7 @@ function canopy_optical_properties! end
 #     2022-Jun-09: rename function to canopy_optical_properties!
 #     2022-Jun-09: update p_sunlit
 #     2023-Mar-11: add code to account for the case of LAI == 0
+#     2023-Apr-25: use exp to compute po, ps, and p_sunlit
 #
 #######################################################################################################################################################################################################
 """
@@ -76,11 +77,17 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeom
     OPTICS._abs_fs_fo .= abs.(OPTICS._fs_fo);
 
     # 3. update the viewing fraction ps, po, pso, and p_sunlit
-    _fac_s = (1 - exp(-OPTICS.ks * can.ci * can.lai / DIM_LAYER)) / (OPTICS.ks * can.ci * can.lai / DIM_LAYER);
-    _fac_o = (1 - exp(-OPTICS.ko * can.ci * can.lai / DIM_LAYER)) / (OPTICS.ko * can.ci * can.lai / DIM_LAYER);
-    OPTICS.po .= exp.(can._x_bnds .* OPTICS.ko .* can.ci .* can.lai) .* _fac_o;
-    OPTICS.ps .= exp.(can._x_bnds .* OPTICS.ks .* can.ci .* can.lai) .* _fac_s;
-    OPTICS.p_sunlit .= (view(OPTICS.ps,1:DIM_LAYER) .+ view(OPTICS.ps,2:DIM_LAYER+1)) ./ 2;
+    # _fac_s = (1 - exp(-OPTICS.ks * _ilai)) / (OPTICS.ks * _ilai);
+    # _fac_o = (1 - exp(-OPTICS.ko * _ilai)) / (OPTICS.ko * _ilai);
+    # OPTICS.po .= exp.(can._x_bnds .* OPTICS.ko .* can.ci .* can.lai) .* _fac_o;
+    # OPTICS.ps .= exp.(can._x_bnds .* OPTICS.ks .* can.ci .* can.lai) .* _fac_s;
+    # OPTICS.p_sunlit .= (view(OPTICS.ps,1:DIM_LAYER) .+ view(OPTICS.ps,2:DIM_LAYER+1)) ./ 2;
+    _ilai = can.ci * can.lai / DIM_LAYER;
+    OPTICS.po = exp.(OPTICS.ko .* can.ci * can.lai .* can._x_bnds);
+    OPTICS.ps = exp.(OPTICS.ks .* can.ci * can.lai .* can._x_bnds);
+    for _i in 1:DIM_LAYER
+        OPTICS.p_sunlit[_i] = 1 / (OPTICS.ks * _ilai) * (exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[_i]) - exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[_i+1]));
+    end;
 
     _dso = sqrt( tand(angles.sza) ^ 2 + tand(angles.vza) ^ 2 - 2 * tand(angles.sza) * tand(angles.vza) * cosd(angles.vaa - angles.saa) );
     @inline _pdf(x::FT) where {FT<:AbstractFloat} = (
@@ -154,6 +161,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::Hyperspectral
 #     2022-Jun-10: add function to compute longwave reflectance, transmittance, and emissivity
 #     2022-Jun-29: use Leaves2D for the hyperspectral RT
 #     2023-Mar-11: add code to account for the case of LAI == 0
+#     2023-Apr-25: use exp to computethe scattering coefficients
 #
 #######################################################################################################################################################################################################
 """
@@ -201,9 +209,12 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves
     # 2. update the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
     OPTICS._τ_ss  = exp(-1 * OPTICS.ks * _ilai);
     OPTICS._τ_dd .= exp.(-1 .* (1 .- OPTICS.σ_ddf) .* _ilai);
-    OPTICS._τ_sd .= OPTICS.σ_sdf .* _ilai;  # TODO: use exp for these!
-    OPTICS._ρ_dd .= OPTICS.σ_ddb .* _ilai;  # TODO: use exp for these!
-    OPTICS._ρ_sd .= OPTICS.σ_sdb .* _ilai;  # TODO: use exp for these!
+    # OPTICS._τ_sd .= OPTICS.σ_sdf .* _ilai;  # TODO: use exp for these!
+    # OPTICS._ρ_dd .= OPTICS.σ_ddb .* _ilai;  # TODO: use exp for these!
+    # OPTICS._ρ_sd .= OPTICS.σ_sdb .* _ilai;  # TODO: use exp for these!
+    OPTICS._τ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdf .* _ilai);
+    OPTICS._ρ_dd .= 1 .- exp.(-1 .* OPTICS.σ_ddb .* _ilai);
+    OPTICS._ρ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdb .* _ilai);
 
     # 3. update the effective reflectance per layer
     canopy_optical_properties!(can, ALBEDO);
@@ -234,7 +245,8 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves
         _σ_lw_b = OPTICS.ddb * leaves[_i].BIO.ρ_LW + OPTICS.ddf * leaves[_i].BIO.τ_LW;
         _σ_lw_f = OPTICS.ddf * leaves[_i].BIO.ρ_LW + OPTICS.ddb * leaves[_i].BIO.τ_LW;
         OPTICS._τ_lw[_i] = exp(-1 * (1 - _σ_lw_f) * _ilai);
-        OPTICS._ρ_lw[_i] = _σ_lw_b * _ilai;
+        # OPTICS._ρ_lw[_i] = _σ_lw_b * _ilai;
+        OPTICS._ρ_lw[_i] = 1 - exp(-1 * _σ_lw_b * _ilai);
         OPTICS.ϵ[_i] = 1 - OPTICS._τ_lw[_i] - OPTICS._ρ_lw[_i];
     end;
 
