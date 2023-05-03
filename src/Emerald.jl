@@ -9,6 +9,7 @@ export EmeraldMath
 export EmeraldIO
 export EmeraldTest
 export EmeraldUtility
+export EmeraldVisualization
 
 
 # include the submodules
