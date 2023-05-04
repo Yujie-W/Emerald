@@ -33,7 +33,8 @@
 |             | Add state field to SPAC                   |
 |             | Pass water and enerby budgets             |
 |             | Scale beta based on roots with + flow     |
-| 2023-Mar-28 | Add root disconnection feature (LAI => 0) |
+|             | Add root disconnection feature (LAI => 0) |
+| 2023-04-25  | Use exp functions in radiation extinction |
 |||
 
 `*` for current development branch
