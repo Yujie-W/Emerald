@@ -60,8 +60,8 @@ function parse_timestamp end
 
 parse_timestamp(timestamp::Union{Int,String}; in_format::String = "YYYYMMDD", out_format::String = "DOY") = (
     _time_stamp = string(timestamp);
-    @assert in_format in TIME_FORMAT "in_format not found in PkgUtility.TIME_FORMAT";
-    @assert out_format in TIME_OUTPUT "out_format not found in PkgUtility.TIME_OUTPUT";
+    @assert in_format in TIME_FORMAT "in_format not found in TIME_FORMAT";
+    @assert out_format in TIME_OUTPUT "out_format not found in TIME_OUTPUT";
 
     # get year, month, and day
     _year   = parse(Int, _time_stamp[1:4]);
@@ -173,17 +173,14 @@ end
 #######################################################################################################################################################################################################
 """
 
-    month_ind(year::Int, doy::Int)
-    month_ind(year::Int, doy::AbstractFloat)
+    month_ind(year::Int, doy::Number)
 
 Return the month index, given
 - `year` Year
 - `doy` Day of year (typically 1-365, 1-366 for leap years)
 
 """
-function month_ind end
-
-month_ind(year::Int, doy::Int) = (
+function month_ind(year::Int, doy::Number)
     # if is leap year
     if isleapyear(year)
         @assert 1 <= doy <= 366;
@@ -209,9 +206,7 @@ month_ind(year::Int, doy::Int) = (
     end;
 
     return _month
-);
-
-month_ind(year::Int, doy::AbstractFloat) = month_ind(year, Int(floor(doy)));
+end
 
 
 end # module

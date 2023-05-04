@@ -1,4 +1,4 @@
-module EmeraldCore
+module EmeraldLand
 
 using ..EmeraldIO
 using ..EmeraldMath

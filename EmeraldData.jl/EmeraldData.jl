@@ -1,7 +1,7 @@
 module EmeraldData
 
-using ..EmeraldCore
 using ..EmeraldIO
+using ..EmeraldLand
 using ..EmeraldMath
 using ..EmeraldUtility
 

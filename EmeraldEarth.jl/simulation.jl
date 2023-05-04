@@ -26,7 +26,7 @@ FT = Float64;
 
 @time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
 @time mat = EmeraldEarth.gm_grids(dts);
-@time sts = Matrix{Union{Nothing,EmeraldCore.Namespace.MultiLayerSPACState{FT}}}(nothing, size(dts.t_lm));
+@time sts = Matrix{Union{Nothing,EmeraldLand.Namespace.MultiLayerSPACState{FT}}}(nothing, size(dts.t_lm));
 @time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
 
 @time wds = EmeraldEarth.weather_drivers(dts, wdr);
