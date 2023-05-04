@@ -2,8 +2,9 @@ module EmeraldIO
 
 
 # include the submodules
-include("Netcdf.jl")
-include("Text.jl"  )
+include("JLD.jl");
+include("Netcdf.jl");
+include("Text.jl"  );
 
 
 end # module
