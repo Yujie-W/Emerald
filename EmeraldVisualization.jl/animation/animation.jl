@@ -29,7 +29,6 @@ animation(make_frame!::Function, inds::Union{UnitRange{Int}, Vector{Int}}; filen
     return isnothing(filename) ? gif(_anim; fps = fps) : (gif(_anim, filename; fps = fps); nothing)
 );
 
-
 animation(dir::String, frames::Vector{String}; filename::Union{Nothing,String} = nothing, fps::Int = 15) = (
     _anim = Animation(dir, frames);
 

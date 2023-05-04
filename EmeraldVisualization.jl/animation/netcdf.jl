@@ -9,7 +9,7 @@
 """
 
     animate_nc!(datafile::String, varname::String; filename::Union{Nothing,String} = nothing, fps::Int = 15)
-    animate_nc!(lats::Vector{<:Number}, lons::Vector{<:Number}, data::Array{<:Number,3}; filename::Union{Nothing,String} = nothing, fps::Int = 15)
+    animate_nc!(lats::Vector{<:Number}, lons::Vector{<:Number}, data::Array{<:Number,3}; filename::Union{Nothing,String} = nothing, fps::Int = 15, ismap::Bool = true)
 
 Animate the netcdf file, given
 - `datafile` Path to netcdf dataset
@@ -19,6 +19,7 @@ Animate the netcdf file, given
 - `lats` Latitude (y axis)
 - `lons` Longitude (x axis)
 - `data` 3D data (x, y, z)
+- `ismap` Whether the data is a map
 
 """
 function animate_nc! end
@@ -28,14 +29,17 @@ animate_nc!(datafile::String, varname::String; filename::Union{Nothing,String} =
     _lons = read_nc(datafile, "lon");
     _data = read_nc(datafile, varname);
 
-    return animate_nc!(_lats, _lons, _data; filename = filename, fps = fps)
+    return animate_nc!(_lats, _lons, _data; filename = filename, fps = fps, ismap = true)
 );
 
-animate_nc!(lats::Vector{<:Number}, lons::Vector{<:Number}, data::Array{<:Number,3}; filename::Union{Nothing,String} = nothing, fps::Int = 15) = (
+animate_nc!(lats::Vector{<:Number}, lons::Vector{<:Number}, data::Array{<:Number,3}; filename::Union{Nothing,String} = nothing, fps::Int = 15, ismap::Bool = true, xorg::Bool = false) = (
+    # disable GKS warning if xorg is false
+    xorg ? nothing : ENV["GKSwstype"] = "100";
+
     _make_frame(i) = (
         _tmp = data[:,:,i]';
         _fig = heatmap(lons, lats, _tmp);
-        set_style!(_fig, GlobalMapStyle(); latitude_360 = (maximum(lons) > 180));
+        ismap ? set_style!(_fig, GlobalMapStyle(); latitude_360 = (maximum(lons) > 180)) : nothing;
     );
 
     return animation(_make_frame, collect(axes(data,3)); filename = filename, fps = fps)

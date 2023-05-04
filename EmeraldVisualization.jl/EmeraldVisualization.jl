@@ -1,16 +1,17 @@
 module EmeraldVisualization
 
-using Plots
+import Plots
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
-using Plots: Plot, Subplot
+using Plots: Animation, Plot, Subplot, gif, heatmap, @animate
 
 using ..EmeraldIO.Netcdf: read_nc
 
 
-include("animation.jl");
-include("netcdf.jl");
-include("styles.jl");
+include("animation/animation.jl");
+include("animation/netcdf.jl");
+
+include("styles/styles.jl");
 
 
 end # module
