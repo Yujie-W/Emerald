@@ -1,4 +1,4 @@
-module JLD
+module Jld2
 
 using FileIO: load, save
 
