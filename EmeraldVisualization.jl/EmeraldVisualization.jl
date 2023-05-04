@@ -12,12 +12,14 @@ using PyPlot: Figure, figure, rc
 
 using ..EmeraldIO.Netcdf: read_nc
 using ..EmeraldMath.Regression: linear_regress
+using ..EmeraldMath.Stats: nanmin, nanmax
 
 
 PATCHES = pyimport("matplotlib.patches");
 
 
 include("animation/animation.jl");
+include("animation/data.jl");
 include("animation/netcdf.jl");
 
 include("scientific/canvas.jl");
