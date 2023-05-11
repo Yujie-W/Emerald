@@ -8,17 +8,17 @@
 #######################################################################################################################################################################################################
 """
 
-    weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
+    weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
 
 Prepare weather driver dataframe to feed SPAC, given
 - `wd_tag` Weather driver version tag
-- `gm_dict` Dictionary that store grid information
+- `gmdict` Dictionary that store grid information
 - `appending` If true, always check whether there are new fields to add
 - `displaying` If true, display information about the NetCDF file
 
 """
-function weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
-    _nc_wd = weather_driver_file(wd_tag, gm_dict; appending = appending, displaying = displaying)[1];
+function weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
+    _nc_wd = weather_driver_file(wd_tag, gmdict; appending = appending, displaying = displaying)[1];
     _df_wd = read_nc(_nc_wd);
 
     #
@@ -26,10 +26,10 @@ function weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bo
     #     1. extropolate the data to 1D resolution
     #     2. extropolate the data to 1H resolution
     #
-    _year = gm_dict["YEAR"];
+    _year = gmdict["YEAR"];
     _days = isleapyear(_year) ? 366 : 365;
     @inline nt_to_1h(label::String) = (
-        _dat_in = gm_dict[label];
+        _dat_in = gmdict[label];
         @assert length(_dat_in) in [366, 365, 53, 52, 46, 12, 1] "Dataset length not supported";
 
         if length(_dat_in) == 1

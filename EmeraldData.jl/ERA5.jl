@@ -258,6 +258,7 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 # General
 #     2023-Mar-20: move function from ClimaLand-0.2
 #     2023-Mar-20: add code to read weather driver for a single grid
+#     2023-May-11: fix a typo in appending
 #
 #######################################################################################################################################################################################################
 """
@@ -294,7 +295,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
     end;
 
     # if file exists and appending is true
-    if isfile(_nc_path) && !appending
+    if isfile(_nc_path) && appending
         if displaying
             @info "$(_nc_path) exists, adding new fields...";
         end;

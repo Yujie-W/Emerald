@@ -25,7 +25,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Dimension of inclination angles"
     DIM_INCL::Int = 9
     "Dimension of canopy layers"
-    DIM_LAYER::Int = 20
+    DIM_LAYER::Int = 12
     "Dimension of SIF wave length bins"
     DIM_SIF::Int = 29
     "Dimension of SIF excitation wave length bins"

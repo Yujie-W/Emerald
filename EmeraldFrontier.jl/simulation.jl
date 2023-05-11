@@ -123,7 +123,7 @@ end
 """
 
     simulation!(wd_tag::String,
-                gm_dict::Dict{String,Any};
+                gmdict::Dict{String,Any};
                 appending::Bool = false,
                 displaying::Bool = false,
                 initialial_state::Union{Nothing,Bool} = true,
@@ -135,7 +135,7 @@ end
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
-- `gm_dict` GriddingMachine dict for site information
+- `gmdict` GriddingMachine dict for site information
 - `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
 - `displaying` If true, displaying information regarding the steps
 - `initialial_state` Initial state of spac: if is a bool, load the first data from the weather driver
@@ -149,7 +149,7 @@ Run simulation on site level, given
 function simulation! end
 
 simulation!(wd_tag::String,
-            gm_dict::Dict{String,Any};
+            gmdict::Dict{String,Any};
             appending::Bool = false,
             displaying::Bool = false,
             initialial_state::Union{Nothing,Bool} = true,
@@ -158,9 +158,9 @@ simulation!(wd_tag::String,
             selection = :,
             t_on::Bool = true,
             θ_on::Bool = true) = (
-    _config = spac_config(gm_dict);
-    _spac = spac(gm_dict, _config);
-    _wdf = weather_driver(wd_tag, gm_dict; appending = appending, displaying = displaying);
+    _config = spac_config(gmdict);
+    _spac = spac(gmdict, _config);
+    _wdf = weather_driver(wd_tag, gmdict; appending = appending, displaying = displaying);
     _wdfr = eachrow(_wdf);
 
     # initialize spac based on initialial_state
