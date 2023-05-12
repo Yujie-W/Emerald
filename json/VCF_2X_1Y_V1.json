@@ -1,0 +1,108 @@
+{
+    "VARIABLE_SETTINGS": [
+        {
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
+            "DATA_NAME": "forestcoverfraction",
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 1,
+            "SCALING_FUNCTION": "x -> x / 100"
+        },
+        {
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
+            "DATA_NAME": "othervegetationfraction",
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 1,
+            "SCALING_FUNCTION": "x -> x / 100"
+        },
+        {
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
+            "DATA_NAME": "novegetationfraction",
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 1,
+            "SCALING_FUNCTION": "x -> x / 100"
+        }
+    ],
+    "VARIABLE_STD_SETTINGS": [
+        {
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
+            "DATA_NAME": "forestcoverfraction_variance",
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 1,
+            "SCALING_FUNCTION": "x -> x / 100"
+        },
+        {
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
+            "DATA_NAME": "othervegetationfraction_variance",
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 1,
+            "SCALING_FUNCTION": "x -> x / 100"
+        },
+        {
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
+            "DATA_NAME": "novegetationfraction_variance",
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 1,
+            "SCALING_FUNCTION": "x -> x / 100"
+        }
+    ],
+    "INPUT_DATASET_SETTINGS": {
+        "FOLDER": "/net/squid/data1/data/pooled/MODIS/MOD44B/gridded",
+        "FILE_NAME_PATTERN": "MODIS-TERRA_C6.1__MOD44B__ForestCoverFraction__LPDAAC__GLOBAL__0.5degree__UHAM-ICDC__XXXXXXXX__fv0.01.nc",
+        "FILE_NAME_FUNCTION": "x -> (isleapyear(x) ? lpad(x,4,\"0\") * \"0305\" : lpad(x,4,\"0\") * \"0306\")",
+        "VALUE_AT": "C",
+        "LAT_LON_FLIPPING": [
+            false,
+            false
+        ],
+        "FORMAT": "N",
+        "PROJECTION": "C",
+        "COVERAGE": "Global"
+    },
+    "GRIDDINGMACHINE": {
+        "LABEL": "VCF",
+        "SPATIAL_RESOLUTION": 2,
+        "VERSION": 1,
+        "TEMPORAL_RESOLUTION": "1Y",
+        "YEARS": [
+            2000,
+            2001,
+            2002,
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021
+        ],
+        "EXTRA_LABEL": "MODIS_MOD44B"
+    },
+    "NETCDF_ATTRIBUTES": {
+        "unit": "-",
+        "year": "2022",
+        "long_name": "Vegetation cover fraction",
+        "title": "MODIS/Terra Vegetation Continuous Fields Yearly L3 Global 250m SIN Grid V061",
+        "journal": "NASA EOSDIS Land Processes DAAC",
+        "doi": "10.5067/MODIS/MOD44B.061",
+        "about": "Three layers: forest, other vegetation, non-vegetated",
+        "authors": "DiMiceli C. et al."
+    }
+}
