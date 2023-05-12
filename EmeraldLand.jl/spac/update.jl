@@ -31,6 +31,7 @@ function update! end
 #     2022-Nov-22: add option to change CO₂ partial pressure through ppm
 #     2023-Mar-28: fix a typo when updating t_soil
 #     2023-Mar-28: update total energy in soil and leaf when prescribing swc and temperature
+#     2023-May-11: add ci to the option list
 #
 #######################################################################################################################################################################################################
 """
@@ -82,6 +83,7 @@ update!(air::AirLayer{FT};
             config::SPACConfiguration{FT};
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
+            ci::Union{Number,Nothing} = nothing,
             lai::Union{Number,Nothing} = nothing,
             swcs::Union{Tuple,Nothing} = nothing,
             t_clm::Union{Number,Nothing} = nothing,
@@ -96,6 +98,7 @@ Update the physiological parameters of the SPAC, given
 - `config` Configuration for `MultiLayerSPAC`
 - `cab` Chlorophyll content. Optional, default is nothing
 - `car` Carotenoid content. Optional, default is nothing
+- `ci` Clumping index. Optional, default is nothing
 - `lai` Leaf area index. Optional, default is nothing
 - `swcs` Soil water content at different layers. Optional, default is nothing
 - `t_clm` Moving average temperature to update Vcmax and Jmax temperature dependencies. Optional, default is nothing
@@ -109,6 +112,7 @@ update!(spac::MultiLayerSPAC{FT},
         config::SPACConfiguration{FT};
         cab::Union{Number,Nothing} = nothing,
         car::Union{Number,Nothing} = nothing,
+        ci::Union{Number,Nothing} = nothing,
         lai::Union{Number,Nothing} = nothing,
         swcs::Union{Tuple,Nothing} = nothing,
         t_clm::Union{Number,Nothing} = nothing,
@@ -142,6 +146,13 @@ update!(spac::MultiLayerSPAC{FT},
         for _i in 1:DIM_LAYER
             LEAVES[_i].HS.AREA = SOIL.AREA * CANOPY.lai / DIM_LAYER;
         end;
+    end;
+
+    # update CI
+    if !isnothing(ci)
+        CANOPY.ci = ci;
+        CANOPY.Ω_A = ci;
+        CANOPY.Ω_B = 0;
     end;
 
     # prescribe soil water content
