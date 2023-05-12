@@ -4,12 +4,14 @@ using LazyArtifacts
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
+using ..EmeraldIO.Text: read_csv
 using ..EmeraldIO.Netcdf: read_nc
 
 using ..Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
 
 const LAND_2017 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2017.nc";
 const LAND_2021 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2021.nc";
+const SOIL_TEXT = read_csv("$(@__DIR__)/../data/SOIL-TEXTURE.csv");
 
 
 include("namespace/air.jl"        )

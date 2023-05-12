@@ -23,6 +23,9 @@ abstract type AbstractSoilVC{FT<:AbstractFloat} end
 # General
 #     2021-Sep-30: define this structure with no default constructor
 #     2022-Oct-19: make struct mutable
+#     2023-May-12: add BrooksCorey constructor
+# Sources
+#     https://ral.ucar.edu/sites/default/files/public/product-tool/unified-noah-lsm/parameters/SOILPARM.TBL
 #
 #######################################################################################################################################################################################################
 """
@@ -38,10 +41,10 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct BrooksCorey{FT<:AbstractFloat} <:AbstractSoilVC{FT}
     # General model information
-    "Maximum soil hydraulic conductivity at 25 °C `[mol m⁻¹ s⁻¹ MPa⁻¹]`"
-    K_MAX::FT
     "Soil b"
     B::FT
+    "Maximum soil hydraulic conductivity at 25 °C `[mol m⁻¹ s⁻¹ MPa⁻¹]`"
+    K_MAX::FT
     "Soil type"
     TYPE::String
     "Potential at saturation `[MPa]`"
@@ -51,6 +54,27 @@ Base.@kwdef mutable struct BrooksCorey{FT<:AbstractFloat} <:AbstractSoilVC{FT}
     "Residual soil volumetric water content"
     Θ_RES::FT
 end
+
+"""
+
+    BrooksCorey{FT}(catg::Int) where {FT<:AbstractFloat}
+
+Return a BrooksCorey soil VC, given
+- `catg` Soil texture catergory (must be within [1,19])
+
+"""
+BrooksCorey{FT}(catg::Int) where {FT<:AbstractFloat} = (
+    @assert 1 <= catg <= 19 "Soil texture catergory must be within 1 to 19!";
+
+    return BrooksCorey{FT}(
+                B     = SOIL_TEXT.BB[catg],
+                K_MAX = SOIL_TEXT.SATDK[catg] / GRAVITY() * 1e6 / M_H₂O(),
+                TYPE  = SOIL_TEXT.NAME[catg],
+                Ψ_SAT = SOIL_TEXT.SATPSI[catg] * ρ_H₂O() * GRAVITY() * 1e-6,
+                Θ_SAT = SOIL_TEXT.MAXSMC[catg],
+                Θ_RES = SOIL_TEXT.REFSMC[catg]
+    )
+);
 
 
 #######################################################################################################################################################################################################
