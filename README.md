@@ -5,6 +5,22 @@
 - `Sapphire` Ocean Model based on CliMA Ocean (To be implemented)
 - `Diamond` Atmosphere Model based on CliMA Atmos (To be implemented)
 
+## Installation
+`Emerald` is not a registered package, to use `Emerald`, one need to install it manually through Julia REPL:
+```julia
+using Pkg;
+Pkg.add(PackageSpec(url="https://github.com/Yujie-W/Emerald.git"));
+```
+
+To use more testing features, you may install a specific branch, say `wyujie`
+```julia
+using Pkg;
+Pkg.add(PackageSpec(url="https://github.com/Yujie-W/Emerald.git", rev="wyujie"));
+```
+
+## Tutorials
+For the details about how to use Emerald, you may look into the `test/tutorial` folder, and subscribe YouTube channel [`Plant Form & Function`](https://www.youtube.com/channel/UCTxiti8ntVAiU4sJ5N2kTnQ).
+
 ## Change logs
 | Version Tag | Linear Change History                     |
 |:------------|:------------------------------------------|
