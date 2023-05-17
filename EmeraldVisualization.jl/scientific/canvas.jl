@@ -44,9 +44,9 @@ function canvas(
     # add axes
     for _i in eachindex(_axids)
         if polar isa Bool
-            _fig.add_subplot(nrow, ncol, axids[_i], polar = polar);
+            _fig.add_subplot(nrow, ncol, _axids[_i], polar = polar);
         else
-            _fig.add_subplot(nrow, ncol, axids[_i], polar = polar[_i]);
+            _fig.add_subplot(nrow, ncol, _axids[_i], polar = polar[_i]);
         end;
     end;
 
