@@ -49,9 +49,21 @@ function reprocess_data!(
             # read the data
             _file = _files[_i_year]
             if length(_dict_vars) == 1
-                _reprocessed_data = read_data(_file, _dict_vars[1], [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]]; scaling_function = data_scaling_functions[1]);
+                _reprocessed_data = read_data(
+                            _file,
+                            _dict_vars[1],
+                            [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
+                            _dict_grid["LAT_LON_RESO"];
+                            coverage = _dict_vars["COVERAGE"],
+                            scaling_function = data_scaling_functions[1]);
                 _reprocessed_std = if !isnothing(_dict_stds)
-                    read_data(_file, _dict_stds[1], [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]]; scaling_function = std_scaling_functions[1])
+                    read_data(
+                            _file,
+                            _dict_stds[1],
+                            [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
+                            _dict_grid["LAT_LON_RESO"];
+                            coverage = _dict_vars["COVERAGE"],
+                            scaling_function = std_scaling_functions[1])
                 else
                     similar(_reprocessed_data) .* NaN
                 end;
@@ -59,9 +71,21 @@ function reprocess_data!(
                 _reprocessed_data = ones(Float64, 360 * _dict_grid["LAT_LON_RESO"], 180 * _dict_grid["LAT_LON_RESO"], length(_dict_vars));
                 _reprocessed_std = ones(Float64, 360 * _dict_grid["LAT_LON_RESO"], 180 * _dict_grid["LAT_LON_RESO"], length(_dict_vars)) .* NaN;
                 for _i_var in eachindex(_dict_vars)
-                    _reprocessed_data[:,:,_i_var] = read_data(_file, _dict_vars[_i_var], [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]]; scaling_function = data_scaling_functions[_i_var]);
+                    _reprocessed_data[:,:,_i_var] = read_data(
+                            _file,
+                            _dict_vars[_i_var],
+                            [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
+                            _dict_grid["LAT_LON_RESO"];
+                            coverage = _dict_vars["COVERAGE"],
+                            scaling_function = data_scaling_functions[_i_var]);
                     if !isnothing(_dict_stds)
-                        _reprocessed_std[:,:,_i_var] = read_data(_file, _dict_stds[_i_var], [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]]; scaling_function = std_scaling_functions[_i_var]);
+                        _reprocessed_std[:,:,_i_var] = read_data(
+                            _file,
+                            _dict_stds[_i_var],
+                            [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
+                            _dict_grid["LAT_LON_RESO"];
+                            coverage = _dict_vars["COVERAGE"],
+                            scaling_function = std_scaling_functions[_i_var]);
                     end;
                 end;
             end;

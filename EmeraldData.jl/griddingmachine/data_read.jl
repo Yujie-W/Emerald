@@ -1,16 +1,18 @@
 """
 
-    read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector; scaling_function::Union{Function,Nothing} = nothing)
+    read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)
 
 Return formatted 2D data, given
 - `data` Input 3D data
 - `ind` Index for 3rd dimension
 - `dict` Dict about the data format
 - `flipping` Whether to flip latitude and longitude
+- `resox` Spatial resolution (N means 1/N °)
+- `coverage` The coverage of input map
 - `scaling_function` Scaling function that to apply
 
 """
-function read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector; scaling_function::Union{Function,Nothing} = nothing)
+function read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector, resox::Int; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)
     # read the layer based on the index orders
     if isnothing(dict["INDEX_AXIS_INDEX"])
         if dict["LONGITUDE_AXIS_INDEX"] == 1 && dict["LATITUDE_AXIS_INDEX"] == 2
@@ -47,7 +49,21 @@ function read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector; scali
     # add a scaling function
     _hata = isnothing(scaling_function) ? _gata : scaling_function.(_gata);
 
-    return _hata
+    # if coverage is GLOBAL, return the data as it is
+    if coverage == "GLOBAL"
+        return _hata
+    end;
+
+    # if the coverage is not global, expand the data
+    _data = zeros(Float64, resox * 360, resox * 180) .* NaN64;
+    _reso = 1 / resox;
+    _lats = (-90+_reso/2):_reso:90;
+    _lons = (-180+_reso/2):_reso:180;
+    _ilats = (coverage[1] .<= _lats .<= coverage[2]);
+    _ilons = (coverage[3] .<= _lons .<= coverage[4]);
+    _data[_ilons,_ilats] .= _hata;
+
+    return _data
 end
 
 
@@ -59,19 +75,21 @@ Return the formatted data, given
 - `filename` File to read
 - `dict` Dict about the data format
 - `flipping` Whether to flip latitude and longitude
+- `resox` Spatial resolution (N means 1/N °)
+- `coverage` The coverage of input map
 - `scaling_function` Scaling function that to apply
 
 """
-function read_data(filename::String, dict::Dict, flipping::Vector; scaling_function::Union{Function,Nothing} = nothing)
+function read_data(filename::String, dict::Dict, flipping::Vector, resox::Int; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)
     _data = read_nc(filename, dict["DATA_NAME"]);
 
     # rotate the data if necessary
     if isnothing(dict["INDEX_AXIS_INDEX"])
-        return read_data_2d(_data, 1, dict, flipping; scaling_function = scaling_function)
+        return read_data_2d(_data, 1, dict, flipping, resox; coverage = coverage, scaling_function = scaling_function)
     else
-        _eata = zeros(Float64, size(_data, dict["LONGITUDE_AXIS_INDEX"]), size(_data, dict["LATITUDE_AXIS_INDEX"]), size(_data, dict["INDEX_AXIS_INDEX"]));
+        _eata = zeros(Float64, resox * 360, resox * 180, size(_data, dict["INDEX_AXIS_INDEX"]));
         for _ind in axes(_data, dict["INDEX_AXIS_INDEX"])
-            _eata[:,:,_ind] .= read_data_2d(_data, _ind, dict, flipping; scaling_function = scaling_function);
+            _eata[:,:,_ind] .= read_data_2d(_data, _ind, dict, flipping, resox; coverage = coverage, scaling_function = scaling_function);
         end;
 
         return _eata
