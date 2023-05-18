@@ -5,7 +5,7 @@ import Plots
 using DataFrames: DataFrame, sort!
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using KernelDensity: kde, pdf
-using Plots: Animation, Plot, Subplot, gif, heatmap, @animate
+using Plots: Animation, Plot, Subplot, gif, heatmap, savefig, @animate
 using ProgressMeter: @showprogress
 using PyCall: PyObject, pyimport
 using PyPlot: Figure, figure, rc

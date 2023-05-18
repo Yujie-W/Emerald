@@ -25,13 +25,16 @@ function variable_dict()
         _data_name = verified_input(_msg, _jdg_1);
 
         _msg = "        What is the longitude axis number of the data? (e.g., 1 for [lon,lat,time] and 2 for [lat,lon,time]) > ";
-        _i_lon = verified_input(_msg, _jdg_2);
+        _i_lon = parse(Int, verified_input(_msg, _jdg_2));
 
         _msg = "        What is the latitude axis number of the data? (e.g., 2 for [lon,lat,time] and 1 for [lat,lon,time]) > ";
-        _i_lat = verified_input(_msg, _jdg_2);
+        _i_lat = parse(Int, verified_input(_msg, _jdg_2));
 
         _msg = "        What is the index axis number of the data? (e.g., 3 for time in [lon,lat,time] and 0 for [lat,lon]) > "
-        _i_ind = verified_input(_msg, _jdg_2);
+        _i_ind = parse(Int, verified_input(_msg, _jdg_2));
+        if _i_ind == 0
+            _i_ind = nothing;
+        end;
 
         _msg = "        If you have extra scaling you want to make, type it here (NCDatasets may do that already, need to double check, example: x -> log(x)) > ";
         println(_msg);

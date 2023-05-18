@@ -18,6 +18,8 @@ function reprocess_data!(
             file_name_function::Union{Function,Nothing} = nothing,
             data_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])],
             std_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])])
+    _jdg_1(x) = (x in ["N", "NO", "Y", "YES"]);
+
     _dict_file = dict["INPUT_MAP_SETS"];
     _dict_grid = dict["GRIDDINGMACHINE"];
     _dict_vars = dict["INPUT_VAR_SETS"];
@@ -28,7 +30,7 @@ function reprocess_data!(
     # determine if there is any information for years
     _years = _dict_grid["YEARS"];
     _files = [];
-    if _years == ""
+    if isnothing(_years)
         push!(_files, _dict_file["FOLDER"] * "/" * _dict_file["FILE_NAME_PATTERN"]);
     else
         for _year in _years
@@ -37,10 +39,10 @@ function reprocess_data!(
     end;
 
     # iterate through the files
-    _i_years = (_years == "" ? [1] : eachindex(_years));
+    _i_years = (isnothing(_years) ? [1] : eachindex(_years));
     for _i_year in _i_years
         # determine whether to skip based on the tag
-        _tag = (_years == "" ? griddingmachine_tag(dict) : griddingmachine_tag(dict, _years[_i_year]));
+        _tag = (isnothing(_years) ? griddingmachine_tag(dict) : griddingmachine_tag(dict, _years[_i_year]));
         _reprocessed_file = "/home/wyujie/GriddingMachine/reprocessed/$(_tag).nc";
 
         # reprocess the data only if file does not exist
@@ -54,7 +56,7 @@ function reprocess_data!(
                             _dict_vars[1],
                             [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
                             _dict_grid["LAT_LON_RESO"];
-                            coverage = _dict_vars["COVERAGE"],
+                            coverage = _dict_file["COVERAGE"],
                             scaling_function = data_scaling_functions[1]);
                 _reprocessed_std = if !isnothing(_dict_stds)
                     read_data(
@@ -62,7 +64,7 @@ function reprocess_data!(
                             _dict_stds[1],
                             [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
                             _dict_grid["LAT_LON_RESO"];
-                            coverage = _dict_vars["COVERAGE"],
+                            coverage = _dict_file["COVERAGE"],
                             scaling_function = std_scaling_functions[1])
                 else
                     similar(_reprocessed_data) .* NaN
@@ -76,7 +78,7 @@ function reprocess_data!(
                             _dict_vars[_i_var],
                             [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
                             _dict_grid["LAT_LON_RESO"];
-                            coverage = _dict_vars["COVERAGE"],
+                            coverage = _dict_file["COVERAGE"],
                             scaling_function = data_scaling_functions[_i_var]);
                     if !isnothing(_dict_stds)
                         _reprocessed_std[:,:,_i_var] = read_data(
@@ -84,17 +86,28 @@ function reprocess_data!(
                             _dict_stds[_i_var],
                             [_dict_file["FLIP_LAT"],_dict_file["FLIP_LON"]],
                             _dict_grid["LAT_LON_RESO"];
-                            coverage = _dict_vars["COVERAGE"],
+                            coverage = _dict_file["COVERAGE"],
                             scaling_function = std_scaling_functions[_i_var]);
                     end;
                 end;
             end;
 
+            # plot the reprocessed file to make sure it is processed correctly
+            _reso = 1 / _dict_grid["LAT_LON_RESO"];
+            _lats = collect((-90+_reso/2):_reso:90);
+            _lons = collect((-180+_reso/2):_reso:180);
+            _ffig = "$(@__DIR__)/temp.gif";
+            animate_data!(_lons, _lats, _reprocessed_data; filename = _ffig);
+            _msg = "The figure is saved as $(_ffig). Is the generated data okay? Type Y/y or N/n to continue > ";
+            _save_data = (verified_input(_msg, uppercase, _jdg_1) in ["Y", "YES"]);
+
             # save the file
-            _var_attr::Dict{String,String} = merge(_dict_outv,_dict_refs);
-            _dim_names = length(size(_reprocessed_std)) == 3 ? ["lon", "lat", "ind"] : ["lon", "lat"];
-            save_nc!(_reprocessed_file, "data", _reprocessed_data, _var_attr);
-            append_nc!(_reprocessed_file, "std", _reprocessed_std, _var_attr, _dim_names);
+            if _save_data
+                _var_attr::Dict{String,String} = merge(_dict_outv,_dict_refs);
+                _dim_names = length(size(_reprocessed_std)) == 3 ? ["lon", "lat", "ind"] : ["lon", "lat"];
+                save_nc!(_reprocessed_file, "data", _reprocessed_data, _var_attr);
+                append_nc!(_reprocessed_file, "std", _reprocessed_std, _var_attr, _dim_names);
+            end;
         else
             @info "File $(_reprocessed_file) exists already, skipping...";
         end;

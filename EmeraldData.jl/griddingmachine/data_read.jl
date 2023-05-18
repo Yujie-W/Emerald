@@ -1,6 +1,6 @@
 """
 
-    read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)
+    read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector, resox::Int; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)
 
 Return formatted 2D data, given
 - `data` Input 3D data
@@ -69,7 +69,7 @@ end
 
 """
 
-    read_data(filename::String, dict::Dict, flipping::Vector; scaling_function::Union{Function,Nothing} = nothing)
+    read_data(filename::String, dict::Dict, flipping::Vector, resox::Int; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)
 
 Return the formatted data, given
 - `filename` File to read

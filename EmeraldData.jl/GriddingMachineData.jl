@@ -5,6 +5,7 @@ using JSON;
 using ..EmeraldIO.Netcdf: append_nc!, read_nc, save_nc!
 using ..EmeraldIO.Terminal: verified_input
 using ..EmeraldUtility.Artifact: deploy_artifact!
+using ..EmeraldVisualization: animate_data!
 
 
 GRIDDING_MACHINE_HOME = "/home/wyujie/GriddingMachine";

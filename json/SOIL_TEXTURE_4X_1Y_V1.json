@@ -14,10 +14,10 @@
     },
     "INPUT_VAR_SETS": [
         {
-            "INDEX_AXIS_INDEX": "3",
-            "LATITUDE_AXIS_INDEX": "2",
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
             "MASKING_FUNCTION": "",
-            "LONGITUDE_AXIS_INDEX": "1",
+            "LONGITUDE_AXIS_INDEX": 1,
             "SCALING_FUNCTION": "",
             "DATA_NAME": "GLDAS_soiltex"
         }

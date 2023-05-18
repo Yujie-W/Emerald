@@ -25,7 +25,7 @@ function reference_attribute_dict()
     while true
         _msg = "    Please input the author information (e.g., Name S. et al.) > ";
         _authors = verified_input(_msg, _jdg_1);
-        ;
+
         _msg = "    Please input the year of the publication > ";
         _year_pub = verified_input(_msg, _jdg_2);
 

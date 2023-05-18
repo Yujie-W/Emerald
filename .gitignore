@@ -24,4 +24,5 @@ docs/site/
 Manifest.toml
 
 # Generated file
+*.gif
 *.nc
