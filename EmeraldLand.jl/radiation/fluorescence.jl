@@ -12,6 +12,7 @@
 #     2023-Mar-11: compute fluorescence only if solar zenith angle < 89
 #     2023-Mar-11: add code to account for the case of LAI == 0
 #     2023-Apr-13: add config to function call
+#     2023-May-19: use δlai per canopy layer
 # Bug fixes
 #     2023-Mar-16: ddb ddf to dob and dof for observed SIF
 #
@@ -46,8 +47,6 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
     if can.lai == 0
         RADIATION.sif_obs .= 0;
     end;
-
-    _ilai = can.lai * can.ci / DIM_LAYER;
 
     # function to weight matrices by inclination angles
     @inline lidf_weight(mat_0, mat_1) = (
@@ -132,6 +131,7 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
                                            OPTICS._tmp_vec_sif_5 .* _sh_O_ .- OPTICS._tmp_vec_sif_6 .* _sh_oθ;
 
         # total emitted SIF for upward and downward direction
+        _ilai = can.δlai[_i] * can.ci;
         RADIATION.s_layer_down[:,_i] .= _ilai .* OPTICS.p_sunlit[_i] .* RADIATION._s_sunlit_down .+ _ilai .* (1 - OPTICS.p_sunlit[_i]) .* RADIATION._s_shaded_down;
         RADIATION.s_layer_up[:,_i]   .= _ilai .* OPTICS.p_sunlit[_i] .* RADIATION._s_sunlit_up   .+ _ilai .* (1 - OPTICS.p_sunlit[_i]) .* RADIATION._s_shaded_up;
     end;
@@ -177,14 +177,14 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
     RADIATION.sif_up[:,end] .= view(RADIATION.sif_down,:,DIM_LAYER+1) .* view(OPTICS.ρ_dd,WLSET.IΛ_SIF,DIM_LAYER+1) .+ view(RADIATION._s_emit_up,:,DIM_LAYER+1);
 
     # 4. compute SIF from the observer direction
-    OPTICS._tmp_vec_layer .= (view(OPTICS.pso,1:DIM_LAYER) .+ view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* _ilai ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(OPTICS.pso,1:DIM_LAYER) .+ view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
     mul!(RADIATION.sif_obs_sunlit, RADIATION._sif_obs_sunlit, OPTICS._tmp_vec_layer);
 
-    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1) .- view(OPTICS.pso,1:DIM_LAYER) .- view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* _ilai ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1) .- view(OPTICS.pso,1:DIM_LAYER) .- view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
     mul!(RADIATION.sif_obs_shaded, RADIATION._sif_obs_shaded, OPTICS._tmp_vec_layer);
 
     RADIATION._sif_obs_scatter .= view(OPTICS.σ_dob,WLSET.IΛ_SIF,:) .* view(RADIATION.sif_down,:,1:DIM_LAYER) .+ view(OPTICS.σ_dof,WLSET.IΛ_SIF,:) .* view(RADIATION.sif_up,:,1:DIM_LAYER);
-    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1)) ./ 2 .* _ilai ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
     mul!(RADIATION.sif_obs_scatter, RADIATION._sif_obs_scatter, OPTICS._tmp_vec_layer);
 
     RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* OPTICS.po[end] ./ FT(pi);

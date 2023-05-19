@@ -13,6 +13,7 @@
 #     2022-Jun-15: rename to HyperspectralMLCanopyOpticalProperty
 #     2022-Jul-19: use kwdef for the constructor
 #     2022-Jul-19: add dimension control to struct
+#     2023-May-19: use δlai per canopy layer
 #
 #######################################################################################################################################################################################################
 """
@@ -181,7 +182,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloa
     "Tranmittance for solar directional->diffuse at each canopy layer"
     _τ_sd::Matrix{FT} = zeros(FT, DIM_WL, DIM_LAYER)
     "Tranmittance for solar directional->directional at each canopy layer"
-    _τ_ss::FT = 0
+    _τ_ss::Vector{FT} = zeros(FT, DIM_LAYER)
 end
 
 
@@ -609,6 +610,8 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     ci::FT = 1
     "Leaf area index"
     lai::FT = 3
+    "Leaf area index distribution"
+    δlai::Vector{FT} = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER
 
     # Cache variables
     "Ones with the length of Θ_AZI"
@@ -620,5 +623,5 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     "Square of cosine of Θ_INCL at different azimuth angles"
     _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * _1_AZI'
     "Cache for level boundary locations"
-    _x_bnds::Vector{FT} = collect(FT, range(0, -1; length=DIM_LAYER+1))
+    _x_bnds::Vector{FT} = [0; [sum(δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai
 end

@@ -186,6 +186,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAl
 #     2023-Mar-11: add code to account for the case of LAI == 0
 #     2023-Apr-13: rename option APAR_car to apar_car
 #     2023-Apr-13: name the method to shortwave_radiation! to be more specific
+#     2023-May-19: use δlai per canopy layer
 # Bug fixes
 #     2022-Jul-15: sum by r_net_sw by the weights of sunlit and shaded fractions
 #     2022-Jul-27: use _ρ_dd, _ρ_sd, _τ_dd, and _τ_sd for leaf energy absorption (typo when refactoring the code)
@@ -224,9 +225,6 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         return nothing
     end;
 
-    _ilai = can.lai * can.ci / DIM_LAYER;
-    _tlai = can.lai / DIM_LAYER;
-
     # 1. update upward and downward direct and diffuse radiation profiles
     RADIATION.e_direct[:,1] .= rad.e_direct;
     RADIATION.e_diffuse_down[:,1] .= rad.e_diffuse;
@@ -238,11 +236,11 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         _e_s_j = view(RADIATION.e_direct      ,:,_i+1);     # direct radiation at lower boundary
         _e_u_i = view(RADIATION.e_diffuse_up  ,:,_i  );     # upward diffuse radiation at upper boundary
 
-        _r_dd_i = view(OPTICS.ρ_dd,:,_i);   # reflectance of the upper boundary (i)
-        _r_sd_i = view(OPTICS.ρ_sd,:,_i);   # reflectance of the upper boundary (i)
-        _t_dd_i = view(OPTICS.τ_dd,:,_i);   # transmittance of the layer (i)
-        _t_sd_i = view(OPTICS.τ_sd,:,_i);   # transmittance of the layer (i)
-        _t_ss__ = OPTICS._τ_ss;             # transmittance for directional->directional
+        _r_dd_i = view(OPTICS.ρ_dd ,:,_i);  # reflectance of the upper boundary (i)
+        _r_sd_i = view(OPTICS.ρ_sd ,:,_i);  # reflectance of the upper boundary (i)
+        _t_dd_i = view(OPTICS.τ_dd ,:,_i);  # transmittance of the layer (i)
+        _t_sd_i = view(OPTICS.τ_sd ,:,_i);  # transmittance of the layer (i)
+        _t_ss__ = view(OPTICS._τ_ss,_i);    # transmittance for directional->directional
 
         _e_s_j .= _t_ss__ .* _e_s_i;
         _e_d_j .= _t_sd_i .* _e_s_i .+ _t_dd_i .* _e_d_i;
@@ -265,7 +263,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         _r_sd__ = view(OPTICS._ρ_sd,:,_i);  # reflectance of the upper boundary (i)
         _t_dd__ = view(OPTICS._τ_dd,:,_i);  # transmittance of the layer (i)
         _t_sd__ = view(OPTICS._τ_sd,:,_i);  # transmittance of the layer (i)
-        _t_ss__ = OPTICS._τ_ss;             # transmittance for directional->directional
+        _t_ss__ = view(OPTICS._τ_ss,_i);    # transmittance for directional->directional
 
         _p_s_i .= _e_s_i;
         _p_d_i .= _e_d_i .+ _e_u_j;
@@ -288,7 +286,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         _e_v_i  .= OPTICS.po[_i] .* _dob_i .* _e_d_i;
         _e_v_i .+= OPTICS.po[_i] .* _dof_i .* _e_u_i;
         _e_v_i .+= OPTICS.pso[_i] .* _so__i .* rad.e_direct;
-        _e_v_i .*= _ilai;
+        _e_v_i .*= can.δlai[_i] * can.ci;
     end;
     RADIATION.e_v[:,end] .= OPTICS.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
 
@@ -300,8 +298,8 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
 
     # 4. compute net absorption for leaves and soil
     for _i in 1:DIM_LAYER
-        _Σ_shaded = view(RADIATION.e_net_diffuse,:,_i)' * WLSET.ΔΛ / 1000 / _tlai;
-        _Σ_sunlit = view(RADIATION.e_net_direct ,:,_i)' * WLSET.ΔΛ / 1000 / _tlai;
+        _Σ_shaded = view(RADIATION.e_net_diffuse,:,_i)' * WLSET.ΔΛ / 1000 / can.δlai[_i];
+        _Σ_sunlit = view(RADIATION.e_net_direct ,:,_i)' * WLSET.ΔΛ / 1000 / can.δlai[_i];
         RADIATION.r_net_sw_shaded[_i] = _Σ_shaded;
         RADIATION.r_net_sw_sunlit[_i] = _Σ_sunlit / OPTICS.p_sunlit[_i] + _Σ_shaded;
         RADIATION.r_net_sw[_i] = _Σ_shaded * (1 - OPTICS.p_sunlit[_i]) + _Σ_sunlit * OPTICS.p_sunlit[_i];
@@ -325,8 +323,8 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(WLSET.Λ_PAR, view(RADIATION.e_sum_diffuse,WLSET.IΛ_PAR,_i)) .* 1000;
         RADIATION._par_sunlit  .= photon.(WLSET.Λ_PAR, view(RADIATION.e_sum_direct ,WLSET.IΛ_PAR,_i)) .* 1000 ./ OPTICS.p_sunlit[_i];
-        RADIATION._apar_shaded .= photon.(WLSET.Λ_PAR, view(RADIATION.e_net_diffuse,WLSET.IΛ_PAR,_i)) .* 1000 ./ _tlai;
-        RADIATION._apar_sunlit .= photon.(WLSET.Λ_PAR, view(RADIATION.e_net_direct ,WLSET.IΛ_PAR,_i)) .* 1000 ./ _tlai ./ OPTICS.p_sunlit[_i];
+        RADIATION._apar_shaded .= photon.(WLSET.Λ_PAR, view(RADIATION.e_net_diffuse,WLSET.IΛ_PAR,_i)) .* 1000 ./ can.δlai[_i];
+        RADIATION._apar_sunlit .= photon.(WLSET.Λ_PAR, view(RADIATION.e_net_direct ,WLSET.IΛ_PAR,_i)) .* 1000 ./ can.δlai[_i] ./ OPTICS.p_sunlit[_i];
         RADIATION._ppar_shaded .= RADIATION._apar_shaded .* _α_apar;
         RADIATION._ppar_sunlit .= RADIATION._apar_sunlit .* _α_apar;
 

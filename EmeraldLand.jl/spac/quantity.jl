@@ -33,6 +33,7 @@ BETA(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 # Changes to this function
 # General
 #     2022-Oct-19: add function to compute canopy net primary productivity
+#     2023-May-19: use δlai per canopy layer
 #
 #######################################################################################################################################################################################################
 """
@@ -51,9 +52,8 @@ CNPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     # compute GPP
     _cnpp::FT = 0;
     for _i in 1:DIM_LAYER
-        _cnpp += CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_net_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_net_shaded;
+        _cnpp += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_net_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_net_shaded) * CANOPY.δlai[_i];
     end;
-    _cnpp *= spac.CANOPY.lai / spac.CANOPY.DIM_LAYER;
 
     return _cnpp
 );
@@ -64,6 +64,7 @@ CNPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 # Changes to this function
 # General
 #     2022-Sep-07: add function to add up GPP for SPAC
+#     2023-May-19: use δlai per canopy layer
 #
 #######################################################################################################################################################################################################
 """
@@ -82,9 +83,8 @@ GPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     # compute GPP
     _gpp::FT = 0;
     for _i in 1:DIM_LAYER
-        _gpp += CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded;
+        _gpp += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded) * CANOPY.δlai[_i];
     end;
-    _gpp *= spac.CANOPY.lai / spac.CANOPY.DIM_LAYER;
 
     return _gpp
 );
@@ -95,6 +95,7 @@ GPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 # Changes to this function
 # General
 #     2022-Oct-19: add function to compute canopy integrated PPAR
+#     2023-May-19: use δlai per canopy layer
 #
 #######################################################################################################################################################################################################
 """
@@ -113,9 +114,8 @@ PPAR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     # compute GPP
     _ppar::FT = 0;
     for _i in 1:DIM_LAYER
-        _ppar += CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded;
+        _ppar += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded) * CANOPY.δlai[_i];
     end;
-    _ppar *= spac.CANOPY.lai / spac.CANOPY.DIM_LAYER;
 
     return _ppar
 );
@@ -126,6 +126,7 @@ PPAR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 # Changes to this function
 # General
 #     2022-Sep-08: add function to add up transpiration rate for SPAC
+#     2023-May-19: use δlai per canopy layer
 #
 #######################################################################################################################################################################################################
 """
@@ -144,9 +145,8 @@ T_VEG(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     # compute transpiration rate
     _tran::FT = 0;
     for _i in 1:DIM_LAYER
-        _tran += flow_out(LEAVES[_i]);
+        _tran += flow_out(LEAVES[_i]) * CANOPY.δlai[_i];
     end;
-    _tran *= spac.CANOPY.lai / spac.CANOPY.DIM_LAYER;
 
     return _tran
 );

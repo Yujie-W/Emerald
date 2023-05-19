@@ -32,6 +32,7 @@ function update! end
 #     2023-Mar-28: fix a typo when updating t_soil
 #     2023-Mar-28: update total energy in soil and leaf when prescribing swc and temperature
 #     2023-May-11: add ci to the option list
+#     2023-May-19: use δlai per canopy layer
 #
 #######################################################################################################################################################################################################
 """
@@ -143,8 +144,10 @@ update!(spac::MultiLayerSPAC{FT},
     # update LAI
     if !isnothing(lai)
         CANOPY.lai = lai;
+        CANOPY.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
+        CANOPY._x_bnds = [0; [sum(CANOPY.δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai;
         for _i in 1:DIM_LAYER
-            LEAVES[_i].HS.AREA = SOIL.AREA * CANOPY.lai / DIM_LAYER;
+            LEAVES[_i].HS.AREA = SOIL.AREA * CANOPY.δlai[_i];
         end;
     end;
 
@@ -197,7 +200,7 @@ update!(spac::MultiLayerSPAC{FT},
     # update Vcmax profile if lai or vcmax is given
     if !isnothing(vcmax) || !isnothing(lai)
         for _i in 2:DIM_LAYER
-            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * CANOPY.lai * ((_i - 1) / DIM_LAYER));
+            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(CANOPY.δlai[1:_i-1]));
             LEAVES[_i].PSM.v_cmax25 = LEAVES[1].PSM.v_cmax25 * _scaling;
             LEAVES[_i].PSM.j_max25 = LEAVES[1].PSM.v_cmax25 * 1.67 * _scaling;
             LEAVES[_i].PSM.r_d25 = LEAVES[1].PSM.v_cmax25 * 0.015 * _scaling;

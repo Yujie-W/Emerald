@@ -6,6 +6,7 @@
 #     2022-Jun-27: add leaf area controller to make sure soil and leaf areas are consistent with leaf area index
 #     2023-Mar-27: initialize soil and leaf e as well (because T, SWC may be changed)
 #     2023-Apr-13: add config to function call
+#     2023-May-19: use δlai per canopy layer
 #
 #######################################################################################################################################################################################################
 """
@@ -28,8 +29,9 @@ initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:
     end;
 
     # make sure leaf area index setup and energy are correct
-    for _clayer in LEAVES
-        _clayer.HS.AREA = SOIL.AREA * CANOPY.lai / DIM_LAYER;
+    for _i in 1:DIM_LAYER
+        _clayer = LEAVES[_i];
+        _clayer.HS.AREA = SOIL.AREA * CANOPY.δlai[_i];
         _clayer.e = (_clayer.CP * _clayer.BIO.lma * 10 + _clayer.HS.v_storage * CP_L_MOL(FT)) * _clayer.t;
     end;
 
