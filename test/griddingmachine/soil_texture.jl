@@ -22,4 +22,6 @@ for NX in ["1X", "4X"]
     end;
 
     reprocess_data!(json_dict; file_name_function = name_function, data_scaling_functions = data_scaling_functions, std_scaling_functions = std_scaling_functions);
+
+    deploy_griddingmachine_artifacts!(json_dict);
 end;

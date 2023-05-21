@@ -108,6 +108,9 @@ function reprocess_data!(
                 save_nc!(_reprocessed_file, "data", _reprocessed_data, _var_attr);
                 append_nc!(_reprocessed_file, "std", _reprocessed_std, _var_attr, _dim_names);
             end;
+
+            # delete the temporary figure
+            rm(_ffig; force = true);
         else
             @info "File $(_reprocessed_file) exists already, skipping...";
         end;
