@@ -2,6 +2,7 @@ module CanopyOptics
 
 using LinearAlgebra: mul!, pinv
 using QuadGK: quadgk
+using SpecialFunctions: beta_inc
 using Statistics: mean
 
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
@@ -9,7 +10,7 @@ using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..Constant: K_STEFAN
 using ..Namespace: BroadbandRadiation, BroadbandSLCanopy, BroadbandSoilAlbedo
 using ..Namespace: HyperspectralMLCanopy, HyperspectralRadiation, HyperspectralSoilAlbedo
-using ..Namespace: Leaves1D, Leaves2D, Soil, SunSensorGeometry, VerhoefLIDF
+using ..Namespace: BetaLIDF, Leaves1D, Leaves2D, Soil, SunSensorGeometry, VerhoefLIDF
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..Optics: energy!, photon, photon!
 

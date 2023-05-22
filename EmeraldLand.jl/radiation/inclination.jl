@@ -3,18 +3,26 @@
 # Changes to this function
 # General
 #     2022-Jun-02: generalize the function from CanopyLayers.dcum to lidf_cdf
+#     2023-May-22: add method for BetaLIDF
 #
 #######################################################################################################################################################################################################
 """
 
+    lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT<:AbstractFloat}
     lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat}
 
 Return the cumulative distribution frequency, given
-- `lidf` `VerhoefLIDF` type algorithm
+- `lidf` `BetaLIDF` or `VerhoefLIDF` type algorithm
 - `θ` Leaf inclination angle in `[°]`
 
 """
 function lidf_cdf end
+
+lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
+    (; A, B) = lidf;
+
+    return beta_inc(A, B, θ / 90, 1 - θ / 90)[1]
+);
 
 lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
     (; A, B) = lidf;
@@ -47,20 +55,21 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
 #     2022-Jun-02: generalize the function from CanopyLayers.dladgen to inclination_angles!
 #     2022-Jun-02: add method for VerhoefLIDF algorithm
 #     2022-Jun-15: add support to BroadbandSLCanopy
+#     2023-May-22: add sypport to BetaLIDF
 #
 #######################################################################################################################################################################################################
 """
 
-    inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::VerhoefLIDF{FT}) where {FT<:AbstractFloat}
+    inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT<:AbstractFloat}
 
 Update the frequency of leaf inclination angles, given
 - `can` `HyperspectralMLCanopy` type multiple layer canopy
-- `lidf` `VerhoefLIDF` type algorithm
+- `lidf` `BetaLIDF` or `VerhoefLIDF` type algorithm
 
 """
 function inclination_angles! end
 
-inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::VerhoefLIDF{FT}) where {FT<:AbstractFloat} = (
+inclination_angles!(can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT<:AbstractFloat} = (
     (; Θ_INCL_BNDS) = can;
 
     for _i in eachindex(can.P_INCL)

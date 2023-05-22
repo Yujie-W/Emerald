@@ -27,4 +27,11 @@
     EmeraldLand.CanopyOptics.inclination_angles!(spac.CANOPY, spac.CANOPY.LIDF);
     EmeraldLand.SPAC.spac!(spac, config, FT(1));
     @test true;
+
+    # By default, we use VerhoefLIDF method to compute LIDF, but we also support the use of Beta function.
+    # To use the BetaLIDF, you need to change the parameter to BetaLIDF first.
+    spac.CANOPY.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();
+    EmeraldLand.CanopyOptics.inclination_angles!(spac.CANOPY, spac.CANOPY.LIDF);
+    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    @test true;
 end

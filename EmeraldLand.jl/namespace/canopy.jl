@@ -422,10 +422,38 @@ end
 $(TYPEDEF)
 
 Hierarchy of AbstractLIDFAlgorithm:
+- [`BetaLIDF`](@ref)
 - [`VerhoefLIDF`](@ref)
 
 """
 abstract type AbstractLIDFAlgorithm{FT<:AbstractFloat} end
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this structure
+# General
+#     2023-May-22: add beta function method
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure for Beta LIDF algorithm
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct BetaLIDF{FT<:AbstractFloat} <: AbstractLIDFAlgorithm{FT}
+    # General model information
+    "Leaf inclination angle distribution function parameter a"
+    A::FT = 1
+    "Leaf inclination angle distribution function parameter b"
+    B::FT = 1
+end
 
 
 #######################################################################################################################################################################################################
@@ -486,6 +514,7 @@ abstract type AbstractCanopy{FT<:AbstractFloat} end
 #     2022-Jun-15: remove RATIO_HV to compute the coefficient numerically
 #     2022-Jun-16: remove some cache variables
 #     2022-Jun-16: add fields: Θ_INCL_BNDS
+#     2023-May-22: add sypport to BetaLIDF
 #
 #######################################################################################################################################################################################################
 """
@@ -506,7 +535,7 @@ Base.@kwdef mutable struct BroadbandSLCanopy{FT<:AbstractFloat} <: AbstractCanop
 
     # Embedded structures
     "Leaf inclination angle distribution function algorithm"
-    LIDF::Union{VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
+    LIDF::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
     "Canopy radiation profiles"
     RADIATION::BroadbandSLCanopyRadiationProfile{FT} = BroadbandSLCanopyRadiationProfile{FT}(DIM_INCL = DIM_INCL)
 
@@ -541,6 +570,7 @@ end
 #     2022-Jun-16: remove some cache variables
 #     2022-Jul-22: remove field APAR_CAR
 #     2022-Aug-30: add field LHA (moved from spac)
+#     2023-May-22: add sypport to BetaLIDF
 #
 #######################################################################################################################################################################################################
 """
@@ -571,7 +601,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     "Hyperspectral absorption features of different leaf components"
     LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "Leaf inclination angle distribution function algorithm"
-    LIDF::Union{VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
+    LIDF::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
     "Wave length set used to paramertize other variables"
     WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
     "Canopy optical properties"
