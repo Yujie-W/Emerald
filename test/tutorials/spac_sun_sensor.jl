@@ -20,6 +20,6 @@
 
     # We also have an embedded function to compute solar zenith angle based on latitude (e.g., 30°N) and solar time (day 1, 13:15; solar noon at 12:00).
     # For more details of this function, please refer to the documentation.
-    spac.ANGLES.sza = EmeraldLand.EarthGeometry.solar_zenith_angle(30.0, 1.0, 13.0, 15.0);
+    spac.ANGLES.sza = EmeraldLand.EarthGeometry.solar_zenith_angle(FT(30), FT(1), FT(13), FT(15));
     @test true;
 end

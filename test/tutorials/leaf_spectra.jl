@@ -10,7 +10,7 @@
     bio = EmeraldLand.Namespace.HyperspectralLeafBiophysics{FT}();
     wls = EmeraldLand.Namespace.WaveLengthSet{FT}();
     lha = EmeraldLand.Namespace.HyperspectralAbsorption{FT}();
-    EmeraldLand.leaf_spectra!(bio, wls, lha, FT(50));
+    EmeraldLand.LeafOptics.leaf_spectra!(bio, wls, lha, FT(50));
     @test true;
 
     # Note that, to avoid unnecessary computing, leaf water content is saved in bio._v_storage.
@@ -18,7 +18,7 @@
     bio.cab = 20;
     bio.car = 5;
     bio._v_storage = 0;
-    EmeraldLand.leaf_spectra!(bio, wls, lha, FT(50));
+    EmeraldLand.LeafOptics.leaf_spectra!(bio, wls, lha, FT(50));
     @test true;
 
     # Users can also emulate broadband simulations in hyperspectral mode by providing
@@ -26,6 +26,6 @@
     #     - NIR reflectance
     #     - PAR transmittance
     #     - NIR transmittance
-    leaf_spectra!(bio, wls, FT(0.1), FT(0.2), FT(0.1), FT(0.2));
+    EmeraldLand.LeafOptics.leaf_spectra!(bio, wls, FT(0.1), FT(0.2), FT(0.1), FT(0.2));
     @test true;
 end

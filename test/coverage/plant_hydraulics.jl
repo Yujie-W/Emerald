@@ -3,16 +3,16 @@
     spac = EmeraldLand.Namespace.MultiLayerSPAC{FT}();
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
     EmeraldLand.SPAC.initialize!(spac, config);
-    @time EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.spac!(spac, config, FT(1));
 
     EmeraldLand.SPAC.update!(spac, config; swcs = (0.08,0.09,0.10,0.2,0.3));
-    @time EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.spac!(spac, config, FT(1));
 
     EmeraldLand.SPAC.update!(spac, config; swcs = (0.08,0.08,0.08,0.2,0.3));
-    @time EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.spac!(spac, config, FT(1));
 
     EmeraldLand.SPAC.update!(spac, config; swcs = (0.08,0.08,0.08,0.08,0.08));
-    @time EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.spac!(spac, config, FT(1));
 
     @test true;
 end
