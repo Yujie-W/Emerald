@@ -28,6 +28,20 @@
     EmeraldLand.SPAC.spac!(spac, config, FT(1));
     @test true;
 
+    # We also support beta function distribution. For example (A,B) =
+    #     (1.000,1.000) gives uniform distribution,
+    #     (1.930,1.101) gives spherical distribution,
+    #     (2.770,1.172) gives erectophile distribution,
+    #     (1.172,2.770) gives planophile distribution,
+    #     (3.326,3.326) gives plagiophile distribution, and
+    #     (0.433,0.433) gives extremophile distribution.
+    spac.CANOPY.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();
+    spac.CANOPY.LIDF.A = 1;
+    spac.CANOPY.LIDF.B = 1;
+    EmeraldLand.CanopyOptics.inclination_angles!(spac.CANOPY, spac.CANOPY.LIDF);
+    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    @test true;
+
     # By default, we use VerhoefLIDF method to compute LIDF, but we also support the use of Beta function.
     # To use the BetaLIDF, you need to change the parameter to BetaLIDF first.
     spac.CANOPY.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();

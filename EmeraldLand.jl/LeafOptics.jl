@@ -72,9 +72,9 @@ Update leaf reflectance and transmittance spectra, and fluorescence spectrum mat
 wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
 lha = EmeraldNamespace.HyperspectralAbsorption{Float64}();
-leaf_spectra!(bio, wls, lha, 50.0);
-leaf_spectra!(bio, wls, lha, 50.0; apar_car=false);
-leaf_spectra!(bio, wls, lha, 50.0; apar_car=false, α=59.0);
+leaf_spectra!(bio, wls, lha, 5.0);
+leaf_spectra!(bio, wls, lha, 5.0; apar_car=false);
+leaf_spectra!(bio, wls, lha, 5.0; apar_car=false, α=59.0);
 ```
 
 """

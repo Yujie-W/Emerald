@@ -4,6 +4,7 @@
 # General
 #     2022-Jun-02: generalize the function from CanopyLayers.dcum to lidf_cdf
 #     2023-May-22: add method for BetaLIDF
+#     2023-May-31: VerhoefLIDF judgement to A > 1 from A >= 1
 #
 #######################################################################################################################################################################################################
 """
@@ -27,7 +28,7 @@ lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
 lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
     (; A, B) = lidf;
 
-    if A >= 1
+    if A > 1
         return 1 - cosd(θ)
     end;
 
