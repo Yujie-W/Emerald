@@ -1,3 +1,11 @@
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-May-12: move function from GriddingMachineDatasets
+#     2023-May-17: add coverage support
+#
+#######################################################################################################################################################################################################
 """
 
     read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector, resox::Int; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)
@@ -67,6 +75,14 @@ function read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector, resox
 end
 
 
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-May-12: move function from GriddingMachineDatasets
+#     2023-May-17: add coverage support
+#
+#######################################################################################################################################################################################################
 """
 
     read_data(filename::String, dict::Dict, flipping::Vector, resox::Int; coverage::Union{String,Vector} = "GLOBAL", scaling_function::Union{Function,Nothing} = nothing)

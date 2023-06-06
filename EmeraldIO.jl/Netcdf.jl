@@ -12,12 +12,12 @@ const ATTR_ABOUT = Dict("about" => "This is a file generated using Netcdf module
                         "notes" => "EmeraldIO.jl uses NCDatasets.jl to read and write NC files");
 
 
-include("netcdf/append.jl")
-include("netcdf/create.jl")
-include("netcdf/grow.jl"  )
-include("netcdf/info.jl"  )
-include("netcdf/read.jl"  )
-include("netcdf/save.jl"  )
+include("netcdf/append.jl");
+include("netcdf/create.jl");
+include("netcdf/grow.jl");
+include("netcdf/info.jl");
+include("netcdf/read.jl");
+include("netcdf/save.jl");
 
 
 end # module

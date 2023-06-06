@@ -15,14 +15,14 @@ using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..Optics: energy!, photon, photon!
 
 
-include("radiation/clumping.jl"      )
-include("radiation/coefficients.jl"  )
-include("radiation/fluorescence.jl"  )
-include("radiation/geometry.jl"      )
-include("radiation/inclination.jl"   )
-include("radiation/radiation.jl"     )
-include("radiation/remote_sensing.jl")
-include("radiation/soil.jl"          )
+include("radiation/clumping.jl");
+include("radiation/coefficients.jl");
+include("radiation/fluorescence.jl");
+include("radiation/geometry.jl");
+include("radiation/inclination.jl");
+include("radiation/radiation.jl");
+include("radiation/remote_sensing.jl");
+include("radiation/soil.jl");
 
 
 end # module

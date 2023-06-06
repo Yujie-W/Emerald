@@ -13,12 +13,12 @@ using ..PlantHydraulics: flow_out, plant_energy!, xylem_flow_profile!, xylem_pre
 using ..StomatalModels: stomatal_conductance!, stomatal_conductance_profile!
 
 
-include("spac/budget.jl"    )
-include("spac/initialize.jl")
-include("spac/model.jl"     )
-include("spac/quantity.jl"  )
-include("spac/state.jl"     )
-include("spac/update.jl"    )
+include("spac/budget.jl");
+include("spac/initialize.jl");
+include("spac/model.jl");
+include("spac/quantity.jl");
+include("spac/state.jl");
+include("spac/update.jl");
 
 
 end # module

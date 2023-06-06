@@ -11,10 +11,10 @@ using ..PlantHydraulics: relative_hydraulic_conductance, ∂E∂P
 using ..SoilHydraulics: relative_hydraulic_conductance
 
 
-include("stomata/conductance.jl")
-include("stomata/empirical.jl"  )
-include("stomata/limits.jl"     )
-include("stomata/optimality.jl" )
+include("stomata/conductance.jl");
+include("stomata/empirical.jl");
+include("stomata/limits.jl");
+include("stomata/optimality.jl");
 
 
 end # module
