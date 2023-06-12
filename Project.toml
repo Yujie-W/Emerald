@@ -33,7 +33,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 CSV = "0.10.9"
 DataFrames = "1.5.0"
-DocStringExtensions = "0.9.3"
+DocStringExtensions = "0.8.6, 0.9.3"
 FileIO = "1.16.1"
 GLM = "1.8.1"
 GriddingMachine = "0.2.9"

@@ -340,11 +340,50 @@ end
 #
 # Changes to this structure
 # General
+#     2023-Jun-12: add struct SoilTraceGasses
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure for soil trace gasses
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct SoilTraceGasses{FT<:AbstractFloat}
+    "CH₄ mole `[mol]`"
+    n_CH₄::FT = 0
+    "CO₂ mole `[mol]`"
+    n_CO₂::FT = 0
+    "Nitrogen mole `[mol]`"
+    n_N₂::FT = 0
+    "Oxygen mole `[mol]`"
+    n_O₂::FT = 0
+    "CH₄ partial pressure `[Pa]`"
+    _p_CH₄::FT = 0
+    "CO₂ partial pressure `[Pa]`"
+    _p_CO₂::FT = 0
+    "Nitrogen partial pressure `[Pa]`"
+    _p_N₂::FT = 0
+    "Oxygen partial pressure `[Pa]`"
+    _p_O₂::FT = 0
+end
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this structure
+# General
 #     2022-Jul-13: add SoilLayer structure
 #     2022-Jul-13: add field K_MAX, K_REF, k, ψ, and ∂θ∂t
 #     2022-Jul-14: remove field K_REF
 #     2022-Jul-14: add field ∂G∂t (renamed to ∂e∂t), ΔZ
 #     2022-Jul-26: move field K_MAX to structure VanGenuchten and BrooksCorey
+#     2023-Jun-12: add field TRACES for SoilTraceGasses
 #
 #######################################################################################################################################################################################################
 """
@@ -368,6 +407,8 @@ Base.@kwdef mutable struct SoilLayer{FT<:AbstractFloat}
     ρ::FT = 2650
 
     # Embedded structures
+    "Soil trace gasses"
+    TRACES::SoilTraceGasses{FT} = SoilTraceGasses{FT}()
     "Soil moisture retention curve"
     VC::Union{BrooksCorey{FT}, VanGenuchten{FT}} = VanGenuchten{FT}("Loam")
 

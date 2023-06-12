@@ -2,7 +2,7 @@ module SPAC
 
 using Statistics: mean
 
-using ..Constant: CP_L, CP_L_MOL, T₀, ρ_H₂O
+using ..Constant: CP_L, CP_L_MOL, GAS_R, P_ATM, T₀, ρ_H₂O
 using ..PhysicalChemistry: saturation_vapor_pressure
 using ..Namespace: AirLayer, GCO₂Mode, MultiLayerSPAC, SPACConfiguration, MultiLayerSPACState
 using ..LeafOptics: leaf_spectra!

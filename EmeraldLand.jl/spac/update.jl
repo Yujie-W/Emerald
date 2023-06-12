@@ -33,6 +33,7 @@ function update! end
 #     2023-Mar-28: update total energy in soil and leaf when prescribing swc and temperature
 #     2023-May-11: add ci to the option list
 #     2023-May-19: use δlai per canopy layer
+#     2023-Jun-12: update soil trace gas as well
 #
 #######################################################################################################################################################################################################
 """
@@ -124,7 +125,7 @@ update!(spac::MultiLayerSPAC{FT},
 ) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
 
-    # update chlorophyll and carotenoid contents (and )
+    # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
         for _leaf in LEAVES
             _leaf.BIO.cab = cab;
@@ -164,6 +165,8 @@ update!(spac::MultiLayerSPAC{FT},
             _slayer = SOIL.LAYERS[_i];
             _slayer.θ = swcs[_i];
             _slayer.e = (_slayer.CP * _slayer.ρ + _slayer.θ * CP_L() * ρ_H₂O()) * _slayer.t;
+            _slayer.TRACES.n_N₂ = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
+            _slayer.TRACES.n_O₂ = spac.AIR[1].P_AIR * 0.21 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
         end;
     end;
 
@@ -173,6 +176,8 @@ update!(spac::MultiLayerSPAC{FT},
             _slayer = SOIL.LAYERS[_i];
             _slayer.t = t_soils[_i];
             _slayer.e = (_slayer.CP * _slayer.ρ + _slayer.θ * CP_L() * ρ_H₂O()) * _slayer.t;
+            _slayer.TRACES.n_N₂ = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
+            _slayer.TRACES.n_O₂ = spac.AIR[1].P_AIR * 0.21 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
         end;
     end;
 
