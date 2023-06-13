@@ -27,8 +27,12 @@ initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:
     # make sure soil energy is correctly scaled with temperature and soil water content
     for _slayer in SOIL.LAYERS
         _slayer.e = (_slayer.CP * _slayer.ρ + _slayer.θ * CP_L() * ρ_H₂O()) * _slayer.t;
-        _slayer.TRACES.n_N₂ = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
-        _slayer.TRACES.n_O₂ = spac.AIR[1].P_AIR * 0.21 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
+        _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t) * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
+        _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
+        _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.209 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
+        _slayer.TRACES.p_H₂O = saturation_vapor_pressure(_slayer.t);
+        _slayer.TRACES.p_N₂  = spac.AIR[1].P_AIR * 0.79;
+        _slayer.TRACES.p_O₂  = spac.AIR[1].P_AIR * 0.209;
     end;
 
     # make sure leaf area index setup and energy are correct

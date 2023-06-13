@@ -89,7 +89,7 @@ soil_plant_air_continuum!(
     # save the result at this stage for the results at the beginning of this time step
 
     # 5. run soil energy water budget
-    soil_budget!(spac);
+    soil_budget!(spac, config);
 
     # 6. run leaf stomatal conductance budget
     stomatal_conductance!(spac);
@@ -98,7 +98,7 @@ soil_plant_air_continuum!(
     plant_energy!(spac);
 
     # 8. update the prognostic variables
-    time_stepper!(spac, δt; p_on = p_on, t_on = t_on, update = update, θ_on = θ_on);
+    time_stepper!(spac, config, δt; p_on = p_on, t_on = t_on, update = update, θ_on = θ_on);
 
     return nothing
 );

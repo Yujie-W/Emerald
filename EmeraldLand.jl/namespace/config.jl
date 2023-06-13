@@ -5,6 +5,7 @@
 #     2023-Apr-13: add state struct to save SPAC configurations
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
 #     2023-Apr-13: move APAR_CAR from leaf structs
+#     2023-Jun-13: add trace gasses as fields
 #
 #######################################################################################################################################################################################################
 """
@@ -42,4 +43,18 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # Embedded structures
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
+
+    # Trace gas information
+    "Trace gas air"
+    TRACE_AIR::TraceGasAir = TraceGasAir{FT}()
+    "Trace gas CH₄"
+    TRACE_CH₄::TraceGasCH₄ = TraceGasCH₄{FT}()
+    "Trace gas CO₂"
+    TRACE_CO₂::TraceGasCO₂ = TraceGasCO₂{FT}()
+    "Trace gas H₂O"
+    TRACE_H₂O::TraceGasH₂O = TraceGasH₂O{FT}()
+    "Trace gas N₂"
+    TRACE_N₂::TraceGasN₂ = TraceGasN₂{FT}()
+    "Trace gas O₂"
+    TRACE_O₂::TraceGasO₂ = TraceGasO₂{FT}()
 end

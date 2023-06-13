@@ -2,9 +2,9 @@ module SoilHydraulics
 
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 
-using ..Constant: CP_L, CP_L_MOL, M_H₂O, Λ_THERMAL_H₂O, ρ_H₂O, ρg_MPa
-using ..Namespace: MultiLayerSPAC, NonSteadyStateFlow, Root, SteadyStateFlow, VanGenuchten
-using ..PhysicalChemistry: relative_surface_tension, relative_viscosity
+using ..Constant: CP_L, CP_L_MOL, GAS_R, M_H₂O, Λ_THERMAL_H₂O, ρ_H₂O, ρg_MPa
+using ..Namespace: MultiLayerSPAC, NonSteadyStateFlow, Root, SPACConfiguration, SteadyStateFlow, VanGenuchten
+using ..PhysicalChemistry: diffusive_coefficient, relative_surface_tension, relative_viscosity
 
 import ..Namespace: BrooksCorey
 
@@ -235,6 +235,7 @@ relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where 
 #     2023-Mar-27: fix a typo when updating e per layer (should use ΔZ per layer rather than the first layer)
 #     2023-Apr-07: fix a typo when updating water content in saturated soil layers
 #     2023-Apr-08: make runoff a cumulative value within a time interval
+#     2023-Jun-13: add trace gas diffusions
 #
 #######################################################################################################################################################################################################
 """
@@ -248,22 +249,26 @@ function soil_budget! end
 
 """
 
-    soil_budget!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
 
 Update the marginal increase of soil water content and energy per layer, given
 - `spac` `MultiLayerSPAC` SPAC
+- `config` Configuration for `MultiLayerSPAC`
 
 """
-soil_budget!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; METEO, ROOTS, ROOTS_INDEX, SOIL) = spac;
+soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+    (; AIR, METEO, ROOTS, ROOTS_INDEX, SOIL) = spac;
+    (; TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
     LAYERS = SOIL.LAYERS;
 
-    # update soil k, ψ, and λ_thermal for each soil layer
+    # update soil k, kd, ψ, and λ_thermal for each soil layer
     for _i in 1:SOIL.DIM_SOIL
         LAYERS[_i].k          = relative_hydraulic_conductance(LAYERS[_i].VC, LAYERS[_i].θ) * LAYERS[_i].VC.K_MAX * relative_viscosity(LAYERS[_i].t) / LAYERS[_i].ΔZ;
         LAYERS[_i].ψ          = soil_ψ_25(LAYERS[_i].VC, LAYERS[_i].θ; oversaturation = true) * relative_surface_tension(LAYERS[_i].t);
+        LAYERS[_i]._kd        = 0.5 * max(0, LAYERS[_i].VC.Θ_SAT - LAYERS[_i].θ) / LAYERS[_i].ΔZ;
         LAYERS[_i]._λ_thermal = (LAYERS[_i].Λ_THERMAL + LAYERS[_i].θ * Λ_THERMAL_H₂O(FT)) / LAYERS[_i].ΔZ;
         LAYERS[_i].∂e∂t       = 0;
+        LAYERS[_i].∂n∂t      .= 0;
         LAYERS[_i].∂θ∂t       = 0;
     end;
 
@@ -302,6 +307,46 @@ soil_budget!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
         LAYERS[_i+1].∂e∂t += SOIL._q[_i] * CP_L_MOL(FT) * LAYERS[_i].t;
     end;
 
+    # update diffusion rate among layers
+    _factor = 2 * LAYERS[1]._kd / GAS_R(FT);
+    LAYERS[1].∂n∂t[1] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CH₄, TRACE_AIR) * (LAYERS[1].TRACES.p_CH₄ / LAYERS[1].t - AIR[1].p_CH₄ / AIR[1].t);
+    LAYERS[1].∂n∂t[2] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CO₂, TRACE_AIR) * (LAYERS[1].TRACES.p_CO₂ / LAYERS[1].t - AIR[1].p_CO₂ / AIR[1].t);
+    LAYERS[1].∂n∂t[3] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_H₂O, TRACE_AIR) * (LAYERS[1].TRACES.p_H₂O / LAYERS[1].t - AIR[1].p_H₂O / AIR[1].t);
+    LAYERS[1].∂n∂t[4] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_N₂ , TRACE_AIR) * (LAYERS[1].TRACES.p_N₂  / LAYERS[1].t - AIR[1].p_N₂  / AIR[1].t);
+    LAYERS[1].∂n∂t[5] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_O₂ , TRACE_AIR) * (LAYERS[1].TRACES.p_O₂  / LAYERS[1].t - AIR[1].p_O₂  / AIR[1].t);
+    for _i in 1:SOIL.DIM_SOIL-1
+        _ratei1 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_CH₄, TRACE_AIR);
+        _ratei2 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_CO₂, TRACE_AIR);
+        _ratei3 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_H₂O, TRACE_AIR);
+        _ratei4 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_N₂ , TRACE_AIR);
+        _ratei5 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_O₂ , TRACE_AIR);
+        _ratej1 = diffusive_coefficient(LAYERS[_i+1].t, TRACE_CH₄, TRACE_AIR);
+        _ratej2 = diffusive_coefficient(LAYERS[_i+1].t, TRACE_CO₂, TRACE_AIR);
+        _ratej3 = diffusive_coefficient(LAYERS[_i+1].t, TRACE_H₂O, TRACE_AIR);
+        _ratej4 = diffusive_coefficient(LAYERS[_i+1].t, TRACE_N₂ , TRACE_AIR);
+        _ratej5 = diffusive_coefficient(LAYERS[_i+1].t, TRACE_O₂ , TRACE_AIR);
+        _ratio1 = 2 * LAYERS[_i]._kd * _ratei1 * LAYERS[_i+1]._kd * _ratej1 / (LAYERS[_i]._kd * _ratei1 + LAYERS[_i+1]._kd * _ratej1) / GAS_R(FT);
+        _ratio2 = 2 * LAYERS[_i]._kd * _ratei2 * LAYERS[_i+1]._kd * _ratej2 / (LAYERS[_i]._kd * _ratei2 + LAYERS[_i+1]._kd * _ratej2) / GAS_R(FT);
+        _ratio3 = 2 * LAYERS[_i]._kd * _ratei3 * LAYERS[_i+1]._kd * _ratej3 / (LAYERS[_i]._kd * _ratei3 + LAYERS[_i+1]._kd * _ratej3) / GAS_R(FT);
+        _ratio4 = 2 * LAYERS[_i]._kd * _ratei4 * LAYERS[_i+1]._kd * _ratej4 / (LAYERS[_i]._kd * _ratei4 + LAYERS[_i+1]._kd * _ratej4) / GAS_R(FT);
+        _ratio5 = 2 * LAYERS[_i]._kd * _ratei5 * LAYERS[_i+1]._kd * _ratej5 / (LAYERS[_i]._kd * _ratei5 + LAYERS[_i+1]._kd * _ratej5) / GAS_R(FT);
+        _drate1 = _ratio1 * (LAYERS[_i].TRACES.p_CH₄ / LAYERS[_i].t - LAYERS[_i+1].TRACES.p_CH₄ / LAYERS[_i+1].t);
+        _drate2 = _ratio2 * (LAYERS[_i].TRACES.p_CO₂ / LAYERS[_i].t - LAYERS[_i+1].TRACES.p_CO₂ / LAYERS[_i+1].t);
+        _drate3 = _ratio3 * (LAYERS[_i].TRACES.p_H₂O / LAYERS[_i].t - LAYERS[_i+1].TRACES.p_H₂O / LAYERS[_i+1].t);
+        _drate4 = _ratio4 * (LAYERS[_i].TRACES.p_N₂  / LAYERS[_i].t - LAYERS[_i+1].TRACES.p_N₂  / LAYERS[_i+1].t);
+        _drate5 = _ratio5 * (LAYERS[_i].TRACES.p_O₂  / LAYERS[_i].t - LAYERS[_i+1].TRACES.p_O₂  / LAYERS[_i+1].t);
+        LAYERS[_i  ].∂n∂t[1] -= _drate1;
+        LAYERS[_i  ].∂n∂t[2] -= _drate2;
+        LAYERS[_i  ].∂n∂t[3] -= _drate3;
+        LAYERS[_i  ].∂n∂t[4] -= _drate4;
+        LAYERS[_i  ].∂n∂t[5] -= _drate5;
+        LAYERS[_i+1].∂n∂t[1] += _drate1;
+        LAYERS[_i+1].∂n∂t[2] += _drate2;
+        LAYERS[_i+1].∂n∂t[3] += _drate3;
+        LAYERS[_i+1].∂n∂t[4] += _drate4;
+        LAYERS[_i+1].∂n∂t[5] += _drate5;
+    end;
+
     # loop through the roots and compute the source/sink terms
     for _i in eachindex(ROOTS)
         LAYERS[ROOTS_INDEX[_i]].∂θ∂t -= root_sink(ROOTS[_i]) * M_H₂O(FT) / ρ_H₂O(FT) / SOIL.AREA / LAYERS[ROOTS_INDEX[_i]].ΔZ;
@@ -328,6 +373,30 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
     for _i in 1:SOIL.DIM_SOIL
         SOIL.LAYERS[_i].θ += SOIL.LAYERS[_i].∂θ∂t * δt;
         SOIL.LAYERS[_i].e += SOIL.LAYERS[_i].∂e∂t * δt / SOIL.LAYERS[_i].ΔZ;
+        _δv = SOIL.LAYERS[_i].ΔZ * max(0, SOIL.LAYERS[_i].VC.Θ_SAT - SOIL.LAYERS[_i].θ);
+        if _δv == 0
+            SOIL.LAYERS[_i].TRACES.n_CH₄ = 0;
+            SOIL.LAYERS[_i].TRACES.n_CO₂ = 0;
+            SOIL.LAYERS[_i].TRACES.n_H₂O = 0;
+            SOIL.LAYERS[_i].TRACES.n_N₂  = 0;
+            SOIL.LAYERS[_i].TRACES.n_O₂  = 0;
+            SOIL.LAYERS[_i].TRACES.p_CH₄ = 0;
+            SOIL.LAYERS[_i].TRACES.p_CO₂ = 0;
+            SOIL.LAYERS[_i].TRACES.p_H₂O = 0;
+            SOIL.LAYERS[_i].TRACES.p_N₂  = 0;
+            SOIL.LAYERS[_i].TRACES.p_O₂  = 0;
+        else
+            SOIL.LAYERS[_i].TRACES.n_CH₄ += SOIL.LAYERS[_i].∂n∂t[1] * δt;
+            SOIL.LAYERS[_i].TRACES.n_CO₂ += SOIL.LAYERS[_i].∂n∂t[2] * δt;
+            SOIL.LAYERS[_i].TRACES.n_H₂O += SOIL.LAYERS[_i].∂n∂t[3] * δt;
+            SOIL.LAYERS[_i].TRACES.n_N₂  += SOIL.LAYERS[_i].∂n∂t[4] * δt;
+            SOIL.LAYERS[_i].TRACES.n_O₂  += SOIL.LAYERS[_i].∂n∂t[5] * δt;
+            SOIL.LAYERS[_i].TRACES.p_CH₄ = SOIL.LAYERS[_i].TRACES.n_CH₄ * GAS_R() * SOIL.LAYERS[_i].t / _δv;
+            SOIL.LAYERS[_i].TRACES.p_CO₂ = SOIL.LAYERS[_i].TRACES.n_CO₂ * GAS_R() * SOIL.LAYERS[_i].t / _δv;
+            SOIL.LAYERS[_i].TRACES.p_H₂O = SOIL.LAYERS[_i].TRACES.n_H₂O * GAS_R() * SOIL.LAYERS[_i].t / _δv;
+            SOIL.LAYERS[_i].TRACES.p_N₂  = SOIL.LAYERS[_i].TRACES.n_N₂  * GAS_R() * SOIL.LAYERS[_i].t / _δv;
+            SOIL.LAYERS[_i].TRACES.p_O₂  = SOIL.LAYERS[_i].TRACES.n_O₂  * GAS_R() * SOIL.LAYERS[_i].t / _δv;
+        end;
     end;
 
     # compute surface runoff

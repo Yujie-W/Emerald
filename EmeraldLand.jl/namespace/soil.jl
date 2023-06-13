@@ -341,6 +341,7 @@ end
 # Changes to this structure
 # General
 #     2023-Jun-12: add struct SoilTraceGasses
+#     2023-Jun-13: add fields for water vapor
 #
 #######################################################################################################################################################################################################
 """
@@ -359,18 +360,22 @@ Base.@kwdef mutable struct SoilTraceGasses{FT<:AbstractFloat}
     n_CH₄::FT = 0
     "CO₂ mole `[mol]`"
     n_CO₂::FT = 0
+    "H₂O mole `[mol]`"
+    n_H₂O::FT = 0
     "Nitrogen mole `[mol]`"
     n_N₂::FT = 0
     "Oxygen mole `[mol]`"
     n_O₂::FT = 0
     "CH₄ partial pressure `[Pa]`"
-    _p_CH₄::FT = 0
+    p_CH₄::FT = 0
     "CO₂ partial pressure `[Pa]`"
-    _p_CO₂::FT = 0
+    p_CO₂::FT = 0
+    "CO₂ partial pressure `[Pa]`"
+    p_H₂O::FT = 0
     "Nitrogen partial pressure `[Pa]`"
-    _p_N₂::FT = 0
+    p_N₂::FT = 0
     "Oxygen partial pressure `[Pa]`"
-    _p_O₂::FT = 0
+    p_O₂::FT = 0
 end
 
 
@@ -383,7 +388,7 @@ end
 #     2022-Jul-14: remove field K_REF
 #     2022-Jul-14: add field ∂G∂t (renamed to ∂e∂t), ΔZ
 #     2022-Jul-26: move field K_MAX to structure VanGenuchten and BrooksCorey
-#     2023-Jun-12: add field TRACES for SoilTraceGasses
+#     2023-Jun-13: add field TRACES for SoilTraceGasses, and ∂n∂t for the gas diffusion
 #
 #######################################################################################################################################################################################################
 """
@@ -431,6 +436,8 @@ Base.@kwdef mutable struct SoilLayer{FT<:AbstractFloat}
     θ::FT = VC.Θ_SAT
     "Marginal increase in energy `[W m⁻²]`"
     ∂e∂t::FT = 0
+    "Marginal increase in energy `[W m⁻²]`"
+    ∂n∂t::Vector{FT} = zeros(FT,5)
     "Marginal increase in soil water content `[s⁻¹]`"
     ∂θ∂t::FT = 0
 
@@ -443,6 +450,8 @@ Base.@kwdef mutable struct SoilLayer{FT<:AbstractFloat}
     # Cache variables
     "Combined specific heat capacity of soil `[J K⁻¹ kg⁻¹]`"
     _cp::FT = 0
+    "Relative soil diffusive coefficient per area based on air fraction (distance accounted for already)"
+    _kd::FT = 0
     "Combined soil thermal conductance `[W m⁻² K⁻¹]`"
     _λ_thermal::FT = 0
 end

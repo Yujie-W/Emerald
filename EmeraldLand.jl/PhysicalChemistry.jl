@@ -1,7 +1,7 @@
 module PhysicalChemistry
 
 using ..Constant: CP_L, CP_V, GAS_R, K_BOLTZMANN, LH_V₀, PRESS_TRIPLE, R_V, T₂₅, T_TRIPLE, V_H₂O
-using ..Namespace: AbstractTraceGas, TraceGasAir, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
+using ..Namespace: AbstractTraceGas, TraceGasAir, TraceGasCH₄, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
 
 
 #######################################################################################################################################################################################################
@@ -40,6 +40,7 @@ capillary_pressure(r::FT, T::FT, α::FT, med::TraceLiquidH₂O{FT} = TraceLiquid
 # Changes to the function
 # General:
 #     2022-Oct-17: clean docs
+#     2023-Jun-12: add support for CH₄ and N₂
 #
 #######################################################################################################################################################################################################
 """
@@ -52,7 +53,7 @@ For the diffusive coefficient of gas in air, the coefficient is simply treated a
 D = D_\\text{ref} ⋅ \\left( \\dfrac{T}{298.15} \\right)^{1.8}
 ```
 
-    diffusive_coefficient(T::FT, mol::Union{TraceGasCO₂{FT}, TraceGasH₂O{FT}, TraceGasO₂{FT}}, med::TraceGasAir{FT}) where {FT<:AbstractFloat}
+    diffusive_coefficient(T::FT, mol::Union{TraceGasCH₄{FT}, TraceGasCO₂{FT}, TraceGasH₂O{FT}, TraceGasN₂{FT}, TraceGasO₂{FT}}, med::TraceGasAir{FT}) where {FT<:AbstractFloat}
 
 Diffusive coefficient of trace molecule in `[m² s⁻¹]`, given
 - `T` Trace medium temperature in `[K]`
@@ -72,7 +73,9 @@ Diffusive coefficient of trace molecule in `[m² s⁻¹]`, given
 """
 function diffusive_coefficient end
 
-diffusive_coefficient(T::FT, mol::Union{TraceGasCO₂{FT}, TraceGasH₂O{FT}, TraceGasO₂{FT}}, med::TraceGasAir{FT}) where {FT<:AbstractFloat} = mol.d_air * relative_diffusive_coefficient(T, mol, med);
+diffusive_coefficient(T::FT, mol::Union{TraceGasCH₄{FT}, TraceGasCO₂{FT}, TraceGasH₂O{FT}, TraceGasN₂{FT}, TraceGasO₂{FT}}, med::TraceGasAir{FT}) where {FT<:AbstractFloat} = (
+    return mol.d_air * relative_diffusive_coefficient(T, mol, med)
+);
 
 diffusive_coefficient(T::FT, mol::Union{TraceGasCO₂{FT}, TraceGasN₂{FT}}, med::TraceLiquidH₂O{FT}) where {FT<:AbstractFloat} = (
     (; a_298, a_a) = mol;

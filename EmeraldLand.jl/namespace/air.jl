@@ -10,6 +10,7 @@
 #     2022-Jul-20: remove fields P_O₂ to avoid update issues
 #     2022-Jul-20: add fields: Z, ΔZ, e, n_CO₂, n_H₂O, ∂e∂t, ∂CO₂∂t, and ∂H₂O∂t
 #     2023-Mar-11: add field f_CO₂ for CO₂ concentration
+#     2023-Jun-13: add fields for CH₄, N₂, O₂ partial pressures and moles
 #
 #######################################################################################################################################################################################################
 """
@@ -37,10 +38,16 @@ Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
     # Prognostic variables (not used for ∂y∂t)
     "CO₂ concentration `[ppm]`"
     f_CO₂::FT = 400
+    "CH₄ partial pressure `[Pa]`"
+    p_CH₄::FT = 0
     "CO₂ partial pressure `[Pa]`"
     p_CO₂::FT = P_AIR * f_CO₂ * 1e-6
     "H₂O partial pressure `[Pa]`"
     p_H₂O::FT = 1500
+    "N₂ partial pressure `[Pa]`"
+    p_N₂::FT = P_AIR * 0.79
+    "O₂ partial pressure `[Pa]`"
+    p_O₂::FT = P_AIR * 0.209
     "Temperature `[K]`"
     t::FT = T₂₅()
     "Wind speed `[m s⁻¹]`"
@@ -49,10 +56,16 @@ Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
     # Prognostic variables (used for ∂y∂t)
     "Total energy within the air layer `[J m⁻²]`"
     e::FT = CP_D_MOL() * (P_AIR - p_H₂O) * ΔZ / GAS_R() + CP_V_MOL() * p_H₂O * ΔZ / GAS_R()
+    "Mole of CH₄ per surface area `[mol m⁻²]`"
+    n_CH₄::FT = p_CO₂ * ΔZ / (GAS_R() * t)
     "Mole of CO₂ per surface area `[mol m⁻²]`"
     n_CO₂::FT = p_CO₂ * ΔZ / (GAS_R() * t)
     "Mole of H₂O per surface area `[mol m⁻²]`"
     n_H₂O::FT = p_H₂O * ΔZ / (GAS_R() * t)
+    "Mole of N₂ per surface area `[mol m⁻²]`"
+    n_N₂::FT = p_CO₂ * ΔZ / (GAS_R() * t)
+    "Mole of O₂ per surface area `[mol m⁻²]`"
+    n_O₂::FT = p_CO₂ * ΔZ / (GAS_R() * t)
     "Marginal increase in total energy `[J m⁻² s⁻¹]`"
     ∂e∂t::FT = 0
     "Marginal increase in total moles of CO₂ `[mol m⁻² s⁻¹]`"

@@ -3,6 +3,7 @@
 # Changes to the types
 # General:
 #     2022-Oct-17: clean docs
+#     2023-Jun-13: add trace gas struct for CH₄ and fields for N₂
 #
 #######################################################################################################################################################################################################
 """
@@ -23,6 +24,7 @@ abstract type AbstractTrace{FT<:AbstractFloat} end
 The gas can be either the target trace molecule (e.g., when computing diffusive coefficient of CO₂ in water using [`diffusive_coefficient`](@ref)) or the medium (e.g., when computing diffusive
     coefficient or CO₂ in air using [`diffusive_coefficient`](@ref)). Currently, `WaterPhysics` supports the following subtypes of `AbstractTraceGas`:
 - [`TraceGasAir`](@ref)
+- [`TraceGasCH₄`](@ref)
 - [`TraceGasCO₂`](@ref)
 - [`TraceGasH₂O`](@ref)
 - [`TraceGasO₂`](@ref)
@@ -53,6 +55,28 @@ Identity trace label for air.
 
 """
 struct TraceGasAir{FT<:AbstractFloat} <: AbstractTraceGas{FT} end
+
+
+"""
+
+$(TYPEDEF)
+
+Identity trace label for gas phase CH₄.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef struct TraceGasCH₄{FT<:AbstractFloat} <: AbstractTraceGas{FT}
+    # related to diffusive coefficient in air
+    "Diffusive coefficient in air in `[m² s⁻¹]`"
+    d_air::FT = 2.20e-5
+
+    # related to diffusive coefficient in liquid water
+    "Diffusive coefficient in liquid water in `[m² s⁻¹]`"
+    d_water::FT = 1.49e-9
+end
 
 
 """
@@ -111,6 +135,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef struct TraceGasN₂{FT<:AbstractFloat} <: AbstractTraceGas{FT}
+    # related to diffusive coefficient in air
+    "Diffusive coefficient in air in `[m² s⁻¹]`"
+    d_air::FT = 2.12e-5
+
     # related to diffusive coefficient in liquid water
     "Hydrodynamic radius of the solute in `[m]`"
     a_298::FT = 1.90e-10
