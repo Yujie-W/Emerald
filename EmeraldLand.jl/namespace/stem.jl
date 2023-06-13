@@ -25,11 +25,11 @@ Base.@kwdef mutable struct Stem{FT<:AbstractFloat}
 
     # Prognostic variables (not used for ∂y∂t)
     "Current temperature"
-    t::FT = T₂₅()
+    t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy in water `[J]`" # TODO: add wood storage as well
-    e::FT = T₂₅() * sum(HS.v_storage) * CP_L_MOL(FT)
+    e::FT = T₂₅(FT) * sum(HS.v_storage) * CP_L_MOL(FT)
     "Marginal increase in energy `[W]`"
     ∂e∂t::FT = 0
 end

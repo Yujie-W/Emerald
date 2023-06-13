@@ -60,7 +60,7 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     end;
 
     # prescribe the precipitation related parameters
-    spac.METEO.rain = _df_pcp * ρ_H₂O() / M_H₂O() / 3600;
+    spac.METEO.rain = _df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
     spac.METEO.t_precip = _df_tar;
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)

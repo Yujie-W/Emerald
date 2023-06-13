@@ -30,7 +30,7 @@ Base.@kwdef mutable struct Meteorology{FT<:AbstractFloat}
     "Precipitation in form of snow (before interception) `[mol m⁻²]`"
     snow::FT = 0
     "Air temperature as the boundary condition for canopy airspace `[K]`"
-    t_air::FT = T₂₅()
+    t_air::FT = T₂₅(FT)
     "Precipitation temperature `[K]`"
-    t_precip::FT = T₂₅()
+    t_precip::FT = T₂₅(FT)
 end

@@ -33,7 +33,7 @@ Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
 
     # Parameters that are not supposed to change with time
     "Atmospheric pressure `[Pa]`"
-    P_AIR::FT = P_ATM()
+    P_AIR::FT = P_ATM(FT)
 
     # Prognostic variables (not used for ∂y∂t)
     "CO₂ concentration `[ppm]`"
@@ -49,23 +49,23 @@ Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
     "O₂ partial pressure `[Pa]`"
     p_O₂::FT = P_AIR * 0.209
     "Temperature `[K]`"
-    t::FT = T₂₅()
+    t::FT = T₂₅(FT)
     "Wind speed `[m s⁻¹]`"
     wind::FT = 1
 
     # Prognostic variables (used for ∂y∂t)
     "Total energy within the air layer `[J m⁻²]`"
-    e::FT = CP_D_MOL() * (P_AIR - p_H₂O) * ΔZ / GAS_R() + CP_V_MOL() * p_H₂O * ΔZ / GAS_R()
+    e::FT = CP_D_MOL(FT) * (P_AIR - p_H₂O) * ΔZ / GAS_R(FT) + CP_V_MOL(FT) * p_H₂O * ΔZ / GAS_R(FT)
     "Mole of CH₄ per surface area `[mol m⁻²]`"
-    n_CH₄::FT = p_CO₂ * ΔZ / (GAS_R() * t)
+    n_CH₄::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
     "Mole of CO₂ per surface area `[mol m⁻²]`"
-    n_CO₂::FT = p_CO₂ * ΔZ / (GAS_R() * t)
+    n_CO₂::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
     "Mole of H₂O per surface area `[mol m⁻²]`"
-    n_H₂O::FT = p_H₂O * ΔZ / (GAS_R() * t)
+    n_H₂O::FT = p_H₂O * ΔZ / (GAS_R(FT) * t)
     "Mole of N₂ per surface area `[mol m⁻²]`"
-    n_N₂::FT = p_CO₂ * ΔZ / (GAS_R() * t)
+    n_N₂::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
     "Mole of O₂ per surface area `[mol m⁻²]`"
-    n_O₂::FT = p_CO₂ * ΔZ / (GAS_R() * t)
+    n_O₂::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
     "Marginal increase in total energy `[J m⁻² s⁻¹]`"
     ∂e∂t::FT = 0
     "Marginal increase in total moles of CO₂ `[mol m⁻² s⁻¹]`"

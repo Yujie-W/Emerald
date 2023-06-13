@@ -822,7 +822,7 @@ Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "Absorbed photosynthetically active radiation used for photosynthesis `[μmol m⁻² s⁻¹]`"
     ppar::FT = 1000
     "Current leaf temperature"
-    t::FT = T₂₅()
+    t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy per area `[J m⁻²]`"
@@ -913,7 +913,7 @@ Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "Absorbed photosynthetically active radiation used for photosynthesis `[μmol m⁻² s⁻¹]`"
     ppar::Vector{FT} = FT[1000, 200]
     "Current leaf temperature"
-    t::Vector{FT} = FT[T₂₅(), T₂₅()]
+    t::Vector{FT} = FT[T₂₅(FT), T₂₅(FT)]
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy per area `[J m⁻²]`"
@@ -1014,7 +1014,7 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "Absorbed photosynthetically active radiation used for photosynthesis for sunlit leaves `[μmol m⁻² s⁻¹]`"
     ppar_sunlit::Matrix{FT} = 1000 .* ones(FT, DIM_INCL, DIM_AZI)
     "Current leaf temperature `[K]`"
-    t::FT = T₂₅()
+    t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy per area `[J m⁻²]`"

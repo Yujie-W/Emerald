@@ -24,7 +24,7 @@ Base.@kwdef mutable struct Root{FT<:AbstractFloat}
 
     # Prognostic variables (not used for ∂y∂t)
     "Current temperature `[K]`"
-    t::FT = T₂₅()
+    t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy in water `[J]`" # TODO: add wood storage as well

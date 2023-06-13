@@ -68,9 +68,9 @@ BrooksCorey{FT}(catg::Int) where {FT<:AbstractFloat} = (
 
     return BrooksCorey{FT}(
                 B     = SOIL_TEXT.BB[catg],
-                K_MAX = SOIL_TEXT.SATDK[catg] / GRAVITY() * 1e6 / M_H₂O(),
+                K_MAX = SOIL_TEXT.SATDK[catg] / GRAVITY(FT) * 1e6 / M_H₂O(FT),
                 TYPE  = SOIL_TEXT.NAME[catg],
-                Ψ_SAT = SOIL_TEXT.SATPSI[catg] * ρ_H₂O() * GRAVITY() * 1e-6,
+                Ψ_SAT = SOIL_TEXT.SATPSI[catg] * ρ_H₂O(FT) * GRAVITY(FT) * 1e-6,
                 Θ_SAT = SOIL_TEXT.MAXSMC[catg],
                 Θ_RES = SOIL_TEXT.REFSMC[catg]
     )
@@ -200,7 +200,7 @@ VanGenuchten{FT}(name::String) where {FT<:AbstractFloat} = (
     end;
 
     # return a new struct
-    return VanGenuchten{FT}(K_MAX = _p[5] / GRAVITY() * 1e6 / M_H₂O(), N = _p[2], TYPE = name, α = _p[1], Θ_RES = _p[4], Θ_SAT = _p[3])
+    return VanGenuchten{FT}(K_MAX = _p[5] / GRAVITY(FT) * 1e6 / M_H₂O(FT), N = _p[2], TYPE = name, α = _p[1], Θ_RES = _p[4], Θ_SAT = _p[3])
 );
 
 
@@ -366,16 +366,6 @@ Base.@kwdef mutable struct SoilTraceGasses{FT<:AbstractFloat}
     n_N₂::FT = 0
     "Oxygen mole `[mol]`"
     n_O₂::FT = 0
-    "CH₄ partial pressure `[Pa]`"
-    p_CH₄::FT = 0
-    "CO₂ partial pressure `[Pa]`"
-    p_CO₂::FT = 0
-    "CO₂ partial pressure `[Pa]`"
-    p_H₂O::FT = 0
-    "Nitrogen partial pressure `[Pa]`"
-    p_N₂::FT = 0
-    "Oxygen partial pressure `[Pa]`"
-    p_O₂::FT = 0
 end
 
 
@@ -427,11 +417,11 @@ Base.@kwdef mutable struct SoilLayer{FT<:AbstractFloat}
 
     # Prognostic variables (not used for ∂y∂t)
     "Temperature `[K]`"
-    t::FT = T₂₅()
+    t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy per volume `[J m⁻³]`"
-    e::FT = (CP * ρ + VC.Θ_SAT * CP_L() * ρ_H₂O()) * t
+    e::FT = (CP * ρ + VC.Θ_SAT * CP_L(FT) * ρ_H₂O(FT)) * t
     "Soil water content"
     θ::FT = VC.Θ_SAT
     "Marginal increase in energy `[W m⁻²]`"

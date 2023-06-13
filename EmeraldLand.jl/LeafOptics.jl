@@ -97,15 +97,15 @@ leaf_spectra!(
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
 
     # calculate the average absorption feature and relative Cab and Car partitions
-    bio.k_all    .= (K_CAB   .* bio.cab .+                          # chlorophyll absorption
-                     K_CAR_V .* bio.car .* (1 - bio.f_zeax) .+      # violaxanthin carotenoid absorption
-                     K_CAR_Z .* bio.car .* bio.f_zeax .+            # zeaxanthin carotenoid absorption
-                     K_ANT   .* bio.ant .+                          # anthocynanin absorption absorption
-                     K_BROWN .* bio.brown .+                        # TODO: needs to be a concentration
-                     K_H₂O   .* (lwc * M_H₂O() / ρ_H₂O() * 100) .+  # water absorption
-                     K_CBC   .* bio.cbc .+                          # carbon-based constituents absorption
-                     K_PRO   .* bio.pro .+                          # protein absorption
-                     K_LMA   .* (bio.lma - bio.cbc - bio.pro)       # dry mass absorption (if some remained)
+    bio.k_all    .= (K_CAB   .* bio.cab .+                              # chlorophyll absorption
+                     K_CAR_V .* bio.car .* (1 - bio.f_zeax) .+          # violaxanthin carotenoid absorption
+                     K_CAR_Z .* bio.car .* bio.f_zeax .+                # zeaxanthin carotenoid absorption
+                     K_ANT   .* bio.ant .+                              # anthocynanin absorption absorption
+                     K_BROWN .* bio.brown .+                            # TODO: needs to be a concentration
+                     K_H₂O   .* (lwc * M_H₂O(FT) / ρ_H₂O(FT) * 100) .+  # water absorption
+                     K_CBC   .* bio.cbc .+                              # carbon-based constituents absorption
+                     K_PRO   .* bio.pro .+                              # protein absorption
+                     K_LMA   .* (bio.lma - bio.cbc - bio.pro)           # dry mass absorption (if some remained)
                     ) ./ MESOPHYLL_N;
     bio.α_cab    .= (K_CAB .* bio.cab) ./ bio.k_all ./ MESOPHYLL_N;
     bio.α_cabcar .= (K_CAB .* bio.cab .+ K_CAR_V .* bio.car .* (1 - bio.f_zeax) .+ K_CAR_Z .* bio.car .* bio.f_zeax) ./ bio.k_all ./ MESOPHYLL_N;
