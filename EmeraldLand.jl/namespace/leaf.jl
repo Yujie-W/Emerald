@@ -781,6 +781,7 @@ abstract type AbstractLeaf{FT<:AbstractFloat} end
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
 #     2023-Apr-13: move field APAR_CAR to SPACConfiguration
+#     2023-Jun-13: add field: etr
 #
 #######################################################################################################################################################################################################
 """
@@ -838,6 +839,8 @@ Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
     a_gross::FT = 0
     "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
     a_net::FT = 0
+    "Actual electron transport `[μmol m⁻² s⁻¹]`"
+    etr::FT = 0
 
     # Cache variables
     "Combined specific heat capacity of leaf per area `[J K⁻¹ m⁻²]`"
@@ -867,6 +870,7 @@ end
 #     2022-Jul-19: remove field p_H₂O_sat
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
+#     2023-Jun-13: add field: etr
 #
 #######################################################################################################################################################################################################
 """
@@ -926,6 +930,8 @@ Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     a_gross::Vector{FT} = FT[0, 0]
     "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
     a_net::Vector{FT} = FT[0, 0]
+    "Actual electron transport `[μmol m⁻² s⁻¹]`"
+    etr::Vector{FT} = FT[0, 0]
 
     # Cache variables
     "Combined specific heat capacity of leaf per area `[J K⁻¹ m⁻²]`"
@@ -958,6 +964,7 @@ end
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
 #     2023-Apr-13: move field APAR_CAR to SPACConfiguration
+#     2023-Jun-13: add field: etr_shaded, etr_sunlit
 #
 #######################################################################################################################################################################################################
 """
@@ -1032,6 +1039,10 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     a_net_shaded::FT = 0
     "Net photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
     a_net_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
+    "Actual electron transport for shaded leaves `[μmol m⁻² s⁻¹]`"
+    etr_shaded::FT = 0
+    "Actual electron transport for sunlit leaves `[μmol m⁻² s⁻¹]`"
+    etr_sunlit::Matrix{FT} = zeros(FT, DIM_INCL, DIM_AZI)
     "Fluorescence quantum yield for shaded leaves `[-]`"
     ϕ_f_shaded::FT = 0
     "Fluorescence quantum yield for sunlit leaves `[-]`"

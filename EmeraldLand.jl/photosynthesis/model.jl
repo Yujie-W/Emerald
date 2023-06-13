@@ -147,6 +147,7 @@ leaf_photosynthesis!(
 #     2022-Jul-12: use β as a must have option (and thus this function becomes a core function of the one above)
 #     2022-Jul-28: move temperature control to function photosystem_temperature_dependence!
 #     2023-Mar-11: add option to compute respiration rate only
+#     2023-Jun-13: save actual etr as well
 #
 #######################################################################################################################################################################################################
 """
@@ -174,6 +175,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT
         PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaf.t);
         leaf.a_net = -PSM._r_d;
         leaf.a_gross = 0;
+        leaf.etr = 0;
 
         return nothing
     end;
@@ -191,6 +193,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT
     # save the rates and to leaf
     leaf.a_net = PSM.a_net;
     leaf.a_gross = PSM.a_gross;
+    leaf.etr = PSM.a_gross / PSM._e_to_c;
 
     return nothing
 );
@@ -204,6 +207,7 @@ leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
             leaves.a_net[_i] = -PSM._r_d;
         end;
         leaves.a_gross .= 0;
+        leaves.etr .= 0;
 
         return nothing
     end;
@@ -226,6 +230,7 @@ leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
         # save the rates and to leaves
         leaves.a_net[_i] = PSM.a_net;
         leaves.a_gross[_i] = PSM.a_gross;
+        leaves.etr[_i] = PSM.a_gross / PSM._e_to_c;
     end;
 
     return nothing
@@ -238,9 +243,11 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
         PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaves.t);
         leaves.a_net_sunlit .= -PSM._r_d;
         leaves.a_gross_sunlit .= 0;
+        leaves.etr_sunlit .= 0;
         leaves.ϕ_f_sunlit .= 0;
         leaves.a_net_shaded = -PSM._r_d;
         leaves.a_gross_shaded = 0;
+        leaves.etr_shaded = 0;
         leaves.ϕ_f_shaded = 0;
 
         return nothing
@@ -263,6 +270,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
         # save the rates and to leaves
         leaves.a_net_sunlit[_i] = PSM.a_net;
         leaves.a_gross_sunlit[_i] = PSM.a_gross;
+        leaves.etr_sunlit[_i] = PSM.a_gross / PSM._e_to_c;
         leaves.ϕ_f_sunlit[_i] = PRC.ϕ_f;
     end;
 
@@ -279,6 +287,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
     # save the rates and to leaves
     leaves.a_net_shaded = PSM.a_net;
     leaves.a_gross_shaded = PSM.a_gross;
+    leaves.etr_shaded = PSM.a_gross / PSM._e_to_c;
     leaves.ϕ_f_shaded = PRC.ϕ_f;
 
     return nothing
@@ -291,6 +300,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
         PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaf.t);
         leaf.a_net = -PSM._r_d;
         leaf.a_gross = 0;
+        leaf.etr = 0;
 
         return nothing
     end;
@@ -316,6 +326,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
     # save the rates and to leaf
     leaf.a_net = PSM.a_net;
     leaf.a_gross = PSM.a_gross;
+    leaf.etr = PSM.a_gross / PSM._e_to_c;
 
     return nothing
 );
@@ -329,6 +340,7 @@ leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
             leaves.a_net[_i] = -PSM._r_d;
         end;
         leaves.a_gross .= 0;
+        leaves.etr .= 0;
 
         return nothing
     end;
@@ -356,6 +368,7 @@ leaf_photosynthesis!(leaves::Leaves1D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
         # save the rates and to leaves
         leaves.a_net[_i] = PSM.a_net;
         leaves.a_gross[_i] = PSM.a_gross;
+        leaves.etr[_i] = PSM.a_gross / PSM._e_to_c;
     end;
 
     return nothing
@@ -368,9 +381,11 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
         PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaves.t);
         leaves.a_net_sunlit .= -PSM._r_d;
         leaves.a_gross_sunlit .= 0;
+        leaves.etr_sunlit .= 0;
         leaves.ϕ_f_sunlit .= 0;
         leaves.a_net_shaded = -PSM._r_d;
         leaves.a_gross_shaded = 0;
+        leaves.etr_shaded = 0;
         leaves.ϕ_f_shaded = 0;
 
         return nothing
@@ -400,6 +415,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
         # save the rates and to leaves
         leaves.a_net_sunlit[_i] = PSM.a_net;
         leaves.a_gross_sunlit[_i] = PSM.a_gross;
+        leaves.etr_sunlit[_i] = PSM.a_gross / PSM._e_to_c;
         leaves.ϕ_f_sunlit[_i] = PRC.ϕ_f;
     end;
 
@@ -423,6 +439,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
     # save the rates and to leaves
     leaves.a_net_shaded = PSM.a_net;
     leaves.a_gross_shaded = PSM.a_gross;
+    leaves.etr_shaded = PSM.a_gross / PSM._e_to_c;
     leaves.ϕ_f_shaded = PRC.ϕ_f;
 
     return nothing

@@ -150,3 +150,64 @@ T_VEG(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 
     return _tran
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Jun-13: add function to add up total ETR
+#
+#######################################################################################################################################################################################################
+"""
+
+    ΣETR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+
+Return the total ETR per ground area, given
+- `spac` `MultiLayerSPAC` SPAC
+
+"""
+function ΣETR end
+
+ΣETR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+
+    # compute GPP
+    _Σetr::FT = 0;
+    for _i in 1:DIM_LAYER
+        _Σetr += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].etr_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].etr_shaded) * CANOPY.δlai[_i];
+    end;
+
+    return _Σetr
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Jun-13: add function to add up total SIF photons
+#
+#######################################################################################################################################################################################################
+"""
+
+ΣSIF(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+
+Return the total SIF at chloroplast level (without any reabsorption) per ground area, given
+- `spac` `MultiLayerSPAC` SPAC
+
+"""
+function ΣSIF end
+
+ΣSIF(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+
+    # compute GPP
+    _Σsif::FT = 0;
+    for _i in 1:DIM_LAYER
+        _Σsif += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit .* LEAVES[_i].ϕ_f_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded * LEAVES[_i].ϕ_f_shaded) *
+                 CANOPY.δlai[_i];
+    end;
+
+    return _Σsif
+);
