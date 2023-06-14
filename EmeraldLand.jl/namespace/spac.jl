@@ -279,6 +279,16 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     # variables to save
     "Gross primary productivity"
     gpp::FT = 0
+    "MODIS EVI"
+    modis_evi::FT = 0
+    "MODIS NDVI"
+    modis_ndvi::FT = 0
+    "MODIS NIRv"
+    modis_nirv::FT = 0
+    "OCO SIF at 759 nm"
+    oco_sif₇₅₉::FT = 0
+    "OCO SIF at 770 nm"
+    oco_sif₇₇₀::FT = 0
     "TROPOMI SIF at 683 nm"
     tropomi_sif₆₈₃::FT = 0
     "TROPOMI SIF at 740 nm"

@@ -29,6 +29,11 @@ spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<
 
     # save the variables used for publications
     state.gpp = GPP(spac);
+    state.modis_evi = MODIS_EVI(CANOPY);
+    state.modis_ndvi = MODIS_NDVI(CANOPY);
+    state.modis_nirv = MODIS_NIRv(CANOPY);
+    state.oco_sif₇₅₉ = OCO2_SIF759(CANOPY);
+    state.oco_sif₇₇₀ = OCO2_SIF770(CANOPY);
     state.tropomi_sif₆₈₃ = TROPOMI_SIF683(CANOPY);
     state.tropomi_sif₇₄₀ = TROPOMI_SIF740(CANOPY);
 
