@@ -279,6 +279,10 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     # variables to save
     "Soil moisture tuning factor β"
     beta::FT = 0
+    "Total chloroplast fluorescence"
+    csif::FT = 0
+    "Total ETR"
+    etr::FT = 0
     "Gross primary productivity"
     gpp::FT = 0
     "MODIS EVI"

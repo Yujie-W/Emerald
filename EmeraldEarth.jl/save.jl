@@ -21,6 +21,8 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiL
         return isnothing(state) ? NaN32 : Float32(getfield(state, fn));
     );
     _mat_beta = get_value.(states, :beta);
+    _mat_csif = get_value.(states, :csif);
+    _mat_etr = get_value.(states, :etr);
     _mat_gpp = get_value.(states, :gpp);
     _mat_evi = get_value.(states, :modis_evi);
     _mat_ndvi = get_value.(states, :modis_ndvi);
@@ -39,6 +41,8 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiL
         _res_lat = 180 / size(states,2);
         _res_lon = 360 / size(states,1);
         _3d_beta = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
+        _3d_csif = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
+        _3d_etr = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
         _3d_gpp = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
         _3d_evi = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
         _3d_ndvi = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
@@ -51,6 +55,8 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiL
         _3d_s770 = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
         _3d_tran = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
         _3d_beta[:,:,1] .= _mat_beta;
+        _3d_csif[:,:,1] .= _mat_csif;
+        _3d_etr[:,:,1] .= _mat_etr;
         _3d_gpp[:,:,1] .= _mat_gpp;
         _3d_evi[:,:,1] .= _mat_evi;
         _3d_ndvi[:,:,1] .= _mat_ndvi;
@@ -67,6 +73,8 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiL
         append_nc!(filename, "lon", collect(Float32, (-180+_res_lon):_res_lon:180), Dict{String,String}("about" => "longitude"), ["lon"]);
         append_nc!(filename, "DOY", Float32[doy], Dict{String,String}("about" => "index of hour in a year"), ["ind"]);
         append_nc!(filename, "BETA", _3d_beta, Dict{String,String}("about" => "Beta factor"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "CSIF", _3d_beta, Dict{String,String}("about" => "Total Chlorophyll SIF photons in [μmol m⁻² s⁻¹] (before reabsorption)"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "ETR", _3d_beta, Dict{String,String}("about" => "Total electron transport in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
         append_nc!(filename, "GPP", _3d_gpp, Dict{String,String}("about" => "GPP in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
         append_nc!(filename, "EVI", _3d_evi, Dict{String,String}("about" => "MODIS EVI"), ["lon", "lat", "ind"]);
         append_nc!(filename, "NDVI", _3d_ndvi, Dict{String,String}("about" => "MODIS NDVI"), ["lon", "lat", "ind"]);
@@ -85,6 +93,8 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiL
     # grow the dataset
     grow_nc!(filename, "DOY", Float32(doy), true);
     grow_nc!(filename, "BETA", _mat_beta, false);
+    grow_nc!(filename, "CSIF", _mat_csif, false);
+    grow_nc!(filename, "ETR", _mat_etr, false);
     grow_nc!(filename, "GPP", _mat_gpp, false);
     grow_nc!(filename, "EVI", _mat_evi, false);
     grow_nc!(filename, "NDVI", _mat_ndvi, false);
