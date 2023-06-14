@@ -123,7 +123,7 @@ wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool
     _wd_vpd   = saturation_vapor_pressure.(_wd_t_air) .- saturation_vapor_pressure.(_wd_t_dew);
     _wd_wind  = sqrt.(_wd_windu .^ 2 .+ _wd_windv .^ 2);
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-        if dts.mask_spac[_ilon,_ilat]
+        if dts.mask_spac[_ilon,_ilat] || dts.mask_soil[_ilon,_ilat]
             _mat_wd[_ilon,_ilat] = Dict{String,Any}(
                         "FDOY"    => (ind - 0.5 + ((_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180) / 15) / 24,
                         "INDEX"   => ind,
@@ -150,7 +150,7 @@ wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool
         _wd_tsl_3 = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_S_3[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_S_3[1], ind);
         _wd_tsl_4 = read_nc("$(ERA5_FOLDER)/reprocessed/$(wd.T_S_4[2])_SL_$(dts.year)_$(dts.gz)X.nc", wd.T_S_4[1], ind);
         for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-            if dts.mask_spac[_ilon,_ilat]
+            if dts.mask_spac[_ilon,_ilat] || dts.mask_soil[_ilon,_ilat]
                 _mat_wd[_ilon,_ilat]["SWC"] = (_wd_swc_1[_ilon,_ilat], _wd_swc_2[_ilon,_ilat], _wd_swc_3[_ilon,_ilat], _wd_swc_4[_ilon,_ilat]);
                 _mat_wd[_ilon,_ilat]["T_SOIL"] = (_wd_tsl_1[_ilon,_ilat], _wd_tsl_2[_ilon,_ilat], _wd_tsl_3[_ilon,_ilat], _wd_tsl_4[_ilon,_ilat]);
             end;
@@ -178,7 +178,7 @@ wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = tru
 
     # prescribe air layer environments and radiation
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-        if dts.mask_spac[_ilon,_ilat]
+        if dts.mask_spac[_ilon,_ilat] || dts.mask_soil[_ilon,_ilat]
             _mat_wd[_ilon,_ilat] = Dict{String,Any}(
                         "FDOY"    => (ind - 0.5 + ((_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180) / 15) / 24,
                         "INDEX"   => ind,
@@ -197,7 +197,7 @@ wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = tru
     # prescribe soil water content
     if soil
         for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-            if dts.mask_spac[_ilon,_ilat]
+            if dts.mask_spac[_ilon,_ilat] || dts.mask_soil[_ilon,_ilat]
                 _mat_wd[_ilon,_ilat]["SWC"] = (wd["SWC_1"][_ilon,_ilat,ind], wd["SWC_2"][_ilon,_ilat,ind], wd["SWC_3"][_ilon,_ilat,ind], wd["SWC_4"][_ilon,_ilat,ind]);
                 _mat_wd[_ilon,_ilat]["T_SOIL"] = (wd["T_S_1"][_ilon,_ilat,ind], wd["T_S_2"][_ilon,_ilat,ind], wd["T_S_3"][_ilon,_ilat,ind], wd["T_S_4"][_ilon,_ilat,ind]);
             end;

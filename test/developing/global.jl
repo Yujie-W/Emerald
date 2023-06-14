@@ -18,12 +18,17 @@ FT = Float64;
 =#
 
 # for debugging use
-@time wdx = EmeraldEarth.wd_grids(dts, wdr, 1);
-@time sts = EmeraldEarth.simulation!(mat, wdx, sts);
-@time EmeraldEarth.save_simulations!("test.nc", sts, 1);
-@time wdx = EmeraldEarth.wd_grids(dts, wdr, 2);
-@time sts = EmeraldEarth.simulation!(mat, wdx, sts);
-@time EmeraldEarth.save_simulations!("test.nc", sts, 2);
+for ind in 1:3:24
+    @time wdx = EmeraldEarth.wd_grids(dts, wdr, ind);
+    @time sts = EmeraldEarth.simulation!(mat, wdx, sts);
+    @time EmeraldEarth.save_simulations!("test.nc", sts, ind);
+end;
+
+# visualize the simulations to make sure the simulation is okay
+EmeraldVisualization.animate_nc!("test.nc", "GPP"; filename = "test.gif", fps = 2);
+
+
+
 
 # visualize the simulations to make sure the simulated area
 nansts = zeros(Bool, size(sts));
