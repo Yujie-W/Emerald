@@ -10,6 +10,7 @@
 #     2022-Sep-07: remove soil oversaturation controller, and add a Δθ <= 0.01 controller
 #     2022-Oct-22: add option t_on to enable/disable soil and leaf energy budgets
 #     2023-Mar-27: add controller for trunk and branch temperatures
+#     2023-Jun-13: add soil gas energy into soil e when computing combined cp
 #
 #######################################################################################################################################################################################################
 """
@@ -31,10 +32,10 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     # make sure each layer does not drain (allow for oversaturation), and θ change is less than 0.01
     _δt_2 = _δt_1;
     if θ_on
-        for _i in 1:SOIL.DIM_SOIL
-            _δt_2 = min(FT(0.01) / abs(SOIL.LAYERS[_i].∂θ∂t), _δt_2);
-            if SOIL.LAYERS[_i].∂θ∂t < 0
-                _δt_dra = (SOIL.LAYERS[_i].VC.Θ_RES - SOIL.LAYERS[_i].θ) / SOIL.LAYERS[_i].∂θ∂t;
+        for _slayer in SOIL.LAYERS
+            _δt_2 = min(FT(0.01) / abs(_slayer.∂θ∂t), _δt_2);
+            if _slayer.∂θ∂t < 0
+                _δt_dra = (_slayer.VC.Θ_RES - _slayer.θ) / _slayer.∂θ∂t;
                 _δt_2 = min(_δt_dra, _δt_2);
             end;
         end;
@@ -43,8 +44,9 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     # make sure soil temperatures do not change more than 1 K per time step
     _δt_3 = _δt_2;
     if t_on
-        for _i in 1:SOIL.DIM_SOIL
-            _∂T∂t = SOIL.LAYERS[_i].∂e∂t / (SOIL.LAYERS[_i].CP * SOIL.LAYERS[_i].ρ + SOIL.LAYERS[_i].θ * ρ_H₂O(FT) * CP_L(FT));
+        for _slayer in SOIL.LAYERS
+            _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
+            _∂T∂t = _slayer.∂e∂t / (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas);
             _δt_3 = min(1 / abs(_∂T∂t), _δt_3);
         end;
     end;
@@ -59,8 +61,8 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     # make sure branch stem temperatures do not change more than 1 K per time step
     _δt_5 = _δt_4;
     if t_on
-        for _i in 1:DIM_LAYER
-            _∂T∂t = BRANCHES[_i].∂e∂t / (CP_L_MOL(FT) * sum(BRANCHES[_i].HS.v_storage));
+        for _branch in BRANCHES
+            _∂T∂t = _branch.∂e∂t / (CP_L_MOL(FT) * sum(_branch.HS.v_storage));
             _δt_5 = min(1 / abs(_∂T∂t), _δt_5);
         end;
     end;
@@ -68,19 +70,19 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
     # make sure leaf temperatures do not change more than 1 K per time step
     _δt_6 = _δt_5;
     if t_on
-        for _i in 1:DIM_LAYER
-            _∂T∂t = LEAVES[_i].∂e∂t / (LEAVES[_i].CP * LEAVES[_i].BIO.lma * 10 + CP_L_MOL(FT) * LEAVES[_i].HS.v_storage);
+        for _clayer in LEAVES
+            _∂T∂t = _clayer.∂e∂t / (_clayer.CP * _clayer.BIO.lma * 10 + CP_L_MOL(FT) * _clayer.HS.v_storage);
             _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
         end;
     end;
 
     # make sure leaf stomatal conductances do not change more than 0.01 mol m⁻² s⁻¹
     _δt_7 = _δt_6;
-    for _i in 1:DIM_LAYER
-        for _∂g∂t in LEAVES[_i].∂g∂t_sunlit
+    for _clayer in LEAVES
+        for _∂g∂t in _clayer.∂g∂t_sunlit
             _δt_7 = min(FT(0.06) / abs(_∂g∂t), _δt_7);
         end;
-        _δt_7 = min(FT(0.06) / abs(LEAVES[_i].∂g∂t_shaded), _δt_7);
+        _δt_7 = min(FT(0.06) / abs(_clayer.∂g∂t_shaded), _δt_7);
     end;
 
     return (_δt_7, _δt_6, _δt_5, _δt_4, _δt_3, _δt_2, _δt_1)

@@ -3,7 +3,7 @@ module SPAC
 using Statistics: mean
 
 using ..Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, P_ATM, T₀, ρ_H₂O
-using ..PhysicalChemistry: saturation_vapor_pressure
+using ..PhysicalChemistry: latent_heat_vapor, saturation_vapor_pressure
 using ..Namespace: AirLayer, GCO₂Mode, MultiLayerSPAC, SPACConfiguration, MultiLayerSPACState
 using ..LeafOptics: leaf_spectra!
 using ..CanopyOptics: TROPOMI_SIF683, TROPOMI_SIF740, canopy_fluorescence!, canopy_radiation!, longwave_radiation!, soil_albedo!

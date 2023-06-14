@@ -35,6 +35,8 @@ function update! end
 #     2023-May-19: use δlai per canopy layer
 #     2023-Jun-12: update soil trace gas as well
 #     2023-Jun-12: fix trace gas initialization
+#     2023-Jun-13: update N₂ and O₂ based on soil water content
+#     2023-Jun-13: add soil gas energy into soil e
 #
 #######################################################################################################################################################################################################
 """
@@ -165,13 +167,13 @@ update!(spac::MultiLayerSPAC{FT},
         for _i in eachindex(swcs)
             _slayer = SOIL.LAYERS[_i];
             _slayer.θ = swcs[_i];
-            _slayer.e = (_slayer.CP * _slayer.ρ + _slayer.θ * CP_L() * ρ_H₂O()) * _slayer.t;
-            _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t) * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
-            _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
-            _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.209 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
-            _slayer.TRACES.p_H₂O = saturation_vapor_pressure(_slayer.t);
-            _slayer.TRACES.p_N₂  = spac.AIR[1].P_AIR * 0.79;
-            _slayer.TRACES.p_O₂  = spac.AIR[1].P_AIR * 0.209;
+            _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
+            _rt = GAS_R(FT) * _slayer.t;
+            _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t) * _slayer.ΔZ * _δθ / _rt;
+            _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
+            _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt
+            _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
+            _slayer.e = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
         end;
     end;
 
@@ -180,21 +182,21 @@ update!(spac::MultiLayerSPAC{FT},
         for _i in eachindex(t_soils)
             _slayer = SOIL.LAYERS[_i];
             _slayer.t = t_soils[_i];
-            _slayer.e = (_slayer.CP * _slayer.ρ + _slayer.θ * CP_L() * ρ_H₂O()) * _slayer.t;
-            _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t) * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
-            _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
-            _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.21 * _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R() * _slayer.t);
-            _slayer.TRACES.p_H₂O = saturation_vapor_pressure(_slayer.t);
-            _slayer.TRACES.p_N₂  = spac.AIR[1].P_AIR * 0.79;
-            _slayer.TRACES.p_O₂  = spac.AIR[1].P_AIR * 0.209;
+            _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
+            _rt = GAS_R(FT) * _slayer.t;
+            _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t) * _slayer.ΔZ * _δθ / _rt;
+            _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
+            _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt
+            _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
+            _slayer.e = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
         end;
     end;
 
     # update Vcmax and Jmax TD
     if !isnothing(t_clm)
         for _leaf in LEAVES
-            _leaf.PSM.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀());
-            _leaf.PSM.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀());
+            _leaf.PSM.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+            _leaf.PSM.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
         end;
     end;
 
