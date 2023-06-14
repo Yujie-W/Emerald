@@ -277,6 +277,8 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     t_clm::Vector{FT}
 
     # variables to save
+    "Soil moisture tuning factor β"
+    beta::FT = 0
     "Gross primary productivity"
     gpp::FT = 0
     "MODIS EVI"
@@ -289,6 +291,12 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     oco_sif₇₅₉::FT = 0
     "OCO SIF at 770 nm"
     oco_sif₇₇₀::FT = 0
+    "PAR"
+    par::FT = 0
+    "PPAR"
+    ppar::FT = 0
+    "Transpiration"
+    transpiration::FT = 0
     "TROPOMI SIF at 683 nm"
     tropomi_sif₆₈₃::FT = 0
     "TROPOMI SIF at 740 nm"
