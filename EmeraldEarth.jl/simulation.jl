@@ -16,44 +16,6 @@ Run simulations on SPAC, given
 - `wd_mat` Matrix of weather drivers
 - `state_mat` Matrix of state variable struct
 
----
-# Example
-```julia
-using Emerald;
-
-FT = Float64;
-@time EmeraldEarth.add_threads!(20, FT);
-
-@time dts = EmeraldEarth.LandDatasets{FT}("gm2", 2020);
-@time mat = EmeraldEarth.gm_grids(dts);
-@time sts = Matrix{Union{Nothing,EmeraldLand.Namespace.MultiLayerSPACState{FT}}}(nothing, size(dts.t_lm));
-@time wdr = EmeraldEarth.ERA5SingleLevelsDriver();
-
-@time wds = EmeraldEarth.weather_drivers(dts, wdr);
-@time wdx = EmeraldEarth.wd_grids(dts, wds, 1);
-
-# for debugging use
-@time wdx = EmeraldEarth.wd_grids(dts, wdr, 1);
-@time sts = EmeraldEarth.simulation!(mat, wdx, sts);
-@time EmeraldEarth.save_simulations!("test.nc", sts, 1);
-@time wdx = EmeraldEarth.wd_grids(dts, wdr, 2);
-@time sts = EmeraldEarth.simulation!(mat, wdx, sts);
-@time EmeraldEarth.save_simulations!("test.nc", sts, 2);
-
-nansts = zeros(Bool, size(sts));
-for i in eachindex(sts)
-    if !isnothing(sts[i]) && isnan(sts[i])
-        nansts[i] = true;
-    end;
-end;
-@show sum(nansts);
-sts[isnothing.(sts)] .= NaN;
-heatmap(sts')
-
-EmeraldEarth.simulation!(mat[339,36], wdx[339,36])
-EmeraldEarth.simulation!(mat[296,120], wdx[296,120])
-```
-
 """
 function simulation! end
 

@@ -316,8 +316,6 @@ soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<
     LAYERS[1].∂n∂t[3] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_H₂O, TRACE_AIR) * (LAYERS[1].TRACES.n_H₂O / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_H₂O / (GAS_R(FT) * AIR[1].t));
     LAYERS[1].∂n∂t[4] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_N₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_N₂  / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_N₂  / (GAS_R(FT) * AIR[1].t));
     LAYERS[1].∂n∂t[5] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_O₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_O₂  / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_O₂  / (GAS_R(FT) * AIR[1].t));
-    # @show (LAYERS[1].TRACES.n_N₂  / LAYERS[1].ΔZ - AIR[1].p_N₂  / (GAS_R(FT) * AIR[1].t));
-    # @show LAYERS[1].∂n∂t[4];
 
     for _i in 1:SOIL.DIM_SOIL-1
         # gas diffusion
@@ -405,10 +403,6 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
         _slayer.θ += _δθ_v;
         _slayer.e += _δθ_v * ρ_H₂O(FT) * CP_L(FT) * _slayer.t;
         _slayer.e += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
-        # if _slayer.ZS[1] > -0.05
-        #     @info "Layering" δt _δθ_v _slayer.t _δθ_v * ρ_H₂O(FT) * CP_L(FT) * _slayer.t;
-        #     #@show _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
-        # end;
 
         # account for mass flow
         _slayer.θ += _slayer.∂θ∂t * δt;

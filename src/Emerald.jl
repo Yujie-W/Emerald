@@ -2,6 +2,7 @@ module Emerald
 
 using Revise
 
+export EmeraldData
 export EmeraldEarth
 export EmeraldFrontier
 export EmeraldIO
