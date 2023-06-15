@@ -6,6 +6,7 @@
 #     2023-Mar-27: prescribe T only if t_on is true, prescribe SWC only is θ_on is true
 #     2023-Mar-29: prescribe longwave radiation as well
 #     2023-Apr-13: add spac config to function call
+#     2023-Jun-15: add a controller over rad to make sure it is >= 0
 #
 #######################################################################################################################################################################################################
 """
@@ -94,8 +95,8 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     # update downward shortwave and longwave radiation
     _in_dir = config.RAD_SW_REF.e_direct' * spac.CANOPY.WLSET.ΔΛ / 1000;
     _in_dif = config.RAD_SW_REF.e_diffuse' * spac.CANOPY.WLSET.ΔΛ / 1000;
-    spac.METEO.rad_sw.e_direct  .= config.RAD_SW_REF.e_direct  .* _df_dir ./ _in_dir;
-    spac.METEO.rad_sw.e_diffuse .= config.RAD_SW_REF.e_diffuse .* _df_dif ./ _in_dif;
+    spac.METEO.rad_sw.e_direct  .= config.RAD_SW_REF.e_direct  .* max(0,_df_dir) ./ _in_dir;
+    spac.METEO.rad_sw.e_diffuse .= config.RAD_SW_REF.e_diffuse .* max(0,_df_dif) ./ _in_dif;
     spac.METEO.rad_lw = _df_lwr;
 
     # update solar zenith angle based on the time

@@ -63,3 +63,82 @@ for i in 1:10
     @info "Debugging" soil_water_flow soil_water_fout root_water_flow leaf_water_flow spac.SOIL.runoff;
     @info "SWC per layer" [slayer.θ for slayer in spac.SOIL.LAYERS];
 end;
+
+
+
+
+#
+# Debugging LAI = 0, four steps
+#     - RAD > 0    &&    LAI > 0
+#     - RAD > 0    &&    LAI = 0
+#     - RAD = 0    &&    LAI > 0
+#     - RAD = 0    &&    LAI = 0
+#
+using Emerald;
+
+function show_spac_info(node)
+    beta = EmeraldLand.SPAC.BETA(spac);
+    par = spac.CANOPY.RADIATION.par_in;
+    ppar = EmeraldLand.SPAC.PPAR(spac);
+    csif = EmeraldLand.SPAC.ΣSIF(spac);
+    etr = EmeraldLand.SPAC.ΣETR(spac);
+    gpp = EmeraldLand.SPAC.GPP(spac);
+    ndvi = EmeraldLand.CanopyOptics.MODIS_NDVI(node.CANOPY);
+    evi = EmeraldLand.CanopyOptics.MODIS_EVI(node.CANOPY);
+    nirv = EmeraldLand.CanopyOptics.MODIS_NIRv(node.CANOPY);
+    sifs = (EmeraldLand.CanopyOptics.TROPOMI_SIF683(node.CANOPY),
+            EmeraldLand.CanopyOptics.TROPOMI_SIF740(node.CANOPY),
+            EmeraldLand.CanopyOptics.OCO2_SIF759(node.CANOPY),
+            EmeraldLand.CanopyOptics.OCO2_SIF770(node.CANOPY));
+    tran = EmeraldLand.SPAC.T_VEG(spac);
+    @info "SPAC Details" beta par ppar csif etr gpp tran ndvi evi nirv sifs;
+end
+
+FT = Float64;
+config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+spac = EmeraldLand.Namespace.MultiLayerSPAC{FT}();
+EmeraldLand.SPAC.update!(spac, config; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
+EmeraldLand.SPAC.initialize!(spac, config);
+spac.METEO.rad_lw = 300;
+
+@info "RAD > 0 and LAI = 0";
+EmeraldLand.SPAC.update!(spac, config; lai = 0);
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);
+
+@info "RAD > 0 and LAI > 0";
+EmeraldLand.SPAC.update!(spac, config; lai = 1);
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);
+
+@info "RAD > 0 and LAI = 0";
+EmeraldLand.SPAC.update!(spac, config; lai = 0);
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);
+
+@info "RAD > 0 and LAI > 0";
+EmeraldLand.SPAC.update!(spac, config; lai = 1);
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);
+
+@info "RAD = 0 and LAI = 0";
+EmeraldLand.SPAC.update!(spac, config; lai = 0);
+spac.METEO.rad_sw.e_direct .= 0;
+spac.METEO.rad_sw.e_diffuse .= 0;
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);
+
+@info "RAD = 0 and LAI > 0";
+EmeraldLand.SPAC.update!(spac, config; lai = 1);
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);
+
+@info "RAD = 0 and LAI > 0 (SZA > 90)";
+spac.ANGLES.sza = 90;
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);
+
+@info "RAD = 0 and LAI = 0 (SZA > 90)";
+EmeraldLand.SPAC.update!(spac, config; lai = 0);
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
+show_spac_info(spac);

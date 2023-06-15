@@ -298,6 +298,7 @@ function gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
     _co2 = _ccs.MEAN[findfirst(_ccs.YEAR .== dts.year)];
 
     # create a matrix of GriddingMachine data
+    # TODO: add a step to verify the input datasets
     @tinfo "Preparing a matrix of GriddingMachine data to work on...";
     _mat_gm = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
@@ -339,10 +340,10 @@ function gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
                         "LONGITUDE"     => (_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180,
                         "MEDLYN_G1"     => nanmean(CLM5_PFTG[_ind_c3]),
                         "SOIL_COLOR"    => min(20, max(1, Int(floor(dts.s_cc[_ilon,_ilat])))),
-                        "SOIL_N"        => dts.s_n[_ilon,_ilat,:],
-                        "SOIL_α"        => dts.s_α[_ilon,_ilat,:],
-                        "SOIL_ΘR"       => dts.s_Θr[_ilon,_ilat,:],
-                        "SOIL_ΘS"       => dts.s_Θs[_ilon,_ilat,:],
+                        "SOIL_N"        => dts.s_n[_ilon,_ilat,:],  # these are nan for some sites, fix this with a better data source
+                        "SOIL_α"        => dts.s_α[_ilon,_ilat,:],  # these are nan for some sites, fix this with a better data source
+                        "SOIL_ΘR"       => dts.s_Θr[_ilon,_ilat,:], # these are nan for some sites, fix this with a better data source
+                        "SOIL_ΘS"       => dts.s_Θs[_ilon,_ilat,:], # these are nan for some sites, fix this with a better data source
                         "VCMAX25"       => [10.0],
                         "YEAR"          => dts.year,
             );

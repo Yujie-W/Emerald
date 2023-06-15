@@ -62,6 +62,7 @@ end;
 #     2023-Mar-29: prescribe longwave radiation as well
 #     2023-Apr-13: re-wire RAD_SW_REF to CACHE_CONFIG
 #     2023-Jun-15: make sure prescribed swc does not exceed the limits
+#     2023-Jun-15: make sure prescribed soil parameters are not NaN and rad is >= 0
 #
 #######################################################################################################################################################################################################
 """
@@ -94,11 +95,14 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     # update soil type information per layer
     for _i in eachindex(CACHE_SPAC.SOIL.LAYERS)
         # TODO: add a line to parameterize K_MAX
-        CACHE_SPAC.SOIL.LAYERS[_i].VC.α = gm_params["SOIL_α"][_i];
-        CACHE_SPAC.SOIL.LAYERS[_i].VC.N = gm_params["SOIL_N"][_i];
-        CACHE_SPAC.SOIL.LAYERS[_i].VC.M = 1 - 1 / CACHE_SPAC.SOIL.LAYERS[_i].VC.N;
-        CACHE_SPAC.SOIL.LAYERS[_i].VC.Θ_RES = gm_params["SOIL_ΘR"][_i];
-        CACHE_SPAC.SOIL.LAYERS[_i].VC.Θ_SAT = gm_params["SOIL_ΘS"][_i];
+        # TODO: fix these later with better data source
+        if !isnan(gm_params["SOIL_α"][_i]) && !isnan(gm_params["SOIL_N"][_i]) && !isnan(gm_params["SOIL_ΘR"][_i]) && !isnan(gm_params["SOIL_ΘS"][_i])
+            CACHE_SPAC.SOIL.LAYERS[_i].VC.α = gm_params["SOIL_α"][_i];
+            CACHE_SPAC.SOIL.LAYERS[_i].VC.N = gm_params["SOIL_N"][_i];
+            CACHE_SPAC.SOIL.LAYERS[_i].VC.M = 1 - 1 / CACHE_SPAC.SOIL.LAYERS[_i].VC.N;
+            CACHE_SPAC.SOIL.LAYERS[_i].VC.Θ_RES = gm_params["SOIL_ΘR"][_i];
+            CACHE_SPAC.SOIL.LAYERS[_i].VC.Θ_SAT = gm_params["SOIL_ΘS"][_i];
+        end;
     end;
 
     # update leaf mass per area and stomtal model
@@ -123,8 +127,8 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     # update shortwave and longwave radiation
     _in_dir = CACHE_CONFIG.RAD_SW_REF.e_direct' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
     _in_dif = CACHE_CONFIG.RAD_SW_REF.e_diffuse' * CACHE_SPAC.CANOPY.WLSET.ΔΛ / 1000;
-    CACHE_SPAC.METEO.rad_sw.e_direct  .= CACHE_CONFIG.RAD_SW_REF.e_direct  .* wd_params["RAD_DIR"] ./ _in_dir;
-    CACHE_SPAC.METEO.rad_sw.e_diffuse .= CACHE_CONFIG.RAD_SW_REF.e_diffuse .* wd_params["RAD_DIF"] ./ _in_dif;
+    CACHE_SPAC.METEO.rad_sw.e_direct  .= CACHE_CONFIG.RAD_SW_REF.e_direct  .* max(0,wd_params["RAD_DIR"]) ./ _in_dir;
+    CACHE_SPAC.METEO.rad_sw.e_diffuse .= CACHE_CONFIG.RAD_SW_REF.e_diffuse .* max(0,wd_params["RAD_DIF"]) ./ _in_dif;
     CACHE_SPAC.METEO.rad_lw = wd_params["RAD_LW"];
 
     # update solar zenith angle based on the time
