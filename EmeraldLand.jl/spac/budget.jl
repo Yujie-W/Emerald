@@ -11,6 +11,7 @@
 #     2022-Oct-22: add option t_on to enable/disable soil and leaf energy budgets
 #     2023-Mar-27: add controller for trunk and branch temperatures
 #     2023-Jun-13: add soil gas energy into soil e when computing combined cp
+#     2023-Jun-15: add judge for root connection
 #
 #######################################################################################################################################################################################################
 """
@@ -53,14 +54,14 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
 
     # make sure trunk temperatures do not change more than 1 K per time step
     _δt_4 = _δt_3;
-    if t_on
+    if t_on && spac._root_connection
         _∂T∂t = TRUNK.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.HS.v_storage));
         _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
     end;
 
     # make sure branch stem temperatures do not change more than 1 K per time step
     _δt_5 = _δt_4;
-    if t_on
+    if t_on && spac._root_connection
         for _branch in BRANCHES
             _∂T∂t = _branch.∂e∂t / (CP_L_MOL(FT) * sum(_branch.HS.v_storage));
             _δt_5 = min(1 / abs(_∂T∂t), _δt_5);
@@ -69,7 +70,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
 
     # make sure leaf temperatures do not change more than 1 K per time step
     _δt_6 = _δt_5;
-    if t_on
+    if t_on && spac._root_connection
         for _clayer in LEAVES
             _∂T∂t = _clayer.∂e∂t / (_clayer.CP * _clayer.BIO.lma * 10 + CP_L_MOL(FT) * _clayer.HS.v_storage);
             _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
@@ -78,11 +79,13 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_
 
     # make sure leaf stomatal conductances do not change more than 0.01 mol m⁻² s⁻¹
     _δt_7 = _δt_6;
-    for _clayer in LEAVES
-        for _∂g∂t in _clayer.∂g∂t_sunlit
-            _δt_7 = min(FT(0.06) / abs(_∂g∂t), _δt_7);
+    if spac._root_connection
+        for _clayer in LEAVES
+            for _∂g∂t in _clayer.∂g∂t_sunlit
+                _δt_7 = min(FT(0.06) / abs(_∂g∂t), _δt_7);
+            end;
+            _δt_7 = min(FT(0.06) / abs(_clayer.∂g∂t_shaded), _δt_7);
         end;
-        _δt_7 = min(FT(0.06) / abs(_clayer.∂g∂t_shaded), _δt_7);
     end;
 
     return (_δt_7, _δt_6, _δt_5, _δt_4, _δt_3, _δt_2, _δt_1)
@@ -102,6 +105,7 @@ end
 #     2023-Apr-13: add config to function call to steady state function
 #     2023-Apr-13: sw and lw radiation moved to METEO
 #     2023-Jun-13: add config to parameter list
+#     2023-Jun-15: add judge for root connection
 #
 #######################################################################################################################################################################################################
 """
@@ -133,21 +137,27 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Numb
         _δt = _δts[1];
 
         # run the budgets for all ∂x∂t
-        if θ_on soil_budget!(spac, _δt); end;
-        stomatal_conductance!(spac, _δt);
-        if t_on plant_energy!(spac, _δt); end;
-        if p_on xylem_flow_profile!(spac, _δt); end;
+        θ_on ? soil_budget!(spac, _δt) : nothing;
+        if spac._root_connection
+            stomatal_conductance!(spac, _δt);
+            t_on ? plant_energy!(spac, _δt) : nothing;
+            p_on ? xylem_flow_profile!(spac, _δt) : nothing;
+        end;
 
         _t_res -= _δt;
 
         # if _t_res > 0 rerun the budget functions (shortwave radiation not included) and etc., else break
         if _t_res > 0
-            if t_on longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL); end;
-            if p_on xylem_pressure_profile!(spac; update = update); end;
-            leaf_photosynthesis!(spac, GCO₂Mode());
-            if θ_on soil_budget!(spac, config); end;
-            stomatal_conductance!(spac);
-            if t_on plant_energy!(spac); end;
+            t_on ? longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL) : nothing;
+            if spac._root_connection
+                p_on ? xylem_pressure_profile!(spac; update = update) : nothing;
+                leaf_photosynthesis!(spac, GCO₂Mode());
+            end;
+            θ_on ? soil_budget!(spac, config) : nothing;
+            if spac._root_connection
+                stomatal_conductance!(spac);
+                t_on ? plant_energy!(spac) : nothing;
+            end;
         else
             break;
         end;
@@ -171,11 +181,15 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
     while true
         # compute the dxdt (not shortwave radiation simulation)
         longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
-        xylem_pressure_profile!(spac; update = update);
-        leaf_photosynthesis!(spac, GCO₂Mode());
+        if spac._root_connection
+            xylem_pressure_profile!(spac; update = update);
+            leaf_photosynthesis!(spac, GCO₂Mode());
+        end;
         soil_budget!(spac, config);
-        stomatal_conductance!(spac);
-        plant_energy!(spac);
+        if spac._root_connection
+            stomatal_conductance!(spac);
+            plant_energy!(spac);
+        end;
 
         # determine whether to break the while loop
         _gpp = GPP(spac);
@@ -190,9 +204,11 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
         _δt = _δts[1];
 
         # run the budgets for all ∂x∂t (except for soil)
-        stomatal_conductance!(spac, _δt);
-        plant_energy!(spac, _δt);
-        xylem_flow_profile!(spac, _δt);
+        if spac._root_connection
+            stomatal_conductance!(spac, _δt);
+            plant_energy!(spac, _δt);
+            xylem_flow_profile!(spac, _δt);
+        end;
     end;
 
     # run canopy fluorescence

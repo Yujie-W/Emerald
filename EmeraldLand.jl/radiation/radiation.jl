@@ -187,6 +187,7 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAl
 #     2023-Apr-13: rename option APAR_car to apar_car
 #     2023-Apr-13: name the method to shortwave_radiation! to be more specific
 #     2023-May-19: use δlai per canopy layer
+#     2023-Jun-15: compute PAR when lai = 0
 # Bug fixes
 #     2022-Jul-15: sum by r_net_sw by the weights of sunlit and shaded fractions
 #     2022-Jul-27: use _ρ_dd, _ρ_sd, _τ_dd, and _τ_sd for leaf energy absorption (typo when refactoring the code)
@@ -221,6 +222,12 @@ shortwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         RADIATION.e_v[:,end] .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
         RADIATION.e_o .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1) ./ FT(pi);
         RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
+
+        RADIATION._par_shaded .= photon.(WLSET.Λ_PAR, view(rad.e_diffuse,WLSET.IΛ_PAR)) .* 1000;
+        RADIATION._par_sunlit .= photon.(WLSET.Λ_PAR, view(rad.e_direct ,WLSET.IΛ_PAR)) .* 1000;
+        RADIATION.par_in_diffuse = RADIATION._par_shaded' * WLSET.ΔΛ_PAR;
+        RADIATION.par_in_direct = RADIATION._par_sunlit' * WLSET.ΔΛ_PAR;
+        RADIATION.par_in = RADIATION.par_in_diffuse + RADIATION.par_in_direct;
 
         return nothing
     end;
@@ -550,6 +557,7 @@ function canopy_radiation! end
 #     2022-Jul-28: update soil albedo at the very first step
 #     2023-Mar-11: run canopy optical properties and shortwave radiation only if solar zenith angle is lower than 89
 #     2023-Apr-13: sw and lw radiation moved to METEO
+#     2023-Jun-15: set albedo to NaN when sza >= 90
 #
 #######################################################################################################################################################################################################
 """
@@ -580,6 +588,9 @@ canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where
         CANOPY.RADIATION.par_sunlit .= 0;
         CANOPY.RADIATION.apar_shaded .= 0;
         CANOPY.RADIATION.apar_sunlit .= 0;
+        CANOPY.RADIATION.e_v .= 0;
+        CANOPY.RADIATION.e_o .= 0;
+        CANOPY.RADIATION.albedo .= NaN;
 
         for _i in 1:DIM_LAYER
             # PPAR for leaves

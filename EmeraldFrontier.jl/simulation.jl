@@ -83,8 +83,7 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     end;
 
     # update clumping index
-    spac.CANOPY.ci = _df_cli;
-    spac.CANOPY.Ω_A = _df_cli;
+    update!(spac, config; ci = _df_cli);
 
     # update environmental conditions
     for _alayer in spac.AIR

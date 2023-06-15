@@ -570,7 +570,8 @@ end
 #     2022-Jun-16: remove some cache variables
 #     2022-Jul-22: remove field APAR_CAR
 #     2022-Aug-30: add field LHA (moved from spac)
-#     2023-May-22: add sypport to BetaLIDF
+#     2023-May-22: add support to BetaLIDF
+#     2023-Jun-15: compute _x_bnds based on lai (add case when lai = 0)
 #
 #######################################################################################################################################################################################################
 """
@@ -653,5 +654,5 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     "Square of cosine of Θ_INCL at different azimuth angles"
     _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * _1_AZI'
     "Cache for level boundary locations"
-    _x_bnds::Vector{FT} = [0; [sum(δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai
+    _x_bnds::Vector{FT} = (lai==0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai))
 end

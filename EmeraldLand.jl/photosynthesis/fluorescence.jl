@@ -14,6 +14,7 @@
 #     2022-Mar-04: add support to sustained NPQ
 #     2022-Mar-04: use the weighted yield for photosynthesis
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
+#     2023-Jun-15: set ϕ_f and ϕ_p to 0 when ppar is 0
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
@@ -37,6 +38,13 @@ Update the rate constants and coefficients in reaction center, given
 function photosystem_coefficients! end
 
 photosystem_coefficients!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, ppar::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+    if ppar == 0
+        rc.ϕ_f = 0;
+        rc.ϕ_p = 0;
+
+        return nothing
+    end;
+
     (; F_PSI, K_D, K_F, K_PSI, K_PSII, K_U, K_X, Φ_PSI_MAX) = rc;
 
     # adapted from https://github.com/jenjohnson/johnson-berry-2021-pres/blob/main/scripts/model_fun.m
@@ -93,6 +101,13 @@ photosystem_coefficients!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCent
 );
 
 photosystem_coefficients!(psm::Union{C3VJPModel{FT}, C4VJPModel{FT}}, rc::VJPReactionCenter{FT}, ppar::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+    if ppar == 0
+        rc.ϕ_f = 0;
+        rc.ϕ_p = 0;
+
+        return nothing
+    end;
+
     (; K_0, K_A, K_B) = rc.FLM;
     (; F_PSII, K_F, K_P_MAX) = rc;
 

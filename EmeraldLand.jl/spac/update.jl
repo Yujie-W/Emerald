@@ -37,6 +37,7 @@ function update! end
 #     2023-Jun-12: fix trace gas initialization
 #     2023-Jun-13: update N₂ and O₂ based on soil water content
 #     2023-Jun-13: add soil gas energy into soil e
+#     2023-Jun-15: make sure prescribed swc does not exceed the limits
 #
 #######################################################################################################################################################################################################
 """
@@ -149,7 +150,7 @@ update!(spac::MultiLayerSPAC{FT},
     if !isnothing(lai)
         CANOPY.lai = lai;
         CANOPY.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
-        CANOPY._x_bnds = [0; [sum(CANOPY.δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai;
+        CANOPY._x_bnds = (lai ==0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(CANOPY.δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai));
         for _i in 1:DIM_LAYER
             LEAVES[_i].HS.AREA = SOIL.AREA * CANOPY.δlai[_i];
         end;
@@ -162,11 +163,11 @@ update!(spac::MultiLayerSPAC{FT},
         CANOPY.Ω_B = 0;
     end;
 
-    # prescribe soil water content
+    # prescribe soil water content (within [Θ_RES,Θ_SAT])
     if !isnothing(swcs)
         for _i in eachindex(swcs)
             _slayer = SOIL.LAYERS[_i];
-            _slayer.θ = swcs[_i];
+            _slayer.θ = max(_slayer.VC.Θ_RES + eps(FT), min(_slayer.VC.Θ_SAT - eps(FT), swcs[_i]));
             _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
             _rt = GAS_R(FT) * _slayer.t;
             _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t) * _slayer.ΔZ * _δθ / _rt;

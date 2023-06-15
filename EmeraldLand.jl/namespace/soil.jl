@@ -332,7 +332,7 @@ Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT<:AbstractFloat} <: Abstrac
     "Cache variable to store ρ_PAR and ρ_NIR (a segmented curve)"
     _ρ_sw::Vector{FT} = zeros(FT, DIM_WL)
     "Last soil moisture used to compute albedo"
-    _θ::FT = 0
+    _θ::FT = -1
 end
 
 

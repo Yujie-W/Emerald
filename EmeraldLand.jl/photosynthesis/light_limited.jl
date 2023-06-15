@@ -49,6 +49,7 @@ light_limited_rate!(psm::C3VJPModel{FT}) where {FT<:AbstractFloat} = (psm._a_j =
 #     2022-Mar-01: j_psi, η_c, and η_l from psm (temperature corrected) rather than constant Η_C and Η_L
 #     2022-Jun-27: remove ppar from input variable list
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
+#     2023-Jun-15: set a_j to 0 when j is 0 (not a quadratic function any more)
 #
 #######################################################################################################################################################################################################
 """
@@ -66,6 +67,12 @@ Update the electron transport limited photosynthetic rate in conductance mode, g
 
 """
 light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+    if psm._j_psi == 0
+        psm._a_j = 0;
+
+        return nothing
+    end;
+
     (; EFF_1, EFF_2) = psm;
 
     _eff_a = 1 - psm._η_l / psm._η_c;
@@ -92,6 +99,12 @@ light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}
 );
 
 light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+    if psm._j == 0
+        psm._a_j = 0;
+
+        return nothing
+    end;
+
     _a = psm._j;
     _b = psm._j * psm._γ_star;
     _c = psm.EFF_1;

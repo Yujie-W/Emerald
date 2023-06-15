@@ -50,7 +50,12 @@ For the details about how to use Emerald, you may look into the `test/tutorial` 
 |             | Pass water and enerby budgets             |
 |             | Scale beta based on roots with + flow     |
 |             | Add root disconnection feature (LAI => 0) |
-| 2023-04-25  | Use exp functions in radiation extinction |
+|             | Use exp functions in radiation extinction |
+|             | Use δLAI per canopy layer (still uniform) |
+|             | Add beta function type LIDF               |
+|             | Fix a bug in Verhoef LIDF (not used)      |
+|             | Add soil trace gas diffusion (e.g. H₂O)   |
+| 2023-06-14  | Run soil only RT as well in global model  |
 |||
 
 `*` for current development branch

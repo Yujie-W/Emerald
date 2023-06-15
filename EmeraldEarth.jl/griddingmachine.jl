@@ -280,6 +280,7 @@ CLM5_PFTS = ["not_vegetated",
 # Changes to this function
 # General
 #     2023-Mar-11: migrate from research repo to Emerald
+#     2023-Jun-15: add non-vegetated land in global simulations
 #
 #######################################################################################################################################################################################################
 """
@@ -327,22 +328,22 @@ function gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
         elseif dts.mask_soil[_ilon,_ilat]
             _mat_gm[_ilon,_ilat] = Dict{String,Any}(
                         "CANOPY_HEIGHT" => eps(FT),
-                        "CHLOROPHYLL"   => [eps(FT)],
-                        "CLUMPING"      => [1],
+                        "CHLOROPHYLL"   => [10.0],
+                        "CLUMPING"      => [1.0],
                         "CO2"           => _co2,
                         "ELEVATION"     => dts.t_ele[_ilon,_ilat],
                         "FT"            => FT,
-                        "LAI"           => [0],
+                        "LAI"           => [0.0],
                         "LATITUDE"      => (_ilat - 0.5) * 180 / size(dts.t_lm,2) - 90,
-                        "LMA"           => eps(FT),
+                        "LMA"           => 0.012,
                         "LONGITUDE"     => (_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180,
-                        "MEDLYN_G1"     => eps(FT),
+                        "MEDLYN_G1"     => nanmean(CLM5_PFTG[_ind_c3]),
                         "SOIL_COLOR"    => min(20, max(1, Int(floor(dts.s_cc[_ilon,_ilat])))),
                         "SOIL_N"        => dts.s_n[_ilon,_ilat,:],
                         "SOIL_α"        => dts.s_α[_ilon,_ilat,:],
                         "SOIL_ΘR"       => dts.s_Θr[_ilon,_ilat,:],
                         "SOIL_ΘS"       => dts.s_Θs[_ilon,_ilat,:],
-                        "VCMAX25"       => [eps(FT)],
+                        "VCMAX25"       => [10.0],
                         "YEAR"          => dts.year,
             );
         end;

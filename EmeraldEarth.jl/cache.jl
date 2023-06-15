@@ -5,6 +5,7 @@
 #     2023-Mar-13: add function to initialize the CACHE_SPAC
 #     2023-Mar-13: initialize CACHE_STATE at the same time
 #     2023-Mar-13: initialize CACHE_CONFIG at the same time
+#     2023-Jun-15: make sure prescribed swc does not exceed the limits
 #
 #######################################################################################################################################################################################################
 """
@@ -41,7 +42,8 @@ function initialize_cache!(FT)
         _leaves.SM = MedlynSM{FT}(G0 = 0.005, β = _bt);
     end;
 
-    # initialize the spac
+    # initialize the spac with non-saturated soil
+    update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(max(_slayer.VC.Θ_SAT - 0.02, (_slayer.VC.Θ_SAT + _slayer.VC.Θ_RES) / 2) for _slayer in CACHE_SPAC.SOIL.LAYERS));
     initialize!(CACHE_SPAC, CACHE_CONFIG);
 
     # create a state struct based on the spac
@@ -59,6 +61,7 @@ end;
 #     2023-Mar-13: add step to synchronize state variables into CACHE_SPAC
 #     2023-Mar-29: prescribe longwave radiation as well
 #     2023-Apr-13: re-wire RAD_SW_REF to CACHE_CONFIG
+#     2023-Jun-15: make sure prescribed swc does not exceed the limits
 #
 #######################################################################################################################################################################################################
 """
@@ -130,6 +133,8 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     # prescribe soil water content
     if "SWC" in keys(wd_params)
         update!(CACHE_SPAC, CACHE_CONFIG; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
+        # TODO: remove this when soil diffusion problem is fixed
+        update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(min(_slayer.VC.Θ_SAT - 0.001, _slayer.θ) for _slayer in CACHE_SPAC.SOIL.LAYERS));
     end;
 
     # synchronize the state if state is not nothing, otherwise set all values to NaN (do thing before prescribing T_SKIN)
@@ -155,9 +160,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     _vcm = griddingmachine_data(gm_params["VCMAX25"], gm_params["YEAR"], _iday);
 
     # update clumping index, LAI, Vcmax, and Chl
-    CACHE_SPAC.CANOPY.ci = _cli;
-    CACHE_SPAC.CANOPY.Ω_A = _cli;
-    update!(CACHE_SPAC, CACHE_CONFIG; cab = _chl, car = _chl / 7, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
+    update!(CACHE_SPAC, CACHE_CONFIG; cab = _chl, car = _chl / 7, ci = _cli, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
 
     return nothing
 end

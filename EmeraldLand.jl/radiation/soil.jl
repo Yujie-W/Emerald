@@ -30,6 +30,7 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #     2022-Jun-14: add method to update broadband or hyperspectral soil albedo
 #     2022-Jul-27: use albedo.α_CLM from ClimaCache v1.1.1, and remove option clm
 #     2022-Jul-27: add albedo._θ control to HyperspectralSoilAlbedo method (fitting required)
+#     2023-Jun-15: make albedo._θ control judge to 0.001
 #
 #######################################################################################################################################################################################################
 """
@@ -71,8 +72,8 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::Hyperspectr
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
-    # if the change of swc is lower than 0.01, do nothing
-    if abs(LAYERS[1].θ - albedo._θ) < 0.01
+    # if the change of swc is lower than 0.001, do nothing
+    if abs(LAYERS[1].θ - albedo._θ) < 0.001
         return nothing
     end;
 

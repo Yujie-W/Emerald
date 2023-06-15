@@ -14,6 +14,7 @@
 #     2023-Mar-28: run PlantHydraulics as the first step
 #     2023-Apr-08: set runoff to 0 at the beginning of each time interval
 #     2023-Apr-13: add config to function call
+#     2023-Jun-15: add judge for root connection (avoid a bug in non-vegetated land)
 #
 #######################################################################################################################################################################################################
 """
@@ -70,18 +71,16 @@ soil_plant_air_continuum!(
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
-    if !spac._root_connection
-        update!(spac, config; lai = 0);
-
-        return nothing
-    end;
+    spac._root_connection ? nothing : update!(spac, config; lai = 0);
 
     # 2. run canopy RT
     canopy_radiation!(spac, config);
 
     # 3. run photosynthesis model
-    stomatal_conductance_profile!(spac);
-    leaf_photosynthesis!(spac, GCO₂Mode());
+    if spac._root_connection
+        stomatal_conductance_profile!(spac);
+        leaf_photosynthesis!(spac, GCO₂Mode());
+    end;
 
     # 4. run canopy fluorescence
     canopy_fluorescence!(spac, config);
@@ -92,10 +91,11 @@ soil_plant_air_continuum!(
     soil_budget!(spac, config);
 
     # 6. run leaf stomatal conductance budget
-    stomatal_conductance!(spac);
-
     # 7. run plant energy budget
-    plant_energy!(spac);
+    if spac._root_connection
+        stomatal_conductance!(spac);
+        plant_energy!(spac);
+    end;
 
     # 8. update the prognostic variables
     time_stepper!(spac, config, δt; p_on = p_on, t_on = t_on, update = update, θ_on = θ_on);
@@ -112,11 +112,7 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
-    if !spac._root_connection
-        update!(spac, config; lai = 0);
-
-        return nothing
-    end;
+    spac._root_connection ? nothing : update!(spac, config; lai = 0);
 
     # 2. run canopy RT
     canopy_radiation!(spac, config);
