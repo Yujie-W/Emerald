@@ -83,13 +83,13 @@ function show_spac_info(node)
     csif = EmeraldLand.SPAC.ΣSIF(spac);
     etr = EmeraldLand.SPAC.ΣETR(spac);
     gpp = EmeraldLand.SPAC.GPP(spac);
-    ndvi = EmeraldLand.CanopyOptics.MODIS_NDVI(node.CANOPY);
-    evi = EmeraldLand.CanopyOptics.MODIS_EVI(node.CANOPY);
-    nirv = EmeraldLand.CanopyOptics.MODIS_NIRv(node.CANOPY);
-    sifs = (EmeraldLand.CanopyOptics.TROPOMI_SIF683(node.CANOPY),
-            EmeraldLand.CanopyOptics.TROPOMI_SIF740(node.CANOPY),
-            EmeraldLand.CanopyOptics.OCO2_SIF759(node.CANOPY),
-            EmeraldLand.CanopyOptics.OCO2_SIF770(node.CANOPY));
+    ndvi = EmeraldLand.CanopyOptics.MODIS_NDVI(node);
+    evi = EmeraldLand.CanopyOptics.MODIS_EVI(node);
+    nirv = EmeraldLand.CanopyOptics.MODIS_NIRv(node);
+    sifs = (EmeraldLand.CanopyOptics.TROPOMI_SIF683(node),
+            EmeraldLand.CanopyOptics.TROPOMI_SIF740(node),
+            EmeraldLand.CanopyOptics.OCO2_SIF759(node),
+            EmeraldLand.CanopyOptics.OCO2_SIF770(node));
     tran = EmeraldLand.SPAC.T_VEG(spac);
     @info "SPAC Details" beta par ppar csif etr gpp tran ndvi evi nirv sifs;
 end

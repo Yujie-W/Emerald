@@ -32,16 +32,16 @@ spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<
     state.csif = ΣSIF(spac);
     state.etr = ΣETR(spac);
     state.gpp = GPP(spac);
-    state.modis_evi = MODIS_EVI(CANOPY);
-    state.modis_ndvi = MODIS_NDVI(CANOPY);
-    state.modis_nirv = MODIS_NIRv(CANOPY);
-    state.oco_sif₇₅₉ = OCO2_SIF759(CANOPY);
-    state.oco_sif₇₇₀ = OCO2_SIF770(CANOPY);
+    state.modis_evi = MODIS_EVI(spac);
+    state.modis_ndvi = MODIS_NDVI(spac);
+    state.modis_nirv = MODIS_NIRv(spac);
+    state.oco_sif₇₅₉ = OCO2_SIF759(spac);
+    state.oco_sif₇₇₀ = OCO2_SIF770(spac);
     state.par = spac.CANOPY.RADIATION.par_in;
     state.ppar = PPAR(spac);
     state.transpiration = T_VEG(spac);
-    state.tropomi_sif₆₈₃ = TROPOMI_SIF683(CANOPY);
-    state.tropomi_sif₇₄₀ = TROPOMI_SIF740(CANOPY);
+    state.tropomi_sif₆₈₃ = TROPOMI_SIF683(spac);
+    state.tropomi_sif₇₄₀ = TROPOMI_SIF740(spac);
 
     return nothing
 );
