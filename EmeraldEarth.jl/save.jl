@@ -4,19 +4,25 @@
 # General
 #     2023-Mar-14: add function to save result per time step
 #     2023-Jun-15: save more data in the netcdf file
+#     2023-Jun-15: add option to display process information
 #
 #######################################################################################################################################################################################################
 """
 
-    save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number) where {FT<:AbstractFloat}
+    save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT<:AbstractFloat}
 
 Save the simulation results to netcdf file, given
 - `filename` Path of the netcdf file
 - `states` Matrix of states (including outputs to save)
 - `doy` Day of year as a float
+- `displaying` Whether to display information regarding process
 
 """
-function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number) where {FT<:AbstractFloat}
+function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT<:AbstractFloat}
+    if displaying
+        @tinfo "Saving the simulation results to netcdf file...";
+    end;
+
     # read results from matrix of states
     @inline get_value(state::Union{Nothing,MultiLayerSPACState}, fn::Symbol) = (
         return isnothing(state) ? NaN32 : Float32(getfield(state, fn));

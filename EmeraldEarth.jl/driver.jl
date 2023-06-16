@@ -88,26 +88,31 @@ end
 #     2023-Mar-13: add function to read weather driver per grid
 #     2023-Mar-13: add method to read weather driver per grid from preloaded drivers
 #     2023-Mar-29: prescribe longwave radiation as well
+#     2023-Jun-15: add option to display process information
 #
 #######################################################################################################################################################################################################
 """
 
-    wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
-    wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+    wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; displaying::Bool = true, leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
+    wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; displaying::Bool = true, leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat}
 
 Prepare a matrix of weather driver data to feed SPAC, given
 - `dts` `LandDatasets` from GriddingMachine
 - `wd` `ERA5SingleLevelsDriver` weather driver or preloaded dictionary
 - `ind` Index of data within a year
+- `displaying` Whether to display information regarding process
 - `leaf` Whether to prescribe leaf temperature from skin temperature, default is true
 - `soil` Whether to prescribe soil water and temperature conditions, default is true
 
 """
 function wd_grids end
 
-wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
+wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; displaying::Bool = true, leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
+    if displaying
+        @tinfo "Preparing a matrix of weather driver data to work on...";
+    end;
+
     # create a matrix of GriddingMachine data
-    @tinfo "Preparing a matrix of weather driver data to work on...";
     _mat_wd = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
 
     # prescribe air layer environments and radiation
@@ -171,9 +176,12 @@ wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; leaf::Bool
     return _mat_wd
 );
 
-wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
+wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; displaying::Bool = true, leaf::Bool = true, soil::Bool = true) where {FT<:AbstractFloat} = (
+    if displaying
+        @tinfo "Preparing a matrix of weather driver data to work on...";
+    end;
+
     # create a matrix of GriddingMachine data
-    @tinfo "Preparing a matrix of weather driver data to work on...";
     _mat_wd = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
 
     # prescribe air layer environments and radiation
@@ -207,8 +215,8 @@ wd_grids(dts::LandDatasets{FT}, wd::Dict{String,Any}, ind::Int; leaf::Bool = tru
     # prescribe leaf temperature from skin temperature
     if leaf
         for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-            if dts.mask_spac[_ilon,_ilat]
-                _mat_wd[_ilon,_ilat]["T_SKIN"] = max(wd["T_AIR"][_ilon,_ilat], wd["T_SKIN"][_ilon,_ilat]);
+            if dts.mask_spac[_ilon,_ilat] || dts.mask_soil[_ilon,_ilat]
+                _mat_wd[_ilon,_ilat]["T_SKIN"] = max(wd["T_AIR"][_ilon,_ilat,ind], wd["T_SKIN"][_ilon,_ilat,ind]);
             end;
         end;
     end;
