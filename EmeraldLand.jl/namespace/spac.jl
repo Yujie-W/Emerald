@@ -108,6 +108,7 @@ end
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF to SPACConfiguration
 #     2023-Apr-13: move RAD_LW and RAD_SW to Meteorology
 #     2023-Apr-26: use a constructor rather than @kwdef
+#     2023-Jun-16: remove fields DIM_*
 #
 #######################################################################################################################################################################################################
 """
@@ -122,14 +123,6 @@ $(TYPEDFIELDS)
 
 """
 mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
-    # dimensions
-    "Dimension of air layers"
-    DIM_AIR::Int
-    "Dimension of canopy layers"
-    DIM_LAYER::Int
-    "Dimension of root layers"
-    DIM_ROOT::Int
-
     # Geometry information
     "Corresponding air layer per canopy layer"
     LEAVES_INDEX::Vector{Int}
@@ -194,37 +187,34 @@ MultiLayerSPAC(
 ) where {FT<:AbstractFloat} = (
     _mask_air = findall(zs[2] .< air_bounds .< zs[3]);
     _mask_soil = findall(zs[1] .< soil_bounds .< 0);
-    _dim_air = length(air_bounds) - 1;
-    _dim_layer = length(_mask_air) + 1;
-    _dim_root = length(_mask_soil) + 1;
-    _dim_soil = length(soil_bounds) - 1;
-    _ind_layer = _dim_layer > 1 ? [findfirst(zs[2] .< air_bounds .< zs[3])[1] - 1; _mask_air] : _mask_air;
-    _ind_root = _dim_root > 1 ? [findfirst(zs[1] .< soil_bounds .< 0) - 1; _mask_soil] : _mask_soil;
+    config.DIM_AIR = length(air_bounds) - 1;
+    config.DIM_LAYER = length(_mask_air) + 1;
+    config.DIM_ROOT = length(_mask_soil) + 1;
+    config.DIM_SOIL = length(soil_bounds) - 1;
+    _ind_layer = config.DIM_LAYER > 1 ? [findfirst(zs[2] .< air_bounds .< zs[3])[1] - 1; _mask_air] : _mask_air;
+    _ind_root = config.DIM_ROOT > 1 ? [findfirst(zs[1] .< soil_bounds .< 0) - 1; _mask_soil] : _mask_soil;
 
     _air_layers = AirLayer{FT}[
         AirLayer{FT}(
             Z = (air_bounds[_i] + air_bounds[_i+1]) / 2,
             ΔZ = (air_bounds[_i+1] - air_bounds[_i])
-        ) for _i in 1:_dim_air];
+        ) for _i in 1:config.DIM_AIR];
     _branches = Stem{FT}[
         Stem{FT}(
             HS = StemHydraulics{FT}(
-                AREA = basal_area / _dim_layer,
+                AREA = basal_area / config.DIM_LAYER,
                 ΔH = (min(zs[3], air_bounds[_ind_layer[_i]+1]) - air_bounds[_ind_layer[_i]])
             )
-        ) for _i in 1:_dim_layer];
+        ) for _i in 1:config.DIM_LAYER];
     _roots = Root{FT}[
         Root{FT}(
             HS = RootHydraulics{FT}(
-                AREA = basal_area / _dim_root,
+                AREA = basal_area / config.DIM_ROOT,
                 ΔH = (soil_bounds[_ind_root[_i]] - max(zs[1], soil_bounds[_ind_root[_i]+1]))
             )
-        ) for _i in 1:_dim_root];
+        ) for _i in 1:config.DIM_ROOT];
 
     return MultiLayerSPAC{FT}(
-                _dim_air,                                                                   # DIM_AIR
-                _dim_layer,                                                                 # DIM_LAYER
-                _dim_root,                                                                  # DIM_ROOT
                 _ind_layer,                                                                 # LEAVES_INDEX
                 _ind_root,                                                                  # ROOTS_INDEX
                 zs,                                                                         # Z
@@ -236,15 +226,15 @@ MultiLayerSPAC(
                 SunSensorGeometry{FT}(),                                                    # ANGLES
                 _branches,                                                                  # BRANCHES
                 HyperspectralMLCanopy(config),                                              # CANOPY
-                Leaves2D{FT}[Leaves2D{FT}() for _i in 1:_dim_layer],                        # LEAVES
+                Leaves2D{FT}[Leaves2D(config) for _i in 1:config.DIM_LAYER],                # LEAVES
                 SPACMemory{FT}(),                                                           # MEMORY
                 Meteorology{FT}(),                                                          # METEO
                 _roots,                                                                     # ROOTS
-                Soil{FT}(DIM_SOIL = _dim_soil, AREA = ground_area, ZS = soil_bounds),       # SOIL
+                Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),         # SOIL
                 Stem{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])),   # TRUNK
-                zeros(FT, _dim_root),                                                       # _fs
-                zeros(FT, _dim_root),                                                       # _ks
-                zeros(FT, _dim_root),                                                       # _ps
+                zeros(FT, config.DIM_ROOT),                                                 # _fs
+                zeros(FT, config.DIM_ROOT),                                                 # _ks
+                zeros(FT, config.DIM_ROOT),                                                 # _ps
                 true,                                                                       # _root_connection
     )
 );
@@ -309,10 +299,10 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
 end
 
 MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, LEAVES) = spac;
+    (; LEAVES) = spac;
 
-    _gs_sunlit = zeros(FT, LEAVES[1].DIM_INCL, LEAVES[1].DIM_AZI, DIM_LAYER);
-    for _i in 1:DIM_LAYER
+    _gs_sunlit = zeros(FT, size(LEAVES[1].g_H₂O_s_sunlit,1), size(LEAVES[1].g_H₂O_s_sunlit,2), length(LEAVES));
+    for _i in eachindex(LEAVES)
         _gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
     end;
 

@@ -7,6 +7,7 @@
 #     2023-Apr-13: move APAR_CAR from leaf structs
 #     2023-Jun-13: add trace gasses as fields
 #     2023-Jun-16: move field WLSET from HyperspectralMLCanopy
+#     2023-Jun-16: move all fields DIM_* to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -25,6 +26,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
 
     # Dimensions
+    "Dimension of air layers"
+    DIM_AIR::Int = 20
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
     "Dimension of inclination angles"
@@ -33,12 +36,16 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_LAYER::Int = 12
     "Number of wavelength bins for NIR"
     DIM_NIR::Int = length(WLSET.IΛ_NIR)
+    "Dimension of root layers"
+    DIM_ROOT::Int = 5
     "Number of wavelength bins for PAR"
     DIM_PAR::Int = length(WLSET.IΛ_PAR)
     "Dimension of SIF wave length bins"
     DIM_SIF::Int = length(WLSET.IΛ_SIF)
     "Dimension of SIF excitation wave length bins"
     DIM_SIFE::Int = length(WLSET.IΛ_SIFE)
+    "Dimension of soil layers"
+    DIM_SOIL::Int = 4
     "Dimension of short wave length bins"
     DIM_WL::Int = length(WLSET.Λ)
 
