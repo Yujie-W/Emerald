@@ -26,6 +26,7 @@ function empirical_equation end
 #     2022-Jul-07: add method for LeuningSM
 #     2022-Jul-07: add method for MedlynSM
 #     2022-Oct-20: add a max controller to make sure vpd is at least 1 Pa
+#     2023-Jun-16: compute saturated vapor pressure based on water water potential
 # Bug fixes
 #     2022-Jul-07: add the factor 1.6 for Medlyn model
 #
@@ -64,7 +65,7 @@ empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT 
     (; P_AIR) = air;
 
     _γ_s = (typeof(PSM) <: C4VJPModel) ? 0 : PSM._γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaf.t) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + β * G1 / (1 + _vpd / D0) * leaf.a_net * FT(1e-6) / (leaf._p_CO₂_s - _γ_s) * P_AIR
 );
@@ -73,7 +74,7 @@ empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT =
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaf.t) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaf.a_net * FT(1e-6) / air.p_CO₂ * P_AIR
 );
@@ -88,6 +89,7 @@ empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT =
 #     2022-Jul-07: add method for LeuningSM using Leaves1D
 #     2022-Jul-07: add method for MedlynSM using Leaves1D
 #     2022-Oct-20: add a max controller to make sure vpd is at least 1 Pa
+#     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #
 #######################################################################################################################################################################################################
 """
@@ -124,7 +126,8 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, i
     (; P_AIR) = air;
 
     _γ_s = (typeof(leaves.PSM) <: C4VJPModel) ? 0 : leaves.PSM._γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaves.t[ind]) - air.p_H₂O);
+    _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _vpd = max(1, _p_s - air.p_H₂O);
 
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net[ind] * FT(1e-6) / (leaves._p_CO₂_s[ind] - _γ_s) * P_AIR
 );
@@ -133,7 +136,8 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, in
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaves.t[ind]) - air.p_H₂O);
+    _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _vpd = max(1, _p_s - air.p_H₂O);
 
     return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaves.a_net[ind] * FT(1e-6) / air.p_CO₂ * P_AIR
 );
@@ -148,6 +152,7 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, in
 #     2022-Jul-07: add method for LeuningSM using Leaves2D for shaded leaves
 #     2022-Jul-07: add method for MedlynSM using Leaves2D for shaded leaves
 #     2022-Oct-20: add a max controller to make sure vpd is at least 1 Pa
+#     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #
 #######################################################################################################################################################################################################
 """
@@ -183,7 +188,7 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; �
     (; P_AIR) = air;
 
     _γ_s = (typeof(leaves.PSM) <: C4VJPModel) ? 0 : leaves.PSM._γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaves.t) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net_shaded * FT(1e-6) / (leaves._p_CO₂_s_shaded - _γ_s) * P_AIR
 );
@@ -192,7 +197,7 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaves.t) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaves.a_net_shaded * FT(1e-6) / air.p_CO₂ * P_AIR
 );
@@ -207,6 +212,7 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β
 #     2022-Jul-07: add method for LeuningSM using Leaves2D for sunlit leaves
 #     2022-Jul-07: add method for MedlynSM using Leaves2D for sunlit leaves
 #     2022-Oct-20: add a max controller to make sure vpd is at least 1 Pa
+#     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #
 #######################################################################################################################################################################################################
 """
@@ -243,7 +249,7 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, i
     (; P_AIR) = air;
 
     _γ_s = (typeof(leaves.PSM) <: C4VJPModel) ? 0 : leaves.PSM._γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaves.t) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net_sunlit[ind] * FT(1e-6) / (leaves._p_CO₂_s_sunlit[ind] - _γ_s) * P_AIR
 );
@@ -252,7 +258,7 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, in
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaves.t) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaves.a_net_sunlit[ind] * FT(1e-6) / air.p_CO₂ * P_AIR
 );

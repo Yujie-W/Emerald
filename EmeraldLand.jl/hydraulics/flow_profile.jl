@@ -226,6 +226,7 @@ root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{
 #     2022-Oct-21: add a second solver to fix the case when root_pk does not work
 #     2023-Mar-28: if root is disconnected, do not update its flow profile
 #     2023-Mar-28: if no root is connected to soil, set all flow to 0
+#     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #
 #######################################################################################################################################################################################################
 """
@@ -540,7 +541,7 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
 
     # update the
     _g = 1 / (1 / LEAF.g_H₂O_s + 1 / (FT(1.35) * LEAF.g_CO₂_b));
-    _d = saturation_vapor_pressure(LEAF.t) - AIR.p_H₂O;
+    _d = saturation_vapor_pressure(LEAF.t, LEAF.HS.p_leaf * 1000000) - AIR.p_H₂O;
     _f = _g * _d / AIR.P_AIR;
     xylem_flow_profile!(LEAF.HS.FLOW, _f);
 
@@ -561,7 +562,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
         _g_sl /= length(LEAVES[_i].g_H₂O_s_sunlit);
 
         _g = _g_sh * (1 - _p_sl) + _g_sl * _p_sl;
-        _d = saturation_vapor_pressure(LEAVES[_i].t) - AIR[LEAVES_INDEX[_i]].p_H₂O;
+        _d = saturation_vapor_pressure(LEAVES[_i].t, LEAVES[_i].HS.p_leaf * 1000000) - AIR[LEAVES_INDEX[_i]].p_H₂O;
         _f = _g * _d / AIR[LEAVES_INDEX[_i]].P_AIR;
 
         xylem_flow_profile!(LEAVES[_i].HS.FLOW, _f);

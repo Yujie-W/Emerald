@@ -237,6 +237,7 @@ relative_hydraulic_conductance(vg::VanGenuchten{FT}, ψ::Bool, ψ_25::FT) where 
 #     2023-Apr-08: make runoff a cumulative value within a time interval
 #     2023-Jun-13: add trace gas diffusions
 #     2023-Jun-13: add diffusion related water and energy budgets
+#     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #
 #######################################################################################################################################################################################################
 """
@@ -398,7 +399,7 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
         end;
 
         # account for evaporation and condensation to/from the air space
-        _ps = saturation_vapor_pressure(_slayer.t);
+        _ps = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000);
         _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
         _slayer.θ += _δθ_v;
         _slayer.e += _δθ_v * ρ_H₂O(FT) * CP_L(FT) * _slayer.t;
