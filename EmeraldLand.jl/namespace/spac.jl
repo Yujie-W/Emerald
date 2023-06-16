@@ -181,7 +181,8 @@ mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
     _root_connection::Bool
 end
 
-MultiLayerSPAC{FT}(;
+MultiLayerSPAC(
+            config::SPACConfiguration{FT};
             air_bounds::Vector{<:Number} = collect(0:0.5:13),
             basal_area::Number = 1,
             elevation::Number = 32,
@@ -234,7 +235,7 @@ MultiLayerSPAC{FT}(;
                 _air_layers,                                                                # AIR
                 SunSensorGeometry{FT}(),                                                    # ANGLES
                 _branches,                                                                  # BRANCHES
-                HyperspectralMLCanopy{FT}(DIM_LAYER = _dim_layer),                          # CANOPY
+                HyperspectralMLCanopy(config),                                              # CANOPY
                 Leaves2D{FT}[Leaves2D{FT}() for _i in 1:_dim_layer],                        # LEAVES
                 SPACMemory{FT}(),                                                           # MEMORY
                 Meteorology{FT}(),                                                          # METEO

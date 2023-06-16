@@ -572,6 +572,7 @@ end
 #     2022-Aug-30: add field LHA (moved from spac)
 #     2023-May-22: add support to BetaLIDF
 #     2023-Jun-15: compute _x_bnds based on lai (add case when lai = 0)
+#     2023-Jun-16: move field WLSET to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -603,24 +604,10 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "Leaf inclination angle distribution function algorithm"
     LIDF::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
-    "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
     "Canopy optical properties"
-    OPTICS::HyperspectralMLCanopyOpticalProperty{FT} = HyperspectralMLCanopyOpticalProperty{FT}(
-                DIM_AZI = DIM_AZI,
-                DIM_INCL = DIM_INCL,
-                DIM_LAYER = DIM_LAYER,
-                DIM_SIF = WLSET.DIM_SIF,
-                DIM_SIFE = WLSET.DIM_SIFE,
-                DIM_WL = WLSET.DIM_WL)
+    OPTICS::HyperspectralMLCanopyOpticalProperty{FT}
     "Canopy radiation profiles"
-    RADIATION::HyperspectralMLCanopyRadiationProfile{FT} = HyperspectralMLCanopyRadiationProfile{FT}(
-                DIM_AZI = DIM_AZI,
-                DIM_INCL = DIM_INCL,
-                DIM_LAYER = DIM_LAYER,
-                DIM_PAR = WLSET.DIM_PAR,
-                DIM_SIF = WLSET.DIM_SIF,
-                DIM_WL = WLSET.DIM_WL)
+    RADIATION::HyperspectralMLCanopyRadiationProfile{FT}
 
     # Geometry information
     "Inclination angle distribution"
@@ -656,3 +643,11 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     "Cache for level boundary locations"
     _x_bnds::Vector{FT} = (lai==0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai))
 end
+
+HyperspectralMLCanopy(config::SPACConfiguration{FT}) where {FT} = (
+    (; DIM_AZI, DIM_INCL, DIM_LAYER, DIM_PAR, DIM_SIF, DIM_SIFE, DIM_WL) = config;
+    return HyperspectralMLCanopy{FT}(
+                OPTICS = HyperspectralMLCanopyOpticalProperty{FT}(DIM_AZI = DIM_AZI, DIM_INCL = DIM_INCL, DIM_LAYER = DIM_LAYER, DIM_SIF = DIM_SIF, DIM_SIFE = DIM_SIFE, DIM_WL = DIM_WL),
+                RADIATION = HyperspectralMLCanopyRadiationProfile{FT}(DIM_AZI = DIM_AZI, DIM_INCL = DIM_INCL, DIM_LAYER = DIM_LAYER, DIM_PAR = DIM_PAR, DIM_SIF = DIM_SIF, DIM_WL = DIM_WL)
+    )
+);

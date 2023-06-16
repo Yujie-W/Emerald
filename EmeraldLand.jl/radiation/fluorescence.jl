@@ -30,10 +30,9 @@ function canopy_fluorescence! end
 
 canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, LEAVES) = spac;
-    (; Φ_PHOTON) = config;
 
     if (ANGLES.sza < 89)
-        canopy_fluorescence!(CANOPY, LEAVES; ϕ_photon = Φ_PHOTON);
+        canopy_fluorescence!(config, CANOPY, LEAVES);
     else
         CANOPY.RADIATION.sif_obs .= 0;
     end;
@@ -41,8 +40,9 @@ canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) wh
     return nothing
 );
 
-canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}; ϕ_photon::Bool = true) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, OPTICS, P_INCL, RADIATION, WLSET) = can;
+canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
+    (; WLSET, Φ_PHOTON) = config;
+    (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
 
     if can.lai == 0
         RADIATION.sif_obs .= 0;
@@ -67,7 +67,7 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         OPTICS._tmp_vec_sife_3 .= view(RADIATION.e_diffuse_up  ,WLSET.IΛ_SIFE,_i) .* WLSET.ΔΛ_SIFE;
 
         # determine which ones to use depending on ϕ_photon
-        if ϕ_photon
+        if Φ_PHOTON
             photon!(WLSET.Λ_SIFE, OPTICS._tmp_vec_sife_1);
             photon!(WLSET.Λ_SIFE, OPTICS._tmp_vec_sife_2);
             photon!(WLSET.Λ_SIFE, OPTICS._tmp_vec_sife_3);
@@ -84,7 +84,7 @@ canopy_fluorescence!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}
         mul!(OPTICS._tmp_vec_sif_6, OPTICS._mat⁻, _e_dif_up);       # SIF component from upward diffuse light for forward (before scaling)
 
         # convert the SIF back to energy unit if ϕ_photon is true
-        if ϕ_photon
+        if Φ_PHOTON
             energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_1);
             energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_2);
             energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_3);

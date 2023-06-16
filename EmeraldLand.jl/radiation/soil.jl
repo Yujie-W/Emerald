@@ -36,17 +36,18 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 """
 
     soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
+    soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
 
 Updates lower soil boundary reflectance, given
-- `can` `HyperspectralMLCanopy` type struct
+- `config` Configurations of spac model
 - `soil` `Soil` type struct
 
 """
 function soil_albedo! end
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = soil_albedo!(can, soil, soil.ALBEDO);
+soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = soil_albedo!(config, soil, soil.ALBEDO);
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
@@ -67,8 +68,8 @@ soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::BroadbandSo
     return nothing
 );
 
-soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = can;
+soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+    (; WLSET) = config;
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 

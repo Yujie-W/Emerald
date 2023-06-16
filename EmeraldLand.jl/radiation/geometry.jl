@@ -118,16 +118,18 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeom
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat}
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat}
 
 Updates lower soil boundary reflectance, given
+- `config` Configuration for `MultiLayerSPAC`
 - `can` `HyperspectralMLCanopy` type struct
 - `albedo` `BroadbandSoilAlbedo` or `HyperspectralSoilAlbedo` type soil albedo
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; OPTICS, WLSET) = can;
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+    (; WLSET) = config;
+    (; OPTICS) = can;
 
     OPTICS.ρ_dd[WLSET.IΛ_PAR,end] .= albedo.ρ_sw[1];
     OPTICS.ρ_dd[WLSET.IΛ_NIR,end] .= albedo.ρ_sw[2];
@@ -137,7 +139,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoil
     return nothing
 );
 
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
     (; OPTICS) = can;
 
     OPTICS.ρ_dd[:,end] .= albedo.ρ_sw;
@@ -163,15 +165,16 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, albedo::Hyperspectral
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT<:AbstractFloat}
 
 Updates canopy optical properties (scattering coefficient matrices), given
+- `config` Configuration for `MultiLayerSPAC`
 - `can` `HyperspectralMLCanopy` type struct
 - `leaves` Vector of `Leaves2D`
 - `soil` Bottom soil boundary layer
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
     (; DIM_LAYER, OPTICS) = can;
     (; ALBEDO) = soil;
     @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";
@@ -184,7 +187,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves
         OPTICS.τ_lw  .= 0;
         OPTICS.τ_sd  .= 0;
         OPTICS._τ_ss .= 0;
-        canopy_optical_properties!(can, ALBEDO);
+        canopy_optical_properties!(config, can, ALBEDO);
         OPTICS.ρ_lw[end] = ALBEDO.ρ_LW;
 
         return nothing
@@ -209,7 +212,7 @@ canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves
     OPTICS._ρ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdb .* can.δlai' .* can.ci);
 
     # 3. update the effective reflectance per layer
-    canopy_optical_properties!(can, ALBEDO);
+    canopy_optical_properties!(config, can, ALBEDO);
 
     for _i in DIM_LAYER:-1:1
         _r_dd__ = view(OPTICS._ρ_dd,:,_i  );    # reflectance without correction

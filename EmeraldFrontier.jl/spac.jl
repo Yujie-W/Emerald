@@ -21,7 +21,13 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT<:AbstractFl
     _air_bounds = _Δz .* collect(0:21);
 
     # create a SPAC to work on
-    _spac = MultiLayerSPAC{FT}(air_bounds = _air_bounds, latitude = gmdict["LATITUDE"], longitude = gmdict["LONGITUDE"], soil_bounds = [0, -0.1, -0.35, -1, -3], zs = [-2, _z_canopy/2, _z_canopy]);
+    _spac = MultiLayerSPAC(
+                config;
+                air_bounds = _air_bounds,
+                latitude = gmdict["LATITUDE"],
+                longitude = gmdict["LONGITUDE"],
+                soil_bounds = [0, -0.1, -0.35, -1, -3],
+                zs = [-2, _z_canopy/2, _z_canopy]);
     _spac.SOIL.COLOR = gmdict["SOIL_COLOR"];
 
     # update soil type information per layer

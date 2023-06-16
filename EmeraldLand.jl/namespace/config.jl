@@ -6,6 +6,7 @@
 #     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
 #     2023-Apr-13: move APAR_CAR from leaf structs
 #     2023-Jun-13: add trace gasses as fields
+#     2023-Jun-16: move field WLSET from HyperspectralMLCanopy
 #
 #######################################################################################################################################################################################################
 """
@@ -20,6 +21,9 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
+    "Wave length set used to paramertize other variables"
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
+
     # Dimensions
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
@@ -27,12 +31,16 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_INCL::Int = 9
     "Dimension of canopy layers"
     DIM_LAYER::Int = 12
+    "Number of wavelength bins for NIR"
+    DIM_NIR::Int = length(WLSET.IΛ_NIR)
+    "Number of wavelength bins for PAR"
+    DIM_PAR::Int = length(WLSET.IΛ_PAR)
     "Dimension of SIF wave length bins"
-    DIM_SIF::Int = 29
+    DIM_SIF::Int = length(WLSET.IΛ_SIF)
     "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int = 45
+    DIM_SIFE::Int = length(WLSET.IΛ_SIFE)
     "Dimension of short wave length bins"
-    DIM_WL::Int = 114
+    DIM_WL::Int = length(WLSET.Λ)
 
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"

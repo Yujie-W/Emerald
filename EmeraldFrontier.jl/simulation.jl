@@ -93,8 +93,8 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     end;
 
     # update downward shortwave and longwave radiation
-    _in_dir = config.RAD_SW_REF.e_direct' * spac.CANOPY.WLSET.ΔΛ / 1000;
-    _in_dif = config.RAD_SW_REF.e_diffuse' * spac.CANOPY.WLSET.ΔΛ / 1000;
+    _in_dir = config.RAD_SW_REF.e_direct'  * config.WLSET.ΔΛ / 1000;
+    _in_dif = config.RAD_SW_REF.e_diffuse' * config.WLSET.ΔΛ / 1000;
     spac.METEO.rad_sw.e_direct  .= config.RAD_SW_REF.e_direct  .* max(0,_df_dir) ./ _in_dir;
     spac.METEO.rad_sw.e_diffuse .= config.RAD_SW_REF.e_diffuse .* max(0,_df_dif) ./ _in_dif;
     spac.METEO.rad_lw = _df_lwr;
@@ -206,19 +206,19 @@ simulation!(spac::MultiLayerSPAC{FT},
 
     # save the SIF and reflectance if there is sunlight
     if _df_dir + _df_dif >= 10
-        dfr.BLUE   = MODIS_BLUE(spac);
-        dfr.EVI    = MODIS_EVI(spac);
-        dfr.NDVI   = MODIS_NDVI(spac);
-        dfr.NIR    = MODIS_NIR(spac);
-        dfr.NIRvI  = MODIS_NIRv(spac);
-        dfr.NIRvR  = MODIS_NIRvR(spac);
+        dfr.BLUE   = MODIS_BLUE(config, spac);
+        dfr.EVI    = MODIS_EVI(config, spac);
+        dfr.NDVI   = MODIS_NDVI(config, spac);
+        dfr.NIR    = MODIS_NIR(config, spac);
+        dfr.NIRvI  = MODIS_NIRv(config, spac);
+        dfr.NIRvR  = MODIS_NIRvR(config, spac);
         dfr.PAR    = spac.CANOPY.RADIATION.par_in;
         dfr.PPAR   = PPAR(spac);
-        dfr.RED    = MODIS_RED(spac);
-        dfr.SIF683 = TROPOMI_SIF683(spac);
-        dfr.SIF740 = TROPOMI_SIF740(spac);
-        dfr.SIF757 = OCO2_SIF759(spac);
-        dfr.SIF771 = OCO2_SIF770(spac);
+        dfr.RED    = MODIS_RED(config, spac);
+        dfr.SIF683 = TROPOMI_SIF683(config, spac);
+        dfr.SIF740 = TROPOMI_SIF740(config, spac);
+        dfr.SIF757 = OCO2_SIF759(config, spac);
+        dfr.SIF771 = OCO2_SIF770(config, spac);
     else
         dfr.BLUE   = NaN;
         dfr.EVI    = NaN;

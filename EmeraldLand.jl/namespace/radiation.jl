@@ -7,6 +7,7 @@
 #     2021-Oct-19: sort variable to prognostic and dignostic catergories
 #     2022-Jul-20: use kwdef for the constructor
 #     2022-Jul-20: add field DATASET to struct
+#     2023-Jun-16: remove fields of DIM_*
 #
 #######################################################################################################################################################################################################
 """
@@ -50,18 +51,6 @@ Base.@kwdef struct WaveLengthSet{FT<:AbstractFloat}
     IΛ_SIF::Vector{Int} = findall( WL_SIF[1] .<= Λ .<= WL_SIF[2] )
     "Indicies of Λ_SIFE in Λ"
     IΛ_SIFE::Vector{Int} = findall( WL_SIFE[1] .<= Λ .<= WL_SIFE[2] )
-
-    # Dimensions
-    "Number of wavelength bins for NIR"
-    DIM_NIR::Int = length(IΛ_NIR)
-    "Number of wavelength bins for PAR"
-    DIM_PAR::Int = length(IΛ_PAR)
-    "Number of wavelength bins for SIF"
-    DIM_SIF::Int = length(IΛ_SIF)
-    "Number of wavelength bins for SIFE"
-    DIM_SIFE::Int = length(IΛ_SIFE)
-    "Number of wavelength bins"
-    DIM_WL::Int = length(Λ)
 
     # Constants based on the ones above
     "Differential wavelength `[nm]`"

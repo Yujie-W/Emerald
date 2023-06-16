@@ -81,7 +81,7 @@ simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Uni
     for _ in 1:10
         soil_plant_air_continuum!(CACHE_SPAC, CACHE_CONFIG, 360; p_on = false, t_on = false, θ_on = false);
     end;
-    spac_state!(CACHE_SPAC, CACHE_STATE);
+    spac_state!(CACHE_CONFIG, CACHE_SPAC, CACHE_STATE);
 
     return CACHE_STATE
 );

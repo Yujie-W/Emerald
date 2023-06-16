@@ -7,17 +7,18 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<:AbstractFloat}
+    spac_state!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<:AbstractFloat}
     spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Synchronize state variables from 1st to 2nd struct, given
+- `config` SPAC configurations
 - `spac` `MultiLayerSPAC` struct for SPAC
 - `state` `MultiLayerSPACState` struct for states
 
 """
 function spac_state! end
 
-spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<:AbstractFloat} = (
+spac_state!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, DIM_LAYER, LEAVES, MEMORY) = spac;
 
     for _i in 1:DIM_LAYER
@@ -32,16 +33,16 @@ spac_state!(spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT<
     state.csif = ΣSIF(spac);
     state.etr = ΣETR(spac);
     state.gpp = GPP(spac);
-    state.modis_evi = MODIS_EVI(spac);
-    state.modis_ndvi = MODIS_NDVI(spac);
-    state.modis_nirv = MODIS_NIRv(spac);
-    state.oco_sif₇₅₉ = OCO2_SIF759(spac);
-    state.oco_sif₇₇₀ = OCO2_SIF770(spac);
+    state.modis_evi = MODIS_EVI(config, spac);
+    state.modis_ndvi = MODIS_NDVI(config, spac);
+    state.modis_nirv = MODIS_NIRv(config, spac);
+    state.oco_sif₇₅₉ = OCO2_SIF759(config, spac);
+    state.oco_sif₇₇₀ = OCO2_SIF770(config, spac);
     state.par = spac.CANOPY.RADIATION.par_in;
     state.ppar = PPAR(spac);
     state.transpiration = T_VEG(spac);
-    state.tropomi_sif₆₈₃ = TROPOMI_SIF683(spac);
-    state.tropomi_sif₇₄₀ = TROPOMI_SIF740(spac);
+    state.tropomi_sif₆₈₃ = TROPOMI_SIF683(config, spac);
+    state.tropomi_sif₇₄₀ = TROPOMI_SIF740(config, spac);
 
     return nothing
 );
