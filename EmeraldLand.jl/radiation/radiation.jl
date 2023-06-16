@@ -165,8 +165,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 );
 
 shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = config;
-    (; DIM_LAYER, RADIATION) = can;
+    (; DIM_LAYER, WLSET) = config;
+    (; RADIATION) = can;
 
     albedo.e_net_direct .= view(RADIATION.e_direct,:,DIM_LAYER+1) .* (1 .- albedo.ρ_sw);
     albedo.e_net_diffuse .= view(RADIATION.e_diffuse_down,:,DIM_LAYER+1) .* (1 .- albedo.ρ_sw);
@@ -226,8 +226,8 @@ shortwave_radiation!(
             soil::Soil{FT};
             apar_car::Bool = true
 ) where {FT<:AbstractFloat} = (
-    (; WLSET) = config;
-    (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
+    (; DIM_LAYER, WLSET) = config;
+    (; OPTICS, P_INCL, RADIATION) = can;
     (; ALBEDO) = soil;
 
     if can.lai == 0
@@ -494,8 +494,10 @@ Updates canopy radiation profiles for shortwave or longwave radiation, given
 
 """
 longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, OPTICS, RADIATION) = can;
+    (; OPTICS, RADIATION) = can;
     (; ALBEDO, LAYERS) = soil;
+
+    _nlayers = length(leaves);
 
     if can.lai == 0
         _r_lw_soil = K_STEFAN(FT) * (1 - ALBEDO.ρ_LW) * LAYERS[1].t ^ 4;
@@ -517,7 +519,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}
     # 2. account for the longwave emission from bottom to up
     RADIATION._r_emit_up[end] = _r_lw_soil;
 
-    for _i in DIM_LAYER:-1:1
+    for _i in _nlayers:-1:1
         _r__ = OPTICS._ρ_lw[_i];
         _r_j = OPTICS.ρ_lw[_i+1];
         _t__ = OPTICS._τ_lw[_i];
@@ -531,7 +533,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}
     # 3. account for the longwave emission from up to bottom
     RADIATION.r_lw_down[1] = rad;
 
-    for _i in 1:DIM_LAYER
+    for _i in 1:_nlayers
         _r_i = OPTICS.ρ_lw[_i];
         _t_i = OPTICS.τ_lw[_i];
 
@@ -542,7 +544,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}
     RADIATION.r_lw_up[end] = RADIATION.r_lw_down[end] * ALBEDO.ρ_LW + _r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
-    for _i in 1:DIM_LAYER
+    for _i in 1:_nlayers
         RADIATION.r_net_lw[_i] = (RADIATION.r_lw_down[_i] + RADIATION.r_lw_up[_i+1]) * (1 - OPTICS._ρ_lw[_i] - OPTICS._τ_lw[_i]) - 2 * RADIATION.r_lw[_i];
     end;
 
@@ -589,12 +591,12 @@ Updates canopy radiation profiles for shortwave and longwave radiation, given
 
 """
 canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
-    (; ANGLES, CANOPY, DIM_LAYER, LEAVES, METEO, SOIL) = spac;
-    (; APAR_CAR) = config;
+    (; ANGLES, CANOPY, LEAVES, METEO, SOIL) = spac;
+    (; APAR_CAR, DIM_LAYER) = config;
 
     soil_albedo!(config, SOIL);
     if ANGLES.sza < 89
-        canopy_optical_properties!(CANOPY, ANGLES);
+        canopy_optical_properties!(config, CANOPY, ANGLES);
         canopy_optical_properties!(config, CANOPY, LEAVES, SOIL);
         shortwave_radiation!(config, CANOPY, LEAVES, METEO.rad_sw, SOIL; apar_car = APAR_CAR);
     else

@@ -549,10 +549,11 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
 );
 
 xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; AIR, CANOPY, DIM_LAYER, LEAVES, LEAVES_INDEX) = spac;
+    (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
+    _nlayers = length(LEAVES);
     for _i in eachindex(LEAVES)
-        _p_sl = CANOPY.OPTICS.p_sunlit[DIM_LAYER + 1 - _i];
+        _p_sl = CANOPY.OPTICS.p_sunlit[_nlayers + 1 - _i];
 
         _g_sh = 1 / (1 /LEAVES[_i].g_H₂O_s_shaded + 1 / (FT(1.35) * LEAVES[_i].g_CO₂_b));
         _g_sl = 0;

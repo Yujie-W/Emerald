@@ -25,14 +25,16 @@ function plant_energy! end
 
 """
 
-    plant_energy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Compute the marginal energy increase in spac, given
+- `config` SPAC configurations
 - `spac` `MultiLayerSPAC` type SPAC
 
 """
-plant_energy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; AIR, BRANCHES, CANOPY, DIM_LAYER, DIM_ROOT, LEAVES, LEAVES_INDEX, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
+plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; DIM_LAYER, DIM_ROOT) = config;
+    (; AIR, BRANCHES, CANOPY, LEAVES, LEAVES_INDEX, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # loop through the roots
     TRUNK.∂e∂t = 0;
@@ -95,15 +97,17 @@ plant_energy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 
 """
 
-    plant_energy!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+    plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
 
 Compute the marginal energy increase in spac, given
+- `config` SPAC configurations
 - `spac` `MultiLayerSPAC` type SPAC
 - `δt` Time step
 
 """
-plant_energy!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
-    (; BRANCHES, DIM_LAYER, DIM_ROOT, LEAVES, ROOTS, TRUNK) = spac;
+plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
+    (; DIM_LAYER, DIM_ROOT) = config;
+    (; BRANCHES, LEAVES, ROOTS, TRUNK) = spac;
 
     # update the temperature for roots
     for _i in 1:DIM_ROOT

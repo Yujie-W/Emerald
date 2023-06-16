@@ -26,7 +26,7 @@ Return adjusted time that soil does not over saturate or drain, given
 
 """
 function adjusted_time(spac::MultiLayerSPAC{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
-    (; BRANCHES, DIM_LAYER, LEAVES, SOIL, TRUNK) = spac;
+    (; BRANCHES, LEAVES, SOIL, TRUNK) = spac;
 
     _δt_1 = δt;
 
@@ -140,7 +140,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Numb
         θ_on ? soil_budget!(spac, _δt) : nothing;
         if spac._root_connection
             stomatal_conductance!(spac, _δt);
-            t_on ? plant_energy!(spac, _δt) : nothing;
+            t_on ? plant_energy!(config, spac, _δt) : nothing;
             p_on ? xylem_flow_profile!(spac, _δt) : nothing;
         end;
 
@@ -156,7 +156,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Numb
             θ_on ? soil_budget!(spac, config) : nothing;
             if spac._root_connection
                 stomatal_conductance!(spac);
-                t_on ? plant_energy!(spac) : nothing;
+                t_on ? plant_energy!(config, spac) : nothing;
             end;
         else
             break;
@@ -188,7 +188,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
         soil_budget!(spac, config);
         if spac._root_connection
             stomatal_conductance!(spac);
-            plant_energy!(spac);
+            plant_energy!(config, spac);
         end;
 
         # determine whether to break the while loop
@@ -206,7 +206,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
         # run the budgets for all ∂x∂t (except for soil)
         if spac._root_connection
             stomatal_conductance!(spac, _δt);
-            plant_energy!(spac, _δt);
+            plant_energy!(config, spac, _δt);
             xylem_flow_profile!(spac, _δt);
         end;
     end;

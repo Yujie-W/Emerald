@@ -94,7 +94,7 @@ soil_plant_air_continuum!(
     # 7. run plant energy budget
     if spac._root_connection
         stomatal_conductance!(spac);
-        plant_energy!(spac);
+        plant_energy!(config, spac);
     end;
 
     # 8. update the prognostic variables

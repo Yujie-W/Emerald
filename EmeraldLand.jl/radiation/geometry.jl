@@ -30,15 +30,17 @@ function canopy_optical_properties! end
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
 
 Updates canopy optical properties (extinction coefficients for direct and diffuse light) based on the SAIL model, given
+- `config` SPAC configurations
 - `can` `HyperspectralMLCanopy` type struct
 - `angles` `SunSensorGeometry` type struct
 
 """
-canopy_optical_properties!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, HOT_SPOT, OPTICS, P_INCL, Θ_AZI) = can;
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
+    (; DIM_LAYER) = config;
+    (; HOT_SPOT, OPTICS, P_INCL, Θ_AZI) = can;
 
     if can.lai == 0
         return nothing
@@ -175,7 +177,8 @@ Updates canopy optical properties (scattering coefficient matrices), given
 
 """
 canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, OPTICS) = can;
+    (; DIM_LAYER) = config;
+    (; OPTICS) = can;
     (; ALBEDO) = soil;
     @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";
 

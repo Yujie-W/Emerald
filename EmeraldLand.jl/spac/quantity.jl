@@ -16,7 +16,7 @@ Return the average beta factor for
 function BETA end
 
 BETA(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, LEAVES) = spac;
+    (; LEAVES) = spac;
 
     # compute the mean beta
     _βs = 0;
@@ -24,7 +24,7 @@ BETA(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
         _βs += β_factor(_leaves.SM);
     end;
 
-    return _βs / DIM_LAYER
+    return _βs / length(LEAVES)
 );
 
 
@@ -47,11 +47,11 @@ Return the canopy net primary productivity per ground area, given
 function CNPP end
 
 CNPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
 
     # compute GPP
     _cnpp::FT = 0;
-    for _i in 1:DIM_LAYER
+    for _i in eachindex(LEAVES)
         _cnpp += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_net_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_net_shaded) * CANOPY.δlai[_i];
     end;
 
@@ -78,11 +78,11 @@ Return the gross primary productivity per ground area, given
 function GPP end
 
 GPP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
 
     # compute GPP
     _gpp::FT = 0;
-    for _i in 1:DIM_LAYER
+    for _i in eachindex(LEAVES)
         _gpp += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded) * CANOPY.δlai[_i];
     end;
 
@@ -109,11 +109,11 @@ Return the canopy integrated PPAR per ground area, given
 function PPAR end
 
 PPAR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
 
     # compute GPP
     _ppar::FT = 0;
-    for _i in 1:DIM_LAYER
+    for _i in eachindex(LEAVES)
         _ppar += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded) * CANOPY.δlai[_i];
     end;
 
@@ -140,11 +140,11 @@ Return the transpiration rate per ground area, given
 function T_VEG end
 
 T_VEG(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
 
     # compute transpiration rate
     _tran::FT = 0;
-    for _i in 1:DIM_LAYER
+    for _i in eachindex(LEAVES)
         _tran += flow_out(LEAVES[_i]) * CANOPY.δlai[_i];
     end;
 
@@ -170,11 +170,11 @@ Return the total ETR per ground area, given
 function ΣETR end
 
 ΣETR(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
 
     # compute GPP
     _Σetr::FT = 0;
-    for _i in 1:DIM_LAYER
+    for _i in eachindex(LEAVES)
         _Σetr += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].etr_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].etr_shaded) * CANOPY.δlai[_i];
     end;
 
@@ -200,11 +200,11 @@ Return the total SIF at chloroplast level (without any reabsorption) per ground 
 function ΣSIF end
 
 ΣSIF(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; CANOPY, DIM_LAYER, LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
 
     # compute GPP
     _Σsif::FT = 0;
-    for _i in 1:DIM_LAYER
+    for _i in eachindex(LEAVES)
         _Σsif += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit .* LEAVES[_i].ϕ_f_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded * LEAVES[_i].ϕ_f_shaded) *
                  CANOPY.δlai[_i];
     end;

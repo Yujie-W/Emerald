@@ -260,7 +260,7 @@ Update the marginal increase of soil water content and energy per layer, given
 """
 soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
     (; AIR, METEO, ROOTS, ROOTS_INDEX, SOIL) = spac;
-    (; TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
+    (; DIM_SOIL, TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
     LAYERS = SOIL.LAYERS;
 
     # update soil k, kd, ψ, and λ_thermal for each soil layer (0.5 for tortuosity factor)
@@ -278,7 +278,7 @@ soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<
     LAYERS[1].∂θ∂t += METEO.rain * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[1].ΔZ;
     LAYERS[1].∂e∂t += METEO.rain * CP_L_MOL(FT) * METEO.t_precip;
     LAYERS[1].∂e∂t += SOIL.ALBEDO.r_net_lw + SOIL.ALBEDO.r_net_sw;
-    for _i in 1:SOIL.DIM_SOIL-1
+    for _i in 1:DIM_SOIL-1
         SOIL._k[_i]         = 1 / (2 / LAYERS[_i].k + 2 / LAYERS[_i+1].k);
         SOIL._δψ[_i]        = LAYERS[_i].ψ - LAYERS[_i+1].ψ + ρg_MPa(FT) * (LAYERS[_i].Z - LAYERS[_i+1].Z);
         SOIL._q[_i]         = SOIL._k[_i] * SOIL._δψ[_i];
@@ -318,7 +318,7 @@ soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<
     LAYERS[1].∂n∂t[4] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_N₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_N₂  / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_N₂  / (GAS_R(FT) * AIR[1].t));
     LAYERS[1].∂n∂t[5] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_O₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_O₂  / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_O₂  / (GAS_R(FT) * AIR[1].t));
 
-    for _i in 1:SOIL.DIM_SOIL-1
+    for _i in 1:DIM_SOIL-1
         # gas diffusion
         _ratei1 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_CH₄, TRACE_AIR);
         _ratei2 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_CO₂, TRACE_AIR);

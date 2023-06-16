@@ -128,7 +128,8 @@ update!(spac::MultiLayerSPAC{FT},
         vcmax::Union{Number,Nothing} = nothing,
         vcmax_expo::Union{Number,Nothing} = nothing
 ) where {FT<:AbstractFloat} = (
-    (; CANOPY, DIM_LAYER, LEAVES, SOIL) = spac;
+    (; DIM_LAYER) = config;
+    (; CANOPY, LEAVES, SOIL) = spac;
 
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)

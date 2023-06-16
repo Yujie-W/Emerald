@@ -41,8 +41,8 @@ canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) wh
 );
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
-    (; WLSET, Φ_PHOTON) = config;
-    (; DIM_LAYER, OPTICS, P_INCL, RADIATION) = can;
+    (; DIM_LAYER, WLSET, Φ_PHOTON) = config;
+    (; OPTICS, P_INCL, RADIATION) = can;
 
     if can.lai == 0
         RADIATION.sif_obs .= 0;

@@ -7,7 +7,8 @@
     #     - Wavelength parameter set that define the wavelength bins
     #     - Hyperspectral absorption feature of leaf biophysical traits
     #     - Leaf water content in [mol m⁻²] (yes, as an input)
-    bio = EmeraldLand.Namespace.HyperspectralLeafBiophysics{FT}();
+    config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+    bio = EmeraldLand.Namespace.HyperspectralLeafBiophysics(config);
     wls = EmeraldLand.Namespace.WaveLengthSet{FT}();
     lha = EmeraldLand.Namespace.HyperspectralAbsorption{FT}();
     EmeraldLand.LeafOptics.leaf_spectra!(bio, wls, lha, FT(5));

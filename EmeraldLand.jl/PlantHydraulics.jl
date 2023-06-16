@@ -11,7 +11,7 @@ using ..Namespace: AbstractSoilVC, AbstractXylemVC, ComplexVC, LinearPVCurve, Lo
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
 using ..Namespace: Leaf, LeafHydraulics, Leaves1D, Leaves2D, NonSteadyStateFlow, Root, RootHydraulics, Soil, SoilLayer, SteadyStateFlow, Stem, StemHydraulics
-using ..Namespace: MonoElementSPAC, MultiLayerSPAC
+using ..Namespace: MonoElementSPAC, MultiLayerSPAC, SPACConfiguration
 using ..SoilHydraulics: soil_θ, soil_ψ_25
 
 import ..SoilHydraulics: relative_hydraulic_conductance

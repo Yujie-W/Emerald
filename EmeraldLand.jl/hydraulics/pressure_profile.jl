@@ -535,7 +535,9 @@ xylem_pressure_profile!(spac::MonoElementSPAC{FT}; update::Bool = true) where {F
 );
 
 xylem_pressure_profile!(spac::MultiLayerSPAC{FT}; update::Bool = true) where {FT<:AbstractFloat} = (
-    (; BRANCHES, DIM_ROOT, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
+    (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
+
+    _nroots = length(ROOTS);
 
     # update water potential from SOIL
     for _i in eachindex(ROOTS_INDEX)
@@ -556,7 +558,7 @@ xylem_pressure_profile!(spac::MultiLayerSPAC{FT}; update::Bool = true) where {FT
         xylem_pressure_profile!(_root, _slayer; update = update);
         _p_mean += _root.HS.p_dos;
     end;
-    _p_mean /= DIM_ROOT;
+    _p_mean /= _nroots;
 
     # update the profile in trunk
     TRUNK.HS.p_ups = _p_mean;
