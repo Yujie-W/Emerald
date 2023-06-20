@@ -14,6 +14,7 @@ const LAND_2021 = artifact"land_model_spectrum_V2" * "/clima_land_spectra_2021.n
 const SOIL_TEXT = read_csv("$(@__DIR__)/../data/SOIL-TEXTURE.csv");
 
 
+include("namespace/pigment.jl");
 include("namespace/radiation.jl");
 include("namespace/trace.jl");
 
@@ -24,7 +25,6 @@ include("namespace/colimit.jl");
 include("namespace/geometry.jl");
 include("namespace/kinetics.jl");
 include("namespace/meteorology.jl");
-include("namespace/pigment.jl");
 include("namespace/soil.jl");
 include("namespace/stomata.jl");
 include("namespace/xylem.jl");

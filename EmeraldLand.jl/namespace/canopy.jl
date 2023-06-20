@@ -684,6 +684,7 @@ BroadbandSLCanopy(config::SPACConfiguration{FT}) where {FT} = (
 #     2023-Jun-15: compute _x_bnds based on lai (add case when lai = 0)
 #     2023-Jun-16: move field WLSET to SPACConfiguration
 #     2023-Jun-16: remove fields DIM_*
+#     2023-Jun-20: move LHA to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -703,8 +704,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     HOT_SPOT::FT = 0.05
 
     # Embedded structures
-    "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "Leaf inclination angle distribution function algorithm"
     LIDF::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
     "Canopy optical properties"

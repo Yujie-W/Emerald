@@ -303,6 +303,7 @@ leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_p
 # General
 #     2022-Jun-29: add method for MultiLayerSPAC
 #     2023-Apr-13: add config to function call
+#     2023-Jun-20: move LHA to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -315,11 +316,11 @@ Update leaf reflectance and transmittance for SPAC, given
 
 """
 leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
-    (; APAR_CAR, WLSET) = config;
-    (; CANOPY, LEAVES) = spac;
+    (; APAR_CAR, LHA, WLSET) = config;
+    (; LEAVES) = spac;
 
     for _leaf in LEAVES
-        leaf_spectra!(_leaf.BIO, WLSET, CANOPY.LHA, _leaf.HS.v_storage; apar_car = APAR_CAR);
+        leaf_spectra!(_leaf.BIO, WLSET, LHA, _leaf.HS.v_storage; apar_car = APAR_CAR);
     end;
 
     return nothing

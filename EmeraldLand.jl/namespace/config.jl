@@ -8,6 +8,7 @@
 #     2023-Jun-13: add trace gasses as fields
 #     2023-Jun-16: move field WLSET from HyperspectralMLCanopy
 #     2023-Jun-16: move all fields DIM_* to SPACConfiguration
+#     2023-Jun-20: move LHA from SPAC canopy
 #
 #######################################################################################################################################################################################################
 """
@@ -56,6 +57,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     Φ_PHOTON::Bool = true
 
     # Embedded structures
+    "Hyperspectral absorption features of different leaf components"
+    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
 
