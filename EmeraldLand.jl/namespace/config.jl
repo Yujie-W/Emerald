@@ -10,6 +10,7 @@
 #     2023-Jun-16: move all fields DIM_* to SPACConfiguration
 #     2023-Jun-20: move LHA from SPAC canopy
 #     2023-Jun-20: move fields Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, and _COS²_Θ_INCL_AZI from spac canopy
+#     2023-Jun-20: move fields α_CLM, α_FITTING, and MAT_ρ from soil albedo
 #
 #######################################################################################################################################################################################################
 """
@@ -24,8 +25,13 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
+    # File path to the Netcdf dataset
+    "File path to the Netcdf dataset"
+    DATASET::String = LAND_2021
+
+    # WaveLengthSet
     "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}()
+    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET = DATASET)
 
     # Dimensions
     "Dimension of air layers"
@@ -54,12 +60,18 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
     APAR_CAR::Bool = true
+    "Whether to use CLM soil albedo scheme"
+    α_CLM::Bool = false
+    "Whether to fit the data from broadband to hyperspectral"
+    α_FITTING::Bool = true
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
 
     # Embedded structures
     "Hyperspectral absorption features of different leaf components"
     LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
+    "A matrix of characteristic curves"
+    MAT_ρ::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
 

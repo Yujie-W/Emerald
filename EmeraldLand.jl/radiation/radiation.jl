@@ -191,6 +191,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 #     2023-Apr-13: name the method to shortwave_radiation! to be more specific
 #     2023-May-19: use δlai per canopy layer
 #     2023-Jun-15: compute PAR when lai = 0
+#     2023-Jun-20: remove option apar_car as it is already in config
 # Bug fixes
 #     2022-Jul-15: sum by r_net_sw by the weights of sunlit and shaded fractions
 #     2022-Jul-27: use _ρ_dd, _ρ_sd, _τ_dd, and _τ_sd for leaf energy absorption (typo when refactoring the code)
@@ -200,14 +201,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(
-                config::SPACConfiguration{FT},
-                can::HyperspectralMLCanopy{FT},
-                leaves::Vector{Leaves2D{FT}},
-                rad::HyperspectralRadiation{FT},
-                soil::Soil{FT};
-                apar_car::Bool = true
-    ) where {FT<:AbstractFloat}
+    shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
 
 Updates canopy radiation profiles for shortwave radiation, given
 - `config` Configuration for `MultiLayerSPAC`
@@ -215,18 +209,10 @@ Updates canopy radiation profiles for shortwave radiation, given
 - `leaves` Vector of `Leaves2D`
 - `rad` Incoming shortwave radiation
 - `soil` Bottom soil boundary layer
-- `apar_car` Whether carotenoid absorption is counted in PPAR, default is true
 
 """
-shortwave_radiation!(
-            config::SPACConfiguration{FT},
-            can::HyperspectralMLCanopy{FT},
-            leaves::Vector{Leaves2D{FT}},
-            rad::HyperspectralRadiation{FT},
-            soil::Soil{FT};
-            apar_car::Bool = true
-) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, WLSET) = config;
+shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+    (; APAR_CAR, DIM_LAYER, WLSET) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
     (; ALBEDO) = soil;
 
@@ -344,7 +330,7 @@ shortwave_radiation!(
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
     for _i in 1:DIM_LAYER
-        _α_apar = apar_car ? view(leaves[_i].BIO.α_cabcar,WLSET.IΛ_PAR) : view(leaves[_i].BIO.α_cab,WLSET.IΛ_PAR);
+        _α_apar = APAR_CAR ? view(leaves[_i].BIO.α_cabcar,WLSET.IΛ_PAR) : view(leaves[_i].BIO.α_cab,WLSET.IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(WLSET.Λ_PAR, view(RADIATION.e_sum_diffuse,WLSET.IΛ_PAR,_i)) .* 1000;
@@ -592,13 +578,13 @@ Updates canopy radiation profiles for shortwave and longwave radiation, given
 """
 canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, LEAVES, METEO, SOIL) = spac;
-    (; APAR_CAR, DIM_LAYER) = config;
+    (; DIM_LAYER) = config;
 
     soil_albedo!(config, SOIL);
     if ANGLES.sza < 89
         canopy_optical_properties!(config, CANOPY, ANGLES);
         canopy_optical_properties!(config, CANOPY, LEAVES, SOIL);
-        shortwave_radiation!(config, CANOPY, LEAVES, METEO.rad_sw, SOIL; apar_car = APAR_CAR);
+        shortwave_radiation!(config, CANOPY, LEAVES, METEO.rad_sw, SOIL);
     else
         CANOPY.RADIATION.r_net_sw .= 0;
         SOIL.ALBEDO.r_net_sw = 0;

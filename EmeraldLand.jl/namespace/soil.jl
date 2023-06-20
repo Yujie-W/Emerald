@@ -230,6 +230,7 @@ abstract type AbstractSoilAlbedo{FT<:AbstractFloat} end
 #     2022-Jun-14: add struct for broadband soil albedo
 #     2022-Jun-14: make soil albedo a two-element vector for PAR and NIR
 #     2022-Jul-27: add field α_CLM
+#     2023-Jun-20: move fields α_CLM to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -247,10 +248,6 @@ Base.@kwdef mutable struct BroadbandSoilAlbedo{FT<:AbstractFloat} <: AbstractSoi
     # Constants
     "Reflectance for longwave radiation"
     ρ_LW::FT = 0.06
-
-    # General model information
-    "Whether to use CLM soil albedo scheme"
-    α_CLM::Bool = false
 
     # Diagnostic variables
     "Net diffuse radiation at top soil `[W m⁻²]`"
@@ -277,6 +274,7 @@ end
 #     2022-Jul-22: rename Ρ (greek) to ρ
 #     2022-Jul-27: add field α_CLM, _θ
 #     2023-Jun-16: remove fields DIM_*
+#     2023-Jun-20: move fields α_CLM, α_FITTING, and MAT_ρ to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -291,19 +289,7 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct HyperspectralSoilAlbedo{FT<:AbstractFloat} <: AbstractSoilAlbedo{FT}
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
-
-    # General model information
-    "Whether to use CLM soil albedo scheme"
-    α_CLM::Bool = false
-    "Whether to fit the data from broadband to hyperspectral"
-    FITTING::Bool = true
-
     # Constants
-    "A matrix of characteristic curves"
-    MAT_ρ::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
     "Reflectance for longwave radiation"
     ρ_LW::FT = 0.06
 

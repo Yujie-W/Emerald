@@ -726,7 +726,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
 end
 
 HyperspectralMLCanopy(config::SPACConfiguration{FT}) where {FT} = (
-    (; DIM_AZI, DIM_INCL, DIM_LAYER) = config;
+    (; DIM_INCL, DIM_LAYER) = config;
 
     _lai = 3;
     _δlai = _lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;

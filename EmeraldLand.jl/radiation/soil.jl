@@ -48,11 +48,12 @@ function soil_albedo! end
 soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = soil_albedo!(config, soil, soil.ALBEDO);
 
 soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+    (; α_CLM) = config;
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
     # use CLM method
-    if albedo.α_CLM
+    if α_CLM
         _delta = max(0, FT(0.11) - FT(0.4) * LAYERS[1].θ);
         albedo.ρ_sw[1] = max(SOIL_ALBEDOS[COLOR,1], SOIL_ALBEDOS[COLOR,3] + _delta);
         albedo.ρ_sw[2] = max(SOIL_ALBEDOS[COLOR,2], SOIL_ALBEDOS[COLOR,4] + _delta);
@@ -69,7 +70,7 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::BroadbandSoi
 );
 
 soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = config;
+    (; MAT_ρ, WLSET, α_CLM, α_FITTING) = config;
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
@@ -83,14 +84,14 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::Hyperspectra
     _par::FT = SOIL_ALBEDOS[COLOR,1] * (1 - _rwc) + _rwc * SOIL_ALBEDOS[COLOR,3];
     _nir::FT = SOIL_ALBEDOS[COLOR,2] * (1 - _rwc) + _rwc * SOIL_ALBEDOS[COLOR,4];
 
-    if albedo.α_CLM
+    if α_CLM
         _delta = max(0, FT(0.11) - FT(0.4) * LAYERS[1].θ);
         _par = max(SOIL_ALBEDOS[COLOR,1], SOIL_ALBEDOS[COLOR,3] + _delta);
         _nir = max(SOIL_ALBEDOS[COLOR,2], SOIL_ALBEDOS[COLOR,4] + _delta);
     end;
 
     # if fitting is disabled, use broadband directly
-    if !albedo.FITTING
+    if !α_FITTING
         albedo.ρ_sw[WLSET.IΛ_PAR] .= _par;
         albedo.ρ_sw[WLSET.IΛ_NIR] .= _nir;
 
@@ -100,11 +101,11 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::Hyperspectra
     # make an initial guess of the weights
     albedo._ρ_sw[WLSET.IΛ_PAR] .= _par;
     albedo._ρ_sw[WLSET.IΛ_NIR] .= _nir;
-    albedo._weight .= pinv(albedo.MAT_ρ) * albedo._ρ_sw;
+    albedo._weight .= pinv(MAT_ρ) * albedo._ρ_sw;
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT<:AbstractFloat} = (
-        mul!(albedo._ρ_sw, albedo.MAT_ρ, x);
+        mul!(albedo._ρ_sw, MAT_ρ, x);
         albedo._tmp_vec_nir .= abs.(view(albedo._ρ_sw,WLSET.IΛ_NIR) .- _nir);
         _diff = ( mean( view(albedo._ρ_sw,WLSET.IΛ_PAR) ) - _par ) ^ 2 + mean( albedo._tmp_vec_nir ) ^ 2;
 
@@ -118,7 +119,7 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::Hyperspectra
     albedo._weight .= _sol;
 
     # update vectors in soil
-    mul!(albedo.ρ_sw, albedo.MAT_ρ, albedo._weight);
+    mul!(albedo.ρ_sw, MAT_ρ, albedo._weight);
 
     # update the albedo._θ to avoid calling this function too many times
     albedo._θ = LAYERS[1].θ;
