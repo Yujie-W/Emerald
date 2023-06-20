@@ -310,13 +310,14 @@ soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<
     end;
 
     # update diffusion rate among layers
+    _alayer = AIR[1];
     _factor = 2 * LAYERS[1]._kd;
     _v_gas = max(0, LAYERS[1].VC.Θ_SAT - LAYERS[1].θ);
-    LAYERS[1].∂n∂t[1] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CH₄, TRACE_AIR) * (LAYERS[1].TRACES.n_CH₄ / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_CH₄ / (GAS_R(FT) * AIR[1].t));
-    LAYERS[1].∂n∂t[2] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CO₂, TRACE_AIR) * (LAYERS[1].TRACES.n_CO₂ / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_CO₂ / (GAS_R(FT) * AIR[1].t));
-    LAYERS[1].∂n∂t[3] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_H₂O, TRACE_AIR) * (LAYERS[1].TRACES.n_H₂O / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_H₂O / (GAS_R(FT) * AIR[1].t));
-    LAYERS[1].∂n∂t[4] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_N₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_N₂  / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_N₂  / (GAS_R(FT) * AIR[1].t));
-    LAYERS[1].∂n∂t[5] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_O₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_O₂  / (LAYERS[1].ΔZ * _v_gas) - AIR[1].p_O₂  / (GAS_R(FT) * AIR[1].t));
+    LAYERS[1].∂n∂t[1] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CH₄, TRACE_AIR) * (LAYERS[1].TRACES.n_CH₄ / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_CH₄ / (GAS_R(FT) * _alayer.t));
+    LAYERS[1].∂n∂t[2] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CO₂, TRACE_AIR) * (LAYERS[1].TRACES.n_CO₂ / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_CO₂ / (GAS_R(FT) * _alayer.t));
+    LAYERS[1].∂n∂t[3] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_H₂O, TRACE_AIR) * (LAYERS[1].TRACES.n_H₂O / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_H₂O / (GAS_R(FT) * _alayer.t));
+    LAYERS[1].∂n∂t[4] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_N₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_N₂  / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_N₂  / (GAS_R(FT) * _alayer.t));
+    LAYERS[1].∂n∂t[5] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_O₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_O₂  / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_O₂  / (GAS_R(FT) * _alayer.t));
 
     for _i in 1:DIM_SOIL-1
         # gas diffusion
@@ -377,12 +378,11 @@ Run soil water and energy budget, given
 
 """
 soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
-    (; SOIL) = spac;
+    (; AIR, SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
-    # run the time step
+    # run the diffusion
     for _slayer in LAYERS
-        # run the diffusion
         _δv = _slayer.ΔZ * max(0, _slayer.VC.Θ_SAT - _slayer.θ);
         if _δv == 0
             _slayer.TRACES.n_CH₄ = 0;
@@ -397,7 +397,38 @@ soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
             _slayer.TRACES.n_N₂  += _slayer.∂n∂t[4] * δt;
             _slayer.TRACES.n_O₂  += _slayer.∂n∂t[5] * δt;
         end;
+    end;
 
+    # compute air volume change using ideal gas law (total energy change accordingly)
+    _alayer = AIR[1];
+    for _i in length(LAYERS):-1:1
+        _slayer = LAYERS[_i];
+        _n_air = (_alayer.P_AIR - saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000)) * _slayer.ΔZ / (GAS_R(FT) * _slayer.t);
+        _n_dry = _slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂;
+        _n_rat = (_n_air - _n_dry) / _n_dry;
+        _slayer.TRACES.n_CH₄ += _n_rat * _slayer.TRACES.n_CH₄;
+        _slayer.TRACES.n_CO₂ += _n_rat * _slayer.TRACES.n_CO₂;
+        _slayer.TRACES.n_N₂  += _n_rat * _slayer.TRACES.n_N₂;
+        _slayer.TRACES.n_O₂  += _n_rat * _slayer.TRACES.n_O₂;
+        _slayer.e += (_n_air - _n_dry) * CP_D_MOL(FT) * _slayer.t;
+        if _i == 1
+            _alayer.n_CH₄ -= _n_rat * _slayer.TRACES.n_CH₄;
+            _alayer.n_CO₂ -= _n_rat * _slayer.TRACES.n_CO₂;
+            _alayer.n_N₂  -= _n_rat * _slayer.TRACES.n_N₂;
+            _alayer.n_O₂  -= _n_rat * _slayer.TRACES.n_O₂;
+            _alayer.e -= (_n_air - _n_dry) * CP_D_MOL(FT) * _slayer.t;
+        else
+            _tlayer = LAYERS[_i-1];
+            _tlayer.TRACES.n_CH₄ -= _n_rat * _slayer.TRACES.n_CH₄;
+            _tlayer.TRACES.n_CO₂ -= _n_rat * _slayer.TRACES.n_CO₂;
+            _tlayer.TRACES.n_N₂  -= _n_rat * _slayer.TRACES.n_N₂;
+            _tlayer.TRACES.n_O₂  -= _n_rat * _slayer.TRACES.n_O₂;
+            _tlayer.e -= (_n_air - _n_dry) * CP_D_MOL(FT) * _slayer.t;
+        end;
+    end;
+
+    # run the water transport (condensation + mass flow)
+    for _slayer in LAYERS
         # account for evaporation and condensation to/from the air space
         _ps = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000);
         _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
