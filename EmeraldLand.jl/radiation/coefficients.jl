@@ -161,20 +161,26 @@ function extinction_scattering_coefficients! end
 #
 # Changes to this method
 # General
+#     2022-Jun-07: add function to update the extinction and scattering coefficient cache within canopy
+#     2022-Jun-07: update _Co, _Cs, _So, _Ss as well for hyperspectral canopy
 #     2022-Jun-15: add method for broadband single layer canopy
+#     2023-Jun-20: add config to parameter list
 #
 #######################################################################################################################################################################################################
 """
 
-    extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
+    extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
+    extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
 
 Update the extinction and scattering coefficients, given
-- `can` `BroadbandSLCanopy` type canopy
+- `config` SPAC configurations
+- `can` `BroadbandSLCanopy` or `HyperspectralMLCanopy` type canopy
 - `angles` `SunSensorGeometry` type angles
 
 """
-extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
-    (; P_INCL, RADIATION, Θ_INCL) = can;
+extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
+    (; Θ_INCL) = config;
+    (; P_INCL, RADIATION) = can;
 
     # the extinction coefficients for direct radiation at different inclination angles
     RADIATION._k_diffuse .= extinction_coefficient.(Θ_INCL);
@@ -187,26 +193,9 @@ extinction_scattering_coefficients!(can::BroadbandSLCanopy{FT}, angles::SunSenso
     return nothing
 );
 
-
-#######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
-#     2022-Jun-07: add function to update the extinction and scattering coefficient cache within canopy
-#     2022-Jun-07: update _Co, _Cs, _So, _Ss as well
-#
-#######################################################################################################################################################################################################
-"""
-
-    extinction_scattering_coefficients!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
-
-Update the extinction and scattering coefficients, given
-- `can` `HyperspectralMLCanopy` type canopy
-- `angles` `SunSensorGeometry` type angles
-
-"""
-extinction_scattering_coefficients!(can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
-    (; OPTICS, Θ_INCL) = can;
+extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
+    (; Θ_INCL) = config;
+    (; OPTICS) = can;
 
     for _i in eachindex(Θ_INCL)
         OPTICS._ks[_i], OPTICS._ko[_i], OPTICS._sb[_i], OPTICS._sf[_i], OPTICS._Co[_i], OPTICS._Cs[_i], OPTICS._So[_i], OPTICS._Ss[_i] =

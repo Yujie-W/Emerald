@@ -39,21 +39,21 @@ Updates canopy optical properties (extinction coefficients for direct and diffus
 
 """
 canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER) = config;
-    (; HOT_SPOT, OPTICS, P_INCL, Θ_AZI) = can;
+    (; DIM_LAYER, Θ_AZI, _1_AZI, _COS_Θ_AZI, _COS²_Θ_INCL, _COS²_Θ_INCL_AZI) = config;
+    (; HOT_SPOT, OPTICS, P_INCL) = can;
 
     if can.lai == 0
         return nothing
     end;
 
     # 1. update the canopy optical properties related to extinction and scattering coefficients
-    extinction_scattering_coefficients!(can, angles);
+    extinction_scattering_coefficients!(config, can, angles);
 
     OPTICS.ko  = P_INCL' * OPTICS._ko;
     OPTICS.ks  = P_INCL' * OPTICS._ks;
     OPTICS.sob = P_INCL' * OPTICS._sb;
     OPTICS.sof = P_INCL' * OPTICS._sf;
-    OPTICS._bf = P_INCL' * can._COS²_Θ_INCL;
+    OPTICS._bf = P_INCL' * _COS²_Θ_INCL;
 
     OPTICS.sdb = (OPTICS.ks + OPTICS._bf) / 2;
     OPTICS.sdf = (OPTICS.ks - OPTICS._bf) / 2;
@@ -64,18 +64,18 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 
     # 2. update the matrices fs and fo
     OPTICS._cos_θ_azi_raa .= cosd.(Θ_AZI .- (angles.vaa - angles.saa));
-    mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Co, can._1_AZI');
+    mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Co, _1_AZI');
     mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._So, OPTICS._cos_θ_azi_raa');
     OPTICS.fo .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(angles.vza);
     OPTICS._abs_fo .= abs.(OPTICS.fo);
 
-    mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Cs, can._1_AZI');
-    mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._Ss, can._COS_Θ_AZI');
+    mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Cs, _1_AZI');
+    mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._Ss, _COS_Θ_AZI');
     OPTICS.fs .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(angles.sza);
     OPTICS._abs_fs .= abs.(OPTICS.fs);
 
-    OPTICS._fo_cos_θ_incl .= OPTICS.fo .* can._COS²_Θ_INCL_AZI;
-    OPTICS._fs_cos_θ_incl .= OPTICS.fs .* can._COS²_Θ_INCL_AZI;
+    OPTICS._fo_cos_θ_incl .= OPTICS.fo .* _COS²_Θ_INCL_AZI;
+    OPTICS._fs_cos_θ_incl .= OPTICS.fs .* _COS²_Θ_INCL_AZI;
     OPTICS._fs_fo .= OPTICS.fs .* OPTICS.fo;
     OPTICS._abs_fs_fo .= abs.(OPTICS._fs_fo);
 

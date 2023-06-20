@@ -41,7 +41,7 @@ canopy_fluorescence!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) wh
 );
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, WLSET, Φ_PHOTON) = config;
+    (; DIM_LAYER, WLSET, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 
     if can.lai == 0
@@ -108,8 +108,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _sl_sθ = lidf_weight(_ϕ_sunlit, OPTICS._fs_cos_θ_incl);
         _sl_SO = lidf_weight(_ϕ_sunlit, OPTICS._abs_fs_fo);
         _sl_so = lidf_weight(_ϕ_sunlit, OPTICS._fs_fo);
-        _sh_θ² = lidf_weight(_ϕ_shaded, can._COS²_Θ_INCL_AZI);
-        _sl_θ² = lidf_weight(_ϕ_sunlit, can._COS²_Θ_INCL_AZI);
+        _sh_θ² = lidf_weight(_ϕ_shaded, _COS²_Θ_INCL_AZI);
+        _sl_θ² = lidf_weight(_ϕ_sunlit, _COS²_Θ_INCL_AZI);
 
         # upward and downward SIF from direct and diffuse radiation per leaf area
         RADIATION._s_shaded_up   .= OPTICS._tmp_vec_sif_3 .* _sh_1_ .+ OPTICS._tmp_vec_sif_4 .* _sh_θ² .+

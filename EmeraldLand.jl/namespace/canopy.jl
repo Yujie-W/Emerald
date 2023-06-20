@@ -615,6 +615,7 @@ abstract type AbstractCanopy{FT<:AbstractFloat} end
 #     2022-Jun-16: add fields: Θ_INCL_BNDS
 #     2023-May-22: add sypport to BetaLIDF
 #     2023-Jun-16: remove fields DIM_*
+#     2023-Jun-20: move fields Θ_INCL and Θ_INCL_BNDS to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -638,10 +639,6 @@ Base.@kwdef mutable struct BroadbandSLCanopy{FT<:AbstractFloat} <: AbstractCanop
     # Geometry information
     "Inclination angle distribution"
     P_INCL::Vector{FT}
-    "Mean inclination angles `[°]`"
-    Θ_INCL::Vector{FT}
-    "Bounds of inclination angles `[°]`"
-    Θ_INCL_BNDS::Matrix{FT}
 
     # Prognostic variables
     "Clumping index"
@@ -653,14 +650,9 @@ end
 BroadbandSLCanopy(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_INCL) = config;
 
-    _bnds = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ];
-
     return BroadbandSLCanopy{FT}(
                 RADIATION   = BroadbandSLCanopyRadiationProfile(config),
                 P_INCL      = ones(FT, DIM_INCL) ./ DIM_INCL,
-                Θ_INCL      = [ (_bnds[_i,1] + _bnds[_i,2]) / 2 for _i in 1:DIM_INCL ],
-                Θ_INCL_BNDS = _bnds,
-
     )
 );
 
@@ -685,6 +677,7 @@ BroadbandSLCanopy(config::SPACConfiguration{FT}) where {FT} = (
 #     2023-Jun-16: move field WLSET to SPACConfiguration
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Jun-20: move LHA to SPACConfiguration
+#     2023-Jun-20: move fields Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, and _COS²_Θ_INCL_AZI to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -714,12 +707,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     # Geometry information
     "Inclination angle distribution"
     P_INCL::Vector{FT}
-    "Mean azimuth angles `[°]`"
-    Θ_AZI::Vector{FT}
-    "Mean inclination angles `[°]`"
-    Θ_INCL::Vector{FT}
-    "Bounds of inclination angles `[°]`"
-    Θ_INCL_BNDS::Matrix{FT}
     "Clumping structure a"
     Ω_A::FT = 1
     "Clumping structure b"
@@ -734,14 +721,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractC
     δlai::Vector{FT}
 
     # Cache variables
-    "Ones with the length of Θ_AZI"
-    _1_AZI::Vector{FT}
-    "Cosine of Θ_AZI"
-    _COS_Θ_AZI::Vector{FT} = cosd.(Θ_AZI)
-    "Square of cosine of Θ_INCL"
-    _COS²_Θ_INCL::Vector{FT} = cosd.(Θ_INCL) .^ 2
-    "Square of cosine of Θ_INCL at different azimuth angles"
-    _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * _1_AZI'
     "Cache for level boundary locations"
     _x_bnds::Vector{FT}
 end
@@ -749,7 +728,6 @@ end
 HyperspectralMLCanopy(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_AZI, DIM_INCL, DIM_LAYER) = config;
 
-    _bnds = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ];
     _lai = 3;
     _δlai = _lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
 
@@ -757,12 +735,8 @@ HyperspectralMLCanopy(config::SPACConfiguration{FT}) where {FT} = (
                 OPTICS      = HyperspectralMLCanopyOpticalProperty(config),
                 RADIATION   = HyperspectralMLCanopyRadiationProfile(config),
                 P_INCL      = ones(FT, DIM_INCL) ./ DIM_INCL,
-                Θ_AZI       = collect(FT, range(0, 360; length=DIM_AZI+1))[1:end-1] .+ 360 / DIM_AZI / 2,
-                Θ_INCL      = [ (_bnds[_i,1] + _bnds[_i,2]) / 2 for _i in 1:DIM_INCL ],
-                Θ_INCL_BNDS = _bnds,
                 lai         = _lai,
                 δlai        = _δlai,
-                _1_AZI      = ones(FT, DIM_AZI),
                 _x_bnds     = ([0; [sum(_δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -_lai),
     )
 );
