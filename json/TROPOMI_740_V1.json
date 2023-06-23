@@ -2,8 +2,8 @@
     "GRIDDINGMACHINE": {
         "LABEL": "SIF",
         "VERSION": 1,
-        "EXTRA_LABEL": "TROPOMI_740DC",
-        "LAT_LON_RESO": 5,
+        "EXTRA_LABEL": "TROPOMI_740",
+        "LAT_LON_RESO": null,
         "YEARS": [
             2018,
             2019,
@@ -11,13 +11,23 @@
             2021,
             2022
         ],
-        "TEMPORAL_RESO": "1M"
+        "TEMPORAL_RESO": null
     },
     "OUTPUT_VAR_ATTR": {
         "about": "Gridded by Frankenberg group",
-        "long_name": "Daylength corrected solar induced chlorophyll fluorescence at 740 nm",
+        "long_name": "Solar induced chlorophyll fluorescence at 740 nm",
         "unit": "mW m⁻² nm⁻¹ sr⁻¹"
     },
+    "INPUT_STD_SETS": [
+        {
+            "INDEX_AXIS_INDEX": 1,
+            "LATITUDE_AXIS_INDEX": 3,
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 2,
+            "SCALING_FUNCTION": "",
+            "DATA_NAME": "sif_sigma"
+        }
+    ],
     "INPUT_VAR_SETS": [
         {
             "INDEX_AXIS_INDEX": 1,
@@ -25,7 +35,7 @@
             "MASKING_FUNCTION": "",
             "LONGITUDE_AXIS_INDEX": 2,
             "SCALING_FUNCTION": "",
-            "DATA_NAME": "sif_dc"
+            "DATA_NAME": "sif"
         }
     ],
     "OUTPUT_REF_ATTR": {
@@ -37,7 +47,7 @@
     },
     "INPUT_MAP_SETS": {
         "FOLDER": "/home/wyujie/GriddingMachine/original",
-        "FILE_NAME_PATTERN": "SIF_TROPOMI_740_5X_1M_XXXXXXXX_V1.nc",
+        "FILE_NAME_PATTERN": null,
         "FILE_NAME_FUNCTION": "x -> lpad(x,4,\"0\")",
         "FORMAT": "NETCDF",
         "PROJECTION": "CYLINDRICAL",

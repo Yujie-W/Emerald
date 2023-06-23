@@ -3,7 +3,7 @@
         "LABEL": "SOIL_TEXTURE",
         "VERSION": 1,
         "EXTRA_LABEL": null,
-        "LAT_LON_RESO": 1,
+        "LAT_LON_RESO": null,
         "YEARS": null,
         "TEMPORAL_RESO": "1Y"
     },
@@ -34,7 +34,7 @@
         "PROJECTION": "CYLINDRICAL",
         "VALUE_AT": true,
         "FLIP_LAT": false,
-        "FILE_NAME_PATTERN": "SOIL_TEXTURE_1X_1Y_V1.nc4",
+        "FILE_NAME_PATTERN": null,
         "FOLDER": "/home/wyujie/GriddingMachine/original",
         "FILE_NAME_FUNCTION": "",
         "COVERAGE": [
