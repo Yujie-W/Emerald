@@ -10,6 +10,10 @@ using ProgressMeter: @showprogress
 using PyCall: PyObject, pyimport
 using PyPlot: Figure, figure, rc
 
+using GriddingMachine.Blender: regrid
+using GriddingMachine.Collector: query_collection
+using GriddingMachine.Indexer: read_LUT
+
 using ..EmeraldIO.Netcdf: read_nc
 using ..EmeraldMath.Regression: linear_regress
 using ..EmeraldMath.Stats: nanmin, nanmax
@@ -17,10 +21,14 @@ using ..EmeraldMath.Stats: nanmin, nanmax
 
 PATCHES = pyimport("matplotlib.patches");
 
+LAND_MASK = nothing;
+
 
 include("animation/animation.jl");
 include("animation/data.jl");
 include("animation/netcdf.jl");
+
+include("data/land_mask.jl");
 
 include("scientific/canvas.jl");
 include("scientific/decoration.jl");
