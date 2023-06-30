@@ -1,3 +1,34 @@
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2022-Jun-13: add function for water budget
+#     2022-Jun-14: use K_MAX and ΔZ and remove K_REF
+#     2022-Jun-14: rescale rain for layer 1
+#     2022-Jun-14: use METEO.rain
+#     2022-Jun-14: add function for soil energy budget
+#     2022-Jun-14: use METEO.rain and METEO.t_precip
+#     2022-Jun-14: add net radiation energy to top soil
+#     2022-Jun-15: add controller to make sure soil layers do not over saturate
+#     2022-Jun-15: merge the soil_water! and soil_energy! to soil_budget!
+#     2022-Jun-16: move time stepper controller to SoilPlantAirContinuum.jl
+#     2022-Jul-26: fix the unit of rain, mass flow, and root extraction (all in mol s⁻¹)
+#     2022-Sep-07: allow soil water oversaturation
+#     2023-Mar-27: fix a typo when updating e per layer (should use ΔZ per layer rather than the first layer)
+#     2023-Apr-07: fix a typo when updating water content in saturated soil layers
+#     2023-Apr-08: make runoff a cumulative value within a time interval
+#     2023-Jun-13: add trace gas diffusions
+#     2023-Jun-13: add diffusion related water and energy budgets
+#     2023-Jun-16: compute saturated vapor pressure based on water water potential
+#
+#######################################################################################################################################################################################################
+"""
+This function have two major features:
+- Compute the marginal change of soil water content and energy
+- Update soil water content and energy without over-saturating or draining the soil
+
+"""
+function soil_budget! end
 
 """
 
@@ -8,30 +39,12 @@ Run soil water and energy budget, given
 - `δt` Time step
 
 """
-soil_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
+soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
+    soil_diffusion!(config, spac, δt);
+
     (; AIR, SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
-    # run the diffusion
-    println("\nJudge point 8");
-    for _slayer in LAYERS
-        _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
-        if _δθ == 0
-            _slayer.TRACES.n_CH₄ = 0;
-            _slayer.TRACES.n_CO₂ = 0;
-            _slayer.TRACES.n_H₂O = 0;
-            _slayer.TRACES.n_N₂  = 0;
-            _slayer.TRACES.n_O₂  = 0;
-        else
-            _slayer.TRACES.n_CH₄ += _slayer.∂n∂t[1] * δt;
-            _slayer.TRACES.n_CO₂ += _slayer.∂n∂t[2] * δt;
-            _slayer.TRACES.n_H₂O += _slayer.∂n∂t[3] * δt;
-            _slayer.TRACES.n_N₂  += _slayer.∂n∂t[4] * δt;
-            _slayer.TRACES.n_O₂  += _slayer.∂n∂t[5] * δt;
-        end;
-        @show _slayer.∂n∂t[1] _slayer.∂n∂t[2] _slayer.∂n∂t[3] _slayer.∂n∂t[4] _slayer.∂n∂t[5];
-        @show _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_H₂O _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂;
-    end;
 
     # compute air volume change using ideal gas law (total energy change accordingly)
     println("\nJudge point 9");

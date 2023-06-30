@@ -25,6 +25,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
+    # Debug mode
+    "Whether to print debug information"
+    DEBUG::Bool = false
+
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
