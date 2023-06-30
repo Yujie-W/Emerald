@@ -2,56 +2,32 @@
 #
 # Changes to the function
 # General
-#     2022-Jun-13: add function for water budget
-#     2022-Jun-14: use K_MAX and ΔZ and remove K_REF
-#     2022-Jun-14: rescale rain for layer 1
-#     2022-Jun-14: use METEO.rain
-#     2022-Jun-14: add function for soil energy budget
-#     2022-Jun-14: use METEO.rain and METEO.t_precip
-#     2022-Jun-14: add net radiation energy to top soil
-#     2022-Jun-15: add controller to make sure soil layers do not over saturate
-#     2022-Jun-15: merge the soil_water! and soil_energy! to soil_budget!
-#     2022-Jun-16: move time stepper controller to SoilPlantAirContinuum.jl
-#     2022-Jul-26: fix the unit of rain, mass flow, and root extraction (all in mol s⁻¹)
-#     2022-Sep-07: allow soil water oversaturation
-#     2023-Mar-27: fix a typo when updating e per layer (should use ΔZ per layer rather than the first layer)
-#     2023-Apr-07: fix a typo when updating water content in saturated soil layers
-#     2023-Apr-08: make runoff a cumulative value within a time interval
-#     2023-Jun-13: add trace gas diffusions
-#     2023-Jun-13: add diffusion related water and energy budgets
-#     2023-Jun-16: compute saturated vapor pressure based on water water potential
+#    2023-Jun-29: copy function out of soil_budget!
+#    2023-Jun-30: add DEBUG mode to check for NaNs
 #
 #######################################################################################################################################################################################################
 """
+#
+    soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
-    soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
-
-Update the marginal increase of soil water content and energy per layer, given
-- `spac` `MultiLayerSPAC` SPAC
-- `config` Configuration for `MultiLayerSPAC`
-
-"""
-soil_budget!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
-    soil_mass_flow!(config, spac);
-    soil_diffusion!(config, spac);
-    soil_source_sink!(spac);
-
-    return nothing
-);
-
-
-"""
-
-    soil_mass_flow!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
-
-Compute the water and energy budget related to mass flow, given
+Compute the infiltration rate between soil layers, given
 - `config` Configuration for `MultiLayerSPAC`
 - `spac` `MultiLayerSPAC` SPAC
 
+#
+    soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+
+Update soil water content and energy per layer, given
+- `config` Configuration for `MultiLayerSPAC`
+- `spac` `MultiLayerSPAC` SPAC
+- `δt` Time step
+
 """
-function soil_mass_flow!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+function soil_infiltration! end
+
+soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
+    (; DEBUG, DIM_SOIL) = config;
     (; METEO, SOIL) = spac;
-    (; DIM_SOIL) = config;
     LAYERS = SOIL.LAYERS;
 
     # update soil k, kd, ψ, and λ_thermal for each soil layer (0.5 for tortuosity factor)
@@ -63,12 +39,25 @@ function soil_mass_flow!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         _slayer.∂e∂t       = 0;
         _slayer.∂n∂t      .= 0;
         _slayer.∂θ∂t       = 0;
+
+        if DEBUG
+            if any(isnan, (_slayer.k, _slayer.ψ, _slayer._kd, _slayer._λ_thermal))
+                @error "NaN detected in soil_infiltration! when computing soil layer hydraulic and thermal properties";
+            end;
+        end;
     end;
 
     # update k, δψ, and flow rate among layers
     LAYERS[1].∂θ∂t += METEO.rain * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[1].ΔZ;
     LAYERS[1].∂e∂t += METEO.rain * CP_L_MOL(FT) * METEO.t_precip;
     LAYERS[1].∂e∂t += SOIL.ALBEDO.r_net_lw + SOIL.ALBEDO.r_net_sw;
+
+    if DEBUG
+        if any(isnan, (LAYERS[1].∂θ∂t, LAYERS[1].∂e∂t))
+            @error "NaN detected in soil_infiltration! when computing top layer water and energy budget from rain and radiation";
+        end;
+    end;
+
     for _i in 1:DIM_SOIL-1
         SOIL._k[_i]         = 1 / (2 / LAYERS[_i].k + 2 / LAYERS[_i+1].k);
         SOIL._δψ[_i]        = LAYERS[_i].ψ - LAYERS[_i+1].ψ + ρg_MPa(FT) * (LAYERS[_i].Z - LAYERS[_i+1].Z);
@@ -92,38 +81,54 @@ function soil_mass_flow!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
             SOIL._q[_i] = -1 * (LAYERS[_i+1].θ - LAYERS[_i+1].VC.Θ_SAT) * LAYERS[_i+1].ΔZ * ρ_H₂O(FT) / M_H₂O(FT);
         end;
 
+        if DEBUG
+            if any(isnan, (SOIL._k[_i], SOIL._δψ[_i], SOIL._q[_i], SOIL._λ_thermal[_i], SOIL._δt[_i], SOIL._q_thermal[_i]))
+                @error "NaN detected in soil_infiltration! when computing water and energy flow between soil layers";
+            end;
+        end;
+
         LAYERS[_i  ].∂θ∂t -= SOIL._q[_i] * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[_i].ΔZ;
         LAYERS[_i+1].∂θ∂t += SOIL._q[_i] * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[_i+1].ΔZ;
         LAYERS[_i  ].∂e∂t -= SOIL._q_thermal[_i];
         LAYERS[_i+1].∂e∂t += SOIL._q_thermal[_i];
         LAYERS[_i  ].∂e∂t -= SOIL._q[_i] * CP_L_MOL(FT) * LAYERS[_i].t;
         LAYERS[_i+1].∂e∂t += SOIL._q[_i] * CP_L_MOL(FT) * LAYERS[_i].t;
+
+        if DEBUG
+            if any(isnan, (LAYERS[_i].∂θ∂t, LAYERS[_i+1].∂θ∂t, LAYERS[_i].∂e∂t, LAYERS[_i+1].∂e∂t))
+                @error "NaN detected in soil_infiltration! when computing water and energy budget from flow between soil layers";
+            end;
+        end;
     end;
 
     return nothing
-end
+);
 
-
-
-
-
-"""
-
-    soil_source_sink!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
-
-Update the source/sink terms for the soil layers, given
-- `spac` the SPAC model
-
-"""
-function soil_source_sink!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
-    (; ROOTS, ROOTS_INDEX, SOIL) = spac;
+soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
+    (; DEBUG) = config;
+    (; SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
-    # loop through the roots and compute the source/sink terms
-    for _i in eachindex(ROOTS)
-        LAYERS[ROOTS_INDEX[_i]].∂θ∂t -= root_sink(ROOTS[_i]) * M_H₂O(FT) / ρ_H₂O(FT) / SOIL.AREA / LAYERS[ROOTS_INDEX[_i]].ΔZ;
-        LAYERS[ROOTS_INDEX[_i]].∂e∂t -= root_sink(ROOTS[_i]) / SOIL.AREA * CP_L_MOL(FT) * LAYERS[_i].t;
+    # run the water transport (condensation + mass flow)
+    for _slayer in LAYERS
+        # account for evaporation and condensation to/from the air space
+        _ps = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000);
+        _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
+
+        _slayer.θ += _δθ_v;
+        _slayer.e += _δθ_v * ρ_H₂O(FT) * CP_L(FT) * _slayer.t;
+        _slayer.e += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
+
+        # account for mass flow
+        _slayer.θ += _slayer.∂θ∂t * δt;
+        _slayer.e += _slayer.∂e∂t * δt / _slayer.ΔZ;
+
+        if DEBUG
+            if any(isnan, (_ps, _δθ_v, _slayer.θ, _slayer.e))
+                @error "NaN detected in soil_infiltration! when computing water budget from condensation and mass flow";
+            end;
+        end;
     end;
 
     return nothing
-end
+);

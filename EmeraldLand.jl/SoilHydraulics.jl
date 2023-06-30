@@ -12,8 +12,9 @@ import ..Namespace: BrooksCorey
 include("soil/budget.jl");
 include("soil/constructor.jl");
 include("soil/diffusion.jl");
-include("soil/dxdt.jl");
+include("soil/infiltration.jl");
 include("soil/sink.jl");
+include("soil/volume.jl");
 include("soil/vulnerability.jl");
 
 

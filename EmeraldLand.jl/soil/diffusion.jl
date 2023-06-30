@@ -7,8 +7,14 @@
 #
 #######################################################################################################################################################################################################
 """
-
+#
     soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+
+Compute the diffusion rate among soil layers, given
+- `config` SPAC configuration
+- `spac` SPAC model
+
+#
     soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
 
 Update diffusion rate among soil layers (and thus water and energy budgets), given
