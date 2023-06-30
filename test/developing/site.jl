@@ -18,9 +18,10 @@ using Emerald;
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}();
 spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
-EmeraldLand.SPAC.update!(spac, config; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
+#EmeraldLand.SPAC.update!(spac, config; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
 EmeraldLand.SPAC.initialize!(spac, config);
 spac.METEO.rad_lw = 300;
+EmeraldLand.SPAC.spac!(spac, config, FT(360));
 
 spac.METEO.rain = 0;
 for i in 1:100
