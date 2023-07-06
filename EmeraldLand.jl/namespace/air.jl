@@ -11,6 +11,7 @@
 #     2022-Jul-20: add fields: Z, ΔZ, e, n_CO₂, n_H₂O, ∂e∂t, ∂CO₂∂t, and ∂H₂O∂t
 #     2023-Mar-11: add field f_CO₂ for CO₂ concentration
 #     2023-Jun-13: add fields for CH₄, N₂, O₂ partial pressures and moles
+#     2023-Jul-06: correct the values for CH₄, N₂, O₂ moles
 #
 #######################################################################################################################################################################################################
 """
@@ -57,15 +58,15 @@ Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
     "Total energy within the air layer `[J m⁻²]`"
     e::FT = CP_D_MOL(FT) * (P_AIR - p_H₂O) * ΔZ / GAS_R(FT) + CP_V_MOL(FT) * p_H₂O * ΔZ / GAS_R(FT)
     "Mole of CH₄ per surface area `[mol m⁻²]`"
-    n_CH₄::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
+    n_CH₄::FT = p_CH₄ * ΔZ / (GAS_R(FT) * t)
     "Mole of CO₂ per surface area `[mol m⁻²]`"
     n_CO₂::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
     "Mole of H₂O per surface area `[mol m⁻²]`"
     n_H₂O::FT = p_H₂O * ΔZ / (GAS_R(FT) * t)
     "Mole of N₂ per surface area `[mol m⁻²]`"
-    n_N₂::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
+    n_N₂::FT = p_N₂ * ΔZ / (GAS_R(FT) * t)
     "Mole of O₂ per surface area `[mol m⁻²]`"
-    n_O₂::FT = p_CO₂ * ΔZ / (GAS_R(FT) * t)
+    n_O₂::FT = p_O₂ * ΔZ / (GAS_R(FT) * t)
     "Marginal increase in total energy `[J m⁻² s⁻¹]`"
     ∂e∂t::FT = 0
     "Marginal increase in total moles of CO₂ `[mol m⁻² s⁻¹]`"

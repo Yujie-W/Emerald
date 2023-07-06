@@ -27,6 +27,7 @@ root_sink(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_in;
 # Changes to the function
 # General
 #     2023-Jun-29: tease apart this function for better readability
+#     2023-Jul-06: add info into DEBUG code block
 #
 #######################################################################################################################################################################################################
 """
@@ -49,7 +50,8 @@ function soil_source_sink!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{F
         LAYERS[ROOTS_INDEX[_i]].∂e∂t -= root_sink(ROOTS[_i]) / SOIL.AREA * CP_L_MOL(FT) * LAYERS[_i].t;
 
         if DEBUG
-            if any(isnan, [LAYERS[ROOTS_INDEX[_i]].∂θ∂t, LAYERS[ROOTS_INDEX[_i]].∂e∂t])
+            if any(isnan, (LAYERS[ROOTS_INDEX[_i]].∂θ∂t, LAYERS[ROOTS_INDEX[_i]].∂e∂t))
+                @info "Debugging" LAYERS[ROOTS_INDEX[_i]].∂θ∂t LAYERS[ROOTS_INDEX[_i]].∂e∂t;
                 @error "NaN detected in soil_source_sink! at layer $(ROOTS_INDEX[_i])";
             end;
         end;

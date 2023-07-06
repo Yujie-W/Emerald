@@ -137,7 +137,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Numb
         _δt = _δts[1];
 
         # run the budgets for all ∂x∂t
-        θ_on ? soil_budget!(spac, _δt) : nothing;
+        θ_on ? soil_budget!(config, spac, _δt) : nothing;
         if spac._root_connection
             stomatal_conductance!(spac, _δt);
             t_on ? plant_energy!(config, spac, _δt) : nothing;
@@ -153,7 +153,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Numb
                 p_on ? xylem_pressure_profile!(spac; update = update) : nothing;
                 leaf_photosynthesis!(spac, GCO₂Mode());
             end;
-            θ_on ? soil_budget!(spac, config) : nothing;
+            θ_on ? soil_budget!(config, spac) : nothing;
             if spac._root_connection
                 stomatal_conductance!(spac);
                 t_on ? plant_energy!(config, spac) : nothing;
@@ -185,7 +185,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
             xylem_pressure_profile!(spac; update = update);
             leaf_photosynthesis!(spac, GCO₂Mode());
         end;
-        soil_budget!(spac, config);
+        soil_budget!(config, spac);
         if spac._root_connection
             stomatal_conductance!(spac);
             plant_energy!(config, spac);

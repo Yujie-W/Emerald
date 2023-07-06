@@ -88,7 +88,7 @@ soil_plant_air_continuum!(
     # save the result at this stage for the results at the beginning of this time step
 
     # 5. run soil energy water budget
-    soil_budget!(spac, config);
+    soil_budget!(config, spac);
 
     # 6. run leaf stomatal conductance budget
     # 7. run plant energy budget

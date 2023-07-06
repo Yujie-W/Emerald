@@ -21,6 +21,7 @@
 #     2023-Jun-13: add diffusion related water and energy budgets
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Jun-30: use separated function for better readability
+#     2023-Jul-06: add DEBUG code block
 #
 #######################################################################################################################################################################################################
 """
@@ -56,16 +57,23 @@ soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) w
     soil_infiltration!(config, spac, δt);
     surface_runoff!(config, spac);
 
+    (; DEBUG) = config;
     (; SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
     # update soil temperature at each layer (top layer t will be same as _t above)
-    for _slayer in LAYERS
+    for _i in eachindex(LAYERS)
+        _slayer = LAYERS[_i];
         _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
         _slayer._cp = _slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas;
         _slayer.t = _slayer.e / _slayer._cp;
 
-        @show _cp_gas _slayer._cp _slayer.t;
+        if DEBUG
+            if any(isnan, (_cp_gas, _slayer._cp, _slayer.t))
+                @info "Debugging" _cp_gas _slayer._cp _slayer.t;
+                @error "NaN detected when computing soil temperature at layer $(_i)";
+            end;
+        end;
     end;
 
     return nothing

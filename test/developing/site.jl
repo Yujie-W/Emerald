@@ -16,7 +16,7 @@ df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection
 using Emerald;
 
 FT = Float64;
-config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
 spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
 #EmeraldLand.SPAC.update!(spac, config; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
 EmeraldLand.SPAC.initialize!(spac, config);
