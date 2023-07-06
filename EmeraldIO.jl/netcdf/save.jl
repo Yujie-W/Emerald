@@ -6,6 +6,8 @@
 #     2022-Jan-28: remove the complicated funtion to create var and dim at the same time
 #     2022-Jan-28: add global attributes to the generated file
 #     2023-Feb-23: migrate from JuliaUtility to Emerald
+# Bug fixes
+#     2023-Jul-06: allow data frame to be growable by fix the index values from Inf to actual length
 #
 #######################################################################################################################################################################################################
 """
@@ -128,7 +130,7 @@ save_nc!(file::String, df::DataFrame, var_names::Vector{String}, var_attributes:
 
     # define dimension related variables
     _n_ind = (growable ? Inf : size(df)[1]);
-    _inds  = collect(1:_n_ind);
+    _inds  = collect(1:size(df)[1]);
 
     # save the variables
     add_nc_dim!(_dset, "ind", _n_ind);

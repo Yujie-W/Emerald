@@ -5,6 +5,7 @@
 #     2022-Jan-27: define the function to grow a netcdf file
 #     2022-Jan-28: add the function to grow semi-automatically with respect to data dimensions
 #     2023-Feb-23: migrate from JuliaUtility to Emerald
+#     2023-Jul-06: add method to grow dataframe type dataset
 #
 #######################################################################################################################################################################################################
 """
@@ -88,6 +89,27 @@ grow_nc!(ds::Dataset, var_name::String, in_data::Union{AbstractFloat,Array,Int,S
 grow_nc!(file::String, var_name::String, in_data::Union{AbstractFloat,Array,Int,String}, pending::Bool) = (
     _dset = Dataset(file, "a");
     grow_nc!(_dset, var_name, in_data, pending);
+    close(_dset);
+
+    return nothing
+);
+
+grow_nc!(ds::Dataset, df::DataFrame) = (
+    _dim_ind = size_nc(ds, "ind");
+    @show _dim_ind;
+    @show collect(axes(df,1) .+ _dim_ind[2][1]);
+    grow_nc!(ds, "ind", collect(axes(df,1) .+ _dim_ind[2][1]), true);
+
+    for _var in names(df)
+        grow_nc!(ds, _var, df[:,_var], false);
+    end;
+
+    return nothing
+);
+
+grow_nc!(file::String, in_data::DataFrame) = (
+    _dset = Dataset(file, "a");
+    grow_nc!(_dset, in_data);
     close(_dset);
 
     return nothing
