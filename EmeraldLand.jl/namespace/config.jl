@@ -11,6 +11,7 @@
 #     2023-Jun-20: move LHA from SPAC canopy
 #     2023-Jun-20: move fields Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, and _COS²_Θ_INCL_AZI from spac canopy
 #     2023-Jun-20: move fields α_CLM, α_FITTING, and MAT_ρ from soil albedo
+#     2023-Jul-06: add field PRESCRIBE_AIR
 #
 #######################################################################################################################################################################################################
 """
@@ -28,6 +29,9 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # Debug mode
     "Whether to print debug information"
     DEBUG::Bool = false
+
+    # Prescribe parameters
+    PRESCRIBE_AIR::Bool = true
 
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
