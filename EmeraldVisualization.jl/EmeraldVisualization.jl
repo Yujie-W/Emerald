@@ -13,8 +13,8 @@ using PyPlot: Figure, figure, rc
 using GriddingMachine.Blender: regrid
 using GriddingMachine.Collector: query_collection
 using GriddingMachine.Indexer: read_LUT
+using NetcdfIO: read_nc
 
-using ..EmeraldIO.Netcdf: read_nc
 using ..EmeraldMath.Regression: linear_regress
 using ..EmeraldMath.Stats: nanmin, nanmax
 
