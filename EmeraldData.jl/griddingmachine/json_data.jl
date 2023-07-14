@@ -13,32 +13,20 @@ Return a dict of the input variable setup
 
 """
 function variable_dict()
-    # functions to use in while loop
-    _jdg_1(x) = (x != "");
-    _jdg_2(x) = (
-        try
-            parse(Int, x)
-            return true
-        catch e
-            return false
-        end;
-    );
-    _jdg_3(x) = (x in ["N", "NO", "Y", "YES"]);
-
     # loop the inputs until satisfied
     _data_dict = Dict{String,Any}();
     while true
         _msg = "        Please input label or band name > ";
-        _data_name = verified_input(_msg, _jdg_1);
+        _data_name = input_string(_msg; no_space = true);
 
         _msg = "        What is the longitude axis number of the data? (e.g., 1 for [lon,lat,time] and 2 for [lat,lon,time]) > ";
-        _i_lon = parse(Int, verified_input(_msg, _jdg_2));
+        _i_lon = input_integer(_msg; int_conversion = true);
 
         _msg = "        What is the latitude axis number of the data? (e.g., 2 for [lon,lat,time] and 1 for [lat,lon,time]) > ";
-        _i_lat = parse(Int, verified_input(_msg, _jdg_2));
+        _i_lat = input_integer(_msg; int_conversion = true);
 
         _msg = "        What is the index axis number of the data? (e.g., 3 for time in [lon,lat,time] and 0 for [lat,lon]) > "
-        _i_ind = parse(Int, verified_input(_msg, _jdg_2));
+        _i_ind = input_integer(_msg; int_conversion = true);
         if _i_ind == 0
             _i_ind = nothing;
         end;
@@ -63,8 +51,8 @@ function variable_dict()
 
         # ask if the Dict looks okay, if so break
         _msg = "Is the generated dict okay? If not, type <N/n or No> to redo the inputs > ";
-        _try_again = (verified_input(_msg, uppercase, _jdg_3) in ["N", "NO"]);
-        if !_try_again
+        _satisfy = input_yes_or_no(_msg; bool_conversion = true);
+        if _satisfy
             break;
         end;
     end;
@@ -88,21 +76,11 @@ Create a vector of Dicts that store variable information
 
 """
 function variable_dicts()
-    # functions to use in while loop
-    _jdg_1(x) = (
-        try
-            parse(Int, x)
-            return true
-        catch e
-            return false
-        end;
-    );
-
     @info "These questions are about how to read the data, please be careful about them...";
 
     # ask for how many independent variables do you want to save as DATA
     _msg = "    How many variables do you want to save as DATA (e.g., combine data1 and data2 in one netcdf file) > ";
-    _data_count = parse(Int, verified_input(_msg, _jdg_1));
+    _data_count = input_integer(_msg; int_conversion = true);
     _data_dicts = Dict{String,Any}[];
     for _i_data in 1:_data_count
         println("    For data $(_i_data):");

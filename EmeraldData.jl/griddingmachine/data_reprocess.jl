@@ -27,8 +27,6 @@ function reprocess_data!(
             file_name_function::Union{Function,Nothing} = nothing,
             data_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])],
             std_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])])
-    _jdg_1(x) = (x in ["N", "NO", "Y", "YES"]);
-
     _dict_file = dict["INPUT_MAP_SETS"];
     _dict_grid = dict["GRIDDINGMACHINE"];
     _dict_vars = dict["INPUT_VAR_SETS"];
@@ -108,7 +106,7 @@ function reprocess_data!(
             _ffig = "$(@__DIR__)/temp.gif";
             animate_data!(_lons, _lats, _reprocessed_data; filename = _ffig);
             _msg = "The figure is saved as $(_ffig). Is the generated data okay? Type Y/y or N/n to continue > ";
-            _save_data = (verified_input(_msg, uppercase, _jdg_1) in ["Y", "YES"]);
+            _save_data = input_yes_or_no(_msg; bool_conversion = true);
 
             # save the file
             if _save_data

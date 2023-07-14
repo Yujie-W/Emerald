@@ -18,7 +18,6 @@ function map_info_dict()
     # functions to use within while loop
     _jdg_1(x) = (x in ["GEOTIFF", "NETCDF"]);
     _jdg_2(x) = (x in ["CYLINDRICAL", "SINUSOIDAL"]);
-    _jdg_3(x) = (x in [false, true]);
     _jdg_4(x) = (
         if x == "GLOBAL"
             return true
@@ -34,7 +33,6 @@ function map_info_dict()
             return false
         end;
     );
-    _jdg_5(x) = (x in ["N", "NO", "Y", "YES"]);
     _opr_1(x) = (
         if uppercase(x) in ["G", "GEOTIFF", "TIFF"]
             return "GEOTIFF"
@@ -71,15 +69,6 @@ function map_info_dict()
             return uppercase(x)
         end;
     );
-    _opr_5(x) = (
-        if uppercase(x) in ["Y", "YES"]
-            return true
-        elseif uppercase(x) in ["N", "NO"]
-            return false
-        else
-            return uppercase(x)
-        end;
-    );
 
     # loop the inputs until satisfied
     _map_info_dict = Dict{String,Any}();
@@ -91,16 +80,16 @@ function map_info_dict()
         _projection = verified_input(_msg, _opr_2, _jdg_2);
 
         _msg = "    Does the value represent data in the center of a grid? (Y for Center or N for Edge) > ";
-        _represent = verified_input(_msg, _opr_3, _jdg_3);
+        _represent = input_yes_or_no(_msg; bool_conversion = true);
 
         _msg = "    What is the coverage of the dataset? (Global or not; if not global, type in the conner values in the order or min lat, max lat, min lon, max lon) > ";
         _coverages = verified_input(_msg, _opr_4, _jdg_4);
 
         _msg = "    Do you need to flip the latitudinal direction? (Yes or No) > ";
-        _flip_lat = verified_input(_msg, _opr_5, _jdg_3);
+        _flip_lat = input_yes_or_no(_msg; bool_conversion = true);
 
         _msg = "    Do you need to flip the longitudinal direction? (Yes or No) > ";
-        _flip_lon = verified_input(_msg, _opr_5, _jdg_3);
+        _flip_lon = input_yes_or_no(_msg; bool_conversion = true);
 
         _map_info_dict = Dict{String,Any}(
             "FOLDER"             => "",
@@ -117,8 +106,8 @@ function map_info_dict()
 
         # ask if the Dict looks okay, if so break
         _msg = "Is the generated dict okay? If not, type <N/n or No> to redo the inputs > ";
-        _try_again = (verified_input(_msg, uppercase, _jdg_5) in ["N", "NO"]);
-        if !_try_again
+        _satisfy = input_yes_or_no(_msg; bool_conversion = true);
+        if _satisfy
             break;
         end;
     end;

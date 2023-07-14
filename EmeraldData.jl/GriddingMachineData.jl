@@ -4,7 +4,8 @@ using JSON;
 
 using NetcdfIO: append_nc!, read_nc, save_nc!
 
-using ..EmeraldIO.Terminal: verified_input
+#using ..EmeraldIO.Terminal:
+using ..EmeraldIO.Terminal: has_no_space, input_integer, input_string, input_yes_or_no, verified_input
 using ..EmeraldUtility.Artifact: deploy_artifact!
 using ..EmeraldVisualization: animate_data!
 
@@ -24,6 +25,7 @@ include("griddingmachine/json_data.jl");
 include("griddingmachine/json_griddingmachine.jl");
 include("griddingmachine/json_map.jl");
 include("griddingmachine/json_save.jl");
+include("griddingmachine/terminal.jl");
 
 
 end # module
