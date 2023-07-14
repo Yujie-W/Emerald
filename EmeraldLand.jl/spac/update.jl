@@ -112,7 +112,7 @@ Update the physiological parameters of the SPAC, given
 - `t_leaf` Leaf temperature. Optional, default is nothing
 - `t_soils` Soil temperature at different layers. Optional, default is nothing
 - `vcmax` Vcmax25 at the top of canopy. Optional, default is nothing
--`vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
+- `vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
 
 """
 update!(spac::MultiLayerSPAC{FT},

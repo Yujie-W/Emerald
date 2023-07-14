@@ -180,8 +180,8 @@ leaf_spectra!(
         end;
     end;
 
-    bio._s     .= bio._ρ ./ bio._τ;
-    bio._k     .= log.(bio._b);
+    bio._s .= bio._ρ ./ bio._τ;
+    bio._k .= log.(bio._b);
     for _i in eachindex(bio._a)
         if 1 < bio._a[_i] < Inf
             bio._s[_i] = 2 * bio._a[_i] / (bio._a[_i] ^ 2 - 1) * log(bio._b[_i]);
