@@ -25,11 +25,11 @@ DF_SIMULATIONS = ["MOD_SWC_1", "MOD_SWC_2", "MOD_SWC_3", "MOD_SWC_4", "MOD_T_L_M
 DF_VARIABLES   = ["F_H2O", "F_CO2", "F_GPP", "BETA", "SIF683", "SIF740", "SIF757", "SIF771", "RED", "BLUE", "NIR", "NDVI", "EVI", "NIRvI", "NIRvR", "PAR", "PPAR"];
 
 
-include("config.jl");
-include("driver.jl");
-include("griddingmachine.jl");
-include("simulation.jl");
-include("spac.jl");
+include("../EmeraldFrontier.jl/config.jl");
+include("../EmeraldFrontier.jl/driver.jl");
+include("../EmeraldFrontier.jl/griddingmachine.jl");
+include("../EmeraldFrontier.jl/simulation.jl");
+include("../EmeraldFrontier.jl/spac.jl");
 
 
 end # EmeraldFrontier

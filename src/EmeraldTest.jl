@@ -1,7 +1,7 @@
 module EmeraldTest
 
 
-include("Recursive.jl");
+include("../EmeraldTest.jl/Recursive.jl");
 
 
 function parse_file(file::String)

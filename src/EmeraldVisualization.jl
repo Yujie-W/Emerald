@@ -24,17 +24,17 @@ PATCHES = pyimport("matplotlib.patches");
 LAND_MASK = nothing;
 
 
-include("animation/animation.jl");
-include("animation/data.jl");
-include("animation/netcdf.jl");
+include("../EmeraldVisualization.jl/animation/animation.jl");
+include("../EmeraldVisualization.jl/animation/data.jl");
+include("../EmeraldVisualization.jl/animation/netcdf.jl");
 
-include("data/land_mask.jl");
+include("../EmeraldVisualization.jl/data/land_mask.jl");
 
-include("scientific/canvas.jl");
-include("scientific/decoration.jl");
-include("scientific/latex.jl");
-include("scientific/scientific.jl");
-include("scientific/shapes.jl");
+include("../EmeraldVisualization.jl/scientific/canvas.jl");
+include("../EmeraldVisualization.jl/scientific/decoration.jl");
+include("../EmeraldVisualization.jl/scientific/latex.jl");
+include("../EmeraldVisualization.jl/scientific/scientific.jl");
+include("../EmeraldVisualization.jl/scientific/shapes.jl");
 
 include("styles/styles.jl");
 

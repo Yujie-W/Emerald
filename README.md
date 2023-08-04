@@ -1,5 +1,7 @@
 # Emerald
 
+**E**arth **M**odeling with **E**nhanced **R**epresentations of **A**ir and **L**and **D**ynamics
+
 ## Model components
 - `Emerald` Land Surface Model based on CliMA Land (Remastered)
 - `Sapphire` Ocean Model based on CliMA Ocean (To be implemented)

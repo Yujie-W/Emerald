@@ -32,12 +32,12 @@ CACHE_SPAC    = nothing;
 CACHE_STATE   = nothing;
 
 
-include("griddingmachine.jl");
-include("driver.jl");
-include("cache.jl");
-include("save.jl");
-include("simulation.jl");
-include("threads.jl");
+include("../EmeraldEarth.jl/griddingmachine.jl");
+include("../EmeraldEarth.jl/driver.jl");
+include("../EmeraldEarth.jl/cache.jl");
+include("../EmeraldEarth.jl/save.jl");
+include("../EmeraldEarth.jl/simulation.jl");
+include("../EmeraldEarth.jl/threads.jl");
 
 
 end # module
