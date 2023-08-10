@@ -36,7 +36,7 @@ include("../EmeraldVisualization.jl/scientific/latex.jl");
 include("../EmeraldVisualization.jl/scientific/scientific.jl");
 include("../EmeraldVisualization.jl/scientific/shapes.jl");
 
-include("styles/styles.jl");
+include("../EmeraldVisualization.jl/styles/styles.jl");
 
 
 end # module

@@ -11,6 +11,7 @@ using StatsBase: percentile
 #     2022-Oct-17: move functions outside of the folder
 #     2023-Mar-10: move function to Emerald
 #     2023-Mar-27: and method for nanmax, nanmin, etc to handle single number rather than an array
+#     2023-Aug-04: add function nansum
 #
 #######################################################################################################################################################################################################
 """
@@ -123,7 +124,6 @@ nanpercentile(x::Number, p::Number) = isnan(x) ? NaN : x;
 Return the std of array by ommiting the NaN, given
 - `x` Array of numbers, can be NaN
 
-```
 """
 function nanstd end
 
@@ -134,6 +134,26 @@ nanstd(x::Array) = (
 );
 
 nanstd(x::Number) = isnan(x) ? NaN : x;
+
+
+"""
+
+    nansum(x::Array)
+    nansum(x::Number)
+
+Return the sum of array by ommiting the NaN, given
+- `x` Array of numbers, can be NaN
+
+"""
+function nansum end
+
+nansum(x::Array) = (
+    _x = filter(!isnan, x);
+
+    return length(_x) == 0 ? 0 : sum( _x )
+);
+
+nansum(x::Number) = isnan(x) ? 0 : x;
 
 
 #######################################################################################################################################################################################################
