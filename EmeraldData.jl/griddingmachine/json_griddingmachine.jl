@@ -22,7 +22,7 @@ function griddingmachine_dict()
         _label = input_string(_msg, uppercase; no_space = true);
 
         _msg = "    Please indicate the level 2 label for the dataset (e.g., VPM as in GPP_VPM_2X_1M_V1, leave empty is there is not any) > ";
-        _label_extra = verified_input(_msg, to_nothing_or_uppercase, is_nothing_or_all_letters);
+        _label_extra = input_string(_msg, to_nothing_or_uppercase; allow_blank = true, no_space = true);
 
         _msg = "    Please indicate the spatial resolution represented with an integer (N for 1/N °) > ";
         _spatial_resolution_nx = input_integer(_msg; int_conversion = true, non_negative = true);

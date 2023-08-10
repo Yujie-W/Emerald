@@ -74,19 +74,18 @@ input_integer(msg::String; int_conversion::Bool = false, non_negative::Bool = fa
     end;
 );
 
-input_string(msg::String; no_space::Bool = false) = (
-    if no_space
-        return verified_input(msg, has_no_space)
-    else
-        return verified_input(msg, is_not_blank)
-    end;
-);
-
-input_string(msg::String, operation_function::Function; no_space::Bool = false) = (
-    if no_space
+input_string(msg::String, operation_function::Function = (x -> x); allow_blank::Bool = false, no_space::Bool = false) = (
+    if !allow_blank && no_space
         return verified_input(msg, operation_function, has_no_space)
-    else
+    elseif !allow_blank && !no_space
         return verified_input(msg, operation_function, is_not_blank)
+    elseif allow_blank && no_space
+        _f(x) = has_no_space(x) || length(x) == 0;
+
+        return verified_input(msg, operation_function, _f)
+    else
+        _f(x) = true;
+        return verified_input(msg, operation_function, _f)
     end;
 );
 
