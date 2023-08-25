@@ -158,16 +158,12 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
 """
 
     extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
-    extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat}
 
 Gap fill the data linearly, given
 - `dts` LandDatasets struct
-- `data` Input data
 
 """
-function extend_data! end
-
-extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
+function extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
     # determine where to fill based on land mask and lai
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
         if (dts.t_lm[_ilon,_ilat] > 0) && (nanmax(dts.p_lai[_ilon,_ilat,:]) > 0)
@@ -189,7 +185,7 @@ extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
                 # extend the data first based on interpolations
                 for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
                     _tmp = _data[_ilon,_ilat,:];
-                    extend_data!(_tmp);
+                    interpolate_data!(_tmp);
                     _data[_ilon,_ilat,:] .= _tmp;
                 end;
 
@@ -201,57 +197,7 @@ extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat} = (
     end;
 
     return nothing
-);
-
-extend_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat} = (
-    if sum(.!isnan.(data)) in [0, length(data)]
-        return nothing
-    end;
-
-    @inline find_last_number(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
-        _x = ind;
-        _y = vec_in[ind];
-        for _i in ind:-1:1
-            if !isnan(vec_in[_i])
-                _x = _i;
-                _y = vec_in[_i];
-                break;
-            end;
-        end;
-
-        return _x, _y
-    );
-
-    @inline find_next_number(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
-        _x = ind;
-        _y = vec_in[ind];
-        for _i in ind:1:length(vec_in)
-            if !isnan(vec_in[_i])
-                _x = _i;
-                _y = vec_in[_i];
-                break;
-            end;
-        end;
-
-        return _x, _y
-    );
-
-    @inline interpolate_data!(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
-        if isnan(vec_in[ind])
-            (_x1,_y1) = find_last_number(vec_in, ind);
-            (_x2,_y2) = find_next_number(vec_in, ind);
-            vec_in[ind] = ((ind - _x1) * _y2 + (_x2 - ind) * _y1) / (_x2 - _x1);
-        end;
-
-        return nothing
-    );
-
-    _data_3x = [data; data; data];
-    interpolate_data!.([_data_3x], (length(data)+1):(length(data)*2));
-    data .= _data_3x[(length(data)+1):(length(data)*2)];
-
-    return nothing
-);
+end;
 
 
 # CLM5 settings

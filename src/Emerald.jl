@@ -15,9 +15,10 @@ export EmeraldVisualization
 
 # include the submodules
 include("EmeraldIO.jl");
-include("EmeraldMath.jl");
 include("EmeraldTest.jl");
 include("EmeraldUtility.jl");
+
+include("EmeraldMath.jl");
 
 include("EmeraldLand.jl");
 include("EmeraldVisualization.jl");

@@ -16,6 +16,7 @@ using ..EmeraldLand.Constant: M_H₂O, ρ_H₂O
 using ..EmeraldLand.EarthGeometry: solar_zenith_angle
 using ..EmeraldLand.Namespace: MultiLayerSPAC, SPACConfiguration, Soil
 using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PPAR, T_VEG, initialize!, soil_plant_air_continuum!, update!
+using ..EmeraldMath.Data: interpolate_data
 using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 using ..EmeraldUtility.Time: month_days
 

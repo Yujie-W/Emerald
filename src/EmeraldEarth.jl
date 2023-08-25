@@ -18,6 +18,7 @@ using ..EmeraldLand.EarthGeometry: solar_zenith_angle
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, MultiLayerSPAC, SPACConfiguration, MultiLayerSPACState, Soil
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldLand.SPAC: GPP, PPAR, initialize!, soil_plant_air_continuum!, spac_state!, update!
+using ..EmeraldMath.Data: interpolate_data!
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Threading: dynamic_workers!

@@ -21,36 +21,12 @@ function weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Boo
     _nc_wd = weather_driver_file(wd_tag, gmdict; appending = appending, displaying = displaying)[1];
     _df_wd = read_nc(_nc_wd);
 
-    #
-    # extropolate the time series based on input variable dimensions, dimensions must be within supported settings
-    #     1. extropolate the data to 1D resolution
-    #     2. extropolate the data to 1H resolution
-    #
-    _year = gmdict["YEAR"];
-    _days = isleapyear(_year) ? 366 : 365;
-    @inline nt_to_1h(label::String) = (
-        _dat_in = gmdict[label];
-        @assert length(_dat_in) in [366, 365, 53, 52, 46, 12, 1] "Dataset length not supported";
-
-        if length(_dat_in) == 1
-            _dat_1d = repeat([_dat_in;]; inner = _days);
-        elseif length(_dat_in) == 12
-            _dat_1d = [([repeat(_dat_in[_m:_m], month_days(_year, _m)) for _m in 1:12]...)...]
-        elseif length(_dat_in) == 46
-            _dat_1d = repeat(_dat_in; inner = 8)[1:_days]
-        elseif length(_dat_in) in [52,53]
-            _dat_1d = repeat([_dat_in;_dat_in[end]]; inner = 7)[1:_days]
-        elseif length(_dat_in) in [365,366]
-            _dat_1d = [_dat_in;_dat_in[end]][1:_days]
-        end;
-
-        return repeat(_dat_1d; inner = 24)
-    );
-    _df_wd[!,"CO2"        ] .= nt_to_1h("CO2");
-    _df_wd[!,"CHLOROPHYLL"] .= nt_to_1h("CHLOROPHYLL");
-    _df_wd[!,"CI"         ] .= nt_to_1h("CLUMPING");
-    _df_wd[!,"LAI"        ] .= nt_to_1h("LAI");
-    _df_wd[!,"VCMAX25"    ] .= nt_to_1h("VCMAX25");
+    # interpolate the data to a new resolution
+    _df_wd[!,"CO2"        ] .= interpolate_data(gmdict["CO2"], gmdict["YEAR"]; out_reso = "1H");
+    _df_wd[!,"CHLOROPHYLL"] .= interpolate_data(gmdict["CHLOROPHYLL"], gmdict["YEAR"]; out_reso = "1H");
+    _df_wd[!,"CI"         ] .= interpolate_data(gmdict["CLUMPING"], gmdict["YEAR"]; out_reso = "1H");
+    _df_wd[!,"LAI"        ] .= interpolate_data(gmdict["LAI"], gmdict["YEAR"]; out_reso = "1H");
+    _df_wd[!,"VCMAX25"    ] .= interpolate_data(gmdict["VCMAX25"], gmdict["YEAR"]; out_reso = "1H");
 
     # add the fields to store outputs
     for _label in DF_VARIABLES
