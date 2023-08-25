@@ -76,11 +76,12 @@ end
 # Changes to this function
 # General
 #     2023-Aug-25: add function (moved from EmeraldFrontier.jl)
+#     2023-Aug-25: add support for single value number (not an array)
 #
 #######################################################################################################################################################################################################
 """
 
-    interpolate_data(dat_in::Array{Float64,1}, year::Int64; out_reso::String = "1H")
+    interpolate_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H") where {FT}
 
 Interpolate the data to 1H or 1D resolution, given
 - `dat_in` Input data
@@ -88,7 +89,7 @@ Interpolate the data to 1H or 1D resolution, given
 - `out_reso` Output temporal resolution
 
 """
-function interpolate_data(dat_in::Array{Float64,1}, year::Int64; out_reso::String = "1H")
+function interpolate_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H") where {FT}
     @assert length(dat_in) in [366, 365, 53, 52, 46, 12, 1] "Dataset length not supported";
 
     _days = isleapyear(year) ? 366 : 365;
