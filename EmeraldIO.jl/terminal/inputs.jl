@@ -84,8 +84,8 @@ input_string(msg::String, operation_function::Function = (x -> x); allow_blank::
 
         return verified_input(msg, operation_function, _f)
     else
-        _f(x) = true;
-        return verified_input(msg, operation_function, _f)
+        _g(x) = true;
+        return verified_input(msg, operation_function, _g)
     end;
 );
 
