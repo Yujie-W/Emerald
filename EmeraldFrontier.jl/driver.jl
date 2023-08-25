@@ -4,6 +4,7 @@
 # General
 #     2023-Mar-20: move function from ClimaLand-0.2
 #     2023-Mar-28: add simulated swc and temperatures into dataframe so as to output
+#     2023-Aug-25: move method to interpolate data to EmeraldMath.jl
 #
 #######################################################################################################################################################################################################
 """

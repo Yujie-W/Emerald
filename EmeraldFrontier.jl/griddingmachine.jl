@@ -75,6 +75,7 @@ CLM5_PFTS = ["not_vegetated",
 # General
 #     2023-Mar-25: add function to get dict so as to create a spac
 #     2023-Mar-25: add three more fields to use ERA weather driver
+#     2023-Aug-25: interpolate the data after reading from GriddingMachine
 #
 #######################################################################################################################################################################################################
 """
@@ -99,11 +100,12 @@ function gm_dict(dts::GriddingMachineLabels, lat::Number, lon::Number)
             _g = CLM5_PFTG[_ind_c3]' * _pfts[_ind_c3] / sum(_pfts[_ind_c3]);
             _g1 = isnan(_g) ? nanmean(CLM5_PFTG[_ind_c3]) : _g;
 
+            # fill in the missing data with interpolate_data! function when reading in the data from GriddingMachine
             return Dict{String,Any}(
                         "C3C4"          => "C3",
                         "CANOPY_HEIGHT" => read_LUT(query_collection(dts.tag_p_ch), lat, lon)[1],
-                        "CHLOROPHYLL"   => read_LUT(query_collection(dts.tag_p_chl), lat, lon)[1],
-                        "CLUMPING"      => read_LUT(query_collection(dts.tag_p_ci), lat, lon)[1],
+                        "CHLOROPHYLL"   => (_tmp = read_LUT(query_collection(dts.tag_p_chl), lat, lon)[1]; interpolate_data!(_tmp); _tmp),
+                        "CLUMPING"      => (_tmp = read_LUT(query_collection(dts.tag_p_ci), lat, lon)[1]; interpolate_data!(_tmp); _tmp),
                         "CO2"           => _co2,
                         "ELEVATION"     => read_LUT(query_collection(dts.tag_t_ele), lat, lon)[1],
                         "FT"            => Float64,
@@ -120,7 +122,7 @@ function gm_dict(dts::GriddingMachineLabels, lat::Number, lon::Number)
                         "SOIL_α"        => read_LUT(query_collection(dts.tag_s_α), lat, lon)[1],
                         "SOIL_ΘR"       => read_LUT(query_collection(dts.tag_s_Θr), lat, lon)[1],
                         "SOIL_ΘS"       => read_LUT(query_collection(dts.tag_s_Θs), lat, lon)[1],
-                        "VCMAX25"       => read_LUT(query_collection(dts.tag_p_vcm), lat, lon)[1],
+                        "VCMAX25"       => (_tmp = read_LUT(query_collection(dts.tag_p_vcm), lat, lon)[1]; interpolate_data!(_tmp); _tmp),
                         "YEAR"          => dts.year,
             );
         end;
