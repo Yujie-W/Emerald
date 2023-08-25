@@ -7,6 +7,7 @@
 #     2023-Mar-29: prescribe longwave radiation as well
 #     2023-Apr-13: add spac config to function call
 #     2023-Jun-15: add a controller over rad to make sure it is >= 0
+#     2023-Aug-25: make soil and leaf temperature and soil moisture optional
 #
 #######################################################################################################################################################################################################
 """
@@ -32,31 +33,31 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     _df_lai::FT = dfr.LAI;
     _df_lwr::FT = dfr.RAD_LW;
     _df_pcp::FT = dfr.PRECIP;
-    _df_sw1::FT = dfr.SWC_1;
-    _df_sw2::FT = dfr.SWC_2;
-    _df_sw3::FT = dfr.SWC_3;
-    _df_sw4::FT = dfr.SWC_4;
     _df_tar::FT = dfr.T_AIR;
-    _df_tlf::FT = dfr.T_LEAF;
-    _df_ts1::FT = dfr.T_SOIL_1;
-    _df_ts2::FT = dfr.T_SOIL_2;
-    _df_ts3::FT = dfr.T_SOIL_3;
-    _df_ts4::FT = dfr.T_SOIL_4;
     _df_vcm::FT = dfr.VCMAX25;
     _df_vpd::FT = dfr.VPD;
     _df_wnd::FT = dfr.WIND;
 
     # adjust optimum t based on 10 day moving average skin temperature
-    _tleaf = t_on ? nanmean([_layer.t for _layer in spac.LEAVES]) : _df_tlf;
+    _tleaf = nanmean([_layer.t for _layer in spac.LEAVES]);
     push!(spac.MEMORY.tem, _tleaf);
     if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
     update!(spac, config; t_clm = nanmean(spac.MEMORY.tem));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
     if !t_on
+        _df_tlf::FT = dfr.T_LEAF;
+        _df_ts1::FT = dfr.T_SOIL_1;
+        _df_ts2::FT = dfr.T_SOIL_2;
+        _df_ts3::FT = dfr.T_SOIL_3;
+        _df_ts4::FT = dfr.T_SOIL_4;
         update!(spac, config; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
     end;
     if !θ_on
+        _df_sw1::FT = dfr.SWC_1;
+        _df_sw2::FT = dfr.SWC_2;
+        _df_sw3::FT = dfr.SWC_3;
+        _df_sw4::FT = dfr.SWC_4;
         update!(spac, config; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
     end;
 
@@ -118,6 +119,7 @@ end
 #     2023-Mar-28: save swcs and temperatures based on t_on and θ_on
 #     2023-Mar-29: add option to load initialial state from weather driver
 #     2023-Apr-13: add spac config to function call
+#     2023-Aug-25: add method to run spac simulations using externally prepared variables661
 #
 #######################################################################################################################################################################################################
 """
@@ -132,6 +134,15 @@ end
                 selection = :,
                 t_on::Bool = true,
                 θ_on::Bool = true)
+    simulation!(config::SPACConfiguration{FT},
+                spac::MultiLayerSPAC{FT},
+                wdf::DataFrame;
+                initialial_state::Union{Nothing,Bool} = true,
+                p_on::Bool = true,
+                saving::Union{Nothing,String} = nothing,
+                selection = :,
+                t_on::Bool = true,
+                θ_on::Bool = true) where {FT}
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
@@ -144,6 +155,11 @@ Run simulation on site level, given
 - `selection` Run selection of data, default is : (namely 1:end)
 - `t_on` If true, plant energy budget is on, do not prescribe the temperatures
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
+
+The second method can be used to run externally prepared config, spac, and weather driver, given
+- `config` SPAC configuration
+- `spac` SPAC
+- `wdf` Weather driver dataframe
 
 """
 function simulation! end
@@ -161,26 +177,39 @@ simulation!(wd_tag::String,
     _config = spac_config(gmdict);
     _spac = spac(gmdict, _config);
     _wdf = weather_driver(wd_tag, gmdict; appending = appending, displaying = displaying);
-    _wdfr = eachrow(_wdf);
+
+    simulation!(_config, _spac, _wdf; initialial_state = initialial_state, p_on = p_on, saving = saving, selection = selection, t_on = t_on, θ_on = θ_on);
+
+    return _wdf
+);
+
+simulation!(config::SPACConfiguration{FT},
+            spac::MultiLayerSPAC{FT},
+            wdf::DataFrame;
+            initialial_state::Union{Nothing,Bool} = true,
+            p_on::Bool = true,
+            saving::Union{Nothing,String} = nothing,
+            selection = :,
+            t_on::Bool = true,
+            θ_on::Bool = true) where {FT} = (
+    _wdfr = eachrow(wdf);
 
     # initialize spac based on initialial_state
     if initialial_state isa Bool
-        prescribe!(_spac, _config, _wdfr[1]; t_on = false, θ_on = false);
+        prescribe!(spac, config, _wdfr[1]; t_on = false, θ_on = false);
     end;
 
     # iterate through the time steps
     @showprogress for _dfr in _wdfr[selection]
-        simulation!(_spac, _config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+        simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
     # save simulation results to hard drive
     if !isnothing(saving)
-        save_nc!(saving, _wdf[selection,2:end]);
-
-        return nothing
+        save_nc!(saving, wdf[selection,2:end]);
     end;
 
-    return _wdf
+    return nothing
 );
 
 simulation!(spac::MultiLayerSPAC{FT},

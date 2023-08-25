@@ -1,6 +1,6 @@
 module EmeraldFrontier
 
-using DataFrames: DataFrameRow
+using DataFrames: DataFrame, DataFrameRow
 using Dates: isleapyear
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
