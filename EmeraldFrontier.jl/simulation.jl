@@ -119,7 +119,8 @@ end
 #     2023-Mar-28: save swcs and temperatures based on t_on and θ_on
 #     2023-Mar-29: add option to load initialial state from weather driver
 #     2023-Apr-13: add spac config to function call
-#     2023-Aug-25: add method to run spac simulations using externally prepared variables661
+#     2023-Aug-25: add method to run spac simulations using externally prepared variables
+#     2023-Aug-26: add debug information
 #
 #######################################################################################################################################################################################################
 """
@@ -180,7 +181,7 @@ simulation!(wd_tag::String,
 
     simulation!(_config, _spac, _wdf; initialial_state = initialial_state, p_on = p_on, saving = saving, selection = selection, t_on = t_on, θ_on = θ_on);
 
-    return _wdf
+    return isnothing(saving) ? _wdf : nothing
 );
 
 simulation!(config::SPACConfiguration{FT},
@@ -221,6 +222,8 @@ simulation!(spac::MultiLayerSPAC{FT},
             δt::Number = 3600,
             θ_on::Bool = true
 ) where {FT<:AbstractFloat} = (
+    (; DEBUG) = config;
+
     # read the data out of dataframe row to reduce memory allocation
     _df_dif::FT = dfr.RAD_DIF;
     _df_dir::FT = dfr.RAD_DIR;
@@ -248,6 +251,14 @@ simulation!(spac::MultiLayerSPAC{FT},
         dfr.SIF740 = TROPOMI_SIF740(config, spac);
         dfr.SIF757 = OCO2_SIF759(config, spac);
         dfr.SIF771 = OCO2_SIF770(config, spac);
+
+        # display the debug information
+        if DEBUG
+            if any(isnan, (dfr.BLUE, dfr.EVI, dfr.NDVI, dfr.NIR, dfr.NIRvI, dfr.NIRvR, dfr.PAR, dfr.PPAR, dfr.RED, dfr.SIF683, dfr.SIF740, dfr.SIF757, dfr.SIF771))
+                @info "Debugging" dfr.BLUE dfr.EVI dfr.NDVI dfr.NIR dfr.NIRvI dfr.NIRvR dfr.PAR dfr.PPAR dfr.RED dfr.SIF683 dfr.SIF740 dfr.SIF757 dfr.SIF771;
+                @error "NaN detected when computing remote sensing variables";
+            end;
+        end;
     else
         dfr.BLUE   = NaN;
         dfr.EVI    = NaN;
@@ -264,6 +275,13 @@ simulation!(spac::MultiLayerSPAC{FT},
         dfr.MOD_SWC_2 = spac.SOIL.LAYERS[2].θ;
         dfr.MOD_SWC_3 = spac.SOIL.LAYERS[3].θ;
         dfr.MOD_SWC_4 = spac.SOIL.LAYERS[4].θ;
+
+        if DEBUG
+            if any(isnan, (dfr.MOD_SWC_1, dfr.MOD_SWC_2, dfr.MOD_SWC_3, dfr.MOD_SWC_4))
+                @info "Debugging" dfr.MOD_SWC_1 dfr.MOD_SWC_2 dfr.MOD_SWC_3 dfr.MOD_SWC_4;
+                @error "NaN detected when computing soil water contents";
+            end;
+        end;
     end;
     if t_on
         _tleaf = [_leaf.t for _leaf in spac.LEAVES];
@@ -274,6 +292,13 @@ simulation!(spac::MultiLayerSPAC{FT},
         dfr.MOD_T_S_2    = spac.SOIL.LAYERS[2].t;
         dfr.MOD_T_S_3    = spac.SOIL.LAYERS[3].t;
         dfr.MOD_T_S_4    = spac.SOIL.LAYERS[4].t;
+
+        if DEBUG
+            if any(isnan, (dfr.MOD_T_L_MAX, dfr.MOD_T_L_MEAN, dfr.MOD_T_L_MIN, dfr.MOD_T_S_1, dfr.MOD_T_S_2, dfr.MOD_T_S_3, dfr.MOD_T_S_4))
+                @info "Debugging" dfr.MOD_T_L_MAX dfr.MOD_T_L_MEAN dfr.MOD_T_L_MIN dfr.MOD_T_S_1 dfr.MOD_T_S_2 dfr.MOD_T_S_3 dfr.MOD_T_S_4;
+                @error "NaN detected when computing soil and leaf temperatures";
+            end;
+        end;
     end;
 
     # save the total flux into the DataFrame
@@ -281,6 +306,13 @@ simulation!(spac::MultiLayerSPAC{FT},
     dfr.F_CO2 = CNPP(spac);
     dfr.F_GPP = GPP(spac);
     dfr.F_H2O = T_VEG(spac);
+
+    if DEBUG
+        if any(isnan, (dfr.F_CO2, dfr.F_GPP, dfr.F_H2O))
+            @info "Debugging" dfr.BETA dfr.F_CO2 dfr.F_GPP dfr.F_H2O;
+            @error "NaN detected when computing fluxes";
+        end;
+    end;
 
     return nothing
 );

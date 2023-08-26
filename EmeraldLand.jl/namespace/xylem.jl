@@ -349,7 +349,7 @@ Base.@kwdef mutable struct LeafHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
     "Maximal leaf xylem hydraulic conductance per leaf area `[mol s⁻¹ MPa⁻¹ m⁻²]`"
     K_SLA::FT = 0.04
     "Total capaciatance at Ψ = 0 `[mol m⁻²]`"
-    V_MAXIMUM::FT = 20
+    V_MAXIMUM::FT = 100 * 1e-6 * ρ_H₂O(FT) / M_H₂O(FT)
 
     # Embedded structures
     "Flow profile"
@@ -417,7 +417,7 @@ Base.@kwdef mutable struct RootHydraulics{FT<:AbstractFloat} <: AbstractHydrauli
     "Root cross-section area `[m²]`"
     AREA::FT = 1
     "Rhizosphere  conductance `[mol s⁻¹ MPa⁻¹]`"
-    K_RHIZ::FT = 5e14
+    K_RHIZ::FT = 5e20
     "Maximal xylem hydraulic conductivity `[mol s⁻¹ MPa⁻¹ m⁻²]`"
     K_X::FT = 25
     "Length `[m]`"
