@@ -71,7 +71,7 @@ soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) w
         if DEBUG
             if any(isnan, (_cp_gas, _slayer._cp, _slayer.t))
                 @info "Debugging" _cp_gas _slayer._cp _slayer.t;
-                @error "NaN detected when computing soil temperature at layer $(_i)";
+                error("NaN detected when computing soil temperature at layer $(_i)");
             end;
         end;
     end;

@@ -53,7 +53,7 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT<:AbstractFl
 
     # add support to C4 photosynthesis
     if gmdict["C3C4"] == "C4"
-        @error "C4 photosynthesis to be setted up";
+        error("C4 photosynthesis to be setted up");
     end;
 
     # update the vcmax for C3 model

@@ -45,7 +45,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
             if any(isnan, (_slayer.k, _slayer.ψ, _slayer._kd, _slayer._λ_thermal))
                 @info "Debugging" _slayer.θ;
                 @info "Debugging" _slayer.k _slayer.ψ _slayer._kd _slayer._λ_thermal;
-                @error "NaN detected in soil_infiltration! when computing soil layer hydraulic and thermal properties";
+                error("NaN detected in soil_infiltration! when computing soil layer hydraulic and thermal properties");
             end;
         end;
     end;
@@ -58,7 +58,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
     if DEBUG
         if any(isnan, (LAYERS[1].∂θ∂t, LAYERS[1].∂e∂t))
             @info "Debugging" LAYERS[1].∂θ∂t LAYERS[1].∂e∂t;
-            @error "NaN detected in soil_infiltration! when computing top layer water and energy budget from rain and radiation";
+            error("NaN detected in soil_infiltration! when computing top layer water and energy budget from rain and radiation");
         end;
     end;
 
@@ -88,7 +88,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
         if DEBUG
             if any(isnan, (SOIL._k[_i], SOIL._δψ[_i], SOIL._q[_i], SOIL._λ_thermal[_i], SOIL._δt[_i], SOIL._q_thermal[_i]))
                 @info "Debugging" SOIL._k[_i] SOIL._δψ[_i] SOIL._q[_i] SOIL._λ_thermal[_i] SOIL._δt[_i] SOIL._q_thermal[_i];
-                @error "NaN detected in soil_infiltration! when computing water and energy flow between soil layers";
+                error("NaN detected in soil_infiltration! when computing water and energy flow between soil layers");
             end;
         end;
 
@@ -102,7 +102,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
         if DEBUG
             if any(isnan, (LAYERS[_i].∂θ∂t, LAYERS[_i+1].∂θ∂t, LAYERS[_i].∂e∂t, LAYERS[_i+1].∂e∂t))
                 @info "Debugging" LAYERS[_i].∂θ∂t LAYERS[_i+1].∂θ∂t LAYERS[_i].∂e∂t LAYERS[_i+1].∂e∂t;
-                @error "NaN detected in soil_infiltration! when computing water and energy budget from flow between soil layers";
+                error("NaN detected in soil_infiltration! when computing water and energy budget from flow between soil layers");
             end;
         end;
     end;
@@ -132,7 +132,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt:
         if DEBUG
             if any(isnan, (_ps, _δθ_v, _slayer.θ, _slayer.e))
                 @info "Debugging" _ps _δθ_v _slayer.θ _slayer.e;
-                @error "NaN detected in soil_infiltration! when computing water budget from condensation and mass flow";
+                error("NaN detected in soil_infiltration! when computing water budget from condensation and mass flow");
             end;
         end;
     end;

@@ -47,7 +47,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
     if DEBUG
         if any(isnan, LAYERS[1].∂n∂t) || any(isnan, (_factor, _v_gas))
             @info "Debugging" _factor _v_gas LAYERS[1].∂n∂t[1] LAYERS[1].∂n∂t[2] LAYERS[1].∂n∂t[3] LAYERS[1].∂n∂t[4] LAYERS[1].∂n∂t[5];
-            @error "NaN in soil_diffusion! at layer 1";
+            error("NaN in soil_diffusion! at layer 1");
         end;
     end;
 
@@ -67,7 +67,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
         if DEBUG
             if any(isnan, (_ratei1, _ratei2, _ratei3, _ratei4, _ratei5, _ratej1, _ratej2, _ratej3, _ratej4, _ratej5))
                 @info "Debugging" _ratei1 _ratei2 _ratei3 _ratei4 _ratei5 _ratej1 _ratej2 _ratej3 _ratej4 _ratej5;
-                @error "NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing diffusion coefficient";
+                error("NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing diffusion coefficient");
             end;
         end;
 
@@ -90,7 +90,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
         if DEBUG
             if any(isnan, (_ratio1, _ratio2, _ratio3, _ratio4, _ratio5, _drate1, _drate2, _drate3, _drate4, _drate5))
                 @info "Debugging" _ratio1 _ratio2 _ratio3 _ratio4 _ratio5 _drate1 _drate2 _drate3 _drate4 _drate5;
-                @error "NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing diffusion rate";
+                error("NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing diffusion rate");
             end;
         end;
 
@@ -110,7 +110,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
                            LAYERS[_i+1].∂n∂t[1], LAYERS[_i+1].∂n∂t[2], LAYERS[_i+1].∂n∂t[3], LAYERS[_i+1].∂n∂t[4], LAYERS[_i+1].∂n∂t[5]))
                 @info "Debugging" LAYERS[_i].∂n∂t[1] LAYERS[_i].∂n∂t[2] LAYERS[_i].∂n∂t[3] LAYERS[_i].∂n∂t[4] LAYERS[_i].∂n∂t[5];
                 @info "Debugging" LAYERS[_i+1].∂n∂t[1], LAYERS[_i+1].∂n∂t[2], LAYERS[_i+1].∂n∂t[3], LAYERS[_i+1].∂n∂t[4], LAYERS[_i+1].∂n∂t[5];
-                @error "NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing ∂n∂t";
+                error("NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing ∂n∂t");
             end;
         end;
 
@@ -122,7 +122,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
         if DEBUG
             if any(isnan, (_δe_gas, LAYERS[_i].∂e∂t, LAYERS[_i+1].∂e∂t))
                 @info "Debugging" _δe_gas LAYERS[_i].∂e∂t LAYERS[_i+1].∂e∂t;
-                @error "NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing ∂e∂t";
+                error("NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing ∂e∂t");
             end;
         end;
     end;
@@ -155,7 +155,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT
         if DEBUG
             if any(isnan, (_δθ, _slayer.TRACES.n_CH₄, _slayer.TRACES.n_CO₂, _slayer.TRACES.n_H₂O, _slayer.TRACES.n_N₂, _slayer.TRACES.n_O₂))
                 @info "Debugging" _δθ _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_H₂O _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂;
-                @error "NaN detected in soil_diffusion! dxdt";
+                error("NaN detected in soil_diffusion! dxdt");
             end;
         end;
     end;

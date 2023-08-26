@@ -52,7 +52,7 @@ function soil_source_sink!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{F
         if DEBUG
             if any(isnan, (LAYERS[ROOTS_INDEX[_i]].∂θ∂t, LAYERS[ROOTS_INDEX[_i]].∂e∂t))
                 @info "Debugging" LAYERS[ROOTS_INDEX[_i]].∂θ∂t LAYERS[ROOTS_INDEX[_i]].∂e∂t;
-                @error "NaN detected in soil_source_sink! at layer $(ROOTS_INDEX[_i])";
+                error("NaN detected in soil_source_sink! at layer $(ROOTS_INDEX[_i])");
             end;
         end;
     end;

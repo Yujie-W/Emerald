@@ -259,7 +259,7 @@ simulation!(spac::MultiLayerSPAC{FT},
         if DEBUG
             if any(isnan, (dfr.BLUE, dfr.EVI, dfr.NDVI, dfr.NIR, dfr.NIRvI, dfr.NIRvR, dfr.PAR, dfr.PPAR, dfr.RED, dfr.SIF683, dfr.SIF740, dfr.SIF757, dfr.SIF771))
                 @info "Debugging" dfr.BLUE dfr.EVI dfr.NDVI dfr.NIR dfr.NIRvI dfr.NIRvR dfr.PAR dfr.PPAR dfr.RED dfr.SIF683 dfr.SIF740 dfr.SIF757 dfr.SIF771;
-                @error "NaN detected when computing remote sensing variables";
+                error("NaN detected when computing remote sensing variables");
             end;
         end;
     else
@@ -282,7 +282,7 @@ simulation!(spac::MultiLayerSPAC{FT},
         if DEBUG
             if any(isnan, (dfr.MOD_SWC_1, dfr.MOD_SWC_2, dfr.MOD_SWC_3, dfr.MOD_SWC_4))
                 @info "Debugging" dfr.MOD_SWC_1 dfr.MOD_SWC_2 dfr.MOD_SWC_3 dfr.MOD_SWC_4;
-                @error "NaN detected when computing soil water contents";
+                error("NaN detected when computing soil water contents");
             end;
         end;
     end;
@@ -299,7 +299,7 @@ simulation!(spac::MultiLayerSPAC{FT},
         if DEBUG
             if any(isnan, (dfr.MOD_T_L_MAX, dfr.MOD_T_L_MEAN, dfr.MOD_T_L_MIN, dfr.MOD_T_S_1, dfr.MOD_T_S_2, dfr.MOD_T_S_3, dfr.MOD_T_S_4))
                 @info "Debugging" dfr.MOD_T_L_MAX dfr.MOD_T_L_MEAN dfr.MOD_T_L_MIN dfr.MOD_T_S_1 dfr.MOD_T_S_2 dfr.MOD_T_S_3 dfr.MOD_T_S_4;
-                @error "NaN detected when computing soil and leaf temperatures";
+                error("NaN detected when computing soil and leaf temperatures");
             end;
         end;
     end;
@@ -313,7 +313,7 @@ simulation!(spac::MultiLayerSPAC{FT},
     if DEBUG
         if any(isnan, (dfr.F_CO2, dfr.F_GPP, dfr.F_H2O))
             @info "Debugging" dfr.BETA dfr.F_CO2 dfr.F_GPP dfr.F_H2O;
-            @error "NaN detected when computing fluxes";
+            error("NaN detected when computing fluxes");
         end;
     end;
 

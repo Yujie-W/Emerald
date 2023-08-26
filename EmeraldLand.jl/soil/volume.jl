@@ -37,7 +37,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         if DEBUG
             if any(isnan, (_i_dry, _j_dry, _j_max))
                 @info "Debugging" _i_dry _j_dry _j_max;
-                @error "NaN detected in volume_balance! between layer $(_i) and layer $(_i+1)";
+                error("NaN detected in volume_balance! between layer $(_i) and layer $(_i+1)");
             end;
         end;
 
@@ -62,7 +62,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
                                _ilayer.TRACES.n_CH₄, _ilayer.TRACES.n_CO₂, _ilayer.TRACES.n_N₂, _ilayer.TRACES.n_O₂, _ilayer.e))
                     @info "Debugging" _jlayer.TRACES.n_CH₄ _jlayer.TRACES.n_CO₂ _jlayer.TRACES.n_N₂ _jlayer.TRACES.n_O₂ _jlayer.e;
                     @info "Debugging" _ilayer.TRACES.n_CH₄ _ilayer.TRACES.n_CO₂ _ilayer.TRACES.n_N₂ _ilayer.TRACES.n_O₂ _ilayer.e;
-                    @error "NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving air from upper layer to lower layer";
+                    error("NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving air from upper layer to lower layer");
                 end;
             end;
         end;
@@ -80,7 +80,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
             if DEBUG
                 if any(isnan, (_jlayer.θ, _ilayer.θ, _jlayer.e, _ilayer.e))
                     @info "Debugging" _jlayer.θ _ilayer.θ _jlayer.e _ilayer.e;
-                    @error "NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving water from upper layer to lower layer";
+                    error("NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving water from upper layer to lower layer");
                 end;
             end;
         end;
@@ -104,7 +104,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
                                _ilayer.TRACES.n_CH₄, _ilayer.TRACES.n_CO₂, _ilayer.TRACES.n_N₂, _ilayer.TRACES.n_O₂, _ilayer.e))
                     @info "Debugging" _jlayer.TRACES.n_CH₄ _jlayer.TRACES.n_CO₂ _jlayer.TRACES.n_N₂ _jlayer.TRACES.n_O₂ _jlayer.e;
                     @info "Debugging" _ilayer.TRACES.n_CH₄ _ilayer.TRACES.n_CO₂ _ilayer.TRACES.n_N₂ _ilayer.TRACES.n_O₂ _ilayer.e;
-                    @error "NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving air from lower layer to upper layer";
+                    error("NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving air from lower layer to upper layer");
                 end;
             end;
         end;
@@ -119,7 +119,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
     if DEBUG
         if any(isnan, (_s_dry, _a_dry, _s_max))
             @info "Debugging" _s_dry _a_dry _s_max;
-            @error "NaN detected in volume_balance! when moving air from top soil from/to atmosphere";
+            error("NaN detected in volume_balance! when moving air from top soil from/to atmosphere");
         end;
     end;
 
@@ -145,7 +145,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
                 @info "Debugging" _n_mass _a_dry;
                 @info "Debugging" _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂ _slayer.e;
                 @info "Debugging" _alayer.n_CH₄ _alayer.n_CO₂ _alayer.n_N₂ _alayer.n_O₂ _alayer.e;
-                @error "NaN detected in volume_balance! when moving air from atmosphere to top soil";
+                error("NaN detected in volume_balance! when moving air from atmosphere to top soil");
             end;
         end;
     elseif _s_max < _s_dry
@@ -168,7 +168,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
                            _alayer.n_CH₄, _alayer.n_CO₂, _alayer.n_N₂, _alayer.n_O₂, _alayer.e))
                 @info "Debugging" _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂ _slayer.e;
                 @info "Debugging" _alayer.n_CH₄ _alayer.n_CO₂ _alayer.n_N₂ _alayer.n_O₂ _alayer.e;
-                @error "NaN detected in volume_balance! when moving air from top soil to atmosphere";
+                error("NaN detected in volume_balance! when moving air from top soil to atmosphere");
             end;
         end;
     end;
@@ -213,7 +213,7 @@ function surface_runoff!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         if DEBUG
             if any(isnan, (_cp, _t, _runoff, LAYERS[1].θ, LAYERS[1].e, SOIL.runoff))
                 @info "Debugging" _cp _t _runoff LAYERS[1].θ LAYERS[1].e SOIL.runoff;
-                @error "NaN detected in surface_runoff!";
+                error("NaN detected in surface_runoff!");
             end;
         end;
     end;

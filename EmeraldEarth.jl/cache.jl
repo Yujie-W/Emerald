@@ -6,6 +6,8 @@
 #     2023-Mar-13: initialize CACHE_STATE at the same time
 #     2023-Mar-13: initialize CACHE_CONFIG at the same time
 #     2023-Jun-15: make sure prescribed swc does not exceed the limits
+# Bug fixes
+#     2023-Aug-26: make sure sza < 89 when total radiation is higher than 10 W m⁻²
 #
 #######################################################################################################################################################################################################
 """
@@ -133,7 +135,8 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     CACHE_SPAC.METEO.rad_lw = wd_params["RAD_LW"];
 
     # update solar zenith angle based on the time
-    CACHE_SPAC.ANGLES.sza = solar_zenith_angle(CACHE_SPAC.LATITUDE, FT(wd_params["FDOY"]));
+    _sza = solar_zenith_angle(CACHE_SPAC.LATITUDE, FT(wd_params["FDOY"]));
+    CACHE_SPAC.ANGLES.sza = (wd_params["RAD_DIR"] + wd_params["RAD_DIF"] > 10) ? min(_sza, 88.999) : _sza;
 
     # prescribe soil water content
     if "SWC" in keys(wd_params)
@@ -202,7 +205,7 @@ function griddingmachine_data(data::Vector, year::Int, d::Int)
     elseif _n == 52
         _bounds = [collect(0:7:361); 367]
     else
-        @error "This temporal resolution is not supported: $(_n)!";
+        error("This temporal resolution is not supported: $(_n)!");
     end
 
     _ind = findfirst(d .<= _bounds) - 1
