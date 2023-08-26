@@ -8,6 +8,8 @@
 #     2023-Apr-13: add spac config to function call
 #     2023-Jun-15: add a controller over rad to make sure it is >= 0
 #     2023-Aug-25: make soil and leaf temperature and soil moisture optional
+# Bug fixes
+#     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88.999
 #
 #######################################################################################################################################################################################################
 """
@@ -101,7 +103,8 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     spac.METEO.rad_lw = _df_lwr;
 
     # update solar zenith angle based on the time
-    spac.ANGLES.sza = solar_zenith_angle(spac.LATITUDE, FT(_df_doy));
+    _sza = solar_zenith_angle(spac.LATITUDE, FT(_df_doy));
+    spac.ANGLES.sza = (_df_dir + _df_dif > 10) ? min(_sza, 88.999) : _sza;
 
     return nothing
 end
