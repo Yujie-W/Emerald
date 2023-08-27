@@ -156,3 +156,33 @@ function run_experiment_1!(; force::Bool = false)
 
     return nothing
 end
+
+
+# this part is to test why the simulation is not working
+#=
+
+site = "NR1";
+# create the spac to use in all the simulations
+gmdict = prepare_gm_dict(site, 2017);
+spac = prepare_spac(gmdict);
+
+# run the model for multiple years
+year = 2018;
+modfile = "$(@__DIR__)/output/ERA5_$(site)_$(year).nc";
+gmdict = prepare_gm_dict(site, year);
+wdf = prepare_weather_driver(gmdict, "ERA5");
+wdfr = eachrow(wdf);
+simulation!(CONFIG, spac, wdf; initialial_state = false, saving = modfile);
+
+
+# make a deep copy of the spac to debug
+# spac_bak = deepcopy(spac);
+
+
+# read back in the spac from the backup
+spac = deepcopy(spac_bak);
+for dfr in wdfr[3860:end]
+    simulation!(spac, CONFIG, dfr; p_on = true, t_on = true, θ_on = true);
+end;
+
+=#

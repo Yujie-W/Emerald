@@ -40,6 +40,7 @@ function update! end
 #     2023-Jun-15: make sure prescribed swc does not exceed the limits
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Aug-25: add option to set yo hydraulic conductance profiles for root, trunk, branches, and leaves
+#     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
 #
 #######################################################################################################################################################################################################
 """
@@ -193,7 +194,7 @@ update!(spac::MultiLayerSPAC{FT},
     if !isnothing(kmax)
         # set up the kmax assuming 50% resistance in root, 25% in stem, and 25% in leaves
         _ks = if kmax isa Number
-            _trunk_percent = (TRUNK.HS.ΔH + BRANCHES[end].HS.ΔH) / TRUNK.HS.ΔH;
+            _trunk_percent = TRUNK.HS.ΔH / (TRUNK.HS.ΔH + BRANCHES[end].HS.ΔH);
             (2 * kmax, 4 * kmax / _trunk_percent, 4 * kmax / (1 - _trunk_percent), 4 * kmax)
         else
             @assert length(kmax) == 4 "kmax must be a number or a tuple of length 4";

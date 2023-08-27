@@ -124,6 +124,7 @@ end
 #     2023-Apr-13: add spac config to function call
 #     2023-Aug-25: add method to run spac simulations using externally prepared variables
 #     2023-Aug-26: add debug information
+#     2023-Aug-27: show ind at debug mode, otherwise show progress bar
 #
 #######################################################################################################################################################################################################
 """
@@ -196,6 +197,8 @@ simulation!(config::SPACConfiguration{FT},
             selection = :,
             t_on::Bool = true,
             θ_on::Bool = true) where {FT} = (
+    (; DEBUG) = config;
+
     _wdfr = eachrow(wdf);
 
     # initialize spac based on initialial_state
@@ -204,8 +207,18 @@ simulation!(config::SPACConfiguration{FT},
     end;
 
     # iterate through the time steps
-    @showprogress for _dfr in _wdfr[selection]
-        simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+    if DEBUG
+        for _dfr in _wdfr[selection]
+            @show _dfr.ind;
+            #if _dfr.ind == 3860
+            #    break;
+            #end;
+            simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+        end;
+    else
+        @showprogress for _dfr in _wdfr[selection]
+            simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+        end;
     end;
 
     # save simulation results to hard drive

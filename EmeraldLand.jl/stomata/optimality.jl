@@ -113,6 +113,16 @@ function ∂A∂E end
     _e2 = _gh2 * (_p_s - air.p_H₂O) / P_AIR;
     _a2 = leaves.PSM.a_net;
 
+    #=
+    DEBUG = true;
+    if DEBUG
+        if any(isnan, (_p_s, _gs1, _gh1, _e1, _a1, _gs2, _gh2, _gc2, _e2, _a2, (_a2 - _a1) / (_e2 - _e1)))
+            @info "Debugging" leaves.t leaves.HS.p_leaf _p_s _gs1 _gh1 _e1 _a1 _gs2 _gh2 _gc2 _e2 _a2 (_a2 - _a1) / (_e2 - _e1);
+            error("NaN in ∂A∂E at leaves $(ind)");
+        end;
+    end;
+    =#
+
     return (_a2 - _a1) / (_e2 - _e1)
 );
 

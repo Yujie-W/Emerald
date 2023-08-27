@@ -109,6 +109,7 @@ end
 #     2023-Apr-13: move RAD_LW and RAD_SW to Meteorology
 #     2023-Apr-26: use a constructor rather than @kwdef
 #     2023-Jun-16: remove fields DIM_*
+#     2023-Aug-27: make corrections over the delta height of the xylem
 #
 #######################################################################################################################################################################################################
 """
@@ -203,14 +204,14 @@ MultiLayerSPAC(
         Stem{FT}(
             HS = StemHydraulics{FT}(
                 AREA = basal_area / config.DIM_LAYER,
-                ΔH = (min(zs[3], air_bounds[_ind_layer[_i]+1]) - air_bounds[_ind_layer[_i]])
+                ΔH = (min(zs[3], air_bounds[_ind_layer[_i]+1]) - zs[2])
             )
         ) for _i in 1:config.DIM_LAYER];
     _roots = Root{FT}[
         Root{FT}(
             HS = RootHydraulics{FT}(
                 AREA = basal_area / config.DIM_ROOT,
-                ΔH = (soil_bounds[_ind_root[_i]] - max(zs[1], soil_bounds[_ind_root[_i]+1]))
+                ΔH = (0 - max(zs[1], soil_bounds[_ind_root[_i]+1]))
             )
         ) for _i in 1:config.DIM_ROOT];
 

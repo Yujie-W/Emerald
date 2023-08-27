@@ -168,7 +168,17 @@ Return the marginal increase of stomatal conductance, given
 ∂g∂t(leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT<:AbstractFloat} = ∂g∂t(leaves.SM, leaves, air, ind; β = β, δe = δe);
 
 ∂g∂t(sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT<:AbstractFloat} = (
-    return max(-0.001, min(0.001, sm.K * (∂A∂E(leaves, air, ind) - ∂Θ∂E(sm, leaves, air, ind; δe = δe))))
+    _dade = ∂A∂E(leaves, air, ind);
+    _dtde = ∂Θ∂E(sm, leaves, air, ind; δe = δe);
+
+    #=
+    if any(isnan, (_dade, _dtde))
+        @info "Debugging" _dade _dtde;
+        error("NaN detected in ∂g∂t calculation!");
+    end;
+    =#
+
+    return max(-0.001, min(0.001, sm.K * (_dade - _dtde)))
 );
 
 ∂g∂t(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT<:AbstractFloat} = (

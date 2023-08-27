@@ -248,6 +248,11 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
     _attr = Dict(var_name => label * "_SL", "unit" => "Same as $(_file_in)");
     save_nc!(_file_out, var_name, _matn, _attr);
 
+    # set the variables to nothing to clean the memory
+    _time = nothing;
+    _matn = nothing;
+    _attr = nothing;
+
     return nothing;
 );
 
