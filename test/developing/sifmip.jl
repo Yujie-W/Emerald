@@ -181,7 +181,8 @@ simulation!(CONFIG, spac, wdf; initialial_state = false, saving = modfile);
 
 # read back in the spac from the backup
 spac = deepcopy(spac_bak);
-for dfr in wdfr[3860:end]
+for dfr in wdfr[4571:end]
+    @show dfr.ind;
     simulation!(spac, CONFIG, dfr; p_on = true, t_on = true, θ_on = true);
 end;
 

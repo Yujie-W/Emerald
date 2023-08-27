@@ -8,6 +8,7 @@
 #     2022-Jul-07: add the method for Leaves2D (shaded leaves)
 #     2022-Jul-07: add the method for Leaves2D (sunlit leaves)
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
+#     2023-Aug-23: add nan check for some methods (not all, to do later)
 # To do
 #     TODO: figure out why the ratios are 1.35 and 1.6, and make them more accurate
 #
@@ -113,17 +114,13 @@ function ∂A∂E end
     _e2 = _gh2 * (_p_s - air.p_H₂O) / P_AIR;
     _a2 = leaves.PSM.a_net;
 
-    #=
-    DEBUG = true;
-    if DEBUG
-        if any(isnan, (_p_s, _gs1, _gh1, _e1, _a1, _gs2, _gh2, _gc2, _e2, _a2, (_a2 - _a1) / (_e2 - _e1)))
-            @info "Debugging" leaves.t leaves.HS.p_leaf _p_s _gs1 _gh1 _e1 _a1 _gs2 _gh2 _gc2 _e2 _a2 (_a2 - _a1) / (_e2 - _e1);
-            error("NaN in ∂A∂E at leaves $(ind)");
-        end;
+    _dade = (_a2 - _a1) / (_e2 - _e1);
+    if isnan(_dade)
+        @info "Debugging" _e1 _a1 _gs1 _gh1 _e2 _a2 _gs2 _gh2 _gc2;
+        error("NaN detected when computing ∂A∂E!");
     end;
-    =#
 
-    return (_a2 - _a1) / (_e2 - _e1)
+    return _dade
 );
 
 

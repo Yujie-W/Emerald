@@ -210,9 +210,6 @@ simulation!(config::SPACConfiguration{FT},
     if DEBUG
         for _dfr in _wdfr[selection]
             @show _dfr.ind;
-            #if _dfr.ind == 3860
-            #    break;
-            #end;
             simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
         end;
     else

@@ -9,6 +9,7 @@
 #     2022-Jul-01: fix a typo in function call
 #     2022-Jul-12: move function from StomataModels.jl to PlantHydraulics.jl
 #     2022-Nov-18: force the beta to be within (0,1]
+#     2023-Aug-27: add nan check for beta calculation of empirical models (optimality models have a beta = nan)
 #
 #######################################################################################################################################################################################################
 """
@@ -26,11 +27,23 @@ Return the β factor based on relative conductance or soil potential/pressure, g
 """
 function β_factor end
 
-β_factor(f::Function, vc::AbstractXylemVC{FT}, x_25::FT) where {FT<:AbstractFloat} = FT(max(eps(FT), min(1, f(relative_hydraulic_conductance(vc, x_25)))));
+β_factor(f::Function, vc::AbstractXylemVC{FT}, x_25::FT) where {FT<:AbstractFloat} = (
+    _β = FT(max(eps(FT), min(1, f(relative_hydraulic_conductance(vc, x_25)))));
 
-β_factor(f::Function, vc::AbstractSoilVC{FT}, x_25::FT) where {FT<:AbstractFloat} = FT(max(eps(FT), min(1, f(relative_hydraulic_conductance(vc, true, x_25)))));
+    return isnan(_β) ? error("Computed β is NaN") : _β
+);
 
-β_factor(f::Function, x_25::FT) where {FT<:AbstractFloat} = FT(max(eps(FT), min(1, f(x_25))));
+β_factor(f::Function, vc::AbstractSoilVC{FT}, x_25::FT) where {FT<:AbstractFloat} = (
+    _β = FT(max(eps(FT), min(1, f(relative_hydraulic_conductance(vc, true, x_25)))));
+
+    return isnan(_β) ? error("Computed β is NaN") : _β
+);
+
+β_factor(f::Function, x_25::FT) where {FT<:AbstractFloat} = (
+    _β = FT(max(eps(FT), min(1, f(x_25))));
+
+    return isnan(_β) ? error("Computed β is NaN") : _β
+);
 
 β_factor(sm::AbstractStomataModel{FT}) where {FT<:AbstractFloat} = FT(NaN);
 
@@ -48,6 +61,7 @@ function β_factor end
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
 #     2022-Nov-18: use root K to weigh the beta among root layers
 #     2023-Mar-27: weigh the beta among root layers only if flow rate is positive (if all flows are negative, beta = 1)
+#     2023-Aug-27: add nan check for beta calculation of empirical models
 # Bug fixes
 #     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaves, β, β.PARAM_X) as I forgot to write β_factor! before `()`
 #
@@ -178,6 +192,8 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
         _sumf += _f_in;
     end;
 
+    @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
+
     if _deno > 0
         β.β₁ = _norm / _deno;
     elseif _sumf < 0
@@ -212,6 +228,8 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
         _sumf += _f_in;
     end;
 
+    @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
+
     if _deno > 0
         β.β₁ = _norm / _deno;
     elseif _sumf < 0
@@ -237,6 +255,8 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
         _deno += _kmax;
         _sumf += _f_in;
     end;
+
+    @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
 
     if _deno > 0
         β.β₁ = _norm / _deno;

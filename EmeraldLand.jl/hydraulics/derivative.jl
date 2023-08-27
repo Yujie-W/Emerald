@@ -6,6 +6,7 @@
 #     2022-Jul-08: add method for LeafHydraulics
 #     2022-Jul-08: add methods for Leaf, Leaves1D, and Leaves2D
 #     2022-Jul-08: add option δe to be more general
+#     2023-Aug-27: add nan check
 #
 #######################################################################################################################################################################################################
 """
@@ -31,6 +32,12 @@ function ∂E∂P end
 
     _p1 = xylem_end_pressure(hs, flow, t);
     _p2 = xylem_end_pressure(hs, flow + δe, t);
+    _dedp = -δe / (_p2 - _p1);
 
-    return -δe / (_p2 - _p1)
+    if isnan(_dedp)
+        @info "Debugging" _p1 _p2 flow t δe;
+        error("NaN detected when computing ∂E∂P!");
+    end;
+
+    return _dedp
 );

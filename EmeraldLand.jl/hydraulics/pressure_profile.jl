@@ -11,8 +11,11 @@
 #     2022-May-25: add method for MonoElementSPAC (without partitioning)
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
 #     2023-Mar-28: set p_ups of root to p_crit of root if disconnected
+# Bug fixes
+#     2023-Aug-27: if p exceeds 0, set it to 0
 # To do
 #     TODO: add method for NonSteadyStateFlow
+#     TODO: allow xylem to recover when p exceeds 0
 #
 #######################################################################################################################################################################################################
 """
@@ -64,6 +67,11 @@ xylem_end_pressure(hs::LeafHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractF
         end;
 
         _p_end -= flow / _k;
+
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
     end;
 
     return _p_end
@@ -84,6 +92,11 @@ xylem_end_pressure(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, flow::FT, T::F
     for _ in 1:10
         _k = relative_hydraulic_conductance(slayer.VC, true, _p_25) * K_RHIZ * 10 / _f_vis;
         _p_25 -= flow / _k;
+
+        # if _p_25 is higher than 0, that means water is refills, set it to 0
+        if _p_25 > 0
+            _p_25 = 0;
+        end;
     end;
 
     # convert the end pressure back to that at liquid pressure to be matric potential
@@ -102,6 +115,11 @@ xylem_end_pressure(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, flow::FT, T::F
         end;
 
         _p_end -= flow / _k + ρg_MPa(FT) * ΔH / DIM_XYLEM;
+
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
     end;
 
     return _p_end
@@ -128,6 +146,11 @@ xylem_end_pressure(hs::StemHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractF
         end;
 
         _p_end -= flow / _k + ρg_MPa(FT) * ΔH / DIM_XYLEM;
+
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
     end;
 
     return _p_end
@@ -277,6 +300,11 @@ xylem_pressure_profile!(hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT
 
         _p_end -= mode.flow / _k;
 
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
+
         hs._p_element[_i] = _p_end;
     end;
 
@@ -318,6 +346,11 @@ xylem_pressure_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T:
 
         _p_end -= mode.f_in / _k;
 
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
+
         hs._p_element[_i] = _p_end;
     end;
 
@@ -348,6 +381,11 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Ste
     for _ in 1:10
         _k = relative_hydraulic_conductance(slayer.VC, true, _p_25) * K_RHIZ * 10 / _f_vis;
         _p_25 -= mode.flow / _k;
+
+        # if _p_25 is higher than 0, that means water is refills, set it to 0
+        if _p_25 > 0
+            _p_25 = 0;
+        end;
     end;
 
     # convert the end pressure back to that at liquid pressure to be matric potential
@@ -371,6 +409,11 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Ste
         end;
 
         _p_end -= mode.flow / _k + ρg_MPa(FT) * ΔH / DIM_XYLEM;
+
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
 
         hs._p_element[_i] = _p_end;
     end;
@@ -396,6 +439,11 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Non
     for _ in 1:10
         _k = relative_hydraulic_conductance(slayer.VC, true, _p_25) * K_RHIZ * 10 / _f_vis;
         _p_25 -= mode.f_in / _k;
+
+        # if _p_25 is higher than 0, that means water is refills, set it to 0
+        if _p_25 > 0
+            _p_25 = 0;
+        end;
     end;
 
     # convert the end pressure back to that at liquid pressure to be matric potential
@@ -420,6 +468,11 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Non
         end;
 
         _p_end -= mode._f_element[_i] / _k + ρg_MPa(FT) * ΔH / DIM_XYLEM;
+
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
 
         hs._p_element[_i] = _p_end;
     end;
@@ -457,6 +510,11 @@ xylem_pressure_profile!(hs::StemHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT
 
         _p_end -= mode.flow / _k + ρg_MPa(FT) * ΔH / DIM_XYLEM;
 
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
+
         hs._p_element[_i] = _p_end;
     end;
 
@@ -492,6 +550,11 @@ xylem_pressure_profile!(hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T:
         end;
 
         _p_end -= mode._f_element[_i] / _k + ρg_MPa(FT) * ΔH / DIM_XYLEM;
+
+        # if _p_end is higher than 0, that means water is refills, set it to 0
+        if _p_end > 0
+            _p_end = 0;
+        end;
 
         hs._p_element[_i] = _p_end;
     end;

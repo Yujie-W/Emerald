@@ -10,6 +10,7 @@
 #     2022-Feb-02: add method for ComplexVC
 #     2022-Feb-02: add a reference kr for more customized calculations
 #     2022-May-25: iterate through VCS rather than its indices for ComplexVC
+#     2023-Aug-27: add nan check
 # Bug fixes
 #     2023-Mar-02: fix an issue with Weibull function critical pressure
 #
@@ -28,11 +29,23 @@ Return the critical xylem water pressure at 25 °C that triggers a given amount 
 """
 function critical_pressure end
 
-critical_pressure(vc::LogisticVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = log(kr / (vc.A + 1 - kr * vc.A)) / vc.B;
+critical_pressure(vc::LogisticVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+    _p = log(kr / (vc.A + 1 - kr * vc.A)) / vc.B;
 
-critical_pressure(vc::PowerVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = -1 * ((1 - kr) / (kr * vc.A)) ^ (1 / vc.B);
+    return isnan(_p) ? error("NaN detected when computing critial pressure!") : _p
+);
 
-critical_pressure(vc::WeibullVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = -1 * (-1 * log(kr)) ^ (1 / vc.C) * vc.B;
+critical_pressure(vc::PowerVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+    _p = -1 * ((1 - kr) / (kr * vc.A)) ^ (1 / vc.B);
+
+    return isnan(_p) ? error("NaN detected when computing critial pressure!") : _p
+);
+
+critical_pressure(vc::WeibullVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+    _p = -1 * (-1 * log(kr)) ^ (1 / vc.C) * vc.B;
+
+    return isnan(_p) ? error("NaN detected when computing critial pressure!") : _p
+);
 
 critical_pressure(vc::ComplexVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
     (; VCS) = vc;
@@ -42,5 +55,5 @@ critical_pressure(vc::ComplexVC{FT}, kr::FT = FT(0.001)) where {FT<:AbstractFloa
         _p_crit = min(_p_crit, critical_pressure(_vc, kr));
     end;
 
-    return _p_crit
+    return isnan(_p_crit) ? error("NaN detected when computing critial pressure!") : _p_crit
 );
