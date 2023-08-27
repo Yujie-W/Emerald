@@ -70,7 +70,7 @@ xylem_end_pressure(hs::LeafHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractF
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end = FT(0);
         end;
     end;
 
@@ -95,7 +95,7 @@ xylem_end_pressure(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, flow::FT, T::F
 
         # if _p_25 is higher than 0, that means water is refills, set it to 0
         if _p_25 > 0
-            _p_25 = 0;
+            _p_25 = FT(0);
         end;
     end;
 
@@ -118,7 +118,7 @@ xylem_end_pressure(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, flow::FT, T::F
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end = FT(0);
         end;
     end;
 
@@ -149,7 +149,7 @@ xylem_end_pressure(hs::StemHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractF
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end = FT(0);
         end;
     end;
 
@@ -302,7 +302,7 @@ xylem_pressure_profile!(hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end= FT(0);
         end;
 
         hs._p_element[_i] = _p_end;
@@ -348,7 +348,7 @@ xylem_pressure_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T:
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end= FT(0);
         end;
 
         hs._p_element[_i] = _p_end;
@@ -384,7 +384,7 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Ste
 
         # if _p_25 is higher than 0, that means water is refills, set it to 0
         if _p_25 > 0
-            _p_25 = 0;
+            _p_25= FT(0);
         end;
     end;
 
@@ -412,7 +412,7 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Ste
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end= FT(0);
         end;
 
         hs._p_element[_i] = _p_end;
@@ -442,7 +442,7 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Non
 
         # if _p_25 is higher than 0, that means water is refills, set it to 0
         if _p_25 > 0
-            _p_25 = 0;
+            _p_25= FT(0);
         end;
     end;
 
@@ -471,7 +471,7 @@ xylem_pressure_profile!(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::Non
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end= FT(0);
         end;
 
         hs._p_element[_i] = _p_end;
@@ -512,7 +512,7 @@ xylem_pressure_profile!(hs::StemHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end= FT(0);
         end;
 
         hs._p_element[_i] = _p_end;
@@ -553,7 +553,7 @@ xylem_pressure_profile!(hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T:
 
         # if _p_end is higher than 0, that means water is refills, set it to 0
         if _p_end > 0
-            _p_end = 0;
+            _p_end= FT(0);
         end;
 
         hs._p_element[_i] = _p_end;
