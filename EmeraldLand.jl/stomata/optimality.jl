@@ -9,6 +9,7 @@
 #     2022-Jul-07: add the method for Leaves2D (sunlit leaves)
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Aug-23: add nan check for some methods (not all, to do later)
+#     2023-Aug-27: make sure D >= 1 when compute dAdE
 # To do
 #     TODO: figure out why the ratios are 1.35 and 1.6, and make them more accurate
 #
@@ -33,11 +34,12 @@ function ∂A∂E end
     (; P_AIR) = air;
 
     _p_s = saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
     _gs1 = leaf.g_H₂O_s;
     _gh1 = 1 / (1 / _gs1 + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e1  = _gh1 * (_p_s - air.p_H₂O) / P_AIR;
+    _e1  = _gh1 * _d / P_AIR;
     _a1  = leaf.a_net;
 
     # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
@@ -45,7 +47,7 @@ function ∂A∂E end
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaf.g_CO₂_b));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaf.g_CO₂_b);
     leaf_photosynthesis!(leaf, air, _gc2, leaf.ppar, leaf.t);
-    _e2 = _gh2 * (_p_s - air.p_H₂O) / P_AIR;
+    _e2 = _gh2 * _d / P_AIR;
     _a2 = leaf.PSM.a_net;
 
     return (_a2 - _a1) / (_e2 - _e1)
@@ -55,11 +57,12 @@ function ∂A∂E end
     (; P_AIR) = air;
 
     _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
     _gs1 = leaves.g_H₂O_s[ind];
     _gh1 = 1 / (1 / _gs1 + 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
-    _e1  = _gh1 * (_p_s - air.p_H₂O) / P_AIR;
+    _e1  = _gh1 * _d / P_AIR;
     _a1  = leaves.a_net[ind];
 
     # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
@@ -67,7 +70,7 @@ function ∂A∂E end
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaves.g_CO₂_b[ind]);
     leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar[ind], leaves.t[ind]);
-    _e2 = _gh2 * (_p_s - air.p_H₂O) / P_AIR;
+    _e2 = _gh2 * _d / P_AIR;
     _a2 = leaves.PSM.a_net;
 
     return (_a2 - _a1) / (_e2 - _e1)
@@ -77,11 +80,12 @@ function ∂A∂E end
     (; P_AIR) = air;
 
     _p_s = saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
     _gs1 = leaves.g_H₂O_s_shaded;
     _gh1 = 1 / (1 / _gs1 + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e1  = _gh1 * (_p_s - air.p_H₂O) / P_AIR;
+    _e1  = _gh1 * _d / P_AIR;
     _a1  = leaves.a_net_shaded;
 
     # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
@@ -89,7 +93,7 @@ function ∂A∂E end
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaves.g_CO₂_b);
     leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_shaded, leaves.t);
-    _e2 = _gh2 * (_p_s - air.p_H₂O) / P_AIR;
+    _e2 = _gh2 * _d / P_AIR;
     _a2 = leaves.PSM.a_net;
 
     return (_a2 - _a1) / (_e2 - _e1)
@@ -99,11 +103,12 @@ function ∂A∂E end
     (; P_AIR) = air;
 
     _p_s = saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
     _gs1 = leaves.g_H₂O_s_sunlit[ind];
     _gh1 = 1 / (1 / _gs1 + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e1  = _gh1 * (_p_s - air.p_H₂O) / P_AIR;
+    _e1  = _gh1 * _d / P_AIR;
     _a1  = leaves.a_net_sunlit[ind];
 
     # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
@@ -111,7 +116,7 @@ function ∂A∂E end
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaves.g_CO₂_b);
     leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_sunlit[ind], leaves.t);
-    _e2 = _gh2 * (_p_s - air.p_H₂O) / P_AIR;
+    _e2 = _gh2 * _d / P_AIR;
     _a2 = leaves.PSM.a_net;
 
     _dade = (_a2 - _a1) / (_e2 - _e1);
@@ -218,6 +223,7 @@ function ∂Θ∂E end
 #     2022-Jul-08: add method for Wang2SM model on Leaf
 #     2022-Jul-08: use ∂E∂P from PlantHydraulics.jl
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
+#     2023-Aug-27: make sure D >= 1 when compute dΘdE
 #
 #######################################################################################################################################################################################################
 """
@@ -240,10 +246,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaf;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaf.g_H₂O_s;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
@@ -254,10 +263,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaf;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaf.g_H₂O_s;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
@@ -270,10 +282,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaf;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaf.g_H₂O_s;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
@@ -281,7 +296,7 @@ Return the marginal risk for stomatal opening, given
     _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
 
     # compute maximum A
-    _ghm = HS._e_crit / (saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O) * P_AIR;
+    _ghm = HS._e_crit / _d * P_AIR;
     _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaf.g_CO₂_b));
     _gcm = 1 / (FT(1.6) / _gsm + 1 / leaf.g_CO₂_b);
     leaf_photosynthesis!(leaf, air, _gcm, leaf.ppar, leaf.t);
@@ -294,10 +309,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaf;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the A and E at the current setting
     _gs = leaf.g_H₂O_s;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     return leaf.a_net / max(eps(FT), (HS._e_crit - _e))
 );
@@ -307,10 +325,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaf;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaf.g_H₂O_s;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
@@ -352,11 +373,12 @@ Return the marginal risk for stomatal opening, given
     (; P_AIR) = air;
 
     _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
-    _e  = _gh * (_p_s - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaves, _e, ind; δe = δe);
 
@@ -370,11 +392,12 @@ Return the marginal risk for stomatal opening, given
     (; P_AIR) = air;
 
     _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
-    _e  = _gh * (_p_s - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaves, _e, ind; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaves, _e, ind; δe = -δe);
@@ -389,11 +412,12 @@ Return the marginal risk for stomatal opening, given
 
     _hs = (ind == 1 ? HS : HS2);
     _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
-    _e  = _gh * (_p_s - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaves, _e, ind; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaves, _e, ind; δe = -δe);
@@ -401,7 +425,7 @@ Return the marginal risk for stomatal opening, given
     _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
 
     # compute maximum A
-    _ghm = _hs._e_crit / (_p_s - air.p_H₂O) * P_AIR;
+    _ghm = _hs._e_crit / _d * P_AIR;
     _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
     _gcm = 1 / (FT(1.6) / _gsm + 1 / leaves.g_CO₂_b[ind]);
     leaf_photosynthesis!(leaves, air, _gcm, leaves.ppar[ind], leaves.t[ind]);
@@ -415,11 +439,12 @@ Return the marginal risk for stomatal opening, given
     (; P_AIR) = air;
 
     _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
     _gs = leaves.g_H₂O_s[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
-    _e  = _gh * (_p_s - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     return leaves.a_net[ind] / max(eps(FT), (HS._e_crit - _e))
 );
@@ -431,11 +456,12 @@ Return the marginal risk for stomatal opening, given
 
     _hs = (ind == 1 ? HS : HS2);
     _p_s = ind == 1 ? saturation_vapor_pressure(leaves.t[ind], leaves.HS.p_leaf * 1000000) : saturation_vapor_pressure(leaves.t[ind], leaves.HS2.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b[ind]));
-    _e  = _gh * (_p_s - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaves, _e, ind; δe = δe);
 
@@ -475,10 +501,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_shaded;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaves, _e; δe = δe);
 
@@ -489,10 +518,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_shaded;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaves, _e; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaves, _e; δe = -δe);
@@ -506,11 +538,12 @@ Return the marginal risk for stomatal opening, given
     (; P_AIR) = air;
 
     _p_s = saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
 
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_shaded;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (_p_s - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaves, _e; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaves, _e; δe = -δe);
@@ -518,7 +551,7 @@ Return the marginal risk for stomatal opening, given
     _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
 
     # compute maximum A
-    _ghm = HS._e_crit / (_p_s - air.p_H₂O) * P_AIR;
+    _ghm = HS._e_crit / _d * P_AIR;
     _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gcm = 1 / (FT(1.6) / _gsm + 1 / leaves.g_CO₂_b);
     leaf_photosynthesis!(leaves, air, _gcm, leaves.ppar_shaded, leaves.t);
@@ -531,10 +564,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the A and E at the current setting
     _gs = leaves.g_H₂O_s_shaded;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     return leaves.a_net_shaded / max(eps(FT), (HS._e_crit - _e))
 );
@@ -544,10 +580,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_shaded;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaves, _e; δe = δe);
 
@@ -588,10 +627,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_sunlit[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaves, _e; δe = δe);
 
@@ -602,10 +644,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_sunlit[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaves, _e; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaves, _e; δe = -δe);
@@ -618,10 +663,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_sunlit[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P_1 = ∂E∂P(leaves, _e; δe = δe);
     _∂E∂P_2 = ∂E∂P(leaves, _e; δe = -δe);
@@ -629,7 +677,7 @@ Return the marginal risk for stomatal opening, given
     _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
 
     # compute maximum A
-    _ghm = HS._e_crit / (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) * P_AIR;
+    _ghm = HS._e_crit / _d * P_AIR;
     _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gcm = 1 / (FT(1.6) / _gsm + 1 / leaves.g_CO₂_b);
     leaf_photosynthesis!(leaves, air, _gcm, leaves.ppar_sunlit[ind], leaves.t);
@@ -642,10 +690,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the A and E at the current setting
     _gs = leaves.g_H₂O_s_sunlit[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     return leaves.a_net_sunlit[ind] / max(eps(FT), (HS._e_crit - _e))
 );
@@ -655,10 +706,13 @@ Return the marginal risk for stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the E at the current setting
     _gs = leaves.g_H₂O_s_sunlit[ind];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
 
     _∂E∂P = ∂E∂P(leaves, _e; δe = δe);
 
@@ -707,11 +761,14 @@ Return the ∂Θ∂E for nocturnal stomatal opening, given
     (; HS) = leaf;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the A and E at the current setting
     _gs = leaf.g_H₂O_s;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
     _gc = 1 / (FT(1.6) / _gs + 1 / leaf.g_CO₂_b);
-    _e  = _gh * (saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
     leaf_photosynthesis!(leaf, air, _gc, sm.ppar_mem, leaf.t);
     _a  = leaf.PSM.a_net;
 
@@ -723,11 +780,14 @@ Return the ∂Θ∂E for nocturnal stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the A and E at the current setting
     _gs = leaves.g_H₂O_s[1];
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b[1]));
     _gc = 1 / (FT(1.6) / _gs + 1 / leaves.g_CO₂_b[1]);
-    _e  = _gh * (saturation_vapor_pressure(leaves.t[1], leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
     leaf_photosynthesis!(leaves, air, _gc, sm.ppar_mem, leaves.t[1]);
     _a  = leaves.PSM.a_net;
 
@@ -739,11 +799,14 @@ Return the ∂Θ∂E for nocturnal stomatal opening, given
     (; HS) = leaves;
     (; P_AIR) = air;
 
+    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _d = max(1, _p_s - air.p_H₂O);
+
     # compute the A and E at the current setting
     _gs = leaves.g_H₂O_s_shaded;
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc = 1 / (FT(1.6) / _gs + 1 / leaves.g_CO₂_b);
-    _e  = _gh * (saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O) / P_AIR;
+    _e  = _gh * _d / P_AIR;
     leaf_photosynthesis!(leaves, air, _gc, sm.ppar_mem, leaves.t);
     _a  = leaves.PSM.a_net;
 

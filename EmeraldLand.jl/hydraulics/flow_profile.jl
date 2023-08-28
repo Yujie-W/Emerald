@@ -227,6 +227,7 @@ root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{
 #     2023-Mar-28: if root is disconnected, do not update its flow profile
 #     2023-Mar-28: if no root is connected to soil, set all flow to 0
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
+#     2023-Aug-23: add configuration to enable/disable leaf condensation
 #
 #######################################################################################################################################################################################################
 """
@@ -345,6 +346,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
         _ψ_soil = soil_ψ_25(_slayer.VC, _slayer.θ) * relative_surface_tension(_slayer.t);
         _p_crit = critical_pressure(_root.HS.VC) * relative_surface_tension(_root.t);
         if _ψ_soil <= _p_crit
+            @warn "Root $(_i) is now disconnected from soil!";
             disconnect!(_root);
         else
             _root._isconnected = true;
@@ -356,6 +358,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
     if _connected > 0
         spac._root_connection = true;
     else
+        @warn "Roots are now all disconnected from soil!"
         spac._root_connection = false;
         disconnect!(TRUNK);
         disconnect!.(BRANCHES);
@@ -483,19 +486,20 @@ xylem_flow_profile!(mode::NonSteadyStateFlow, f_out::FT) where {FT<:AbstractFloa
 
 """
 
-    xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
-    xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
+    xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
+    xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
 
 Update flow profiles for the soil-plant-air continuum (set up leaf flow rate from stomatal conductance first), given
+- `config` `SPACConfiguration` type struct
 - `spac` `MonoElementSPAC` or `MultiLayerSPAC` type SPAC system
 - `Δt` Time step length
 
 """
-xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     (; LEAF, ROOT, STEM) = spac;
 
     # 0. update leaf flow or f_out from stomatal conductance
-    xylem_flow_profile!(spac);
+    xylem_flow_profile!(config, spac);
 
     # 1. update the leaf flow profile
     xylem_flow_profile!(LEAF, Δt);
@@ -511,11 +515,11 @@ xylem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat
     return nothing
 );
 
-xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # 0. update leaf flow or f_out from stomatal conductance
-    xylem_flow_profile!(spac);
+    xylem_flow_profile!(config, spac);
 
     # 1. update the leaf flow profile
     xylem_flow_profile!.(LEAVES, Δt);
@@ -536,19 +540,22 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
     return nothing
 );
 
-xylem_flow_profile!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; ALLOW_LEAF_CONDENSATION) = config;
     (; AIR, LEAF) = spac;
 
     # update the
     _g = 1 / (1 / LEAF.g_H₂O_s + 1 / (FT(1.35) * LEAF.g_CO₂_b));
     _d = saturation_vapor_pressure(LEAF.t, LEAF.HS.p_leaf * 1000000) - AIR.p_H₂O;
+    ALLOW_LEAF_CONDENSATION ? nothing : _d = max(_d, 0);
     _f = _g * _d / AIR.P_AIR;
     xylem_flow_profile!(LEAF.HS.FLOW, _f);
 
     return nothing
 );
 
-xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; ALLOW_LEAF_CONDENSATION) = config;
     (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
     _nlayers = length(LEAVES);
@@ -564,6 +571,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 
         _g = _g_sh * (1 - _p_sl) + _g_sl * _p_sl;
         _d = saturation_vapor_pressure(LEAVES[_i].t, LEAVES[_i].HS.p_leaf * 1000000) - AIR[LEAVES_INDEX[_i]].p_H₂O;
+        ALLOW_LEAF_CONDENSATION ? nothing : _d = max(_d, 0);
         _f = _g * _d / AIR[LEAVES_INDEX[_i]].P_AIR;
 
         xylem_flow_profile!(LEAVES[_i].HS.FLOW, _f);

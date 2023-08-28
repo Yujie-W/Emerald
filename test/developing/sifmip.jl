@@ -109,7 +109,7 @@ function prepare_spac(gmdict::Dict)
 
     # change soil kmax to a higher value
     for _slayer in _spac.SOIL.LAYERS
-        _slayer.VC.K_MAX = 1e-4 / GRAVITY(FT) * 1e6 / M_H₂O(FT);
+        _slayer.VC.K_MAX = 1e-5 / GRAVITY(FT) * 1e6 / M_H₂O(FT);
     end;
 
     # set the limits of leaf gs within (0.0001, 0.1)

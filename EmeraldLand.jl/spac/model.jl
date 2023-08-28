@@ -69,7 +69,7 @@ soil_plant_air_continuum!(
     spac.SOIL.runoff = 0;
 
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
-    xylem_flow_profile!(spac, FT(0));
+    xylem_flow_profile!(config, spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
     spac._root_connection ? nothing : update!(spac, config; lai = 0);
 
@@ -110,7 +110,7 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT
     spac.SOIL.runoff = 0;
 
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
-    xylem_flow_profile!(spac, FT(0));
+    xylem_flow_profile!(config, spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
     spac._root_connection ? nothing : update!(spac, config; lai = 0);
 

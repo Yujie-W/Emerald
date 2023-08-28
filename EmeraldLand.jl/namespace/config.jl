@@ -12,6 +12,7 @@
 #     2023-Jun-20: move fields Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, and _COS²_Θ_INCL_AZI from spac canopy
 #     2023-Jun-20: move fields α_CLM, α_FITTING, and MAT_ρ from soil albedo
 #     2023-Jul-06: add field PRESCRIBE_AIR
+#     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #
 #######################################################################################################################################################################################################
 """
@@ -31,6 +32,9 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DEBUG::Bool = false
 
     # Prescribe parameters
+    "Allow leaf condensation"
+    ALLOW_LEAF_CONDENSATION::Bool = false
+    "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
 
     # File path to the Netcdf dataset
