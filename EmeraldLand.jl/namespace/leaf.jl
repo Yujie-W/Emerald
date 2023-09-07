@@ -1039,6 +1039,7 @@ end
 #     2023-Apr-13: move field APAR_CAR to SPACConfiguration
 #     2023-Jun-13: add field: etr_shaded, etr_sunlit
 #     2023-Jun-16: remove fields DIM_*
+#     2023-Sep-07: add water flow integrators
 #
 #######################################################################################################################################################################################################
 """
@@ -1115,6 +1116,10 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     ϕ_f_shaded::FT = 0
     "Fluorescence quantum yield for sunlit leaves `[-]`"
     ϕ_f_sunlit::Matrix{FT}
+    "Integrator for transpiration in"
+    ∫∂w∂t_in = 0
+    "Integrator for transpiration out"
+    ∫∂w∂t_out = 0
 
     # Cache variables
     "Combined specific heat capacity of leaf per area `[J K⁻¹ m⁻²]`"

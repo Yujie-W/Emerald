@@ -5,7 +5,7 @@ using Statistics: mean
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
 using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 
-using ..Constant: CP_D_MOL, CP_L_MOL, GAS_R, M_H₂O, T₂₅, ρg_MPa
+using ..Constant: CP_D_MOL, CP_L_MOL, CP_V_MOL, GAS_R, M_H₂O, T₂₅, ρg_MPa
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..Namespace: AbstractSoilVC, AbstractXylemVC, ComplexVC, LinearPVCurve, LogisticVC, PowerVC, SegmentedPVCurve, WeibullVC
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ

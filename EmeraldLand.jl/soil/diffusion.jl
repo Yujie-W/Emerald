@@ -5,6 +5,8 @@
 #    2023-Jun-29: copy function out of soil_budget!
 #    2023-Jun-29: add code to display debug information
 #     2023-Jul-06: add info into DEBUG code block
+#     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
+#     2023-Sep-07: fix a typo in the concentration calculations
 #
 #######################################################################################################################################################################################################
 """
@@ -27,7 +29,12 @@ Update diffusion rate among soil layers (and thus water and energy budgets), giv
 function soil_diffusion! end
 
 soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; DEBUG) = config;
+    (; ALLOW_SOIL_EVAPORATION, DEBUG) = config;
+
+    if !ALLOW_SOIL_EVAPORATION
+        return nothing
+    end;
+
     (; AIR, SOIL) = spac;
     (; DIM_SOIL, TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
     LAYERS = SOIL.LAYERS;
@@ -35,13 +42,13 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
     # update diffusion rate among layers
     _alayer = AIR[1];
     _factor = 2 * LAYERS[1]._kd;
-    _v_gas = max(0, LAYERS[1].VC.Θ_SAT - LAYERS[1].θ);
+    _v_gas = max(0, LAYERS[1].VC.Θ_SAT - LAYERS[1].θ) * LAYERS[1].ΔZ;
     if _v_gas > 0
-        LAYERS[1].∂n∂t[1] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CH₄, TRACE_AIR) * (LAYERS[1].TRACES.n_CH₄ / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_CH₄ / (GAS_R(FT) * _alayer.t));
-        LAYERS[1].∂n∂t[2] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CO₂, TRACE_AIR) * (LAYERS[1].TRACES.n_CO₂ / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_CO₂ / (GAS_R(FT) * _alayer.t));
-        LAYERS[1].∂n∂t[3] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_H₂O, TRACE_AIR) * (LAYERS[1].TRACES.n_H₂O / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_H₂O / (GAS_R(FT) * _alayer.t));
-        LAYERS[1].∂n∂t[4] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_N₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_N₂  / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_N₂  / (GAS_R(FT) * _alayer.t));
-        LAYERS[1].∂n∂t[5] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_O₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_O₂  / (LAYERS[1].ΔZ * _v_gas) - _alayer.p_O₂  / (GAS_R(FT) * _alayer.t));
+        LAYERS[1].∂n∂t[1] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CH₄, TRACE_AIR) * (LAYERS[1].TRACES.n_CH₄ / _v_gas - _alayer.p_CH₄ / (GAS_R(FT) * _alayer.t));
+        LAYERS[1].∂n∂t[2] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_CO₂, TRACE_AIR) * (LAYERS[1].TRACES.n_CO₂ / _v_gas - _alayer.p_CO₂ / (GAS_R(FT) * _alayer.t));
+        LAYERS[1].∂n∂t[3] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_H₂O, TRACE_AIR) * (LAYERS[1].TRACES.n_H₂O / _v_gas - _alayer.p_H₂O / (GAS_R(FT) * _alayer.t));
+        LAYERS[1].∂n∂t[4] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_N₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_N₂  / _v_gas - _alayer.p_N₂  / (GAS_R(FT) * _alayer.t));
+        LAYERS[1].∂n∂t[5] -= _factor * diffusive_coefficient(LAYERS[1].t, TRACE_O₂ , TRACE_AIR) * (LAYERS[1].TRACES.n_O₂  / _v_gas - _alayer.p_O₂  / (GAS_R(FT) * _alayer.t));
     end;
 
     if DEBUG
@@ -51,7 +58,11 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
         end;
     end;
 
+    # TODO: did I forget this term? (LAYERS[1].ΔZ * _v_gas)
     for _i in 1:DIM_SOIL-1
+        _v_gas_i = max(0, LAYERS[1].VC.Θ_SAT - LAYERS[1].θ) * LAYERS[_i].ΔZ;
+        _v_gas_j = max(0, LAYERS[1].VC.Θ_SAT - LAYERS[1].θ) * LAYERS[_i+1].ΔZ;
+
         # gas diffusion
         _ratei1 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_CH₄, TRACE_AIR);
         _ratei2 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_CO₂, TRACE_AIR);
@@ -65,8 +76,8 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
         _ratej5 = diffusive_coefficient(LAYERS[_i+1].t, TRACE_O₂ , TRACE_AIR);
 
         if DEBUG
-            if any(isnan, (_ratei1, _ratei2, _ratei3, _ratei4, _ratei5, _ratej1, _ratej2, _ratej3, _ratej4, _ratej5))
-                @info "Debugging" _ratei1 _ratei2 _ratei3 _ratei4 _ratei5 _ratej1 _ratej2 _ratej3 _ratej4 _ratej5;
+            if any(isnan, (_v_gas_i, _v_gas_j, _ratei1, _ratei2, _ratei3, _ratei4, _ratei5, _ratej1, _ratej2, _ratej3, _ratej4, _ratej5))
+                @info "Debugging" _v_gas_i _v_gas_j _ratei1 _ratei2 _ratei3 _ratei4 _ratei5 _ratej1 _ratej2 _ratej3 _ratej4 _ratej5;
                 error("NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing diffusion coefficient");
             end;
         end;
@@ -77,11 +88,11 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
             _ratio3 = 2 * LAYERS[_i]._kd * _ratei3 * LAYERS[_i+1]._kd * _ratej3 / (LAYERS[_i]._kd * _ratei3 + LAYERS[_i+1]._kd * _ratej3);
             _ratio4 = 2 * LAYERS[_i]._kd * _ratei4 * LAYERS[_i+1]._kd * _ratej4 / (LAYERS[_i]._kd * _ratei4 + LAYERS[_i+1]._kd * _ratej4);
             _ratio5 = 2 * LAYERS[_i]._kd * _ratei5 * LAYERS[_i+1]._kd * _ratej5 / (LAYERS[_i]._kd * _ratei5 + LAYERS[_i+1]._kd * _ratej5);
-            _drate1 = _ratio1 * (LAYERS[_i].TRACES.n_CH₄ / LAYERS[_i].ΔZ - LAYERS[_i+1].TRACES.n_CH₄ / LAYERS[_i+1].ΔZ);
-            _drate2 = _ratio2 * (LAYERS[_i].TRACES.n_CO₂ / LAYERS[_i].ΔZ - LAYERS[_i+1].TRACES.n_CO₂ / LAYERS[_i+1].ΔZ);
-            _drate3 = _ratio3 * (LAYERS[_i].TRACES.n_H₂O / LAYERS[_i].ΔZ - LAYERS[_i+1].TRACES.n_H₂O / LAYERS[_i+1].ΔZ);
-            _drate4 = _ratio4 * (LAYERS[_i].TRACES.n_N₂  / LAYERS[_i].ΔZ - LAYERS[_i+1].TRACES.n_N₂  / LAYERS[_i+1].ΔZ);
-            _drate5 = _ratio5 * (LAYERS[_i].TRACES.n_O₂  / LAYERS[_i].ΔZ - LAYERS[_i+1].TRACES.n_O₂  / LAYERS[_i+1].ΔZ);
+            _drate1 = _ratio1 * (LAYERS[_i].TRACES.n_CH₄ / _v_gas_i - LAYERS[_i+1].TRACES.n_CH₄ / _v_gas_j);
+            _drate2 = _ratio2 * (LAYERS[_i].TRACES.n_CO₂ / _v_gas_i - LAYERS[_i+1].TRACES.n_CO₂ / _v_gas_j);
+            _drate3 = _ratio3 * (LAYERS[_i].TRACES.n_H₂O / _v_gas_i - LAYERS[_i+1].TRACES.n_H₂O / _v_gas_j);
+            _drate4 = _ratio4 * (LAYERS[_i].TRACES.n_N₂  / _v_gas_i - LAYERS[_i+1].TRACES.n_N₂  / _v_gas_j);
+            _drate5 = _ratio5 * (LAYERS[_i].TRACES.n_O₂  / _v_gas_i - LAYERS[_i+1].TRACES.n_O₂  / _v_gas_j);
         else
             _ratio1 = _ratio2 = _ratio3 = _ratio4 = _ratio5 = 0;
             _drate1 = _drate2 = _drate3 = _drate4 = _drate5 = 0;
@@ -131,7 +142,12 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
 );
 
 soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
-    (; DEBUG) = config;
+    (; ALLOW_SOIL_EVAPORATION, DEBUG) = config;
+
+    if !ALLOW_SOIL_EVAPORATION
+        return nothing
+    end;
+
     (; SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 

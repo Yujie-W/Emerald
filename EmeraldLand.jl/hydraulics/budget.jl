@@ -13,6 +13,7 @@
 #     2023-Mar-27: redo the energy balance related to water transport by make a statement of whether the flow is positive or negative
 #     2023-May-19: use δlai per canopy layer
 #     2023-Aug-27: add nan check
+#     2023-Sep-07: bug fix for the energy budget of leaf as CP_V and CP_L are accounted for in the latent heat of vaporization function
 #
 #######################################################################################################################################################################################################
 """
@@ -97,7 +98,7 @@ plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
             LEAVES[_i].∂e∂t  = 0;
             LEAVES[_i].∂e∂t += (CANOPY.RADIATION.r_net_sw[DIM_LAYER+1-_i] + CANOPY.RADIATION.r_net_lw[DIM_LAYER+1-_i]) / CANOPY.δlai[_i];
             LEAVES[_i].∂e∂t -= flow_out(LEAVES[_i]) * M_H₂O(FT) * latent_heat_vapor(LEAVES[_i].t);
-            LEAVES[_i].∂e∂t -= flow_out(LEAVES[_i]) * CP_L_MOL(FT) * LEAVES[_i].t;
+            LEAVES[_i].∂e∂t -= flow_out(LEAVES[_i]) * CP_V_MOL(FT) * LEAVES[_i].t; # note here that CP_L_MOL is included in the latent_heat_vapor TD function
             LEAVES[_i].∂e∂t -= 2 * _g_be * CP_D_MOL(FT) * (LEAVES[_i].t - AIR[LEAVES_INDEX[_i]].t);
 
             if isnan(LEAVES[_i].∂e∂t)

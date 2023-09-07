@@ -15,6 +15,7 @@
 #     2023-Apr-08: set runoff to 0 at the beginning of each time interval
 #     2023-Apr-13: add config to function call
 #     2023-Jun-15: add judge for root connection (avoid a bug in non-vegetated land)
+#     2023-Sep-07: add ALLOW_LEAF_SHEDDING check
 #
 #######################################################################################################################################################################################################
 """
@@ -71,7 +72,7 @@ soil_plant_air_continuum!(
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(config, spac, FT(0));
     xylem_pressure_profile!(spac; update = update);
-    spac._root_connection ? nothing : update!(spac, config; lai = 0);
+    (!spac._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(spac, config; lai = 0) : nothing;
 
     # 2. run canopy RT
     canopy_radiation!(spac, config);

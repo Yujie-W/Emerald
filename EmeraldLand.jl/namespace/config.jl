@@ -13,6 +13,7 @@
 #     2023-Jun-20: move fields α_CLM, α_FITTING, and MAT_ρ from soil albedo
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
+#     2023-Sep-07: add field ALLOW_LEAF_SHEDDING, ALLOW_SOIL_EVAPORATION, and T_CLM
 #
 #######################################################################################################################################################################################################
 """
@@ -34,6 +35,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # Prescribe parameters
     "Allow leaf condensation"
     ALLOW_LEAF_CONDENSATION::Bool = false
+    "Allow leaf shedding"
+    ALLOW_LEAF_SHEDDING::Bool = false
+    "Allow soil evaporation"
+    ALLOW_SOIL_EVAPORATION::Bool = false
     "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
 
@@ -72,6 +77,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # General model information
     "Whether APAR absorbed by carotenoid is counted as PPAR"
     APAR_CAR::Bool = true
+    "Whether to acclimate leaf Vcmax and Jmax TD"
+    T_CLM::Bool = true
     "Whether to use CLM soil albedo scheme"
     α_CLM::Bool = false
     "Whether to fit the data from broadband to hyperspectral"

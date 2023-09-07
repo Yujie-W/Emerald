@@ -4,6 +4,7 @@
 # General
 #     2022-May-25: add Root structure
 #     2022-Jul-15: add fields e, ∂e∂t
+#     2023-Sep-07: add water flow integrators
 #
 #######################################################################################################################################################################################################
 """
@@ -31,6 +32,10 @@ Base.@kwdef mutable struct Root{FT<:AbstractFloat}
     e::FT = sum(HS.v_storage) * CP_L_MOL(FT) * t
     "Marginal increase in energy `[W]`"
     ∂e∂t::FT = 0
+    "Integrator for soil water extration `[mol m⁻² s⁻¹]`"
+    ∫∂w∂t_in::FT = 0
+    "Integrator for root water extration `[mol m⁻² s⁻¹]`"
+    ∫∂w∂t_out::FT = 0
 
     # Cache variable
     "Whether root is connected to soil"

@@ -125,6 +125,7 @@ end
 #     2023-Aug-25: add method to run spac simulations using externally prepared variables
 #     2023-Aug-26: add debug information
 #     2023-Aug-27: show ind at debug mode, otherwise show progress bar
+#     2023-Sep-07: initialize integrators when starting a new simulation in a long time step
 #
 #######################################################################################################################################################################################################
 """
@@ -210,7 +211,7 @@ simulation!(config::SPACConfiguration{FT},
     if DEBUG
         for _dfr in _wdfr[selection]
             @show _dfr.ind;
-            simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+            @time simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
         end;
     else
         @showprogress for _dfr in _wdfr[selection]
@@ -241,6 +242,15 @@ simulation!(spac::MultiLayerSPAC{FT},
     _df_dif::FT = dfr.RAD_DIF;
     _df_dir::FT = dfr.RAD_DIR;
 
+    # initialize the integrators
+    for _slayer in spac.SOIL.LAYERS
+        _slayer.∫∂w∂t_out = 0;
+    end;
+    for _rlayer in [spac.ROOTS; spac.TRUNK; spac.BRANCHES; spac.LEAVES]
+        _rlayer.∫∂w∂t_in = 0;
+        _rlayer.∫∂w∂t_out = 0;
+    end;
+
     # prescribe parameters
     prescribe!(spac, config, dfr; t_on = t_on, θ_on = θ_on);
 
@@ -248,6 +258,22 @@ simulation!(spac::MultiLayerSPAC{FT},
     for _ in 1:n_step
         soil_plant_air_continuum!(spac, config, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
+
+    # test if the integrated water flow is conserved
+    #=
+    if DEBUG
+        _sum_soil_out = sum([_slayer.∫∂w∂t_out for _slayer in spac.SOIL.LAYERS]);
+        _sum_root_in = sum([_rlayer.∫∂w∂t_in for _rlayer in spac.ROOTS]) / spac.SOIL.AREA;
+        _sum_root_out = sum([_rlayer.∫∂w∂t_out for _rlayer in spac.ROOTS]) / spac.SOIL.AREA;
+        _sum_trnk_in = spac.TRUNK.∫∂w∂t_in / spac.SOIL.AREA;
+        _sum_trnk_out = spac.TRUNK.∫∂w∂t_out / spac.SOIL.AREA;
+        _sum_stem_in = sum([_slayer.∫∂w∂t_in for _slayer in spac.BRANCHES]) / spac.SOIL.AREA;
+        _sum_stem_out = sum([_slayer.∫∂w∂t_out for _slayer in spac.BRANCHES]) / spac.SOIL.AREA;
+        _sum_leaf_in = [_slayer.∫∂w∂t_in for _slayer in spac.LEAVES]' * spac.CANOPY.δlai;
+        _sum_leaf_out = [_clayer.∫∂w∂t_out for _clayer in spac.LEAVES]' * spac.CANOPY.δlai;
+        @info "Debugging" _sum_soil_out _sum_root_in _sum_root_out _sum_trnk_in _sum_trnk_out _sum_stem_in _sum_stem_out _sum_leaf_in _sum_leaf_out spac.METEO.rain;
+    end;
+    =#
 
     # save the SIF and reflectance if there is sunlight
     if _df_dir + _df_dif >= 10

@@ -7,6 +7,8 @@
 #     2023-Apr-13: add CACHE_CONFIG in function
 #     2023-Jun-15: add some code for debugging (not used for actual simulations)
 #     2023-Jun-15: add option to display process information
+# To do
+#     TODO: use integrated value for GPP, ET, etc
 #
 #######################################################################################################################################################################################################
 """

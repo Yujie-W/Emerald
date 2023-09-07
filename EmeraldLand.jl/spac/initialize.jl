@@ -11,6 +11,7 @@
 #     2023-Jun-13: update N₂ and O₂ based on soil water content
 #     2023-Jun-13: add soil gas energy into soil e
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
+#     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
 #
 #######################################################################################################################################################################################################
 """
@@ -25,15 +26,18 @@ Initialize the SPAC, given
 function initialize! end
 
 initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+    (; ALLOW_SOIL_EVAPORATION) = config;
     (; CANOPY, LEAVES, SOIL) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
     for _slayer in SOIL.LAYERS
-        _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
-        _rt = GAS_R(FT) * _slayer.t;
-        _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000) * _slayer.ΔZ * _δθ / _rt;
-        _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
-        _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt;
+        if ALLOW_SOIL_EVAPORATION
+            _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
+            _rt = GAS_R(FT) * _slayer.t;
+            _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000) * _slayer.ΔZ * _δθ / _rt;
+            _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
+            _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt;
+        end;
         _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
         _slayer.e = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
     end;

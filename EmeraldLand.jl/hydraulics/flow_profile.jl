@@ -95,6 +95,8 @@ flow_out(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_out;
 #     2022-Jul-08: add method for root organ
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
 #     2023-Mar-28: return (NaN,0) if root is disconnected
+#     2023-Sep-07: update flow rate integrators
+#     2023-Sep-07: add root disconnection warning message
 #
 #######################################################################################################################################################################################################
 """
@@ -251,9 +253,25 @@ Update organ flow rate profile after setting up the flow rate out, given
 - `Δt` Time step length
 
 """
-xylem_flow_profile!(organ::Union{Leaf{FT}, Leaves2D{FT}, Stem{FT}}, Δt::FT) where {FT<:AbstractFloat} = xylem_flow_profile!(organ.HS, organ.t, Δt);
+xylem_flow_profile!(organ::Union{Leaves2D{FT}, Stem{FT}}, Δt::FT) where {FT<:AbstractFloat} = (
+    xylem_flow_profile!(organ.HS, organ.t, Δt);
+    organ.∫∂w∂t_in += flow_in(organ) * Δt;
+    organ.∫∂w∂t_out += flow_out(organ) * Δt;
 
-xylem_flow_profile!(organ::Root{FT}, Δt::FT) where {FT<:AbstractFloat} = organ._isconnected ? xylem_flow_profile!(organ.HS, organ.t, Δt) : nothing;
+    return nothing
+);
+
+xylem_flow_profile!(organ::Leaf{FT}, Δt::FT) where {FT<:AbstractFloat} = xylem_flow_profile!(organ.HS, organ.t, Δt);
+
+xylem_flow_profile!(organ::Root{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+    if organ._isconnected
+        xylem_flow_profile!(organ.HS, organ.t, Δt);
+        organ.∫∂w∂t_in += flow_in(organ) * Δt;
+        organ.∫∂w∂t_out += flow_out(organ) * Δt;
+    end;
+
+    return nothing
+);
 
 xylem_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     (; HS, HS2) = organ;
@@ -346,7 +364,6 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
         _ψ_soil = soil_ψ_25(_slayer.VC, _slayer.θ) * relative_surface_tension(_slayer.t);
         _p_crit = critical_pressure(_root.HS.VC) * relative_surface_tension(_root.t);
         if _ψ_soil <= _p_crit
-            @warn "Root $(_i) is now disconnected from soil!";
             disconnect!(_root);
         else
             _root._isconnected = true;
@@ -355,7 +372,11 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
     end;
 
     # if all roots are disconnected, set all flows to 0
+    # TODO: if leaf shedding is allowed, remember to update leaf area when roots are reconnected to the soil
     if _connected > 0
+        if !spac._root_connection
+            @warn "Roots are now reconnected to soil!";
+        end;
         spac._root_connection = true;
     else
         @warn "Roots are now all disconnected from soil!"

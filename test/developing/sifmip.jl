@@ -10,7 +10,7 @@ using GriddingMachine.Indexer: read_LUT
 using NetcdfIO: read_nc
 
 
-CONFIG = SPACConfiguration{Float64}(DEBUG = true);
+CONFIG = SPACConfiguration{Float64}(DEBUG = true, ALLOW_SOIL_EVAPORATION = true, T_CLM = false);
 MERRAFOLDER = "/home/wyujie/ProjectData/SIF_MIP/MERRA";
 
 
@@ -105,16 +105,16 @@ function prepare_spac(gmdict::Dict)
     end;
 
     # set plant kmax to 0.05 as in the GMD paper
-    update!(_spac, CONFIG; kmax = 0.1);
+    update!(_spac, CONFIG; kmax = 0.08);
 
     # change soil kmax to a higher value
     for _slayer in _spac.SOIL.LAYERS
-        _slayer.VC.K_MAX = 1e-5 / GRAVITY(FT) * 1e6 / M_H₂O(FT);
+        _slayer.VC.K_MAX = 1e-4 / GRAVITY(FT) * 1e6 / M_H₂O(FT);
     end;
 
-    # set the limits of leaf gs within (0.0001, 0.1)
+    # set the limits of leaf gs within (0.0001, 0.08)
     for _ilayer in _spac.LEAVES
-        _ilayer.G_LIMITS .= [1e-4, 0.1];
+        _ilayer.G_LIMITS .= [eps(FT), 0.08];
     end;
 
     # initialize the spac
@@ -133,7 +133,7 @@ function run_experiment_1!(; force::Bool = false)
         _spac = prepare_spac(_gmdict);
 
         # run the model for multiple years
-        for _year in [2018]
+        for _year in [2018,2019]
             _modfile = "$(@__DIR__)/output/ERA5_$(_site)_$(_year).nc";
             _figfile = "$(@__DIR__)/output/ERA5_$(_site)_$(_year).png";
             if !isfile(_modfile) || force

@@ -41,6 +41,7 @@ function update! end
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Aug-25: add option to set yo hydraulic conductance profiles for root, trunk, branches, and leaves
 #     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
+#     2023-Sep-07: add ALLOW_LEAF_CONDENSATION and T_CLM checks
 #
 #######################################################################################################################################################################################################
 """
@@ -133,7 +134,7 @@ update!(spac::MultiLayerSPAC{FT},
         vcmax::Union{Number,Nothing} = nothing,
         vcmax_expo::Union{Number,Nothing} = nothing
 ) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER) = config;
+    (; ALLOW_SOIL_EVAPORATION, DIM_LAYER, T_CLM) = config;
     (; AIR, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL, TRUNK) = spac;
 
     # update chlorophyll and carotenoid contents (and spectra)
@@ -185,8 +186,10 @@ update!(spac::MultiLayerSPAC{FT},
     # update Vcmax and Jmax TD
     if !isnothing(t_clm)
         for _leaf in LEAVES
-            _leaf.PSM.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-            _leaf.PSM.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+            if T_CLM
+                _leaf.PSM.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+                _leaf.PSM.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+            end;
         end;
     end;
 
@@ -219,11 +222,13 @@ update!(spac::MultiLayerSPAC{FT},
         for _i in eachindex(swcs)
             _slayer = SOIL.LAYERS[_i];
             _slayer.θ = max(_slayer.VC.Θ_RES + eps(FT), min(_slayer.VC.Θ_SAT - eps(FT), swcs[_i]));
-            _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
-            _rt = GAS_R(FT) * _slayer.t;
-            _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000) * _slayer.ΔZ * _δθ / _rt;
-            _slayer.TRACES.n_N₂  = AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
-            _slayer.TRACES.n_O₂  = AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt
+            if ALLOW_SOIL_EVAPORATION
+                _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
+                _rt = GAS_R(FT) * _slayer.t;
+                _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000) * _slayer.ΔZ * _δθ / _rt;
+                _slayer.TRACES.n_N₂  = AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
+                _slayer.TRACES.n_O₂  = AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt
+            end;
             _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
             _slayer.e = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
         end;

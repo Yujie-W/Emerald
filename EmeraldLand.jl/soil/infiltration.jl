@@ -5,6 +5,8 @@
 #     2023-Jun-29: copy function out of soil_budget!
 #     2023-Jun-30: add DEBUG mode to check for NaNs
 #     2023-Jul-06: add info into DEBUG code block
+#     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
+#     2023-Sep-07: add integrators for soil water budget
 #
 #######################################################################################################################################################################################################
 """
@@ -111,27 +113,42 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
 );
 
 soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
-    (; DEBUG) = config;
-    (; SOIL) = spac;
+    (; ALLOW_SOIL_EVAPORATION, DEBUG) = config;
+    (; METEO, SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
     # run the water transport (condensation + mass flow)
-    for _slayer in LAYERS
-        # account for evaporation and condensation to/from the air space
-        _ps = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000);
-        _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
+    for _i in eachindex(LAYERS)
+        _slayer = LAYERS[_i];
 
-        _slayer.θ += _δθ_v;
-        _slayer.e += _δθ_v * ρ_H₂O(FT) * CP_L(FT) * _slayer.t;
-        _slayer.e += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
+        # account for evaporation and condensation to/from the air space
+        if ALLOW_SOIL_EVAPORATION
+            _ps = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000);
+            _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
+
+            _slayer.θ += _δθ_v;
+            _slayer.e += _δθ_v * ρ_H₂O(FT) * CP_V(FT) * _slayer.t; # this energy is transferred from/to air, so use CP_V
+            _slayer.e += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
+
+            if DEBUG
+                if any(isnan, (_ps, _δθ_v, _slayer.θ, _slayer.e))
+                    @info "Debugging" _ps _δθ_v _slayer.θ _slayer.e;
+                    error("NaN detected in soil_infiltration! when computing water budget from condensation and mass flow");
+                end;
+            end;
+        end;
 
         # account for mass flow
         _slayer.θ += _slayer.∂θ∂t * δt;
         _slayer.e += _slayer.∂e∂t * δt / _slayer.ΔZ;
+        _slayer.∫∂w∂t_out -= _slayer.∂θ∂t * _slayer.ΔZ * δt *  ρ_H₂O(FT) / M_H₂O(FT);
+        if _i == 1
+            _slayer.∫∂w∂t_out += METEO.rain * δt;
+        end;
 
         if DEBUG
-            if any(isnan, (_ps, _δθ_v, _slayer.θ, _slayer.e))
-                @info "Debugging" _ps _δθ_v _slayer.θ _slayer.e;
+            if any(isnan, (_slayer.θ, _slayer.e))
+                @info "Debugging" _slayer.θ _slayer.e;
                 error("NaN detected in soil_infiltration! when computing water budget from condensation and mass flow");
             end;
         end;

@@ -6,6 +6,7 @@
 #     2023-Jul-06: sort the order of gas volume balance and water volume balance
 #     2023-Jul-06: add DEBUG code block
 #     2023-Jul-06: add PRESCRIBE_AIR mode to avoid the errors due to mass balance in air
+#     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
 #
 #######################################################################################################################################################################################################
 """
@@ -18,7 +19,12 @@ Balance the air volume in the soil so that pressure is in equilibrium, given
 
 """
 function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
-    (; DEBUG, PRESCRIBE_AIR) = config;
+    (; ALLOW_SOIL_EVAPORATION, DEBUG, PRESCRIBE_AIR) = config;
+
+    if !ALLOW_SOIL_EVAPORATION
+        return nothing
+    end;
+
     (; AIR, SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
@@ -182,6 +188,7 @@ end
 # Changes to the function
 # General
 #    2023-Jun-30: move function out of soil_budget!
+#     2023-Sep-07: add integrators for soil water budget
 #
 #######################################################################################################################################################################################################
 """
@@ -209,6 +216,7 @@ function surface_runoff!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         LAYERS[1].θ = LAYERS[1].VC.Θ_SAT;
         LAYERS[1].e -= _runoff / LAYERS[1].ΔZ * CP_L_MOL(FT) * _t;
         SOIL.runoff += _runoff;
+        LAYERS[1].∫∂w∂t_out -= _runoff;
 
         if DEBUG
             if any(isnan, (_cp, _t, _runoff, LAYERS[1].θ, LAYERS[1].e, SOIL.runoff))
