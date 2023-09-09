@@ -126,6 +126,7 @@ end
 #     2023-Aug-26: add debug information
 #     2023-Aug-27: show ind at debug mode, otherwise show progress bar
 #     2023-Sep-07: initialize integrators when starting a new simulation in a long time step
+#     2023-Sep-09: save the quantum yields when saving the simulation results
 #
 #######################################################################################################################################################################################################
 """
@@ -290,11 +291,12 @@ simulation!(spac::MultiLayerSPAC{FT},
         dfr.SIF740 = TROPOMI_SIF740(config, spac);
         dfr.SIF757 = OCO2_SIF759(config, spac);
         dfr.SIF771 = OCO2_SIF770(config, spac);
+        dfr.ΦD, dfr.ΦF, dfr.ΦN, dfr.ΦP = ΦDFNP(spac);
 
         # display the debug information
         if DEBUG
-            if any(isnan, (dfr.BLUE, dfr.EVI, dfr.NDVI, dfr.NIR, dfr.NIRvI, dfr.NIRvR, dfr.PAR, dfr.PPAR, dfr.RED, dfr.SIF683, dfr.SIF740, dfr.SIF757, dfr.SIF771))
-                @info "Debugging" dfr.BLUE dfr.EVI dfr.NDVI dfr.NIR dfr.NIRvI dfr.NIRvR dfr.PAR dfr.PPAR dfr.RED dfr.SIF683 dfr.SIF740 dfr.SIF757 dfr.SIF771;
+            if any(isnan, (dfr.BLUE, dfr.EVI, dfr.NDVI, dfr.NIR, dfr.NIRvI, dfr.NIRvR, dfr.PAR, dfr.PPAR, dfr.RED, dfr.SIF683, dfr.SIF740, dfr.SIF757, dfr.SIF771, dfr.ΦD, dfr.ΦF, dfr.ΦN, dfr.ΦP))
+                @info "Debugging" dfr.BLUE dfr.EVI dfr.NDVI dfr.NIR dfr.NIRvI dfr.NIRvR dfr.PAR dfr.PPAR dfr.RED dfr.SIF683 dfr.SIF740 dfr.SIF757 dfr.SIF771 dfr.ΦD dfr.ΦF dfr.ΦN dfr.ΦP;
                 error("NaN detected when computing remote sensing variables");
             end;
         end;
@@ -306,6 +308,10 @@ simulation!(spac::MultiLayerSPAC{FT},
         dfr.NIRvI  = NaN;
         dfr.NIRvR  = NaN;
         dfr.RED    = NaN;
+        dfr.ΦD     = NaN;
+        dfr.ΦF     = NaN;
+        dfr.ΦN     = NaN;
+        dfr.ΦP     = NaN;
     end;
 
     # save water contents and temperatures based on t_on and θ_on
