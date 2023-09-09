@@ -42,6 +42,7 @@ function leaf_spectra! end
 #     2022-Jul-28: run leaf_spectra! only if lwc differs from _v_storage
 #     2022-Aug-17: add option reabsorb to function to enable/disable SIF reabsorption
 #     2023-Apr-13: rename option APAR_CAR to apar_car
+#     2023-Sep-09: remove option reabsorb as it is computed by default and saved to mat_b_chl and mat_f_chl
 # To do
 #     TODO: add References for this methods
 #
@@ -54,7 +55,6 @@ function leaf_spectra! end
                 lha::HyperspectralAbsorption{FT},
                 lwc::FT;
                 apar_car::Bool = true,
-                reabsorb::Bool = true,
                 α::FT = FT(40)
     ) where {FT<:AbstractFloat}
 
@@ -64,7 +64,6 @@ Update leaf reflectance and transmittance spectra, and fluorescence spectrum mat
 - `lha` `HyperspectralAbsorption` type struct that contains absorption characteristic curves
 - `lwc` Leaf water content `[mol m⁻²]`
 - `apar_car` If true, carotenoid absorption is accounted for in PPAR, default is `true`
-- `reabsorb` If true, SIF reabsorption is enabled; otherwise, mat_b and mat_f should be based on the case with no reabsorption
 - `α` Optimum angle of incidence (default is 40° as in PROSPECT-D, SCOPE uses 59°)
 
 # Examples
@@ -84,7 +83,6 @@ leaf_spectra!(
             lha::HyperspectralAbsorption{FT},
             lwc::FT;
             apar_car::Bool = true,
-            reabsorb::Bool = true,
             α::FT = FT(40)
 ) where {FT<:AbstractFloat} = (
     # if leaf water content is the same as the historical value, do nothing
@@ -193,16 +191,12 @@ leaf_spectra!(
     # indices of WLE and WLF within wlp
     _ϵ = FT(2) ^ -NDUB;
     bio._ρ_e     .= view(bio._s,IΛ_SIFE) .* _ϵ;
-    bio._ρ_f     .= view(bio._s,IΛ_SIF) * _ϵ;
+    bio._ρ_f     .= view(bio._s,IΛ_SIF) .* _ϵ;
     bio._sigmoid .= 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp.(Λ_SIFE' ./ 10));
     bio._mat_f   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
     bio._mat_b   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
     bio._τ_e     .= 1 .- (view(bio._k,IΛ_SIFE) .+ view(bio._s,IΛ_SIFE)) .* _ϵ;
-    if reabsorb
-        bio._τ_f .= 1 .- (view(bio._k,IΛ_SIF) .+ view(bio._s,IΛ_SIF)) .* _ϵ;
-    else
-        bio._τ_f .= 1 .- view(bio._s,IΛ_SIF) .* _ϵ;
-    end;
+    bio._τ_f     .= 1 .- (view(bio._k,IΛ_SIF) .+ view(bio._s,IΛ_SIF)) .* _ϵ;
 
     # Doubling adding routine
     for _ in 1:NDUB
@@ -212,10 +206,6 @@ leaf_spectra!(
         bio._τ_f_n   .= bio._τ_f .* bio._x_f;
         bio._ρ_e_n   .= bio._ρ_e .* (1 .+ bio._τ_e_n);
         bio._ρ_f_n   .= bio._ρ_f .* (1 .+ bio._τ_f_n);
-        #bio._a₁₁     .= bio._x_f * bio._1_e .+ bio._1_f * bio._x_e';
-        #bio._a₁₂     .= (bio._x_f * bio._x_e') .* (bio._ρ_f * bio._1_e .+ bio._1_f * bio._ρ_e');
-        #bio._a₂₁     .= 1 .+ (bio._x_f * bio._x_e') .* (1 .+ bio._ρ_f * bio._ρ_e');
-        #bio._a₂₂     .= (bio._x_f .* bio._ρ_f) * bio._1_e .+ bio._1_f * (bio._x_e.*bio._ρ_e)';
         bio._a₁₁     .= bio._x_f .* bio._1_e .+ bio._1_f .* bio._x_e';
         bio._a₁₂     .= (bio._x_f .* bio._x_e') .* (bio._ρ_f .* bio._1_e .+ bio._1_f .* bio._ρ_e');
         bio._a₂₁     .= 1 .+ (bio._x_f * bio._x_e') .* (1 .+ bio._ρ_f * bio._ρ_e');
@@ -245,6 +235,55 @@ leaf_spectra!(
 
     bio.mat_b .= bio._ma .* bio._mat_b .+ bio._mb .* bio._mat_f;
     bio.mat_f .= bio._ma .* bio._mat_f .+ bio._mb .* bio._mat_b;
+
+    #
+    # compute the case without reabsorption
+    #
+    # redo all the calculations above to make sure things are correct though this is a bit waste of time
+    bio._ρ_e     .= view(bio._s,IΛ_SIFE) .* _ϵ;
+    bio._ρ_f     .= view(bio._s,IΛ_SIF) .* _ϵ;
+    bio._mat_f   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
+    bio._mat_b   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
+    bio._τ_e     .= 1 .- (view(bio._k,IΛ_SIFE) .+ view(bio._s,IΛ_SIFE)) .* _ϵ;
+    bio._τ_f     .= 1 .- view(bio._s,IΛ_SIF) .* _ϵ;
+
+    # Doubling adding routine
+    for _ in 1:NDUB
+        bio._x_e     .= bio._τ_e ./ (1 .- bio._ρ_e .^ 2);
+        bio._x_f     .= bio._τ_f ./ (1 .- bio._ρ_f .^ 2);
+        bio._τ_e_n   .= bio._τ_e .* bio._x_e;
+        bio._τ_f_n   .= bio._τ_f .* bio._x_f;
+        bio._ρ_e_n   .= bio._ρ_e .* (1 .+ bio._τ_e_n);
+        bio._ρ_f_n   .= bio._ρ_f .* (1 .+ bio._τ_f_n);
+        bio._a₁₁     .= bio._x_f .* bio._1_e .+ bio._1_f .* bio._x_e';
+        bio._a₁₂     .= (bio._x_f .* bio._x_e') .* (bio._ρ_f .* bio._1_e .+ bio._1_f .* bio._ρ_e');
+        bio._a₂₁     .= 1 .+ (bio._x_f * bio._x_e') .* (1 .+ bio._ρ_f * bio._ρ_e');
+        bio._z_e     .= bio._x_e .* bio._ρ_e;
+        bio._z_f     .= bio._x_f .* bio._ρ_f;
+        bio._a₂₂     .= bio._z_f .* bio._1_e .+ bio._1_f .* bio._z_e';
+        bio._mat_f_n .= bio._mat_f .* bio._a₁₁ .+ bio._mat_b .* bio._a₁₂;
+        bio._mat_b_n .= bio._mat_b .* bio._a₂₁ .+ bio._mat_f .* bio._a₂₂;
+        bio._τ_e     .= bio._τ_e_n;
+        bio._ρ_e     .= bio._ρ_e_n;
+        bio._τ_f     .= bio._τ_f_n;
+        bio._ρ_f     .= bio._ρ_f_n;
+        bio._mat_f   .= bio._mat_f_n;
+        bio._mat_b   .= bio._mat_b_n;
+    end;
+
+    # This reduced red SIF quite a bit in backscatter, not sure why.
+    bio._ρ_b  .= bio._ρ .+ bio._τ .^ 2 .* bio._ρ₂₁ ./ (1 .- bio._ρ .* bio._ρ₂₁);
+    bio._z_e  .= view(bio._τ_α,IΛ_SIFE) ./ (1 .- view(bio._ρ₂₁,IΛ_SIFE) .* view(bio._ρ_b,IΛ_SIFE));
+    bio._m_xe .= bio._1_f .* bio._z_e';
+    bio._m_xf .= view(bio._τ₂₁,IΛ_SIF) ./ (1 .- view(bio._ρ₂₁,IΛ_SIF) .* view(bio._ρ_b,IΛ_SIF)) .* bio._1_e;
+    bio._z_e  .= view(bio._τ,IΛ_SIFE) .* view(bio._ρ₂₁,IΛ_SIFE) ./ (1 .- view(bio._ρ,IΛ_SIFE) .* view(bio._ρ₂₁,IΛ_SIFE));
+    bio._m_ye .= bio._1_f .* bio._z_e';
+    bio._m_yf .= view(bio._τ,IΛ_SIF) .* view(bio._ρ₂₁,IΛ_SIF) ./ (1 .- view(bio._ρ,IΛ_SIF) .* view(bio._ρ₂₁,IΛ_SIF)) .* bio._1_e;
+    bio._ma   .= bio._m_xe .* (1 .+ bio._m_ye .* bio._m_yf) .* bio._m_xf;
+    bio._mb   .= bio._m_xe .* (bio._m_ye .+ bio._m_yf) .* bio._m_xf;
+
+    bio.mat_b_chl .= bio._ma .* bio._mat_b .+ bio._mb .* bio._mat_f;
+    bio.mat_f_chl .= bio._ma .* bio._mat_f .+ bio._mb .* bio._mat_b;
 
     # store leaf water content
     bio._v_storage = lwc;

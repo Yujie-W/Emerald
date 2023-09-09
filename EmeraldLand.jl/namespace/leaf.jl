@@ -69,6 +69,7 @@ end
 #     2022-Jul-20: rename ρ_lw and τ_lw to ρ_LW and τ_LW
 #     2022-Jul-28: add field _v_storage to speed up calculations (run leaf_spectra! only of _v_storage differs from current leaf water content)
 #     2023-Jun-16: remove fields DIM_*
+#     2023-Sep-09: add field mat_b_chl and mat_f_chl
 #
 #######################################################################################################################################################################################################
 """
@@ -116,8 +117,12 @@ Base.@kwdef mutable struct HyperspectralLeafBiophysics{FT<:AbstractFloat} <: Abs
     k_all::Vector{FT}
     "Fluorescence excitation matrix backwards `[-]`"
     mat_b::Matrix{FT}
+    "Fluorescence excitation matrix backwards without reabsorption `[-]`"
+    mat_b_chl::Matrix{FT}
     "Fluorescence excitation matrix forwards `[-]`"
     mat_f::Matrix{FT}
+    "Fluorescence excitation matrix forwards without reabsorption `[-]`"
+    mat_f_chl::Matrix{FT}
     "Relative absorption by Chlorophyll `[-]`"
     α_cab::Vector{FT}
     "Relative absorption by Chlorophyll+Carotenoid `[-]`"
