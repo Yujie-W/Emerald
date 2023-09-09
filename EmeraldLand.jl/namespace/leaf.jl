@@ -691,6 +691,7 @@ abstract type AbstractReactionCenter{FT<:AbstractFloat} end
 #     2022-Feb-07: add fluorescence model as a field
 #     2022-Jul-20: rename quite some cache variables
 #     2023-Jan-27: set default K_D to 0.95 instead of 0.85
+#     2023-Sep-09: add fields ϕ_d and ϕ_n
 #
 #######################################################################################################################################################################################################
 """
@@ -722,8 +723,12 @@ Base.@kwdef mutable struct VJPReactionCenter{FT<:AbstractFloat} <:AbstractReacti
     k_npq_sus::FT = 0
 
     # Diagnostic variables
+    "Heat dissipation yield"
+    ϕ_d::FT = 0
     "Fluorescence yield"
     ϕ_f::FT = 0
+    "Non-photochemical quenching yeild"
+    ϕ_n::FT = 0
     "Photochemical yield"
     ϕ_p::FT = 0
 
@@ -1040,6 +1045,7 @@ end
 #     2023-Jun-13: add field: etr_shaded, etr_sunlit
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Sep-07: add water flow integrators
+#     2023-Sep-09: add fields ϕ_x_shaded and ϕ_x_sunlit
 #
 #######################################################################################################################################################################################################
 """
@@ -1112,10 +1118,22 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     etr_shaded::FT = 0
     "Actual electron transport for sunlit leaves `[μmol m⁻² s⁻¹]`"
     etr_sunlit::Matrix{FT}
+    "Heat dissipation quantum yield for shaded leaves `[-]`"
+    ϕ_d_shaded::FT = 0
+    "Heat dissipation quantum yield for sunlit leaves `[-]`"
+    ϕ_d_sunlit::Matrix{FT}
     "Fluorescence quantum yield for shaded leaves `[-]`"
     ϕ_f_shaded::FT = 0
     "Fluorescence quantum yield for sunlit leaves `[-]`"
     ϕ_f_sunlit::Matrix{FT}
+    "Non-photochemical quenching quantum yield for shaded leaves `[-]`"
+    ϕ_n_shaded::FT = 0
+    "Non-photochemical quenching quantum yield for sunlit leaves `[-]`"
+    ϕ_n_sunlit::Matrix{FT}
+    "Photochemical quantum yield for shaded leaves `[-]`"
+    ϕ_p_shaded::FT = 0
+    "Photochemical quantum yield for sunlit leaves `[-]`"
+    ϕ_p_sunlit::Matrix{FT}
     "Integrator for transpiration in"
     ∫∂w∂t_in = 0
     "Integrator for transpiration out"
@@ -1149,7 +1167,10 @@ Leaves2D(config::SPACConfiguration{FT}) where {FT} = (
                 a_gross_sunlit  = zeros(FT, DIM_INCL, DIM_AZI),
                 a_net_sunlit    = zeros(FT, DIM_INCL, DIM_AZI),
                 etr_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
+                ϕ_d_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
                 ϕ_f_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
+                ϕ_n_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
+                ϕ_p_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
                 _g_CO₂_sunlit   = zeros(FT, DIM_INCL, DIM_AZI),
                 _p_CO₂_i_sunlit = zeros(FT, DIM_INCL, DIM_AZI),
                 _p_CO₂_s_sunlit = zeros(FT, DIM_INCL, DIM_AZI),

@@ -156,6 +156,40 @@ T_VEG(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
 #
 # Changes to this function
 # General
+#     2023-Sep-09: add function to compute the weighted average of ϕ_d, ϕ_f, ϕ_n, and ϕ_p
+#
+#######################################################################################################################################################################################################
+
+function ΦDFNP end
+
+ΦDFNP(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; CANOPY, LEAVES) = spac;
+
+    _sum_ϕda::FT = 0;
+    _sum_ϕfa::FT = 0;
+    _sum_ϕna::FT = 0;
+    _sum_ϕpa::FT = 0;
+    _sum_a::FT = 0;
+    for _i in eachindex(LEAVES)
+        _sum_ϕda += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_d_sunlit) +
+                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_d_shaded) * CANOPY.δlai[_i];
+        _sum_ϕfa += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_f_sunlit) +
+                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_f_shaded) * CANOPY.δlai[_i];
+        _sum_ϕna += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_n_sunlit) +
+                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_n_shaded) * CANOPY.δlai[_i];
+        _sum_ϕpa += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_p_sunlit) +
+                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_p_shaded) * CANOPY.δlai[_i];
+        _sum_a += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded) * CANOPY.δlai[_i];
+    end;
+
+    return (_sum_ϕda, _sum_ϕfa, _sum_ϕna, _sum_ϕpa) ./ _sum_a
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2023-Jun-13: add function to add up total ETR
 #
 #######################################################################################################################################################################################################
@@ -202,7 +236,7 @@ function ΣSIF end
 ΣSIF(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES) = spac;
 
-    # compute GPP
+    # compute SIF
     _Σsif::FT = 0;
     for _i in eachindex(LEAVES)
         _Σsif += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit .* LEAVES[_i].ϕ_f_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded * LEAVES[_i].ϕ_f_shaded) *

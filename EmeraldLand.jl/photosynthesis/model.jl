@@ -148,6 +148,7 @@ leaf_photosynthesis!(
 #     2022-Jul-28: move temperature control to function photosystem_temperature_dependence!
 #     2023-Mar-11: add option to compute respiration rate only
 #     2023-Jun-13: save actual etr as well
+#     2023-Sep-09: save ϕ_d, ϕ_n, and ϕ_p to Leaves2D
 #
 #######################################################################################################################################################################################################
 """
@@ -271,7 +272,10 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
         leaves.a_net_sunlit[_i] = PSM.a_net;
         leaves.a_gross_sunlit[_i] = PSM.a_gross;
         leaves.etr_sunlit[_i] = PSM.a_gross / PSM._e_to_c;
+        leaves.ϕ_d_sunlit[_i] = PRC.ϕ_d;
         leaves.ϕ_f_sunlit[_i] = PRC.ϕ_f;
+        leaves.ϕ_n_sunlit[_i] = PRC.ϕ_n;
+        leaves.ϕ_p_sunlit[_i] = PRC.ϕ_p;
     end;
 
     # run the model for shaded leaves
@@ -288,7 +292,10 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
     leaves.a_net_shaded = PSM.a_net;
     leaves.a_gross_shaded = PSM.a_gross;
     leaves.etr_shaded = PSM.a_gross / PSM._e_to_c;
+    leaves.ϕ_d_shaded = PRC.ϕ_d;
     leaves.ϕ_f_shaded = PRC.ϕ_f;
+    leaves.ϕ_n_shaded = PRC.ϕ_n;
+    leaves.ϕ_p_shaded = PRC.ϕ_p;
 
     return nothing
 );
@@ -416,7 +423,10 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
         leaves.a_net_sunlit[_i] = PSM.a_net;
         leaves.a_gross_sunlit[_i] = PSM.a_gross;
         leaves.etr_sunlit[_i] = PSM.a_gross / PSM._e_to_c;
+        leaves.ϕ_d_sunlit[_i] = PRC.ϕ_d;
         leaves.ϕ_f_sunlit[_i] = PRC.ϕ_f;
+        leaves.ϕ_n_sunlit[_i] = PRC.ϕ_n;
+        leaves.ϕ_p_sunlit[_i] = PRC.ϕ_p;
     end;
 
     # run the model for shaded leaves
@@ -440,7 +450,10 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
     leaves.a_net_shaded = PSM.a_net;
     leaves.a_gross_shaded = PSM.a_gross;
     leaves.etr_shaded = PSM.a_gross / PSM._e_to_c;
+    leaves.ϕ_d_shaded = PRC.ϕ_d;
     leaves.ϕ_f_shaded = PRC.ϕ_f;
+    leaves.ϕ_n_shaded = PRC.ϕ_n;
+    leaves.ϕ_p_shaded = PRC.ϕ_p;
 
     return nothing
 );

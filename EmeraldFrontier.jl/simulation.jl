@@ -221,7 +221,7 @@ simulation!(config::SPACConfiguration{FT},
 
     # save simulation results to hard drive
     if !isnothing(saving)
-        save_nc!(saving, wdf[selection,2:end]);
+        save_nc!(saving, wdf[selection,[_n != "ind" for _n in names(wdf)]]);
     end;
 
     return nothing

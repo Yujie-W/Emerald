@@ -7,6 +7,7 @@
 #     2023-Jul-06: add info into DEBUG code block
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
 #     2023-Sep-07: fix a typo in the concentration calculations
+#     2023-Sep-09: fix a typo in the concentration calculations
 #
 #######################################################################################################################################################################################################
 """
@@ -60,8 +61,8 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
 
     # TODO: did I forget this term? (LAYERS[1].ΔZ * _v_gas)
     for _i in 1:DIM_SOIL-1
-        _v_gas_i = max(0, LAYERS[1].VC.Θ_SAT - LAYERS[1].θ) * LAYERS[_i].ΔZ;
-        _v_gas_j = max(0, LAYERS[1].VC.Θ_SAT - LAYERS[1].θ) * LAYERS[_i+1].ΔZ;
+        _v_gas_i = max(0, LAYERS[_i].VC.Θ_SAT - LAYERS[_i].θ) * LAYERS[_i].ΔZ;
+        _v_gas_j = max(0, LAYERS[_i+1].VC.Θ_SAT - LAYERS[_i+1].θ) * LAYERS[_i+1].ΔZ;
 
         # gas diffusion
         _ratei1 = diffusive_coefficient(LAYERS[_i  ].t, TRACE_CH₄, TRACE_AIR);
@@ -100,7 +101,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
 
         if DEBUG
             if any(isnan, (_ratio1, _ratio2, _ratio3, _ratio4, _ratio5, _drate1, _drate2, _drate3, _drate4, _drate5))
-                @info "Debugging" _ratio1 _ratio2 _ratio3 _ratio4 _ratio5 _drate1 _drate2 _drate3 _drate4 _drate5;
+                @info "Debugging" LAYERS[_i]._kd LAYERS[_i+1]._kd _v_gas_i _v_gas_j _ratio1 _ratio2 _ratio3 _ratio4 _ratio5 _drate1 _drate2 _drate3 _drate4 _drate5;
                 error("NaN in soil_diffusion! at layers $(_i) and $(_i+1) when computing diffusion rate");
             end;
         end;

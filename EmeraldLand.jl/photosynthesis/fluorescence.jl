@@ -15,6 +15,7 @@
 #     2022-Mar-04: use the weighted yield for photosynthesis
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2023-Jun-15: set ϕ_f and ϕ_p to 0 when ppar is 0
+#     2023-Sep-09: compute ϕ_d and ϕ_n in the VJPReactionCenter
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
@@ -132,6 +133,8 @@ photosystem_coefficients!(psm::Union{C3VJPModel{FT}, C4VJPModel{FT}}, rc::VJPRea
     rc._f_m  = K_F / (K_F + rc._k_d);
     rc._f_m′ = K_F / (K_F + rc._k_d + rc._k_npq_rev + rc.k_npq_sus);
     rc.ϕ_f   = rc._f_m′ * (1 - rc.ϕ_p);
+    rc.ϕ_d   = rc._k_d / K_F * rc.ϕ_f;
+    rc.ϕ_n   = (rc._k_npq_rev + rc.k_npq_sus) / K_F * rc.ϕ_f;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
