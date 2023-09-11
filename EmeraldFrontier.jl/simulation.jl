@@ -127,6 +127,7 @@ end
 #     2023-Aug-27: show ind at debug mode, otherwise show progress bar
 #     2023-Sep-07: initialize integrators when starting a new simulation in a long time step
 #     2023-Sep-09: save the quantum yields when saving the simulation results
+#     2023-Sep-11: save the integrated SIF when saving the simulation results
 #
 #######################################################################################################################################################################################################
 """
@@ -278,19 +279,22 @@ simulation!(spac::MultiLayerSPAC{FT},
 
     # save the SIF and reflectance if there is sunlight
     if _df_dir + _df_dif >= 10
-        dfr.BLUE   = MODIS_BLUE(config, spac);
-        dfr.EVI    = MODIS_EVI(config, spac);
-        dfr.NDVI   = MODIS_NDVI(config, spac);
-        dfr.NIR    = MODIS_NIR(config, spac);
-        dfr.NIRvI  = MODIS_NIRv(config, spac);
-        dfr.NIRvR  = MODIS_NIRvR(config, spac);
-        dfr.PAR    = spac.CANOPY.RADIATION.par_in;
-        dfr.PPAR   = PPAR(spac);
-        dfr.RED    = MODIS_RED(config, spac);
-        dfr.SIF683 = TROPOMI_SIF683(config, spac);
-        dfr.SIF740 = TROPOMI_SIF740(config, spac);
-        dfr.SIF757 = OCO2_SIF759(config, spac);
-        dfr.SIF771 = OCO2_SIF770(config, spac);
+        dfr.BLUE      = MODIS_BLUE(config, spac);
+        dfr.EVI       = MODIS_EVI(config, spac);
+        dfr.NDVI      = MODIS_NDVI(config, spac);
+        dfr.NIR       = MODIS_NIR(config, spac);
+        dfr.NIRvI     = MODIS_NIRv(config, spac);
+        dfr.NIRvR     = MODIS_NIRvR(config, spac);
+        dfr.PAR       = spac.CANOPY.RADIATION.par_in;
+        dfr.PPAR      = PPAR(spac);
+        dfr.RED       = MODIS_RED(config, spac);
+        dfr.SIF683    = TROPOMI_SIF683(config, spac);
+        dfr.SIF740    = TROPOMI_SIF740(config, spac);
+        dfr.SIF757    = OCO2_SIF759(config, spac);
+        dfr.SIF771    = OCO2_SIF770(config, spac);
+        dfr.ΣSIF      = ΣSIF(spac);
+        dfr.ΣSIF_CHL  = ΣSIF_CHL(config, spac);
+        dfr.ΣSIF_LEAF = ΣSIF_LEAF(config, spac);
         dfr.ΦD, dfr.ΦF, dfr.ΦN, dfr.ΦP = ΦDFNP(spac);
 
         # display the debug information

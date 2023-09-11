@@ -70,6 +70,7 @@ end
 #     2022-Jul-28: add field _v_storage to speed up calculations (run leaf_spectra! only of _v_storage differs from current leaf water content)
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Sep-09: add field mat_b_chl and mat_f_chl
+#     2023-Sep-11: add mat_b_chl and mat_f_chl in the constructor function
 #
 #######################################################################################################################################################################################################
 """
@@ -208,7 +209,9 @@ HyperspectralLeafBiophysics(config::SPACConfiguration{FT}) where {FT} = (
     return HyperspectralLeafBiophysics{FT}(
                 k_all     = zeros(FT, DIM_WL),
                 mat_b     = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_b_chl = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f     = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_f_chl = zeros(FT, DIM_SIF, DIM_SIFE),
                 α_cab     = zeros(FT, DIM_WL),
                 α_cabcar  = zeros(FT, DIM_WL),
                 α_sw      = zeros(FT, DIM_WL),
