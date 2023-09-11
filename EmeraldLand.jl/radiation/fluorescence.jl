@@ -13,8 +13,10 @@
 #     2023-Mar-11: add code to account for the case of LAI == 0
 #     2023-Apr-13: add config to function call
 #     2023-May-19: use δlai per canopy layer
+#     2023-Sep-11: compute the SIF at chloroplast level at the same time
 # Bug fixes
 #     2023-Mar-16: ddb ddf to dob and dof for observed SIF
+#     2023-Sep-11: set ilai to lai rather than lai*ci
 #
 #######################################################################################################################################################################################################
 """
@@ -55,6 +57,74 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 
         return mean(OPTICS._tmp_vec_azi)
     );
+
+    # 0. compute chloroplast SIF emissions for different layers
+    for _i in 1:DIM_LAYER
+        OPTICS._mat⁺ .= (leaves[_i].BIO.mat_b_chl .+ leaves[_i].BIO.mat_f_chl) ./ 2;
+        OPTICS._mat⁻ .= (leaves[_i].BIO.mat_b_chl .- leaves[_i].BIO.mat_f_chl) ./ 2;
+
+        # integrate the energy in each wave length bins
+        OPTICS._tmp_vec_sife_1 .= view(RADIATION.e_direct      ,WLSET.IΛ_SIFE,1 ) .* WLSET.ΔΛ_SIFE;
+        OPTICS._tmp_vec_sife_2 .= view(RADIATION.e_diffuse_down,WLSET.IΛ_SIFE,_i) .* WLSET.ΔΛ_SIFE;
+        OPTICS._tmp_vec_sife_3 .= view(RADIATION.e_diffuse_up  ,WLSET.IΛ_SIFE,_i) .* WLSET.ΔΛ_SIFE;
+
+        # determine which ones to use depending on ϕ_photon
+        if Φ_PHOTON
+            photon!(WLSET.Λ_SIFE, OPTICS._tmp_vec_sife_1);
+            photon!(WLSET.Λ_SIFE, OPTICS._tmp_vec_sife_2);
+            photon!(WLSET.Λ_SIFE, OPTICS._tmp_vec_sife_3);
+        end;
+
+        _e_dir, _e_dif_down, _e_dif_up = OPTICS._tmp_vec_sife_1, OPTICS._tmp_vec_sife_2, OPTICS._tmp_vec_sife_3;
+
+        # convert the excitation radiation to fluorescence components
+        mul!(OPTICS._tmp_vec_sif_1, OPTICS._mat⁺, _e_dir);          # SIF component from direct light (before scaling)
+        mul!(OPTICS._tmp_vec_sif_2, OPTICS._mat⁻, _e_dir);          # SIF component from direct light (before scaling)
+        mul!(OPTICS._tmp_vec_sif_3, OPTICS._mat⁺, _e_dif_down);     # SIF component from downward diffuse light for backward (before scaling)
+        mul!(OPTICS._tmp_vec_sif_4, OPTICS._mat⁻, _e_dif_down);     # SIF component from downward diffuse light for backward (before scaling)
+        mul!(OPTICS._tmp_vec_sif_5, OPTICS._mat⁺, _e_dif_up);       # SIF component from upward diffuse light for forward (before scaling)
+        mul!(OPTICS._tmp_vec_sif_6, OPTICS._mat⁻, _e_dif_up);       # SIF component from upward diffuse light for forward (before scaling)
+
+        # convert the SIF back to energy unit if ϕ_photon is true
+        if Φ_PHOTON
+            energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_1);
+            energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_2);
+            energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_3);
+            energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_4);
+            energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_5);
+            energy!(WLSET.Λ_SIF, OPTICS._tmp_vec_sif_6);
+        end;
+
+        # add up the fluorescence at various wavelength bins for sunlit and (up- and down-ward) diffuse SIF
+        _ϕ_sunlit = leaves[_i].ϕ_f_sunlit;
+        _ϕ_shaded = leaves[_i].ϕ_f_shaded;
+
+        # compute the weights
+        _sh_1_ = lidf_weight(_ϕ_shaded, 1);
+        _sl_1_ = lidf_weight(_ϕ_sunlit, 1);
+        _sl_S_ = lidf_weight(_ϕ_sunlit, OPTICS._abs_fs);
+        _sl_sθ = lidf_weight(_ϕ_sunlit, OPTICS._fs_cos_θ_incl);
+        _sh_θ² = lidf_weight(_ϕ_shaded, _COS²_Θ_INCL_AZI);
+        _sl_θ² = lidf_weight(_ϕ_sunlit, _COS²_Θ_INCL_AZI);
+
+        # upward and downward SIF from direct and diffuse radiation per leaf area
+        RADIATION._s_shaded_up   .= OPTICS._tmp_vec_sif_3 .* _sh_1_ .+ OPTICS._tmp_vec_sif_4 .* _sh_θ² .+
+                                    OPTICS._tmp_vec_sif_5 .* _sh_1_ .- OPTICS._tmp_vec_sif_6 .* _sh_θ²;
+        RADIATION._s_shaded_down .= OPTICS._tmp_vec_sif_3 .* _sh_1_ .- OPTICS._tmp_vec_sif_4 .* _sh_θ² .+
+                                    OPTICS._tmp_vec_sif_5 .* _sh_1_ .+ OPTICS._tmp_vec_sif_6 .* _sh_θ²;
+        RADIATION._s_sunlit_up   .= OPTICS._tmp_vec_sif_1 .* _sl_S_ .+ OPTICS._tmp_vec_sif_2 .* _sl_sθ .+
+                                    OPTICS._tmp_vec_sif_3 .* _sl_1_ .+ OPTICS._tmp_vec_sif_4 .* _sl_θ² .+
+                                    OPTICS._tmp_vec_sif_5 .* _sl_1_ .- OPTICS._tmp_vec_sif_6 .* _sl_θ²;
+        RADIATION._s_sunlit_down .= OPTICS._tmp_vec_sif_1 .* _sl_S_ .- OPTICS._tmp_vec_sif_2 .* _sl_sθ .+
+                                    OPTICS._tmp_vec_sif_3 .* _sl_1_ .- OPTICS._tmp_vec_sif_4 .* _sl_θ² .+
+                                    OPTICS._tmp_vec_sif_5 .* _sl_1_ .+ OPTICS._tmp_vec_sif_6 .* _sl_θ²;
+
+        # total emitted SIF for upward and downward direction
+        # set _ilai to LAI but not LAI * CI as this is the total emitted SIF
+        _ilai = can.δlai[_i];
+        RADIATION.s_layer_down_chl[:,_i] .= _ilai .* OPTICS.p_sunlit[_i] .* RADIATION._s_sunlit_down .+ _ilai .* (1 - OPTICS.p_sunlit[_i]) .* RADIATION._s_shaded_down;
+        RADIATION.s_layer_up_chl[:,_i]   .= _ilai .* OPTICS.p_sunlit[_i] .* RADIATION._s_sunlit_up   .+ _ilai .* (1 - OPTICS.p_sunlit[_i]) .* RADIATION._s_shaded_up;
+    end;
 
     # 1. compute SIF emissions for different layers
     for _i in 1:DIM_LAYER
@@ -131,7 +201,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
                                            OPTICS._tmp_vec_sif_5 .* _sh_O_ .- OPTICS._tmp_vec_sif_6 .* _sh_oθ;
 
         # total emitted SIF for upward and downward direction
-        _ilai = can.δlai[_i] * can.ci;
+        # set _ilai to LAI but not LAI * CI as this is the total emitted SIF
+        _ilai = can.δlai[_i];
         RADIATION.s_layer_down[:,_i] .= _ilai .* OPTICS.p_sunlit[_i] .* RADIATION._s_sunlit_down .+ _ilai .* (1 - OPTICS.p_sunlit[_i]) .* RADIATION._s_shaded_down;
         RADIATION.s_layer_up[:,_i]   .= _ilai .* OPTICS.p_sunlit[_i] .* RADIATION._s_sunlit_up   .+ _ilai .* (1 - OPTICS.p_sunlit[_i]) .* RADIATION._s_shaded_up;
     end;

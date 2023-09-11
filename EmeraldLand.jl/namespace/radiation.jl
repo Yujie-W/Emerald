@@ -8,6 +8,7 @@
 #     2022-Jul-20: use kwdef for the constructor
 #     2022-Jul-20: add field DATASET to struct
 #     2023-Jun-16: remove fields of DIM_*
+#     2023-Sep-11: add field ΔΛ_SIF
 #
 #######################################################################################################################################################################################################
 """
@@ -57,6 +58,8 @@ Base.@kwdef struct WaveLengthSet{FT<:AbstractFloat}
     ΔΛ::Vector{FT} = Λ_UPPER .- Λ_LOWER
     "Differential wavelength for PAR `[nm]`"
     ΔΛ_PAR::Vector{FT} = ΔΛ[IΛ_PAR]
+    "Differential wavelength for SIF `[nm]`"
+    ΔΛ_SIF::Vector{FT} = ΔΛ[IΛ_SIF]
     "Differential wavelength for SIF excitation `[nm]`"
     ΔΛ_SIFE::Vector{FT} = ΔΛ[IΛ_SIFE]
     "Wavelength bins for PAR `[nm]`"

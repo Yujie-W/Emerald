@@ -335,6 +335,7 @@ BroadbandSLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} = (
 #     2022-Jul-19: add dimension control to struct
 #     2022-Aug-30: rename sif_obs_ssoil to sif_obs_soil (typo fix, non-breaking)
 #     2023-Jun-16: remove fields DIM_*
+#     2023-Sep-11: add fields s_layer_down_chl and s_layer_up_chl to store the SIF at chloroplast level
 #
 #######################################################################################################################################################################################################
 """
@@ -400,8 +401,12 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
     r_net_sw_sunlit::Vector{FT}
     "Downwelling SIF for sunlit leaves at each wavelength for a layer"
     s_layer_down::Matrix{FT}
+    "Downwelling SIF for sunlit leaves at each wavelength for a layer at chloroplast level"
+    s_layer_down_chl::Matrix{FT}
     "Upwelling SIF for sunlit leaves at each wavelength for a layer"
     s_layer_up::Matrix{FT}
+    "Upwelling SIF for sunlit leaves at each wavelength for a layer at chloroplast level"
+    s_layer_up_chl::Matrix{FT}
     "Downwelling SIF"
     sif_down::Matrix{FT}
     "SIF at observer direction"
@@ -480,7 +485,9 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
                 r_net_sw_shaded  = zeros(FT, DIM_LAYER),
                 r_net_sw_sunlit  = zeros(FT, DIM_LAYER),
                 s_layer_down     = zeros(FT, DIM_SIF, DIM_LAYER),
+                s_layer_down_chl = zeros(FT, DIM_SIF, DIM_LAYER),
                 s_layer_up       = zeros(FT, DIM_SIF, DIM_LAYER),
+                s_layer_up_chl   = zeros(FT, DIM_SIF, DIM_LAYER),
                 sif_down         = zeros(FT, DIM_SIF, DIM_LAYER+1),
                 sif_obs          = zeros(FT, DIM_SIF),
                 sif_obs_shaded   = zeros(FT, DIM_SIF),

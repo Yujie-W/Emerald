@@ -236,11 +236,75 @@ function ΣSIF end
 ΣSIF(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES) = spac;
 
-    # compute SIF
+    # compute SIF in photons unit
     _Σsif::FT = 0;
     for _i in eachindex(LEAVES)
         _Σsif += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit .* LEAVES[_i].ϕ_f_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded * LEAVES[_i].ϕ_f_shaded) *
                  CANOPY.δlai[_i];
+    end;
+
+    return _Σsif
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-11: add function to add up total SIF at chloroplast level (without any reabsorption)
+#
+#######################################################################################################################################################################################################
+"""
+
+    ΣSIF_CHL(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+
+Return the total SIF at chloroplast level (without any reabsorption) in W m⁻² per ground area, given
+- `config` `SPACConfiguration` SPAC configuration
+- `spac` `MultiLayerSPAC` SPAC
+
+"""
+function ΣSIF_CHL end
+
+ΣSIF_CHL(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; WLSET) = config;
+    (; CANOPY, LEAVES) = spac;
+
+    # compute SIF in energy unit before reabsorption within leaves (W m⁻²)
+    _Σsif::FT = 0;
+    for _i in eachindex(LEAVES)
+        _Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,_i] .+ CANOPY.RADIATION.s_layer_up_chl[:,_i])' * WLSET.ΔΛ_SIF;
+    end;
+
+    return _Σsif
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-11: add function to add up total SIF in energy unit at leaf level after reabsorption
+#
+#######################################################################################################################################################################################################
+"""
+
+    ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+
+Return the total SIF at leaf level after reabsorption in W m⁻² per ground area, given
+- `config` `SPACConfiguration` SPAC configuration
+- `spac` `MultiLayerSPAC` SPAC
+
+"""
+function ΣSIF_LEAF end
+
+ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; WLSET) = config;
+    (; CANOPY, LEAVES) = spac;
+
+    # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
+    _Σsif::FT = 0;
+    for _i in eachindex(LEAVES)
+        _Σsif += (CANOPY.RADIATION.s_layer_down[:,_i] .+ CANOPY.RADIATION.s_layer_up[:,_i])' * WLSET.ΔΛ_SIF;
     end;
 
     return _Σsif
