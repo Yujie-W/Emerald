@@ -220,7 +220,7 @@ function ΣETR end
 #
 # Changes to this function
 # General
-#     2023-Jun-13: add function to add up total SIF photons
+#     2023-Jun-13: add function to add up total SIF photons (unit mol m⁻² s⁻¹)
 #
 #######################################################################################################################################################################################################
 """
@@ -252,6 +252,7 @@ function ΣSIF end
 # Changes to this function
 # General
 #     2023-Sep-11: add function to add up total SIF at chloroplast level (without any reabsorption)
+#     2023-Sep-11: convert the unit to W m⁻² per ground area from nW m⁻²
 #
 #######################################################################################################################################################################################################
 """
@@ -272,7 +273,7 @@ function ΣSIF_CHL end
     # compute SIF in energy unit before reabsorption within leaves (W m⁻²)
     _Σsif::FT = 0;
     for _i in eachindex(LEAVES)
-        _Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,_i] .+ CANOPY.RADIATION.s_layer_up_chl[:,_i])' * WLSET.ΔΛ_SIF;
+        _Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,_i] .+ CANOPY.RADIATION.s_layer_up_chl[:,_i])' * WLSET.ΔΛ_SIF / 1000;
     end;
 
     return _Σsif
@@ -284,6 +285,7 @@ function ΣSIF_CHL end
 # Changes to this function
 # General
 #     2023-Sep-11: add function to add up total SIF in energy unit at leaf level after reabsorption
+#     2023-Sep-11: convert the unit to W m⁻² per ground area from nW m⁻²
 #
 #######################################################################################################################################################################################################
 """
@@ -304,7 +306,7 @@ function ΣSIF_LEAF end
     # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
     _Σsif::FT = 0;
     for _i in eachindex(LEAVES)
-        _Σsif += (CANOPY.RADIATION.s_layer_down[:,_i] .+ CANOPY.RADIATION.s_layer_up[:,_i])' * WLSET.ΔΛ_SIF;
+        _Σsif += (CANOPY.RADIATION.s_layer_down[:,_i] .+ CANOPY.RADIATION.s_layer_up[:,_i])' * WLSET.ΔΛ_SIF / 1000;
     end;
 
     return _Σsif
