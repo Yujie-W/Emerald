@@ -16,6 +16,7 @@
 #     2023-Sep-07: add field ALLOW_LEAF_SHEDDING, ENABLE_SOIL_EVAPORATION, and T_CLM
 #     2023-Sep-11: add option update legacy to the SPAC configuration
 #     2023-Sep-11: add option KR_THRESHOLD to the SPAC configuration
+#     2023-Sep-11: add fields ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
 #
 #######################################################################################################################################################################################################
 """
@@ -41,10 +42,16 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     ALLOW_LEAF_SHEDDING::Bool = false
     "Whether APAR absorbed by carotenoid is counted as PPAR"
     APAR_CAR::Bool = true
-    "Enable soil evaporation"
-    ENABLE_SOIL_EVAPORATION::Bool = false
     "Enable drought legacy effect"
     ENABLE_DROUGHT_LEGACY::Bool = false
+    "Enable energy balance (t_on)"
+    ENABLE_ENERGY_BUDGET::Bool = true
+    "Enable plant hydraulics (p_on)"
+    ENABLE_PLANT_HYDRAULICS::Bool = true
+    "Enable soil water budget (θ_on)"
+    ENABLE_SOIL_WATER_BUDGET::Bool = true
+    "Enable soil evaporation"
+    ENABLE_SOIL_EVAPORATION::Bool = false
     "Whether to acclimate leaf Vcmax and Jmax TD"
     T_CLM::Bool = true
     "Whether to use CLM soil albedo scheme"

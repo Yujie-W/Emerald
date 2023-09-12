@@ -13,29 +13,28 @@
 #     2023-Jun-13: add soil gas energy into soil e when computing combined cp
 #     2023-Jun-15: add judge for root connection
 #     2023-Aug-27: add DEBUG controller
+#     2023-Sep-11: move the optional t_on and θ_on to the config struct
 #
 #######################################################################################################################################################################################################
 """
 
-    function adjusted_time(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+        adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
 
 Return adjusted time that soil does not over saturate or drain, given
-- `spac` `MultiLayerSPAC` SPAC
 - `config` Configuration for `MultiLayerSPAC`
+- `spac` `MultiLayerSPAC` SPAC
 - `δt` Time step
-- `t_on` If true, plant energy budget is on (set false to run sensitivity analysis or prescribing mode)
-- `θ_on` If true, soil water budget is on (set false to run sensitivity analysis or prescribing mode)
 
 """
-function adjusted_time(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::FT; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
-    (; DEBUG) = config;
+function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+    (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
     (; BRANCHES, LEAVES, SOIL, TRUNK) = spac;
 
     _δt_1 = δt;
 
     # make sure each layer does not drain (allow for oversaturation), and θ change is less than 0.01
     _δt_2 = _δt_1;
-    if θ_on
+    if ENABLE_SOIL_WATER_BUDGET
         for _slayer in SOIL.LAYERS
             _δt_2 = min(FT(0.01) / abs(_slayer.∂θ∂t), _δt_2);
             if _slayer.∂θ∂t < 0
@@ -54,7 +53,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, 
 
     # make sure soil temperatures do not change more than 1 K per time step
     _δt_3 = _δt_2;
-    if t_on
+    if ENABLE_ENERGY_BUDGET
         for _slayer in SOIL.LAYERS
             _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
             _∂T∂t = _slayer.∂e∂t / (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas);
@@ -71,7 +70,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, 
 
     # make sure trunk temperatures do not change more than 1 K per time step
     _δt_4 = _δt_3;
-    if t_on && spac._root_connection
+    if ENABLE_ENERGY_BUDGET
         _∂T∂t = TRUNK.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.HS.v_storage));
         _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
 
@@ -85,7 +84,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, 
 
     # make sure branch stem temperatures do not change more than 1 K per time step
     _δt_5 = _δt_4;
-    if t_on && spac._root_connection
+    if ENABLE_ENERGY_BUDGET
         for _branch in BRANCHES
             _∂T∂t = _branch.∂e∂t / (CP_L_MOL(FT) * sum(_branch.HS.v_storage));
             _δt_5 = min(1 / abs(_∂T∂t), _δt_5);
@@ -101,7 +100,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, 
 
     # make sure leaf temperatures do not change more than 1 K per time step
     _δt_6 = _δt_5;
-    if t_on && spac._root_connection
+    if ENABLE_ENERGY_BUDGET && spac.CANOPY.lai > 0
         for _clayer in LEAVES
             _∂T∂t = _clayer.∂e∂t / (_clayer.CP * _clayer.BIO.lma * 10 + CP_L_MOL(FT) * _clayer.HS.v_storage);
             _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
@@ -117,7 +116,7 @@ function adjusted_time(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, 
 
     # make sure leaf stomatal conductances do not change more than 0.06 mol m⁻² s⁻¹
     _δt_7 = _δt_6;
-    if spac._root_connection
+    if spac.CANOPY.lai > 0
         for _clayer in LEAVES
             for _∂g∂t in _clayer.∂g∂t_sunlit
                 _δt_7 = min(FT(0.06) / abs(_∂g∂t), _δt_7);
@@ -154,26 +153,23 @@ end
 #     2023-Apr-13: sw and lw radiation moved to METEO
 #     2023-Jun-13: add config to parameter list
 #     2023-Jun-15: add judge for root connection
+#     2023-Sep-11: move the optional p_on, t_on and θ_on to the config struct
 #
 #######################################################################################################################################################################################################
 """
 
-    time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat}
-    time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat}
+    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat}
+    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Move forward in time for SPAC with time stepper controller, given
-- `spac` `MultiLayerSPAC` SPAC
 - `config` Configuration for `MultiLayerSPAC`
+- `spac` `MultiLayerSPAC` SPAC
 - `δt` Time step (if not given, solve for steady state solution)
-- `p_on` If true, plant hydraulic flow and pressure profiles will be updated
-- `t_on` If true, plant energy budget is on (set false to run sensitivity analysis or prescribing mode)
-- `update` If true, update leaf xylem legacy effect
-- `θ_on` If true, soil water budget is on (set false to run sensitivity analysis or prescribing mode)
 
 """
 function time_stepper! end
 
-time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Number; p_on::Bool = true, t_on::Bool = true, update::Bool = false, θ_on::Bool = true) where {FT<:AbstractFloat} = (
+time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES, METEO, SOIL) = spac;
 
     # run the update function until time elapses
@@ -181,30 +177,30 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Numb
     _t_res = FT(δt);
     while true
         _count += 1;
-        _δts = adjusted_time(spac, config, _t_res; θ_on = θ_on, t_on = t_on);
+        _δts = adjusted_time(config, spac, _t_res);
         _δt = _δts[1];
 
         # run the budgets for all ∂x∂t
-        θ_on ? soil_budget!(config, spac, _δt) : nothing;
+        soil_budget!(config, spac, _δt);
         if spac._root_connection
             stomatal_conductance!(spac, _δt);
-            t_on ? plant_energy!(config, spac, _δt) : nothing;
-            p_on ? xylem_flow_profile!(config, spac, _δt) : nothing;
+            plant_energy!(config, spac, _δt);
+            xylem_flow_profile!(config, spac, _δt);
         end;
 
         _t_res -= _δt;
 
         # if _t_res > 0 rerun the budget functions (shortwave radiation not included) and etc., else break
         if _t_res > 0
-            t_on ? longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL) : nothing;
+            longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
             if spac._root_connection
-                p_on ? xylem_pressure_profile!(spac; update = update) : nothing;
+                xylem_pressure_profile!(config, spac);
                 leaf_photosynthesis!(spac, GCO₂Mode());
             end;
-            θ_on ? soil_budget!(config, spac) : nothing;
+            soil_budget!(config, spac);
             if spac._root_connection
                 stomatal_conductance!(spac);
-                t_on ? plant_energy!(config, spac) : nothing;
+                plant_energy!(config, spac);
             end;
         else
             break;
@@ -220,7 +216,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Numb
     return nothing
 );
 
-time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::Bool = false) where {FT<:AbstractFloat} = (
+time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES, METEO, SOIL) = spac;
 
     # run the update function until the gpp is stable
@@ -230,7 +226,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
         # compute the dxdt (not shortwave radiation simulation)
         longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
         if spac._root_connection
-            xylem_pressure_profile!(spac; update = update);
+            xylem_pressure_profile!(config, spac);
             leaf_photosynthesis!(spac, GCO₂Mode());
         end;
         soil_budget!(config, spac);
@@ -248,7 +244,7 @@ time_stepper!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}; update::B
         _gpp_last = _gpp;
 
         # use adjusted time to make sure no numerical issues
-        _δts = adjusted_time(spac, config, FT(30); θ_on = false);
+        _δts = adjusted_time(config, spac, FT(30));
         _δt = _δts[1];
 
         # run the budgets for all ∂x∂t (except for soil)
