@@ -14,16 +14,17 @@
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+    prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
 
 Prescribe traits and environmental conditions, given
+- `config` `SPACConfiguration` type SPAC configuration
 - `spac` `MultiLayerSPAC` type SPAC
 - `dfr` `DataFrameRow` type weather driver
 - `t_on` If true, plant energy budget is on, do not prescribe the temperatures
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
-function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
     # read the data out of dataframe row to reduce memory allocation
     _df_atm::FT = dfr.P_ATM;
     _df_chl::FT = dfr.CHLOROPHYLL;
@@ -44,7 +45,7 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     _tleaf = nanmean([_layer.t for _layer in spac.LEAVES]);
     push!(spac.MEMORY.tem, _tleaf);
     if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
-    update!(spac, config; t_clm = nanmean(spac.MEMORY.tem));
+    update!(config, spac; t_clm = nanmean(spac.MEMORY.tem));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
     if !t_on
@@ -53,14 +54,14 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
         _df_ts2::FT = dfr.T_SOIL_2;
         _df_ts3::FT = dfr.T_SOIL_3;
         _df_ts4::FT = dfr.T_SOIL_4;
-        update!(spac, config; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
+        update!(config, spac; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
     end;
     if !θ_on
         _df_sw1::FT = dfr.SWC_1;
         _df_sw2::FT = dfr.SWC_2;
         _df_sw3::FT = dfr.SWC_3;
         _df_sw4::FT = dfr.SWC_4;
-        update!(spac, config; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
+        update!(config, spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
     end;
 
     # prescribe the precipitation related parameters
@@ -72,22 +73,22 @@ function prescribe!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, dfr
     _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.MEMORY.vcm);
     _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.MEMORY.chl);
     if _trigger_lai
-        update!(spac, config; lai = _df_lai, vcmax_expo = 0.3);
+        update!(config, spac; lai = _df_lai, vcmax_expo = 0.3);
         spac.MEMORY.lai = _df_lai;
     end;
 
     if _trigger_vcm
-        update!(spac, config; vcmax = _df_vcm, vcmax_expo = 0.3);
+        update!(config, spac; vcmax = _df_vcm, vcmax_expo = 0.3);
         spac.MEMORY.vcm = _df_vcm;
     end;
 
     if _trigger_chl
-        update!(spac, config; cab = _df_chl, car = _df_chl / 7);
+        update!(config, spac; cab = _df_chl, car = _df_chl / 7);
         spac.MEMORY.chl = _df_chl;
     end;
 
     # update clumping index
-    update!(spac, config; ci = _df_cli);
+    update!(config, spac; ci = _df_cli);
 
     # update environmental conditions
     for _alayer in spac.AIR
@@ -206,18 +207,18 @@ simulation!(config::SPACConfiguration{FT},
 
     # initialize spac based on initialial_state
     if initialial_state isa Bool
-        prescribe!(spac, config, _wdfr[1]; t_on = false, θ_on = false);
+        prescribe!(config, spac, _wdfr[1]; t_on = false, θ_on = false);
     end;
 
     # iterate through the time steps
     if DEBUG
         for _dfr in _wdfr[selection]
             @show _dfr.ind;
-            @time simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+            @time simulation!(config, spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
         end;
     else
         @showprogress for _dfr in _wdfr[selection]
-            simulation!(spac, config, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+            simulation!(config, spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
         end;
     end;
 
@@ -229,8 +230,8 @@ simulation!(config::SPACConfiguration{FT},
     return nothing
 );
 
-simulation!(spac::MultiLayerSPAC{FT},
-            config::SPACConfiguration{FT},
+simulation!(config::SPACConfiguration{FT},
+            spac::MultiLayerSPAC{FT},
             dfr::DataFrameRow;
             n_step::Int = 10,
             p_on::Bool = true,
@@ -254,11 +255,11 @@ simulation!(spac::MultiLayerSPAC{FT},
     end;
 
     # prescribe parameters
-    prescribe!(spac, config, dfr; t_on = t_on, θ_on = θ_on);
+    prescribe!(config, spac, dfr; t_on = t_on, θ_on = θ_on);
 
     # run the model
     for _ in 1:n_step
-        soil_plant_air_continuum!(spac, config, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
+        soil_plant_air_continuum!(config, spac, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
     end;
 
     # test if the integrated water flow is conserved

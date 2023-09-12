@@ -2,14 +2,14 @@
     FT = Float64;
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
     spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
-    EmeraldLand.SPAC.initialize!(spac, config);
-    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.initialize!(config, spac);
+    EmeraldLand.SPAC.spac!(config, spac, FT(1));
 
     # Changing canopy structure may result in changes in other parameters, such as Vcmax profile.
     # Thus, it is not recommended to modify those parametes manually unless otherwise told to by developers.
     # It is highly recommended to use our embedded function update! to modify canopy structure.
     # Currently, function update! supports the modification of leaf area index and clumping index.
-    EmeraldLand.SPAC.update!(spac, config; lai = 3, ci = 0.8);
+    EmeraldLand.SPAC.update!(config, spac; lai = 3, ci = 0.8);
     @test true;
 
     # Leaf inclination angle distribution is stored as a vector P_INCL in field CANOPY.
@@ -25,7 +25,7 @@
     spac.CANOPY.LIDF.A = -0.35;
     spac.CANOPY.LIDF.B = -0.15;
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
-    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
     # We also support beta function distribution. For example (A,B) =
@@ -39,13 +39,13 @@
     spac.CANOPY.LIDF.A = 1;
     spac.CANOPY.LIDF.B = 1;
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
-    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
     # By default, we use VerhoefLIDF method to compute LIDF, but we also support the use of Beta function.
     # To use the BetaLIDF, you need to change the parameter to BetaLIDF first.
     spac.CANOPY.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
-    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 end

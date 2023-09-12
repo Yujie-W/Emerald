@@ -89,8 +89,8 @@ update!(air::AirLayer{FT};
 
 """
 
-    update!(spac::MultiLayerSPAC{FT},
-            config::SPACConfiguration{FT};
+    update!(config::SPACConfiguration{FT},
+            spac::MultiLayerSPAC{FT},;
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
             ci::Union{Number,Nothing} = nothing,
@@ -120,8 +120,8 @@ Update the physiological parameters of the SPAC, given
 - `vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
 
 """
-update!(spac::MultiLayerSPAC{FT},
-        config::SPACConfiguration{FT};
+update!(config::SPACConfiguration{FT},
+        spac::MultiLayerSPAC{FT};
         cab::Union{Number,Nothing} = nothing,
         car::Union{Number,Nothing} = nothing,
         ci::Union{Number,Nothing} = nothing,
@@ -151,7 +151,7 @@ update!(spac::MultiLayerSPAC{FT},
         end;
     end;
     if !isnothing(cab) || !isnothing(car)
-        leaf_spectra!(spac, config);
+        leaf_spectra!(config, spac);
     end;
 
     # update LAI and Vcmax (with scaling factor)

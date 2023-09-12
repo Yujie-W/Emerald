@@ -569,14 +569,14 @@ function canopy_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
+    canopy_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Updates canopy radiation profiles for shortwave and longwave radiation, given
-- `spac` `MultiLayerSPAC` type SPAC
 - `config` Configurations of spac model
+- `spac` `MultiLayerSPAC` type SPAC
 
 """
-canopy_radiation!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+canopy_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; ANGLES, CANOPY, LEAVES, METEO, SOIL) = spac;
     (; DIM_LAYER) = config;
 

@@ -2,8 +2,8 @@
     FT = Float64;
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
     spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
-    EmeraldLand.SPAC.initialize!(spac, config);
-    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.initialize!(config, spac);
+    EmeraldLand.SPAC.spac!(config, spac, FT(1));
 
     # There are two ways to change leaf biophysical parameters.
     # The first method is to do it manually.
@@ -18,13 +18,13 @@
         leaf.BIO.lma = 0.012;       # leaf mass per area lma = cbc + pro
         leaf.BIO.pro = 0.001;       # protein content
     end;
-    EmeraldLand.LeafOptics.leaf_spectra!(spac, config);
+    EmeraldLand.LeafOptics.leaf_spectra!(config, spac);
     @test true;
 
     # The second method is to use the embedded function update! from submodule SPAC.
     # In this case, function leaf_spectra! runs automatically.
     # Note that it is recommended to change both at the same time, otherwise leaf_spectra! will run twice.
     # As to the supported options of the function update!, please check out the documentation.
-    EmeraldLand.SPAC.update!(spac, config; cab = 40, car = 10);
+    EmeraldLand.SPAC.update!(config, spac; cab = 40, car = 10);
     @test true;
 end

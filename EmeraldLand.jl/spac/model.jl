@@ -32,10 +32,10 @@ This function runs the model using the following steps:
 
 This function is supposed to have the highest hierarchy, and should support all SPAC types defined in EmeraldNamespace.jl. Note to update the water flow profile when initializing the SPAC.
 
-    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Number) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(spac::Nothing, config::Nothing) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(config::Nothing, spac::Nothing) where {FT<:AbstractFloat}
 
 Run SPAC model and move forward in time with time stepper controller, given
 - `spac` `MultiLayerSPAC` SPAC, or nothing
@@ -47,17 +47,17 @@ function soil_plant_air_continuum! end
 
 # TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
 # TODO: add top soil evaporation
-soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}, δt::Number) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
 
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(config, spac, FT(0));
     xylem_pressure_profile!(config, spac);
-    (!spac._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(spac, config; lai = 0) : nothing;
+    (!spac._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(config, spac; lai = 0) : nothing;
 
     # 2. run canopy RT
-    canopy_radiation!(spac, config);
+    canopy_radiation!(config, spac);
 
     # 3. run photosynthesis model
     if spac._root_connection
@@ -66,7 +66,7 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT
     end;
 
     # 4. run canopy fluorescence
-    canopy_fluorescence!(spac, config);
+    canopy_fluorescence!(config, spac);
 
     # save the result at this stage for the results at the beginning of this time step
 
@@ -86,19 +86,19 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT
     return nothing
 );
 
-soil_plant_air_continuum!(spac::Nothing, config::Nothing, δt::Number) = nothing;
+soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) = nothing;
 
-soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
 
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     xylem_flow_profile!(config, spac, FT(0));
     xylem_pressure_profile!(config, spac);
-    spac._root_connection ? nothing : update!(spac, config; lai = 0);
+    spac._root_connection ? nothing : update!(config, spac; lai = 0);
 
     # 2. run canopy RT
-    canopy_radiation!(spac, config);
+    canopy_radiation!(config, spac);
 
     # 3. update the prognostic variables (except for soil water and temperature)
     time_stepper!(config, spac);
@@ -108,7 +108,7 @@ soil_plant_air_continuum!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT
     return nothing
 );
 
-soil_plant_air_continuum!(spac::Nothing, config::Nothing) = nothing;
+soil_plant_air_continuum!(config::Nothing, spac::Nothing) = nothing;
 
 
 # add an alias for soil_plant_air_continuum!

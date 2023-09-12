@@ -17,16 +17,16 @@
 #######################################################################################################################################################################################################
 """
 
-    initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
+    initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Initialize the SPAC, given
-- `spac` `MultiLayerSPAC` SPAC
 - `config` Configurations of spac model
+- `spac` `MultiLayerSPAC` SPAC
 
 """
 function initialize! end
 
-initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; ENABLE_SOIL_EVAPORATION) = config;
     (; CANOPY, LEAVES, SOIL) = spac;
 
@@ -51,7 +51,7 @@ initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:
     end;
 
     # initialize leaf level spectra
-    leaf_spectra!(spac, config);
+    leaf_spectra!(config, spac);
 
     # initialize stomatal conductance
     stomatal_conductance!(spac, FT(0));

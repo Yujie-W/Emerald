@@ -554,7 +554,7 @@ xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt
     xylem_flow_profile!(TRUNK, Δt);
 
     # 4. set up root flow rate and profile
-    xylem_flow_profile!(spac, flow_in(TRUNK), Δt);
+    xylem_flow_profile!(config, spac, flow_in(TRUNK), Δt);
 
     return nothing
 );

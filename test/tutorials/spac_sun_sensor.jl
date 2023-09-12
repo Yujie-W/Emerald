@@ -2,8 +2,8 @@
     FT = Float64;
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
     spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
-    EmeraldLand.SPAC.initialize!(spac, config);
-    EmeraldLand.SPAC.spac!(spac, config, FT(1));
+    EmeraldLand.SPAC.initialize!(config, spac);
+    EmeraldLand.SPAC.spac!(config, spac, FT(1));
 
     # Sun-sensor geometry impacts the signal that can be detected remotely.
     # There are several parameters related, and they are

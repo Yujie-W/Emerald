@@ -256,7 +256,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
     end;
 
     # run canopy fluorescence
-    canopy_fluorescence!(spac, config);
+    canopy_fluorescence!(config, spac);
 
     return nothing
 );

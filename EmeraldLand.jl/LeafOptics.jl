@@ -347,14 +347,14 @@ leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_p
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat}
+    leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
 
 Update leaf reflectance and transmittance for SPAC, given
-- `spac` `MultiLayerSPAC` type SPAC
 - `config` Configurations of spac model
+- `spac` `MultiLayerSPAC` type SPAC
 
 """
-leaf_spectra!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
+leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     (; APAR_CAR, LHA, WLSET) = config;
     (; LEAVES) = spac;
 
