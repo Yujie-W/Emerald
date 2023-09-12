@@ -17,8 +17,11 @@ using ..SoilHydraulics: soil_θ, soil_ψ_25
 import ..SoilHydraulics: relative_hydraulic_conductance
 
 
-# include functions
-include("hydraulics/beta.jl");
+# include functions related to beta factor
+include("hydraulics/beta/model.jl");
+include("hydraulics/beta/read.jl");
+include("hydraulics/beta/set.jl");
+
 include("hydraulics/budget.jl");
 include("hydraulics/conductance_pressure.jl");
 include("hydraulics/derivative.jl");

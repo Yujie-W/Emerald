@@ -21,7 +21,7 @@ BETA(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     # compute the mean beta
     _βs = 0;
     for _leaves in LEAVES
-        _βs += β_factor(_leaves.SM);
+        _βs += read_β(_leaves.SM);
     end;
 
     return _βs / length(LEAVES)

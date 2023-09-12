@@ -10,7 +10,7 @@ using ..CanopyOptics: MODIS_EVI, MODIS_NDVI, MODIS_NIRv, OCO2_SIF759, OCO2_SIF77
 using ..CanopyOptics: canopy_fluorescence!, canopy_radiation!, longwave_radiation!, soil_albedo!
 using ..Photosynthesis: leaf_photosynthesis!
 using ..SoilHydraulics: soil_budget!
-using ..PlantHydraulics: flow_out, plant_energy!, xylem_flow_profile!, xylem_pressure_profile!, β_factor
+using ..PlantHydraulics: flow_out, plant_energy!, read_β, xylem_flow_profile!, xylem_pressure_profile!
 using ..StomatalModels: stomatal_conductance!, stomatal_conductance_profile!
 
 
