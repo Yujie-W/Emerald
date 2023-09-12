@@ -134,7 +134,7 @@ update!(spac::MultiLayerSPAC{FT},
         vcmax::Union{Number,Nothing} = nothing,
         vcmax_expo::Union{Number,Nothing} = nothing
 ) where {FT<:AbstractFloat} = (
-    (; ALLOW_SOIL_EVAPORATION, DIM_LAYER, T_CLM) = config;
+    (; ENABLE_SOIL_EVAPORATION, DIM_LAYER, T_CLM) = config;
     (; AIR, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL, TRUNK) = spac;
 
     # update chlorophyll and carotenoid contents (and spectra)
@@ -222,7 +222,7 @@ update!(spac::MultiLayerSPAC{FT},
         for _i in eachindex(swcs)
             _slayer = SOIL.LAYERS[_i];
             _slayer.θ = max(_slayer.VC.Θ_RES + eps(FT), min(_slayer.VC.Θ_SAT - eps(FT), swcs[_i]));
-            if ALLOW_SOIL_EVAPORATION
+            if ENABLE_SOIL_EVAPORATION
                 _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
                 _rt = GAS_R(FT) * _slayer.t;
                 _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000) * _slayer.ΔZ * _δθ / _rt;

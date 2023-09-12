@@ -862,6 +862,7 @@ abstract type AbstractLeaf{FT<:AbstractFloat} end
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
 #     2023-Apr-13: move field APAR_CAR to SPACConfiguration
 #     2023-Jun-13: add field: etr
+#     2023-Sep-11: set minimum G to 0 instead of 1e-4
 #
 #######################################################################################################################################################################################################
 """
@@ -880,7 +881,7 @@ Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
     "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    G_LIMITS::Vector{FT} = FT[1e-4, 0.3]
+    G_LIMITS::Vector{FT} = FT[0, 0.3]
     "Leaf width `[m]`"
     WIDTH::FT = 0.05
 
@@ -957,6 +958,7 @@ Leaf(config::SPACConfiguration{FT}) where {FT} = (
 #     2022-Nov-18: use Union type for SM
 #     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
 #     2023-Jun-13: add field: etr
+#     2023-Sep-11: set minimum G to 0 instead of 1e-4
 #
 #######################################################################################################################################################################################################
 """
@@ -975,7 +977,7 @@ Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
     "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    G_LIMITS::Vector{FT} = FT[1e-4, 0.3]
+    G_LIMITS::Vector{FT} = FT[0, 0.3]
     "Leaf width `[m]`"
     WIDTH::FT = 0.05
 
@@ -1054,6 +1056,7 @@ end
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Sep-07: add water flow integrators
 #     2023-Sep-09: add fields ϕ_x_shaded and ϕ_x_sunlit
+#     2023-Sep-11: set minimum G to 0 instead of 1e-4
 #
 #######################################################################################################################################################################################################
 """
@@ -1073,7 +1076,7 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
     "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    G_LIMITS::Vector{FT} = FT[1e-4, 0.3]
+    G_LIMITS::Vector{FT} = FT[0, 0.3]
     "Leaf width `[m]`"
     WIDTH::FT = 0.05
 

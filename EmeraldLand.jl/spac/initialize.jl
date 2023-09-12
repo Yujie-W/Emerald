@@ -12,6 +12,7 @@
 #     2023-Jun-13: add soil gas energy into soil e
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
+#     2023-Sep-11: rename ALLOW_SOIL_EVAPORATION to ENABLE_SOIL_EVAPORATION
 #
 #######################################################################################################################################################################################################
 """
@@ -26,12 +27,12 @@ Initialize the SPAC, given
 function initialize! end
 
 initialize!(spac::MultiLayerSPAC{FT}, config::SPACConfiguration{FT}) where {FT<:AbstractFloat} = (
-    (; ALLOW_SOIL_EVAPORATION) = config;
+    (; ENABLE_SOIL_EVAPORATION) = config;
     (; CANOPY, LEAVES, SOIL) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
     for _slayer in SOIL.LAYERS
-        if ALLOW_SOIL_EVAPORATION
+        if ENABLE_SOIL_EVAPORATION
             _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
             _rt = GAS_R(FT) * _slayer.t;
             _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000) * _slayer.ΔZ * _δθ / _rt;

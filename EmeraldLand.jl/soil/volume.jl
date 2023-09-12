@@ -7,6 +7,7 @@
 #     2023-Jul-06: add DEBUG code block
 #     2023-Jul-06: add PRESCRIBE_AIR mode to avoid the errors due to mass balance in air
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
+#     2023-Sep-11: rename ALLOW_SOIL_EVAPORATION to ENABLE_SOIL_EVAPORATION
 #
 #######################################################################################################################################################################################################
 """
@@ -19,9 +20,9 @@ Balance the air volume in the soil so that pressure is in equilibrium, given
 
 """
 function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
-    (; ALLOW_SOIL_EVAPORATION, DEBUG, PRESCRIBE_AIR) = config;
+    (; ENABLE_SOIL_EVAPORATION, DEBUG, PRESCRIBE_AIR) = config;
 
-    if !ALLOW_SOIL_EVAPORATION
+    if !ENABLE_SOIL_EVAPORATION
         return nothing
     end;
 

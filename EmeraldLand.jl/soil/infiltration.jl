@@ -7,6 +7,7 @@
 #     2023-Jul-06: add info into DEBUG code block
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
 #     2023-Sep-07: add integrators for soil water budget
+#     2023-Sep-11: rename ALLOW_SOIL_EVAPORATION to ENABLE_SOIL_EVAPORATION
 #
 #######################################################################################################################################################################################################
 """
@@ -113,7 +114,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
 );
 
 soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
-    (; ALLOW_SOIL_EVAPORATION, DEBUG) = config;
+    (; ENABLE_SOIL_EVAPORATION, DEBUG) = config;
     (; METEO, SOIL) = spac;
     LAYERS = SOIL.LAYERS;
 
@@ -122,7 +123,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt:
         _slayer = LAYERS[_i];
 
         # account for evaporation and condensation to/from the air space
-        if ALLOW_SOIL_EVAPORATION
+        if ENABLE_SOIL_EVAPORATION
             _ps = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000);
             _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
 

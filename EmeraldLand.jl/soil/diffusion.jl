@@ -8,6 +8,7 @@
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
 #     2023-Sep-07: fix a typo in the concentration calculations
 #     2023-Sep-09: fix a typo in the concentration calculations
+#     2023-Sep-11: rename ALLOW_SOIL_EVAPORATION to ENABLE_SOIL_EVAPORATION
 #
 #######################################################################################################################################################################################################
 """
@@ -30,9 +31,9 @@ Update diffusion rate among soil layers (and thus water and energy budgets), giv
 function soil_diffusion! end
 
 soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; ALLOW_SOIL_EVAPORATION, DEBUG) = config;
+    (; ENABLE_SOIL_EVAPORATION, DEBUG) = config;
 
-    if !ALLOW_SOIL_EVAPORATION
+    if !ENABLE_SOIL_EVAPORATION
         return nothing
     end;
 
@@ -143,9 +144,9 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
 );
 
 soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
-    (; ALLOW_SOIL_EVAPORATION, DEBUG) = config;
+    (; ENABLE_SOIL_EVAPORATION, DEBUG) = config;
 
-    if !ALLOW_SOIL_EVAPORATION
+    if !ENABLE_SOIL_EVAPORATION
         return nothing
     end;
 
