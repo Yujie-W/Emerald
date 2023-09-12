@@ -7,7 +7,7 @@
 #     2022-Jun-01: add method for MonoElementSPAC
 #     2022-Oct-21: add a p_ups if statement
 #     2023-Sep-11: add config to the variable list
-#     2023-Sep-11: rename function to critical_flow to conductance_pressure
+#     2023-Sep-11: rename function to critical_flow
 #
 #######################################################################################################################################################################################################
 """
@@ -37,7 +37,7 @@ critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini:
     # compute the misc variables
     _f_st = relative_surface_tension(T);
     _f_vis = relative_viscosity(T);
-    _p_crt = conductance_pressure(VC, KR_THRESHOLD) * _f_st;
+    _p_crt = xylem_pressure(VC, KR_THRESHOLD) * _f_st;
 
     # add a judgement to make sure p_ups is higher than _p_crt
     if hs.p_ups < _p_crt
@@ -88,7 +88,7 @@ critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT 
     _kt = 1 / (1 / _kr + 1 / _ks + 1 / _kl);
 
     # compute leaf critical pressure
-    _p_crt = conductance_pressure(LEAF.HS.VC, KR_THRESHOLD) * relative_surface_tension(LEAF.t);
+    _p_crt = xylem_pressure(LEAF.HS.VC, KR_THRESHOLD) * relative_surface_tension(LEAF.t);
 
     # add a judgement to make sure p_ups is higher than _p_crt
     if (ROOT.HS.p_ups <= _p_crt)

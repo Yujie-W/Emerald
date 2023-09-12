@@ -11,26 +11,24 @@
 #######################################################################################################################################################################################################
 """
 
-    xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat}
-    xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat}
+    xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, t::FT) where {FT<:AbstractFloat}
+    xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, t::FT) where {FT<:AbstractFloat}
 
 Return the xylem water pressure in MPa, given
 - `pv` `LinearPVCurve` or `SegmentedPVCurve` type pressure volume curve
 - `rvol` Relative volume (relative to maximum)
-- `T` Temperature
+- `t` Temperature
 
 """
-function xylem_pressure end
+xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, t::FT) where {FT<:AbstractFloat} = (rvol - 1) / pv.SLOPE;
 
-xylem_pressure(pv::LinearPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat} = (rvol - 1) / pv.SLOPE;
-
-xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, t::FT) where {FT<:AbstractFloat} = (
     (; C_ALL, RWC_APO, RWC_TLP, ϵ_BULK) = pv;
 
     if rvol > RWC_TLP
-        return -C_ALL * GAS_R(FT) * T / (rvol - RWC_APO) * FT(1e-6) + ϵ_BULK * (rvol - RWC_TLP)
+        return -C_ALL * GAS_R(FT) * t / (rvol - RWC_APO) * FT(1e-6) + ϵ_BULK * (rvol - RWC_TLP)
     elseif rvol > RWC_APO
-        return -C_ALL * GAS_R(FT) * T / (rvol - RWC_APO) * FT(1e-6)
+        return -C_ALL * GAS_R(FT) * t / (rvol - RWC_APO) * FT(1e-6)
     else
         return FT(-100)
     end

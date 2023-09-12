@@ -22,16 +22,33 @@ include("hydraulics/beta/model.jl");
 include("hydraulics/beta/read.jl");
 include("hydraulics/beta/set.jl");
 
+# include functions related to drought effects
+include("hydraulics/drought/disconnection.jl");
+include("hydraulics/drought/legacy.jl");
+
+# include function related to stomtal optimality
+include("hydraulics/optimality/critical_flow.jl");
+include("hydraulics/optimality/derivative.jl");
+
+# include functions related to xylem vulnerability curve
+include("hydraulics/vc/conductance.jl");
+include("hydraulics/vc/pressure.jl");
+include("hydraulics/vc/pressure_volume.jl");
+
+# include functions related to flow and pressure profiles
+include("hydraulics/flow_profile/flow_out.jl");
+include("hydraulics/flow_profile/leaf_flow_out.jl");
+include("hydraulics/flow_profile/leaf_flow_profile.jl");
+include("hydraulics/flow_profile/read.jl");
+include("hydraulics/flow_profile/root_pk.jl");
+include("hydraulics/flow_profile/root_flow_out.jl");
+include("hydraulics/flow_profile/root_flow_profile.jl");
+include("hydraulics/flow_profile/stem_flow_out.jl");
+include("hydraulics/flow_profile/stem_flow_profile.jl");
+
 include("hydraulics/budget.jl");
-include("hydraulics/conductance_pressure.jl");
-include("hydraulics/derivative.jl");
-include("hydraulics/disconnection.jl");
 include("hydraulics/flow_profile.jl");
-include("hydraulics/legacy.jl");
 include("hydraulics/pressure_profile.jl");
-include("hydraulics/pressure_volume.jl");
-include("hydraulics/target_flow.jl");
-include("hydraulics/vulnerability.jl");
 
 
 end # module
