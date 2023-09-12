@@ -221,6 +221,7 @@ xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) wher
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
 #     2023-Sep-11: put option update to the SPAC configuration
 #     2023-Sep-11: add config to the variable list
+#     2023-Sep-11: rename function to critical_flow to conductance_pressure
 # To do
 #     TODO: add leaf extra-xylary vulnerability curve
 #
@@ -607,6 +608,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}
 );
 
 xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+    (; KR_THRESHOLD) = config;
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     _nroots = length(ROOTS);
@@ -618,7 +620,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT})
         if _root._isconnected
             _root.HS.p_ups = soil_ψ_25(_slayer.VC, _slayer.θ) * relative_surface_tension(_slayer.t);
         else
-            _root.HS.p_ups = critical_pressure(_root.HS.VC) * relative_surface_tension(_root.t);
+            _root.HS.p_ups = conductance_pressure(_root.HS.VC, KR_THRESHOLD) * relative_surface_tension(_root.t);
         end;
     end;
 

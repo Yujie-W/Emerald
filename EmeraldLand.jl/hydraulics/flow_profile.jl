@@ -230,6 +230,7 @@ root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{
 #     2023-Mar-28: if no root is connected to soil, set all flow to 0
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Aug-23: add configuration to enable/disable leaf condensation
+#     2023-Sep-11: add config to the variable list
 #
 #######################################################################################################################################################################################################
 """
@@ -340,20 +341,17 @@ xylem_flow_profile!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::Non
 
 """
 
-    xylem_flow_profile!(roots::Vector{Root{FT}}, soil::Soil{FT}, cache_f::Vector{FT}, cache_k::Vector{FT}, cache_p::Vector{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat}
+    xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat}
 
 Partition root flow rates at different layers for known total flow rate out, given
-- `roots` Vector of `Root` in a multiple roots system
-- `roots_index` Vector to match roots to soil layers
-- `soil` Soil of companion roots
-- `cache_f` Flow rate cache into each root
-- `cache_k` Total conductance cache of each root
-- `cache_p` Root xylem end pressure cache of each root
+- `config` SPAC configurations
+- `spac` `MultiLayerSPAC` type SPAC
 - `f_sum` Total flow rate out of the roots
 - `Δt` Time step length
 
 """
-xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat} = (
+xylem_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:AbstractFloat} = (
+    (; KR_THRESHOLD) = config;
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
     # very first step here: if soil is too dry, disconnect root from soil
@@ -362,7 +360,7 @@ xylem_flow_profile!(spac::MultiLayerSPAC{FT}, f_sum::FT, Δt::FT) where {FT<:Abs
         _root = ROOTS[_i];
         _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
         _ψ_soil = soil_ψ_25(_slayer.VC, _slayer.θ) * relative_surface_tension(_slayer.t);
-        _p_crit = critical_pressure(_root.HS.VC) * relative_surface_tension(_root.t);
+        _p_crit = conductance_pressure(_root.HS.VC, KR_THRESHOLD) * relative_surface_tension(_root.t);
         if _ψ_soil <= _p_crit
             disconnect!(_root);
         else

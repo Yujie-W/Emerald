@@ -20,7 +20,7 @@ import ..SoilHydraulics: relative_hydraulic_conductance
 # include functions
 include("hydraulics/beta.jl");
 include("hydraulics/budget.jl");
-include("hydraulics/critical_pressure.jl");
+include("hydraulics/conductance_pressure.jl");
 include("hydraulics/derivative.jl");
 include("hydraulics/disconnection.jl");
 include("hydraulics/flow_profile.jl");
