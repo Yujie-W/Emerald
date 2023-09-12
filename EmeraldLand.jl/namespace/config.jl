@@ -13,7 +13,8 @@
 #     2023-Jun-20: move fields α_CLM, α_FITTING, and MAT_ρ from soil albedo
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
-#     2023-Sep-07: add field ALLOW_LEAF_SHEDDING, ALLOW_SOIL_EVAPORATION, and T_CLM
+#     2023-Sep-07: add field ALLOW_LEAF_SHEDDING, ENABLE_SOIL_EVAPORATION, and T_CLM
+#     2023-Sep-11: put option update to the SPAC configuration
 #
 #######################################################################################################################################################################################################
 """
@@ -32,13 +33,27 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to print debug information"
     DEBUG::Bool = false
 
-    # Prescribe parameters
+    # Turn on/off features
     "Allow leaf condensation"
     ALLOW_LEAF_CONDENSATION::Bool = false
     "Allow leaf shedding"
     ALLOW_LEAF_SHEDDING::Bool = false
-    "Allow soil evaporation"
-    ALLOW_SOIL_EVAPORATION::Bool = false
+    "Whether APAR absorbed by carotenoid is counted as PPAR"
+    APAR_CAR::Bool = true
+    "Enable soil evaporation"
+    ENABLE_SOIL_EVAPORATION::Bool = false
+    "Enable drought legacy effect"
+    ENABLE_DROUGHT_LEGACY::Bool = false
+    "Whether to acclimate leaf Vcmax and Jmax TD"
+    T_CLM::Bool = true
+    "Whether to use CLM soil albedo scheme"
+    α_CLM::Bool = false
+    "Whether to fit the data from broadband to hyperspectral"
+    α_FITTING::Bool = true
+    "Whether to convert energy to photons when computing fluorescence"
+    Φ_PHOTON::Bool = true
+
+    # Prescribe parameters
     "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
 
@@ -73,18 +88,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_SOIL::Int = 4
     "Dimension of short wave length bins"
     DIM_WL::Int = length(WLSET.Λ)
-
-    # General model information
-    "Whether APAR absorbed by carotenoid is counted as PPAR"
-    APAR_CAR::Bool = true
-    "Whether to acclimate leaf Vcmax and Jmax TD"
-    T_CLM::Bool = true
-    "Whether to use CLM soil albedo scheme"
-    α_CLM::Bool = false
-    "Whether to fit the data from broadband to hyperspectral"
-    α_FITTING::Bool = true
-    "Whether to convert energy to photons when computing fluorescence"
-    Φ_PHOTON::Bool = true
 
     # Embedded structures
     "Hyperspectral absorption features of different leaf components"
