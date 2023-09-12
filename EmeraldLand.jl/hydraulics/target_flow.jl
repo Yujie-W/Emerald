@@ -6,6 +6,7 @@
 #     2022-Jun-01: add method for LeafHydraulics
 #     2022-Jun-01: add method for MonoElementSPAC
 #     2022-Oct-21: add a p_ups if statement
+#     2023-Sep-11: add config to the variable list
 #
 #######################################################################################################################################################################################################
 """
@@ -19,22 +20,23 @@ function critical_flow end
 
 """
 
-    critical_flow(hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat}
+    critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5)) where {FT<:AbstractFloat}
 
 Return the critical flow rate that triggers a given amount of loss of conductance, given
+- `config` `SPACConfiguration` type struct
 - `hs` `LeafHydraulics` type struct
 - `T` Liquid temperature
 - `ini` Initial guess
-- `kr` Reference conductance, default is 0.001
 
 """
-critical_flow(hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5)) where {FT<:AbstractFloat} = (
+    (; KR_THRESHOLD) = config;
     (; K_SLA, VC) = hs;
 
     # compute the misc variables
     _f_st = relative_surface_tension(T);
     _f_vis = relative_viscosity(T);
-    _p_crt = critical_pressure(VC, kr) * _f_st;
+    _p_crt = critical_pressure(VC, KR_THRESHOLD) * _f_st;
 
     # add a judgement to make sure p_ups is higher than _p_crt
     if hs.p_ups < _p_crt
@@ -66,14 +68,16 @@ critical_flow(hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5); kr::FT = FT(0.00
 
 """
 
-    critical_flow(spac::MonoElementSPAC{FT}, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat}
+    critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT = FT(0.5)) where {FT<:AbstractFloat}
 
 Return the critical flow rate that triggers a given amount of loss of conductance, given
+- `config` `SPACConfiguration` type struct
 - `spac` `MonoElementSPAC` type struct
 - `ini` Initial guess
-- `kr` Reference conductance, default is 0.001
+
 """
-critical_flow(spac::MonoElementSPAC{FT}, ini::FT = FT(0.5); kr::FT = FT(0.001)) where {FT<:AbstractFloat} = (
+critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT = FT(0.5)) where {FT<:AbstractFloat} = (
+    (; KR_THRESHOLD) = config;
     (; LEAF, ROOT, STEM) = spac;
 
     # read out the conductances
@@ -83,7 +87,7 @@ critical_flow(spac::MonoElementSPAC{FT}, ini::FT = FT(0.5); kr::FT = FT(0.001)) 
     _kt = 1 / (1 / _kr + 1 / _ks + 1 / _kl);
 
     # compute leaf critical pressure
-    _p_crt = critical_pressure(LEAF.HS.VC, kr) * relative_surface_tension(LEAF.t);
+    _p_crt = critical_pressure(LEAF.HS.VC, KR_THRESHOLD) * relative_surface_tension(LEAF.t);
 
     # add a judgement to make sure p_ups is higher than _p_crt
     if (ROOT.HS.p_ups <= _p_crt)

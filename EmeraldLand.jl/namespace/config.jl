@@ -14,7 +14,8 @@
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #     2023-Sep-07: add field ALLOW_LEAF_SHEDDING, ENABLE_SOIL_EVAPORATION, and T_CLM
-#     2023-Sep-11: put option update to the SPAC configuration
+#     2023-Sep-11: add option update legacy to the SPAC configuration
+#     2023-Sep-11: add option KR_THRESHOLD to the SPAC configuration
 #
 #######################################################################################################################################################################################################
 """
@@ -65,7 +66,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Wave length set used to paramertize other variables"
     WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET = DATASET)
 
-    # Dimensions
+    # Dimensions of the spac system
     "Dimension of air layers"
     DIM_AIR::Int = 20
     "Dimension of azimuth angles"
@@ -89,7 +90,11 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Dimension of short wave length bins"
     DIM_WL::Int = length(WLSET.Λ)
 
-    # Embedded structures
+    # Constant values used to configurate the thresholds
+    "Threshold of the critical pressure or flow that trigger a remainder of conductance"
+    KR_THRESHOLD::FT = 0.001
+
+    # Embedded structures that are supposed to be constant
     "Hyperspectral absorption features of different leaf components"
     LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
     "A matrix of characteristic curves"
@@ -97,7 +102,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Downwelling shortwave radiation reference spectrum"
     RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
 
-    # Canopy geometry
+    # Canopy geometry related angles
     "Mean azimuth angles `[°]`"
     Θ_AZI::Vector{FT} = collect(FT, range(0, 360; length=DIM_AZI+1))[1:end-1] .+ 360 / DIM_AZI / 2
     "Bounds of inclination angles `[°]`"
