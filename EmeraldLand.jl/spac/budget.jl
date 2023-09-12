@@ -185,7 +185,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         if spac._root_connection
             stomatal_conductance!(spac, _δt);
             plant_energy!(config, spac, _δt);
-            xylem_flow_profile!(config, spac, _δt);
+            spac_flow_profile!(config, spac, _δt);
         end;
 
         _t_res -= _δt;
@@ -251,7 +251,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
         if spac._root_connection
             stomatal_conductance!(spac, _δt);
             plant_energy!(config, spac, _δt);
-            xylem_flow_profile!(config, spac, _δt);
+            spac_flow_profile!(config, spac, _δt);
         end;
     end;
 

@@ -43,11 +43,11 @@ include("hydraulics/flow_profile/read.jl");
 include("hydraulics/flow_profile/root_pk.jl");
 include("hydraulics/flow_profile/root_flow_out.jl");
 include("hydraulics/flow_profile/root_flow_profile.jl");
+include("hydraulics/flow_profile/spac_flow_profile.jl");
 include("hydraulics/flow_profile/stem_flow_out.jl");
 include("hydraulics/flow_profile/stem_flow_profile.jl");
 
 include("hydraulics/budget.jl");
-include("hydraulics/flow_profile.jl");
 include("hydraulics/pressure_profile.jl");
 
 
