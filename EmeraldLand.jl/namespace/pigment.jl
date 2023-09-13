@@ -13,6 +13,7 @@
 #     2022-Jul-20: use kwdef for the constructor
 #     2022-Jul-20: add field DATASET to struct
 #     2023-Sep-12: rename K_PS to Φ_PS
+#     2023-Sep-13: add fields Φ_PSI and Φ_PSII
 #
 #######################################################################################################################################################################################################
 """
@@ -54,4 +55,8 @@ Base.@kwdef struct HyperspectralAbsorption{FT<:AbstractFloat}
     NR::Vector{FT} = read_nc(DATASET, "NR")
     "Fluorescence yield of PS I and II probability function `[nm⁻¹]`"
     Φ_PS::Vector{FT} = read_nc(DATASET, "K_PS")
+    "Fluorescence yield of PS I probability function `[nm⁻¹]`"
+    Φ_PSI::Vector{FT} = read_nc(DATASET, "K_PS1")
+    "Fluorescence yield of PS II probability function `[nm⁻¹]`"
+    Φ_PSII::Vector{FT} = read_nc(DATASET, "K_PS2")
 end
