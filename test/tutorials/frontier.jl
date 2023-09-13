@@ -9,7 +9,7 @@
     wd_data = EmeraldFrontier.weather_driver(wd_tag, gm_dict);
 
     # Users may run the model using prescribed weather drivers by setting p_on, t_on, θ_on to false, or run the energy/water budget by setting those to true.
-    df_pres = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240, p_on = false, t_on = false, θ_on = false);
-    df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240, p_on = true, t_on = true, θ_on = true);
+    df_pres = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240);
+    df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240);
     @test true;
 end

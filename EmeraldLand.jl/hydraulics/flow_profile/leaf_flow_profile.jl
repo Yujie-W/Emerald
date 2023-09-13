@@ -3,6 +3,7 @@
 # Changes to the function
 # General
 #     2023-Sep-11: rename method to leaf_flow_profile! to be more specific in function name
+#     2023-Sep-12: update leaf flow profile only if lai > 0
 #
 #######################################################################################################################################################################################################
 """
@@ -26,8 +27,10 @@ leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt
 );
 
 leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
-    set_leaf_flow_out!(config, spac);
-    leaf_flow_profile!.(spac.LEAVES, Δt);
+    if spac.CANOPY.lai > 0
+        set_leaf_flow_out!(config, spac);
+        leaf_flow_profile!.(spac.LEAVES, Δt);
+    end;
 
     return nothing
 );

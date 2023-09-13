@@ -57,10 +57,10 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT<:AbstractFl
     end;
 
     # update the vcmax for C3 model
-    update!(_spac, config; vcmax = nanmean(gmdict["VCMAX25"]), vcmax_expo = 0.3);
+    update!(config, _spac; vcmax = nanmean(gmdict["VCMAX25"]), vcmax_expo = 0.3);
 
     # initialize the spac
-    initialize!(_spac, config);
+    initialize!(config, _spac);
 
     return _spac
 end

@@ -129,6 +129,7 @@ end
 #     2023-Sep-07: initialize integrators when starting a new simulation in a long time step
 #     2023-Sep-09: save the quantum yields when saving the simulation results
 #     2023-Sep-11: save the integrated SIF when saving the simulation results
+#     2023-Sep-12: remove option p_on, t_on, and θ_on as they are now in CONFIG
 #
 #######################################################################################################################################################################################################
 """
@@ -138,20 +139,14 @@ end
                 appending::Bool = false,
                 displaying::Bool = false,
                 initialial_state::Union{Nothing,Bool} = true,
-                p_on::Bool = true,
                 saving::Union{Nothing,String} = nothing,
-                selection = :,
-                t_on::Bool = true,
-                θ_on::Bool = true)
+                selection = :)
     simulation!(config::SPACConfiguration{FT},
                 spac::MultiLayerSPAC{FT},
                 wdf::DataFrame;
                 initialial_state::Union{Nothing,Bool} = true,
-                p_on::Bool = true,
                 saving::Union{Nothing,String} = nothing,
-                selection = :,
-                t_on::Bool = true,
-                θ_on::Bool = true) where {FT}
+                selection = :) where {FT}
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
@@ -159,11 +154,8 @@ Run simulation on site level, given
 - `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
 - `displaying` If true, displaying information regarding the steps
 - `initialial_state` Initial state of spac: if is a bool, load the first data from the weather driver
-- `p_on` If true, plant hydraulic flow and pressure profiles will be updated
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
 - `selection` Run selection of data, default is : (namely 1:end)
-- `t_on` If true, plant energy budget is on, do not prescribe the temperatures
-- `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 The second method can be used to run externally prepared config, spac, and weather driver, given
 - `config` SPAC configuration
@@ -178,16 +170,13 @@ simulation!(wd_tag::String,
             appending::Bool = false,
             displaying::Bool = false,
             initialial_state::Union{Nothing,Bool} = true,
-            p_on::Bool = true,
             saving::Union{Nothing,String} = nothing,
-            selection = :,
-            t_on::Bool = true,
-            θ_on::Bool = true) = (
+            selection = :) = (
     _config = spac_config(gmdict);
     _spac = spac(gmdict, _config);
     _wdf = weather_driver(wd_tag, gmdict; appending = appending, displaying = displaying);
 
-    simulation!(_config, _spac, _wdf; initialial_state = initialial_state, p_on = p_on, saving = saving, selection = selection, t_on = t_on, θ_on = θ_on);
+    simulation!(_config, _spac, _wdf; initialial_state = initialial_state, saving = saving, selection = selection);
 
     return isnothing(saving) ? _wdf : nothing
 );
@@ -196,11 +185,8 @@ simulation!(config::SPACConfiguration{FT},
             spac::MultiLayerSPAC{FT},
             wdf::DataFrame;
             initialial_state::Union{Nothing,Bool} = true,
-            p_on::Bool = true,
             saving::Union{Nothing,String} = nothing,
-            selection = :,
-            t_on::Bool = true,
-            θ_on::Bool = true) where {FT} = (
+            selection = :) where {FT} = (
     (; DEBUG) = config;
 
     _wdfr = eachrow(wdf);
@@ -214,11 +200,11 @@ simulation!(config::SPACConfiguration{FT},
     if DEBUG
         for _dfr in _wdfr[selection]
             @show _dfr.ind;
-            @time simulation!(config, spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+            @time simulation!(config, spac, _dfr);
         end;
     else
         @showprogress for _dfr in _wdfr[selection]
-            simulation!(config, spac, _dfr; p_on = p_on, t_on = t_on, θ_on = θ_on);
+            simulation!(config, spac, _dfr);
         end;
     end;
 
@@ -234,12 +220,9 @@ simulation!(config::SPACConfiguration{FT},
             spac::MultiLayerSPAC{FT},
             dfr::DataFrameRow;
             n_step::Int = 10,
-            p_on::Bool = true,
-            t_on::Bool = true,
-            δt::Number = 3600,
-            θ_on::Bool = true
+            δt::Number = 3600
 ) where {FT<:AbstractFloat} = (
-    (; DEBUG) = config;
+    (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
 
     # read the data out of dataframe row to reduce memory allocation
     _df_dif::FT = dfr.RAD_DIF;
@@ -255,11 +238,11 @@ simulation!(config::SPACConfiguration{FT},
     end;
 
     # prescribe parameters
-    prescribe!(config, spac, dfr; t_on = t_on, θ_on = θ_on);
+    prescribe!(config, spac, dfr);
 
     # run the model
     for _ in 1:n_step
-        soil_plant_air_continuum!(config, spac, δt / n_step; p_on = p_on, t_on = t_on, θ_on = θ_on);
+        soil_plant_air_continuum!(config, spac, δt / n_step);
     end;
 
     # test if the integrated water flow is conserved
@@ -320,7 +303,7 @@ simulation!(config::SPACConfiguration{FT},
     end;
 
     # save water contents and temperatures based on t_on and θ_on
-    if θ_on
+    if ENABLE_SOIL_WATER_BUDGET
         dfr.MOD_SWC_1 = spac.SOIL.LAYERS[1].θ;
         dfr.MOD_SWC_2 = spac.SOIL.LAYERS[2].θ;
         dfr.MOD_SWC_3 = spac.SOIL.LAYERS[3].θ;
@@ -333,7 +316,7 @@ simulation!(config::SPACConfiguration{FT},
             end;
         end;
     end;
-    if t_on
+    if ENABLE_ENERGY_BUDGET
         _tleaf = [_leaf.t for _leaf in spac.LEAVES];
         dfr.MOD_T_L_MAX  = nanmax(_tleaf);
         dfr.MOD_T_L_MEAN = nanmean(_tleaf);
