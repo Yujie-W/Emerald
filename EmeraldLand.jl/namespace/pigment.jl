@@ -12,6 +12,7 @@
 #     2021-Nov-24: tease apart the characteristic absorption curves to HyperspectralAbsorption
 #     2022-Jul-20: use kwdef for the constructor
 #     2022-Jul-20: add field DATASET to struct
+#     2023-Sep-12: rename K_PS to Φ_PS
 #
 #######################################################################################################################################################################################################
 """
@@ -49,8 +50,8 @@ Base.@kwdef struct HyperspectralAbsorption{FT<:AbstractFloat}
     K_LMA::Vector{FT} = read_nc(DATASET, "K_LMA")
     "Specific absorption coefficients of protein `[-]`"
     K_PRO::Vector{FT} = read_nc(DATASET, "K_PRO")
-    "Specific absorption coefficients of PS I and II `[-]`"
-    K_PS::Vector{FT} = read_nc(DATASET, "K_PS")
     "Refractive index `[-]`"
     NR::Vector{FT} = read_nc(DATASET, "NR")
+    "Fluorescence yield of PS I and II probability function `[nm⁻¹]`"
+    Φ_PS::Vector{FT} = read_nc(DATASET, "K_PS")
 end

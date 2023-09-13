@@ -43,6 +43,7 @@ function leaf_spectra! end
 #     2022-Aug-17: add option reabsorb to function to enable/disable SIF reabsorption
 #     2023-Apr-13: rename option APAR_CAR to apar_car
 #     2023-Sep-09: remove option reabsorb as it is computed by default and saved to mat_b_chl and mat_f_chl
+#     2023-Sep-12: rename K_PS to Φ_PS to be more accurate
 # To do
 #     TODO: add References for this methods
 #
@@ -91,7 +92,7 @@ leaf_spectra!(
     end;
 
     (; MESOPHYLL_N, NDUB) = bio;
-    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, K_PS, NR) = lha;
+    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, NR, Φ_PS) = lha;
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
 
     # calculate the average absorption feature and relative Cab and Car partitions
@@ -193,8 +194,8 @@ leaf_spectra!(
     bio._ρ_e     .= view(bio._s,IΛ_SIFE) .* _ϵ;
     bio._ρ_f     .= view(bio._s,IΛ_SIF) .* _ϵ;
     bio._sigmoid .= 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp.(Λ_SIFE' ./ 10));
-    bio._mat_f   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
-    bio._mat_b   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
+    bio._mat_f   .= Φ_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
+    bio._mat_b   .= Φ_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
     bio._τ_e     .= 1 .- (view(bio._k,IΛ_SIFE) .+ view(bio._s,IΛ_SIFE)) .* _ϵ;
     bio._τ_f     .= 1 .- (view(bio._k,IΛ_SIF) .+ view(bio._s,IΛ_SIF)) .* _ϵ;
 
@@ -242,8 +243,8 @@ leaf_spectra!(
     # redo all the calculations above to make sure things are correct though this is a bit waste of time
     bio._ρ_e     .= view(bio._s,IΛ_SIFE) .* _ϵ;
     bio._ρ_f     .= view(bio._s,IΛ_SIF) .* _ϵ;
-    bio._mat_f   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
-    bio._mat_b   .= K_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
+    bio._mat_f   .= Φ_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
+    bio._mat_b   .= Φ_PS[IΛ_SIF] .* _ϵ ./ 2 .* bio._k_chl[IΛ_SIFE]' .* bio._sigmoid;
     bio._τ_e     .= 1 .- (view(bio._k,IΛ_SIFE) .+ view(bio._s,IΛ_SIFE)) .* _ϵ;
     bio._τ_f     .= 1 .- view(bio._s,IΛ_SIF) .* _ϵ;
 
