@@ -4,6 +4,7 @@
 # General
 #     2023-Mar-28: add function to disconnect root from soil
 #     2023-Mar-28: add function to disconnect others (by setting flows to 0)
+#     2023-Sep-14: set g of leaves to 0 when root system is disconnected
 #
 #######################################################################################################################################################################################################
 """
@@ -18,8 +19,11 @@ Disconnect root from soil (and set othes' flow to 0), given
 """
 function disconnect! end
 
-disconnect!(organ::Union{Leaf{FT},Leaves2D{FT},Stem{FT}}) where {FT<:AbstractFloat} = (
+disconnect!(organ::Leaf{FT}) where {FT<:AbstractFloat} = (
     disconnect!(organ.HS, organ.HS.FLOW);
+
+    organ.g_H₂O_s = 0;
+    organ._g_CO₂ = 0;
 
     return nothing
 );
@@ -28,11 +32,31 @@ disconnect!(organ::Leaves1D{FT}) where {FT<:AbstractFloat} = (
     disconnect!(organ.HS1, organ.HS1.FLOW);
     disconnect!(organ.HS2, organ.HS2.FLOW);
 
+    organ.g_H₂O_s .= 0;
+    organ._g_CO₂ .= 0;
+
+    return nothing
+);
+
+disconnect!(organ::Leaves2D{FT}) where {FT<:AbstractFloat} = (
+    disconnect!(organ.HS, organ.HS.FLOW);
+
+    organ.g_H₂O_s_shaded = 0;
+    organ.g_H₂O_s_sunlit .= 0;
+    organ._g_CO₂_shaded = 0;
+    organ._g_CO₂_sunlit .= 0;
+
     return nothing
 );
 
 disconnect!(organ::Root{FT}) where {FT<:AbstractFloat} = (
     organ._isconnected = false;
+    disconnect!(organ.HS, organ.HS.FLOW);
+
+    return nothing
+);
+
+disconnect!(organ::Stem{FT}) where {FT<:AbstractFloat} = (
     disconnect!(organ.HS, organ.HS.FLOW);
 
     return nothing

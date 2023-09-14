@@ -246,6 +246,7 @@ function stomatal_conductance! end
 # General
 #     2022-Jul-12: add new method to compute marginal stomatal conductance increase
 #     2022-Jul-12: add new method to update marginal stomatal conductance for SPAC
+#     2023-Sep-14: add root disconnection control
 # To do
 #     TODO: be careful with the β here (need to used the value stored in empirical SM)
 #     TODO: use ∂gₙ∂t for nighttime conditions
@@ -272,7 +273,9 @@ stomatal_conductance!(spac::MonoElementSPAC{FT}; β::FT = FT(1)) where {FT<:Abst
 stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
     (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
-    if CANOPY.lai == 0
+    # if lai = 0 or roots are not connected, do nothing
+    # TODO: redo this later to foce dgdt to 0
+    if CANOPY.lai == 0 || !spac._root_connection
         return nothing
     end;
 
@@ -317,6 +320,7 @@ stomatal_conductance!(leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) w
 #     2022-Jul-26: limit g in range after updating stomatal conductance
 #     2023-Mar-11: do nothing if LAI == 0
 #     2023-Mar-13: move some methods as stomatal_conductance_profile!
+#     2023-Sep-14: add root disconnection control
 #
 #######################################################################################################################################################################################################
 """
@@ -340,7 +344,8 @@ stomatal_conductance!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFlo
 stomatal_conductance!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     (; CANOPY, LEAVES) = spac;
 
-    if CANOPY.lai == 0
+    # if lai = 0 or roots are not connected, do nothing
+    if CANOPY.lai == 0 || !spac._root_connection
         return nothing
     end;
 

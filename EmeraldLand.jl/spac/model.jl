@@ -17,6 +17,7 @@
 #     2023-Jun-15: add judge for root connection (avoid a bug in non-vegetated land)
 #     2023-Sep-07: add ALLOW_LEAF_SHEDDING check
 #     2023-Sep-11: move the optional t_on and θ_on to the config struct
+#     2023-Sep-14: remove some if else control from root disconnection
 #
 #######################################################################################################################################################################################################
 """
@@ -60,10 +61,8 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     canopy_radiation!(config, spac);
 
     # 3. run photosynthesis model
-    if spac._root_connection
-        stomatal_conductance_profile!(spac);
-        leaf_photosynthesis!(spac, GCO₂Mode());
-    end;
+    stomatal_conductance_profile!(spac);
+    leaf_photosynthesis!(spac, GCO₂Mode());
 
     # 4. run canopy fluorescence
     canopy_fluorescence!(config, spac);
@@ -74,11 +73,10 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     soil_budget!(config, spac);
 
     # 6. run leaf stomatal conductance budget
+    stomatal_conductance!(spac);
+
     # 7. run plant energy budget
-    if spac._root_connection
-        stomatal_conductance!(spac);
-        plant_energy!(config, spac);
-    end;
+    plant_energy!(config, spac);
 
     # 8. update the prognostic variables
     time_stepper!(config, spac, δt);

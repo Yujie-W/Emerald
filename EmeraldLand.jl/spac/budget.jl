@@ -154,6 +154,7 @@ end
 #     2023-Jun-13: add config to parameter list
 #     2023-Jun-15: add judge for root connection
 #     2023-Sep-11: move the optional p_on, t_on and θ_on to the config struct
+#     2023-Sep-14: remove some if else control from root disconnection
 #
 #######################################################################################################################################################################################################
 """
@@ -182,9 +183,9 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
 
         # run the budgets for all ∂x∂t
         soil_budget!(config, spac, _δt);
+        stomatal_conductance!(spac, _δt);
+        plant_energy!(config, spac, _δt);
         if spac._root_connection
-            stomatal_conductance!(spac, _δt);
-            plant_energy!(config, spac, _δt);
             spac_flow_profile!(config, spac, _δt);
         end;
 
@@ -195,13 +196,11 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
             longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
             if spac._root_connection
                 xylem_pressure_profile!(config, spac);
-                leaf_photosynthesis!(spac, GCO₂Mode());
             end;
+            leaf_photosynthesis!(spac, GCO₂Mode());
             soil_budget!(config, spac);
-            if spac._root_connection
-                stomatal_conductance!(spac);
-                plant_energy!(config, spac);
-            end;
+            stomatal_conductance!(spac);
+            plant_energy!(config, spac);
         else
             break;
         end;
