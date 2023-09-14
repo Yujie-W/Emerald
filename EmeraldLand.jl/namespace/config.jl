@@ -17,6 +17,7 @@
 #     2023-Sep-11: add option update legacy to the SPAC configuration
 #     2023-Sep-11: add option KR_THRESHOLD to the SPAC configuration
 #     2023-Sep-11: add fields ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
+#     2023-Sep-14: make sure the configuration struct is consistent with the DATASET
 #
 #######################################################################################################################################################################################################
 """
@@ -103,11 +104,11 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
 
     # Embedded structures that are supposed to be constant
     "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}()
+    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}(DATASET = DATASET)
     "A matrix of characteristic curves"
     MAT_ρ::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
     "Downwelling shortwave radiation reference spectrum"
-    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}()
+    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}(DATASET)
 
     # Canopy geometry related angles
     "Mean azimuth angles `[°]`"

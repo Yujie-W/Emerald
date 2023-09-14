@@ -8,6 +8,12 @@ using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..Optics: average_transmittance, energy, energy!, photon, photon!
 
 
+include("optics/interface.jl");
+include("optics/layer.jl");
+include("optics/leaf.jl");
+include("optics/sublayer.jl");
+
+
 #######################################################################################################################################################################################################
 #
 # Changes made to this function
