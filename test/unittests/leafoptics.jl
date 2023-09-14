@@ -100,4 +100,20 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(0 .<= mat_f .< 1);
         @test sum(sif_b .+ sif_f) ≈ α_sife' * rad;
     end;
+
+    @testset "SIF emission matrices of the leaf" begin
+        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        lha = config.LHA;
+        wls = config.WLSET;
+        bio = NS.HyperspectralLeafBiophysics(config);
+        ρ,τ = LO.leaf_spectra(lha, bio, 5.0, 40.0);
+        α_sife = (1 .- ρ .- τ)[wls.IΛ_SIFE];
+        mat_b,mat_f = LO.leaf_sif_matrices(lha, wls, bio, 5.0, 40.0);
+        rad = ones(size(mat_b,1));
+        sif_b = mat_b' * rad;
+        sif_f = mat_f' * rad;
+        @test all(0 .<= mat_b .< 1);
+        @test all(0 .<= mat_f .< 1);
+        @test sum(sif_b .+ sif_f) .< α_sife' * rad;
+    end;
 end;

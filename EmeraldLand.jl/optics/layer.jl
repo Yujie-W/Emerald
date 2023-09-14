@@ -81,6 +81,8 @@ layer_ρ_τ(lha::HyperspectralAbsorption{FT}, θ::FT) where {FT} = (
 # Changes to this function
 # General
 #     2023-Sep-14: add function to compute the SIF excitation ratio of a single layer of a leaf
+# To do
+#     TODO: this function is not used, consider to remove it later
 #
 #######################################################################################################################################################################################################
 """

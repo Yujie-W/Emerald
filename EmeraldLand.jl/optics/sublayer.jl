@@ -13,7 +13,7 @@ Return the transmittance of a sublayer of a leaf with pigments, given
 - `lha` leaf hyperspectral absorption coefficients
 - `bio` leaf hyperspectral biophysics
 - `lwc` leaf water content
-- `x` proportion of the sublayer of the whole leaf
+- `x` proportion of the layer of the whole leaf
 - `N` number of sublayers of the whole layer
 
 """
