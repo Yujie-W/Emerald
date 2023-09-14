@@ -11,6 +11,19 @@ df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection
 
 
 #
+# Debugging the root disconnection and reconnection issues
+#
+using Emerald;
+
+FT = Float64;
+config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
+spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
+spac.METEO.rad_lw = 300;
+EmeraldLand.SPAC.initialize!(config, spac);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));ß
+
+
+#
 # Debugging the soil water budget
 #
 using Emerald;
