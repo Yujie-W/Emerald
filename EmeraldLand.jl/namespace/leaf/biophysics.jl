@@ -67,9 +67,9 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     # shortwave radiation
     # pigment absorption fractions
     "Chlorophyll a and b absorption fraction `[-]`"
-    k_cab::Vector{FT}
+    f_cab::Vector{FT}
     "Carotenoid absorption fraction `[-]`"
-    k_car::Vector{FT}
+    f_car::Vector{FT}
 
     # reflectance and transmittance at the air-water interface
     "Air-water interface reflectance with an average angle `[-]`"
