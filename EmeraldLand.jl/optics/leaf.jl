@@ -53,11 +53,12 @@ end;
 # General
 #     2023-Sep-14: add function to compute the leaf level SIF matrices (before any reabsorption)
 #     2023-Sep-14: use layer_ρ_τ_direct and layer_ρ_τ_diffuse to compute the reflectance and transmittance of the leaf layers
+#     2023-Sep-14: use only cab and car absorption for the SIF excitation
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_raw_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+    leaf_raw_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10, ϕ_car::FT = FT(0)) where {FT}
 
 Return the leaf level SIF matrices (before any reabsorption), given
 - `lha` leaf hyperspectral absorption coefficients
@@ -66,11 +67,13 @@ Return the leaf level SIF matrices (before any reabsorption), given
 - `lwc` leaf water content
 - `θ` incident angle of the incoming radiation
 - `N` number of sublayers of the each sublayer (default: 10)
+- `ϕ_car` carotenoid contribution to chlorophyll fluorescence (default: 0)
 
 """
-function leaf_raw_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+function leaf_raw_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10, ϕ_car::FT = FT(0)) where {FT}
     (; Φ_PS) = lha;
     (; IΛ_SIF, IΛ_SIFE) = wls;
+    (; MESOPHYLL_N) = bio;
 
     # compute the reflectance and transmittance of the leaf layers (isotropic light)
     # _ρ_s,_τ_s = layer_ρ_τ(lha, bio, lwc, 1/MESOPHYLL_N, θ; N = N);
@@ -80,13 +83,17 @@ function leaf_raw_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLength
     _ρ_1,_τ_1,_ρ_2,_τ_2 = layer_ρ_τ_diffuse(lha, bio, lwc; N = N);
     _denom = 1 .- _ρ_1 .* _ρ_2;
 
+    # compute the absorption by cab and car
+    _,_f_cab,_f_car = sublayer_τ(lha, bio, lwc, 1/MESOPHYLL_N, N);
+    _ϕ_sife = (_f_cab .+ _f_car .* ϕ_car)[IΛ_SIFE];
+
     # compute the mat_b_chl and mat_f_chl of the up and lower layers of a 2-layer leaf
     # _sife_s1 = layer_raw_sife(lha, wls, bio, lwc, 1/MESOPHYLL_N, θ; N = N);             # upper layer with light from upper side
     # _sife_l1 = layer_raw_sife(lha, wls, bio, lwc, 1/MESOPHYLL_N, FT(90); N = N);        # upper layer with light from lower side
     # _sife_l2 = layer_raw_sife(lha, wls, bio, lwc, 1 - 1/MESOPHYLL_N, FT(90); N = N);    # lower layer with light from upper side
-    _sife_s1 = (1 .- _ρ_s .- _τ_s)[IΛ_SIFE];
-    _sife_l1 = (1 .- _ρ_1 .- _τ_1)[IΛ_SIFE];
-    _sife_l2 = (1 .- _ρ_2 .- _τ_2)[IΛ_SIFE];
+    _sife_s1 = (1 .- _ρ_s .- _τ_s)[IΛ_SIFE] .* _ϕ_sife;
+    _sife_l1 = (1 .- _ρ_1 .- _τ_1)[IΛ_SIFE] .* _ϕ_sife;
+    _sife_l2 = (1 .- _ρ_2 .- _τ_2)[IΛ_SIFE] .* _ϕ_sife;
 
     # compute the effective mat_b_chl and mat_f_chl of the leaf layers after counting for the SIF excitation wavelength
     # if you sum up _sife_1 .+ _sife_2, it should be equal to (1 - ρ_leaf - τ_leaf)[IΛ_SIFE]
@@ -94,6 +101,9 @@ function leaf_raw_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLength
     _sife_2 = _sife_l2 .* _τ_s[IΛ_SIFE] ./ _denom[IΛ_SIFE];
 
     # now compute the effective SIF emissions at the two layers (forward and backward)
+    # TODO: here the assumption that SIF is evenly distributed in the lower layer is imperfect because the lower n-1 layers could have internal reflectance and transmittance
+    #       a better way would be to modify the the leaf_sif_matrices function
+    #       currently, this is enough to compute the total SIF emissions from the chlorophyll
     _mat_b_1 = _sife_1 ./ 2 * Φ_PS[IΛ_SIF]';
     _mat_f_1 = _sife_1 ./ 2 * Φ_PS[IΛ_SIF]';
     _mat_b_2 = _sife_2 ./ 2 * Φ_PS[IΛ_SIF]';
@@ -123,11 +133,12 @@ end;
 # General
 #     2023-Sep-14: add function to compute the leaf level SIF matrices (after leaf reabsorption)
 #     2023-Sep-14: use layer_ρ_τ_direct and layer_ρ_τ_diffuse to compute the reflectance and transmittance of the leaf layers
+#     2023-Sep-14: use only cab and car absorption for the SIF excitation
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+    leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10, ϕ_car::FT = FT(0)) where {FT}
 
 Return the leaf level SIF matrices (after leaf reabsorption), given
 - `lha` leaf hyperspectral absorption coefficients
@@ -136,9 +147,10 @@ Return the leaf level SIF matrices (after leaf reabsorption), given
 - `lwc` leaf water content
 - `θ` incident angle of the incoming radiation
 - `N` number of sublayers of the each sublayer (default: 10)
+- `ϕ_car` carotenoid contribution to chlorophyll fluorescence (default: 0)
 
 """
-function leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+function leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10, ϕ_car::FT = FT(0)) where {FT}
     (; NR, Φ_PS) = lha;
     (; IΛ_SIF, IΛ_SIFE) = wls;
     (; MESOPHYLL_N) = bio;
@@ -160,14 +172,15 @@ function leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{
     #
 
     # 1. compute the transmittance and absorption within a sublayer
-    _t_sub = sublayer_τ(lha, bio, lwc, 1/MESOPHYLL_N, N);
+    _t_sub,_f_cab,_f_car = sublayer_τ(lha, bio, lwc, 1/MESOPHYLL_N, N);
     _t_sub_sife = _t_sub[IΛ_SIFE];
     _a_sub_sife = 1 .- _t_sub_sife;
     _t_all_sife = _t_sub_sife .^ N;
     _t_sub_sif  = _t_sub[IΛ_SIF];
+    _ϕ_sife = (_f_cab .+ _f_car .* ϕ_car)[IΛ_SIFE];
 
     # 2. compute SIF emissions at the SIFE absorption site and rescale it based on the SIF absorption
-    _rad_i = deepcopy(_τ_sf_sife);
+    _rad_i = _τ_sf_sife .* _ϕ_sife;
     _mat_b_1 = zeros(FT, length(IΛ_SIFE), length(IΛ_SIF));
     _mat_f_1 = zeros(FT, length(IΛ_SIFE), length(IΛ_SIF));
     # now the radiation goes from up to down
@@ -195,7 +208,7 @@ function leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{
     #
 
     # 1. compute the transmittance and absorption within a sublayer
-    _t_sub = sublayer_τ(lha, bio, lwc, 1 - 1/MESOPHYLL_N, N);
+    _t_sub,_,_ = sublayer_τ(lha, bio, lwc, 1 - 1/MESOPHYLL_N, N);
     _t_sub_sife = _t_sub[IΛ_SIFE];
     _a_sub_sife = 1 .- _t_sub_sife;
     _t_all_sife = _t_sub_sife .^ N;
@@ -207,7 +220,7 @@ function leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{
     _ρ_21_rescale = 1 .- _τ_21_rescale;
 
     # 3. compute SIF emissions at the SIFE absorption site and rescale it based on the SIF absorption
-    _rad_i = _τ_0[IΛ_SIFE] .* _τ_12_rescale;
+    _rad_i = _τ_0[IΛ_SIFE] .* _ϕ_sife .* _τ_12_rescale;
     _mat_b_2 = zeros(FT, length(IΛ_SIFE), length(IΛ_SIF));
     _mat_f_2 = zeros(FT, length(IΛ_SIFE), length(IΛ_SIF));
     # now the radiation goes from up to down

@@ -4,6 +4,7 @@
 # General
 #     2023-Sep-14: add function to compute the transmittance of a sublayer of a leaf with pigments
 #     2023-Sep-14: compute the total τ for N layers and then downscale it to τ^(1/N)
+#     2023-Sep-14: compute the fraction of cab and car absorption in the sublayer
 #
 #######################################################################################################################################################################################################
 """
@@ -23,6 +24,10 @@ function sublayer_τ(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBio
 
     # define the vectors
     _sum_ki_xi = similar(K_CAB);
+    _k_cab = similar(K_CAB);
+    _k_car = similar(K_CAB);
+    _f_cab = similar(K_CAB);
+    _f_car = similar(K_CAB);
     _τ_all = similar(K_CAB);
 
     # compute the sum of absorption coefficients in one of the N sublayers of 1 layer (x of the total leaf thickness)
@@ -35,11 +40,18 @@ function sublayer_τ(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBio
                     K_CBC   * bio.cbc +                                 # carbon-based constituents absorption
                     K_PRO   * bio.pro +                                 # protein absorption
                     K_LMA   * (bio.lma - bio.cbc - bio.pro);            # dry mass absorption (if some remained)
+    @. _k_cab = K_CAB * bio.cab;
+    @. _k_car = K_CAR_V * bio.car * (1 - bio.f_zeax) + K_CAR_Z * bio.car * bio.f_zeax;
+
+    # compute the absorption ratios from cab and car
+    @. _f_cab = _k_cab / _sum_ki_xi;
+    @. _f_car = _k_car / _sum_ki_xi;
+
     #_sum_ki_xi .*= x / N;
     _sum_ki_xi .*= x;
 
     # this is the case when light penetrate with an angle (integrated over all angles, without accounting for F_CELL)
     @. _τ_all = (1 - _sum_ki_xi) * exp(-_sum_ki_xi) + _sum_ki_xi^2 * expint(_sum_ki_xi + eps(FT));
 
-    return _τ_all .^ (FT(1) / N)
+    return _τ_all .^ (FT(1) / N), _f_cab, _f_car
 end;

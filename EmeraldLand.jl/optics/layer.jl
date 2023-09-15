@@ -36,7 +36,7 @@ layer_ρ_τ(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBiophysics{F
 
     # absorption ratio within the layer
     # this one should be similar to sublayer_transmittance(lha, bio, x, 1)
-    _t_all = sublayer_τ(lha, bio, lwc, x, N) .^ N;
+    _t_all = sublayer_τ(lha, bio, lwc, x, N)[1] .^ N;
 
     # compute the integrated reflectance
     _denom = 1 .- _ρ_21 .* _t_all .* _ρ_21 .* _t_all;
@@ -109,7 +109,7 @@ function layer_ρ_τ_direct(lha::HyperspectralAbsorption{FT}, bio::Hyperspectral
 
     # absorption ratio within the layer
     # this one should be similar to sublayer_transmittance(lha, bio, x, 1)
-    _t_all = sublayer_τ(lha, bio, lwc, 1/MESOPHYLL_N, N) .^ N;
+    _t_all = sublayer_τ(lha, bio, lwc, 1/MESOPHYLL_N, N)[1] .^ N;
 
     # compute the integrated reflectance
     _denom = 1 .- _ρ_21 .* _t_all .* _ρ_21 .* _t_all;
@@ -158,7 +158,7 @@ layer_ρ_τ_diffuse(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBiop
 
     # absorption ratio within the layer
     # this one should be similar to sublayer_transmittance(lha, bio, x, 1)
-    _t_all = sublayer_τ(lha, bio, lwc, 1/MESOPHYLL_N, N) .^ N;
+    _t_all = sublayer_τ(lha, bio, lwc, 1/MESOPHYLL_N, N)[1] .^ N;
 
     # compute the integrated reflectance for the first layer
     _ρ_1 = similar(_t_all);
@@ -261,7 +261,7 @@ function layer_raw_sife(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}
 
     # compute the transmittance within the sublayer
     _rad_i = deepcopy(_τ_surface);
-    _t_sub = sublayer_τ(lha, bio, lwc, x, N)[IΛ_SIFE];
+    _t_sub = sublayer_τ(lha, bio, lwc, x, N)[1][IΛ_SIFE];
     _a_sub = 1 .- _t_sub;
     _t_all = _t_sub .^ N;
 
