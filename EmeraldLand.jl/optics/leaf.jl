@@ -15,7 +15,7 @@ Return the leaf spectra for reflectance and transmittance, given
 - `bio` leaf hyperspectral biophysics
 - `lwc` leaf water content
 - `θ` incident angle of the incoming radiation
-- `N` number of sublayers of the each sublayer (default: 10)
+- `N` number of sublayers of each layer
 
 """
 function leaf_spectra(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
@@ -66,7 +66,7 @@ Return the leaf level SIF matrices (before any reabsorption), given
 - `bio` leaf hyperspectral biophysics
 - `lwc` leaf water content
 - `θ` incident angle of the incoming radiation
-- `N` number of sublayers of the each sublayer (default: 10)
+- `N` number of sublayers of each layer
 - `ϕ_car` carotenoid contribution to chlorophyll fluorescence (default: 0)
 
 """
@@ -146,7 +146,7 @@ Return the leaf level SIF matrices (after leaf reabsorption), given
 - `bio` leaf hyperspectral biophysics
 - `lwc` leaf water content
 - `θ` incident angle of the incoming radiation
-- `N` number of sublayers of the each sublayer (default: 10)
+- `N` number of sublayers of each layer
 - `ϕ_car` carotenoid contribution to chlorophyll fluorescence (default: 0)
 
 """

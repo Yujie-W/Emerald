@@ -114,12 +114,8 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     # SIF excitation to emittance matrix
     "SIF matrix backwards `[-]`"
     mat_b::Matrix{FT}
-    "SIF matrix backwards without reabsorption `[-]`"
-    mat_b_chl::Matrix{FT}
     "SIF matrix forwards `[-]`"
     mat_f::Matrix{FT}
-    "SIF matrix forwards without reabsorption `[-]`"
-    mat_f_chl::Matrix{FT}
 
     # longwave radiation
     "Broadband thermal reflectance, related to blackbody emittance `[-]`"
