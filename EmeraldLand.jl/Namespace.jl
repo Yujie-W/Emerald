@@ -18,6 +18,9 @@ const LAND_2021_1NM = artifact"land_model_spectrum_V4" * "/clima_land_spectra_1n
 const SOIL_TEXT     = read_csv("$(@__DIR__)/../data/SOIL-TEXTURE.csv");
 
 
+include("namespace/leaf/biophysics.jl");
+
+
 include("namespace/pigment.jl");
 include("namespace/radiation.jl");
 include("namespace/trace.jl");
