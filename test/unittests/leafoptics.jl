@@ -34,10 +34,15 @@ import Emerald.EmeraldLand.Namespace as NS
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
         lha = config.LHA;
         bio = NS.HyperspectralLeafBiophysics(config);
-        τ₁ = LO.sublayer_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 10);
-        τ₂ = LO.sublayer_τ(lha, bio, 5.0, 1 - 1/bio.MESOPHYLL_N, 10);
+        τ₁,f_cab_1,f_car_1 = LO.sublayer_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 10);
+        τ₂,f_cab_2,f_car_2 = LO.sublayer_τ(lha, bio, 5.0, 1 - 1/bio.MESOPHYLL_N, 10);
+
         @test all(0 .< τ₁ .< 1);
         @test all(0 .< τ₂ .< 1);
+        @test all(0 .<= f_cab_1 .<= 1);
+        @test all(0 .<= f_cab_2 .<= 1);
+        @test all(0 .<= f_car_1 .<= 1);
+        @test all(0 .<= f_car_2 .<= 1);
     end;
 
     @testset "Isotropic radiation ρ and τ of leaf layer" begin
@@ -46,6 +51,13 @@ import Emerald.EmeraldLand.Namespace as NS
         bio = NS.HyperspectralLeafBiophysics(config);
         ρ₁,τ₁ = LO.layer_ρ_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 90.0);
         ρ₂,τ₂ = LO.layer_ρ_τ(lha, bio, 5.0, 1 - 1/bio.MESOPHYLL_N, 90.0);
+        @test all(0 .< ρ₁ .< 1);
+        @test all(0 .< ρ₂ .< 1);
+        @test all(0 .< τ₁ .< 1);
+        @test all(0 .< τ₂ .< 1);
+        @test all(ρ₁ .+ τ₁ .< 1);
+        @test all(ρ₂ .+ τ₂ .< 1);
+        ρ₁,τ₁,ρ₂,τ₂ = LO.layer_ρ_τ_diffuse(lha, bio, 5.0);
         @test all(0 .< ρ₁ .< 1);
         @test all(0 .< ρ₂ .< 1);
         @test all(0 .< τ₁ .< 1);
@@ -92,13 +104,15 @@ import Emerald.EmeraldLand.Namespace as NS
         bio = NS.HyperspectralLeafBiophysics(config);
         ρ,τ = LO.leaf_spectra(lha, bio, 5.0, 40.0);
         α_sife = (1 .- ρ .- τ)[wls.IΛ_SIFE];
+        _,f_cab,f_car = LO.sublayer_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 10);
+        ϕ_sife = f_cab[wls.IΛ_SIFE];
         mat_b,mat_f = LO.leaf_raw_sif_matrices(lha, wls, bio, 5.0, 40.0);
         rad = ones(size(mat_b,1));
         sif_b = mat_b' * rad;
         sif_f = mat_f' * rad;
         @test all(0 .<= mat_b .< 1);
         @test all(0 .<= mat_f .< 1);
-        @test sum(sif_b .+ sif_f) ≈ α_sife' * rad;
+        @test sum(sif_b .+ sif_f) ≈ (ϕ_sife .* α_sife)' * rad;
     end;
 
     @testset "SIF emission matrices of the leaf" begin
@@ -108,12 +122,14 @@ import Emerald.EmeraldLand.Namespace as NS
         bio = NS.HyperspectralLeafBiophysics(config);
         ρ,τ = LO.leaf_spectra(lha, bio, 5.0, 40.0);
         α_sife = (1 .- ρ .- τ)[wls.IΛ_SIFE];
+        _,f_cab,f_car = LO.sublayer_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 10);
+        ϕ_sife = f_cab[wls.IΛ_SIFE];
         mat_b,mat_f = LO.leaf_sif_matrices(lha, wls, bio, 5.0, 40.0);
         rad = ones(size(mat_b,1));
         sif_b = mat_b' * rad;
         sif_f = mat_f' * rad;
         @test all(0 .<= mat_b .< 1);
         @test all(0 .<= mat_f .< 1);
-        @test sum(sif_b .+ sif_f) .< α_sife' * rad;
+        @test sum(sif_b .+ sif_f) .< (ϕ_sife .* α_sife)' * rad;
     end;
 end;
