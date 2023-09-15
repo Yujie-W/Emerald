@@ -3,6 +3,7 @@
 # Changes to the function
 # General
 #     2023-Sep-14: add function to compute the transmittance of a sublayer of a leaf with pigments
+#     2023-Sep-14: compute the total τ for N layers and then downscale it to τ^(1/N)
 #
 #######################################################################################################################################################################################################
 """
@@ -34,10 +35,11 @@ function sublayer_τ(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBio
                     K_CBC   * bio.cbc +                                 # carbon-based constituents absorption
                     K_PRO   * bio.pro +                                 # protein absorption
                     K_LMA   * (bio.lma - bio.cbc - bio.pro);            # dry mass absorption (if some remained)
-    _sum_ki_xi .*= x / N;
+    #_sum_ki_xi .*= x / N;
+    _sum_ki_xi .*= x;
 
     # this is the case when light penetrate with an angle (integrated over all angles, without accounting for F_CELL)
     @. _τ_all = (1 - _sum_ki_xi) * exp(-_sum_ki_xi) + _sum_ki_xi^2 * expint(_sum_ki_xi + eps(FT));
 
-    return _τ_all
+    return _τ_all .^ (FT(1) / N)
 end;
