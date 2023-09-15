@@ -16,16 +16,16 @@ Return the reflectance and transmittance at the interface between two media for 
 
 """
 function interface_ρ_τ(n₁::FT, n₂::FT, θ₁::FT) where {FT}
-    _sin_θ₁ = sind(θ₁);
-    _cos_θ₁ = cosd(θ₁);
-    _sin_θ₂ = min(1, n₁ / n₂ * _sin_θ₁);
-    _cos_θ₂ = sqrt(1 - _sin_θ₂^2);
+    sinθ₁ = sind(θ₁);
+    cosθ₁ = cosd(θ₁);
+    sinθ₂ = min(1, n₁ / n₂ * sinθ₁);
+    cosθ₂ = sqrt(1 - sinθ₂^2);
 
-    _ρ_s = ((n₁ * _cos_θ₁ - n₂ * _cos_θ₂) / (n₁ * _cos_θ₁ + n₂ * _cos_θ₂)) ^ 2;
-    _ρ_p = ((n₂ * _cos_θ₁ - n₁ * _cos_θ₂) / (n₂ * _cos_θ₁ + n₁ * _cos_θ₂)) ^ 2;
-    _ρ = (_ρ_s + _ρ_p) / 2;
+    ρ_s = ((n₁ * cosθ₁ - n₂ * cosθ₂) / (n₁ * cosθ₁ + n₂ * cosθ₂)) ^ 2;
+    ρ_p = ((n₂ * cosθ₁ - n₁ * cosθ₂) / (n₂ * cosθ₁ + n₁ * cosθ₂)) ^ 2;
+    ρ = (ρ_s + ρ_p) / 2;
 
-    return _ρ, 1 - _ρ
+    return ρ, 1 - ρ
 end
 
 
@@ -60,18 +60,18 @@ function interface_integrated_τ(m::FT, θ₁::FT) where {FT}
     u = 1 + 2 * cosθ₁ * (cosθ₁ + m * cosθ₂) / (m² - 1);
     U = (m² + 1) * u - (m² - 1);
 
-    _s_0 = FT(-2 / 3) * FT(π) * (m² - 1) ^ -2;
-    _s_1 = (2 * m * cosθ₁ * cosθ₂) ^ 3;
-    _s_2 = 4sin²θ₁ * (2sin⁴θ₁ - (3m² + 3) * sin²θ₁ + 6m²);
-    _i_s = _s_0 * (_s_1 + _s_2);
+    s₀ = FT(-2 / 3) * FT(π) * (m² - 1) ^ -2;
+    s₁ = (2 * m * cosθ₁ * cosθ₂) ^ 3;
+    s₂ = 4sin²θ₁ * (2sin⁴θ₁ - (3m² + 3) * sin²θ₁ + 6m²);
+    i_s = s₀ * (s₁ + s₂);
 
-    _p_1 = 2 * FT(π) * m² * (m² - 1) * (m² + 1) ^ -3;
-    _p_2 = U + (m⁴ + 6m² + 1) / U + 2 * (m² - 1) * log(U);
-    _p_3 = 2 * FT(π) * m² * (m² - 1) ^ -2;
-    _p_4 = U / u - (m² + 1)^2 * u / U - 2 * (m² + 1) * log(U/u);
-    _i_p = _p_1 * _p_2 + _p_3 * _p_4;
+    p₁ = 2 * FT(π) * m² * (m² - 1) * (m² + 1) ^ -3;
+    p₂ = U + (m⁴ + 6m² + 1) / U + 2 * (m² - 1) * log(U);
+    p₃ = 2 * FT(π) * m² * (m² - 1) ^ -2;
+    p₄ = U / u - (m² + 1)^2 * u / U - 2 * (m² + 1) * log(U/u);
+    i_p = p₁ * p₂ + p₃ * p₄;
 
-    return _i_s, _i_p
+    return i_s, i_p
 end
 
 
@@ -96,22 +96,55 @@ function interface_isotropic_τ(n₁::FT, n₂::FT, θ₁::FT) where {FT}
     m = n₂ / n₁;
 
     if m > 1
-        _s_1, _p_1 = interface_integrated_τ(m, FT(0));
-        _s_2, _p_2 = interface_integrated_τ(m, θ₁);
+        s₁, p₁ = interface_integrated_τ(m, FT(0));
+        s₂, p₂ = interface_integrated_τ(m, θ₁);
         _denom = FT(2) * FT(π) * sind(θ₁)^2;
-
-        _τ_s = (_s_2 - _s_1) / _denom;
-        _τ_p = (_p_1 - _p_2) / _denom; # seems like the original equation made a mistake in the sign
-        _τ = (_τ_s + _τ_p) / 2;
     else
-        _s_1, _p_1 = interface_integrated_τ(1 / m, FT(0));
-        _s_2, _p_2 = interface_integrated_τ(1 / m, θ₁);
+        s₁, p₁ = interface_integrated_τ(1 / m, FT(0));
+        s₂, p₂ = interface_integrated_τ(1 / m, θ₁);
         _denom = FT(2) * FT(π) * sind(θ₁)^2;
-
-        _τ_s = (_s_2 - _s_1) / _denom;
-        _τ_p = (_p_1 - _p_2) / _denom;
-        _τ = (_τ_s + _τ_p) / 2 * m ^ 2;
     end
 
-    return _τ
+    τ_s = (s₂ - s₁) / _denom;
+    τ_p = (p₁ - p₂) / _denom; # seems like the original equation made a mistake in the sign
+
+    return (τ_s + τ_p) / 2
 end
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-15: add function to update the auxiliary variables in HyperLeafBio struct
+#
+#######################################################################################################################################################################################################
+"""
+
+    leaf_interface_spectra!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT}
+    leaf_interface_spectra!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT}
+
+Update the interface reflectance and transmittance in `bio`, given
+- `config` SPAC configuration
+- `bio` HyperLeafBio struct
+- `θ` average angle of the incident radiation
+- `lha` HyperspectralAbsorption struct
+
+"""
+function leaf_interface_spectra! end;
+
+leaf_interface_spectra!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT} = leaf_interface_spectra!(config.LHA, bio, θ);
+
+leaf_interface_spectra!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT} = (
+    (; NR) = lha;
+
+    bio.auxil.τ_interface_θ  .= interface_isotropic_τ.(FT(1), NR, θ);
+    bio.auxil.τ_interface_12 .= interface_isotropic_τ.(FT(1), NR, FT(90));
+    bio.auxil.τ_interface_21 .= interface_isotropic_τ.(NR, FT(1), FT(90));
+
+    bio.auxil.ρ_interface_θ  .= 1 .- bio.auxil.τ_interface_θ;
+    bio.auxil.ρ_interface_12 .= 1 .- bio.auxil.τ_interface_12;
+    bio.auxil.ρ_interface_21 .= 1 .- bio.auxil.τ_interface_21;
+
+    return nothing
+);

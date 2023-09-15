@@ -177,7 +177,7 @@ Struct that contains leaf biophysical traits used to run leaf reflectance and tr
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperLeafBiophysics{FT<:AbstractFloat}
+Base.@kwdef mutable struct HyperLeafBio{FT<:AbstractFloat}
     # state variables (prognostic or structural)
     "State variables"
     state::HyperLeafBioState{FT} = HyperLeafBioState{FT}()

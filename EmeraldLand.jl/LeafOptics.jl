@@ -8,6 +8,7 @@ using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..Optics: average_transmittance, energy, energy!, photon, photon!
 
 
+using ..Namespace: HyperLeafBio
 include("optics/interface.jl");
 include("optics/layer.jl");
 include("optics/leaf.jl");
