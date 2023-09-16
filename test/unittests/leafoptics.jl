@@ -30,56 +30,65 @@ import Emerald.EmeraldLand.Namespace as NS
         end;
     end;
 
+    @testset "Isotropic radiation ρ and τ at the interface" begin
+        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        bio = NS.HyperLeafBio(config);
+        LO.leaf_interface_ρ_τ!(config, bio, 40.0);
+
+        @test all(0 .< bio.auxil.ρ_interface_θ  .< 1);
+        @test all(0 .< bio.auxil.τ_interface_θ  .< 1);
+        @test all(0 .< bio.auxil.ρ_interface_12 .< 1);
+        @test all(0 .< bio.auxil.τ_interface_12 .< 1);
+        @test all(0 .< bio.auxil.ρ_interface_21 .< 1);
+        @test all(0 .< bio.auxil.τ_interface_21 .< 1);
+    end;
+
     @testset "Isotropic radiation τ of leaf sublayer" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        lha = config.LHA;
-        bio = NS.HyperspectralLeafBiophysics(config);
-        τ₁,f_cab_1,f_car_1 = LO.sublayer_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 10);
-        τ₂,f_cab_2,f_car_2 = LO.sublayer_τ(lha, bio, 5.0, 1 - 1/bio.MESOPHYLL_N, 10);
+        bio = NS.HyperLeafBio(config);
+        LO.leaf_interface_ρ_τ!(config, bio, 40.0);
+        LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
 
-        @test all(0 .< τ₁ .< 1);
-        @test all(0 .< τ₂ .< 1);
-        @test all(0 .<= f_cab_1 .<= 1);
-        @test all(0 .<= f_cab_2 .<= 1);
-        @test all(0 .<= f_car_1 .<= 1);
-        @test all(0 .<= f_car_2 .<= 1);
+        @test all(0 .<= bio.auxil.f_cab   .<= 1);
+        @test all(0 .<= bio.auxil.f_car   .<= 1);
+        @test all(0 .<= bio.auxil.τ_sub_1 .<= 1);
+        @test all(0 .<= bio.auxil.τ_sub_2 .<= 1);
     end;
 
     @testset "Isotropic radiation ρ and τ of leaf layer" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        lha = config.LHA;
-        bio = NS.HyperspectralLeafBiophysics(config);
-        ρ₁,τ₁ = LO.layer_ρ_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 90.0);
-        ρ₂,τ₂ = LO.layer_ρ_τ(lha, bio, 5.0, 1 - 1/bio.MESOPHYLL_N, 90.0);
-        @test all(0 .< ρ₁ .< 1);
-        @test all(0 .< ρ₂ .< 1);
-        @test all(0 .< τ₁ .< 1);
-        @test all(0 .< τ₂ .< 1);
-        @test all(ρ₁ .+ τ₁ .< 1);
-        @test all(ρ₂ .+ τ₂ .< 1);
-        ρ₁,τ₁,ρ₂,τ₂ = LO.layer_ρ_τ_diffuse(lha, bio, 5.0);
-        @test all(0 .< ρ₁ .< 1);
-        @test all(0 .< ρ₂ .< 1);
-        @test all(0 .< τ₁ .< 1);
-        @test all(0 .< τ₂ .< 1);
-        @test all(ρ₁ .+ τ₁ .< 1);
-        @test all(ρ₂ .+ τ₂ .< 1);
+        bio = NS.HyperLeafBio(config);
+        LO.leaf_interface_ρ_τ!(config, bio, 40.0);
+        LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
+        LO.leaf_layer_ρ_τ!(bio, 10);
+
+        @test all(0 .< bio.auxil.ρ_layer_θ .< 1);
+        @test all(0 .< bio.auxil.τ_layer_θ .< 1);
+        @test all(0 .< bio.auxil.ρ_layer_1 .< 1);
+        @test all(0 .< bio.auxil.τ_layer_1 .< 1);
+        @test all(0 .< bio.auxil.ρ_layer_2 .< 1);
+        @test all(0 .< bio.auxil.τ_layer_2 .< 1);
+        @test all(bio.auxil.ρ_layer_θ .+ bio.auxil.τ_layer_θ .< 1);
+        @test all(bio.auxil.ρ_layer_1 .+ bio.auxil.τ_layer_1 .< 1);
+        @test all(bio.auxil.ρ_layer_2 .+ bio.auxil.τ_layer_2 .< 1);
     end;
 
     @testset "Isotropic radiation ρ and τ of the leaf" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        lha = config.LHA;
-        bio = NS.HyperspectralLeafBiophysics(config);
-        ρ₁,τ₁ = LO.leaf_spectra(lha, bio, 5.0, 40.0);
-        ρ₂,τ₂ = LO.leaf_spectra(lha, bio, 5.0, 59.0);
-        @test all(0 .< ρ₁ .< 1);
-        @test all(0 .< ρ₂ .< 1);
-        @test all(0 .< τ₁ .< 1);
-        @test all(0 .< τ₂ .< 1);
-        @test all(ρ₁ .+ τ₁ .< 1);
-        @test all(ρ₂ .+ τ₂ .< 1);
+        bio = NS.HyperLeafBio(config);
+
+        LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
+        @test all(0 .< bio.auxil.ρ_leaf .< 1);
+        @test all(0 .< bio.auxil.τ_leaf .< 1);
+        @test all(bio.auxil.ρ_leaf .+ bio.auxil.τ_leaf .< 1);
+
+        LO.leaf_spectra!(config, bio, 5.0, 59.0; N = 10);
+        @test all(0 .< bio.auxil.ρ_leaf .< 1);
+        @test all(0 .< bio.auxil.τ_leaf .< 1);
+        @test all(bio.auxil.ρ_leaf .+ bio.auxil.τ_leaf .< 1);
     end;
 
+    #=
     @testset "Raw SIF excitation coefficient of leaf layer" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
         lha = config.LHA;
@@ -132,4 +141,5 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(0 .<= mat_f .< 1);
         @test sum(sif_b .+ sif_f) .< (ϕ_sife .* α_sife)' * rad;
     end;
+    =#
 end;

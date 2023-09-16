@@ -128,8 +128,8 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_SIF, DIM_SIFE, DIM_WL) = config;
 
     return HyperLeafBioAuxil{FT}(
-                k_cab            = zeros(FT, DIM_WL),
-                k_car            = zeros(FT, DIM_WL),
+                f_cab            = zeros(FT, DIM_WL),
+                f_car            = zeros(FT, DIM_WL),
                 ρ_interface_θ    = zeros(FT, DIM_WL),
                 τ_interface_θ    = zeros(FT, DIM_WL),
                 ρ_interface_12   = zeros(FT, DIM_WL),
@@ -147,9 +147,7 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 ρ_leaf           = zeros(FT, DIM_WL),
                 τ_leaf           = zeros(FT, DIM_WL),
                 mat_b            = zeros(FT, DIM_SIF, DIM_SIFE),
-                mat_b_chl        = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f            = zeros(FT, DIM_SIF, DIM_SIFE),
-                mat_f_chl        = zeros(FT, DIM_SIF, DIM_SIFE),
     )
 );
 
@@ -178,5 +176,7 @@ Base.@kwdef mutable struct HyperLeafBio{FT<:AbstractFloat}
     "State variables"
     state::HyperLeafBioState{FT} = HyperLeafBioState{FT}()
     "Auxiliary variables"
-    auxil::HyperLeafBioAuxil{FT} = HyperLeafBioAuxil{FT}()
+    auxil::HyperLeafBioAuxil{FT}
 end
+
+HyperLeafBio(config::SPACConfiguration{FT}) where {FT} = return HyperLeafBio{FT}(auxil = HyperLeafBioAuxil(config));

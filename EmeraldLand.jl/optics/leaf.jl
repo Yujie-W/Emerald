@@ -99,55 +99,8 @@ leaf_spectra!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, θ:
     return nothing
 );
 
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2023-Sep-14: add function to compute the leaf spectra for reflectance and transmittance
-#     2023-Sep-14: use layer_ρ_τ_direct and layer_ρ_τ_diffuse to compute the reflectance and transmittance of the leaf layers
-#
-#######################################################################################################################################################################################################
-"""
 
-    leaf_spectra(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
-
-Return the leaf spectra for reflectance and transmittance, given
-- `lha` leaf hyperspectral absorption coefficients
-- `bio` leaf hyperspectral biophysics
-- `lwc` leaf water content
-- `θ` incident angle of the incoming radiation
-- `N` number of sublayers of each layer
-
-"""
-function leaf_spectra(lha::HyperspectralAbsorption{FT}, bio::HyperspectralLeafBiophysics{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
-    # compute the reflectance and transmittance of the adaxial and abaixal surfaces (with optimum angle)
-    # _ρ_s,_τ_s = layer_ρ_τ(lha, bio, lwc, 1/MESOPHYLL_N, θ; N= N);
-    _ρ_s,_τ_s = layer_ρ_τ_direct(lha, bio, lwc, θ; N= N);
-
-    # define the vectors
-    _denom = similar(_ρ_s);
-    _ρ_leaf = similar(_ρ_s);
-    _τ_leaf = similar(_ρ_s);
-
-    # compute the reflectance and transmittance of the leaf layers (isotropic light)
-    # _ρ_1,_τ_1 = layer_ρ_τ(lha, bio, lwc, 1/MESOPHYLL_N, FT(90); N = N);
-    # _ρ_2,_τ_2 = layer_ρ_τ(lha, bio, lwc, 1 - 1/MESOPHYLL_N, FT(90); N = N);
-    _ρ_1,_τ_1,_ρ_2,_τ_2 = layer_ρ_τ_diffuse(lha, bio, lwc; N = N);
-
-    @. _denom = 1 - _ρ_1 * _ρ_2;
-    @. _τ_leaf = _τ_s * _τ_2 / _denom;
-    @. _ρ_leaf = _ρ_s + _τ_s * _ρ_2 * _τ_1 / _denom;
-
-    # You can double check the conservation like this
-    # _α_s = 1 .- _ρ_s .- _τ_s;
-    # _α_1 = 1 .- _ρ_1 .- _τ_1;
-    # _α_2 = 1 .- _ρ_2 .- _τ_2;
-    # _α_leaf = _α_s .+ _τ_s .* _ρ_2 .* _α_1 ./ _denom .+ _τ_s .* _α_2 ./ _denom;
-
-    return _ρ_leaf, _τ_leaf
-end;
-
-
+#=
 #######################################################################################################################################################################################################
 #
 # Changes to this function
@@ -359,3 +312,4 @@ function leaf_sif_matrices(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{
 
     return _mat_b, _mat_f
 end;
+=#

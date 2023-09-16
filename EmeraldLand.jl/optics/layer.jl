@@ -71,7 +71,7 @@ end;
 Return the rescaled reflectance of the n-1 layer of a leaf, given
 - `ρ₁` reflectance of the first layer
 - `τ₁` transmittance of the first layer
-- `m` proportion of the n-1 layers of the whole leaf
+- `m` n - 1
 
 """
 function layer_2_ρ(ρ₁::FT, τ₁::FT, m::FT) where {FT}
@@ -99,7 +99,7 @@ end;
 Return the rescaled reflectance of the n-1 layer of a leaf, given
 - `ρ₁` reflectance of the first layer
 - `τ₁` transmittance of the first layer
-- `m` proportion of the n-1 layers of the whole leaf
+- `m` n - 1
 
 """
 function layer_2_τ(ρ₁::FT, τ₁::FT, m::FT) where {FT}
@@ -130,14 +130,14 @@ Update the reflectance and transmittance of the leaf layers, given
 
 """
 function leaf_layer_ρ_τ!(bio::HyperLeafBio{FT}, N::Int) where {FT}
-    bio.auxil.ρ_layer_θ .= layer_1_ρ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_21, bio.auxil.τ_sub_1, N);
-    bio.auxil.τ_layer_θ .= layer_1_τ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_21, bio.auxil.τ_sub_1, N);
-    bio.auxil.ρ_layer_1 .= layer_1_ρ.(bio.auxil.τ_interface_12, bio.auxil.ρ_21, bio.auxil.τ_sub_1, N);
-    bio.auxil.τ_layer_1 .= layer_1_τ.(bio.auxil.τ_interface_12, bio.auxil.ρ_21, bio.auxil.τ_sub_1, N);
+    bio.auxil.ρ_layer_θ .= layer_1_ρ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
+    bio.auxil.τ_layer_θ .= layer_1_τ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
+    bio.auxil.ρ_layer_1 .= layer_1_ρ.(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
+    bio.auxil.τ_layer_1 .= layer_1_τ.(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
 
-    x = 1 - 1 / bio.state.meso_n;
-    bio.auxil.ρ_layer_2 .= layer_2_ρ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, x, N);
-    bio.auxil.τ_layer_2 .= layer_2_τ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, x, N);
+    m = bio.state.meso_n - 1;
+    bio.auxil.ρ_layer_2 .= layer_2_ρ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
+    bio.auxil.τ_layer_2 .= layer_2_τ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
 
     return nothing
 end;
