@@ -6,8 +6,8 @@
 #
 # Algorithm
 #     here we want to solve the following equation for ρ_12 and ρ_21 (decouple the two)
-#         τ_eff =                 (1 - ρ_12) * τ_all * (1 - ρ_21) / (1 - τ_all ^ 2 * ρ_21 ^ 2)
-#         ρ_eff = x + τ_all * y * (1 - ρ_12) * τ_all * (1 - ρ_21) / (1 - τ_all ^ 2 * ρ_21 ^ 2)
+#         τ_eff =                       (1 - ρ_12) * τ_all * (1 - ρ_21) / (1 - τ_all ^ 2 * ρ_21 ^ 2)
+#         ρ_eff = ρ_12 + τ_all * ρ_21 * (1 - ρ_12) * τ_all * (1 - ρ_21) / (1 - τ_all ^ 2 * ρ_21 ^ 2)
 #     let x = ρ_12
 #         y = ρ_21
 #         t = τ_eff

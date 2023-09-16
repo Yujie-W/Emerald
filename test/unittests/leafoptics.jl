@@ -4,7 +4,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
 
 @testset verbose = true "New Leaf Optics Model" begin
-    @testset "Direct radiation ρ and τ of an interface" begin
+    @testset "Interface ρ and τ for direct radiation" begin
         n₁ = 1.0
         n₂ = 1.33
         for θ₁ in collect(Float64, 0:1:89)
@@ -19,7 +19,7 @@ import Emerald.EmeraldLand.Namespace as NS
         end;
     end;
 
-    @testset "Isotropic radiation τ of an interface" begin
+    @testset "Interface τ for isotropic radiation" begin
         n₁ = 1.0
         n₂ = 1.33
         for θ₁ in collect(Float64, 1:1:90)
@@ -30,7 +30,7 @@ import Emerald.EmeraldLand.Namespace as NS
         end;
     end;
 
-    @testset "Isotropic radiation ρ and τ at the interface" begin
+    @testset "Leaf interface ρ and τ" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
         bio = NS.HyperLeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
@@ -43,7 +43,7 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(0 .< bio.auxil.τ_interface_21 .< 1);
     end;
 
-    @testset "Isotropic radiation τ of leaf sublayer" begin
+    @testset "Leaf sublayer τ and f" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
         bio = NS.HyperLeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
@@ -55,7 +55,7 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(0 .<= bio.auxil.τ_sub_2 .<= 1);
     end;
 
-    @testset "Isotropic radiation ρ and τ of leaf layer" begin
+    @testset "Leaf layer ρ and τ" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
         bio = NS.HyperLeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
@@ -73,7 +73,32 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(bio.auxil.ρ_layer_2 .+ bio.auxil.τ_layer_2 .< 1);
     end;
 
-    @testset "Isotropic radiation ρ and τ of the leaf" begin
+    @testset "Leaf layer effective interface ρ" begin
+        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        bio = NS.HyperLeafBio(config);
+        LO.leaf_interface_ρ_τ!(config, bio, 40.0);
+        LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
+        LO.leaf_layer_ρ_τ!(bio, 10);
+
+        # test if the effective ρ_12 and ρ_21 are same as the modeled using the layer 1 data
+        ρ_12 = LO.effective_ρ_12.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, bio.auxil.τ_sub_1.^10);
+        ρ_21 = LO.effective_ρ_21.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, bio.auxil.τ_sub_1.^10);
+        @test all(bio.auxil.ρ_interface_12 .≈ ρ_12);
+        @test all(bio.auxil.ρ_interface_21 .≈ ρ_21);
+
+        # test the effective ρ_12 and ρ_21 converge back to the layer 2 data
+        ρ_2 = bio.auxil.ρ_layer_2;
+        τ_2 = bio.auxil.τ_layer_2;
+        τ_all = bio.auxil.τ_sub_2 .^ 10
+        ρ_12 = LO.effective_ρ_12.(ρ_2, τ_2, τ_all);
+        ρ_21 = LO.effective_ρ_21.(ρ_2, τ_2, τ_all);
+        τ_re =                          (1 .- ρ_12) .* τ_all .* (1 .- ρ_21) ./ (1 .- τ_all .^ 2 .* ρ_21 .^ 2);
+        ρ_re = ρ_12 .+ τ_all .* ρ_21 .* (1 .- ρ_12) .* τ_all .* (1 .- ρ_21) ./ (1 .- τ_all .^ 2 .* ρ_21 .^ 2);
+        @test all(ρ_re .≈ ρ_2);
+        @test all(τ_re .≈ τ_2);
+    end;
+
+    @testset "Leaf ρ and τ" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
         bio = NS.HyperLeafBio(config);
 
@@ -88,58 +113,17 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(bio.auxil.ρ_leaf .+ bio.auxil.τ_leaf .< 1);
     end;
 
-    #=
-    @testset "Raw SIF excitation coefficient of leaf layer" begin
+    @testset "Leaf SIF backward and forward matrices" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        lha = config.LHA;
+        bio = NS.HyperLeafBio(config);
         wls = config.WLSET;
-        bio = NS.HyperspectralLeafBiophysics(config);
-        ρ₁,τ₁ = LO.layer_ρ_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 40.0);
-        ρ₂,τ₂ = LO.layer_ρ_τ(lha, bio, 5.0, 1 - 1/bio.MESOPHYLL_N, 90.0);
-        α₁_sife = (1 .- ρ₁ .- τ₁)[wls.IΛ_SIFE];
-        α₂_sife = (1 .- ρ₂ .- τ₂)[wls.IΛ_SIFE];
-        sife₁ = LO.layer_raw_sife(lha, wls, bio, 5.0, 1/bio.MESOPHYLL_N, 40.0);
-        sife₂ = LO.layer_raw_sife(lha, wls, bio, 5.0, 1 - 1/bio.MESOPHYLL_N, 90.0);
-        @test all(0 .< sife₁ .< 1);
-        @test all(0 .< sife₂ .< 1);
-        @test all(α₁_sife .≈ sife₁);
-        @test all(α₂_sife .≈ sife₂);
-    end;
+        LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
+        rad = ones(Float64, size(bio.auxil.mat_b,2));
+        sif_b = bio.auxil.mat_b * rad;
+        sif_f = bio.auxil.mat_f * rad;
 
-    @testset "Raw SIF emission matrices of the leaf" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        lha = config.LHA;
-        wls = config.WLSET;
-        bio = NS.HyperspectralLeafBiophysics(config);
-        ρ,τ = LO.leaf_spectra(lha, bio, 5.0, 40.0);
-        α_sife = (1 .- ρ .- τ)[wls.IΛ_SIFE];
-        _,f_cab,f_car = LO.sublayer_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 10);
-        ϕ_sife = f_cab[wls.IΛ_SIFE];
-        mat_b,mat_f = LO.leaf_raw_sif_matrices(lha, wls, bio, 5.0, 40.0);
-        rad = ones(size(mat_b,1));
-        sif_b = mat_b' * rad;
-        sif_f = mat_f' * rad;
-        @test all(0 .<= mat_b .< 1);
-        @test all(0 .<= mat_f .< 1);
-        @test sum(sif_b .+ sif_f) ≈ (ϕ_sife .* α_sife)' * rad;
+        @test all(0 .<= bio.auxil.mat_b .< 1);
+        @test all(0 .<= bio.auxil.mat_f .< 1);
+        @test sum(sif_b .+ sif_f) .< sum(bio.auxil.α_leaf[wls.IΛ_SIFE] .* bio.auxil.f_sife[wls.IΛ_SIFE] .* rad);
     end;
-
-    @testset "SIF emission matrices of the leaf" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        lha = config.LHA;
-        wls = config.WLSET;
-        bio = NS.HyperspectralLeafBiophysics(config);
-        ρ,τ = LO.leaf_spectra(lha, bio, 5.0, 40.0);
-        α_sife = (1 .- ρ .- τ)[wls.IΛ_SIFE];
-        _,f_cab,f_car = LO.sublayer_τ(lha, bio, 5.0, 1/bio.MESOPHYLL_N, 10);
-        ϕ_sife = f_cab[wls.IΛ_SIFE];
-        mat_b,mat_f = LO.leaf_sif_matrices(lha, wls, bio, 5.0, 40.0);
-        rad = ones(size(mat_b,1));
-        sif_b = mat_b' * rad;
-        sif_f = mat_f' * rad;
-        @test all(0 .<= mat_b .< 1);
-        @test all(0 .<= mat_f .< 1);
-        @test sum(sif_b .+ sif_f) .< (ϕ_sife .* α_sife)' * rad;
-    end;
-    =#
 end;

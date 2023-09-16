@@ -54,6 +54,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-15: add function to update the leaf reflectance and transmittance within HyperLeafBio
+#     2023-Sep-16: save leaf aborption as well
 #
 #######################################################################################################################################################################################################
 """
@@ -67,6 +68,7 @@ Update the leaf reflectance and transmittance within `bio`, given
 function leaf_ρ_τ!(bio::HyperLeafBio{FT}) where {FT}
     bio.auxil.ρ_leaf .= leaf_ρ.(bio.auxil.ρ_layer_θ, bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, bio.auxil.ρ_layer_2);
     bio.auxil.τ_leaf .= leaf_τ.(bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2);
+    bio.auxil.α_leaf .= 1 .- bio.auxil.ρ_leaf .- bio.auxil.τ_leaf;
 
     return nothing
 end;
@@ -96,7 +98,7 @@ leaf_spectra!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, θ:
     leaf_sublayer_f_τ!(config, bio, lwc, N);
     leaf_layer_ρ_τ!(bio, N);
     leaf_ρ_τ!(bio);
-    leaf_sif_matrices!(config, bio);
+    leaf_sif_matrices!(config, bio, N);
 
     return nothing
 );

@@ -253,7 +253,7 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int)
 
 leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT} = (
     (; Φ_PS) = lha;
-    (; DIM_SIFE, IΛ_SIF, IΛ_SIFE) = wls;
+    (; IΛ_SIF, IΛ_SIFE) = wls;
 
     # update the SIF emission vector per excitation wavelength
     ϕ = view(Φ_PS, IΛ_SIF);
@@ -263,7 +263,7 @@ leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio
     τ_2_sif = view(bio.auxil.τ_layer_2, IΛ_SIF);
     τ_sub_sif_1 = view(bio.auxil.τ_sub_1, IΛ_SIF);
     τ_sub_sif_2 = view(bio.auxil.τ_sub_2, IΛ_SIF);
-    for i in 1:DIM_SIFE
+    for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
         vec_b_1 = view(bio.auxil.mat_b_1, :, ii);
         vec_f_1 = view(bio.auxil.mat_f_1, :, ii);
@@ -280,15 +280,15 @@ leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio
         ρ_l_1   = bio.auxil.ρ_layer_1[ii];          # the reflectance of isotropic radiation across layer 1
         ρ_l_2   = bio.auxil.ρ_layer_2[ii];          # the reflectance of isotropic radiation across layer 2 (n-1)
         τ_l_2   = bio.auxil.τ_layer_2[ii];          # the transmittance of isotropic radiation across layer 2 (n-1)
-        f_sife  = bio.state.f_sife[ii];
+        f_sife  = bio.auxil.f_sife[ii];
 
         # update the SIF conversion matrix of the two layers
         layer_1_sif_vec!(τ_i_θ, τ_i_12, τ_i_21, τ_sub_1, τ_l_θ, ρ_l_1, ρ_l_2, f_sife, τ_sub_sif_1, vec_b_1, vec_f_1, ϕ, N);
         layer_2_sif_vec!(τ_sub_2, τ_l_θ, ρ_l_1, ρ_l_2, τ_l_2, f_sife, τ_sub_sif_2, vec_b_2, vec_f_2, ϕ, N);
 
         # compute the SIF emission vector backward and forward
-        vec_b .= leaf_sif_b(vec_b_1, vec_f_1, vec_b_2, ρ_1_sif, τ_1_sif, ρ_2_sif);
-        vec_f .= leaf_sif_f(vec_f_1, vec_b_2, vec_f_2, ρ_1_sif, ρ_2_sif, τ_2_sif);
+        vec_b .= leaf_sif_b.(vec_b_1, vec_f_1, vec_b_2, ρ_1_sif, τ_1_sif, ρ_2_sif);
+        vec_f .= leaf_sif_f.(vec_f_1, vec_b_2, vec_f_2, ρ_1_sif, ρ_2_sif, τ_2_sif);
     end;
 
     return nothing
