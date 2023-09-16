@@ -121,8 +121,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    leaf_interface_spectra!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT}
-    leaf_interface_spectra!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT}
+    leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT}
+    leaf_interface_ρ_τ!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT}
 
 Update the interface reflectance and transmittance in `bio`, given
 - `config` SPAC configuration
@@ -131,11 +131,11 @@ Update the interface reflectance and transmittance in `bio`, given
 - `lha` HyperspectralAbsorption struct
 
 """
-function leaf_interface_spectra! end;
+function leaf_interface_ρ_τ! end;
 
-leaf_interface_spectra!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT} = leaf_interface_spectra!(config.LHA, bio, θ);
+leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = leaf_interface_ρ_τ!(config.LHA, bio, θ);
 
-leaf_interface_spectra!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT = FT(40)) where {FT} = (
+leaf_interface_ρ_τ!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = (
     (; NR) = lha;
 
     bio.auxil.τ_interface_θ  .= interface_isotropic_τ.(FT(1), NR, θ);

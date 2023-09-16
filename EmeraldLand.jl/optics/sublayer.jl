@@ -131,8 +131,8 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_sublayer_absorptions!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT}
-    leaf_sublayer_absorptions!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT}
+    leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT}
+    leaf_sublayer_f_τ!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT}
 
 Update the sublayer absorption and transmittance within `bio`, given
 - `config` SPAC configuration
@@ -142,11 +142,11 @@ Update the sublayer absorption and transmittance within `bio`, given
 - `lha` HyperspectralAbsorption struct
 
 """
-function leaf_sublayer_absorptions! end;
+function leaf_sublayer_f_τ! end;
 
-leaf_sublayer_absorptions!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = leaf_sublayer_absorptions!(config.lha, bio, lwc, N);
+leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = leaf_sublayer_f_τ!(config.lha, bio, lwc, N);
 
-leaf_sublayer_absorptions!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = (
+leaf_sublayer_f_τ!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = (
     (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO) = lha;
 
     x = 1 / bio.state.meso_n;
