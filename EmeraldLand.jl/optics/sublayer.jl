@@ -127,6 +127,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-15: add function to update the sublayer absorption and transmittance within HyperLeafBio
+#     2023-Sep-15: save f_sife as well as f_cab and f_car
 #
 #######################################################################################################################################################################################################
 """
@@ -150,8 +151,9 @@ leaf_sublayer_f_τ!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, lwc
     (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO) = lha;
 
     x = 1 / bio.state.meso_n;
-    bio.auxil.f_cab .= sublayer_f_cab.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
-    bio.auxil.f_car .= sublayer_f_car.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    bio.auxil.f_cab  .= sublayer_f_cab.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    bio.auxil.f_car  .= sublayer_f_car.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    bio.auxil.f_sife .= bio.auxil.f_cab .+ bio.auxil.f_car .* (1 - bio.state.ϕ_car);
 
     bio.auxil.τ_sub_1 .= sublayer_τ.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x, N);
     bio.auxil.τ_sub_2 .= sublayer_τ.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, 1-x, N);

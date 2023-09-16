@@ -50,6 +50,7 @@ end;
 #     2023-Sep-14: moved the auxiliary variables out from HyperLeafBiophysics
 #     2023-Sep-14: add fields to store the interface, layer, and leaf reflectance and transmittance
 #     2023-Sep-14: add fields to store the SIF calculation matrices
+#     2023-Sep-16: add field f_sife to store the SIF excitation fraction
 #
 #######################################################################################################################################################################################################
 """
@@ -70,6 +71,8 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     f_cab::Vector{FT}
     "Carotenoid absorption fraction `[-]`"
     f_car::Vector{FT}
+    "SIF excitation fraction `[-]`"
+    f_sife::Vector{FT}
 
     # reflectance and transmittance at the air-water interface
     "Air-water interface reflectance with an average angle `[-]`"
@@ -130,6 +133,7 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
     return HyperLeafBioAuxil{FT}(
                 f_cab            = zeros(FT, DIM_WL),
                 f_car            = zeros(FT, DIM_WL),
+                f_sife           = zeros(FT, DIM_WL),
                 ρ_interface_θ    = zeros(FT, DIM_WL),
                 τ_interface_θ    = zeros(FT, DIM_WL),
                 ρ_interface_12   = zeros(FT, DIM_WL),
