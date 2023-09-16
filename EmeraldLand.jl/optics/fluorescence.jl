@@ -95,7 +95,7 @@ end;
 #
 # Changes to this function
 # General
-#     2023-Sep-16: add function to update the SIF conversion maxtri of the n-1 layer
+#     2023-Sep-16: add function to update the SIF conversion matrix of the n-1 layer
 #
 #######################################################################################################################################################################################################
 """
@@ -225,3 +225,71 @@ function leaf_sif_f(sif_f_1::FT, sif_b_2::FT, sif_f_2::FT, ρ_1::FT, ρ_2::FT, �
 
     return sif_f_1 * τ_2 / denom + sif_b_2 * ρ_1 * τ_2 / denom + sif_f_2
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-16: add function to update the SIF conversion matrix of the leaf
+#
+#######################################################################################################################################################################################################
+"""
+
+    leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
+    leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
+
+Update the SIF conversion matrix of the leaf, given
+- `config` SPAC configuration
+- `bio` leaf biophysics
+- `N` number of sublayers of each layer
+- `lha` leaf hyperspectral absorption
+- `wls` wavelength set
+
+"""
+function leaf_sif_matrices! end;
+
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT} = leaf_sif_matrices!(config.LHA, config.WLSET, bio, N);
+
+leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT} = (
+    (; Φ_PS) = lha;
+    (; DIM_SIFE, IΛ_SIF, IΛ_SIFE) = wls;
+
+    # update the SIF emission vector per excitation wavelength
+    ϕ = view(Φ_PS, IΛ_SIF);
+    ρ_1_sif = view(bio.auxil.ρ_layer_1, IΛ_SIF);
+    τ_1_sif = view(bio.auxil.τ_layer_1, IΛ_SIF);
+    ρ_2_sif = view(bio.auxil.ρ_layer_2, IΛ_SIF);
+    τ_2_sif = view(bio.auxil.τ_layer_2, IΛ_SIF);
+    τ_sub_sif_1 = view(bio.auxil.τ_sub_1, IΛ_SIF);
+    τ_sub_sif_2 = view(bio.auxil.τ_sub_2, IΛ_SIF);
+    for i in 1:DIM_SIFE
+        ii = IΛ_SIFE[i];
+        vec_b_1 = view(bio.auxil.mat_b_1, :, ii);
+        vec_f_1 = view(bio.auxil.mat_f_1, :, ii);
+        vec_b_2 = view(bio.auxil.mat_b_2, :, ii);
+        vec_f_2 = view(bio.auxil.mat_f_2, :, ii);
+        vec_b   = view(bio.auxil.mat_b, :, ii);
+        vec_f   = view(bio.auxil.mat_f, :, ii);
+        τ_i_θ   = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
+        τ_i_12  = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
+        τ_i_21  = bio.auxil.τ_interface_21[ii];     # the transmittance of the isotropic radiation at the water-air interface
+        τ_sub_1 = bio.auxil.τ_sub_1[ii];            # the transmittance within a sublayer of layer 1
+        τ_sub_2 = bio.auxil.τ_sub_2[ii];            # the transmittance within a sublayer of layer 2 (n-1)
+        τ_l_θ   = bio.auxil.τ_layer_θ[ii];          # the transmittance of the incoming radiation across the leaf layer 1
+        ρ_l_1   = bio.auxil.ρ_layer_1[ii];          # the reflectance of isotropic radiation across layer 1
+        ρ_l_2   = bio.auxil.ρ_layer_2[ii];          # the reflectance of isotropic radiation across layer 2 (n-1)
+        τ_l_2   = bio.auxil.τ_layer_2[ii];          # the transmittance of isotropic radiation across layer 2 (n-1)
+        f_sife  = bio.state.f_sife[ii];
+
+        # update the SIF conversion matrix of the two layers
+        layer_1_sif_vec!(τ_i_θ, τ_i_12, τ_i_21, τ_sub_1, τ_l_θ, ρ_l_1, ρ_l_2, f_sife, τ_sub_sif_1, vec_b_1, vec_f_1, ϕ, N);
+        layer_2_sif_vec!(τ_sub_2, τ_l_θ, ρ_l_1, ρ_l_2, τ_l_2, f_sife, τ_sub_sif_2, vec_b_2, vec_f_2, ϕ, N);
+
+        # compute the SIF emission vector backward and forward
+        vec_b .= leaf_sif_b(vec_b_1, vec_f_1, vec_b_2, ρ_1_sif, τ_1_sif, ρ_2_sif);
+        vec_f .= leaf_sif_f(vec_f_1, vec_b_2, vec_f_2, ρ_1_sif, ρ_2_sif, τ_2_sif);
+    end;
+
+    return nothing
+);

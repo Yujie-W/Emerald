@@ -51,6 +51,7 @@ end;
 #     2023-Sep-14: add fields to store the interface, layer, and leaf reflectance and transmittance
 #     2023-Sep-14: add fields to store the SIF calculation matrices
 #     2023-Sep-16: add field f_sife to store the SIF excitation fraction
+#     2023-Sep-16: add fields mat_b_i and mat_f_i to store the SIF conversion matrices for each layer
 #
 #######################################################################################################################################################################################################
 """
@@ -115,6 +116,14 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     τ_leaf::Vector{FT}
 
     # SIF excitation to emittance matrix
+    "First layer SIF matrix backwards `[-]`"
+    mat_b_1::Matrix{FT}
+    "First layer SIF matrix forwards `[-]`"
+    mat_f_1::Matrix{FT}
+    "Second layer SIF matrix backwards `[-]`"
+    mat_b_2::Matrix{FT}
+    "Second layer SIF matrix forwards `[-]`"
+    mat_f_2::Matrix{FT}
     "SIF matrix backwards `[-]`"
     mat_b::Matrix{FT}
     "SIF matrix forwards `[-]`"
@@ -150,6 +159,10 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 τ_layer_2        = zeros(FT, DIM_WL),
                 ρ_leaf           = zeros(FT, DIM_WL),
                 τ_leaf           = zeros(FT, DIM_WL),
+                mat_b_1          = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_f_1          = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_b_2          = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_f_2          = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_b            = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f            = zeros(FT, DIM_SIF, DIM_SIFE),
     )
