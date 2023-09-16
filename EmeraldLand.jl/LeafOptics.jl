@@ -10,6 +10,7 @@ using ..Optics: average_transmittance, energy, energy!, photon, photon!
 
 using ..Namespace: HyperLeafBio, HyperLeafBioState
 include("optics/effective.jl");
+include("optics/fluorescence.jl");
 include("optics/interface.jl");
 include("optics/layer.jl");
 include("optics/leaf.jl");
