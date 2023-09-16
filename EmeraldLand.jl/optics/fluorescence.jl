@@ -162,3 +162,66 @@ function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f
 
     return nothing
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-16: add function to compute the SIF emission backward
+#
+#######################################################################################################################################################################################################
+"""
+
+    leaf_sif_b(sif_b_1::FT, sif_f_1::FT, sif_b_2::FT, ρ_1::FT, τ_1::FT, ρ_2::FT) where {FT}
+
+Return the SIF emission backward, given
+- `sif_b_1` SIF emission backward from the first layer
+- `sif_f_1` SIF emission forward from the first layer
+- `sif_b_2` SIF emission backward from the second layer
+- `ρ_1` reflectance of the first layer (1)
+- `τ_1` transmittance of the first layer (1)
+- `ρ_2` reflectance of the second layer (n-1)
+
+"""
+function leaf_sif_b(sif_b_1::FT, sif_f_1::FT, sif_b_2::FT, ρ_1::FT, τ_1::FT, ρ_2::FT) where {FT}
+    # the sif that goes backward is the sum of
+    #     - sif_b_1
+    #     - sif_f_1 reflected by the 2nd layer and then transmit through the 1st layer (needs to be rescaled)
+    #     - sif_b_2 that transmit through the n-1 layer (needs to be rescaled)
+    denom = 1 - ρ_1 * ρ_2;
+
+    return sif_b_1 + sif_f_1 * ρ_2 * τ_1 / denom + sif_b_2 * τ_1 / denom
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-16: add function to compute the SIF emission forward
+#
+#######################################################################################################################################################################################################
+"""
+
+    leaf_sif_f(sif_f_1::FT, sif_b_2::FT, sif_f_2::FT, ρ_1::FT, ρ_2::FT, τ_2::FT) where {FT}
+
+Return the SIF emission forward, given
+- `sif_f_1` SIF emission forward from the first layer
+- `sif_b_2` SIF emission backward from the second layer
+- `sif_f_2` SIF emission forward from the second layer
+- `ρ_1` reflectance of the first layer (1)
+- `ρ_2` reflectance of the second layer (n-1)
+- `τ_2` transmittance of the second layer (n-1)
+
+"""
+function leaf_sif_f(sif_f_1::FT, sif_b_2::FT, sif_f_2::FT, ρ_1::FT, ρ_2::FT, τ_2::FT) where {FT}
+
+    # the sif that goes forward is the sum of
+    #     - sif_f_1 that transmit through the 2nd layer (needs to be rescaled)
+    #     - sif_b_2 reflected by the 1st layer and then transmit through the 2nd layer (needs to be rescaled)
+    #     - sif_f_2
+    denom = 1 - ρ_1 * ρ_2;
+
+    return sif_f_1 * τ_2 / denom + sif_b_2 * ρ_1 * τ_2 / denom + sif_f_2
+end;
