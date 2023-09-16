@@ -46,16 +46,16 @@ function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_
     #    now the radiation goes from up to down
     rad_i = τ_i_θ * f_sife;
     for i in 1:N
-        vec_b .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
     # 2. then the radiation goes from down to up after hitting the water-air interface
     rad_i *= ρ_i_21;
     for i in N:-1:1
-        vec_b .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
@@ -69,16 +69,16 @@ function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_
     #    now the radiation goes from down to up
     rad_i = τ_θ * ρ_2 / (1 - ρ_1 * ρ_2) * τ_i_12 * f_sife;
     for i in N:-1:1
-        vec_b .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
     # 4. then the radiation goes from up to down
     rad_i *= ρ_i_21;
     for i in 1:N
-        vec_b .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
@@ -142,16 +142,16 @@ function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f
     #    now the radiation goes from up to down
     rad_i = τ_θ / (1 - ρ_1 * ρ_2) * τ_i_12 * f_sife;
     for i in 1:N
-        vec_b .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
     # 3. then the radiation goes from down to up
     rad_i *= ρ_i_21;
     for i in N:-1:1
-        vec_b .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub * ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
@@ -265,12 +265,12 @@ leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio
     τ_sub_sif_2 = view(bio.auxil.τ_sub_2, IΛ_SIF);
     for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
-        vec_b_1 = view(bio.auxil.mat_b_1, :, ii);
-        vec_f_1 = view(bio.auxil.mat_f_1, :, ii);
-        vec_b_2 = view(bio.auxil.mat_b_2, :, ii);
-        vec_f_2 = view(bio.auxil.mat_f_2, :, ii);
-        vec_b   = view(bio.auxil.mat_b, :, ii);
-        vec_f   = view(bio.auxil.mat_f, :, ii);
+        vec_b_1 = view(bio.auxil.mat_b_1, :, i);
+        vec_f_1 = view(bio.auxil.mat_f_1, :, i);
+        vec_b_2 = view(bio.auxil.mat_b_2, :, i);
+        vec_f_2 = view(bio.auxil.mat_f_2, :, i);
+        vec_b   = view(bio.auxil.mat_b, :, i);
+        vec_f   = view(bio.auxil.mat_f, :, i);
         τ_i_θ   = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
         τ_i_12  = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
         τ_i_21  = bio.auxil.τ_interface_21[ii];     # the transmittance of the isotropic radiation at the water-air interface
