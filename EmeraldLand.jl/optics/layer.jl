@@ -8,20 +8,25 @@
 """
 
     layer_1_ρ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT}
+    layer_1_ρ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT}
 
 Return the rescaled reflectance of the first layer of a leaf, given
 - `τ_in` transmittance of the incoming radiation
 - `ρ_21` reflectance at the water(2)-air(1) interface
 - `τ_sub` transmittance within a sublayer
 - `N` number of sublayers of each layer
+- `τ_all` transmittance within a layer
 
 """
-function layer_1_ρ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT}
-    τ_all = τ_sub ^ N;
+function layer_1_ρ end;
+
+layer_1_ρ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT} = layer_1_ρ(τ_in, ρ_21, τ_sub ^ N);
+
+layer_1_ρ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT} = (
     denom = 1 - ρ_21 * τ_all * ρ_21 * τ_all;
 
     return 1 - τ_in + τ_in * τ_all * ρ_21 * τ_all * (1 - ρ_21) / denom
-end;
+);
 
 
 #######################################################################################################################################################################################################
@@ -34,20 +39,25 @@ end;
 """
 
     layer_1_τ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT}
+    layer_1_τ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT}
 
 Return the rescaled transmittance of the first layer of a leaf, given
 - `τ_in` transmittance of the incoming radiation
 - `ρ_21` reflectance at the water(2)-air(1) interface
 - `τ_sub` transmittance within a sublayer
 - `N` number of sublayers of each layer
+- `τ_all` transmittance within a layer
 
 """
-function layer_1_τ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT}
-    τ_all = τ_sub ^ N;
+function layer_1_τ end;
+
+layer_1_τ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT} = layer_1_τ(τ_in, ρ_21, τ_sub ^ N);
+
+layer_1_τ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT} = (
     denom = 1 - ρ_21 * τ_all * ρ_21 * τ_all;
 
     return τ_in * τ_all * (1 - ρ_21) / denom
-end;
+);
 
 
 #######################################################################################################################################################################################################
@@ -140,4 +150,29 @@ function leaf_layer_ρ_τ!(bio::HyperLeafBio{FT}, N::Int) where {FT}
     bio.auxil.τ_layer_2 .= layer_2_τ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
 
     return nothing
+end;
+
+
+# here we want to solve the following equation for ρ_12 and ρ_21 (decouple the two)
+#     τ_eff =                 (1 - ρ_12) * τ_all * (1 - ρ_21) / (1 - τ_all ^ 2 * ρ_21 ^ 2)
+#     ρ_eff = x + τ_all * y * (1 - ρ_12) * τ_all * (1 - ρ_21) / (1 - τ_all ^ 2 * ρ_21 ^ 2)
+# let x = ρ_12
+#     y = ρ_21
+#     t = τ_eff
+#     r = ρ_eff
+#     k = τ_all
+# then we have
+#     t =             (1 - x) * k * (1 - y) / (1 - k ^ 2 * y ^ 2)
+#     r = x + k * y * (1 - x) * k * (1 - y) / (1 - k ^ 2 * y ^ 2)
+# solve x and y using wolframalpha.com and we have
+#     x = (t * (k - t) + r^2 - r) / (k * t + r  - 1)
+#     y = (k * (r - 1) + t) / k / (k * t + r - 1)
+
+function effective_ρ_12(ρ_eff::FT, τ_eff::FT, τ_all::FT) where {FT}
+    return (τ_eff * (τ_all - τ_eff) + ρ_eff^2 - ρ_eff) / (τ_all * τ_eff + ρ_eff - 1)
+end;
+
+
+function effective_ρ_21(ρ_eff::FT, τ_eff::FT, τ_all::FT) where {FT}
+    return (τ_all * (ρ_eff - 1) + τ_eff) / τ_all / (τ_all * τ_eff + ρ_eff - 1)
 end;

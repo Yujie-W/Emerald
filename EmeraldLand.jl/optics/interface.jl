@@ -26,7 +26,7 @@ function interface_ρ_τ(n₁::FT, n₂::FT, θ₁::FT) where {FT}
     ρ = (ρ_s + ρ_p) / 2;
 
     return ρ, 1 - ρ
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -72,7 +72,7 @@ function interface_integrated_τ(m::FT, θ₁::FT) where {FT}
     i_p = p₁ * p₂ + p₃ * p₄;
 
     return i_s, i_p
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -80,6 +80,7 @@ end
 # Changes to this function
 # General
 #     2023-Sep-14: add function to compute transmittance at the interface for isotropic light
+#     2023-Sep-15: fix a typo introduced by mistake when removing _ from the variable names
 #
 #######################################################################################################################################################################################################
 """
@@ -99,17 +100,22 @@ function interface_isotropic_τ(n₁::FT, n₂::FT, θ₁::FT) where {FT}
         s₁, p₁ = interface_integrated_τ(m, FT(0));
         s₂, p₂ = interface_integrated_τ(m, θ₁);
         _denom = FT(2) * FT(π) * sind(θ₁)^2;
+
+        τ_s = (s₂ - s₁) / _denom;
+        τ_p = (p₁ - p₂) / _denom; # seems like the original equation made a mistake in the sign
+
+        return (τ_s + τ_p) / 2
     else
         s₁, p₁ = interface_integrated_τ(1 / m, FT(0));
         s₂, p₂ = interface_integrated_τ(1 / m, θ₁);
         _denom = FT(2) * FT(π) * sind(θ₁)^2;
-    end
 
-    τ_s = (s₂ - s₁) / _denom;
-    τ_p = (p₁ - p₂) / _denom; # seems like the original equation made a mistake in the sign
+        τ_s = (s₂ - s₁) / _denom;
+        τ_p = (p₁ - p₂) / _denom;
 
-    return (τ_s + τ_p) / 2
-end
+        return (τ_s + τ_p) / 2 * m ^ 2
+    end;
+end;
 
 
 #######################################################################################################################################################################################################
