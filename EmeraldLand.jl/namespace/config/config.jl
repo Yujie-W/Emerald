@@ -81,6 +81,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # WaveLengthSet
     "Wave length set used to paramertize other variables"
     WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET = DATASET)
+    "Reference Spetra"
+    SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(DATASET = DATASET)
 
     # Dimensions of the spac system
     "Dimension of air layers"
@@ -109,14 +111,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # Constant values used to configurate the thresholds
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"
     KR_THRESHOLD::FT = 0.001
-
-    # Embedded structures that are supposed to be constant
-    "Hyperspectral absorption features of different leaf components"
-    LHA::HyperspectralAbsorption{FT} = HyperspectralAbsorption{FT}(DATASET = DATASET)
-    "A matrix of characteristic curves"
-    MAT_ρ::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
-    "Downwelling shortwave radiation reference spectrum"
-    RAD_SW_REF::HyperspectralRadiation{FT} = HyperspectralRadiation{FT}(DATASET)
 
     # Canopy geometry related angles
     "Mean azimuth angles `[°]`"

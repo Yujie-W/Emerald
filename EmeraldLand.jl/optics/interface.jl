@@ -128,21 +128,21 @@ end;
 """
 
     leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT}
-    leaf_interface_ρ_τ!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT}
+    leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT}
 
 Update the interface reflectance and transmittance in `bio`, given
 - `config` SPAC configuration
 - `bio` HyperLeafBio struct
 - `θ` average angle of the incident radiation
-- `lha` HyperspectralAbsorption struct
+- `spectra` ReferenceSpectra struct
 
 """
 function leaf_interface_ρ_τ! end;
 
-leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = leaf_interface_ρ_τ!(config.LHA, bio, θ);
+leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = leaf_interface_ρ_τ!(config.SPECTRA, bio, θ);
 
-leaf_interface_ρ_τ!(lha::HyperspectralAbsorption{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = (
-    (; NR) = lha;
+leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = (
+    (; NR) = spectra;
 
     bio.auxil.τ_interface_θ  .= interface_isotropic_τ.(FT(1), NR, θ);
     bio.auxil.τ_interface_12 .= interface_isotropic_τ.(FT(1), NR, FT(90));

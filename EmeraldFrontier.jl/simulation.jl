@@ -5,7 +5,6 @@
 #     2023-Mar-25: add function to prescribe parameters from weather drivers
 #     2023-Mar-27: prescribe T only if t_on is true, prescribe SWC only is θ_on is true
 #     2023-Mar-29: prescribe longwave radiation as well
-#     2023-Apr-13: add spac config to function call
 #     2023-Jun-15: add a controller over rad to make sure it is >= 0
 #     2023-Aug-25: make soil and leaf temperature and soil moisture optional
 # Bug fixes
@@ -97,10 +96,10 @@ function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr
     end;
 
     # update downward shortwave and longwave radiation
-    _in_dir = config.RAD_SW_REF.e_direct'  * config.WLSET.ΔΛ / 1000;
-    _in_dif = config.RAD_SW_REF.e_diffuse' * config.WLSET.ΔΛ / 1000;
-    spac.METEO.rad_sw.e_direct  .= config.RAD_SW_REF.e_direct  .* max(0,_df_dir) ./ _in_dir;
-    spac.METEO.rad_sw.e_diffuse .= config.RAD_SW_REF.e_diffuse .* max(0,_df_dif) ./ _in_dif;
+    _in_dir = view(config.SPECTRA.SOLAR_RAD,:,1)' * config.WLSET.ΔΛ / 1000;
+    _in_dif = view(config.SPECTRA.SOLAR_RAD,:,2)' * config.WLSET.ΔΛ / 1000;
+    spac.METEO.rad_sw.e_direct  .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,_df_dir) ./ _in_dir;
+    spac.METEO.rad_sw.e_diffuse .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,_df_dif) ./ _in_dif;
     spac.METEO.rad_lw = _df_lwr;
 
     # update solar zenith angle based on the time
@@ -122,14 +121,12 @@ end
 #     2023-Mar-28: add option selection to run part of the whole year simulations
 #     2023-Mar-28: save swcs and temperatures based on t_on and θ_on
 #     2023-Mar-29: add option to load initialial state from weather driver
-#     2023-Apr-13: add spac config to function call
 #     2023-Aug-25: add method to run spac simulations using externally prepared variables
 #     2023-Aug-26: add debug information
 #     2023-Aug-27: show ind at debug mode, otherwise show progress bar
 #     2023-Sep-07: initialize integrators when starting a new simulation in a long time step
 #     2023-Sep-09: save the quantum yields when saving the simulation results
 #     2023-Sep-11: save the integrated SIF when saving the simulation results
-#     2023-Sep-12: remove option p_on, t_on, and θ_on as they are now in CONFIG
 #
 #######################################################################################################################################################################################################
 """

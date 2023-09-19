@@ -3,15 +3,11 @@
 # Changes to this function
 # General
 #     2022-Jun-10: migrate the function from CanopyLayers
-#     2022-Jun-10: rename function to canopy_fluorescence!
-#     2022-Jun-13: finished migrating the SIF function
 #     2022-Jun-14: convert energy and photon back and forth if using photon mode
-#     2022-Jun-29: use Leaves2D for the hyperspectral RT
 #     2022-Jun-29: use ϕ_f in Leaves2D
 #     2022-Jun-29: add method for SPAC
 #     2023-Mar-11: compute fluorescence only if solar zenith angle < 89
 #     2023-Mar-11: add code to account for the case of LAI == 0
-#     2023-Apr-13: add config to function call
 #     2023-May-19: use δlai per canopy layer
 #     2023-Sep-11: compute the SIF at chloroplast level at the same time
 #     2023-Sep-11: redo the calculation of SIF for different layers using the SIF excitation radiation directly
@@ -44,7 +40,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wh
 );
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
-    (; APAR_CAR, DIM_LAYER, LHA, WLSET, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
+    (; APAR_CAR, DIM_LAYER, SPECTRA, WLSET, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 
     if can.lai == 0
@@ -79,12 +75,12 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _e_dir, _e_dif_down, _e_dif_up = OPTICS._tmp_vec_sife_1, OPTICS._tmp_vec_sife_2, OPTICS._tmp_vec_sife_3;
 
         # convert the excitation radiation to fluorescence components
-        OPTICS._tmp_vec_sif_1 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dir) ./ 2;
-        OPTICS._tmp_vec_sif_2 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dir) ./ 2;
-        OPTICS._tmp_vec_sif_3 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_down) ./ 2;
-        OPTICS._tmp_vec_sif_4 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_down) ./ 2;
-        OPTICS._tmp_vec_sif_5 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_up) ./ 2;
-        OPTICS._tmp_vec_sif_6 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_up) ./ 2;
+        OPTICS._tmp_vec_sif_1 .= SPECTRA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dir) ./ 2;
+        OPTICS._tmp_vec_sif_2 .= SPECTRA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dir) ./ 2;
+        OPTICS._tmp_vec_sif_3 .= SPECTRA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_down) ./ 2;
+        OPTICS._tmp_vec_sif_4 .= SPECTRA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_down) ./ 2;
+        OPTICS._tmp_vec_sif_5 .= SPECTRA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_up) ./ 2;
+        OPTICS._tmp_vec_sif_6 .= SPECTRA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_up) ./ 2;
 
         # convert the SIF back to energy unit if ϕ_photon is true
         if Φ_PHOTON

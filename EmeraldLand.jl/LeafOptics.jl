@@ -3,7 +3,7 @@ module LeafOptics
 using SpecialFunctions: expint
 
 using ..Constant: M_H₂O, ρ_H₂O
-using ..Namespace: HyperspectralAbsorption, HyperspectralRadiation, HyperspectralLeafBiophysics, WaveLengthSet
+using ..Namespace: HyperspectralRadiation, HyperspectralLeafBiophysics, ReferenceSpectra, WaveLengthSet
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..Optics: average_transmittance, energy, energy!, photon, photon!
 
@@ -42,17 +42,11 @@ function leaf_spectra! end
 #     2020-Mar-30: account for carotenoid absorption as PPAR as well as chlorophyll
 #     2020-Mar-31: use 40° rather than 59° for _τ_α calculation (following PROSPECT-D)
 #     2021-Aug-06: If bio.CBC and bio.PRO are not zero, they are accounted for twice in bio.LMA, thus the spectrum from LMA need to subtract the contribution from CBC and PRO
-#     2021-Aug-07: replace function `expint` with that from SpecialFunctions
 #     2021-Oct-21: add α to input parameters so that one can roll back to 59° for _τ_α calculation
-#     2021-Nov-29: separate HyperspectralAbsorption as constant struct
-#     2022-Jan-13: use LeafBiophysics directly in the function rather than Leaf
-#     2022-Jun-15: rename LeafBiophysics to HyperspectralLeafBiophysics to be more descriptive
 #     2022-Jul-22: add lwc to function variable list
 #     2022-Jul-28: run leaf_spectra! only if lwc differs from _v_storage
 #     2022-Aug-17: add option reabsorb to function to enable/disable SIF reabsorption
-#     2023-Apr-13: rename option APAR_CAR to apar_car
 #     2023-Sep-09: remove option reabsorb as it is computed by default and saved to mat_b_chl and mat_f_chl
-#     2023-Sep-12: rename K_PS to Φ_PS to be more accurate
 #     2023-Sep-18: remove the useless and wrong mat_b(f)_chl calculations
 # To do
 #     TODO: add References for this methods
@@ -63,7 +57,7 @@ function leaf_spectra! end
     leaf_spectra!(
                 bio::HyperspectralLeafBiophysics{FT},
                 wls::WaveLengthSet{FT},
-                lha::HyperspectralAbsorption{FT},
+                spectra::ReferenceSpectra{FT},
                 lwc::FT;
                 apar_car::Bool = true,
                 α::FT = FT(40)
@@ -72,7 +66,7 @@ function leaf_spectra! end
 Update leaf reflectance and transmittance spectra, and fluorescence spectrum matrices, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
 - `wls` `WaveLengthSet` type struct that contain wave length bins
-- `lha` `HyperspectralAbsorption` type struct that contains absorption characteristic curves
+- `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
 - `lwc` Leaf water content `[mol m⁻²]`
 - `apar_car` If true, carotenoid absorption is accounted for in PPAR, default is `true`
 - `α` Optimum angle of incidence (default is 40° as in PROSPECT-D, SCOPE uses 59°)
@@ -81,17 +75,17 @@ Update leaf reflectance and transmittance spectra, and fluorescence spectrum mat
 ```julia
 wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
-lha = EmeraldNamespace.HyperspectralAbsorption{Float64}();
-leaf_spectra!(bio, wls, lha, 5.0);
-leaf_spectra!(bio, wls, lha, 5.0; apar_car=false);
-leaf_spectra!(bio, wls, lha, 5.0; apar_car=false, α=59.0);
+spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
+leaf_spectra!(bio, wls, spectra, 5.0);
+leaf_spectra!(bio, wls, spectra, 5.0; apar_car=false);
+leaf_spectra!(bio, wls, spectra, 5.0; apar_car=false, α=59.0);
 ```
 
 """
 leaf_spectra!(
             bio::HyperspectralLeafBiophysics{FT},
             wls::WaveLengthSet{FT},
-            lha::HyperspectralAbsorption{FT},
+            spectra::ReferenceSpectra{FT},
             lwc::FT;
             apar_car::Bool = true,
             α::FT = FT(40)
@@ -102,7 +96,7 @@ leaf_spectra!(
     end;
 
     (; MESOPHYLL_N, NDUB) = bio;
-    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, NR, Φ_PS) = lha;
+    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, NR, Φ_PS) = spectra;
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
 
     # calculate the average absorption feature and relative Cab and Car partitions
@@ -259,9 +253,6 @@ leaf_spectra!(
 # Changes made to this method
 # General
 #     2021-Oct-22: add another method to prescribe leaf spectra such as transmittance and reflectance from broadband method
-#     2021-Nov-29: separate HyperspectralAbsorption as constant struct
-#     2022-Jan-13: use LeafBiophysics directly in the function rather than Leaf
-#     2022-Jun-15: rename LeafBiophysics to HyperspectralLeafBiophysics to be more descriptive
 #
 #######################################################################################################################################################################################################
 """
@@ -303,8 +294,6 @@ leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_p
 # Changes made to this method
 # General
 #     2022-Jun-29: add method for MultiLayerSPAC
-#     2023-Apr-13: add config to function call
-#     2023-Jun-20: move LHA to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -317,11 +306,11 @@ Update leaf reflectance and transmittance for SPAC, given
 
 """
 leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; APAR_CAR, LHA, WLSET) = config;
+    (; APAR_CAR, SPECTRA, WLSET) = config;
     (; LEAVES) = spac;
 
     for _leaf in LEAVES
-        leaf_spectra!(_leaf.BIO, WLSET, LHA, _leaf.HS.v_storage; apar_car = APAR_CAR);
+        leaf_spectra!(_leaf.BIO, WLSET, SPECTRA, _leaf.HS.v_storage; apar_car = APAR_CAR);
     end;
 
     return nothing
@@ -333,10 +322,7 @@ leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
 # Changes made to this function
 # General
 #     2021-Oct-22: add function to compute leaf level PAR and APAR
-#     2022-Jan-13: use LeafBiophysics directly in the function rather than Leaf
-#     2022-Jun-15: rename LeafBiophysics to HyperspectralLeafBiophysics to be more descriptive
 #     2022-Jun-27: refactor the function to return PAR, APAR, and PPAR
-#     2023-Apr-13: rename option APAR_CAR to apar_car
 #
 #######################################################################################################################################################################################################
 """
@@ -402,8 +388,6 @@ end
 #     2021-Jul-08: use mat_b and mat_f for SIF at backward and forward directions
 #     2021-Aug-05: add option to sumulate SIF in photon to photon mode
 #     2021-Oct-22: refactor the function to leaf_SIF to return the SIFs directly
-#     2022-Jan-13: use LeafBiophysics directly in the function rather than Leaf
-#     2022-Jun-15: rename LeafBiophysics to HyperspectralLeafBiophysics to be more descriptive
 #
 #######################################################################################################################################################################################################
 """

@@ -25,10 +25,8 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #
 # Changes to this function
 # General
-#     2022-Jun-09: rename function to soil_albedo!
 #     2022-Jun-14: migrate the function from CanopyLayers
 #     2022-Jun-14: add method to update broadband or hyperspectral soil albedo
-#     2022-Jul-27: use albedo.α_CLM from ClimaCache v1.1.1, and remove option clm
 #     2022-Jul-27: add albedo._θ control to HyperspectralSoilAlbedo method (fitting required)
 #     2023-Jun-15: make albedo._θ control judge to 0.001
 #
@@ -70,7 +68,7 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::BroadbandSoi
 );
 
 soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; MAT_ρ, WLSET, α_CLM, α_FITTING) = config;
+    (; SPECTRA, WLSET, α_CLM, α_FITTING) = config;
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
 
@@ -101,11 +99,11 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::Hyperspectra
     # make an initial guess of the weights
     albedo._ρ_sw[WLSET.IΛ_PAR] .= _par;
     albedo._ρ_sw[WLSET.IΛ_NIR] .= _nir;
-    albedo._weight .= pinv(MAT_ρ) * albedo._ρ_sw;
+    albedo._weight .= pinv(SPECTRA.MAT_SOIL) * albedo._ρ_sw;
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT<:AbstractFloat} = (
-        mul!(albedo._ρ_sw, MAT_ρ, x);
+        mul!(albedo._ρ_sw, SPECTRA.MAT_SOIL, x);
         albedo._tmp_vec_nir .= abs.(view(albedo._ρ_sw,WLSET.IΛ_NIR) .- _nir);
         _diff = ( mean( view(albedo._ρ_sw,WLSET.IΛ_PAR) ) - _par ) ^ 2 + mean( albedo._tmp_vec_nir ) ^ 2;
 
@@ -119,7 +117,7 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::Hyperspectra
     albedo._weight .= _sol;
 
     # update vectors in soil
-    mul!(albedo.ρ_sw, MAT_ρ, albedo._weight);
+    mul!(albedo.ρ_sw, SPECTRA.MAT_SOIL, albedo._weight);
 
     # update the albedo._θ to avoid calling this function too many times
     albedo._θ = LAYERS[1].θ;

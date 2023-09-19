@@ -242,7 +242,6 @@ Return the SIF emission forward, given
 
 """
 function leaf_sif_f(sif_f_1::FT, sif_b_2::FT, sif_f_2::FT, ρ_1::FT, ρ_2::FT, τ_2::FT) where {FT}
-
     # the sif that goes forward is the sum of
     #     - sif_f_1 that transmit through the 2nd layer (needs to be rescaled)
     #     - sif_b_2 reflected by the 1st layer and then transmit through the 2nd layer (needs to be rescaled)
@@ -301,8 +300,8 @@ Update the SIF conversion matrix of the leaf, given
 
 """
 function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
-    (; LHA, WLSET, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
-    (; Φ_PS, Φ_PSI, Φ_PSII) = LHA;
+    (; SPECTRA, WLSET, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
+    (; Φ_PS, Φ_PSI, Φ_PSII) = SPECTRA;
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE) = WLSET;
 
     # update the SIF emission vector per excitation wavelength

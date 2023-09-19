@@ -5,15 +5,10 @@
 #     2021-Aug-04: refactor the structure with constants, variables, and temporary cache
 #     2021-Aug-04: add concentrations and characteristic curves altogether
 #     2021-Aug-10: add CBC and PRO supoort
-#     2021-Agu-10: add constructors within the structure rather than initialize it externally
-#     2021-Sep-30: rename LeafBio to LeafBiophysics to be more specific
-#     2021-Oct-19: sort variable to prognostic and dignostic catergories
-#     2021-Oct-21: rename f_sense and K_SENES to brown and K_BROWN
 #     2021-Nov-24: tease apart the characteristic absorption curves to HyperspectralAbsorption
-#     2022-Jul-20: use kwdef for the constructor
 #     2022-Jul-20: add field DATASET to struct
-#     2023-Sep-12: rename K_PS to Φ_PS
 #     2023-Sep-13: add fields Φ_PSI and Φ_PSII
+#     2023-Sep-19: add fields MAT_SOIL and SOLAR_RAD
 #
 #######################################################################################################################################################################################################
 """
@@ -27,12 +22,12 @@ Immutable struct that contains leaf biophysical traits used to run leaf reflecti
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct HyperspectralAbsorption{FT<:AbstractFloat}
+Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
 
-    # Constant features
+    # Constant features for the leaf
     "Specific absorption coefficients of anthocynanin `[-]`"
     K_ANT::Vector{FT} = read_nc(DATASET, "K_ANT")
     "Specific absorption coefficients of senescent material (brown pigments) `[-]`"
@@ -59,4 +54,12 @@ Base.@kwdef struct HyperspectralAbsorption{FT<:AbstractFloat}
     Φ_PSI::Vector{FT} = read_nc(DATASET, "K_PS1")
     "Fluorescence yield of PS II probability function `[nm⁻¹]`"
     Φ_PSII::Vector{FT} = read_nc(DATASET, "K_PS2")
+
+    # Variable features for the soil
+    "A matrix of characteristic curves"
+    MAT_SOIL::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
+
+    # Variable features for the radiation
+    "Downwelling shortwave radiation reference spectrum"
+    SOLAR_RAD::Matrix{FT} = [read_nc(DATASET, "E_DIFF") read_nc(DATASET, "E_DIR")]
 end
