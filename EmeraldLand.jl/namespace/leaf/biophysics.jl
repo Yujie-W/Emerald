@@ -52,6 +52,7 @@ end;
 #     2023-Sep-14: add fields to store the SIF calculation matrices
 #     2023-Sep-16: add field f_sife to store the SIF excitation fraction and α_leaf to store the leaf absorption
 #     2023-Sep-16: add fields mat_b_i and mat_f_i to store the SIF conversion matrices for each layer
+#     2023-Sep-18: add fields τ_all_i and mat_x_i_out to store the total transmittance within a layer and the SIF conversion matrices after reabsorption, reflection, and transmission
 #
 #######################################################################################################################################################################################################
 """
@@ -94,6 +95,10 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     τ_sub_1::Vector{FT}
     "Second Layer sublayer transmittance with isotropic light `[-]`"
     τ_sub_2::Vector{FT}
+    "First layer total transmittance of all sublayers `[-]`"
+    τ_all_1::Vector{FT}
+    "Second layer total transmittance of all sublayers `[-]`"
+    τ_all_2::Vector{FT}
 
     # reflectance and transmittance of a single layer
     "First layer reflectance with an average angle `[-]`"
@@ -118,14 +123,22 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     α_leaf::Vector{FT}
 
     # SIF excitation to emittance matrix
-    "First layer SIF matrix backwards `[-]`"
+    "First layer SIF matrix backwards (emission only) `[-]`"
     mat_b_1::Matrix{FT}
-    "First layer SIF matrix forwards `[-]`"
+    "First layer SIF matrix forwards (emission only) `[-]`"
     mat_f_1::Matrix{FT}
-    "Second layer SIF matrix backwards `[-]`"
+    "Second layer SIF matrix backwards (emission only) `[-]`"
     mat_b_2::Matrix{FT}
-    "Second layer SIF matrix forwards `[-]`"
+    "Second layer SIF matrix forwards (emission only) `[-]`"
     mat_f_2::Matrix{FT}
+    "First layer SIF matrix backwards (after reabsorption, reflection, and transmission) `[-]`"
+    mat_b_1_out::Matrix{FT}
+    "First layer SIF matrix forwards (after reabsorption, reflection, and transmission) `[-]`"
+    mat_f_1_out::Matrix{FT}
+    "Second layer SIF matrix backwards (after reabsorption, reflection, and transmission) `[-]`"
+    mat_b_2_out::Matrix{FT}
+    "Second layer SIF matrix forwards (after reabsorption, reflection, and transmission) `[-]`"
+    mat_f_2_out::Matrix{FT}
     "SIF matrix backwards `[-]`"
     mat_b::Matrix{FT}
     "SIF matrix forwards `[-]`"
@@ -153,6 +166,8 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 τ_interface_21   = zeros(FT, DIM_WL),
                 τ_sub_1          = zeros(FT, DIM_WL),
                 τ_sub_2          = zeros(FT, DIM_WL),
+                τ_all_1          = zeros(FT, DIM_WL),
+                τ_all_2          = zeros(FT, DIM_WL),
                 ρ_layer_θ        = zeros(FT, DIM_WL),
                 τ_layer_θ        = zeros(FT, DIM_WL),
                 ρ_layer_1        = zeros(FT, DIM_WL),
@@ -166,6 +181,10 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 mat_f_1          = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_b_2          = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f_2          = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_b_1_out      = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_f_1_out      = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_b_2_out      = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_f_2_out      = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_b            = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f            = zeros(FT, DIM_SIF, DIM_SIFE),
     )

@@ -168,6 +168,32 @@ end;
 #
 # Changes to this function
 # General
+#     2023-Sep-18: add function to update the SIF conversion matrix of the layer after reabsorption, reflection, and transmission
+#
+#######################################################################################################################################################################################################
+"""
+
+    layer_sif_out(sif_b::FT, sif_f::FT, ρ_21::FT, τ_all::FT) where {FT}
+
+Return the SIF emission of one layer after reabsorption, reflection, and transmission, given
+- `sif_b` SIF emission backward relative to the interface
+- `sif_f` SIF emission forward relative to the interface
+- `ρ_21` reflectance of the interface
+- `τ_all` transmittance of the layer
+
+"""
+function layer_sif_out(sif_b::FT, sif_f::FT, ρ_21::FT, τ_all::FT) where {FT}
+    # SIF out of an interface is computed as the sum of
+    #     forward SIF that transmit through the interface (plus the reflection-reflection correction)
+    #     backward SIF that reflect by the interface and then transmit through the interface (plus the reflection-reflection correction)
+    return (sif_f + sif_b * τ_all * ρ_21) * (1 - ρ_21) / (1 - ρ_21^2 * τ_all^2)
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2023-Sep-16: add function to compute the SIF emission backward
 #
 #######################################################################################################################################################################################################
@@ -232,6 +258,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-16: add function to update the SIF conversion matrix of the leaf
+#     2023-Sep-18: add an intermediate step to compute SIF out of each layer before rescaling it to the leaf level SIF
 #
 #######################################################################################################################################################################################################
 """
@@ -257,38 +284,52 @@ leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio
 
     # update the SIF emission vector per excitation wavelength
     ϕ = view(Φ_PS, IΛ_SIF);
-    ρ_1_sif = view(bio.auxil.ρ_layer_1, IΛ_SIF);
-    τ_1_sif = view(bio.auxil.τ_layer_1, IΛ_SIF);
-    ρ_2_sif = view(bio.auxil.ρ_layer_2, IΛ_SIF);
-    τ_2_sif = view(bio.auxil.τ_layer_2, IΛ_SIF);
+    ρ_21_sif    = view(bio.auxil.ρ_interface_21, IΛ_SIF);
+    ρ_1_sif     = view(bio.auxil.ρ_layer_1, IΛ_SIF);
+    τ_1_sif     = view(bio.auxil.τ_layer_1, IΛ_SIF);
+    ρ_2_sif     = view(bio.auxil.ρ_layer_2, IΛ_SIF);
+    τ_2_sif     = view(bio.auxil.τ_layer_2, IΛ_SIF);
     τ_sub_sif_1 = view(bio.auxil.τ_sub_1, IΛ_SIF);
     τ_sub_sif_2 = view(bio.auxil.τ_sub_2, IΛ_SIF);
+    τ_all_sif_1 = view(bio.auxil.τ_all_1, IΛ_SIF);
+    τ_all_sif_2 = view(bio.auxil.τ_all_2, IΛ_SIF);
     for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
-        vec_b_1 = view(bio.auxil.mat_b_1, :, i);
-        vec_f_1 = view(bio.auxil.mat_f_1, :, i);
-        vec_b_2 = view(bio.auxil.mat_b_2, :, i);
-        vec_f_2 = view(bio.auxil.mat_f_2, :, i);
-        vec_b   = view(bio.auxil.mat_b, :, i);
-        vec_f   = view(bio.auxil.mat_f, :, i);
-        τ_i_θ   = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
-        τ_i_12  = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
-        τ_i_21  = bio.auxil.τ_interface_21[ii];     # the transmittance of the isotropic radiation at the water-air interface
-        τ_sub_1 = bio.auxil.τ_sub_1[ii];            # the transmittance within a sublayer of layer 1
-        τ_sub_2 = bio.auxil.τ_sub_2[ii];            # the transmittance within a sublayer of layer 2 (n-1)
-        τ_l_θ   = bio.auxil.τ_layer_θ[ii];          # the transmittance of the incoming radiation across the leaf layer 1
-        ρ_l_1   = bio.auxil.ρ_layer_1[ii];          # the reflectance of isotropic radiation across layer 1
-        ρ_l_2   = bio.auxil.ρ_layer_2[ii];          # the reflectance of isotropic radiation across layer 2 (n-1)
-        τ_l_2   = bio.auxil.τ_layer_2[ii];          # the transmittance of isotropic radiation across layer 2 (n-1)
-        f_sife  = bio.auxil.f_sife[ii];
+        vec_b_1     = view(bio.auxil.mat_b_1, :, i);
+        vec_f_1     = view(bio.auxil.mat_f_1, :, i);
+        vec_b_2     = view(bio.auxil.mat_b_2, :, i);
+        vec_f_2     = view(bio.auxil.mat_f_2, :, i);
+        vec_b_1_out = view(bio.auxil.mat_b_1_out, :, i);
+        vec_f_1_out = view(bio.auxil.mat_f_1_out, :, i);
+        vec_b_2_out = view(bio.auxil.mat_b_2_out, :, i);
+        vec_f_2_out = view(bio.auxil.mat_f_2_out, :, i);
+        vec_b       = view(bio.auxil.mat_b, :, i);
+        vec_f       = view(bio.auxil.mat_f, :, i);
+        τ_i_θ       = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
+        τ_i_12      = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
+        ρ_i_21      = bio.auxil.ρ_interface_21[ii];     # the reflectance of the isotropic radiation at the water-air interface
+        τ_i_21      = bio.auxil.τ_interface_21[ii];     # the transmittance of the isotropic radiation at the water-air interface
+        τ_sub_1     = bio.auxil.τ_sub_1[ii];            # the transmittance within a sublayer of layer 1
+        τ_sub_2     = bio.auxil.τ_sub_2[ii];            # the transmittance within a sublayer of layer 2 (n-1)
+        τ_l_θ       = bio.auxil.τ_layer_θ[ii];          # the transmittance of the incoming radiation across the leaf layer 1
+        ρ_l_1       = bio.auxil.ρ_layer_1[ii];          # the reflectance of isotropic radiation across layer 1
+        ρ_l_2       = bio.auxil.ρ_layer_2[ii];          # the reflectance of isotropic radiation across layer 2 (n-1)
+        τ_l_2       = bio.auxil.τ_layer_2[ii];          # the transmittance of isotropic radiation across layer 2 (n-1)
+        f_sife      = bio.auxil.f_sife[ii];
 
-        # update the SIF conversion matrix of the two layers
+        # update the SIF conversion matrix of the two layers (SIF that reachs the internal the water-air interface)
         layer_1_sif_vec!(τ_i_θ, τ_i_12, τ_i_21, τ_sub_1, τ_l_θ, ρ_l_1, ρ_l_2, f_sife, τ_sub_sif_1, vec_b_1, vec_f_1, ϕ, N);
         layer_2_sif_vec!(τ_sub_2, τ_l_θ, ρ_l_1, ρ_l_2, τ_l_2, f_sife, τ_sub_sif_2, vec_b_2, vec_f_2, ϕ, N);
 
+        # update the SIF conversion matrix of the two layers (SIF that reachs the external the water-air interface)
+        vec_b_1_out .= layer_sif_out.(vec_b_1, vec_f_1, ρ_21_sif, τ_all_sif_1);
+        vec_f_1_out .= layer_sif_out.(vec_f_1, vec_b_1, ρ_21_sif, τ_all_sif_1);
+        vec_b_2_out .= layer_sif_out.(vec_b_2, vec_f_2, ρ_21_sif, τ_all_sif_2);
+        vec_f_2_out .= layer_sif_out.(vec_f_2, vec_b_2, ρ_21_sif, τ_all_sif_2);
+
         # compute the SIF emission vector backward and forward
-        vec_b .= leaf_sif_b.(vec_b_1, vec_f_1, vec_b_2, ρ_1_sif, τ_1_sif, ρ_2_sif);
-        vec_f .= leaf_sif_f.(vec_f_1, vec_b_2, vec_f_2, ρ_1_sif, ρ_2_sif, τ_2_sif);
+        vec_b .= leaf_sif_b.(vec_b_1_out, vec_f_1_out, vec_b_2_out, ρ_1_sif, τ_1_sif, ρ_2_sif);
+        vec_f .= leaf_sif_f.(vec_f_1_out, vec_b_2_out, vec_f_2_out, ρ_1_sif, ρ_2_sif, τ_2_sif);
     end;
 
     return nothing
