@@ -48,7 +48,7 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT<:AbstractFl
 
     # update leaf mass per area and stomtal model
     for _leaves in _spac.LEAVES
-        _leaves.BIO.lma = gmdict["LMA"];
+        _leaves.BIO.state.lma = gmdict["LMA"];
     end;
 
     # add support to C4 photosynthesis

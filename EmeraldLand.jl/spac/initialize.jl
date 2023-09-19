@@ -47,7 +47,7 @@ initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:
     for _i in eachindex(LEAVES)
         _clayer = LEAVES[_i];
         _clayer.HS.AREA = SOIL.AREA * CANOPY.δlai[_i];
-        _clayer.e = (_clayer.CP * _clayer.BIO.lma * 10 + _clayer.HS.v_storage * CP_L_MOL(FT)) * _clayer.t;
+        _clayer.e = (_clayer.CP * _clayer.BIO.state.lma * 10 + _clayer.HS.v_storage * CP_L_MOL(FT)) * _clayer.t;
     end;
 
     # initialize leaf level spectra

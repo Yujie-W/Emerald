@@ -310,7 +310,7 @@ leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
     (; LEAVES) = spac;
 
     for _leaf in LEAVES
-        leaf_spectra!(_leaf.BIO, WLSET, SPECTRA, _leaf.HS.v_storage; apar_car = APAR_CAR);
+        leaf_spectra!(config, _leaf.BIO, _leaf.HS.v_storage);
     end;
 
     return nothing
@@ -438,7 +438,7 @@ function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, 
     _sif_f = energy.(Λ_SIF, _phot_f);
 
     return _sif_b, _sif_f
-end
+end;
 
 
 end # module

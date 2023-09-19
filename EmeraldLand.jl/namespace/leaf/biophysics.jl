@@ -39,7 +39,7 @@ Base.@kwdef mutable struct HyperLeafBioState{FT<:AbstractFloat}
     "Fraction of carotenoid aborption into SIF `[-]`"
     ϕ_car::FT = 0
     "Fraction of carotenoid aborption into PPAR `[-]`"
-    ϕ_car_ppar::FT = 0
+    ϕ_car_ppar::FT = 1
 end;
 
 
@@ -54,6 +54,7 @@ end;
 #     2023-Sep-16: add fields mat_b_i and mat_f_i to store the SIF conversion matrices for each layer
 #     2023-Sep-18: add fields τ_all_i and mat_x_i_out to store the total transmittance within a layer and the SIF conversion matrices after reabsorption, reflection, and transmission
 #     2023-Sep-18: add a cache variable _ϕ_sif to store the SIF PDF based on the wavelength of excitation (do not use this value outside the Emerald model)
+#     2023-Sep-19: add field f_ppar to store the PPAR absorption fraction
 #
 #######################################################################################################################################################################################################
 """
@@ -74,6 +75,8 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     f_cab::Vector{FT}
     "Carotenoid absorption fraction `[-]`"
     f_car::Vector{FT}
+    "PPAR fraction `[-]`"
+    f_ppar::Vector{FT}
     "SIF excitation fraction `[-]`"
     f_sife::Vector{FT}
 
@@ -162,6 +165,7 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
     return HyperLeafBioAuxil{FT}(
                 f_cab            = zeros(FT, DIM_WL),
                 f_car            = zeros(FT, DIM_WL),
+                f_ppar           = zeros(FT, DIM_WL),
                 f_sife           = zeros(FT, DIM_WL),
                 ρ_interface_θ    = zeros(FT, DIM_WL),
                 τ_interface_θ    = zeros(FT, DIM_WL),

@@ -152,7 +152,7 @@ plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) 
         BRANCHES[_i].e += BRANCHES[_i].∂e∂t * δt;
         BRANCHES[_i].t  = BRANCHES[_i].e / (CP_L_MOL(FT) * sum(BRANCHES[_i].HS.v_storage));
         LEAVES[_i].e   += LEAVES[_i].∂e∂t * δt;
-        LEAVES[_i].t    = LEAVES[_i].e / (LEAVES[_i].CP * LEAVES[_i].BIO.lma * 10 + CP_L_MOL(FT) * LEAVES[_i].HS.v_storage);
+        LEAVES[_i].t    = LEAVES[_i].e / (LEAVES[_i].CP * LEAVES[_i].BIO.state.lma * 10 + CP_L_MOL(FT) * LEAVES[_i].HS.v_storage);
 
         if isnan(BRANCHES[_i].t) || isnan(BRANCHES[_i].e) || isnan(LEAVES[_i].t) || isnan(LEAVES[_i].e)
             @info "Debugging" BRANCHES[_i].t BRANCHES[_i].e sum(BRANCHES[_i].HS.v_storage);

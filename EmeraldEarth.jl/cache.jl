@@ -109,7 +109,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
 
     # update leaf mass per area and stomtal model
     for _leaves in CACHE_SPAC.LEAVES
-        _leaves.BIO.lma = gm_params["LMA"];
+        _leaves.BIO.state.lma = gm_params["LMA"];
         _leaves.SM.G1 = gm_params["MEDLYN_G1"];
     end;
 

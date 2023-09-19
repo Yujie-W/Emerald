@@ -858,6 +858,7 @@ abstract type AbstractLeaf{FT<:AbstractFloat} end
 #     2023-Apr-13: move field APAR_CAR to SPACConfiguration
 #     2023-Jun-13: add field: etr
 #     2023-Sep-11: set minimum G to 0 instead of 1e-4
+#     2023-Sep-18: use HyperLeafBio instead of HyperspectralLeafBiophysics
 #
 #######################################################################################################################################################################################################
 """
@@ -882,7 +883,7 @@ Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
 
     # Embedded structures
     "[`AbstractLeafBiophysics`](@ref) type leaf biophysical parameters"
-    BIO::Union{BroadbandLeafBiophysics{FT}, HyperspectralLeafBiophysics{FT}}
+    BIO::Union{BroadbandLeafBiophysics{FT}, HyperLeafBio{FT}}
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
     HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
@@ -931,7 +932,7 @@ end
 
 Leaf(config::SPACConfiguration{FT}) where {FT} = (
     return Leaf{FT}(
-                BIO = HyperspectralLeafBiophysics(config),
+                BIO = HyperLeafBio(config),
     )
 )
 
@@ -1052,6 +1053,7 @@ end
 #     2023-Sep-07: add water flow integrators
 #     2023-Sep-09: add fields ϕ_x_shaded and ϕ_x_sunlit
 #     2023-Sep-11: set minimum G to 0 instead of 1e-4
+#     2023-Sep-18: use HyperLeafBio instead of HyperspectralLeafBiophysics
 #
 #######################################################################################################################################################################################################
 """
@@ -1076,8 +1078,8 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     WIDTH::FT = 0.05
 
     # Embedded structures
-    "[`HyperspectralLeafBiophysics`](@ref) type leaf biophysical parameters"
-    BIO::HyperspectralLeafBiophysics{FT}
+    "[`HyperLeafBio`](@ref) type leaf biophysical parameters"
+    BIO::HyperLeafBio{FT}
     "[`LeafHydraulics`](@ref) type leaf hydraulic system"
     HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
@@ -1099,7 +1101,7 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy per area `[J m⁻²]`"
-    e::FT = (CP * BIO.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
+    e::FT = (CP * BIO.state.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
     "Stomatal conductance to water vapor for shaded leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_shaded::FT = 0.01
     "Stomatal conductance to water vapor for sunlit leaves `[mol m⁻² s⁻¹]`"
@@ -1166,7 +1168,7 @@ Leaves2D(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_AZI, DIM_INCL) = config;
 
     return Leaves2D{FT}(
-                BIO             = HyperspectralLeafBiophysics(config),
+                BIO             = HyperLeafBio(config),
                 ppar_sunlit     = 1000 .* ones(FT, DIM_INCL, DIM_AZI),
                 g_H₂O_s_sunlit  = FT(0.01) .* ones(FT, DIM_INCL, DIM_AZI),
                 ∂g∂t_sunlit     = zeros(FT, DIM_INCL, DIM_AZI),

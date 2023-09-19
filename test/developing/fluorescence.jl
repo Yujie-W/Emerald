@@ -2,7 +2,7 @@ using Test
 using Emerald;
 
 
-@testset "Fluorescence photon conservation" begin
+@testset "Fluorescence photon conservation of the SCOPE SIF model" begin
     FT = Float64;
     config = EmeraldLand.Namespace.SPACConfiguration{FT}(DATASET = EmeraldLand.Namespace.LAND_2021_1NM);
     bio = EmeraldLand.Namespace.HyperspectralLeafBiophysics(config);

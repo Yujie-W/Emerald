@@ -330,7 +330,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
     for _i in 1:DIM_LAYER
-        _α_apar = APAR_CAR ? view(leaves[_i].BIO.α_cabcar,WLSET.IΛ_PAR) : view(leaves[_i].BIO.α_cab,WLSET.IΛ_PAR);
+        _α_apar = view(leaves[_i].BIO.auxil.f_ppar, WLSET.IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(WLSET.Λ_PAR, view(RADIATION.e_sum_diffuse,WLSET.IΛ_PAR,_i)) .* 1000;

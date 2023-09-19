@@ -140,14 +140,12 @@ update!(config::SPACConfiguration{FT},
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
         for _leaf in LEAVES
-            _leaf.BIO.cab = cab;
-            _leaf.BIO._v_storage = 0;
+            _leaf.BIO.state.cab = cab;
         end;
     end;
     if !isnothing(car)
         for _leaf in LEAVES
-            _leaf.BIO.car = car;
-            _leaf.BIO._v_storage = 0;
+            _leaf.BIO.state.car = car;
         end;
     end;
     if !isnothing(cab) || !isnothing(car)
@@ -253,7 +251,7 @@ update!(config::SPACConfiguration{FT},
     if !isnothing(t_leaf)
         for _leaf in LEAVES
             _leaf.t = t_leaf;
-            _leaf.e = (_leaf.CP * _leaf.BIO.lma * 10 + _leaf.HS.v_storage * CP_L_MOL(FT)) * _leaf.t;
+            _leaf.e = (_leaf.CP * _leaf.BIO.state.lma * 10 + _leaf.HS.v_storage * CP_L_MOL(FT)) * _leaf.t;
         end;
     end;
 

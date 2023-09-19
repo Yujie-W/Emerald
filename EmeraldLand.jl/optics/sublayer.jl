@@ -130,6 +130,7 @@ end;
 #     2023-Sep-15: save f_sife as well as f_cab and f_car
 #     2023-Sep-16: fix a typo related to f_car (was using 1 - f_car)
 #     2023-Sep-18: save τ_all_i after computing τ_sub_i
+#     2023-Sep-19: save f_ppar at the same time
 #
 #######################################################################################################################################################################################################
 """
@@ -155,6 +156,7 @@ leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, lwc::F
     x = 1 / bio.state.meso_n;
     bio.auxil.f_cab  .= sublayer_f_cab.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
     bio.auxil.f_car  .= sublayer_f_car.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    bio.auxil.f_ppar .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car_ppar;
     bio.auxil.f_sife .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car;
 
     bio.auxil.τ_sub_1 .= sublayer_τ.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x, N);

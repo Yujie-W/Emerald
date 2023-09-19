@@ -175,15 +175,15 @@ function ∂T∂E end
 
 ∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, bio.ϵ_LW);
 
-∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, 1 - bio.τ_LW);
+∂T∂E(bio::HyperLeafBio{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, 1 - bio.auxil.τ_LW);
 
 ∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaves.t[1], leaves.WIDTH, air.wind, bio.ϵ_LW);
 
-∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaves.t[1], leaves.WIDTH, air.wind, 1 - bio.τ_LW);
+∂T∂E(bio::HyperLeafBio{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaves.t[1], leaves.WIDTH, air.wind, 1 - bio.auxil.τ_LW);
 
 ∂T∂E(bio::BroadbandLeafBiophysics{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, bio.ϵ_LW);
 
-∂T∂E(bio::HyperspectralLeafBiophysics{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, 1 - bio.τ_LW);
+∂T∂E(bio::HyperLeafBio{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT<:AbstractFloat} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, 1 - bio.auxil.τ_LW);
 
 ∂T∂E(f_view::FT, t::FT, width::FT, wind::FT, ϵ::FT) where {FT<:AbstractFloat} = (
     _λ = latent_heat_vapor(t) * M_H₂O(FT);

@@ -11,12 +11,11 @@
     # Also, remember to change the cache variable _v_storage to a different value.
     # Otherwise, leaf spectra would not be updated.
     for leaf in spac.LEAVES
-        leaf.BIO._v_storage = 0;    # change _v_storage to 0 so as to trigger function leaf_spectra!
-        leaf.BIO.cab = 40;          # chlorophyll a and b content
-        leaf.BIO.car = 10;          # carotenoid content
-        leaf.BIO.cbc = 0.011;       # strutural carbon content
-        leaf.BIO.lma = 0.012;       # leaf mass per area lma = cbc + pro
-        leaf.BIO.pro = 0.001;       # protein content
+        leaf.BIO.state.cab = 40;        # chlorophyll a and b content
+        leaf.BIO.state.car = 10;        # carotenoid content
+        leaf.BIO.state.cbc = 0.011;     # strutural carbon content
+        leaf.BIO.state.lma = 0.012;     # leaf mass per area lma = cbc + pro
+        leaf.BIO.state.pro = 0.001;     # protein content
     end;
     EmeraldLand.LeafOptics.leaf_spectra!(config, spac);
     @test true;
