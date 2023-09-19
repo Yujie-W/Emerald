@@ -53,6 +53,7 @@ end;
 #     2023-Sep-16: add field f_sife to store the SIF excitation fraction and α_leaf to store the leaf absorption
 #     2023-Sep-16: add fields mat_b_i and mat_f_i to store the SIF conversion matrices for each layer
 #     2023-Sep-18: add fields τ_all_i and mat_x_i_out to store the total transmittance within a layer and the SIF conversion matrices after reabsorption, reflection, and transmission
+#     2023-Sep-18: add a cache variable _ϕ_sif to store the SIF PDF based on the wavelength of excitation (do not use this value outside the Emerald model)
 #
 #######################################################################################################################################################################################################
 """
@@ -149,6 +150,10 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     ρ_LW::FT = 0.01
     "Broadband thermal transmission, related to blackbody emittance `[-]`"
     τ_LW::FT = 0.01
+
+    # cache variables
+    "SIF PDF based on the wavelength of excitation `[-]`"
+    _ϕ_sif::Vector{FT}
 end;
 
 HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
@@ -187,6 +192,7 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 mat_f_2_out      = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_b            = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f            = zeros(FT, DIM_SIF, DIM_SIFE),
+                _ϕ_sif           = zeros(FT, DIM_SIF)
     )
 );
 

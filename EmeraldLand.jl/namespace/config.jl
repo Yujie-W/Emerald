@@ -18,6 +18,7 @@
 #     2023-Sep-11: add option KR_THRESHOLD to the SPAC configuration
 #     2023-Sep-11: add fields ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
 #     2023-Sep-14: make sure the configuration struct is consistent with the DATASET
+#     2023-Sep-18: add field Φ_SIF_WL for a new feature
 #
 #######################################################################################################################################################################################################
 """
@@ -61,6 +62,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     α_FITTING::Bool = true
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
+    "Whether to partition the SIF PDF based the wavelength"
+    Φ_SIF_WL::Bool = true
 
     # Prescribe parameters
     "Prescribe air layer information such as partial pressures"

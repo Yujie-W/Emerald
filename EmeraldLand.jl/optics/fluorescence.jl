@@ -8,7 +8,7 @@
 #######################################################################################################################################################################################################
 """
 
-    layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::SubArray, N::Int) where {FT}
+    layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::Vector, N::Int) where {FT}
 
 Update the SIF conversion matrix of the first layer, given
 - `τ_i_θ` transmittance of the incoming radiation at the air-water interface
@@ -26,7 +26,7 @@ Update the SIF conversion matrix of the first layer, given
 - `N` number of sublayers of each layer
 
 """
-function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::SubArray, N::Int) where {FT}
+function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::Vector, N::Int) where {FT}
     # parameters required for the calculation that can be derived from the input parameters
     ρ_i_21 = 1 - τ_i_21;
     α_sub = 1 - τ_sub;
@@ -100,7 +100,7 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::SubArray, N::Int) where {FT}
+    layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::Vector, N::Int) where {FT}
 
 Update the SIF conversion matrix of the n-1 layer, given
 - `τ_sub` transmittance within a sublayer
@@ -116,7 +116,7 @@ Update the SIF conversion matrix of the n-1 layer, given
 - `N` number of sublayers of each layer
 
 """
-function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::SubArray, N::Int) where {FT}
+function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::Vector, N::Int) where {FT}
     # parameters required for the calculation
     α_sub = 1 - τ_sub;
     τ_all = τ_sub ^ N;
@@ -257,33 +257,59 @@ end;
 #
 # Changes to this function
 # General
+#     2023-Sep-18: add function to compute how much SIF emission is through PSII
+#
+#######################################################################################################################################################################################################
+"""
+
+    sif_psii_fraction(wl::FT; f_max::FT = FT(0.7)) where {FT}
+
+Return the fraction of SIF emission that is through PSII, given
+- `wl` excitation wavelength
+
+Note if you want to customize the contribution from PSII, you can overwrite this function externally.
+
+"""
+function sif_psii_fraction(wl::FT; f_max::FT = FT(0.85)) where {FT}
+    if wl < 670
+        return f_max
+    else
+        return max(0, f_max - (wl - 670) / 80 * f_max);
+    end;
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2023-Sep-16: add function to update the SIF conversion matrix of the leaf
 #     2023-Sep-18: add an intermediate step to compute SIF out of each layer before rescaling it to the leaf level SIF
+#     2023-Sep-18: partition the SIF emission from PSI and PSII if Φ_SIF_WL is true
 #
 #######################################################################################################################################################################################################
 """
 
     leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
-    leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
 
 Update the SIF conversion matrix of the leaf, given
 - `config` SPAC configuration
 - `bio` leaf biophysics
 - `N` number of sublayers of each layer
-- `lha` leaf hyperspectral absorption
-- `wls` wavelength set
 
 """
-function leaf_sif_matrices! end;
+function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
+    (; LHA, WLSET, Φ_SIF_WL) = config;
+    (; Φ_PS, Φ_PSI, Φ_PSII) = LHA;
+    (; IΛ_SIF, IΛ_SIFE, Λ_SIFE) = WLSET;
 
-leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT} = leaf_sif_matrices!(config.LHA, config.WLSET, bio, N);
-
-leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT} = (
-    (; Φ_PS) = lha;
-    (; IΛ_SIF, IΛ_SIFE) = wls;
+    # use Φ_PS if Φ_SIF_WL is false
+    ϕ = bio.auxil._ϕ_sif;
+    if !Φ_SIF_WL
+        ϕ .= view(Φ_PS, IΛ_SIF);
+    end;
 
     # update the SIF emission vector per excitation wavelength
-    ϕ = view(Φ_PS, IΛ_SIF);
     ρ_21_sif    = view(bio.auxil.ρ_interface_21, IΛ_SIF);
     ρ_1_sif     = view(bio.auxil.ρ_layer_1, IΛ_SIF);
     τ_1_sif     = view(bio.auxil.τ_layer_1, IΛ_SIF);
@@ -295,6 +321,14 @@ leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio
     τ_all_sif_2 = view(bio.auxil.τ_all_2, IΛ_SIF);
     for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
+
+        # compute ϕ if Φ_SIF_WL is true
+        if Φ_SIF_WL
+            f_psii = sif_psii_fraction(Λ_SIFE[i]);
+            ϕ .= view(Φ_PSII, IΛ_SIF) .* f_psii .+ view(Φ_PSI, IΛ_SIF) .* (1 - f_psii);
+        end;
+
+        # read in the values from the auxilary variables
         vec_b_1     = view(bio.auxil.mat_b_1, :, i);
         vec_f_1     = view(bio.auxil.mat_f_1, :, i);
         vec_b_2     = view(bio.auxil.mat_b_2, :, i);
@@ -333,4 +367,4 @@ leaf_sif_matrices!(lha::HyperspectralAbsorption{FT}, wls::WaveLengthSet{FT}, bio
     end;
 
     return nothing
-);
+end;
