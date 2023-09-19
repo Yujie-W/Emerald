@@ -2,7 +2,7 @@
 #
 # Changes to this struct
 # General
-#     2023-Sep-14: moved the state variables out from HyperLeafBiophysics
+#     2023-Sep-14: add struct HyperLeafBioState
 #     2023-Sep-14: add fields ϕ_car and ϕ_car_ppar
 #
 #######################################################################################################################################################################################################
@@ -47,7 +47,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-14: moved the auxiliary variables out from HyperLeafBiophysics
+#     2023-Sep-14: add struct HyperLeafBioAuxil
 #     2023-Sep-14: add fields to store the interface, layer, and leaf reflectance and transmittance
 #     2023-Sep-14: add fields to store the SIF calculation matrices
 #     2023-Sep-16: add field f_sife to store the SIF excitation fraction and α_leaf to store the leaf absorption
@@ -202,7 +202,6 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
 # Changes to this struct
 # General
 #     2023-Sep-14: add new struct to use with the new leaf optics model (copied from HyperspectralLeafBiophysics)
-#     2023-Sep-14: clean the variables to state and auxil structs
 #
 #######################################################################################################################################################################################################
 """

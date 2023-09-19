@@ -19,15 +19,17 @@ const SOIL_TEXT     = read_csv("$(@__DIR__)/../data/SOIL-TEXTURE.csv");
 
 
 include("namespace/config/spectra.jl");
-
-
-include("namespace/radiation.jl");
-include("namespace/trace.jl");
+include("namespace/config/wavelength.jl");
+include("namespace/config/trace.jl");
 
 include("namespace/config/config.jl");
 
-
 include("namespace/leaf/biophysics.jl");
+
+include("namespace/radiation.jl");
+
+
+
 
 
 include("namespace/air.jl");
