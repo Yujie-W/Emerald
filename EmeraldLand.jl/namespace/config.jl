@@ -19,6 +19,7 @@
 #     2023-Sep-11: add fields ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
 #     2023-Sep-14: make sure the configuration struct is consistent with the DATASET
 #     2023-Sep-18: add field Φ_SIF_WL for a new feature
+#     2023-Sep-19: add field Φ_SIF_CUTOFF and Φ_SIF_RESCALE for a new feature to force SIF wavelength to be lower than the excitation wavelength
 #
 #######################################################################################################################################################################################################
 """
@@ -62,6 +63,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     α_FITTING::Bool = true
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
+    "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
+    Φ_SIF_CUTOFF::Int = 0
+    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
+    Φ_SIF_RESCALE::Bool = true
     "Whether to partition the SIF PDF based the wavelength"
     Φ_SIF_WL::Bool = true
 

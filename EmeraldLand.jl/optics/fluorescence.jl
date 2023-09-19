@@ -286,6 +286,8 @@ end;
 #     2023-Sep-16: add function to update the SIF conversion matrix of the leaf
 #     2023-Sep-18: add an intermediate step to compute SIF out of each layer before rescaling it to the leaf level SIF
 #     2023-Sep-18: partition the SIF emission from PSI and PSII if Φ_SIF_WL is true
+#     2023-Sep-19: add option to cut off SIF emission to make sure its wavelength is within the range of the SIF excitation wavelengths
+#     2023-Sep-19: add option to rescale the SIF emission PDF because of the cut off
 #
 #######################################################################################################################################################################################################
 """
@@ -299,15 +301,9 @@ Update the SIF conversion matrix of the leaf, given
 
 """
 function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
-    (; LHA, WLSET, Φ_SIF_WL) = config;
+    (; LHA, WLSET, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
     (; Φ_PS, Φ_PSI, Φ_PSII) = LHA;
-    (; IΛ_SIF, IΛ_SIFE, Λ_SIFE) = WLSET;
-
-    # use Φ_PS if Φ_SIF_WL is false
-    ϕ = bio.auxil._ϕ_sif;
-    if !Φ_SIF_WL
-        ϕ .= view(Φ_PS, IΛ_SIF);
-    end;
+    (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE) = WLSET;
 
     # update the SIF emission vector per excitation wavelength
     ρ_21_sif    = view(bio.auxil.ρ_interface_21, IΛ_SIF);
@@ -319,13 +315,34 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}
     τ_sub_sif_2 = view(bio.auxil.τ_sub_2, IΛ_SIF);
     τ_all_sif_1 = view(bio.auxil.τ_all_1, IΛ_SIF);
     τ_all_sif_2 = view(bio.auxil.τ_all_2, IΛ_SIF);
+    ϕ           = bio.auxil._ϕ_sif;
     for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
 
-        # compute ϕ if Φ_SIF_WL is true
+        # compute ϕ if Φ_SIF_WL is true, otherwise use the default Φ_PS
         if Φ_SIF_WL
             f_psii = sif_psii_fraction(Λ_SIFE[i]);
             ϕ .= view(Φ_PSII, IΛ_SIF) .* f_psii .+ view(Φ_PSI, IΛ_SIF) .* (1 - f_psii);
+        else
+            ϕ .= view(Φ_PS, IΛ_SIF);
+        end;
+
+        #  tune SIF emission PDF based on the SIF excitation wavelength
+        #     0: not cut off
+        #     1: sharp cut off
+        #     2: sigmoid cut off used in SCOPE
+        #     x: add more functions if you wish
+        if Φ_SIF_CUTOFF == 1
+            if ii > IΛ_SIF[1]
+                ϕ[1:ii-IΛ_SIF[1]] .= 0;
+            end;
+        elseif Φ_SIF_CUTOFF == 2
+            ϕ .*= 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp(Λ_SIFE[ii] / 10));
+        end;
+
+        # rescale ϕ if Φ_SIF_RESCALE is true
+        if Φ_SIF_RESCALE && Φ_SIF_CUTOFF > 0
+            ϕ ./= sum(ϕ);
         end;
 
         # read in the values from the auxilary variables
@@ -341,7 +358,6 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}
         vec_f       = view(bio.auxil.mat_f, :, i);
         τ_i_θ       = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
         τ_i_12      = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
-        ρ_i_21      = bio.auxil.ρ_interface_21[ii];     # the reflectance of the isotropic radiation at the water-air interface
         τ_i_21      = bio.auxil.τ_interface_21[ii];     # the transmittance of the isotropic radiation at the water-air interface
         τ_sub_1     = bio.auxil.τ_sub_1[ii];            # the transmittance within a sublayer of layer 1
         τ_sub_2     = bio.auxil.τ_sub_2[ii];            # the transmittance within a sublayer of layer 2 (n-1)
