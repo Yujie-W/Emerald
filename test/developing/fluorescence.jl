@@ -22,9 +22,6 @@
     sif_photon = (bio.mat_b .+ bio.mat_f) * (rad_photon[wls.IΛ_SIFE] .* wls.ΔΛ_SIFE);
     @show sif_photon' * wls.ΔΛ_SIF;
 
-    sif_photon = (bio.mat_b_chl .+ bio.mat_f_chl) * (rad_photon[wls.IΛ_SIFE] .* wls.ΔΛ_SIFE);
-    @show sif_photon' * wls.ΔΛ_SIF;
-
     sif_photon = (bio._mat_b .+ bio._mat_f) * (rad_photon[wls.IΛ_SIFE] .* wls.ΔΛ_SIFE);
     @show sif_photon' * wls.ΔΛ_SIF;
 

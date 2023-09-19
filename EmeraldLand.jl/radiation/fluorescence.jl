@@ -14,6 +14,7 @@
 #     2023-Apr-13: add config to function call
 #     2023-May-19: use δlai per canopy layer
 #     2023-Sep-11: compute the SIF at chloroplast level at the same time
+#     2023-Sep-11: redo the calculation of SIF for different layers using the SIF excitation radiation directly
 # Bug fixes
 #     2023-Mar-16: ddb ddf to dob and dof for observed SIF
 #     2023-Sep-11: set ilai to lai rather than lai*ci
@@ -43,7 +44,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wh
 );
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, WLSET, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
+    (; APAR_CAR, DIM_LAYER, LHA, WLSET, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 
     if can.lai == 0
@@ -60,13 +61,13 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 
     # 0. compute chloroplast SIF emissions for different layers
     for _i in 1:DIM_LAYER
-        OPTICS._mat⁺ .= (leaves[_i].BIO.mat_b_chl .+ leaves[_i].BIO.mat_f_chl) ./ 2;
-        OPTICS._mat⁻ .= (leaves[_i].BIO.mat_b_chl .- leaves[_i].BIO.mat_f_chl) ./ 2;
+        _k_chl = APAR_CAR ? view(leaves[_i].BIO.α_cabcar, WLSET.IΛ_SIFE) : view(leaves[_i].BIO.α_cab, WLSET.IΛ_SIFE);
+        _α_sw = view(leaves[_i].BIO.α_sw, WLSET.IΛ_SIFE);
 
-        # integrate the energy in each wave length bins
-        OPTICS._tmp_vec_sife_1 .= view(RADIATION.e_direct      ,WLSET.IΛ_SIFE,1 ) .* WLSET.ΔΛ_SIFE;
-        OPTICS._tmp_vec_sife_2 .= view(RADIATION.e_diffuse_down,WLSET.IΛ_SIFE,_i) .* WLSET.ΔΛ_SIFE;
-        OPTICS._tmp_vec_sife_3 .= view(RADIATION.e_diffuse_up  ,WLSET.IΛ_SIFE,_i) .* WLSET.ΔΛ_SIFE;
+        # integrate the energy absorbed by chl (and car) in each wave length bins
+        OPTICS._tmp_vec_sife_1 .= view(RADIATION.e_direct      ,WLSET.IΛ_SIFE,1 ) .* WLSET.ΔΛ_SIFE .* _k_chl .* _α_sw;
+        OPTICS._tmp_vec_sife_2 .= view(RADIATION.e_diffuse_down,WLSET.IΛ_SIFE,_i) .* WLSET.ΔΛ_SIFE .* _k_chl .* _α_sw;
+        OPTICS._tmp_vec_sife_3 .= view(RADIATION.e_diffuse_up  ,WLSET.IΛ_SIFE,_i) .* WLSET.ΔΛ_SIFE .* _k_chl .* _α_sw;
 
         # determine which ones to use depending on ϕ_photon
         if Φ_PHOTON
@@ -78,12 +79,12 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _e_dir, _e_dif_down, _e_dif_up = OPTICS._tmp_vec_sife_1, OPTICS._tmp_vec_sife_2, OPTICS._tmp_vec_sife_3;
 
         # convert the excitation radiation to fluorescence components
-        mul!(OPTICS._tmp_vec_sif_1, OPTICS._mat⁺, _e_dir);          # SIF component from direct light (before scaling)
-        mul!(OPTICS._tmp_vec_sif_2, OPTICS._mat⁻, _e_dir);          # SIF component from direct light (before scaling)
-        mul!(OPTICS._tmp_vec_sif_3, OPTICS._mat⁺, _e_dif_down);     # SIF component from downward diffuse light for backward (before scaling)
-        mul!(OPTICS._tmp_vec_sif_4, OPTICS._mat⁻, _e_dif_down);     # SIF component from downward diffuse light for backward (before scaling)
-        mul!(OPTICS._tmp_vec_sif_5, OPTICS._mat⁺, _e_dif_up);       # SIF component from upward diffuse light for forward (before scaling)
-        mul!(OPTICS._tmp_vec_sif_6, OPTICS._mat⁻, _e_dif_up);       # SIF component from upward diffuse light for forward (before scaling)
+        OPTICS._tmp_vec_sif_1 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dir) ./ 2;
+        OPTICS._tmp_vec_sif_2 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dir) ./ 2;
+        OPTICS._tmp_vec_sif_3 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_down) ./ 2;
+        OPTICS._tmp_vec_sif_4 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_down) ./ 2;
+        OPTICS._tmp_vec_sif_5 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_up) ./ 2;
+        OPTICS._tmp_vec_sif_6 .= LHA.Φ_PS[WLSET.IΛ_SIF] .* sum(_e_dif_up) ./ 2;
 
         # convert the SIF back to energy unit if ϕ_photon is true
         if Φ_PHOTON

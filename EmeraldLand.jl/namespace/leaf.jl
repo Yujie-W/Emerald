@@ -71,6 +71,7 @@ end
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Sep-09: add field mat_b_chl and mat_f_chl
 #     2023-Sep-11: add mat_b_chl and mat_f_chl in the constructor function
+#     2023-Sep-09: remove field mat_b_chl and mat_f_chl because SCOPE scheme is incorrect
 #
 #######################################################################################################################################################################################################
 """
@@ -118,12 +119,8 @@ Base.@kwdef mutable struct HyperspectralLeafBiophysics{FT<:AbstractFloat} <: Abs
     k_all::Vector{FT}
     "Fluorescence excitation matrix backwards `[-]`"
     mat_b::Matrix{FT}
-    "Fluorescence excitation matrix backwards without reabsorption `[-]`"
-    mat_b_chl::Matrix{FT}
     "Fluorescence excitation matrix forwards `[-]`"
     mat_f::Matrix{FT}
-    "Fluorescence excitation matrix forwards without reabsorption `[-]`"
-    mat_f_chl::Matrix{FT}
     "Relative absorption by Chlorophyll `[-]`"
     α_cab::Vector{FT}
     "Relative absorption by Chlorophyll+Carotenoid `[-]`"
@@ -209,9 +206,7 @@ HyperspectralLeafBiophysics(config::SPACConfiguration{FT}) where {FT} = (
     return HyperspectralLeafBiophysics{FT}(
                 k_all     = zeros(FT, DIM_WL),
                 mat_b     = zeros(FT, DIM_SIF, DIM_SIFE),
-                mat_b_chl = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f     = zeros(FT, DIM_SIF, DIM_SIFE),
-                mat_f_chl = zeros(FT, DIM_SIF, DIM_SIFE),
                 α_cab     = zeros(FT, DIM_WL),
                 α_cabcar  = zeros(FT, DIM_WL),
                 α_sw      = zeros(FT, DIM_WL),
