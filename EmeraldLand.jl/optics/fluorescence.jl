@@ -300,9 +300,8 @@ Update the SIF conversion matrix of the leaf, given
 
 """
 function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
-    (; SPECTRA, WLSET, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
-    (; Φ_PS, Φ_PSI, Φ_PSII) = SPECTRA;
-    (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE) = WLSET;
+    (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
+    (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE, Φ_PS, Φ_PSI, Φ_PSII) = SPECTRA;
 
     # update the SIF emission vector per excitation wavelength
     ρ_21_sif    = view(bio.auxil.ρ_interface_21, IΛ_SIF);

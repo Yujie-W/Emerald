@@ -267,13 +267,13 @@ Return the total SIF at chloroplast level (without any reabsorption) in W m⁻²
 function ΣSIF_CHL end
 
 ΣSIF_CHL(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = config;
+    (; SPECTRA) = config;
     (; CANOPY, LEAVES) = spac;
 
     # compute SIF in energy unit before reabsorption within leaves (W m⁻²)
     _Σsif::FT = 0;
     for _i in eachindex(LEAVES)
-        _Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,_i] .+ CANOPY.RADIATION.s_layer_up_chl[:,_i])' * WLSET.ΔΛ_SIF / 1000;
+        _Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,_i] .+ CANOPY.RADIATION.s_layer_up_chl[:,_i])' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return _Σsif
@@ -300,13 +300,13 @@ Return the total SIF at leaf level after reabsorption in W m⁻² per ground are
 function ΣSIF_LEAF end
 
 ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = config;
+    (; SPECTRA) = config;
     (; CANOPY, LEAVES) = spac;
 
     # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
     _Σsif::FT = 0;
     for _i in eachindex(LEAVES)
-        _Σsif += (CANOPY.RADIATION.s_layer_down[:,_i] .+ CANOPY.RADIATION.s_layer_up[:,_i])' * WLSET.ΔΛ_SIF / 1000;
+        _Σsif += (CANOPY.RADIATION.s_layer_down[:,_i] .+ CANOPY.RADIATION.s_layer_up[:,_i])' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return _Σsif

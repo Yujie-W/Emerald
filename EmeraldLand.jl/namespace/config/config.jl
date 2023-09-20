@@ -20,6 +20,7 @@
 #     2023-Sep-14: make sure the configuration struct is consistent with the DATASET
 #     2023-Sep-18: add field Φ_SIF_WL for a new feature
 #     2023-Sep-19: add field Φ_SIF_CUTOFF and Φ_SIF_RESCALE for a new feature to force SIF wavelength to be lower than the excitation wavelength
+#     2023-Sep-20: move all fields in WLSET to SPECTRA
 #
 #######################################################################################################################################################################################################
 """
@@ -78,9 +79,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "File path to the Netcdf dataset"
     DATASET::String = LAND_2021
 
-    # WaveLengthSet
-    "Wave length set used to paramertize other variables"
-    WLSET::WaveLengthSet{FT} = WaveLengthSet{FT}(DATASET = DATASET)
+    # Reference spectra
     "Reference Spetra"
     SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(DATASET = DATASET)
 
@@ -94,19 +93,19 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Dimension of canopy layers"
     DIM_LAYER::Int = 12
     "Number of wavelength bins for NIR"
-    DIM_NIR::Int = length(WLSET.IΛ_NIR)
+    DIM_NIR::Int = length(SPECTRA.IΛ_NIR)
     "Dimension of root layers"
     DIM_ROOT::Int = 5
     "Number of wavelength bins for PAR"
-    DIM_PAR::Int = length(WLSET.IΛ_PAR)
+    DIM_PAR::Int = length(SPECTRA.IΛ_PAR)
     "Dimension of SIF wave length bins"
-    DIM_SIF::Int = length(WLSET.IΛ_SIF)
+    DIM_SIF::Int = length(SPECTRA.IΛ_SIF)
     "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int = length(WLSET.IΛ_SIFE)
+    DIM_SIFE::Int = length(SPECTRA.IΛ_SIFE)
     "Dimension of soil layers"
     DIM_SOIL::Int = 4
     "Dimension of short wave length bins"
-    DIM_WL::Int = length(WLSET.Λ)
+    DIM_WL::Int = length(SPECTRA.Λ)
 
     # Constant values used to configurate the thresholds
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"

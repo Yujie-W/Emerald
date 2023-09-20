@@ -130,13 +130,13 @@ Updates lower soil boundary reflectance, given
 
 """
 canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = config;
+    (; SPECTRA) = config;
     (; OPTICS) = can;
 
-    OPTICS.ρ_dd[WLSET.IΛ_PAR,end] .= albedo.ρ_sw[1];
-    OPTICS.ρ_dd[WLSET.IΛ_NIR,end] .= albedo.ρ_sw[2];
-    OPTICS.ρ_sd[WLSET.IΛ_PAR,end] .= albedo.ρ_sw[1];
-    OPTICS.ρ_sd[WLSET.IΛ_NIR,end] .= albedo.ρ_sw[2];
+    OPTICS.ρ_dd[SPECTRA.IΛ_PAR,end] .= albedo.ρ_sw[1];
+    OPTICS.ρ_dd[SPECTRA.IΛ_NIR,end] .= albedo.ρ_sw[2];
+    OPTICS.ρ_sd[SPECTRA.IΛ_PAR,end] .= albedo.ρ_sw[1];
+    OPTICS.ρ_sd[SPECTRA.IΛ_NIR,end] .= albedo.ρ_sw[2];
 
     return nothing
 );

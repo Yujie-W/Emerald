@@ -3,7 +3,7 @@ module LeafOptics
 using SpecialFunctions: expint
 
 using ..Constant: M_H₂O, ρ_H₂O
-using ..Namespace: HyperspectralRadiation, HyperspectralLeafBiophysics, ReferenceSpectra, WaveLengthSet
+using ..Namespace: HyperspectralRadiation, HyperspectralLeafBiophysics, ReferenceSpectra
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..Optics: average_transmittance, energy, energy!, photon, photon!
 
@@ -56,7 +56,6 @@ function leaf_spectra! end
 
     leaf_spectra!(
                 bio::HyperspectralLeafBiophysics{FT},
-                wls::WaveLengthSet{FT},
                 spectra::ReferenceSpectra{FT},
                 lwc::FT;
                 apar_car::Bool = true,
@@ -65,7 +64,6 @@ function leaf_spectra! end
 
 Update leaf reflectance and transmittance spectra, and fluorescence spectrum matrices, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
-- `wls` `WaveLengthSet` type struct that contain wave length bins
 - `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
 - `lwc` Leaf water content `[mol m⁻²]`
 - `apar_car` If true, carotenoid absorption is accounted for in PPAR, default is `true`
@@ -73,18 +71,16 @@ Update leaf reflectance and transmittance spectra, and fluorescence spectrum mat
 
 # Examples
 ```julia
-wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
 spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
-leaf_spectra!(bio, wls, spectra, 5.0);
-leaf_spectra!(bio, wls, spectra, 5.0; apar_car=false);
-leaf_spectra!(bio, wls, spectra, 5.0; apar_car=false, α=59.0);
+leaf_spectra!(bio, spectra, 5.0);
+leaf_spectra!(bio, spectra, 5.0; apar_car=false);
+leaf_spectra!(bio, spectra, 5.0; apar_car=false, α=59.0);
 ```
 
 """
 leaf_spectra!(
             bio::HyperspectralLeafBiophysics{FT},
-            wls::WaveLengthSet{FT},
             spectra::ReferenceSpectra{FT},
             lwc::FT;
             apar_car::Bool = true,
@@ -96,8 +92,7 @@ leaf_spectra!(
     end;
 
     (; MESOPHYLL_N, NDUB) = bio;
-    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, NR, Φ_PS) = spectra;
-    (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
+    (; IΛ_SIF, IΛ_SIFE, K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, NR, Λ_SIF, Λ_SIFE, Φ_PS) = spectra;
 
     # calculate the average absorption feature and relative Cab and Car partitions
     bio.k_all    .= (K_CAB   .* bio.cab .+                              # chlorophyll absorption
@@ -257,11 +252,11 @@ leaf_spectra!(
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT<:AbstractFloat}
+    leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT<:AbstractFloat}
 
 Update leaf reflectance and transmittance (e.g., prescribe broadband PAR and NIR values), given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
-- `wls` `WaveLengthSet` type struct that contain wave length bins
+- `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
 - `ρ_par` Reflectance at PAR region
 - `ρ_nir` Reflectance at NIR region
 - `τ_par` Transmittance at PAR region
@@ -269,14 +264,14 @@ Update leaf reflectance and transmittance (e.g., prescribe broadband PAR and NIR
 
 # Examples
 ```julia
-wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
-leaf_spectra!(bio, wls, 0.1, 0.45, 0.05, 0.25);
+spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
+leaf_spectra!(bio, spectra, 0.1, 0.45, 0.05, 0.25);
 ```
 
 """
-leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT<:AbstractFloat} = (
-    (; IΛ_NIR, IΛ_PAR) = wls;
+leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT<:AbstractFloat} = (
+    (; IΛ_NIR, IΛ_PAR) = spectra;
 
     bio.ρ_sw[IΛ_PAR] .= ρ_par;
     bio.ρ_sw[IΛ_NIR] .= ρ_nir;
@@ -306,7 +301,6 @@ Update leaf reflectance and transmittance for SPAC, given
 
 """
 leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
-    (; APAR_CAR, SPECTRA, WLSET) = config;
     (; LEAVES) = spac;
 
     for _leaf in LEAVES
@@ -327,27 +321,27 @@ leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
 #######################################################################################################################################################################################################
 """
 
-    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
+    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
 
 Return leaf level PAR, APAR, and PPAR, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
-- `wls` `WaveLengthSet` type struct that contains wave length bins
+- `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
 - `rad` `HyperspectralRadiation` type struct that contains incoming radiation information
 - `apar_car` If true (default), account carotenoid absorption as PPAR; otherwise, PPAR is only by chlorophyll
 
 ---
 # Examples
 ```julia
-wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
+spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
 rad = EmeraldNamespace.HyperspectralRadiation{Float64}();
-par,apar,ppar = leaf_PAR(bio, wls, rad);
-par,apar,ppar = leaf_PAR(bio, wls, rad; apar_car=false);
+par,apar,ppar = leaf_PAR(bio, spectra, rad);
+par,apar,ppar = leaf_PAR(bio, spectra, rad; apar_car=false);
 ```
 
 """
-function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
-    (; IΛ_PAR, ΔΛ_PAR, Λ_PAR) = wls;
+function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT<:AbstractFloat}
+    (; IΛ_PAR, ΔΛ_PAR, Λ_PAR) = spectra;
 
     # PPAR absorption feature (after APAR is computed)
     _α_ppar = (apar_car ? view(bio.α_cabcar, IΛ_PAR) : view(bio.α_cab, IΛ_PAR));
@@ -392,11 +386,11 @@ end
 #######################################################################################################################################################################################################
 """
 
-    leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT<:AbstractFloat}
+    leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT<:AbstractFloat}
 
 Return the leaf level SIF at backward and forward directions, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
-- `wls` `WaveLengthSet` type struct that contains wave length bins
+- `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
 - `rad` `HyperspectralRadiation` type struct that contains incoming radiation information
 - `ϕ` Fluorescence quantum yield
 - `ϕ_photon` If true (default), convert photon to photon when computing SIF; otherwise, convert energy to energy
@@ -404,16 +398,16 @@ Return the leaf level SIF at backward and forward directions, given
 ---
 # Examples
 ```julia
-wls = EmeraldNamespace.WaveLengthSet{Float64}();
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
+spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
 rad = EmeraldNamespace.HyperspectralRadiation{Float64}();
-sif_b,sif_f = leaf_SIF(bio, wls, rad, 0.01);
-sif_b,sif_f = leaf_SIF(bio, wls, rad, 0.01; ϕ_photon=false);
+sif_b,sif_f = leaf_SIF(bio, spectra, 0.01);
+sif_b,sif_f = leaf_SIF(bio, spectra, 0.01; ϕ_photon=false);
 ```
 
 """
-function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, wls::WaveLengthSet{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT<:AbstractFloat}
-    (; IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = wls;
+function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT<:AbstractFloat}
+    (; IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = spectra;
 
     # calculate the excitation energy and photons
     _e_excitation = (view(rad.e_direct, IΛ_SIFE) .+ view(rad.e_diffuse, IΛ_SIFE)) .* ΔΛ_SIFE;

@@ -116,7 +116,6 @@ import Emerald.EmeraldLand.Namespace as NS
     @testset "Leaf SIF backward and forward matrices" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
         bio = NS.HyperLeafBio(config);
-        wls = config.WLSET;
         LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
         rad = ones(Float64, size(bio.auxil.mat_b,2));
         sif_b = bio.auxil.mat_b * rad;
@@ -124,6 +123,6 @@ import Emerald.EmeraldLand.Namespace as NS
 
         @test all(0 .<= bio.auxil.mat_b .< 1);
         @test all(0 .<= bio.auxil.mat_f .< 1);
-        @test sum(sif_b .+ sif_f) .< sum(bio.auxil.α_leaf[wls.IΛ_SIFE] .* bio.auxil.f_sife[wls.IΛ_SIFE] .* rad);
+        @test sum(sif_b .+ sif_f) .< sum(bio.auxil.α_leaf[config.SPECTRA.IΛ_SIFE] .* bio.auxil.f_sife[config.SPECTRA.IΛ_SIFE] .* rad);
     end;
 end;

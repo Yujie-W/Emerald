@@ -5,7 +5,6 @@ using Profile
 
 config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
 bio = NS.HyperLeafBio(config);
-wls = config.WLSET;
 LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
 Profile.clear()
 

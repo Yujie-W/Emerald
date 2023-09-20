@@ -148,16 +148,16 @@ Updates soil shortwave radiation profiles, given
 
 """
 shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; WLSET) = config;
+    (; SPECTRA) = config;
     (; DIM_LAYER, OPTICS, RADIATION) = can;
 
-    OPTICS._tmp_vec_λ[WLSET.IΛ_PAR] .= view(RADIATION.e_direct,WLSET.IΛ_PAR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[1]);
-    OPTICS._tmp_vec_λ[WLSET.IΛ_NIR] .= view(RADIATION.e_direct,WLSET.IΛ_NIR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[2]);
-    albedo.e_net_direct = OPTICS._tmp_vec_λ' * WLSET.ΔΛ / 1000;
+    OPTICS._tmp_vec_λ[SPECTRA.IΛ_PAR] .= view(RADIATION.e_direct,SPECTRA.IΛ_PAR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[1]);
+    OPTICS._tmp_vec_λ[SPECTRA.IΛ_NIR] .= view(RADIATION.e_direct,SPECTRA.IΛ_NIR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[2]);
+    albedo.e_net_direct = OPTICS._tmp_vec_λ' * SPECTRA.ΔΛ / 1000;
 
-    OPTICS._tmp_vec_λ[WLSET.IΛ_PAR] .= view(RADIATION.e_diffuse_down,WLSET.IΛ_PAR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[1]);
-    OPTICS._tmp_vec_λ[WLSET.IΛ_NIR] .= view(RADIATION.e_diffuse_down,WLSET.IΛ_NIR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[2]);
-    albedo.e_net_diffuse = OPTICS._tmp_vec_λ' * WLSET.ΔΛ / 1000;
+    OPTICS._tmp_vec_λ[SPECTRA.IΛ_PAR] .= view(RADIATION.e_diffuse_down,SPECTRA.IΛ_PAR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[1]);
+    OPTICS._tmp_vec_λ[SPECTRA.IΛ_NIR] .= view(RADIATION.e_diffuse_down,SPECTRA.IΛ_NIR,DIM_LAYER+1) .* (1 .- albedo.ρ_sw[2]);
+    albedo.e_net_diffuse = OPTICS._tmp_vec_λ' * SPECTRA.ΔΛ / 1000;
 
     albedo.r_net_sw = albedo.e_net_direct + albedo.e_net_diffuse;
 
@@ -165,12 +165,12 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 );
 
 shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
-    (; DIM_LAYER, WLSET) = config;
+    (; DIM_LAYER, SPECTRA) = config;
     (; RADIATION) = can;
 
     albedo.e_net_direct .= view(RADIATION.e_direct,:,DIM_LAYER+1) .* (1 .- albedo.ρ_sw);
     albedo.e_net_diffuse .= view(RADIATION.e_diffuse_down,:,DIM_LAYER+1) .* (1 .- albedo.ρ_sw);
-    albedo.r_net_sw = (albedo.e_net_direct' * WLSET.ΔΛ + albedo.e_net_diffuse' * WLSET.ΔΛ) / 1000;
+    albedo.r_net_sw = (albedo.e_net_direct' * SPECTRA.ΔΛ + albedo.e_net_diffuse' * SPECTRA.ΔΛ) / 1000;
 
     return nothing
 );
@@ -212,7 +212,7 @@ Updates canopy radiation profiles for shortwave radiation, given
 
 """
 shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
-    (; APAR_CAR, DIM_LAYER, WLSET) = config;
+    (; DIM_LAYER, SPECTRA) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
     (; ALBEDO) = soil;
 
@@ -228,10 +228,10 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         RADIATION.e_o .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1) ./ FT(pi);
         RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
 
-        RADIATION._par_shaded .= photon.(WLSET.Λ_PAR, view(rad.e_diffuse,WLSET.IΛ_PAR)) .* 1000;
-        RADIATION._par_sunlit .= photon.(WLSET.Λ_PAR, view(rad.e_direct ,WLSET.IΛ_PAR)) .* 1000;
-        RADIATION.par_in_diffuse = RADIATION._par_shaded' * WLSET.ΔΛ_PAR;
-        RADIATION.par_in_direct = RADIATION._par_sunlit' * WLSET.ΔΛ_PAR;
+        RADIATION._par_shaded .= photon.(SPECTRA.Λ_PAR, view(rad.e_diffuse,SPECTRA.IΛ_PAR)) .* 1000;
+        RADIATION._par_sunlit .= photon.(SPECTRA.Λ_PAR, view(rad.e_direct ,SPECTRA.IΛ_PAR)) .* 1000;
+        RADIATION.par_in_diffuse = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
+        RADIATION.par_in_direct = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR;
         RADIATION.par_in = RADIATION.par_in_diffuse + RADIATION.par_in_direct;
 
         return nothing
@@ -310,8 +310,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 
     # 4. compute net absorption for leaves and soil
     for _i in 1:DIM_LAYER
-        _Σ_shaded = view(RADIATION.e_net_diffuse,:,_i)' * WLSET.ΔΛ / 1000 / can.δlai[_i];
-        _Σ_sunlit = view(RADIATION.e_net_direct ,:,_i)' * WLSET.ΔΛ / 1000 / can.δlai[_i];
+        _Σ_shaded = view(RADIATION.e_net_diffuse,:,_i)' * SPECTRA.ΔΛ / 1000 / can.δlai[_i];
+        _Σ_sunlit = view(RADIATION.e_net_direct ,:,_i)' * SPECTRA.ΔΛ / 1000 / can.δlai[_i];
         RADIATION.r_net_sw_shaded[_i] = _Σ_shaded;
         RADIATION.r_net_sw_sunlit[_i] = _Σ_sunlit / OPTICS.p_sunlit[_i] + _Σ_shaded;
         RADIATION.r_net_sw[_i] = _Σ_shaded * (1 - OPTICS.p_sunlit[_i]) + _Σ_sunlit * OPTICS.p_sunlit[_i];
@@ -320,43 +320,43 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
     shortwave_radiation!(config, can, ALBEDO);
 
     # 5. compute top-of-canopy and leaf level PAR, APAR, and PPAR per ground area
-    RADIATION._par_shaded .= photon.(WLSET.Λ_PAR, view(rad.e_diffuse,WLSET.IΛ_PAR)) .* 1000;
-    RADIATION._par_sunlit .= photon.(WLSET.Λ_PAR, view(rad.e_direct ,WLSET.IΛ_PAR)) .* 1000;
-    RADIATION.par_in_diffuse = RADIATION._par_shaded' * WLSET.ΔΛ_PAR;
-    RADIATION.par_in_direct = RADIATION._par_sunlit' * WLSET.ΔΛ_PAR;
+    RADIATION._par_shaded .= photon.(SPECTRA.Λ_PAR, view(rad.e_diffuse,SPECTRA.IΛ_PAR)) .* 1000;
+    RADIATION._par_sunlit .= photon.(SPECTRA.Λ_PAR, view(rad.e_direct ,SPECTRA.IΛ_PAR)) .* 1000;
+    RADIATION.par_in_diffuse = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
+    RADIATION.par_in_direct = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR;
     RADIATION.par_in = RADIATION.par_in_diffuse + RADIATION.par_in_direct;
 
     mul!(OPTICS._tmp_vec_azi, OPTICS._abs_fs', P_INCL);
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
     for _i in 1:DIM_LAYER
-        _α_apar = view(leaves[_i].BIO.auxil.f_ppar, WLSET.IΛ_PAR);
+        _α_apar = view(leaves[_i].BIO.auxil.f_ppar, SPECTRA.IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
-        RADIATION._par_shaded  .= photon.(WLSET.Λ_PAR, view(RADIATION.e_sum_diffuse,WLSET.IΛ_PAR,_i)) .* 1000;
-        RADIATION._par_sunlit  .= photon.(WLSET.Λ_PAR, view(RADIATION.e_sum_direct ,WLSET.IΛ_PAR,_i)) .* 1000 ./ OPTICS.p_sunlit[_i];
-        RADIATION._apar_shaded .= photon.(WLSET.Λ_PAR, view(RADIATION.e_net_diffuse,WLSET.IΛ_PAR,_i)) .* 1000 ./ can.δlai[_i];
-        RADIATION._apar_sunlit .= photon.(WLSET.Λ_PAR, view(RADIATION.e_net_direct ,WLSET.IΛ_PAR,_i)) .* 1000 ./ can.δlai[_i] ./ OPTICS.p_sunlit[_i];
+        RADIATION._par_shaded  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_diffuse,SPECTRA.IΛ_PAR,_i)) .* 1000;
+        RADIATION._par_sunlit  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_direct ,SPECTRA.IΛ_PAR,_i)) .* 1000 ./ OPTICS.p_sunlit[_i];
+        RADIATION._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_diffuse,SPECTRA.IΛ_PAR,_i)) .* 1000 ./ can.δlai[_i];
+        RADIATION._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_direct ,SPECTRA.IΛ_PAR,_i)) .* 1000 ./ can.δlai[_i] ./ OPTICS.p_sunlit[_i];
         RADIATION._ppar_shaded .= RADIATION._apar_shaded .* _α_apar;
         RADIATION._ppar_sunlit .= RADIATION._apar_sunlit .* _α_apar;
 
         # PAR for leaves
-        _Σ_par_dif = RADIATION._par_shaded' * WLSET.ΔΛ_PAR;
-        _Σ_par_dir = RADIATION._par_sunlit' * WLSET.ΔΛ_PAR * _normi;
+        _Σ_par_dif = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
+        _Σ_par_dir = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
         RADIATION.par_shaded[_i] = _Σ_par_dif;
         RADIATION.par_sunlit[:,:,_i] .= OPTICS._abs_fs_fo .* _Σ_par_dir;
         RADIATION.par_sunlit[:,:,_i] .+= _Σ_par_dif;
 
         # APAR for leaves
-        _Σ_apar_dif = RADIATION._apar_shaded' * WLSET.ΔΛ_PAR;
-        _Σ_apar_dir = RADIATION._apar_sunlit' * WLSET.ΔΛ_PAR * _normi;
+        _Σ_apar_dif = RADIATION._apar_shaded' * SPECTRA.ΔΛ_PAR;
+        _Σ_apar_dir = RADIATION._apar_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
         RADIATION.apar_shaded[_i] = _Σ_apar_dif;
         RADIATION.apar_sunlit[:,:,_i] .= OPTICS._abs_fs_fo .* _Σ_apar_dir;
         RADIATION.apar_sunlit[:,:,_i] .+= _Σ_apar_dif;
 
         # PPAR for leaves
-        _Σ_ppar_dif = RADIATION._ppar_shaded' * WLSET.ΔΛ_PAR;
-        _Σ_ppar_dir = RADIATION._ppar_sunlit' * WLSET.ΔΛ_PAR * _normi;
+        _Σ_ppar_dif = RADIATION._ppar_shaded' * SPECTRA.ΔΛ_PAR;
+        _Σ_ppar_dir = RADIATION._ppar_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
         leaves[_i].ppar_shaded  = _Σ_ppar_dif;
         leaves[_i].ppar_sunlit .= OPTICS._abs_fs_fo .* _Σ_ppar_dir .+ _Σ_ppar_dif;
     end;
