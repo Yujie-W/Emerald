@@ -47,6 +47,8 @@ product_limited_rate!(psm::C4VJPModel{FT}, p_i::FT; β::FT = FT(1)) where {FT<:A
 #     2022-Jan-14: add input variable g_lc to make the code more modular
 #     2022-Feb-28: add C3CytochromeModel support
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
+# Bug fixes
+#     2023-Sep-21: if g_lc is 0, set a_p to r
 #
 #######################################################################################################################################################################################################
 """
@@ -75,7 +77,11 @@ product_limited_rate!(psm::C4VJPModel{FT}, air::AirLayer{FT}, g_lc::FT; β::FT =
     _qc = _a*_p - _r*(_p + _d);
     _an = lower_quadratic(_qa, _qb, _qc);
 
-    psm._a_p = _an + _r;
+    if g_lc == 0
+        psm._a_p = _r;
+    else
+        psm._a_p = _an + _r;
+    end;
 
     return nothing
 );

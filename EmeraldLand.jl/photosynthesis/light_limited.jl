@@ -50,6 +50,8 @@ light_limited_rate!(psm::C3VJPModel{FT}) where {FT<:AbstractFloat} = (psm._a_j =
 #     2022-Jun-27: remove ppar from input variable list
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2023-Jun-15: set a_j to 0 when j is 0 (not a quadratic function any more)
+# Bug fixes
+#     2023-Sep-21: if g_lc is 0, set a_j to r
 #
 #######################################################################################################################################################################################################
 """
@@ -93,13 +95,17 @@ light_limited_rate!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}
     _qc = _a*_p - _b - _r*(_c*_p + _d);
     _an = lower_quadratic(_qa, _qb, _qc);
 
-    psm._a_j = _an + _r;
+    if g_lc == 0
+        psm._a_j = _r;
+    else
+        psm._a_j = _an + _r;
+    end;
 
     return nothing
 );
 
 light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
-    if psm._j == 0
+    if psm._j == 0 || g_lc == 0
         psm._a_j = 0;
 
         return nothing
@@ -118,7 +124,11 @@ light_limited_rate!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, air::AirLaye
     _qc = _a*_p - _b - _r*(_c*_p + _d);
     _an = lower_quadratic(_qa, _qb, _qc);
 
-    psm._a_j = _an + _r;
+    if g_lc == 0
+        psm._a_j = _r;
+    else
+        psm._a_j = _an + _r;
+    end;
 
     return nothing
 );
