@@ -269,7 +269,7 @@ Return the fraction of SIF emission that is through PSII, given
 Note if you want to customize the contribution from PSII, you can overwrite this function externally.
 
 """
-function sif_psii_fraction(wl::FT; f_max::FT = FT(0.85)) where {FT}
+function sif_psii_fraction(wl::FT; f_max::FT = FT(0.7)) where {FT}
     if wl < 670
         return f_max
     else
