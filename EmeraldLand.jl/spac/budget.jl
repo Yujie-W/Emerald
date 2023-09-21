@@ -207,7 +207,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
 
         # if total count exceeds 100
         if (_count > 1000) && (_δt < 0.01) && (_t_res > 10)
-            @info "Number of steppers exceeds 100, breaking..." spac.LATITUDE spac.LONGITUDE spac.CANOPY.lai _t_res _δts;
+            @info "Number of steppers exceeds 1000, breaking..." spac.LATITUDE spac.LONGITUDE spac.CANOPY.lai _t_res _δts;
             break;
         end;
     end;

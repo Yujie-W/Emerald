@@ -229,7 +229,7 @@ MultiLayerSPAC(
                 HyperspectralMLCanopy(config),                                              # CANOPY
                 Leaves2D{FT}[Leaves2D(config) for _i in 1:config.DIM_LAYER],                # LEAVES
                 SPACMemory{FT}(),                                                           # MEMORY
-                Meteorology{FT}(),                                                          # METEO
+                Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),       # METEO
                 _roots,                                                                     # ROOTS
                 Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),         # SOIL
                 Stem{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])),   # TRUNK

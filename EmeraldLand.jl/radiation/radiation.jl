@@ -357,8 +357,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         # PPAR for leaves
         _Σ_ppar_dif = RADIATION._ppar_shaded' * SPECTRA.ΔΛ_PAR;
         _Σ_ppar_dir = RADIATION._ppar_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
-        leaves[_i].ppar_shaded  = _Σ_ppar_dif;
-        leaves[_i].ppar_sunlit .= OPTICS._abs_fs_fo .* _Σ_ppar_dir .+ _Σ_ppar_dif;
+        leaves[DIM_LAYER+1-_i].ppar_shaded  = _Σ_ppar_dif;
+        leaves[DIM_LAYER+1-_i].ppar_sunlit .= OPTICS._abs_fs_fo .* _Σ_ppar_dir .+ _Σ_ppar_dif;
     end;
 
     return nothing
@@ -581,6 +581,7 @@ canopy_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where
     (; DIM_LAYER) = config;
 
     soil_albedo!(config, SOIL);
+    # TODO: note here that this will disable the optical properties of longwave radiation and result in bugs
     if ANGLES.sza < 89
         canopy_optical_properties!(config, CANOPY, ANGLES);
         canopy_optical_properties!(config, CANOPY, LEAVES, SOIL);
