@@ -1,3 +1,9 @@
+# The design of a refactored struct consists of several major components:
+#     state variables are all store in a single struct as a field
+#     auxiliary variables are all store in a single struct as a field
+#     other sublevel structs that has their own state and auxiliary variables are stored as fields
+# To avoid any confusion, it is recommended to use only state and auxiliary variables in the main struct, or use only the fields of sublevel structs
+
 module Namespace
 
 using LazyArtifacts
@@ -15,19 +21,28 @@ const LAND_2017     = artifact"land_model_spectrum_V4" * "/clima_land_spectra_20
 const LAND_2021     = artifact"land_model_spectrum_V4" * "/clima_land_spectra_2021.nc";
 const LAND_2017_1NM = artifact"land_model_spectrum_V4" * "/clima_land_spectra_1nm_2017.nc";
 const LAND_2021_1NM = artifact"land_model_spectrum_V4" * "/clima_land_spectra_1nm_2021.nc";
-const SOIL_TEXT     = read_csv("$(@__DIR__)/../data/SOIL-TEXTURE.csv");
+const SOIL_TEXT     = read_csv("$(@__DIR__)/../../data/SOIL-TEXTURE.csv");
 
 
+# The configuration of the SPAC system
 include("config/spectra.jl");
 include("config/trace.jl");
 
 include("config/config.jl");
 
+
+# Plant hydraulics
 include("xylem/flow.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
 
+include("xylem/xylem.jl");
+
+
+#
 include("leaf/biophysics.jl");
+
+
 
 include("radiation.jl");
 

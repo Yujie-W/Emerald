@@ -1,3 +1,7 @@
+# This file contains the definitions of flow profile models (e.g., steady state and non-steady state flow)
+# All the models are supposed to be store auxilary results, so each struct itself is a auxilary variable
+
+# the structs below will be deprecated in the future
 #######################################################################################################################################################################################################
 #
 # Changes to this type

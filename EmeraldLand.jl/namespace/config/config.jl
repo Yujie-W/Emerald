@@ -147,4 +147,4 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     _COS²_Θ_INCL::Vector{FT} = cosd.(Θ_INCL) .^ 2
     "Square of cosine of Θ_INCL at different azimuth angles"
     _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * _1_AZI'
-end
+end;

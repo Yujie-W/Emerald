@@ -229,6 +229,6 @@ Base.@kwdef mutable struct HyperLeafBio{FT<:AbstractFloat}
     state::HyperLeafBioState{FT} = HyperLeafBioState{FT}()
     "Auxiliary variables"
     auxil::HyperLeafBioAuxil{FT}
-end
+end;
 
 HyperLeafBio(config::SPACConfiguration{FT}) where {FT} = return HyperLeafBio{FT}(auxil = HyperLeafBioAuxil(config));

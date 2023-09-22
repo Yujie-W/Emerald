@@ -112,7 +112,7 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     Λ_SIF::Vector{FT} = Λ[IΛ_SIF]
     "Wavelength bins for SIF excitation `[nm]`"
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
-end
+end;
 
 
 """

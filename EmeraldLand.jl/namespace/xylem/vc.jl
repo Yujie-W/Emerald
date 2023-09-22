@@ -1,3 +1,6 @@
+# This file contains the definitions of the vulnerability curve models
+# Because VC curve is a trait (a state), so there is no need to split the struct into state and auxilary parts.
+
 #######################################################################################################################################################################################################
 #
 # Changes to this type
@@ -16,7 +19,7 @@ Hierarchy of AbstractXylemVC:
 - [`ComplexVC`](@ref)
 
 """
-abstract type AbstractXylemVC{FT<:AbstractFloat} end
+abstract type AbstractXylemVC{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################
@@ -40,10 +43,10 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct LogisticVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     # General model information
     "Multiplier to exponential component"
-    A::FT = 1
+    a::FT = 1
     "Multiplier to pressure `[MPa⁻¹]`"
-    B::FT = 1
-end
+    b::FT = 1
+end;
 
 
 #######################################################################################################################################################################################################
@@ -67,10 +70,10 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct PowerVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     # General model information
     "Multiplier to power component `[MPa⁻ᵇ]`"
-    A::FT = 1
+    a::FT = 1
     "Power to pressure"
-    B::FT = 1
-end
+    b::FT = 1
+end;
 
 
 #######################################################################################################################################################################################################
@@ -94,10 +97,10 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct WeibullVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     # General model information
     "Numerator in the exponential component `[MPa]`"
-    B::FT = 2
+    b::FT = 2
     "Power to pressure component"
-    C::FT = 5
-end
+    c::FT = 5
+end;
 
 
 #######################################################################################################################################################################################################
@@ -121,7 +124,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct ComplexVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     # General model information
     "Percentages of each VC component"
-    PS::Vector{FT} = FT[0.5, 0.5]
+    fs::Vector{FT} = FT[0.5, 0.5]
     "Vector of vulnerability curve components"
-    VCS::Union{Vector{LogisticVC{FT}}, Vector{PowerVC{FT}}, Vector{WeibullVC{FT}}, Vector{AbstractXylemVC{FT}}} = WeibullVC{FT}[WeibullVC{FT}(), WeibullVC{FT}(B = 3)]
-end
+    vcs::Union{Vector{LogisticVC{FT}}, Vector{PowerVC{FT}}, Vector{WeibullVC{FT}}, Vector{AbstractXylemVC{FT}}} = WeibullVC{FT}[WeibullVC{FT}(), WeibullVC{FT}(B = 3)]
+end;

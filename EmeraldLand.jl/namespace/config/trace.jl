@@ -18,7 +18,7 @@
 $(TYPEDEF)
 
 """
-abstract type AbstractTrace{FT<:AbstractFloat} end
+abstract type AbstractTrace{FT<:AbstractFloat} end;
 
 
 """
@@ -34,7 +34,7 @@ The gas can be either the target trace molecule (e.g., when computing diffusive 
 $(TYPEDEF)
 
 """
-abstract type AbstractTraceGas{FT<:AbstractFloat} <: AbstractTrace{FT} end
+abstract type AbstractTraceGas{FT<:AbstractFloat} <: AbstractTrace{FT} end;
 
 
 """
@@ -46,7 +46,7 @@ The liquid can be either the medium for gas (e.g., when computing diffusive coef
 $(TYPEDEF)
 
 """
-abstract type AbstractTraceLiquid{FT<:AbstractFloat} <: AbstractTrace{FT} end
+abstract type AbstractTraceLiquid{FT<:AbstractFloat} <: AbstractTrace{FT} end;
 
 
 """
@@ -56,7 +56,7 @@ $(TYPEDEF)
 Identity trace label for air.
 
 """
-struct TraceGasAir{FT<:AbstractFloat} <: AbstractTraceGas{FT} end
+struct TraceGasAir{FT<:AbstractFloat} <: AbstractTraceGas{FT} end;
 
 
 """
@@ -78,7 +78,7 @@ Base.@kwdef struct TraceGasCH₄{FT<:AbstractFloat} <: AbstractTraceGas{FT}
     # related to diffusive coefficient in liquid water
     "Diffusive coefficient in liquid water in `[m² s⁻¹]`"
     d_water::FT = 1.49e-9
-end
+end;
 
 
 """
@@ -104,7 +104,7 @@ Base.@kwdef struct TraceGasCO₂{FT<:AbstractFloat} <: AbstractTraceGas{FT}
     a_a::FT = 2e-3
     "Diffusive coefficient in liquid water in `[m² s⁻¹]`"
     d_water::FT = 2.147813e-9
-end
+end;
 
 
 """
@@ -122,7 +122,7 @@ Base.@kwdef struct TraceGasH₂O{FT<:AbstractFloat} <: AbstractTraceGas{FT}
     # related to diffusive coefficient in air
     "Diffusive coefficient in air in `[m² s⁻¹]`"
     d_air::FT = 2.82e-5
-end
+end;
 
 
 """
@@ -148,7 +148,7 @@ Base.@kwdef struct TraceGasN₂{FT<:AbstractFloat} <: AbstractTraceGas{FT}
     a_a::FT = 2.2e-3
     "Diffusive coefficient in liquid water in `[m² s⁻¹]`"
     d_water::FT = 1.899062e-9
-end
+end;
 
 
 """
@@ -170,7 +170,7 @@ Base.@kwdef struct TraceGasO₂{FT<:AbstractFloat} <: AbstractTraceGas{FT}
     # related to diffusive coefficient in liquid water
     "Diffusive coefficient in liquid water in `[m² s⁻¹]`"
     d_water::FT = 2.10e-9
-end
+end;
 
 
 """
@@ -208,4 +208,4 @@ Base.@kwdef struct TraceLiquidH₂O{FT<:AbstractFloat} <: AbstractTraceLiquid{FT
     υ_C::FT = 0.04527
     "Viscosity coefficient D in `[K⁻²]`"
     υ_D::FT = -3.376e-5
-end
+end;

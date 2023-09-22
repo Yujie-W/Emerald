@@ -1,3 +1,6 @@
+# The file contains the definitions of the pressure volume curve models
+# Because PV curve is a trait (a state), so there is no need to split the struct into state and auxilary parts.
+
 #######################################################################################################################################################################################################
 #
 # Changes to this type
@@ -14,7 +17,7 @@ Hierarchy of AbstractPVCurve:
 - [`SegmentedPVCurve`](@ref)
 
 """
-abstract type AbstractPVCurve{FT<:AbstractFloat} end
+abstract type AbstractPVCurve{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################
@@ -38,10 +41,10 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct LinearPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{FT}
     # General model information
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
-    K_REFILL::FT = 1e4
+    k_refill::FT = 1e4
     "Slope of the linear PV curve (relative to maximum) `[MPa⁻¹]`"
-    SLOPE::FT = 0.2
-end
+    slope::FT = 0.2
+end;
 
 
 #######################################################################################################################################################################################################
@@ -66,13 +69,13 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct SegmentedPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{FT}
     # General model information
     "n_o / maximum V `[mol m⁻³]`"
-    C_ALL::FT = 300
+    c_all::FT = 300
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
-    K_REFILL::FT = 1e-4
+    k_refill::FT = 1e-4
     "Apoplastic water content relative to maximum water volume"
-    RWC_APO::FT = 0.2
+    θ_apo::FT = 0.2
     "Relative water content at turgor loss point"
-    RWC_TLP::FT = 0.8
+    θ_tlp::FT = 0.8
     "Bulk modulus of elasticity `[MPa]`"
-    ϵ_BULK::FT = 20
-end
+    ϵ_bulk::FT = 20
+end;
