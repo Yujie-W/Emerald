@@ -104,7 +104,7 @@ function reprocess_data!(
             _lats = collect((-90+_reso/2):_reso:90);
             _lons = collect((-180+_reso/2):_reso:180);
             _ffig = "$(@__DIR__)/temp.gif";
-            animate_data!(_lons, _lats, _reprocessed_data; filename = _ffig);
+            # animate_data!(_lons, _lats, _reprocessed_data; filename = _ffig);
             _msg = "The figure is saved as $(_ffig). Is the generated data okay? Type Y/y or N/n to continue > ";
             _save_data = input_yes_or_no(_msg; bool_conversion = true);
 
