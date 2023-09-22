@@ -5,7 +5,7 @@ using ..EmeraldMath
 
 
 include("../EmeraldLand.jl/Constant.jl");
-include("../EmeraldLand.jl/Namespace.jl");
+include("../EmeraldLand.jl/namespace/Namespace.jl");
 
 include("../EmeraldLand.jl/EarthGeometry.jl");
 include("../EmeraldLand.jl/Optics.jl");

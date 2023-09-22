@@ -18,34 +18,38 @@ const LAND_2021_1NM = artifact"land_model_spectrum_V4" * "/clima_land_spectra_1n
 const SOIL_TEXT     = read_csv("$(@__DIR__)/../data/SOIL-TEXTURE.csv");
 
 
-include("namespace/config/spectra.jl");
-include("namespace/config/trace.jl");
+include("config/spectra.jl");
+include("config/trace.jl");
 
-include("namespace/config/config.jl");
+include("config/config.jl");
 
-include("namespace/leaf/biophysics.jl");
+include("xylem/flow.jl");
+include("xylem/pv.jl");
+include("xylem/vc.jl");
 
-include("namespace/radiation.jl");
+include("leaf/biophysics.jl");
+
+include("radiation.jl");
 
 
 
 
 
-include("namespace/air.jl");
-include("namespace/colimit.jl");
-include("namespace/geometry.jl");
-include("namespace/kinetics.jl");
-include("namespace/meteorology.jl");
-include("namespace/soil.jl");
-include("namespace/stomata.jl");
-include("namespace/xylem.jl");
+include("air.jl");
+include("colimit.jl");
+include("geometry.jl");
+include("kinetics.jl");
+include("meteorology.jl");
+include("soil.jl");
+include("stomata.jl");
+include("xylem.jl");
 
-include("namespace/canopy.jl");
-include("namespace/leaf.jl");
-include("namespace/root.jl");
-include("namespace/stem.jl");
+include("canopy.jl");
+include("leaf.jl");
+include("root.jl");
+include("stem.jl");
 
-include("namespace/spac.jl");
+include("spac.jl");
 
 
 end

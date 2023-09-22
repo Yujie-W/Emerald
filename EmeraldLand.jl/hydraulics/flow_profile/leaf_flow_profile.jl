@@ -19,6 +19,12 @@ Set the flow profile of the leaf, given
 """
 function leaf_flow_profile! end
 
+# set up the flow out and then update the leaf flow profiles
+# the correction function calling order is
+#     leaf_flow_profile!(config, spac, Δt)
+#         leaf_flow_profile!(organ, Δt)
+#             leaf_flow_profile!(hs, t, Δt)
+#                 leaf_flow_profile!(hs, mode, t, Δt)
 leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT} = (
     set_leaf_flow_out!(config, spac);
     leaf_flow_profile!(spac.LEAF, Δt);
@@ -29,12 +35,16 @@ leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt
 leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     if spac.CANOPY.lai > 0
         set_leaf_flow_out!(config, spac);
-        leaf_flow_profile!.(spac.LEAVES, Δt);
+        # do this way to avoid memory allocation of a [nothing...] vector
+        for leaf in spac.LEAVES
+            leaf_flow_profile!(leaf, Δt);
+        end;
     end;
 
     return nothing
 );
 
+# wrapper methods to call leaf_flow_profile! for different types of organ
 leaf_flow_profile!(organ::Leaf{FT}, Δt::FT) where {FT<:AbstractFloat} = leaf_flow_profile!(organ.HS, organ.t, Δt);
 
 leaf_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
@@ -54,6 +64,9 @@ leaf_flow_profile!(organ::Leaves2D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     return nothing
 );
 
+# wrapper function to call different methods with steady and non-steady state flow modes
+#     if the flow is steady state, do nothing as there is no buffer
+#     if the flow is non-steady state, update the flow profile because there is a buffer system
 leaf_flow_profile!(hs::LeafHydraulics{FT}, t::FT, Δt::FT) where {FT<:AbstractFloat} = leaf_flow_profile!(hs, hs.FLOW, t, Δt);
 
 leaf_flow_profile!(hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, t::FT, Δt::FT) where {FT<:AbstractFloat} = nothing;
@@ -61,10 +74,10 @@ leaf_flow_profile!(hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, t::FT, Δt
 leaf_flow_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, t::FT, Δt::FT) where {FT<:AbstractFloat} = (
     (; PVC, V_MAXIMUM) = hs;
 
-    _f_vis = relative_viscosity(t);
+    f_vis = relative_viscosity(t);
 
     # compute the flow rate from capacitance buffer
-    mode._f_buffer[1] = (hs._p_storage - hs.p_leaf) * capacitance_buffer(PVC) / _f_vis * V_MAXIMUM;
+    mode._f_buffer[1] = (hs._p_storage - hs.p_leaf) * capacitance_buffer(PVC) / f_vis * V_MAXIMUM;
 
     # make sure the buffer rate does not drain or overflow the capacictance
     if (mode._f_buffer[1] > 0) && (hs.v_storage <= mode._f_buffer[1] * Δt)

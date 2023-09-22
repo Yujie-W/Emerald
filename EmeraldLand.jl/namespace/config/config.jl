@@ -106,6 +106,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_SOIL::Int = 4
     "Dimension of short wave length bins"
     DIM_WL::Int = length(SPECTRA.Λ)
+    "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
+    DIM_XYLEM::Int = 5
 
     # Constant values used to configurate the thresholds
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"

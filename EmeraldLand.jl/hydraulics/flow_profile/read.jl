@@ -35,21 +35,21 @@ flow_in(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT<:Abs
 flow_in(organ::Leaves1D{FT}) where {FT<:AbstractFloat} = (flow_in(organ.HS), flow_in(organ.HS2));
 
 flow_in(organs::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
-    _f_sum::FT = 0;
-    for _i in eachindex(organs)
-        _f_sum += flow_in(organs[_i]) * organs[_i].HS.AREA;
+    f_sum::FT = 0;
+    for i in eachindex(organs)
+        f_sum += flow_in(organs[i]) * organs[i].HS.AREA;
     end;
 
-    return _f_sum
+    return f_sum
 );
 
 flow_in(organs::Vector{Stem{FT}}) where {FT<:AbstractFloat} = (
-    _f_sum::FT = 0;
-    for _i in eachindex(organs)
-        _f_sum += flow_in(organs[_i]);
+    f_sum::FT = 0;
+    for i in eachindex(organs)
+        f_sum += flow_in(organs[i]);
     end;
 
-    return _f_sum
+    return f_sum
 );
 
 flow_in(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}) where {FT<:AbstractFloat} = flow_in(hs.FLOW);

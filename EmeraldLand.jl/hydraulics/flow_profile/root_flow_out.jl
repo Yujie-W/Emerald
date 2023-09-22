@@ -18,6 +18,7 @@ Set the flow out from each root, given
 """
 function set_root_flow_out! end
 
+# if there is only one root that is simple, just set the flow out
 set_root_flow_out!(spac::MonoElementSPAC{FT}) where {FT} = (
     (; STEM, ROOT) = spac;
 
@@ -26,6 +27,10 @@ set_root_flow_out!(spac::MonoElementSPAC{FT}) where {FT} = (
     return nothing
 );
 
+# the problem with the multiple layered roots system is that we need to make sure that pressure at the end of each root is the same
+# therefore, we need to find an algorithm to find the flow rates of each root
+# the algorithm is usually fine when the soil water is sufficient, but when the soil water is not sufficient, the algorithm may not converge because of the low hydraulic conductance
+# moreover, in many models it is not necessary to do this calculation because they do not use plant hydraulics.
 set_root_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
     # very first step here: if soil is too dry, disconnect root from soil
     disconnect_roots!(config, spac);
@@ -117,62 +122,6 @@ set_root_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
         #     _use_second_solver = true;
         # end;
     end;
-
-    #=
-    # disable the second solver for now
-    # use second solver to solve for the flow rates (when SWC differs a lot among layers)
-    if _use_second_solver
-        @inline diff_p_root(ind::Int, e::FT, p::FT) where {FT<:AbstractFloat} = (
-            _root = ROOTS[ind];
-            _slayer = SOIL.LAYERS[ROOTS_INDEX[ind]];
-            if _root._isconnected
-                set_flow_out!(_root.HS.FLOW, e);
-                _root.HS.FLOW._f_element .= _root.HS.FLOW.f_out .- _root.HS.FLOW._f_sum;
-            end;
-            (_p,_) = root_pk(_root, _slayer);
-
-            return _p - p
-        );
-
-        @inline diff_e_root(p::FT) where {FT<:AbstractFloat} = (
-            _sum::FT = 0;
-            for _i in eachindex(ROOTS_INDEX)
-                _root = ROOTS[_i];
-                if _root._isconnected
-                    _f(e) = diff_p_root(_i, e, p);
-                    _tol = SolutionTolerance{FT}(1e-8, 50);
-                    _met = NewtonBisectionMethod{FT}(x_min = -1000, x_max = 1000, x_ini = 0);
-                    _sol = find_zero(_f, _met, _tol);
-                    _sum += _sol;
-                end;
-            end;
-
-            return _sum - _f_sum
-        );
-
-        _tol = SolutionTolerance{FT}(1e-8, 50);
-        _met = NewtonBisectionMethod{FT}(x_min = -1000, x_max = 1000, x_ini = 0);
-        _p_r = find_zero(diff_e_root, _met, _tol);
-
-        for _i in eachindex(ROOTS_INDEX)
-            _root = ROOTS[_i];
-            _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
-
-            if _root._isconnected
-                _f(e) = diff_p_root(_i, e, _p_r);
-                _tol = SolutionTolerance{FT}(1e-8, 50);
-                _met = NewtonBisectionMethod{FT}(x_min = -1000, x_max = 1000, x_ini = 0);
-                spac._fs[_i] = find_zero(_f, _met, _tol);
-                set_flow_out!(_root.HS.FLOW, spac._fs[_i]);
-                _root.HS.FLOW._f_element .= _root.HS.FLOW.f_out .- _root.HS.FLOW._f_sum;
-            else
-                spac._fs[_i] = 0;
-            end;
-
-            spac._ps[_i],spac._ks[_i] = root_pk(_root, _slayer);
-        end;
-    end;
-    =#
 
     # update root buffer rates again
     if spac._root_connection
