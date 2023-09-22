@@ -6,24 +6,18 @@
 # Changes to this struct
 # General
 #     2023-Apr-13: add state struct to save SPAC configurations
-#     2023-Apr-13: move Φ_PHOTON, RAD_SW_REF from MultiLayerSPAC
-#     2023-Apr-13: move APAR_CAR from leaf structs
+#     2023-Apr-13: add fields Φ_PHOTON, RAD_SW_REF, and APAR_CAR
 #     2023-Jun-13: add trace gasses as fields
-#     2023-Jun-16: move field WLSET from HyperspectralMLCanopy
-#     2023-Jun-16: move all fields DIM_* to SPACConfiguration
-#     2023-Jun-20: move LHA from SPAC canopy
-#     2023-Jun-20: move fields Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, and _COS²_Θ_INCL_AZI from spac canopy
-#     2023-Jun-20: move fields α_CLM, α_FITTING, and MAT_ρ from soil albedo
+#     2023-Jun-16: add fields WLSET, DIM_*
+#     2023-Jun-20: add fields LHA, Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI, α_CLM, α_FITTING, and MAT_ρ
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
-#     2023-Sep-07: add field ALLOW_LEAF_SHEDDING, ENABLE_SOIL_EVAPORATION, and T_CLM
-#     2023-Sep-11: add option update legacy to the SPAC configuration
-#     2023-Sep-11: add option KR_THRESHOLD to the SPAC configuration
-#     2023-Sep-11: add fields ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
-#     2023-Sep-14: make sure the configuration struct is consistent with the DATASET
-#     2023-Sep-18: add field Φ_SIF_WL for a new feature
-#     2023-Sep-19: add field Φ_SIF_CUTOFF and Φ_SIF_RESCALE for a new feature to force SIF wavelength to be lower than the excitation wavelength
-#     2023-Sep-20: move all fields in WLSET to SPECTRA
+#     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, ENABLE_SOIL_EVAPORATION, and T_CLM
+#     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD, ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
+#     2023-Sep-18: add field Φ_SIF_WL
+#     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
+#     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
+#     2023-Sep-22: remove APAR_CAR (now a state variable in HyperLeafBioState)
 #
 #######################################################################################################################################################################################################
 """
@@ -42,13 +36,40 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to print debug information"
     DEBUG::Bool = false
 
+    # File path to the Netcdf dataset
+    "File path to the Netcdf dataset"
+    DATASET::String = LAND_2021
+
+    # Reference spectra
+    "Reference Spetra"
+    SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(DATASET = DATASET)
+
+    # features related to the leaf optics and fluorescence
+    "Whether to convert energy to photons when computing fluorescence"
+    Φ_PHOTON::Bool = true
+    "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
+    Φ_SIF_CUTOFF::Int = 0
+    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
+    Φ_SIF_RESCALE::Bool = true
+    "Whether to partition the SIF PDF based the wavelength"
+    Φ_SIF_WL::Bool = true
+
+    # features related to plant hydraulics
+    "Threshold of the critical pressure or flow that trigger a remainder of conductance"
+    KR_THRESHOLD::FT = 0.001
+    "Whether to run the model at steady state mode"
+    STEADY_STATE_FLOW::Bool = true
+
+
+
+
+
+
     # Turn on/off features
     "Allow leaf condensation"
     ALLOW_LEAF_CONDENSATION::Bool = false
     "Allow leaf shedding"
     ALLOW_LEAF_SHEDDING::Bool = false
-    "Whether APAR absorbed by carotenoid is counted as PPAR"
-    APAR_CAR::Bool = true
     "Enable drought legacy effect"
     ENABLE_DROUGHT_LEGACY::Bool = false
     "Enable energy balance (t_on)"
@@ -65,26 +86,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     α_CLM::Bool = false
     "Whether to fit the data from broadband to hyperspectral"
     α_FITTING::Bool = true
-    "Whether to convert energy to photons when computing fluorescence"
-    Φ_PHOTON::Bool = true
-    "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
-    Φ_SIF_CUTOFF::Int = 0
-    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
-    Φ_SIF_RESCALE::Bool = true
-    "Whether to partition the SIF PDF based the wavelength"
-    Φ_SIF_WL::Bool = true
 
     # Prescribe parameters
     "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
-
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
-
-    # Reference spectra
-    "Reference Spetra"
-    SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(DATASET = DATASET)
 
     # Dimensions of the spac system
     "Dimension of air layers"
@@ -111,10 +116,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_WL::Int = length(SPECTRA.Λ)
     "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
     DIM_XYLEM::Int = 5
-
-    # Constant values used to configurate the thresholds
-    "Threshold of the critical pressure or flow that trigger a remainder of conductance"
-    KR_THRESHOLD::FT = 0.001
 
     # Canopy geometry related angles
     "Mean azimuth angles `[°]`"

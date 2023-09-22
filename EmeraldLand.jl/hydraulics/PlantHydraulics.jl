@@ -14,41 +14,42 @@ using ..Namespace: Leaf, LeafHydraulics, Leaves1D, Leaves2D, NonSteadyStateFlow,
 using ..Namespace: MonoElementSPAC, MultiLayerSPAC, SPACConfiguration
 using ..SoilHydraulics: soil_θ, soil_ψ_25
 
-import ..SoilHydraulics: relative_hydraulic_conductance
+
+include("xylem/vc.jl");
 
 
 # include functions related to beta factor
-include("hydraulics/beta/model.jl");
-include("hydraulics/beta/read.jl");
-include("hydraulics/beta/set.jl");
+include("beta/model.jl");
+include("beta/read.jl");
+include("beta/set.jl");
 
 # include functions related to drought effects
-include("hydraulics/drought/disconnection.jl");
-include("hydraulics/drought/legacy.jl");
+include("drought/disconnection.jl");
+include("drought/legacy.jl");
 
 # include function related to stomtal optimality
-include("hydraulics/optimality/critical_flow.jl");
-include("hydraulics/optimality/derivative.jl");
+include("optimality/critical_flow.jl");
+include("optimality/derivative.jl");
 
 # include functions related to xylem vulnerability curve
-include("hydraulics/vc/conductance.jl");
-include("hydraulics/vc/pressure.jl");
-include("hydraulics/vc/pressure_volume.jl");
+include("vc/conductance.jl");
+include("vc/pressure.jl");
+include("vc/pressure_volume.jl");
 
 # include functions related to flow and pressure profiles
-include("hydraulics/flow_profile/flow_out.jl");
-include("hydraulics/flow_profile/leaf_flow_out.jl");
-include("hydraulics/flow_profile/leaf_flow_profile.jl");
-include("hydraulics/flow_profile/read.jl");
-include("hydraulics/flow_profile/root_pk.jl");
-include("hydraulics/flow_profile/root_flow_out.jl");
-include("hydraulics/flow_profile/root_flow_profile.jl");
-include("hydraulics/flow_profile/spac_flow_profile.jl");
-include("hydraulics/flow_profile/stem_flow_out.jl");
-include("hydraulics/flow_profile/stem_flow_profile.jl");
+include("flow_profile/flow_out.jl");
+include("flow_profile/leaf_flow_out.jl");
+include("flow_profile/leaf_flow_profile.jl");
+include("flow_profile/read.jl");
+include("flow_profile/root_pk.jl");
+include("flow_profile/root_flow_out.jl");
+include("flow_profile/root_flow_profile.jl");
+include("flow_profile/spac_flow_profile.jl");
+include("flow_profile/stem_flow_out.jl");
+include("flow_profile/stem_flow_profile.jl");
 
-include("hydraulics/budget.jl");
-include("hydraulics/pressure_profile.jl");
+include("budget.jl");
+include("pressure_profile.jl");
 
 
 end # module

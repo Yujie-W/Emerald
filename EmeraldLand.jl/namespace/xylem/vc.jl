@@ -126,5 +126,5 @@ Base.@kwdef mutable struct ComplexVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     "Percentages of each VC component"
     fs::Vector{FT} = FT[0.5, 0.5]
     "Vector of vulnerability curve components"
-    vcs::Union{Vector{LogisticVC{FT}}, Vector{PowerVC{FT}}, Vector{WeibullVC{FT}}, Vector{AbstractXylemVC{FT}}} = WeibullVC{FT}[WeibullVC{FT}(), WeibullVC{FT}(B = 3)]
+    vcs::Union{Vector{LogisticVC{FT}}, Vector{PowerVC{FT}}, Vector{WeibullVC{FT}}, Vector{AbstractXylemVC{FT}}} = WeibullVC{FT}[WeibullVC{FT}(), WeibullVC{FT}(b = 3)]
 end;

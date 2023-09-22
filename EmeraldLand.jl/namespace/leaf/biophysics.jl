@@ -48,14 +48,11 @@ end;
 # Changes to this struct
 # General
 #     2023-Sep-14: add struct HyperLeafBioAuxil
-#     2023-Sep-14: add fields to store the interface, layer, and leaf reflectance and transmittance
-#     2023-Sep-14: add fields to store the SIF calculation matrices
-#     2023-Sep-16: add field f_sife to store the SIF excitation fraction and α_leaf to store the leaf absorption
-#     2023-Sep-16: add fields mat_b_i and mat_f_i to store the SIF conversion matrices for each layer
-#     2023-Sep-18: add fields τ_all_i and mat_x_i_out to store the total transmittance within a layer and the SIF conversion matrices after reabsorption, reflection, and transmission
-#     2023-Sep-18: add a cache variable _ϕ_sif to store the SIF PDF based on the wavelength of excitation (do not use this value outside the Emerald model)
-#     2023-Sep-19: add field f_ppar to store the PPAR absorption fraction
-#     2023-Sep-22: add field f_psii to store the PSII PPAR absorption fraction
+#     2023-Sep-14: add fields to store the interface, layer, and leaf reflectance and transmittance; SIF calculation matrices
+#     2023-Sep-16: add fields f_sife, mat_b_i and mat_f_i
+#     2023-Sep-18: add fields τ_all_i, mat_x_i_out, and _ϕ_sif
+#     2023-Sep-19: add field f_ppar
+#     2023-Sep-22: add field f_psii
 #
 #######################################################################################################################################################################################################
 """

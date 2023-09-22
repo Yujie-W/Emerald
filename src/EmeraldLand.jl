@@ -15,7 +15,7 @@ include("../EmeraldLand.jl/LeafOptics.jl");
 include("../EmeraldLand.jl/CanopyOptics.jl");
 include("../EmeraldLand.jl/Photosynthesis.jl");
 include("../EmeraldLand.jl/SoilHydraulics.jl");
-include("../EmeraldLand.jl/PlantHydraulics.jl");
+include("../EmeraldLand.jl/hydraulics/PlantHydraulics.jl");
 include("../EmeraldLand.jl/StomatalModels.jl");
 include("../EmeraldLand.jl/SPAC.jl");
 
