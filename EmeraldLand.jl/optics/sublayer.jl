@@ -126,6 +126,32 @@ end;
 #
 # Changes to this function
 # General
+#     2023-Sep-18: add function to compute how much PPAR is absorbed by PSII (used for SIF and PPAR)
+#
+#######################################################################################################################################################################################################
+"""
+
+    psii_fraction(wl::FT; f_max::FT = FT(0.7)) where {FT}
+
+Return the fraction of PSII PPAR absorption, given
+- `wl` excitation wavelength
+
+Note if you want to customize the contribution from PSII, you can overwrite this function externally.
+
+"""
+function psii_fraction(wl::FT; f_max::FT = FT(0.7)) where {FT}
+    if wl < 670
+        return f_max
+    else
+        return max(0, f_max - (wl - 670) / 80 * f_max);
+    end;
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2023-Sep-15: add function to update the sublayer absorption and transmittance within HyperLeafBio
 #     2023-Sep-15: save f_sife as well as f_cab and f_car
 #     2023-Sep-16: fix a typo related to f_car (was using 1 - f_car)
@@ -151,12 +177,13 @@ function leaf_sublayer_f_τ! end;
 leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = leaf_sublayer_f_τ!(config.SPECTRA, bio, lwc, N);
 
 leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = (
-    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO) = spectra;
+    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = spectra;
 
     x = 1 / bio.state.meso_n;
     bio.auxil.f_cab  .= sublayer_f_cab.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
     bio.auxil.f_car  .= sublayer_f_car.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
     bio.auxil.f_ppar .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car_ppar;
+    bio.auxil.f_psii .= psii_fraction(Λ);
     bio.auxil.f_sife .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car;
 
     bio.auxil.τ_sub_1 .= sublayer_τ.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x, N);

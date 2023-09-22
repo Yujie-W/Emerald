@@ -55,6 +55,7 @@ end;
 #     2023-Sep-18: add fields τ_all_i and mat_x_i_out to store the total transmittance within a layer and the SIF conversion matrices after reabsorption, reflection, and transmission
 #     2023-Sep-18: add a cache variable _ϕ_sif to store the SIF PDF based on the wavelength of excitation (do not use this value outside the Emerald model)
 #     2023-Sep-19: add field f_ppar to store the PPAR absorption fraction
+#     2023-Sep-22: add field f_psii to store the PSII PPAR absorption fraction
 #
 #######################################################################################################################################################################################################
 """
@@ -77,6 +78,8 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     f_car::Vector{FT}
     "PPAR fraction `[-]`"
     f_ppar::Vector{FT}
+    "PSII PPAR fraction `[-]`"
+    f_psii::Vector{FT}
     "SIF excitation fraction `[-]`"
     f_sife::Vector{FT}
 
@@ -166,6 +169,7 @@ HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 f_cab            = zeros(FT, DIM_WL),
                 f_car            = zeros(FT, DIM_WL),
                 f_ppar           = zeros(FT, DIM_WL),
+                f_psii           = zeros(FT, DIM_WL),
                 f_sife           = zeros(FT, DIM_WL),
                 ρ_interface_θ    = zeros(FT, DIM_WL),
                 τ_interface_θ    = zeros(FT, DIM_WL),

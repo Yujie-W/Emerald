@@ -256,32 +256,6 @@ end;
 #
 # Changes to this function
 # General
-#     2023-Sep-18: add function to compute how much SIF emission is through PSII
-#
-#######################################################################################################################################################################################################
-"""
-
-    sif_psii_fraction(wl::FT; f_max::FT = FT(0.7)) where {FT}
-
-Return the fraction of SIF emission that is through PSII, given
-- `wl` excitation wavelength
-
-Note if you want to customize the contribution from PSII, you can overwrite this function externally.
-
-"""
-function sif_psii_fraction(wl::FT; f_max::FT = FT(0.7)) where {FT}
-    if wl < 670
-        return f_max
-    else
-        return max(0, f_max - (wl - 670) / 80 * f_max);
-    end;
-end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
 #     2023-Sep-16: add function to update the SIF conversion matrix of the leaf
 #     2023-Sep-18: add an intermediate step to compute SIF out of each layer before rescaling it to the leaf level SIF
 #     2023-Sep-18: partition the SIF emission from PSI and PSII if Φ_SIF_WL is true
@@ -319,7 +293,7 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}
 
         # compute ϕ if Φ_SIF_WL is true, otherwise use the default Φ_PS
         if Φ_SIF_WL
-            f_psii = sif_psii_fraction(Λ_SIFE[i]);
+            f_psii = bio.auxil.f_psii[ii];
             ϕ .= view(Φ_PSII, IΛ_SIF) .* f_psii .+ view(Φ_PSI, IΛ_SIF) .* (1 - f_psii);
         else
             ϕ .= view(Φ_PS, IΛ_SIF);
