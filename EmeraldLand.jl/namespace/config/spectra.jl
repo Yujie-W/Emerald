@@ -1,3 +1,7 @@
+# This file contains the spectra information to use with the SPAC system
+# By default, the reference spectra is to run at hyperspectral mode
+# However, if is also possible to run the model at broadband mode, and we provide a constructor for this purpose (SIF will be disabled this way)
+
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
@@ -73,7 +77,7 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
 
     # Variable features for the radiation
     "Downwelling shortwave radiation reference spectrum"
-    SOLAR_RAD::Matrix{FT} = [read_nc(DATASET, "E_DIFF") read_nc(DATASET, "E_DIR")]
+    SOLAR_RAD::Matrix{FT} = [read_nc(DATASET, "E_DIR") read_nc(DATASET, "E_DIFF")]
 
     # Constants
     "Wavelength limits for NIR `[nm]`"
@@ -109,3 +113,49 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     "Wavelength bins for SIF excitation `[nm]`"
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
 end
+
+
+"""
+
+    broadband_spectra(FT)
+
+Return a ReferenceSpectra object with broadband spectra, given
+- `FT`: the floating point type to use
+
+"""
+broadband_spectra(FT) = ReferenceSpectra{FT}(
+            DATASET   = "Customized Broadband Spectra",
+            Λ         = [550, 1600],
+            Λ_LOWER   = [400, 700],
+            Λ_UPPER   = [700, 2500],
+            ΔΛ        = [300, 1800],
+            K_ANT     = [0, 0],                             # will not be used
+            K_BROWN   = [0, 0],                             # will not be used
+            K_CAB     = [0, 0],                             # will not be used
+            K_CAR_V   = [0, 0],                             # will not be used
+            K_CAR_Z   = [0, 0],                             # will not be used
+            K_CBC     = [0, 0],                             # will not be used
+            K_H₂O     = [0, 0],                             # will not be used
+            K_LMA     = [0, 0],                             # will not be used
+            K_PRO     = [0, 0],                             # will not be used
+            NR        = [1.5, 1.5],                         # will not be used
+            Φ_PS      = [0, 0],                             # will not be used
+            Φ_PSI     = [0, 0],                             # will not be used
+            Φ_PSII    = [0, 0],                             # will not be used
+            MAT_SOIL  = [0 0; 0 0],                         # will not be used
+            SOLAR_RAD = [191.544 119.923; 277.752 55.076],
+            WL_NIR    = [700, 2500],
+            WL_PAR    = [400, 700],
+            WL_SIF    = [640, 850],                         # will not be used
+            WL_SIFE   = [400, 750],                         # will not be used
+            IΛ_NIR    = [2],
+            IΛ_PAR    = [1],
+            IΛ_SIF    = [1],                                # will not be used
+            IΛ_SIFE   = [1],                                # will not be used
+            ΔΛ_PAR    = [300],
+            ΔΛ_SIF    = [210],                              # will not be used
+            ΔΛ_SIFE   = [350],                              # will not be used
+            Λ_PAR     = [550],
+            Λ_SIF     = [745],                              # will not be used
+            Λ_SIFE    = [550],                              # will not be used
+);

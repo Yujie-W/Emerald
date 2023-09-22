@@ -1,3 +1,6 @@
+# This file contains the global configuration of the SPAC system
+# The first step for running any code should be to define a config struct
+
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
