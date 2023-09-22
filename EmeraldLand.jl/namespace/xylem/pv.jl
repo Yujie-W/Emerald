@@ -24,6 +24,33 @@ abstract type AbstractPVCurve{FT<:AbstractFloat} end;
 #
 # Changes to this struct
 # General
+#     2023-Sep-22: add exponential PV curve
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains information for exponential PV curve
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct ExponentialPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{FT}
+    # General model information
+    "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
+    k_refill::FT = 1e4
+    "Slope of the linear PV curve (relative to maximum) `[MPa⁻¹]`"
+    slope::FT = 0.2
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2022-Apr-20: add linear PV curve
 #
 #######################################################################################################################################################################################################
@@ -72,7 +99,7 @@ Base.@kwdef mutable struct SegmentedPVCurve{FT<:AbstractFloat} <: AbstractPVCurv
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
     k_refill::FT = 1e-4
     "Apoplastic water content relative to maximum water volume"
-    θ_apo::FT = 0.2
+    θ_apo::FT = 0.4
     "Relative water content at turgor loss point"
     θ_tlp::FT = 0.8
     "Bulk modulus of elasticity `[MPa]`"

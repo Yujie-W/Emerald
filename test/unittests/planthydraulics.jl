@@ -24,4 +24,23 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         end;
     end;
 
+    @testset "Pressure volume curves P(V)" begin
+        for pv in [NS.ExponentialPVCurve{Float64}(), NS.LinearPVCurve{Float64}(), NS.SegmentedPVCurve{Float64}()]
+            vs = collect(Float64, 0.21:0.01:1);
+            ps = PH.capacitance_pressure.((pv,), vs, 298.15);
+
+            @test all(-100 .<= ps);
+        end;
+    end;
+
+    @testset "Pressure volume curves V(P)" begin
+        for pv in [NS.ExponentialPVCurve{Float64}(), NS.LinearPVCurve{Float64}(), NS.SegmentedPVCurve{Float64}()]
+            v1 = collect(Float64, 0.41:0.01:1);
+            ps = PH.capacitance_pressure.((pv,), v1, 298.15);
+            v2 = PH.capacitance_volume.((pv,), ps, 298.15);
+
+            @test all(v2 .≈ v1);
+        end;
+    end;
+
 end;
