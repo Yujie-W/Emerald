@@ -43,4 +43,21 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         end;
     end;
 
+    @testset "Read flow in/out of the xylem" begin
+        config = NS.SPACConfiguration{Float64}();
+        xylem = NS.XylemHydraulics(config);
+        nssflow = NS.XylemHydraulicsAuxilNSS(config);
+        ssflow = NS.XylemHydraulicsAuxilSS(config);
+
+        @test PH.flow_in(xylem) == PH.flow_in(nssflow) == PH.flow_in(ssflow) == 0;
+        @test PH.flow_out(xylem) == PH.flow_out(ssflow) == PH.flow_out(nssflow) == 0;
+
+        PH.set_flow_profile!(xylem, 1.0);
+        PH.set_flow_profile!(nssflow, 1.0);
+        PH.set_flow_profile!(ssflow, 1.0);
+
+        @test PH.flow_in(xylem) == PH.flow_in(nssflow) == PH.flow_in(ssflow) == 1;
+        @test PH.flow_out(xylem) == PH.flow_out(ssflow) == PH.flow_out(nssflow) == 1;
+    end;
+
 end;

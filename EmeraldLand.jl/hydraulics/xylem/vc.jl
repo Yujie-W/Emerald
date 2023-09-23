@@ -71,7 +71,6 @@ relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
 #     2022-Feb-02: add method for WeibullVC
 #     2022-Feb-02: add method for ComplexVC
 #     2022-Feb-02: add a reference kr for more customized calculations
-#     2022-May-25: iterate through VCS rather than its indices for ComplexVC
 #     2023-Sep-22: use solver to find the target pressure for ComplexVC
 # Bug fixes
 #     2023-Mar-02: fix an issue with Weibull function critical pressure
