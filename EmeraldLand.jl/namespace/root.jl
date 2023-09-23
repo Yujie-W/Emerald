@@ -18,7 +18,7 @@ Structure to save root parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Root{FT<:AbstractFloat}
+Base.@kwdef mutable struct Root2{FT<:AbstractFloat}
     # Embedded structures
     "[`RootHydraulics`](@ref) type root hydraulic system"
     HS::RootHydraulics{FT} = RootHydraulics{FT}()

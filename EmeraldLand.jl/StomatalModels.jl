@@ -7,7 +7,7 @@ using ..Namespace: AirLayer, BroadbandLeafBiophysics, C4VJPModel, GCO₂Mode, Hy
 using ..Namespace: MonoElementSPAC, MultiLayerSPAC
 using ..Photosynthesis: leaf_photosynthesis!, ∂R∂T
 using ..PhysicalChemistry: latent_heat_vapor, relative_diffusive_coefficient, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using ..PlantHydraulics: relative_hydraulic_conductance, ∂E∂P
+using ..PlantHydraulics: ∂E∂P
 using ..SoilHydraulics: relative_hydraulic_conductance
 
 
