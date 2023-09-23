@@ -23,6 +23,7 @@ include("xylem/pressure_profile.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
 
+include("root/flow_profile.jl");
 include("root/pressure_profile.jl");
 include("root/rhizosphere.jl");
 

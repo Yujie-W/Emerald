@@ -6,7 +6,7 @@
 # General
 #     2023-Sep-23: add function to update the xylem pressure profile
 #
-# #######################################################################################################################################################################################################
+#######################################################################################################################################################################################################
 """
 
     xylem_pressure_profile!(xylem::XylemHydraulics{FT}, t::FT) where {FT}
@@ -38,7 +38,7 @@ xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulic
         end;
 
         # flow rate is the mean of that at two planes (i and i+1)
-        x_aux.pressure[i+1] -= (x_aux.flow[i] + x_aux.flow[i+1]) / 2 / k + ρg_MPa(FT) * x_state.Δh / N;
+        x_aux.pressure[i+1] = x_aux.pressure[i] - (x_aux.flow[i] + x_aux.flow[i+1]) / 2 / k - ρg_MPa(FT) * x_state.Δh / N;
     end;
 
     return nothing
@@ -61,7 +61,7 @@ xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulic
             k = k_mem / f_vis * k_max * N;
         end;
 
-        x_aux.pressure[i+1] -= x_aux.flow / k + ρg_MPa(FT) * x_state.Δh / N;
+        x_aux.pressure[i+1] = x_aux.pressure[i] - x_aux.flow / k - ρg_MPa(FT) * x_state.Δh / N;
     end;
 
     return nothing

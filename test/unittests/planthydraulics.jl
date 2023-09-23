@@ -79,4 +79,21 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         @test all(ssflow.pressure[2:end] .< 0);
     end;
 
+    @testset "Root flow and pressure profiles" begin
+        config = NS.SPACConfiguration{Float64}();
+        root = NS.Root(config);
+        soil = NS.SoilLayer{Float64}();
+        flow = 1.0;
+        PH.set_flow_profile!(root.xylem, flow);
+        PH.root_pressure_profile!(root, soil);
+
+        p_target = root.xylem.auxil.pressure[end];
+        PH.root_flow_profile!(root, soil, p_target);
+        f_target = PH.flow_out(root.xylem);
+        PH.root_pressure_profile!(root, soil);
+
+        @test PH.flow_out(root.xylem) ≈ f_target;
+        @test root.xylem.auxil.pressure[end] ≈ p_target;
+    end;
+
 end;

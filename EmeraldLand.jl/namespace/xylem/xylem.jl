@@ -88,7 +88,7 @@ end;
 XylemHydraulicsAuxilNSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraulicsAuxilNSS{FT}(
             flow        = zeros(FT, config.DIM_XYLEM + 1),
             flow_buffer = zeros(FT, config.DIM_XYLEM),
-            k_history   = zeros(FT, config.DIM_XYLEM),
+            k_history   = ones(FT, config.DIM_XYLEM),
             p_storage   = zeros(FT, config.DIM_XYLEM),
             pressure    = zeros(FT, config.DIM_XYLEM + 1)
 );
@@ -124,7 +124,7 @@ Base.@kwdef mutable struct XylemHydraulicsAuxilSS{FT} <: AbstractFlowProfile{FT}
 end;
 
 XylemHydraulicsAuxilSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraulicsAuxilSS{FT}(
-            k_history = zeros(FT, config.DIM_XYLEM),
+            k_history = ones(FT, config.DIM_XYLEM),
             pressure  = zeros(FT, config.DIM_XYLEM + 1)
 );
 

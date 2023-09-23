@@ -41,7 +41,7 @@ Return the root struct with initialized energy states, given
 """
 Root(config::SPACConfiguration{FT}) where {FT} = (
     r_energy = RootEnergy{FT}();
-    r_xylem = XylemHydraulics{FT}(config);
+    r_xylem = XylemHydraulics(config);
 
     # now update the energy state of the root before returning the root struct
     r_energy.auxil.cp = sum(r_xylem.state.v_storage) * CP_L_MOL(FT) + (r_xylem.state.cp * r_xylem.state.area * r_xylem.state. l);
