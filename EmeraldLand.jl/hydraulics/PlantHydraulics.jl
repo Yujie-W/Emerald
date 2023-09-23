@@ -9,7 +9,7 @@ using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
 using ..Constant: CP_D_MOL, CP_L_MOL, CP_V_MOL, GAS_R, M_H₂O, T₂₅, ρg_MPa
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..Namespace: AbstractSoilVC, AbstractXylemVC, ComplexVC, ExponentialPVCurve, LinearPVCurve, LogisticVC, PowerVC, SegmentedPVCurve, WeibullVC
-using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS
+using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
 using ..Namespace: Leaf, LeafHydraulics, Leaves1D, Leaves2D, NonSteadyStateFlow, Root, RootHydraulics, Soil, SoilLayer, SteadyStateFlow, Stem, StemHydraulics
@@ -18,6 +18,7 @@ using ..SoilHydraulics: soil_θ, soil_ψ_25
 
 
 include("xylem/flow_profile.jl");
+include("xylem/pressure_profile.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
 

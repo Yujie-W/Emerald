@@ -60,4 +60,23 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         @test PH.flow_out(xylem) == PH.flow_out(ssflow) == PH.flow_out(nssflow) == 1;
     end;
 
+    @testset "Update pressure profile in xylem" begin
+        config = NS.SPACConfiguration{Float64}();
+        xylem = NS.XylemHydraulics(config);
+        nssflow = NS.XylemHydraulicsAuxilNSS(config);
+        ssflow = NS.XylemHydraulicsAuxilSS(config);
+        PH.set_flow_profile!(xylem, 1.0);
+        PH.set_flow_profile!(nssflow, 1.0);
+        PH.set_flow_profile!(ssflow, 1.0);
+
+        PH.xylem_pressure_profile!(xylem, 298.15);
+        PH.xylem_pressure_profile!(xylem.state, nssflow, 298.15);
+        PH.xylem_pressure_profile!(xylem.state, ssflow, 298.15);
+
+        @test xylem.auxil.pressure[end] == nssflow.pressure[end] == ssflow.pressure[end] < 0;
+        @test all(xylem.auxil.pressure[2:end] .< 0);
+        @test all(nssflow.pressure[2:end] .< 0);
+        @test all(ssflow.pressure[2:end] .< 0);
+    end;
+
 end;
