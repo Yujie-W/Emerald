@@ -7,6 +7,7 @@
 # General
 #     2023-Sep-23: add Root struct with energy and xylem fields
 #     2023-Sep-23: add constructor for Root struct and initialize the energy state of the root
+#     2023-Sep-23: add field rhizosphere
 #
 #######################################################################################################################################################################################################
 """
@@ -20,12 +21,14 @@ Structure to save root parameters
 $(TYPEDFIELDS)
 
 """
-mutable struct Root{FT}
+Base.@kwdef mutable struct Root{FT}
     "Root energy struct"
     energy::RootEnergy{FT}
+    "Rhizosphere struct"
+    rhizosphere::Rhizosphere{FT} = Rhizosphere{FT}()
     "Root xylem struct"
     xylem::XylemHydraulics{FT}
-end
+end;
 
 
 """
@@ -44,5 +47,8 @@ Root(config::SPACConfiguration{FT}) where {FT} = (
     r_energy.auxil.cp = sum(r_xylem.state.v_storage) * CP_L_MOL(FT) + (r_xylem.state.cp * r_xylem.state.area * r_xylem.state. l);
     r_energy.state.energy = r_energy.auxil.cp * r_energy.auxil.t;
 
-    return Root{FT}(r_energy, r_xylem)
+    return Root{FT}(
+                energy = r_energy,
+                xylem  = r_xylem
+    )
 );

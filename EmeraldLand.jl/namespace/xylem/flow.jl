@@ -18,7 +18,7 @@ Hierarchy of AbstractFlowProfile:
 - [`SteadyStateFlow`](@ref)
 
 """
-abstract type AbstractFlowProfile{FT<:AbstractFloat} end
+abstract type AbstractFlowProfile{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################
@@ -58,7 +58,7 @@ Base.@kwdef mutable struct NonSteadyStateFlow{FT<:AbstractFloat} <: AbstractFlow
     _f_buffer::Vector{FT} = zeros(FT, DIM_CAPACITY)
     "Vector of sum buffer water flow `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
     _f_sum::Vector{FT} = zeros(FT, DIM_CAPACITY)
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -83,4 +83,4 @@ Base.@kwdef mutable struct SteadyStateFlow{FT<:AbstractFloat} <: AbstractFlowPro
     # Diagnostic variables
     "Flow rate through the organ `[mol s⁻¹]` (for root and stem) or `[mol m⁻² s⁻¹]` (for leaf)"
     flow::FT = 0
-end
+end;

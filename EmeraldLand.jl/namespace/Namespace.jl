@@ -41,6 +41,7 @@ include("xylem/xylem.jl");
 
 # Root system (dependent on xylem)
 include("root/energy.jl");
+include("root/rhizosphere.jl");
 
 include("root/root.jl");
 
