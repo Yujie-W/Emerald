@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-22: define the struct to store the state variables used in xylem hydraulics
 #     2023-Sep-22: add field v_max, pv
+#     2023-Sep-23: add field cp
 #
 #######################################################################################################################################################################################################
 """
@@ -22,6 +23,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemHydraulicsState{FT}
     "Area of xylem (root and stem) or of leaf `[m²]`"
     area::FT = 1
+    "Heat capacity of the root `[J m⁻³ K⁻¹]`"
+    cp::FT = 1e6
     "Maximal xylem hydraulic conductivity `[mol s⁻¹ MPa⁻¹ m⁻¹]` for root and stem; `[mol s⁻¹ MPa⁻¹ m⁻²]` for leaf"
     k_max::FT = 25
     "Length `[m]`"

@@ -31,12 +31,18 @@ include("config/trace.jl");
 include("config/config.jl");
 
 
-# Plant hydraulics
+# Plant hydraulics (dependent on config)
 include("xylem/flow.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
 
 include("xylem/xylem.jl");
+
+
+# Root system (dependent on xylem)
+include("root/energy.jl");
+
+include("root/root.jl");
 
 
 #
