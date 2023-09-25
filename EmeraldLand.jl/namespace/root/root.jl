@@ -23,7 +23,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct Root{FT}
     "Root energy struct"
-    energy::RootEnergy{FT}
+    energy::XylemEnergy{FT}
     "Rhizosphere struct"
     rhizosphere::Rhizosphere{FT} = Rhizosphere{FT}()
     "Root xylem struct"
@@ -40,7 +40,7 @@ Return the root struct with initialized energy states, given
 
 """
 Root(config::SPACConfiguration{FT}) where {FT} = (
-    r_energy = RootEnergy{FT}();
+    r_energy = XylemEnergy{FT}();
     r_xylem = XylemHydraulics(config);
 
     # now update the energy state of the root before returning the root struct

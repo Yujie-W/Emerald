@@ -18,14 +18,20 @@ using ..Namespace: MonoElementSPAC, MultiLayerSPAC, SPACConfiguration
 using ..SoilHydraulics: relative_hydraulic_conductance, soil_θ, soil_ψ_25
 
 
+# xylem
 include("xylem/flow_profile.jl");
 include("xylem/pressure_profile.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
 
+# root (dependent on xylem)
 include("root/flow_profile.jl");
 include("root/pressure_profile.jl");
 include("root/rhizosphere.jl");
+
+# stem (dependent on xylem)
+include("stem/flow_profile.jl");
+include("stem/pressure_profile.jl");
 
 
 # include functions related to beta factor

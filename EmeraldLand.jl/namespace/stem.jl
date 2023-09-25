@@ -19,7 +19,7 @@ Structure to save stem parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Stem{FT<:AbstractFloat}
+Base.@kwdef mutable struct Stem2{FT<:AbstractFloat}
     # Embedded structures
     "[`StemHydraulics`](@ref) type stem hydraulic system"
     HS::StemHydraulics{FT} = StemHydraulics{FT}()

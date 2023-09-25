@@ -32,6 +32,7 @@ include("config/config.jl");
 
 
 # Plant hydraulics (dependent on config)
+include("xylem/energy.jl");
 include("xylem/flow.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
@@ -40,11 +41,13 @@ include("xylem/xylem.jl");
 
 
 # Root system (dependent on xylem)
-include("root/energy.jl");
 include("root/rhizosphere.jl");
 
 include("root/root.jl");
 
+
+# Stem system (dependent on xylem)
+include("stem/stem.jl");
 
 #
 include("leaf/biophysics.jl");

@@ -5,7 +5,7 @@
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add RootEnergyState
+#     2023-Sep-23: add XylemEnergyState
 #
 #######################################################################################################################################################################################################
 """
@@ -19,7 +19,7 @@ Structure to save root energy state variables
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct RootEnergyState{FT}
+Base.@kwdef mutable struct XylemEnergyState{FT}
     "Total energy `[J]`"
     energy::FT = 0
 end;
@@ -29,7 +29,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add RootEnergyAuxil
+#     2023-Sep-23: add XylemEnergyAuxil
 #
 #######################################################################################################################################################################################################
 """
@@ -43,7 +43,7 @@ Structure to save root energy auxiliary variables
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct RootEnergyAuxil{FT}
+Base.@kwdef mutable struct XylemEnergyAuxil{FT}
     "Combined heat capacity of root and water `[J K⁻¹]`"
     cp::FT = 0
     "Temperature `[K]`"
@@ -57,7 +57,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add RootEnergy
+#     2023-Sep-23: add XylemEnergy
 #
 #######################################################################################################################################################################################################
 """
@@ -71,9 +71,9 @@ Structure to save root energy variables
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct RootEnergy{FT}
-    "Root energy state"
-    state::RootEnergyState{FT} = RootEnergyState{FT}()
-    "Root energy auxil"
-    auxil::RootEnergyAuxil{FT} = RootEnergyAuxil{FT}()
+Base.@kwdef mutable struct XylemEnergy{FT}
+    "Xylem energy state"
+    state::XylemEnergyState{FT} = XylemEnergyState{FT}()
+    "Xylem energy auxil"
+    auxil::XylemEnergyAuxil{FT} = XylemEnergyAuxil{FT}()
 end;

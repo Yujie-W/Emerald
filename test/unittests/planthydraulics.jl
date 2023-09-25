@@ -96,4 +96,15 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         @test root.xylem.auxil.pressure[end] ≈ p_target;
     end;
 
+    @testset "Stem flow and pressure profiles" begin
+        config = NS.SPACConfiguration{Float64}();
+        stem = NS.Stem(config);
+        flow = 1.0;
+        PH.set_flow_profile!(stem.xylem, flow);
+        PH.stem_pressure_profile!(stem, -0.1);
+
+        @test PH.flow_out(stem.xylem) == flow;
+        @test all(stem.xylem.auxil.pressure .<= -0.1);
+    end;
+
 end;
