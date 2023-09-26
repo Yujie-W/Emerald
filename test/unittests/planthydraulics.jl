@@ -107,4 +107,19 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         @test all(stem.xylem.auxil.pressure .<= -0.1);
     end;
 
+    @testset "Leaf flow and pressure profile" begin
+        config = NS.SPACConfiguration{Float64}();
+        leaf = NS.Leaf(config);
+        PH.leaf_pressure_profile!(leaf, -0.1);
+
+        @test all(leaf.xylem.auxil.pressure .<= -0.1);
+
+        # scenario of non-steady state flow
+        config = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
+        leaf = NS.Leaf(config);
+        PH.leaf_pressure_profile!(leaf, -0.1);
+
+        @test all(leaf.xylem.auxil.pressure .<= -0.1);
+    end;
+
 end;

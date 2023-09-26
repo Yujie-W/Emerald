@@ -9,7 +9,7 @@ using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
 using ..Constant: CP_D_MOL, CP_L_MOL, CP_V_MOL, GAS_R, M_H₂O, T₂₅, ρg_MPa
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..Namespace: AbstractSoilVC, AbstractXylemVC, ComplexVC, ExponentialPVCurve, LinearPVCurve, LogisticVC, PowerVC, SegmentedPVCurve, WeibullVC
-using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
+using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState, XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
 using ..Namespace: Root, SoilLayer
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
@@ -32,6 +32,10 @@ include("root/rhizosphere.jl");
 # stem (dependent on xylem)
 include("stem/flow_profile.jl");
 include("stem/pressure_profile.jl");
+
+# leaf (dependent on xylem)
+include("leaf/capacitor.jl");
+include("leaf/pressure_profile.jl");
 
 
 # include functions related to beta factor

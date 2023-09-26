@@ -38,6 +38,7 @@ include("xylem/pv.jl");
 include("xylem/vc.jl");
 
 include("xylem/extraxylem.jl");
+include("xylem/junction.jl");
 include("xylem/xylem.jl");
 
 

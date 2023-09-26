@@ -872,7 +872,7 @@ Structure to save leaf parameters. This structure is meant for leaf level resear
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaf2{FT<:AbstractFloat} <: AbstractLeaf{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -930,8 +930,8 @@ Base.@kwdef mutable struct Leaf{FT<:AbstractFloat} <: AbstractLeaf{FT}
     _p_CO₂_s::FT = 0
 end
 
-Leaf(config::SPACConfiguration{FT}) where {FT} = (
-    return Leaf{FT}(
+Leaf2(config::SPACConfiguration{FT}) where {FT} = (
+    return Leaf2{FT}(
                 BIO = HyperLeafBio(config),
     )
 )

@@ -4,31 +4,27 @@
 #
 # Changes to this struct
 # General
-#     2023-Sep-26: define the struct to store the state variables used in extraxylary capacitor
+#     2023-Sep-26: define the struct to store the state variables used in junction capacitor
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the state variables for extraxylary capacitor
+Struct that contains the state variables for junction capacitor
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
-    "Maximum extraxylary hydraulic conductance `[mol s⁻¹ MPa⁻¹ m⁻²]`"
-    k_max::FT = 100
+Base.@kwdef mutable struct JunctionCapacitorState{FT}
     "Pressure volume curve of the capacitor"
     pv::AbstractPVCurve{FT} = ExponentialPVCurve{FT}()
     "Current volume of the capacitor `[mol m⁻²]`"
     v_storage::FT = 0
     "Capacitor maximum volume per basal area or per leaf area `[mol m⁻²]`"
     v_max::FT = 0
-    "Vulnerability curve of the extraxylary capacitor"
-    vc::AbstractXylemVC{FT} = WeibullVC{FT}(5,1)
 end
 
 
@@ -36,27 +32,23 @@ end
 #
 # Changes to this struct
 # General
-#     2023-Sep-26: define the struct to store the auxilary variables used in extraxylary capacitor
+#     2023-Sep-26: define the struct to store the auxilary variables used in junction capacitor
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the auxilary variables for extraxylary capacitor
+Struct that contains the auxilary variables for junction capacitor
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct ExtraXylemCapacitorAuxil{FT}
-    "Flow rate out from the capacitor `[mol m⁻² s⁻¹]`"
-    flow::FT = 0
-    "Hydraulic conductance of the capacitor `[mol s⁻¹ MPa⁻¹ m⁻²]`"
-    k::FT = 100
-    "Pressure at the end of the capacitor `[MPa]`"
-    p_leaf::FT = 0
+Base.@kwdef mutable struct JunctionCapacitorAuxil{FT}
+    "Pressure of the capacitor `[MPa]`"
+    p::FT = 0
 end
 
 
@@ -78,9 +70,9 @@ Struct that contains the capacitor state and auxilary variables
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct ExtraXylemCapacitor{FT}
+Base.@kwdef mutable struct JunctionCapacitor{FT}
     "State variables of the capacitor"
-    state::ExtraXylemCapacitorState{FT} = ExtraXylemCapacitorState{FT}()
+    state::JunctionCapacitorState{FT} = JunctionCapacitorState{FT}()
     "Auxilary variables of the capacitor"
-    auxil::ExtraXylemCapacitorAuxil{FT} = ExtraXylemCapacitorAuxil{FT}()
+    auxil::JunctionCapacitorAuxil{FT} = JunctionCapacitorAuxil{FT}()
 end
