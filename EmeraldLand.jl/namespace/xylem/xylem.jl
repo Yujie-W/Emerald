@@ -23,7 +23,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemHydraulicsState{FT}
     "Area of xylem (root and stem) or of leaf `[m²]`"
     area::FT = 1
-    "Heat capacity of the root `[J m⁻³ K⁻¹]`"
+    "Heat capacity of the xylem per volume or of leaf per mass `[J m⁻³ K⁻¹]`"
     cp::FT = 1e6
     "Maximal xylem hydraulic conductivity `[mol s⁻¹ MPa⁻¹ m⁻¹]` for root and stem; `[mol s⁻¹ MPa⁻¹ m⁻²]` for leaf"
     k_max::FT = 25

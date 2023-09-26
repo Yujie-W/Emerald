@@ -1,11 +1,11 @@
-# This file contains the structs used to store the energy state and auxiliary variables of the xylem (root and stem)
-# Note here that the energy state needs to be initialized with the heat capacity of xylem and water, water content, and temperature...
+# This file contains the structs used to store the energy state and auxiliary variables of the leaf
+# Note here that the energy state needs to be initialized with the heat capacity of leaf and water, water content, and temperature...
 
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add XylemEnergyState
+#     2023-Sep-25: add LeafEnergyState
 #
 #######################################################################################################################################################################################################
 """
@@ -19,7 +19,7 @@ Structure to save root energy state variables
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemEnergyState{FT}
+Base.@kwdef mutable struct LeafEnergyState{FT}
     "Total energy `[J]`"
     energy::FT = 0
 end;
@@ -29,7 +29,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add XylemEnergyAuxil
+#     2023-Sep-25: add LeafEnergyAuxil
 #
 #######################################################################################################################################################################################################
 """
@@ -43,7 +43,7 @@ Structure to save root energy auxiliary variables
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemEnergyAuxil{FT}
+Base.@kwdef mutable struct LeafEnergyAuxil{FT}
     "Combined heat capacity of root and water `[J K⁻¹]`"
     cp::FT = 0
     "Temperature `[K]`"
@@ -57,7 +57,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add XylemEnergy
+#     2023-Sep-25: add LeafEnergy
 #
 #######################################################################################################################################################################################################
 """
@@ -71,9 +71,9 @@ Structure to save root energy variables
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemEnergy{FT}
-    "Xylem energy state"
-    state::XylemEnergyState{FT} = XylemEnergyState{FT}()
-    "Xylem energy auxil"
-    auxil::XylemEnergyAuxil{FT} = XylemEnergyAuxil{FT}()
+Base.@kwdef mutable struct LeafEnergy{FT}
+    "Leaf energy state"
+    state::LeafEnergyState{FT} = LeafEnergyState{FT}()
+    "Leaf energy auxil"
+    auxil::LeafEnergyAuxil{FT} = LeafEnergyAuxil{FT}()
 end;

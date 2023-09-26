@@ -37,6 +37,7 @@ include("xylem/flow.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
 
+include("xylem/extraxylem.jl");
 include("xylem/xylem.jl");
 
 
@@ -49,8 +50,12 @@ include("root/root.jl");
 # Stem system (dependent on xylem)
 include("stem/stem.jl");
 
-#
+
+# Leaf system (dependent on xylem)
 include("leaf/biophysics.jl");
+include("leaf/energy.jl");
+
+include("leaf/leaf.jl");
 
 
 

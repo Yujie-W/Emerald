@@ -1,79 +1,78 @@
-# This file contains the structs used to store the energy state and auxiliary variables of the xylem (root and stem)
-# Note here that the energy state needs to be initialized with the heat capacity of xylem and water, water content, and temperature...
+# This file contains the capacitor outside the xylem, e.g., leaf capacitor and root-trunk junction capacitor
 
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add XylemEnergyState
+#     2023-Sep-26: define the struct to store the state variables used in extraxylary capacitor
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Structure to save root energy state variables
+Struct that contains the state variables for extraxylary capacitor
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemEnergyState{FT}
-    "Total energy `[J]`"
-    energy::FT = 0
-end;
+Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
+    "Pressure volume curve of the capacitor"
+    pv::AbstractPVCurve{FT} = ExponentialPVCurve{FT}()
+    "Current volume of the capacitor `[mol m⁻²]`"
+    v_storage::FT = 0
+    "Capacitor maximum volume per basal area or per leaf area `[mol m⁻²]`"
+    v_max::FT = 0
+end
 
 
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add XylemEnergyAuxil
+#     2023-Sep-26: define the struct to store the auxilary variables used in extraxylary capacitor
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Structure to save root energy auxiliary variables
+Struct that contains the auxilary variables for extraxylary capacitor
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemEnergyAuxil{FT}
-    "Combined heat capacity of root and water `[J K⁻¹]`"
-    cp::FT = 0
-    "Temperature `[K]`"
-    t::FT = 298.15
-    "Partial derivative of the energy per time `[J s⁻¹]`"
-    ∂e∂t::FT = 0
-end;
+Base.@kwdef mutable struct ExtraXylemCapacitorAuxil{FT}
+    "Pressure of the capacitor `[MPa]`"
+    p::FT = 0
+end
 
 
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
 # General
-#     2023-Sep-23: add XylemEnergy
+#     2023-Sep-26: define the struct to store the capacitor
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Structure to save root energy variables
+Struct that contains the capacitor state and auxilary variables
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemEnergy{FT}
-    "Xylem energy state"
-    state::XylemEnergyState{FT} = XylemEnergyState{FT}()
-    "Xylem energy auxil"
-    auxil::XylemEnergyAuxil{FT} = XylemEnergyAuxil{FT}()
-end;
+Base.@kwdef mutable struct ExtraXylemCapacitor{FT}
+    "State variables of the capacitor"
+    state::ExtraXylemCapacitorState{FT} = ExtraXylemCapacitorState{FT}()
+    "Auxilary variables of the capacitor"
+    auxil::ExtraXylemCapacitorAuxil{FT} = ExtraXylemCapacitorAuxil{FT}()
+end
