@@ -29,6 +29,7 @@ include("xylem/vc.jl");
 include("root/flow_profile.jl");
 include("root/pressure_profile.jl");
 include("root/rhizosphere.jl");
+include("root/water_budget.jl");
 
 # stem (dependent on xylem)
 include("stem/flow_profile.jl");
@@ -39,6 +40,8 @@ include("leaf/capacitor.jl");
 include("leaf/flow_profile.jl");
 include("leaf/pressure_profile.jl");
 include("leaf/water_budget.jl");
+
+
 
 
 # include functions related to beta factor
