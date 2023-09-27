@@ -165,7 +165,6 @@ xylem_end_pressure(hs::StemHydraulics{FT}, flow::FT, T::FT) where {FT} = (
 #     2022-May-25: add method for MonoElementSPAC (with sunlit and shaded partitioning)
 # To do
 #     TODO: abstractize the flow rates with canopy RT module
-#     TODO: make this method for Leaves1D
 #
 #######################################################################################################################################################################################################
 """
@@ -208,7 +207,6 @@ xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) wher
 #     2022-May-27: add method for StemHydraulics at non steady state
 #     2022-May-27: add method for Leaf, Root, and Stem (for both steady and non-steady states)
 #     2022-Jun-30: add support to Leaves2D
-#     2022-Jun-30: add method for Leaves1D
 #     2022-May-27: add method for MonoElementSPAC
 #     2022-May-27: add method for MonoGrassSPAC
 #     2022-May-27: add method for MonoPalmSPAC
@@ -239,11 +237,10 @@ function xylem_pressure_profile! end
 
     xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Union{Leaf2{FT}, Leaves2D{FT}, Stem{FT}}) where {FT}
     xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Root{FT}, slayer::SoilLayer{FT}) where {FT}
-    xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Leaves1D{FT}) where {FT}
 
 Update xylem pressure profile (flow profile needs to be updated a priori), given
 - `config` `SPACConfiguration` type struct
-- `organ` `Leaf2`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type organ
+- `organ` `Leaf2`, `Leaves2D`, `Root`, or `Stem` type organ
 - `slayer` Soil layer corresponded to root
 - `drought_legacy` If true, update xylem cavitation legacy and leaf critical flow (e_crit)
 
@@ -260,20 +257,6 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Root{FT}, slayer::
     (; HS) = organ;
 
     xylem_pressure_profile!(config, HS, slayer, HS.FLOW, organ.t);
-
-    return nothing
-);
-
-xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Leaves1D{FT}) where {FT} = (
-    (; HS, HS2) = organ;
-
-    xylem_pressure_profile!(config, HS, HS.FLOW, organ.t[1]);
-    HS2._k_history .= HS._k_history;
-    HS2.p_history .= HS.p_history;
-
-    xylem_pressure_profile!(config, HS2, HS2.FLOW, organ.t[2]);
-    HS._k_history .= HS2._k_history;
-    HS.p_history .= HS2.p_history;
 
     return nothing
 );

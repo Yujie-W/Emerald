@@ -833,7 +833,6 @@ Abstract type for leaf
 
 Hierarchy of the `AbstractLeaf`
 - [`Leaf`](@ref)
-- [`Leaves1D`](@ref)
 - [`Leaves2D`](@ref)
 
 """
@@ -940,101 +939,7 @@ Leaf2(config::SPACConfiguration{FT}) where {FT} = (
     return Leaf2{FT}(
                 NS = Leaf(config)
     )
-)
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this structure
-# General
-#     2022-Jun-27: add new structure for leaves with 1D Vector of parameters, such as leaves for sunlit and shaded partitions
-#     2022-Jun-27: make BIO BroadbandLeafBiophysics only
-#     2022-Jun-28: add a_gross and a_net, make t a Vector, remove _t
-#     2022-Jun-30: add a second HS2 for shaded leaves
-#     2022-Jun-30: add SM as a field
-#     2022-Jul-01: add G_LIMITS as a field
-#     2022-Jul-07: make p_H₂O_sat a vector
-#     2022-Jul-12: add field: ∂g∂t
-#     2022-Jul-14: add field: CP, e, cp, and ∂e∂t
-#     2022-Jul-19: remove field p_H₂O_sat
-#     2022-Nov-18: use Union type for SM
-#     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
-#     2023-Jun-13: add field: etr
-#     2023-Sep-11: set minimum G to 0 instead of 1e-4
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Structure to save leaf parameters for a single canopy layer. This structure is meant for canopy level research and canopy radiative transfer scheme with sunlit and shaded partitioning.
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
-    # Constants
-    # "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
-    # CP::FT = 1780
-    "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    G_LIMITS::Vector{FT} = FT[1e-3, 0.3]
-    "Leaf width `[m]`"
-    WIDTH::FT = 0.05
-
-    # Embedded structures
-    "New leaf struct, will replace Leaf2 in the next major refactor"
-    NS::Leaf{FT}
-    # "[`BroadbandLeafBiophysics`](@ref) type leaf biophysical parameters"
-    # BIO::BroadbandLeafBiophysics{FT} = BroadbandLeafBiophysics{FT}()
-    # "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    # HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
-    # "[`LeafHydraulics`](@ref) type leaf hydraulic system used for other calculations (say sunlit and shaded leaf partitioning)"
-    # HS2::LeafHydraulics{FT} = LeafHydraulics{FT}()
-    "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
-    PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
-    "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
-    PSM::Union{C3VJPModel{FT}, C4VJPModel{FT}, C3CytochromeModel{FT}} = C3VJPModel{FT}()
-    "Stomatal model"
-    SM::Union{AndereggSM{FT}, BallBerrySM{FT}, EllerSM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}} = WangSM{FT}()
-
-    # Prognostic variables (not used for ∂y∂t)
-    "Boundary leaf diffusive conductance to CO₂ `[mol m⁻² s⁻¹]`"
-    g_CO₂_b::Vector{FT} = FT[3, 3]
-    "Absorbed photosynthetically active radiation used for photosynthesis `[μmol m⁻² s⁻¹]`"
-    ppar::Vector{FT} = FT[1000, 200]
-    # "Current leaf temperature"
-    # t::Vector{FT} = FT[T₂₅(FT), T₂₅(FT)]
-
-    # Prognostic variables (used for ∂y∂t)
-    # "Total stored energy per area `[J m⁻²]`"
-    # e::Vector{FT} = FT[(CP * BIO.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t[1], (CP * BIO.lma * 10 + HS2.v_storage * CP_L_MOL(FT)) * t[2]]
-    "Stomatal conductance to water vapor `[mol m⁻² s⁻¹]`"
-    g_H₂O_s::Vector{FT} = FT[0.01, 0.01]
-    # "Marginal increase in energy `[W m⁻²]`"
-    # ∂e∂t::Vector{FT} = FT[0, 0]
-    "Marginal increase of conductance per time `[mol m⁻² s⁻²]`"
-    ∂g∂t::Vector{FT} = FT[0, 0]
-
-    # Diagnostic variables
-    "Gross photosynthetic rate `[μmol m⁻² s⁻¹]`"
-    a_gross::Vector{FT} = FT[0, 0]
-    "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
-    a_net::Vector{FT} = FT[0, 0]
-    "Actual electron transport `[μmol m⁻² s⁻¹]`"
-    etr::Vector{FT} = FT[0, 0]
-
-    # Cache variables
-    "Combined specific heat capacity of leaf per area `[J K⁻¹ m⁻²]`"
-    _cp::Vector{FT} = FT[0, 0]
-    "Total leaf diffusive conductance to CO₂ `[mol m⁻² s⁻¹]`"
-    _g_CO₂::Vector{FT} = FT[0, 0]
-    "Leaf internal CO₂ partial pressure `[Pa]`"
-    _p_CO₂_i::Vector{FT} = FT[0, 0]
-    "Leaf surface CO₂ partial pressure `[Pa]`"
-    _p_CO₂_s::Vector{FT} = FT[0, 0]
-end
+);
 
 
 #######################################################################################################################################################################################################
