@@ -49,16 +49,11 @@ include("drought/disconnection.jl");
 include("drought/legacy.jl");
 
 # include function related to stomtal optimality
-include("optimality/critical_flow.jl");
 include("optimality/derivative.jl");
 
 # include functions related to flow and pressure profiles
-include("flow_profile/flow_out.jl");
 include("flow_profile/leaf_flow_out.jl");
 include("flow_profile/leaf_flow_profile.jl");
-include("flow_profile/read.jl");
-include("flow_profile/root_pk.jl");
-include("flow_profile/root_flow_out.jl");
 include("flow_profile/root_flow_profile.jl");
 include("flow_profile/spac_flow_profile.jl");
 include("flow_profile/stem_flow_out.jl");

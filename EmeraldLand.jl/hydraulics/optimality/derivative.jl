@@ -23,17 +23,17 @@ function ∂E∂P end
 
 ∂E∂P(lf::Union{Leaf2{FT}, Leaves2D{FT}}, flow::FT; δe::FT = FT(1e-7)) where {FT} = ∂E∂P(lf.HS, flow, lf.t; δe = δe);
 
-∂E∂P(hs::LeafHydraulics{FT}, flow::FT, t::FT; δe::FT = FT(1e-7)) where {FT} = (
+∂E∂P(xylem::XylemHydraulics{FT}, flow::FT, t::FT; δe::FT = FT(1e-7)) where {FT} = (
     @assert δe != 0 "δe must not be 0";
 
-    _p1 = xylem_end_pressure(hs, flow, t);
-    _p2 = xylem_end_pressure(hs, flow + δe, t);
-    _dedp = -δe / (_p2 - _p1);
+    p1 = xylem_end_pressure(xylem, flow, t);
+    p2 = xylem_end_pressure(xylem, flow + δe, t);
+    dedp = -δe / (p2 - p1);
 
-    if isnan(_dedp)
-        @info "Debugging" _p1 _p2 flow t δe;
+    if isnan(dedp)
+        @info "Debugging" p1 p2 flow t δe;
         error("NaN detected when computing ∂E∂P!");
     end;
 
-    return _dedp
+    return dedp
 );
