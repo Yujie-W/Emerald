@@ -13,23 +13,23 @@
 #######################################################################################################################################################################################################
 """
 
-    clear_legacy!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat}
-    clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
-    clear_legacy!(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT<:AbstractFloat}
-    clear_legacy!(organ::Leaves1D{FT}) where {FT<:AbstractFloat}
+    clear_legacy!(spac::MonoElementSPAC{FT}) where {FT}
+    clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT}
+    clear_legacy!(organ::Union{Leaf2{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT}
+    clear_legacy!(organ::Leaves1D{FT}) where {FT}
 
 Clear the legacy for hydraulic organ or system, given
 - `spac` `MonoElementSPAC` or `MultiLayerSPAC` type structure
-- `organ` `Leaf`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type structure
+- `organ` `Leaf2`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type structure
 """
 function clear_legacy! end
 
-clear_legacy!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (clear_legacy!(spac.LEAF); clear_legacy!(spac.ROOT); clear_legacy!(spac.STEM););
+clear_legacy!(spac::MonoElementSPAC{FT}) where {FT} = (clear_legacy!(spac.LEAF); clear_legacy!(spac.ROOT); clear_legacy!(spac.STEM););
 
-clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
+clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
 
-clear_legacy!(organ::Union{Leaf{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT<:AbstractFloat} = clear_legacy!(organ.HS);
+clear_legacy!(organ::Union{Leaf2{FT}, Leaves2D{FT}, Root2{FT}, Stem2{FT}}) where {FT} = clear_legacy!(organ.HS);
 
-clear_legacy!(organ::Leaves1D{FT}) where {FT<:AbstractFloat} = (clear_legacy!(organ.HS); clear_legacy!(organ.HS2););
+clear_legacy!(organ::Leaves1D{FT}) where {FT} = (clear_legacy!(organ.HS); clear_legacy!(organ.HS2););
 
-clear_legacy!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}) where {FT<:AbstractFloat} = (hs._k_history .= 1; hs.p_history .= 0; return nothing);
+clear_legacy!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}) where {FT} = (hs._k_history .= 1; hs.p_history .= 0; return nothing);

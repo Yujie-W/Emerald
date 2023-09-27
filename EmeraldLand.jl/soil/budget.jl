@@ -26,14 +26,14 @@
 #######################################################################################################################################################################################################
 """
 #
-    soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Update the marginal increase of soil water content and energy per layer, given
 - `config` Configuration for `MultiLayerSPAC`
 - `spac` `MultiLayerSPAC` SPAC
 
 #
-    soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+    soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
 
 Run soil water and energy budget, given
 - `config` Configuration for `MultiLayerSPAC`
@@ -43,7 +43,7 @@ Run soil water and energy budget, given
 """
 function soil_budget! end
 
-soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     soil_infiltration!(config, spac);
     soil_diffusion!(config, spac);
     soil_source_sink!(config, spac);
@@ -51,7 +51,7 @@ soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<
     return nothing
 );
 
-soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
+soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
     soil_diffusion!(config, spac, δt);
     volume_balance!(config, spac);
     soil_infiltration!(config, spac, δt);

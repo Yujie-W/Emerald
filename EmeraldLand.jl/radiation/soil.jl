@@ -33,8 +33,8 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
-    soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}) where {FT<:AbstractFloat}
+    soil_albedo!(can::HyperspectralMLCanopy{FT}, soil::Soil{FT}) where {FT}
+    soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `config` Configurations of spac model
@@ -43,9 +43,9 @@ Updates lower soil boundary reflectance, given
 """
 function soil_albedo! end
 
-soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}) where {FT<:AbstractFloat} = soil_albedo!(config, soil, soil.ALBEDO);
+soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}) where {FT} = soil_albedo!(config, soil, soil.ALBEDO);
 
-soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT} = (
     (; α_CLM) = config;
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
@@ -67,7 +67,7 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::BroadbandSoi
     return nothing
 );
 
-soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT} = (
     (; SPECTRA, α_CLM, α_FITTING) = config;
     (; COLOR, LAYERS) = soil;
     @assert 1 <= COLOR <=20;
@@ -102,7 +102,7 @@ soil_albedo!(config::SPACConfiguration{FT}, soil::Soil{FT}, albedo::Hyperspectra
     albedo._weight .= pinv(SPECTRA.MAT_SOIL) * albedo._ρ_sw;
 
     # function to solve for weights
-    @inline _fit(x::Vector{FT}) where {FT<:AbstractFloat} = (
+    @inline _fit(x::Vector{FT}) where {FT} = (
         mul!(albedo._ρ_sw, SPECTRA.MAT_SOIL, x);
         albedo._tmp_vec_nir .= abs.(view(albedo._ρ_sw,SPECTRA.IΛ_NIR) .- _nir);
         _diff = ( mean( view(albedo._ρ_sw,SPECTRA.IΛ_PAR) ) - _par ) ^ 2 + mean( albedo._tmp_vec_nir ) ^ 2;

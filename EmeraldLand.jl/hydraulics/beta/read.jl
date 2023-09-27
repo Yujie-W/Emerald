@@ -7,9 +7,9 @@
 #######################################################################################################################################################################################################
 """
 
-    β_factor(f::Function, vc::AbstractXylemVC{FT}, x_25::FT) where {FT<:AbstractFloat}
-    β_factor(f::Function, vc::AbstractSoilVC{FT}, x_25::FT) where {FT<:AbstractFloat}
-    β_factor(f::Function, x_25::FT) where {FT<:AbstractFloat}
+    β_factor(f::Function, vc::AbstractXylemVC{FT}, x_25::FT) where {FT}
+    β_factor(f::Function, vc::AbstractSoilVC{FT}, x_25::FT) where {FT}
+    β_factor(f::Function, x_25::FT) where {FT}
 
 Return the β factor based on relative conductance or soil potential/pressure, given
 - `f` Function to translate relative k to β, for example f(x) = x, f(x) = x², and f(x) = sqrt(x) for x in [0,1]
@@ -20,6 +20,6 @@ Return the β factor based on relative conductance or soil potential/pressure, g
 """
 function read_β end
 
-read_β(sm::AbstractStomataModel{FT}) where {FT<:AbstractFloat} = FT(NaN);
+read_β(sm::AbstractStomataModel{FT}) where {FT} = FT(NaN);
 
-read_β(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT<:AbstractFloat} = sm.β.β₁;
+read_β(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = sm.β.β₁;

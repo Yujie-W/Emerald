@@ -17,7 +17,7 @@
 #######################################################################################################################################################################################################
 """
 
-    initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Initialize the SPAC, given
 - `config` Configurations of spac model
@@ -26,7 +26,7 @@ Initialize the SPAC, given
 """
 function initialize! end
 
-initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ENABLE_SOIL_EVAPORATION) = config;
     (; CANOPY, LEAVES, SOIL) = spac;
 

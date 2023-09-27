@@ -26,7 +26,7 @@ root_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt
     return nothing
 );
 
-root_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+root_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     (; ROOTS) = spac;
 
     set_root_flow_out!(config, spac);
@@ -35,7 +35,7 @@ root_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt:
     return nothing
 );
 
-root_flow_profile!(organ::Root{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+root_flow_profile!(organ::Root{FT}, Δt::FT) where {FT} = (
     if organ._isconnected
         root_flow_profile!(organ.HS, organ.t, Δt);
         organ.∫∂w∂t_in += flow_in(organ) * Δt;
@@ -45,11 +45,11 @@ root_flow_profile!(organ::Root{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-root_flow_profile!(hs::RootHydraulics{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = root_flow_profile!(hs, hs.FLOW, T, Δt);
+root_flow_profile!(hs::RootHydraulics{FT}, T::FT, Δt::FT) where {FT} = root_flow_profile!(hs, hs.FLOW, T, Δt);
 
-root_flow_profile!(hs::RootHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = nothing;
+root_flow_profile!(hs::RootHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT, Δt::FT) where {FT} = nothing;
 
-root_flow_profile!(hs::RootHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = (
+root_flow_profile!(hs::RootHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT, Δt::FT) where {FT} = (
     (; DIM_XYLEM, PVC, V_MAXIMUM) = hs;
 
     _f_vis = relative_viscosity(T);

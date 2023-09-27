@@ -60,6 +60,17 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to run the model at steady state mode"
     STEADY_STATE_FLOW::Bool = true
 
+    # features related to canopy photosynthesis
+    # Note
+    #     1. to use the hyperspectral mode, set both to true
+    #     2. to use the broadband mode with sunlit/shaded fractions, set SUNLIT_FRACTION to true and SUNLIT_ANGLES to false
+    #     3. to use the broadband mode with one leaf model, set both to false (ppar_sunlit and ppar_shaded will be set to be the same)
+    #     4. to use big leaf model, TODO item
+    "Whether to partition the sunlit fraction into different inclination and azimuth angles (if false, use float for sunlit fraction)"
+    SUNLIT_ANGLES::Bool = true
+    "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
+    SUNLIT_FRACTION::Bool = true
+
 
 
 

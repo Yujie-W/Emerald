@@ -18,7 +18,7 @@
 #######################################################################################################################################################################################################
 """
 
-        adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+        adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
 
 Return adjusted time that soil does not over saturate or drain, given
 - `config` Configuration for `MultiLayerSPAC`
@@ -26,7 +26,7 @@ Return adjusted time that soil does not over saturate or drain, given
 - `δt` Time step
 
 """
-function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
     (; BRANCHES, LEAVES, SOIL, TRUNK) = spac;
 
@@ -159,8 +159,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat}
-    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT}
+    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Move forward in time for SPAC with time stepper controller, given
 - `config` Configuration for `MultiLayerSPAC`
@@ -170,7 +170,7 @@ Move forward in time for SPAC with time stepper controller, given
 """
 function time_stepper! end
 
-time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat} = (
+time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT} = (
     (; CANOPY, LEAVES, METEO, SOIL) = spac;
 
     # run the update function until time elapses
@@ -215,7 +215,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
     return nothing
 );
 
-time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES, METEO, SOIL) = spac;
 
     # run the update function until the gpp is stable

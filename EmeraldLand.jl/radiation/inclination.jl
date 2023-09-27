@@ -9,8 +9,8 @@
 #######################################################################################################################################################################################################
 """
 
-    lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT<:AbstractFloat}
-    lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat}
+    lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT}
+    lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT}
 
 Return the cumulative distribution frequency, given
 - `lidf` `BetaLIDF` or `VerhoefLIDF` type algorithm
@@ -19,13 +19,13 @@ Return the cumulative distribution frequency, given
 """
 function lidf_cdf end
 
-lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
+lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT} = (
     (; A, B) = lidf;
 
     return beta_inc(A, B, θ / 90, 1 - θ / 90)[1]
 );
 
-lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
+lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT} = (
     (; A, B) = lidf;
 
     if A > 1
@@ -62,7 +62,7 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    inclination_angles!(config::SPACConfiguration{FT}, can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT<:AbstractFloat}
+    inclination_angles!(config::SPACConfiguration{FT}, can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT}
 
 Update the frequency of leaf inclination angles, given
 - `config` SPAC configurations
@@ -74,7 +74,7 @@ function inclination_angles! end
 
 inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = inclination_angles!(config, spac.CANOPY, spac.CANOPY.LIDF);
 
-inclination_angles!(config::SPACConfiguration{FT}, can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT<:AbstractFloat} = (
+inclination_angles!(config::SPACConfiguration{FT}, can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT} = (
     (; Θ_INCL_BNDS) = config;
 
     for _i in eachindex(can.P_INCL)

@@ -20,20 +20,20 @@
 #######################################################################################################################################################################################################
 """
 
-    xylem_end_pressure(organ::Union{Leaf{FT}, Stem{FT}}, flow::FT) where {FT<:AbstractFloat}
-    xylem_end_pressure(organ::Root{FT}, slayer::SoilLayer{FT}, flow::FT) where {FT<:AbstractFloat}
-    xylem_end_pressure(spac::MonoElementSPAC{FT}, flow::FT) where {FT<:AbstractFloat}
+    xylem_end_pressure(organ::Union{Leaf2{FT}, Stem2{FT}}, flow::FT) where {FT}
+    xylem_end_pressure(organ::Root{FT}, slayer::SoilLayer{FT}, flow::FT) where {FT}
+    xylem_end_pressure(spac::MonoElementSPAC{FT}, flow::FT) where {FT}
 
 Return the xylem end water pressure in MPa, given
-- `organ` `Leaf`, `Root`, or `Stem` type struct
+- `organ` `Leaf2`, `Root2`, or `Stem2` type struct
 - `slayer` Soil layer corresponded to root
-- `flow` Flow rate (per leaf area for Leaf) `[mol (m⁻²) s⁻¹]`
+- `flow` Flow rate (per leaf area for Leaf2) `[mol (m⁻²) s⁻¹]`
 - `spac` `MonoElementSPAC` type struct
 
 """
 function xylem_end_pressure end
 
-xylem_end_pressure(spac::MonoElementSPAC{FT}, flow::FT) where {FT<:AbstractFloat} = (
+xylem_end_pressure(spac::MonoElementSPAC{FT}, flow::FT) where {FT} = (
     (; LEAF, ROOT, SOIL, STEM) = spac;
 
     # calculate the p_dos for root and stem
@@ -43,11 +43,11 @@ xylem_end_pressure(spac::MonoElementSPAC{FT}, flow::FT) where {FT<:AbstractFloat
     return xylem_end_pressure(LEAF, flow / LEAF.HS.AREA);
 );
 
-xylem_end_pressure(organ::Union{Leaf{FT}, Stem{FT}}, flow::FT) where {FT<:AbstractFloat} = xylem_end_pressure(organ.HS, flow, organ.t);
+xylem_end_pressure(organ::Union{Leaf2{FT}, Stem2{FT}}, flow::FT) where {FT} = xylem_end_pressure(organ.HS, flow, organ.t);
 
-xylem_end_pressure(organ::Root{FT}, slayer::SoilLayer{FT}, flow::FT) where {FT<:AbstractFloat} = xylem_end_pressure(organ.HS, slayer, flow, organ.t);
+xylem_end_pressure(organ::Root{FT}, slayer::SoilLayer{FT}, flow::FT) where {FT} = xylem_end_pressure(organ.HS, slayer, flow, organ.t);
 
-xylem_end_pressure(hs::LeafHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractFloat} = (
+xylem_end_pressure(hs::LeafHydraulics{FT}, flow::FT, T::FT) where {FT} = (
     (; DIM_XYLEM, K_SLA, VC) = hs;
 
     _f_st = relative_surface_tension(T);
@@ -77,7 +77,7 @@ xylem_end_pressure(hs::LeafHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractF
     return _p_end
 );
 
-xylem_end_pressure(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, flow::FT, T::FT) where {FT<:AbstractFloat} = (
+xylem_end_pressure(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, flow::FT, T::FT) where {FT} = (
     (; AREA, DIM_XYLEM, K_RHIZ, K_X, L, VC, ΔH) = hs;
 
     _k_max = AREA * K_X / L;
@@ -125,7 +125,7 @@ xylem_end_pressure(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, flow::FT, T::F
     return _p_end
 );
 
-xylem_end_pressure(hs::StemHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractFloat} = (
+xylem_end_pressure(hs::StemHydraulics{FT}, flow::FT, T::FT) where {FT} = (
     (; AREA, DIM_XYLEM, K_X, L, VC, ΔH) = hs;
 
     _k_max = AREA * K_X / L;
@@ -170,7 +170,7 @@ xylem_end_pressure(hs::StemHydraulics{FT}, flow::FT, T::FT) where {FT<:AbstractF
 #######################################################################################################################################################################################################
 """
 
-    xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) where {FT<:AbstractFloat}
+    xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) where {FT}
 
 Return the xylem end water pressure in MPa for sunlit and shaded leaves, given
 - `spac` `MonoElementSPAC` type struct
@@ -178,7 +178,7 @@ Return the xylem end water pressure in MPa for sunlit and shaded leaves, given
 - `f_sh` Shaded leaves flow rate `[mol s⁻¹]`
 - `r_sl` Sunlit leaves fraction
 """
-xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) where {FT<:AbstractFloat} = (
+xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) where {FT} = (
     (; LEAF, ROOT, STEM) = spac;
 
     # calculate the p_dos for root and stem
@@ -237,18 +237,18 @@ function xylem_pressure_profile! end
 
 """
 
-    xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Union{Leaf{FT}, Leaves2D{FT}, Stem{FT}}) where {FT<:AbstractFloat}
-    xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Root{FT}, slayer::SoilLayer{FT}) where {FT<:AbstractFloat}
-    xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Leaves1D{FT}) where {FT<:AbstractFloat}
+    xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Union{Leaf2{FT}, Leaves2D{FT}, Stem{FT}}) where {FT}
+    xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Root{FT}, slayer::SoilLayer{FT}) where {FT}
+    xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Leaves1D{FT}) where {FT}
 
 Update xylem pressure profile (flow profile needs to be updated a priori), given
 - `config` `SPACConfiguration` type struct
-- `organ` `Leaf`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type organ
+- `organ` `Leaf2`, `Leaves1D`, `Leaves2D`, `Root`, or `Stem` type organ
 - `slayer` Soil layer corresponded to root
 - `drought_legacy` If true, update xylem cavitation legacy and leaf critical flow (e_crit)
 
 """
-xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Union{Leaf{FT}, Leaves2D{FT}, Stem{FT}}) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Union{Leaf2{FT}, Leaves2D{FT}, Stem{FT}}) where {FT} = (
     (; HS) = organ;
 
     xylem_pressure_profile!(config, HS, HS.FLOW, organ.t);
@@ -256,7 +256,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Union{Leaf{FT}, Le
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Root{FT}, slayer::SoilLayer{FT}) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Root{FT}, slayer::SoilLayer{FT}) where {FT} = (
     (; HS) = organ;
 
     xylem_pressure_profile!(config, HS, slayer, HS.FLOW, organ.t);
@@ -264,7 +264,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Root{FT}, slayer::
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Leaves1D{FT}) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Leaves1D{FT}) where {FT} = (
     (; HS, HS2) = organ;
 
     xylem_pressure_profile!(config, HS, HS.FLOW, organ.t[1]);
@@ -278,7 +278,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, organ::Leaves1D{FT}) wher
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT} = (
     (; ENABLE_DROUGHT_LEGACY) = config;
     (; DIM_XYLEM, K_SLA, VC) = hs;
 
@@ -325,7 +325,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, m
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT} = (
     (; ENABLE_DROUGHT_LEGACY) = config;
     (; DIM_XYLEM, K_SLA, VC) = hs;
 
@@ -372,7 +372,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, m
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT} = (
     (; ENABLE_DROUGHT_LEGACY) = config;
     (; AREA, DIM_XYLEM, K_RHIZ, K_X, L, VC, ΔH) = hs;
 
@@ -431,7 +431,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::RootHydraulics{FT}, s
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT} = (
     (; ENABLE_DROUGHT_LEGACY) = config;
     (; AREA, DIM_XYLEM, K_RHIZ, K_X, L, VC, ΔH) = hs;
 
@@ -491,7 +491,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::RootHydraulics{FT}, s
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::StemHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::StemHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT} = (
     (; ENABLE_DROUGHT_LEGACY) = config;
     (; AREA, DIM_XYLEM, K_X, L, VC, ΔH) = hs;
 
@@ -533,7 +533,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::StemHydraulics{FT}, m
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT} = (
     (; ENABLE_DROUGHT_LEGACY) = config;
     (; AREA, DIM_XYLEM, K_X, L, VC, ΔH) = hs;
 
@@ -580,15 +580,15 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::StemHydraulics{FT}, m
 # TODO: add soil ion concentration
 """
 
-    xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat}
-    xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT}
+    xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Update xylem pressure profile (flow profile needs to be updated a priori), given
 - `spac` `MonoElementSPAC` or `MultiLayerSPAC` type spac
 - `drought_legacy` If true, update xylem cavitation legacy
 
 """
-xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT} = (
     (; LEAF, ROOT, SOIL, STEM) = spac;
 
     # update water potential from SOIL
@@ -607,7 +607,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}
     return nothing
 );
 
-xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; KR_THRESHOLD) = config;
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
 
@@ -657,7 +657,7 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT})
 
 # TODO: f_sl and f_sh are not saved correctly here, a change over Leaf structure may be required
 #=
-xylem_pressure_profile!(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT; update::Bool = true) where {FT<:AbstractFloat} = (
+xylem_pressure_profile!(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT; update::Bool = true) where {FT} = (
     (; LEAF, ROOT, STEM) = spac;
 
     xylem_pressure_profile!(ROOT, f_sl + f_sh; update = update);

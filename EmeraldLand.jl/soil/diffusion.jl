@@ -13,14 +13,14 @@
 #######################################################################################################################################################################################################
 """
 #
-    soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Compute the diffusion rate among soil layers, given
 - `config` SPAC configuration
 - `spac` SPAC model
 
 #
-    soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat}
+    soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
 
 Update diffusion rate among soil layers (and thus water and energy budgets), given
 - `config` SPAC configuration
@@ -30,7 +30,7 @@ Update diffusion rate among soil layers (and thus water and energy budgets), giv
 """
 function soil_diffusion! end
 
-soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ENABLE_SOIL_EVAPORATION, DEBUG) = config;
 
     if !ENABLE_SOIL_EVAPORATION
@@ -143,7 +143,7 @@ soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {
     return nothing
 );
 
-soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT<:AbstractFloat} = (
+soil_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
     (; ENABLE_SOIL_EVAPORATION, DEBUG) = config;
 
     if !ENABLE_SOIL_EVAPORATION

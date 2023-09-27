@@ -1,3 +1,5 @@
+#=
+
 #######################################################################################################################################################################################################
 #
 # Changes to this type
@@ -273,6 +275,8 @@ HyperspectralLeafBiophysics(config::SPACConfiguration{FT}) where {FT} = (
                 _τ_f_n    = zeros(FT, DIM_SIF),
     )
 );
+
+=#
 
 
 #######################################################################################################################################################################################################
@@ -874,18 +878,20 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct Leaf2{FT<:AbstractFloat} <: AbstractLeaf{FT}
     # Constants
-    "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
-    CP::FT = 1780
+    # "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
+    # CP::FT = 1780
     "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
     G_LIMITS::Vector{FT} = FT[1e-3, 0.3]
     "Leaf width `[m]`"
     WIDTH::FT = 0.05
 
     # Embedded structures
-    "[`AbstractLeafBiophysics`](@ref) type leaf biophysical parameters"
-    BIO::Union{BroadbandLeafBiophysics{FT}, HyperLeafBio{FT}}
-    "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    "New leaf struct, will replace Leaf2 in the next major refactor"
+    NS::Leaf{FT} = Leaf{FT}()
+    # "[`AbstractLeafBiophysics`](@ref) type leaf biophysical parameters"
+    # BIO::Union{BroadbandLeafBiophysics{FT}, HyperLeafBio{FT}}
+    # "[`LeafHydraulics`](@ref) type leaf hydraulic system"
+    # HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -898,16 +904,16 @@ Base.@kwdef mutable struct Leaf2{FT<:AbstractFloat} <: AbstractLeaf{FT}
     g_CO₂_b::FT = 3
     "Absorbed photosynthetically active radiation used for photosynthesis `[μmol m⁻² s⁻¹]`"
     ppar::FT = 1000
-    "Current leaf temperature"
-    t::FT = T₂₅(FT)
+    # "Current leaf temperature"
+    # t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
-    "Total stored energy per area `[J m⁻²]`"
-    e::FT = (CP * BIO.state.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
+    # "Total stored energy per area `[J m⁻²]`"
+    # e::FT = (CP * BIO.state.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
     "Stomatal conductance to water vapor `[mol m⁻² s⁻¹]`"
     g_H₂O_s::FT = 0.01
-    "Marginal increase in energy `[W m⁻²]`"
-    ∂e∂t::FT = 0
+    # "Marginal increase in energy `[W m⁻²]`"
+    # ∂e∂t::FT = 0
     "Marginal increase of conductance per time `[mol m⁻² s⁻²]`"
     ∂g∂t::FT = 0
 
@@ -932,7 +938,7 @@ end
 
 Leaf2(config::SPACConfiguration{FT}) where {FT} = (
     return Leaf2{FT}(
-                BIO = HyperLeafBio(config),
+                NS = Leaf(config)
     )
 )
 
@@ -970,20 +976,22 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     # Constants
-    "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
-    CP::FT = 1780
+    # "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
+    # CP::FT = 1780
     "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
     G_LIMITS::Vector{FT} = FT[1e-3, 0.3]
     "Leaf width `[m]`"
     WIDTH::FT = 0.05
 
     # Embedded structures
-    "[`BroadbandLeafBiophysics`](@ref) type leaf biophysical parameters"
-    BIO::BroadbandLeafBiophysics{FT} = BroadbandLeafBiophysics{FT}()
-    "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
-    "[`LeafHydraulics`](@ref) type leaf hydraulic system used for other calculations (say sunlit and shaded leaf partitioning)"
-    HS2::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    "New leaf struct, will replace Leaf2 in the next major refactor"
+    NS::Leaf{FT}
+    # "[`BroadbandLeafBiophysics`](@ref) type leaf biophysical parameters"
+    # BIO::BroadbandLeafBiophysics{FT} = BroadbandLeafBiophysics{FT}()
+    # "[`LeafHydraulics`](@ref) type leaf hydraulic system"
+    # HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    # "[`LeafHydraulics`](@ref) type leaf hydraulic system used for other calculations (say sunlit and shaded leaf partitioning)"
+    # HS2::LeafHydraulics{FT} = LeafHydraulics{FT}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -996,16 +1004,16 @@ Base.@kwdef mutable struct Leaves1D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     g_CO₂_b::Vector{FT} = FT[3, 3]
     "Absorbed photosynthetically active radiation used for photosynthesis `[μmol m⁻² s⁻¹]`"
     ppar::Vector{FT} = FT[1000, 200]
-    "Current leaf temperature"
-    t::Vector{FT} = FT[T₂₅(FT), T₂₅(FT)]
+    # "Current leaf temperature"
+    # t::Vector{FT} = FT[T₂₅(FT), T₂₅(FT)]
 
     # Prognostic variables (used for ∂y∂t)
-    "Total stored energy per area `[J m⁻²]`"
-    e::Vector{FT} = FT[(CP * BIO.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t[1], (CP * BIO.lma * 10 + HS2.v_storage * CP_L_MOL(FT)) * t[2]]
+    # "Total stored energy per area `[J m⁻²]`"
+    # e::Vector{FT} = FT[(CP * BIO.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t[1], (CP * BIO.lma * 10 + HS2.v_storage * CP_L_MOL(FT)) * t[2]]
     "Stomatal conductance to water vapor `[mol m⁻² s⁻¹]`"
     g_H₂O_s::Vector{FT} = FT[0.01, 0.01]
-    "Marginal increase in energy `[W m⁻²]`"
-    ∂e∂t::Vector{FT} = FT[0, 0]
+    # "Marginal increase in energy `[W m⁻²]`"
+    # ∂e∂t::Vector{FT} = FT[0, 0]
     "Marginal increase of conductance per time `[mol m⁻² s⁻²]`"
     ∂g∂t::Vector{FT} = FT[0, 0]
 
@@ -1078,10 +1086,12 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     WIDTH::FT = 0.05
 
     # Embedded structures
-    "[`HyperLeafBio`](@ref) type leaf biophysical parameters"
-    BIO::HyperLeafBio{FT}
-    "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
+    "New leaf struct, will replace Leaf2 in the next major refactor"
+    NS::Leaf{FT}
+    # "[`HyperLeafBio`](@ref) type leaf biophysical parameters"
+    # BIO::HyperLeafBio{FT}
+    # "[`LeafHydraulics`](@ref) type leaf hydraulic system"
+    # HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
     "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
     PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
     "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
@@ -1096,18 +1106,18 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     ppar_shaded::FT = 200
     "Absorbed photosynthetically active radiation used for photosynthesis for sunlit leaves `[μmol m⁻² s⁻¹]`"
     ppar_sunlit::Matrix{FT} =
-    "Current leaf temperature `[K]`"
-    t::FT = T₂₅(FT)
+    # "Current leaf temperature `[K]`"
+    # t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
-    "Total stored energy per area `[J m⁻²]`"
-    e::FT = (CP * BIO.state.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
+    # "Total stored energy per area `[J m⁻²]`"
+    # e::FT = (CP * BIO.state.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
     "Stomatal conductance to water vapor for shaded leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_shaded::FT = 0.01
     "Stomatal conductance to water vapor for sunlit leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_sunlit::Matrix{FT}
-    "Marginal increase in energy `[W m⁻²]`"
-    ∂e∂t::FT = 0
+    # "Marginal increase in energy `[W m⁻²]`"
+    # ∂e∂t::FT = 0
     "Marginal increase of conductance per time for shaded leaves `[mol m⁻² s⁻²]`"
     ∂g∂t_shaded::FT = 0
     "Marginal increase of conductance per timefor sunlit leaves `[mol m⁻² s⁻²]`"

@@ -45,6 +45,7 @@ Leaf(config::SPACConfiguration{FT}) where {FT} = (
     l_xylem = XylemHydraulics(config);
 
     # now update the energy state of the leaf before returning the leaf struct
+    l_xylem.state.cp = 1780;
     l_capacitor.state.v_storage = l_capacitor.state.v_max * l_xylem.state.area;
     l_energy.auxil.cp = l_capacitor.state.v_storage * CP_L_MOL(FT) + l_bio.state.lma * l_xylem.state.area * l_xylem.state.cp;
     l_energy.state.energy = l_energy.auxil.cp * l_energy.auxil.t;

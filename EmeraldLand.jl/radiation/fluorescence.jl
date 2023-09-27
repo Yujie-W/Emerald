@@ -19,7 +19,7 @@
 #######################################################################################################################################################################################################
 """
 
-    canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Updates canopy fluorescence, given
 - `config` Configuration for `MultiLayerSPAC`
@@ -28,7 +28,7 @@ Updates canopy fluorescence, given
 """
 function canopy_fluorescence! end
 
-canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ANGLES, CANOPY, LEAVES) = spac;
 
     if (ANGLES.sza < 89)
@@ -40,7 +40,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wh
     return nothing
 );
 
-canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}) where {FT<:AbstractFloat} = (
+canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}) where {FT} = (
     (; DIM_LAYER, SPECTRA, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 

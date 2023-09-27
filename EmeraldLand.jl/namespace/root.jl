@@ -20,18 +20,20 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct Root2{FT<:AbstractFloat}
     # Embedded structures
-    "[`RootHydraulics`](@ref) type root hydraulic system"
-    HS::RootHydraulics{FT} = RootHydraulics{FT}()
+    "New root struct, will replace Root2 in the next major refactor"
+    NS::Root{FT}
+    # "[`RootHydraulics`](@ref) type root hydraulic system"
+    # HS::RootHydraulics{FT} = RootHydraulics{FT}()
 
     # Prognostic variables (not used for ∂y∂t)
-    "Current temperature `[K]`"
-    t::FT = T₂₅(FT)
+    # "Current temperature `[K]`"
+    # t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
-    "Total stored energy in water `[J]`" # TODO: add wood storage as well
-    e::FT = sum(HS.v_storage) * CP_L_MOL(FT) * t
-    "Marginal increase in energy `[W]`"
-    ∂e∂t::FT = 0
+    # "Total stored energy in water `[J]`" # TODO: add wood storage as well
+    # e::FT = sum(HS.v_storage) * CP_L_MOL(FT) * t
+    # "Marginal increase in energy `[W]`"
+    # ∂e∂t::FT = 0
     "Integrator for soil water extration `[mol m⁻² s⁻¹]`"
     ∫∂w∂t_in::FT = 0
     "Integrator for root water extration `[mol m⁻² s⁻¹]`"
@@ -41,3 +43,7 @@ Base.@kwdef mutable struct Root2{FT<:AbstractFloat}
     "Whether root is connected to soil"
     _isconnected::Bool = true
 end
+
+Root2(config::SPACConfiguration{FT}) where {FT} = Root2{FT}(
+            NS = Root(config)
+);

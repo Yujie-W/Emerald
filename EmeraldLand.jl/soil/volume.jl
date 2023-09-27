@@ -12,14 +12,14 @@
 #######################################################################################################################################################################################################
 """
 
-    volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Balance the air volume in the soil so that pressure is in equilibrium, given
 - `config` Configuration for `MultiLayerSPAC`
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; ENABLE_SOIL_EVAPORATION, DEBUG, PRESCRIBE_AIR) = config;
 
     if !ENABLE_SOIL_EVAPORATION

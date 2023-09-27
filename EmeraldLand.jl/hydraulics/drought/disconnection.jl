@@ -9,9 +9,9 @@
 #######################################################################################################################################################################################################
 """
 
-    disconnect!(organ::Union{Leaf{FT},Leaves2D{FT},Stem{FT}}) where {FT<:AbstractFloat}
-    disconnect!(organ::Leaves1D{FT}) where {FT<:AbstractFloat}
-    disconnect!(organ::Root{FT}) where {FT<:AbstractFloat}
+    disconnect!(organ::Union{Leaf2{FT},Leaves2D{FT},Stem{FT}}) where {FT}
+    disconnect!(organ::Leaves1D{FT}) where {FT}
+    disconnect!(organ::Root{FT}) where {FT}
 
 Disconnect root from soil (and set othes' flow to 0), given
 - `organ` Root, stem, or leaf
@@ -19,7 +19,7 @@ Disconnect root from soil (and set othes' flow to 0), given
 """
 function disconnect! end
 
-disconnect!(organ::Leaf{FT}) where {FT<:AbstractFloat} = (
+disconnect!(organ::Leaf2{FT}) where {FT} = (
     disconnect!(organ.HS, organ.HS.FLOW);
 
     organ.g_H₂O_s = 0;
@@ -28,7 +28,7 @@ disconnect!(organ::Leaf{FT}) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-disconnect!(organ::Leaves1D{FT}) where {FT<:AbstractFloat} = (
+disconnect!(organ::Leaves1D{FT}) where {FT} = (
     disconnect!(organ.HS1, organ.HS1.FLOW);
     disconnect!(organ.HS2, organ.HS2.FLOW);
 
@@ -38,7 +38,7 @@ disconnect!(organ::Leaves1D{FT}) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-disconnect!(organ::Leaves2D{FT}) where {FT<:AbstractFloat} = (
+disconnect!(organ::Leaves2D{FT}) where {FT} = (
     disconnect!(organ.HS, organ.HS.FLOW);
 
     organ.g_H₂O_s_shaded = 0;
@@ -49,20 +49,20 @@ disconnect!(organ::Leaves2D{FT}) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-disconnect!(organ::Root{FT}) where {FT<:AbstractFloat} = (
+disconnect!(organ::Root2{FT}) where {FT} = (
     organ._isconnected = false;
     disconnect!(organ.HS, organ.HS.FLOW);
 
     return nothing
 );
 
-disconnect!(organ::Stem{FT}) where {FT<:AbstractFloat} = (
+disconnect!(organ::Stem2{FT}) where {FT} = (
     disconnect!(organ.HS, organ.HS.FLOW);
 
     return nothing
 );
 
-disconnect!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = (
+disconnect!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}) where {FT} = (
     # update the pressure
     hs.p_leaf = hs._p_storage;
 
@@ -76,7 +76,7 @@ disconnect!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}) where {FT<:Abs
     return nothing
 );
 
-disconnect!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = (
+disconnect!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::NonSteadyStateFlow{FT}) where {FT} = (
     # update the pressure
     hs._p_element .= hs._p_storage;
 
@@ -90,7 +90,7 @@ disconnect!(hs::Union{RootHydraulics{FT}, StemHydraulics{FT}}, mode::NonSteadySt
     return nothing
 );
 
-disconnect!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}, mode::SteadyStateFlow{FT}) where {FT<:AbstractFloat} = (
+disconnect!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}}, mode::SteadyStateFlow{FT}) where {FT} = (
     mode.flow = 0;
 
     return nothing

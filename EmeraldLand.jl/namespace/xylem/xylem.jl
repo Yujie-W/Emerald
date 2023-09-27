@@ -70,7 +70,7 @@ Struct that contains the auxilary variables for xylem hydraulics at non-steady s
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemHydraulicsAuxilNSS{FT} <: AbstractFlowProfile{FT}
+Base.@kwdef mutable struct XylemHydraulicsAuxilNSS{FT}
     "Critical flow rate `[mol s⁻¹ m⁻²]`"
     e_crit::FT = 0
     "Flow rates at each plane (N+1) `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"
@@ -112,7 +112,7 @@ Struct that contains the auxilary variables for xylem hydraulics at steady state
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct XylemHydraulicsAuxilSS{FT} <: AbstractFlowProfile{FT}
+Base.@kwdef mutable struct XylemHydraulicsAuxilSS{FT}
     "Critical flow rate `[mol s⁻¹ m⁻²]`"
     e_crit::FT = 0
     "Flow rates through the system `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"

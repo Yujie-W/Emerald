@@ -13,10 +13,10 @@
 #######################################################################################################################################################################################################
 """
 
-    relative_xylem_k(vc::ComplexVC{FT}, p_25::FT) where {FT<:AbstractFloat}
-    relative_xylem_k(vc::LogisticVC{FT}, p_25::FT) where {FT<:AbstractFloat}
-    relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT<:AbstractFloat}
-    relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT<:AbstractFloat}
+    relative_xylem_k(vc::ComplexVC{FT}, p_25::FT) where {FT}
+    relative_xylem_k(vc::LogisticVC{FT}, p_25::FT) where {FT}
+    relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT}
+    relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT}
 
 Return the relative xylem hydraulic conductance, given
 - `vc` `ComplexVC`, `LogisticVC`, `PowerVC`, or `WeibullVC` type vulnerability curve
@@ -25,7 +25,7 @@ Return the relative xylem hydraulic conductance, given
 """
 function relative_xylem_k end;
 
-relative_xylem_k(vc::ComplexVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
+relative_xylem_k(vc::ComplexVC{FT}, p_25::FT) where {FT} = (
     @assert sum(vc.fs) ≈ 1 "Probabilities of VCs must sum up to 1!";
     @assert length(vc.fs) == length(vc.vcs) "Lengths of VC curves and probabilities must equal!";
 
@@ -37,7 +37,7 @@ relative_xylem_k(vc::ComplexVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
     return kr
 );
 
-relative_xylem_k(vc::LogisticVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
+relative_xylem_k(vc::LogisticVC{FT}, p_25::FT) where {FT} = (
     if p_25 >= 0
         return FT(1)
     end;
@@ -45,7 +45,7 @@ relative_xylem_k(vc::LogisticVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
     return min(1, max(0, (1 - 1/(1 + vc.a * exp(vc.b * p_25))) * (vc.a + 1) / vc.a))
 );
 
-relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
+relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT} = (
     if p_25 >= 0
         return FT(1)
     end;
@@ -53,7 +53,7 @@ relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
     return min(1, max(0, 1 / (1 + vc.a * (-p_25) ^ vc.b)))
 );
 
-relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
+relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT} = (
     if p_25 >= 0
         return FT(1)
     end;
@@ -78,10 +78,10 @@ relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    xylem_pressure(vc::ComplexVC{FT}, kr::FT) where {FT<:AbstractFloat}
-    xylem_pressure(vc::LogisticVC{FT}, kr::FT) where {FT<:AbstractFloat}
-    xylem_pressure(vc::PowerVC{FT}, kr::FT) where {FT<:AbstractFloat}
-    xylem_pressure(vc::WeibullVC{FT}, kr::FT) where {FT<:AbstractFloat}
+    xylem_pressure(vc::ComplexVC{FT}, kr::FT) where {FT}
+    xylem_pressure(vc::LogisticVC{FT}, kr::FT) where {FT}
+    xylem_pressure(vc::PowerVC{FT}, kr::FT) where {FT}
+    xylem_pressure(vc::WeibullVC{FT}, kr::FT) where {FT}
 
 Return the critical xylem water pressure at 25 °C that triggers a given amount of loss of conductance, given
 - `vc` `ComplexVC`, `LogisticVC`, `PowerVC`, or `WeibullVC` type struct
@@ -90,13 +90,13 @@ Return the critical xylem water pressure at 25 °C that triggers a given amount 
 """
 function xylem_pressure end
 
-xylem_pressure(vc::LogisticVC{FT}, kr::FT) where {FT<:AbstractFloat} = log(kr / (vc.a + 1 - kr * vc.a)) / vc.b;
+xylem_pressure(vc::LogisticVC{FT}, kr::FT) where {FT} = log(kr / (vc.a + 1 - kr * vc.a)) / vc.b;
 
-xylem_pressure(vc::PowerVC{FT}, kr::FT) where {FT<:AbstractFloat} = -1 * ((1 - kr) / (kr * vc.a)) ^ (1 / vc.b);
+xylem_pressure(vc::PowerVC{FT}, kr::FT) where {FT} = -1 * ((1 - kr) / (kr * vc.a)) ^ (1 / vc.b);
 
-xylem_pressure(vc::WeibullVC{FT}, kr::FT) where {FT<:AbstractFloat} = -1 * (-1 * log(kr)) ^ (1 / vc.c) * vc.b;
+xylem_pressure(vc::WeibullVC{FT}, kr::FT) where {FT} = -1 * (-1 * log(kr)) ^ (1 / vc.c) * vc.b;
 
-xylem_pressure(vc::ComplexVC{FT}, kr::FT) where {FT<:AbstractFloat} = (
+xylem_pressure(vc::ComplexVC{FT}, kr::FT) where {FT} = (
     # use the p from each curve to define the min and max of target pressure
     p_min::FT = 0;
     p_max::FT = -Inf;

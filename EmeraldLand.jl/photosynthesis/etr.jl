@@ -14,9 +14,9 @@
 #######################################################################################################################################################################################################
 """
 
-    photosystem_electron_transport!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT<:AbstractFloat}
-    photosystem_electron_transport!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT<:AbstractFloat}
-    photosystem_electron_transport!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT<:AbstractFloat}
+    photosystem_electron_transport!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
+    photosystem_electron_transport!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
+    photosystem_electron_transport!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
 
 Update the electron transport rates, given
 - `psm` `C3CytochromeModel`, `C3VJPModel`, or `C4VJPModel` type C3 photosynthesis model
@@ -28,7 +28,7 @@ Update the electron transport rates, given
 """
 function photosystem_electron_transport! end
 
-photosystem_electron_transport!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+photosystem_electron_transport!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
     (; EFF_1, EFF_2) = psm;
     (; F_PSI, Φ_PSI_MAX) = rc;
 
@@ -40,7 +40,7 @@ photosystem_electron_transport!(psm::C3CytochromeModel{FT}, rc::CytochromeReacti
     return nothing
 );
 
-photosystem_electron_transport!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+photosystem_electron_transport!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
     (; EFF_1, EFF_2) = psm;
     (; F_PSII) = rc;
 
@@ -51,7 +51,7 @@ photosystem_electron_transport!(psm::C3VJPModel{FT}, rc::VJPReactionCenter{FT}, 
     return nothing
 );
 
-photosystem_electron_transport!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+photosystem_electron_transport!(psm::C4VJPModel{FT}, rc::VJPReactionCenter{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
     (; F_PSII) = rc;
 
     psm._e_to_c = 1 / 6;

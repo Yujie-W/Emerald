@@ -22,7 +22,7 @@ stem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     return nothing
 );
 
-stem_flow_profile!(organ::Stem{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+stem_flow_profile!(organ::Stem{FT}, Δt::FT) where {FT} = (
     stem_flow_profile!(organ.HS, organ.t, Δt);
     organ.∫∂w∂t_in += flow_in(organ) * Δt;
     organ.∫∂w∂t_out += flow_out(organ) * Δt;
@@ -30,11 +30,11 @@ stem_flow_profile!(organ::Stem{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-stem_flow_profile!(hs::StemHydraulics{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = stem_flow_profile!(hs, hs.FLOW, T, Δt);
+stem_flow_profile!(hs::StemHydraulics{FT}, T::FT, Δt::FT) where {FT} = stem_flow_profile!(hs, hs.FLOW, T, Δt);
 
-stem_flow_profile!(hs::StemHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = nothing;
+stem_flow_profile!(hs::StemHydraulics{FT}, mode::SteadyStateFlow{FT}, T::FT, Δt::FT) where {FT} = nothing;
 
-stem_flow_profile!(hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT, Δt::FT) where {FT<:AbstractFloat} = (
+stem_flow_profile!(hs::StemHydraulics{FT}, mode::NonSteadyStateFlow{FT}, T::FT, Δt::FT) where {FT} = (
     (; DIM_XYLEM, PVC, V_MAXIMUM) = hs;
 
     _f_vis = relative_viscosity(T);

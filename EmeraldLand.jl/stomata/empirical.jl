@@ -33,10 +33,10 @@ function empirical_equation end
 #######################################################################################################################################################################################################
 """
 
-    empirical_equation(sm::BallBerrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::GentineSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
+    empirical_equation(sm::BallBerrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::GentineSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
 
 Return the stomatal conductance computed from empirical model formulation, given
 - `sm` `BallBerrySM`, `GentineSM`, `LeuningSM`, or `MedlynSM` type model
@@ -45,21 +45,21 @@ Return the stomatal conductance computed from empirical model formulation, given
 - `β` Tuning factor for G1 (must be 1 if tuning factor is not based on G1)
 
 """
-empirical_equation(sm::BallBerrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::BallBerrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * air.p_H₂O / saturation_vapor_pressure(air.t) * leaf.a_net * FT(1e-6) / leaf._p_CO₂_s * P_AIR
 );
 
-empirical_equation(sm::GentineSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::GentineSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * leaf.a_net * FT(1e-6) / leaf._p_CO₂_i * P_AIR
 );
 
-empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; D0, G0, G1) = sm;
     (; PSM) = leaf;
     (; P_AIR) = air;
@@ -70,7 +70,7 @@ empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT 
     return G0 + β * G1 / (1 + _vpd / D0) * leaf.a_net * FT(1e-6) / (leaf._p_CO₂_s - _γ_s) * P_AIR
 );
 
-empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
@@ -94,10 +94,10 @@ empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT =
 #######################################################################################################################################################################################################
 """
 
-    empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::GentineSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::LeuningSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::MedlynSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
+    empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::GentineSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::LeuningSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::MedlynSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
 
 Return the stomatal conductance computed from empirical model formulation, given
 - `sm` `BallBerrySM`, `GentineSM`, `LeuningSM`, or `MedlynSM` type model
@@ -107,21 +107,21 @@ Return the stomatal conductance computed from empirical model formulation, given
 - `β` Tuning factor for G1 (must be 1 if tuning factor is not based on G1)
 
 """
-empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * air.p_H₂O / saturation_vapor_pressure(air.t) * leaves.a_net[ind] * FT(1e-6) / leaves._p_CO₂_s[ind] * P_AIR
 );
 
-empirical_equation(sm::GentineSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::GentineSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * leaves.a_net[ind] * FT(1e-6) / leaves._p_CO₂_i[ind] * P_AIR
 );
 
-empirical_equation(sm::LeuningSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::LeuningSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; D0, G0, G1) = sm;
     (; P_AIR) = air;
 
@@ -132,7 +132,7 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, i
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net[ind] * FT(1e-6) / (leaves._p_CO₂_s[ind] - _γ_s) * P_AIR
 );
 
-empirical_equation(sm::MedlynSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::MedlynSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
@@ -157,10 +157,10 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves1D{FT}, air::AirLayer{FT}, in
 #######################################################################################################################################################################################################
 """
 
-    empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat}
+    empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
 
 Return the stomatal conductance computed from empirical model formulation for the shaded leaves of `Leaves2D`, given
 - `sm` `BallBerrySM`, `GentineSM`, `LeuningSM`, or `MedlynSM` type model
@@ -169,21 +169,21 @@ Return the stomatal conductance computed from empirical model formulation for th
 - `β` Tuning factor for G1 (must be 1 if tuning factor is not based on G1)
 
 """
-empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * air.p_H₂O / saturation_vapor_pressure(air.t) * leaves.a_net_shaded * FT(1e-6) / leaves._p_CO₂_s_shaded * P_AIR
 );
 
-empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * leaves.a_net_shaded * FT(1e-6) / leaves._p_CO₂_i_shaded * P_AIR
 );
 
-empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; D0, G0, G1) = sm;
     (; P_AIR) = air;
 
@@ -193,7 +193,7 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; �
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net_shaded * FT(1e-6) / (leaves._p_CO₂_s_shaded - _γ_s) * P_AIR
 );
 
-empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
@@ -217,10 +217,10 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β
 #######################################################################################################################################################################################################
 """
 
-    empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
-    empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat}
+    empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
 
 Return the stomatal conductance computed from empirical model formulation for the sunlit leaves of `Leaves2D`, given
 - `sm` `BallBerrySM`, `GentineSM`, `LeuningSM`, or `MedlynSM` type model
@@ -230,21 +230,21 @@ Return the stomatal conductance computed from empirical model formulation for th
 - `β` Tuning factor for G1 (must be 1 if tuning factor is not based on G1)
 
 """
-empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::BallBerrySM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * air.p_H₂O / saturation_vapor_pressure(air.t) * leaves.a_net_sunlit[ind] * FT(1e-6) / leaves._p_CO₂_s_sunlit[ind] * P_AIR
 );
 
-empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::GentineSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
     return G0 + β * G1 * leaves.a_net_sunlit[ind] * FT(1e-6) / leaves._p_CO₂_i_sunlit[ind] * P_AIR
 );
 
-empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; D0, G0, G1) = sm;
     (; P_AIR) = air;
 
@@ -254,7 +254,7 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, i
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net_sunlit[ind] * FT(1e-6) / (leaves._p_CO₂_s_sunlit[ind] - _γ_s) * P_AIR
 );
 
-empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT<:AbstractFloat} = (
+empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
     (; P_AIR) = air;
 

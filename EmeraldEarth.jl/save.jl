@@ -9,7 +9,7 @@
 #######################################################################################################################################################################################################
 """
 
-    save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT<:AbstractFloat}
+    save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT}
 
 Save the simulation results to netcdf file, given
 - `filename` Path of the netcdf file
@@ -18,7 +18,7 @@ Save the simulation results to netcdf file, given
 - `displaying` Whether to display information regarding process
 
 """
-function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT<:AbstractFloat}
+function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT}
     if displaying
         @tinfo "Saving the simulation results to netcdf file...";
     end;

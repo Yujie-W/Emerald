@@ -1,3 +1,5 @@
+#=
+
 #######################################################################################################################################################################################################
 #
 # Changes to the function
@@ -31,7 +33,7 @@ set_root_flow_out!(spac::MonoElementSPAC{FT}) where {FT} = (
 # therefore, we need to find an algorithm to find the flow rates of each root
 # the algorithm is usually fine when the soil water is sufficient, but when the soil water is not sufficient, the algorithm may not converge because of the low hydraulic conductance
 # moreover, in many models it is not necessary to do this calculation because they do not use plant hydraulics.
-set_root_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+set_root_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     # very first step here: if soil is too dry, disconnect root from soil
     disconnect_roots!(config, spac);
     disconnect_spac!(spac);
@@ -135,3 +137,5 @@ set_root_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
 
     return nothing
 );
+
+=#

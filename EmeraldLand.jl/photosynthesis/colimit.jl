@@ -11,14 +11,14 @@
 #######################################################################################################################################################################################################
 """
 
-    colimit_photosynthesis!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}; β::FT = FT(1)) where {FT<:AbstractFloat}
+    colimit_photosynthesis!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}; β::FT = FT(1)) where {FT}
 
 Colimit the photosynthesis by rubisco-, light-, and product-limited photosynthetic rates, given
 - `psm` `C3CytochromeModel`, `C3VJPModel`, or `C4VJPModel` type photosynthesis model
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd (default is 1)
 
 """
-function colimit_photosynthesis!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}; β::FT = FT(1)) where {FT<:AbstractFloat}
+function colimit_photosynthesis!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}; β::FT = FT(1)) where {FT}
     _a_i        = colimited_rate(psm._a_c, psm._a_j, psm.COLIMIT_CJ);
     psm.a_gross = colimited_rate(psm._a_p, _a_i, psm.COLIMIT_IP);
     psm.a_net   = psm.a_gross - β * psm._r_d;
@@ -40,10 +40,10 @@ end
 #######################################################################################################################################################################################################
 """
 
-    colimited_rate(a_1::FT, a_2::FT, colim::MinimumColimit{FT}) where {FT<:AbstractFloat}
-    colimited_rate(a_1::FT, a_2::FT, colim::QuadraticColimit{FT}) where {FT<:AbstractFloat}
-    colimited_rate(a_1::FT, a_2::FT, colim::SerialColimit{FT}) where {FT<:AbstractFloat}
-    colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT<:AbstractFloat}
+    colimited_rate(a_1::FT, a_2::FT, colim::MinimumColimit{FT}) where {FT}
+    colimited_rate(a_1::FT, a_2::FT, colim::QuadraticColimit{FT}) where {FT}
+    colimited_rate(a_1::FT, a_2::FT, colim::SerialColimit{FT}) where {FT}
+    colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT}
 
 Return the minimum of two rates, given
 - `a_1` Rate 1
@@ -53,10 +53,10 @@ Return the minimum of two rates, given
 """
 function colimited_rate end
 
-colimited_rate(a_1::FT, a_2::FT, colim::MinimumColimit{FT}) where {FT<:AbstractFloat} = min(a_1, a_2);
+colimited_rate(a_1::FT, a_2::FT, colim::MinimumColimit{FT}) where {FT} = min(a_1, a_2);
 
-colimited_rate(a_1::FT, a_2::FT, colim::QuadraticColimit{FT}) where {FT<:AbstractFloat} = lower_quadratic(colim.CURVATURE, -(a_1 + a_2), a_1 * a_2);
+colimited_rate(a_1::FT, a_2::FT, colim::QuadraticColimit{FT}) where {FT} = lower_quadratic(colim.CURVATURE, -(a_1 + a_2), a_1 * a_2);
 
-colimited_rate(a_1::FT, a_2::FT, colim::SerialColimit{FT}) where {FT<:AbstractFloat} = a_1 * a_2 / (a_1 + a_2);
+colimited_rate(a_1::FT, a_2::FT, colim::SerialColimit{FT}) where {FT} = a_1 * a_2 / (a_1 + a_2);
 
-colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT<:AbstractFloat} = a_1 * a_2 / sqrt(a_1 ^ 2 + a_2 ^ 2);
+colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT} = a_1 * a_2 / sqrt(a_1 ^ 2 + a_2 ^ 2);

@@ -12,14 +12,14 @@ using ..Constant: YEAR_D
 #######################################################################################################################################################################################################
 """
 
-    day_length(lat::FT, fdoy::FT) where {FT<:AbstractFloat}
+    day_length(lat::FT, fdoy::FT) where {FT}
 
 Return the daytime length, given
 - `lat` Latitude in °
 - `fdoy` Day of year (digits after decimal for time of day)
 
 """
-function day_length(lat::FT, fdoy::FT) where {FT<:AbstractFloat}
+function day_length(lat::FT, fdoy::FT) where {FT}
     _deg  = 360 / YEAR_D(FT) * (fdoy + 10);
     _decl = -FT(23.44) * cosd(_deg);
 
@@ -42,9 +42,9 @@ end
 #######################################################################################################################################################################################################
 """
 
-    solar_azimuth_angle(lat::FT, decl::FT, lha::FT) where {FT<:AbstractFloat}
-    solar_azimuth_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT<:AbstractFloat}
-    solar_azimuth_angle(lat::FT, fdoy::FT) where {FT<:AbstractFloat}
+    solar_azimuth_angle(lat::FT, decl::FT, lha::FT) where {FT}
+    solar_azimuth_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT}
+    solar_azimuth_angle(lat::FT, fdoy::FT) where {FT}
 
 Return the solar azimuth angle, given
 - `lat` Latitude in °
@@ -58,7 +58,7 @@ Return the solar azimuth angle, given
 """
 function solar_azimuth_angle end
 
-solar_azimuth_angle(lat::FT, decl::FT, lha::FT) where {FT<:AbstractFloat} = (
+solar_azimuth_angle(lat::FT, decl::FT, lha::FT) where {FT} = (
     _cos_sza = sind(lat) * sind(decl) + cosd(lat) * cosd(decl) * cosd(lha);
 
     if _cos_sza == 1
@@ -71,14 +71,14 @@ solar_azimuth_angle(lat::FT, decl::FT, lha::FT) where {FT<:AbstractFloat} = (
     return lha >= 0 ? 360 - acosd(_cos_saa) : acosd(_cos_saa)
 );
 
-solar_azimuth_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT<:AbstractFloat} = (
+solar_azimuth_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT} = (
     _decl = solar_declination_angle(day + (hour + minute / 60) / 24);
     _lha  = (hour - 12) * 15;
 
     return solar_azimuth_angle(lat, _decl, _lha)
 );
 
-solar_azimuth_angle(lat::FT, fdoy::FT) where {FT<:AbstractFloat} = (
+solar_azimuth_angle(lat::FT, fdoy::FT) where {FT} = (
     _decl = solar_declination_angle(fdoy);
     _lha  = ((fdoy % 1) - FT(0.5)) * 360;
 
@@ -95,13 +95,13 @@ solar_azimuth_angle(lat::FT, fdoy::FT) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    solar_declination_angle(fdoy::FT) where {FT<:AbstractFloat}
+    solar_declination_angle(fdoy::FT) where {FT}
 
 Return the solar declination angle, given
 - `fdoy` Day of year
 
 """
-function solar_declination_angle(fdoy::FT) where {FT<:AbstractFloat}
+function solar_declination_angle(fdoy::FT) where {FT}
     return -FT(23.44) * cosd(360 / YEAR_D(FT) * (fdoy + 10))
 end
 
@@ -117,9 +117,9 @@ end
 #######################################################################################################################################################################################################
 """
 
-    solar_zenith_angle(lat::FT, decl::FT, lha::FT) where {FT<:AbstractFloat}
-    solar_zenith_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT<:AbstractFloat}
-    solar_zenith_angle(lat::FT, fdoy::FT) where {FT<:AbstractFloat}
+    solar_zenith_angle(lat::FT, decl::FT, lha::FT) where {FT}
+    solar_zenith_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT}
+    solar_zenith_angle(lat::FT, fdoy::FT) where {FT}
 
 Return the solar zenith angle, given
 - `lat` Latitude in °
@@ -133,20 +133,20 @@ Return the solar zenith angle, given
 """
 function solar_zenith_angle end
 
-solar_zenith_angle(lat::FT, decl::FT, lha::FT) where {FT<:AbstractFloat} = (
+solar_zenith_angle(lat::FT, decl::FT, lha::FT) where {FT} = (
     _cos_sza = sind(lat) * sind(decl) + cosd(lat) * cosd(decl) * cosd(lha);
 
     return acosd(_cos_sza)
 );
 
-solar_zenith_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT<:AbstractFloat} = (
+solar_zenith_angle(lat::FT, day::FT, hour::FT, minute::FT) where {FT} = (
     _decl = solar_declination_angle(day + (hour + minute / 60) / 24);
     _lha  = (hour - 12) * 15;
 
     return solar_zenith_angle(lat, _decl, _lha)
 );
 
-solar_zenith_angle(lat::FT, fdoy::FT) where {FT<:AbstractFloat} = (
+solar_zenith_angle(lat::FT, fdoy::FT) where {FT} = (
     _decl = solar_declination_angle(fdoy);
     _lha  = ((fdoy % 1) - FT(0.5)) * 360;
 

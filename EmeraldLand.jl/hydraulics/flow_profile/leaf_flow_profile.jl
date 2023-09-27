@@ -8,8 +8,8 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
-    leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
+    leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT}
+    leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
 
 Set the flow profile of the leaf, given
 - `config` `SPACConfiguration` type struct
@@ -45,9 +45,9 @@ leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt:
 );
 
 # wrapper methods to call leaf_flow_profile! for different types of organ
-leaf_flow_profile!(organ::Leaf{FT}, Δt::FT) where {FT<:AbstractFloat} = leaf_flow_profile!(organ.HS, organ.t, Δt);
+leaf_flow_profile!(organ::Leaf2{FT}, Δt::FT) where {FT} = leaf_flow_profile!(organ.HS, organ.t, Δt);
 
-leaf_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+leaf_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT} = (
     (; HS, HS2) = organ;
 
     leaf_flow_profile!(HS, organ.t[1], Δt);
@@ -56,7 +56,7 @@ leaf_flow_profile!(organ::Leaves1D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
     return nothing
 );
 
-leaf_flow_profile!(organ::Leaves2D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
+leaf_flow_profile!(organ::Leaves2D{FT}, Δt::FT) where {FT} = (
     leaf_flow_profile!(organ.HS, organ.t, Δt);
     organ.∫∂w∂t_in += flow_in(organ) * Δt;
     organ.∫∂w∂t_out += flow_out(organ) * Δt;
@@ -67,11 +67,11 @@ leaf_flow_profile!(organ::Leaves2D{FT}, Δt::FT) where {FT<:AbstractFloat} = (
 # wrapper function to call different methods with steady and non-steady state flow modes
 #     if the flow is steady state, do nothing as there is no buffer
 #     if the flow is non-steady state, update the flow profile because there is a buffer system
-leaf_flow_profile!(hs::LeafHydraulics{FT}, t::FT, Δt::FT) where {FT<:AbstractFloat} = leaf_flow_profile!(hs, hs.FLOW, t, Δt);
+leaf_flow_profile!(hs::LeafHydraulics{FT}, t::FT, Δt::FT) where {FT} = leaf_flow_profile!(hs, hs.FLOW, t, Δt);
 
-leaf_flow_profile!(hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, t::FT, Δt::FT) where {FT<:AbstractFloat} = nothing;
+leaf_flow_profile!(hs::LeafHydraulics{FT}, mode::SteadyStateFlow{FT}, t::FT, Δt::FT) where {FT} = nothing;
 
-leaf_flow_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, t::FT, Δt::FT) where {FT<:AbstractFloat} = (
+leaf_flow_profile!(hs::LeafHydraulics{FT}, mode::NonSteadyStateFlow{FT}, t::FT, Δt::FT) where {FT} = (
     (; PVC, V_MAXIMUM) = hs;
 
     f_vis = relative_viscosity(t);

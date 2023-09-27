@@ -7,8 +7,8 @@
 #######################################################################################################################################################################################################
 """
 
-    set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat}
-    set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT}
+    set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Set the flow out from each leaf, given
 - `config` `SPACConfiguration` type struct
@@ -18,7 +18,7 @@ Set the flow out from each leaf, given
 function set_leaf_flow_out! end
 
 # compute the flow rate exiting the leaf and update it to the leaf of a MonoElementSPAC
-set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = (
+set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT} = (
     (; ALLOW_LEAF_CONDENSATION) = config;
     (; AIR, LEAF) = spac;
 
@@ -26,7 +26,8 @@ set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) whe
     d = saturation_vapor_pressure(LEAF.t, LEAF.HS.p_leaf * 1000000) - AIR.p_H₂O;
     ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
     f = g * d / AIR.P_AIR;
-    set_flow_out!(LEAF.HS.FLOW, f);
+    # set_flow_out!(LEAF.HS.FLOW, f);
+    set_flow_profile!(LEAF.NS.xylem, f);
 
     return nothing
 );
@@ -34,7 +35,7 @@ set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) whe
 # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a MultiLayerSPAC
 #     LEAVES index is from lower to upper, and thus the sunlit leaves fraction is DIM_LAYER + 1 - i
 #     AIR index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX
-set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ALLOW_LEAF_CONDENSATION, DIM_LAYER) = config;
     (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
@@ -53,7 +54,8 @@ set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
         ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
         f = g * d / AIR[LEAVES_INDEX[i]].P_AIR;
 
-        set_flow_out!(LEAVES[i].HS.FLOW, f);
+        # set_flow_out!(LEAVES[i].HS.FLOW, f);
+        set_flow_profile!(LEAVES[i].NS.xylem, f);
     end;
 
     return nothing

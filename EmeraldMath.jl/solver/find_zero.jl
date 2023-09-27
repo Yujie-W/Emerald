@@ -7,10 +7,10 @@
 #######################################################################################################################################################################################################
 """
 
-    find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat}
-    find_zero(f::Function, ms::NewtonBisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat}
-    find_zero(f::Function, ms::NewtonRaphsonMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat}
-    find_zero(f::Function, ms::ReduceStepMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat}
+    find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT}
+    find_zero(f::Function, ms::NewtonBisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT}
+    find_zero(f::Function, ms::NewtonRaphsonMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT}
+    find_zero(f::Function, ms::ReduceStepMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT}
 
 Function to find the first root that gives a target function result of zero. If the root does not exist, the function returns the point where the target function is most close to zero:
 - `f` function to solve
@@ -21,7 +21,7 @@ Function to find the first root that gives a target function result of zero. If 
 """
 function find_zero end
 
-find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT} = (
     # create variable to store steps
     # _count for iterations
     _count::Int = 0;
@@ -100,7 +100,7 @@ find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}
     return _solution
 );
 
-find_zero(f::Function, ms::NewtonBisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_zero(f::Function, ms::NewtonBisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT} = (
     # _count for iterations
     _count::Int = 0;
 
@@ -189,7 +189,7 @@ find_zero(f::Function, ms::NewtonBisectionMethod{FT}, tol::Union{ResidualToleran
     return _solution
 );
 
-find_zero(f::Function, ms::NewtonRaphsonMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_zero(f::Function, ms::NewtonRaphsonMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT} = (
     # _count for iterations
     _count::Int = 0;
 
@@ -228,7 +228,7 @@ find_zero(f::Function, ms::NewtonRaphsonMethod{FT}, tol::Union{ResidualTolerance
     return _x_ntr
 );
 
-find_zero(f::Function, ms::ReduceStepMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT<:AbstractFloat} = (
+find_zero(f::Function, ms::ReduceStepMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT} = (
     # _count iterations
     _count = 0;
 

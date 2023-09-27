@@ -57,13 +57,13 @@ end
 
 """
 
-    BrooksCorey{FT}(catg::Int) where {FT<:AbstractFloat}
+    BrooksCorey{FT}(catg::Int) where {FT}
 
 Return a BrooksCorey soil VC, given
 - `catg` Soil texture catergory (must be within [1,19])
 
 """
-BrooksCorey{FT}(catg::Int) where {FT<:AbstractFloat} = (
+BrooksCorey{FT}(catg::Int) where {FT} = (
     @assert 1 <= catg <= 19 "Soil texture catergory must be within 1 to 19!";
 
     return BrooksCorey{FT}(
@@ -124,13 +124,13 @@ end
 
 """
 
-    VanGenuchten{FT}(name::String) where {FT<:AbstractFloat}
+    VanGenuchten{FT}(name::String) where {FT}
 
 Constructor for [`VanGenuchten`](@ref), given
 - `name` Soil type name, need to be Sand, Loamy Sand, Sandy Loam, Loam (default), Sandy Clay Loam, Silt Loam, Silt, Clay Loam, Silty Clay Loam, Sandy Clay, Silty Clay, and Clay.
 
 """
-VanGenuchten{FT}(name::String) where {FT<:AbstractFloat} = (
+VanGenuchten{FT}(name::String) where {FT} = (
     #=
     # Parameters from Loam soil
     _p = [ 367.3476, 1.56, 0.43, 0.078, exp(-0.32) * 0.0254 / 3600];

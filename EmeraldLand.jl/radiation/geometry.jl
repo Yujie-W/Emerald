@@ -30,7 +30,7 @@ function canopy_optical_properties! end
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
 
 Updates canopy optical properties (extinction coefficients for direct and diffuse light) based on the SAIL model, given
 - `config` SPAC configurations
@@ -38,7 +38,7 @@ Updates canopy optical properties (extinction coefficients for direct and diffus
 - `angles` `SunSensorGeometry` type struct
 
 """
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
     (; DIM_LAYER, Θ_AZI, _1_AZI, _COS_Θ_AZI, _COS²_Θ_INCL, _COS²_Θ_INCL_AZI) = config;
     (; HOT_SPOT, OPTICS, P_INCL) = can;
 
@@ -88,7 +88,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     end;
 
     _dso = sqrt( tand(angles.sza) ^ 2 + tand(angles.vza) ^ 2 - 2 * tand(angles.sza) * tand(angles.vza) * cosd(angles.vaa - angles.saa) );
-    @inline _pdf(x::FT) where {FT<:AbstractFloat} = (
+    @inline _pdf(x::FT) where {FT} = (
         _Σk = OPTICS.ko + OPTICS.ks;
         _Πk = OPTICS.ko * OPTICS.ks;
         _cl = can.ci * can.lai;
@@ -120,8 +120,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat}
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `config` Configuration for `MultiLayerSPAC`
@@ -129,7 +129,7 @@ Updates lower soil boundary reflectance, given
 - `albedo` `BroadbandSoilAlbedo` or `HyperspectralSoilAlbedo` type soil albedo
 
 """
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT} = (
     (; SPECTRA) = config;
     (; OPTICS) = can;
 
@@ -141,7 +141,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     return nothing
 );
 
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT} = (
     (; OPTICS) = can;
 
     OPTICS.ρ_dd[:,end] .= albedo.ρ_sw;
@@ -167,7 +167,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT<:AbstractFloat}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT}
 
 Updates canopy optical properties (scattering coefficient matrices), given
 - `config` Configuration for `MultiLayerSPAC`
@@ -176,7 +176,7 @@ Updates canopy optical properties (scattering coefficient matrices), given
 - `soil` Bottom soil boundary layer
 
 """
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT<:AbstractFloat} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, soil::Soil{FT}) where {FT} = (
     (; DIM_LAYER) = config;
     (; OPTICS) = can;
     (; ALBEDO) = soil;

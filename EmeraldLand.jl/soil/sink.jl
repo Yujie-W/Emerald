@@ -7,7 +7,7 @@
 #######################################################################################################################################################################################################
 """
 
-    root_sink(root::Root{FT}) where {FT<:AbstractFloat}
+    root_sink(root::Root{FT}) where {FT}
 
 Return root water update, given
 - `root` `Root` type struct that may contain non- and steady state flow
@@ -15,11 +15,11 @@ Return root water update, given
 """
 function root_sink end
 
-root_sink(root::Root{FT}) where {FT<:AbstractFloat} = root_sink(root.HS.FLOW);
+root_sink(root::Root{FT}) where {FT} = root_sink(root.HS.FLOW);
 
-root_sink(mode::SteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.flow;
+root_sink(mode::SteadyStateFlow{FT}) where {FT} = mode.flow;
 
-root_sink(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_in;
+root_sink(mode::NonSteadyStateFlow{FT}) where {FT} = mode.f_in;
 
 
 #######################################################################################################################################################################################################
@@ -32,14 +32,14 @@ root_sink(mode::NonSteadyStateFlow{FT}) where {FT<:AbstractFloat} = mode.f_in;
 #######################################################################################################################################################################################################
 """
 
-    soil_source_sink!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    soil_source_sink!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Update the source/sink terms for the soil layers, given
 - `config` the SPAC configuration
 - `spac` the SPAC model
 
 """
-function soil_source_sink!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+function soil_source_sink!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; DEBUG) = config;
     (; ROOTS, ROOTS_INDEX, SOIL) = spac;
     LAYERS = SOIL.LAYERS;

@@ -24,21 +24,21 @@ function β_factor! end
 
 """
 
-    β_factor!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat}
+    β_factor!(spac::MonoElementSPAC{FT}) where {FT}
 
 Update the beta factor for the LEAF component in SPAC, given
 - `spac` `MonoElementSPAC` type SPAC
 
 """
-β_factor!(spac::MonoElementSPAC{FT}) where {FT<:AbstractFloat} = β_factor!(spac, spac.LEAF.SM);
+β_factor!(spac::MonoElementSPAC{FT}) where {FT} = β_factor!(spac, spac.LEAF.SM);
 
-β_factor!(spac::MonoElementSPAC{FT}, sm::AbstractStomataModel{FT}) where {FT<:AbstractFloat} = nothing;
+β_factor!(spac::MonoElementSPAC{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
-β_factor!(spac::MonoElementSPAC{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT<:AbstractFloat} = β_factor!(spac, sm.β);
+β_factor!(spac::MonoElementSPAC{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = β_factor!(spac, sm.β);
 
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}) where {FT<:AbstractFloat} = β_factor!(spac, β, β.PARAM_X);
+β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(spac, β, β.PARAM_X);
 
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT<:AbstractFloat} = (
+β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
     (; LEAF) = spac;
 
     _f_st = relative_surface_tension(LEAF.t);
@@ -48,7 +48,7 @@ Update the beta factor for the LEAF component in SPAC, given
     return nothing
 );
 
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT<:AbstractFloat} = (
+β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
     (; ROOT, SOIL) = spac;
 
     _f_st = relative_surface_tension(ROOT.t);
@@ -58,7 +58,7 @@ Update the beta factor for the LEAF component in SPAC, given
     return nothing
 );
 
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT<:AbstractFloat} = (
+β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
     (; LEAF) = spac;
 
     _f_st = relative_surface_tension(LEAF.t);
@@ -68,7 +68,7 @@ Update the beta factor for the LEAF component in SPAC, given
     return nothing
 );
 
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT<:AbstractFloat} = (
+β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
     (; ROOT) = spac;
 
     _f_st = relative_surface_tension(ROOT.t);
@@ -78,7 +78,7 @@ Update the beta factor for the LEAF component in SPAC, given
     return nothing
 );
 
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT<:AbstractFloat} = (
+β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
     (; ROOT, SOIL) = spac;
 
     _f_st = relative_surface_tension(ROOT.t);
@@ -91,7 +91,7 @@ Update the beta factor for the LEAF component in SPAC, given
 
 """
 
-    β_factor!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    β_factor!(spac::MultiLayerSPAC{FT}) where {FT}
 
 Update the β factor for the LEAVES component in SPAC, given
 - `spac` `MultiLayerSPAC` type SPAC
@@ -100,7 +100,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     root.
 
 """
-β_factor!(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+β_factor!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES, ROOTS, SOIL) = spac;
 
     for _i in eachindex(LEAVES)
@@ -110,14 +110,14 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, sm::AbstractStomataModel{FT}) where {FT<:AbstractFloat} = nothing;
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT<:AbstractFloat} =
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
     β_factor!(roots, soil, leaves, sm.β);
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}) where {FT<:AbstractFloat} = β_factor!(roots, soil, leaves, β, β.PARAM_X);
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soil, leaves, β, β.PARAM_X);
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT<:AbstractFloat} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
     _f_st = relative_surface_tension(leaves.t);
 
     β.β₁ = β_factor(β.FUNC, leaves.HS.VC, leaves.HS._p_element[end] / _f_st);
@@ -125,7 +125,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT<:AbstractFloat} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
@@ -153,7 +153,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT<:AbstractFloat} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
     _f_st = relative_surface_tension(leaves.t);
 
     β.β₁ = β_factor(β.FUNC, leaves.HS._p_element[end] / _f_st);
@@ -161,7 +161,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT<:AbstractFloat} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
@@ -189,7 +189,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT<:AbstractFloat} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;

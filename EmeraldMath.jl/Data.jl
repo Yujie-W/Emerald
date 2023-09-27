@@ -14,18 +14,18 @@ using ..EmeraldUtility.Time: month_days
 #######################################################################################################################################################################################################
 """
 
-    interpolate_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat}
+    interpolate_data!(data::Union{FT, Vector{FT}}) where {FT}
 
 Gap fill the data linearly, given
 - `data` Input data
 
 """
-function interpolate_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat}
+function interpolate_data!(data::Union{FT, Vector{FT}}) where {FT}
     if sum(.!isnan.(data)) in [0, length(data)]
         return nothing
     end;
 
-    @inline find_last_number(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
+    @inline find_last_number(vec_in::Vector{FT}, ind::Int) where {FT} = (
         _x = ind;
         _y = vec_in[ind];
         for _i in ind:-1:1
@@ -39,7 +39,7 @@ function interpolate_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat
         return _x, _y
     );
 
-    @inline find_next_number(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
+    @inline find_next_number(vec_in::Vector{FT}, ind::Int) where {FT} = (
         _x = ind;
         _y = vec_in[ind];
         for _i in ind:1:length(vec_in)
@@ -53,7 +53,7 @@ function interpolate_data!(data::Union{FT, Vector{FT}}) where {FT<:AbstractFloat
         return _x, _y
     );
 
-    @inline interpolate_data!(vec_in::Vector{FT}, ind::Int) where {FT<:AbstractFloat} = (
+    @inline interpolate_data!(vec_in::Vector{FT}, ind::Int) where {FT} = (
         if isnan(vec_in[ind])
             (_x1,_y1) = find_last_number(vec_in, ind);
             (_x2,_y2) = find_next_number(vec_in, ind);

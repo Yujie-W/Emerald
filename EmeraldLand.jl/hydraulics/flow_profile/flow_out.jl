@@ -1,3 +1,5 @@
+#=
+
 #######################################################################################################################################################################################################
 #
 # Changes to the function
@@ -7,8 +9,8 @@
 #######################################################################################################################################################################################################
 """
 
-    set_flow!(mode::SteadyStateFlow, f_out::FT) where {FT<:AbstractFloat}
-    set_flow!(mode::NonSteadyStateFlow, f_out::FT) where {FT<:AbstractFloat}
+    set_flow!(mode::SteadyStateFlow, f_out::FT) where {FT}
+    set_flow!(mode::NonSteadyStateFlow, f_out::FT) where {FT}
 
 Set flow profile based on the flow mode, given
 - `mode` `SteadyStateFlow` or `NonSteadyStateFlow` type struct
@@ -17,6 +19,8 @@ Set flow profile based on the flow mode, given
 """
 function set_flow_out! end
 
-set_flow_out!(mode::SteadyStateFlow, f_out::FT) where {FT<:AbstractFloat} = (mode.flow = f_out; return nothing);
+set_flow_out!(mode::SteadyStateFlow, f_out::FT) where {FT} = (mode.flow = f_out; return nothing);
 
-set_flow_out!(mode::NonSteadyStateFlow, f_out::FT) where {FT<:AbstractFloat} = (mode.f_out = f_out; return nothing);
+set_flow_out!(mode::NonSteadyStateFlow, f_out::FT) where {FT} = (mode.f_out = f_out; return nothing);
+
+=#

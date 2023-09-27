@@ -13,7 +13,7 @@
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+    prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT}
 
 Prescribe traits and environmental conditions, given
 - `config` `SPACConfiguration` type SPAC configuration
@@ -23,7 +23,7 @@ Prescribe traits and environmental conditions, given
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
-function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT<:AbstractFloat}
+function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT}
     # read the data out of dataframe row to reduce memory allocation
     _df_atm::FT = dfr.P_ATM;
     _df_chl::FT = dfr.CHLOROPHYLL;
@@ -218,7 +218,7 @@ simulation!(config::SPACConfiguration{FT},
             dfr::DataFrameRow;
             n_step::Int = 10,
             δt::Number = 3600
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
 
     # read the data out of dataframe row to reduce memory allocation

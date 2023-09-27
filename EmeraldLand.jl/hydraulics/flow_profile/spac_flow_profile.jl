@@ -37,7 +37,7 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT<:AbstractFloat}
+    spac_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT}
 
 Update flow profiles for the soil-plant-air continuum (set up leaf flow rate from stomatal conductance first), given
 - `config` `SPACConfiguration` type struct
@@ -47,7 +47,7 @@ Update flow profiles for the soil-plant-air continuum (set up leaf flow rate fro
 """
 function spac_flow_profile! end
 
-spac_flow_profile!(config::SPACConfiguration{FT}, spac::Union{MonoElementSPAC{FT},MultiLayerSPAC{FT}}, Δt::FT) where {FT<:AbstractFloat} = (
+spac_flow_profile!(config::SPACConfiguration{FT}, spac::Union{MonoElementSPAC{FT},MultiLayerSPAC{FT}}, Δt::FT) where {FT} = (
     # 1. update the leaf flow profile
     leaf_flow_profile!(config, spac, Δt);
 

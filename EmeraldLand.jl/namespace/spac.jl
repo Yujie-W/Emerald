@@ -74,22 +74,28 @@ Base.@kwdef mutable struct MonoElementSPAC{FT<:AbstractFloat} <: AbstractSPACSys
     "Air conditions"
     AIR::AirLayer{FT} = AirLayer{FT}()
     "Leaf system"
-    LEAF::Leaf{FT} = Leaf{FT}()
+    LEAF::Leaf2{FT}
     "Memory cache"
     MEMORY::SPACMemory{FT} = SPACMemory{FT}()
     "Meteorology information"
     METEO::Meteorology{FT} = Meteorology{FT}()
     "Root system"
-    ROOT::Root{FT} = Root{FT}()
+    ROOT::Root2{FT}
     "Soil component"
     SOIL::Soil{FT} = Soil{FT}(ZS = FT[0, -1])
     "Stem system"
-    STEM::Stem{FT} = Stem{FT}()
+    STEM::Stem2{FT}
 
     # Cache variables
     "Relative hydraulic conductance"
     _krs::Vector{FT} = ones(FT, 4)
 end
+
+MonoElementSPAC(config::SPACConfiguration{FT}) where {FT} = MonoElementSPAC{FT}(
+            LEAF = Leaf2(config),
+            ROOT = Root2(config),
+            STEM = Stem2(config),
+);
 
 
 #######################################################################################################################################################################################################
@@ -148,7 +154,7 @@ mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
     "Sun sensor geometry"
     ANGLES::SunSensorGeometry{FT}
     "Branch hydraulic system"
-    BRANCHES::Vector{Stem{FT}}
+    BRANCHES::Vector{Stem2{FT}}
     "Canopy used for radiation calculations"
     CANOPY::HyperspectralMLCanopy{FT}
     "Leaf per layer"
@@ -158,11 +164,11 @@ mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
     "Meteorology information"
     METEO::Meteorology{FT}
     "Root hydraulic system"
-    ROOTS::Vector{Root{FT}}
+    ROOTS::Vector{Root2{FT}}
     "Soil component"
     SOIL::Soil{FT}
     "Trunk hydraulic system"
-    TRUNK::Stem{FT}
+    TRUNK::Stem2{FT}
 
     # Cache variables
     "Flow rate per root layer"
@@ -185,7 +191,7 @@ MultiLayerSPAC(
             longitude::Number = 115.4494,
             soil_bounds::Vector{<:Number} = [0,-0.1,-0.25,-0.5,-1,-3],
             zs::Vector{<:Number} = [-1,6,12]
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     _mask_air = findall(zs[2] .< air_bounds .< zs[3]);
     _mask_soil = findall(zs[1] .< soil_bounds .< 0);
     config.DIM_AIR = length(air_bounds) - 1;
@@ -200,20 +206,22 @@ MultiLayerSPAC(
             Z = (air_bounds[_i] + air_bounds[_i+1]) / 2,
             ΔZ = (air_bounds[_i+1] - air_bounds[_i])
         ) for _i in 1:config.DIM_AIR];
-    _branches = Stem{FT}[
-        Stem{FT}(
-            HS = StemHydraulics{FT}(
-                AREA = basal_area / config.DIM_LAYER,
-                ΔH = (min(zs[3], air_bounds[_ind_layer[_i]+1]) - zs[2])
-            )
-        ) for _i in 1:config.DIM_LAYER];
-    _roots = Root{FT}[
-        Root{FT}(
-            HS = RootHydraulics{FT}(
-                AREA = basal_area / config.DIM_ROOT,
-                ΔH = (0 - max(zs[1], soil_bounds[_ind_root[_i]+1]))
-            )
-        ) for _i in 1:config.DIM_ROOT];
+    # TODO: fix the k and h set up
+    _branches = Stem2{FT}[Stem2(config) for _i in 1:config.DIM_LAYER];
+        #Stem2{FT}(
+        #    HS = StemHydraulics{FT}(
+        #        AREA = basal_area / config.DIM_LAYER,
+        #        ΔH = (min(zs[3], air_bounds[_ind_layer[_i]+1]) - zs[2])
+        #    )
+        #) for _i in 1:config.DIM_LAYER];
+    # TODO: fix the k and h set up
+    _roots = Root2{FT}[Root2(config) for _i in 1:config.DIM_ROOT];
+        # Root2{FT}(
+        #     HS = RootHydraulics{FT}(
+        #         AREA = basal_area / config.DIM_ROOT,
+        #         ΔH = (0 - max(zs[1], soil_bounds[_ind_root[_i]+1]))
+        #     )
+        # ) for _i in 1:config.DIM_ROOT];
 
     return MultiLayerSPAC{FT}(
                 _ind_layer,                                                                 # LEAVES_INDEX
@@ -232,7 +240,8 @@ MultiLayerSPAC(
                 Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),       # METEO
                 _roots,                                                                     # ROOTS
                 Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),         # SOIL
-                Stem{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])),   # TRUNK
+                #Stem2{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])),  # TRUNK
+                Stem2(config),                                                              # TRUNK (TODO: fix the k and h set up)
                 zeros(FT, config.DIM_ROOT),                                                 # _fs
                 zeros(FT, config.DIM_ROOT),                                                 # _ks
                 zeros(FT, config.DIM_ROOT),                                                 # _ps
@@ -299,7 +308,7 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     tropomi_sif₇₄₀::FT = 0
 end
 
-MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;
 
     _gs_sunlit = zeros(FT, size(LEAVES[1].g_H₂O_s_sunlit,1), size(LEAVES[1].g_H₂O_s_sunlit,2), length(LEAVES));

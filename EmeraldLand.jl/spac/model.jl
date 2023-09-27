@@ -33,10 +33,10 @@ This function runs the model using the following steps:
 
 This function is supposed to have the highest hierarchy, and should support all SPAC types defined in EmeraldNamespace.jl. Note to update the water flow profile when initializing the SPAC.
 
-    soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) where {FT<:AbstractFloat}
-    soil_plant_air_continuum!(config::Nothing, spac::Nothing) where {FT<:AbstractFloat}
+    soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT}
+    soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) where {FT}
+    soil_plant_air_continuum!(config::Nothing, spac::Nothing) where {FT}
 
 Run SPAC model and move forward in time with time stepper controller, given
 - `spac` `MultiLayerSPAC` SPAC, or nothing
@@ -48,7 +48,7 @@ function soil_plant_air_continuum! end
 
 # TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
 # TODO: add top soil evaporation
-soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
 
@@ -86,7 +86,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
 
 soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) = nothing;
 
-soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = (
+soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
 

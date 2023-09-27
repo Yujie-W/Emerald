@@ -1,3 +1,5 @@
+#=
+
 #######################################################################################################################################################################################################
 #
 # Changes to the function
@@ -15,7 +17,7 @@
 #######################################################################################################################################################################################################
 """
 
-    root_pk(root::Root{FT}) where {FT<:AbstractFloat}
+    root_pk(root::Root{FT}) where {FT}
 
 Return the root end pressure and total hydraulic conductance to find solution of flow rates in all roots, given
 - `root` `Root` type struct
@@ -23,11 +25,11 @@ Return the root end pressure and total hydraulic conductance to find solution of
 """
 function root_pk end
 
-root_pk(root::Root{FT}, slayer::SoilLayer{FT}) where {FT<:AbstractFloat} = root._isconnected ? root_pk(root.HS, slayer, root.t) : (FT(NaN), FT(0));
+root_pk(root::Root{FT}, slayer::SoilLayer{FT}) where {FT} = root._isconnected ? root_pk(root.HS, slayer, root.t) : (FT(NaN), FT(0));
 
-root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, T::FT) where {FT<:AbstractFloat} = root_pk(hs, slayer, hs.FLOW, T);
+root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, T::FT) where {FT} = root_pk(hs, slayer, hs.FLOW, T);
 
-root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}, T::FT) where {FT} = (
     (; AREA, DIM_XYLEM, K_RHIZ, K_X, L, ΔH) = hs;
 
     _k_max = AREA * K_X / L;
@@ -69,7 +71,7 @@ root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::SteadyStateFlow{FT}
     return _p_end, 1/_r_all
 );
 
-root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT<:AbstractFloat} = (
+root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{FT}, T::FT) where {FT} = (
     (; AREA, DIM_XYLEM, K_RHIZ, K_X, L, ΔH) = hs;
 
     _k_max = AREA * K_X / L;
@@ -110,3 +112,5 @@ root_pk(hs::RootHydraulics{FT}, slayer::SoilLayer{FT}, mode::NonSteadyStateFlow{
 
     return _p_end, 1/_r_all
 );
+
+=#

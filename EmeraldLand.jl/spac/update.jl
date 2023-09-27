@@ -53,7 +53,7 @@ function update! end
             t::Union{Number,Nothing} = nothing,
             vpd::Union{Number,Nothing} = nothing,
             wind::Union{Number,Nothing} = nothing
-    ) where {FT<:AbstractFloat}
+    ) where {FT}
 
 Update the environmental conditions (such as saturated vapor pressure and relative humidity) of the air surrounding the leaf, given
 - `air` `AirLayer` type structure
@@ -74,7 +74,7 @@ update!(air::AirLayer{FT};
         t::Union{Number,Nothing} = nothing,
         vpd::Union{Number,Nothing} = nothing,
         wind::Union{Number,Nothing} = nothing
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     if !isnothing(t) air.t = t; end;
     if !isnothing(wind) air.wind = wind; end;
     if !isnothing(f_CO₂) air.f_CO₂ = f_CO₂; air.p_CO₂ = air.f_CO₂ * air.P_AIR * 1e-6; end;
@@ -102,7 +102,7 @@ update!(air::AirLayer{FT};
             t_soils::Union{Tuple,Nothing} = nothing,
             vcmax::Union{Number,Nothing} = nothing,
             vcmax_expo::Union{Number,Nothing} = nothing
-    ) where {FT<:AbstractFloat}
+    ) where {FT}
 
 Update the physiological parameters of the SPAC, given
 - `spac` Soil plant air continuum
@@ -133,7 +133,7 @@ update!(config::SPACConfiguration{FT},
         t_soils::Union{Tuple,Nothing} = nothing,
         vcmax::Union{Number,Nothing} = nothing,
         vcmax_expo::Union{Number,Nothing} = nothing
-) where {FT<:AbstractFloat} = (
+) where {FT} = (
     (; ENABLE_SOIL_EVAPORATION, DIM_LAYER, T_CLM) = config;
     (; AIR, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL, TRUNK) = spac;
 

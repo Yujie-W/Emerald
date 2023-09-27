@@ -9,12 +9,12 @@
 #######################################################################################################################################################################################################
 """
 
-    BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT<:AbstractFloat}
+    BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT}
 
 A constructor for BrooksCorey to create BrooksCorey type soil from VanGenuchten type, given
 - `vg` `VanGenuchten` type soil water retention curve
 """
-BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT<:AbstractFloat} = (
+BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT} = (
     _bc = BrooksCorey{FT}(K_MAX = vg.K_MAX, B = 1, TYPE = vg.TYPE, Ψ_SAT = 0.001, Θ_SAT = vg.Θ_SAT, Θ_RES = vg.Θ_RES);
 
     # generate data to fit

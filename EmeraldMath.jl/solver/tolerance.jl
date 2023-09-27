@@ -102,8 +102,8 @@ end
 #######################################################################################################################################################################################################
 """
 
-    if_break(tol::ResidualTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT<:AbstractFloat}
-    if_break(tol::SolutionTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT<:AbstractFloat}
+    if_break(tol::ResidualTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT}
+    if_break(tol::SolutionTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT}
 
 Determine whether to break, given
 - `tol` tolerance struct
@@ -118,6 +118,6 @@ When the tolerance is for target function residual, if the modeled residual is l
 """
 function if_break end
 
-if_break(tol::ResidualTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT<:AbstractFloat} = (abs(y) < tol.tol) || (n > tol.n_limit);
+if_break(tol::ResidualTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT} = (abs(y) < tol.tol) || (n > tol.n_limit);
 
-if_break(tol::SolutionTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT<:AbstractFloat} = (abs(x1-x2) < tol.tol) || (n > tol.n_limit);
+if_break(tol::SolutionTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT} = (abs(x1-x2) < tol.tol) || (n > tol.n_limit);

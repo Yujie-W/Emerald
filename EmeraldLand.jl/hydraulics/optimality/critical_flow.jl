@@ -21,7 +21,7 @@ function critical_flow end
 
 """
 
-    critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5)) where {FT<:AbstractFloat}
+    critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5)) where {FT}
 
 Return the critical flow rate that triggers a given amount of loss of conductance, given
 - `config` `SPACConfiguration` type struct
@@ -30,7 +30,7 @@ Return the critical flow rate that triggers a given amount of loss of conductanc
 - `ini` Initial guess
 
 """
-critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5)) where {FT<:AbstractFloat} = (
+critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini::FT = FT(0.5)) where {FT} = (
     (; KR_THRESHOLD) = config;
     (; K_SLA, VC) = hs;
 
@@ -67,9 +67,10 @@ critical_flow(config::SPACConfiguration{FT}, hs::LeafHydraulics{FT}, T::FT, ini:
 );
 
 
+#=
 """
 
-    critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT = FT(0.5)) where {FT<:AbstractFloat}
+    critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT = FT(0.5)) where {FT}
 
 Return the critical flow rate that triggers a given amount of loss of conductance, given
 - `config` `SPACConfiguration` type struct
@@ -77,7 +78,7 @@ Return the critical flow rate that triggers a given amount of loss of conductanc
 - `ini` Initial guess
 
 """
-critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT = FT(0.5)) where {FT<:AbstractFloat} = (
+critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT = FT(0.5)) where {FT} = (
     (; KR_THRESHOLD) = config;
     (; LEAF, ROOT, STEM) = spac;
 
@@ -116,3 +117,4 @@ critical_flow(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, ini::FT 
 
     return _solut
 );
+=#

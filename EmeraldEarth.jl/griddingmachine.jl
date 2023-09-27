@@ -91,14 +91,14 @@ end
 
 """
 
-    LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat}
+    LandDatasets{FT}(gm_tag::String, year::Int) where {FT}
 
 Constructor of LandDatasets, given
 - `gm_tag` Unique tag of GriddingMachine parameterization
 - `year` year of simulations
 
 """
-LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
+LandDatasets{FT}(gm_tag::String, year::Int) where {FT} = (
     @assert gm_tag in ["gm1", "gm2"] "Parameterization tag $(gm_tag) is not supported!";
 
     @tinfo "Querying data from GriddingMachine...";
@@ -158,13 +158,13 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT<:AbstractFloat} = (
 #######################################################################################################################################################################################################
 """
 
-    extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
+    extend_data!(dts::LandDatasets{FT}) where {FT}
 
 Gap fill the data linearly, given
 - `dts` LandDatasets struct
 
 """
-function extend_data!(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
+function extend_data!(dts::LandDatasets{FT}) where {FT}
     # determine where to fill based on land mask and lai
     for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
         if (dts.t_lm[_ilon,_ilat] > 0) && (nanmax(dts.p_lai[_ilon,_ilat,:]) > 0)
@@ -232,13 +232,13 @@ CLM5_PFTS = ["not_vegetated",
 #######################################################################################################################################################################################################
 """
 
-    gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
+    gm_grids(dts::LandDatasets{FT}) where {FT}
 
 Prepare a matrix of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct
 
 """
-function gm_grids(dts::LandDatasets{FT}) where {FT<:AbstractFloat}
+function gm_grids(dts::LandDatasets{FT}) where {FT}
     # read some general data
     _ind_c3 = [2:14;16;17];
     _ccs = read_csv("$(@__DIR__)/../data/CO2-1Y.csv");

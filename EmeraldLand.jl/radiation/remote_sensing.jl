@@ -39,7 +39,7 @@ function read_spectrum end
 #######################################################################################################################################################################################################
 """
 
-    read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT<:AbstractFloat}
+    read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT}
 
 Return the spectrum value at target wavelength bin, given
 - `x` X-axis of the spectrum
@@ -47,7 +47,7 @@ Return the spectrum value at target wavelength bin, given
 - `target` Target x value
 
 """
-read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT<:AbstractFloat} = (
+read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
     @assert length(x) == length(y) "Dimensions of provided spectrum x and y must match!";
     @assert x[1] <= target <= x[end] "Target wavelength must be within the range provided spectum!";
 
@@ -73,7 +73,7 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT<:AbstractFloat
 #######################################################################################################################################################################################################
 """
 
-    read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT<:AbstractFloat}
+    read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT}
 
 Return the spectrum value at target wavelength bin, given
 - `x` X-axis of the spectrum
@@ -83,7 +83,7 @@ Return the spectrum value at target wavelength bin, given
 - `steps` The incremental Δx is `(x₂ - x₁) / steps`
 
 """
-read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT<:AbstractFloat} = (
+read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT} = (
     _ys = 0;
     _δx = (x₂ - x₁) / steps;
     for _i in 1:(steps+1)
@@ -109,7 +109,7 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) 
 #######################################################################################################################################################################################################
 """
 
-    MODIS_BLUE(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_BLUE(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return blue band reflectance for MODIS setup, given
 - `config` Configurations of spac model
@@ -118,9 +118,9 @@ Return blue band reflectance for MODIS setup, given
 """
 function MODIS_BLUE end
 
-MODIS_BLUE(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_BLUE(spac.CANOPY, config.SPECTRA);
+MODIS_BLUE(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_BLUE(spac.CANOPY, config.SPECTRA);
 
-MODIS_BLUE(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_BLUE(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ, RADIATION.albedo, FT(MODIS_BAND_3[1]), FT(MODIS_BAND_3[2]); steps=4)
@@ -129,7 +129,7 @@ MODIS_BLUE(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where 
 
 """
 
-    MODIS_EVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_EVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return EVI for MODIS setup, given
 - `config` Configurations of spac model
@@ -138,9 +138,9 @@ Return EVI for MODIS setup, given
 """
 function MODIS_EVI end
 
-MODIS_EVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_EVI(spac.CANOPY, config.SPECTRA);
+MODIS_EVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_EVI(spac.CANOPY, config.SPECTRA);
 
-MODIS_EVI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_EVI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     _blue = MODIS_BLUE(can, spectra);
     _red  = MODIS_RED(can, spectra);
     _nir  = MODIS_NIR(can, spectra);
@@ -151,7 +151,7 @@ MODIS_EVI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {
 
 """
 
-    MODIS_EVI2(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_EVI2(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return EVI2 for MODIS setup, given
 - `config` Configurations of spac model
@@ -160,9 +160,9 @@ Return EVI2 for MODIS setup, given
 """
 function MODIS_EVI2 end
 
-MODIS_EVI2(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_EVI2(spac.CANOPY, config.SPECTRA);
+MODIS_EVI2(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_EVI2(spac.CANOPY, config.SPECTRA);
 
-MODIS_EVI2(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_EVI2(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     _red = MODIS_RED(can, spectra);
     _nir = MODIS_NIR(can, spectra);
 
@@ -172,7 +172,7 @@ MODIS_EVI2(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where 
 
 """
 
-    MODIS_LSWI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_LSWI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return LSWI for MODIS setup, given
 - `config` Configurations of spac model
@@ -181,9 +181,9 @@ Return LSWI for MODIS setup, given
 """
 function MODIS_LSWI end
 
-MODIS_LSWI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_LSWI(spac.CANOPY, config.SPECTRA);
+MODIS_LSWI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_LSWI(spac.CANOPY, config.SPECTRA);
 
-MODIS_LSWI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_LSWI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     _nir  = MODIS_NIR(can, spectra);
@@ -195,7 +195,7 @@ MODIS_LSWI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where 
 
 """
 
-    MODIS_NDVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_NDVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return NDVI for MODIS setup, given
 - `config` Configurations of spac model
@@ -204,9 +204,9 @@ Return NDVI for MODIS setup, given
 """
 function MODIS_NDVI end
 
-MODIS_NDVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_NDVI(spac.CANOPY, config.SPECTRA);
+MODIS_NDVI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_NDVI(spac.CANOPY, config.SPECTRA);
 
-MODIS_NDVI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_NDVI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     _red = MODIS_RED(can, spectra);
     _nir = MODIS_NIR(can, spectra);
 
@@ -216,7 +216,7 @@ MODIS_NDVI(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where 
 
 """
 
-    MODIS_NIR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_NIR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return near infrared band reflectance for MODIS setup, given
 - `config` Configurations of spac model
@@ -225,9 +225,9 @@ Return near infrared band reflectance for MODIS setup, given
 """
 function MODIS_NIR end
 
-MODIS_NIR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_NIR(spac.CANOPY, config.SPECTRA);
+MODIS_NIR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_NIR(spac.CANOPY, config.SPECTRA);
 
-MODIS_NIR(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_NIR(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ, RADIATION.albedo, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6)
@@ -236,7 +236,7 @@ MODIS_NIR(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {
 
 """
 
-    MODIS_NIRv(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_NIRv(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return NIRv for MODIS setup, given
 - `config` Configurations of spac model
@@ -245,9 +245,9 @@ Return NIRv for MODIS setup, given
 """
 function MODIS_NIRv end
 
-MODIS_NIRv(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_NIRv(spac.CANOPY, config.SPECTRA);
+MODIS_NIRv(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_NIRv(spac.CANOPY, config.SPECTRA);
 
-MODIS_NIRv(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_NIRv(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     _red = MODIS_RED(can, spectra);
     _nir = MODIS_NIR(can, spectra);
 
@@ -257,7 +257,7 @@ MODIS_NIRv(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where 
 
 """
 
-    MODIS_NIRvR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_NIRvR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return NIRv radiance for MODIS setup, given
 - `config` Configurations of spac model
@@ -266,9 +266,9 @@ Return NIRv radiance for MODIS setup, given
 """
 function MODIS_NIRvR end
 
-MODIS_NIRvR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_NIRvR(spac.CANOPY, config.SPECTRA);
+MODIS_NIRvR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_NIRvR(spac.CANOPY, config.SPECTRA);
 
-MODIS_NIRvR(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_NIRvR(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     _nir_rad = read_spectrum(spectra.Λ, RADIATION.e_o, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6);
@@ -279,7 +279,7 @@ MODIS_NIRvR(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where
 
 """
 
-    MODIS_RED(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    MODIS_RED(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return red band reflectance for MODIS setup, given
 - `config` Configurations of spac model
@@ -288,9 +288,9 @@ Return red band reflectance for MODIS setup, given
 """
 function MODIS_RED end
 
-MODIS_RED(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = MODIS_RED(spac.CANOPY, config.SPECTRA);
+MODIS_RED(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_RED(spac.CANOPY, config.SPECTRA);
 
-MODIS_RED(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+MODIS_RED(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ, RADIATION.albedo, FT(MODIS_BAND_1[1]), FT(MODIS_BAND_1[2]); steps=6)
@@ -299,7 +299,7 @@ MODIS_RED(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {
 
 """
 
-    OCO2_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    OCO2_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 759 nm for OCO2 setup, given
 - `config` Configurations of spac model
@@ -308,9 +308,9 @@ Return SIF @ 759 nm for OCO2 setup, given
 """
 function OCO2_SIF759 end
 
-OCO2_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = OCO2_SIF759(spac.CANOPY, config.SPECTRA);
+OCO2_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO2_SIF759(spac.CANOPY, config.SPECTRA);
 
-OCO2_SIF759(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+OCO2_SIF759(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO2_SIF_759[1]), FT(OCO2_SIF_759[2]); steps=4)
@@ -319,7 +319,7 @@ OCO2_SIF759(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where
 
 """
 
-    OCO2_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    OCO2_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 770 nm for OCO2 setup, given
 - `config` Configurations of spac model
@@ -328,9 +328,9 @@ Return SIF @ 770 nm for OCO2 setup, given
 """
 function OCO2_SIF770 end
 
-OCO2_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = OCO2_SIF770(spac.CANOPY, config.SPECTRA);
+OCO2_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO2_SIF770(spac.CANOPY, config.SPECTRA);
 
-OCO2_SIF770(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+OCO2_SIF770(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO2_SIF_770[1]), FT(OCO2_SIF_770[2]); steps=4)
@@ -339,7 +339,7 @@ OCO2_SIF770(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where
 
 """
 
-    OCO3_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    OCO3_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 759 nm for OCO3 setup, given
 - `config` Configurations of spac model
@@ -348,9 +348,9 @@ Return SIF @ 759 nm for OCO3 setup, given
 """
 function OCO3_SIF759 end
 
-OCO3_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = OCO3_SIF759(spac.CANOPY, config.SPECTRA);
+OCO3_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO3_SIF759(spac.CANOPY, config.SPECTRA);
 
-OCO3_SIF759(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+OCO3_SIF759(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO3_SIF_759[1]), FT(OCO3_SIF_759[2]); steps=4)
@@ -359,7 +359,7 @@ OCO3_SIF759(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where
 
 """
 
-    OCO3_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    OCO3_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 770 nm for OCO3 setup, given
 - `config` Configurations of spac model
@@ -368,9 +368,9 @@ Return SIF @ 770 nm for OCO3 setup, given
 """
 function OCO3_SIF770 end
 
-OCO3_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = OCO3_SIF770(spac.CANOPY, config.SPECTRA);
+OCO3_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO3_SIF770(spac.CANOPY, config.SPECTRA);
 
-OCO3_SIF770(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+OCO3_SIF770(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO3_SIF_770[1]), FT(OCO3_SIF_770[2]); steps=4)
@@ -379,7 +379,7 @@ OCO3_SIF770(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where
 
 """
 
-    TROPOMI_SIF683(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF683(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 682.5 nm for TROPOMI setup, given
 - `config` Configurations of spac model
@@ -388,9 +388,9 @@ Return SIF @ 682.5 nm for TROPOMI setup, given
 """
 function TROPOMI_SIF683 end
 
-TROPOMI_SIF683(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = TROPOMI_SIF683(spac.CANOPY, config.SPECTRA);
+TROPOMI_SIF683(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF683(spac.CANOPY, config.SPECTRA);
 
-TROPOMI_SIF683(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+TROPOMI_SIF683(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(TROPOMI_SIF_683[1]), FT(TROPOMI_SIF_683[2]); steps=5)
@@ -399,7 +399,7 @@ TROPOMI_SIF683(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) wh
 
 """
 
-    TROPOMI_SIF740(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF740(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 740 nm for TROPOMI setup, given
 - `config` Configurations of spac model
@@ -408,9 +408,9 @@ Return SIF @ 740 nm for TROPOMI setup, given
 """
 function TROPOMI_SIF740 end
 
-TROPOMI_SIF740(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = TROPOMI_SIF740(spac.CANOPY, config.SPECTRA);
+TROPOMI_SIF740(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF740(spac.CANOPY, config.SPECTRA);
 
-TROPOMI_SIF740(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+TROPOMI_SIF740(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(740))
@@ -419,7 +419,7 @@ TROPOMI_SIF740(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) wh
 
 """
 
-    TROPOMI_SIF747(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF747(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 746.5 nm for TROPOMI setup, given
 - `config` Configurations of spac model
@@ -428,9 +428,9 @@ Return SIF @ 746.5 nm for TROPOMI setup, given
 """
 function TROPOMI_SIF747 end
 
-TROPOMI_SIF747(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = TROPOMI_SIF747(spac.CANOPY, config.SPECTRA);
+TROPOMI_SIF747(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF747(spac.CANOPY, config.SPECTRA);
 
-TROPOMI_SIF747(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+TROPOMI_SIF747(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(TROPOMI_SIF_747[1]), FT(TROPOMI_SIF_747[2]); steps=8)
@@ -439,7 +439,7 @@ TROPOMI_SIF747(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) wh
 
 """
 
-    TROPOMI_SIF751(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat}
+    TROPOMI_SIF751(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Return SIF @ 750.5 nm for TROPOMI setup, given
 - `config` Configurations of spac model
@@ -448,9 +448,9 @@ Return SIF @ 750.5 nm for TROPOMI setup, given
 """
 function TROPOMI_SIF751 end
 
-TROPOMI_SIF751(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT<:AbstractFloat} = TROPOMI_SIF751(spac.CANOPY, config.SPECTRA);
+TROPOMI_SIF751(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF751(spac.CANOPY, config.SPECTRA);
 
-TROPOMI_SIF751(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT<:AbstractFloat} = (
+TROPOMI_SIF751(can::HyperspectralMLCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     (; RADIATION) = can;
 
     return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(TROPOMI_SIF_751[1]), FT(TROPOMI_SIF_751[2]); steps=5)
