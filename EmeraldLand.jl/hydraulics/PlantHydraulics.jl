@@ -24,6 +24,7 @@ include("xylem/flow_profile.jl");
 include("xylem/pressure_profile.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
+include("xylem/water_budget.jl");
 
 # root (dependent on xylem)
 include("root/flow_profile.jl");
@@ -34,6 +35,7 @@ include("root/water_budget.jl");
 # stem (dependent on xylem)
 include("stem/flow_profile.jl");
 include("stem/pressure_profile.jl");
+include("stem/water_budget.jl");
 
 # leaf (dependent on xylem)
 include("leaf/capacitor.jl");

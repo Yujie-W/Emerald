@@ -1,4 +1,4 @@
-# This file contains function to update the water budget of the root
+# This file contains function to update the water budget of the trunk and branches
 
 #######################################################################################################################################################################################################
 #
@@ -9,16 +9,18 @@
 #######################################################################################################################################################################################################
 """
 
-    root_water_budget!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
+    stem_water_budget!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
 
-Set the flow profile of each root, given
+Set the flow profile of each stem (trunk and branches), given
 - `spac` `MultiLayerSPAC` type struct
 - `Δt` time step
 
 """
-function root_water_budget!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
-    for root in spac.ROOTS
-        xylem_water_budget!(root, (root).NS, (root).NS.xylem.auxil, (root).NS.energy.t, Δt);
+function stem_water_budget(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
+    xylem_water_budget!(spac.TRUNK, (spac.TRUNK).NS, (spac.TRUNK).NS.xylem.auxil, (spac.TRUNK).NS.energy.t, Δt);
+
+    for stem in spac.BRANCHES
+        xylem_water_budget!(stem, (stem).NS, (stem).NS.xylem.auxil, (stem).NS.energy.t, Δt);
     end;
 
     return nothing
