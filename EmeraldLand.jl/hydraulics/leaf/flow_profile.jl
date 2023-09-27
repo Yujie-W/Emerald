@@ -2,7 +2,7 @@
 #
 # Changes to the function
 # General
-#     2023-Sep-11: add function from xylem_flow_profile! to set_leaf_flow! to be more specific in function name
+#     2023-Sep-11: add function leaf_flow_profile!
 #
 #######################################################################################################################################################################################################
 """
@@ -14,12 +14,11 @@ Set the flow out from each leaf, given
 - `spac` `MultiLayerSPAC` type struct
 
 """
-function set_leaf_flow_out! end
+function leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a MultiLayerSPAC
+    #     LEAVES index is from lower to upper, and thus the sunlit leaves fraction is DIM_LAYER + 1 - i
+    #     AIR index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX
 
-# compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a MultiLayerSPAC
-#     LEAVES index is from lower to upper, and thus the sunlit leaves fraction is DIM_LAYER + 1 - i
-#     AIR index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX
-set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ALLOW_LEAF_CONDENSATION, DIM_LAYER) = config;
     (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
@@ -43,4 +42,4 @@ set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
     end;
 
     return nothing
-);
+end;

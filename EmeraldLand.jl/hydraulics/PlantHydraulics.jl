@@ -38,6 +38,7 @@ include("stem/pressure_profile.jl");
 include("leaf/capacitor.jl");
 include("leaf/flow_profile.jl");
 include("leaf/pressure_profile.jl");
+include("leaf/water_budget.jl");
 
 
 # include functions related to beta factor
@@ -53,8 +54,6 @@ include("drought/legacy.jl");
 include("optimality/derivative.jl");
 
 # include functions related to flow and pressure profiles
-include("flow_profile/leaf_flow_out.jl");
-include("flow_profile/leaf_flow_profile.jl");
 include("flow_profile/root_flow_profile.jl");
 include("flow_profile/spac_flow_profile.jl");
 include("flow_profile/stem_flow_out.jl");

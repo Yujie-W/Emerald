@@ -41,7 +41,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct ExponentialPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{FT}
     # General model information
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
-    k_refill::FT = 1e4
+    k_refill::FT = 1e-4
     "Slope of the linear PV curve (relative to maximum) `[MPa⁻¹]`"
     slope::FT = 0.2
 end;
@@ -68,7 +68,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct LinearPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{FT}
     # General model information
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
-    k_refill::FT = 1e4
+    k_refill::FT = 1e-4
     "Slope of the linear PV curve (relative to maximum) `[MPa⁻¹]`"
     slope::FT = 0.2
 end;
