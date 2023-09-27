@@ -21,26 +21,6 @@ Limit stomatal conductance for H₂O for
 """
 function limit_stomatal_conductance! end
 
-limit_stomatal_conductance!(leaf::Leaf2{FT}) where {FT} = (
-    (; G_LIMITS) = leaf;
-
-    _ratio = relative_diffusive_coefficient(leaf.t);
-    _g_min = G_LIMITS[1] * _ratio;
-    _g_max = G_LIMITS[2] * _ratio;
-
-    # if gsw is lower than the limits
-    if leaf.g_H₂O_s < _g_min
-        leaf.g_H₂O_s = _g_min
-    end;
-
-    # if gsw is higher than the limits
-    if leaf.g_H₂O_s > _g_max
-        leaf.g_H₂O_s = _g_max
-    end;
-
-    return nothing
-);
-
 limit_stomatal_conductance!(leaves::Leaves2D{FT}) where {FT} = (
     (; G_LIMITS) = leaves;
 

@@ -11,7 +11,7 @@
 #######################################################################################################################################################################################################
 """
 
-    disconnect!(organ::Union{Leaf2{FT},Leaves2D{FT},Stem{FT}}) where {FT}
+    disconnect!(organ::Union{Leaves2D{FT},Stem{FT}}) where {FT}
     disconnect!(organ::Root{FT}) where {FT}
 
 Disconnect root from soil (and set othes' flow to 0), given
@@ -19,15 +19,6 @@ Disconnect root from soil (and set othes' flow to 0), given
 
 """
 function disconnect! end
-
-disconnect!(organ::Leaf2{FT}) where {FT} = (
-    disconnect!(organ.HS, organ.HS.FLOW);
-
-    organ.g_H₂O_s = 0;
-    organ._g_CO₂ = 0;
-
-    return nothing
-);
 
 disconnect!(organ::Leaves2D{FT}) where {FT} = (
     disconnect!(organ.HS, organ.HS.FLOW);

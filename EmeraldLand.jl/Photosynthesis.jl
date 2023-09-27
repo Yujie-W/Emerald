@@ -7,7 +7,7 @@ using ..Namespace: CytochromeReactionCenter, VJPReactionCenter, VanDerTolFluores
 using ..Namespace: Arrhenius, ArrheniusPeak, C3VJPModel, C3CytochromeModel, C4VJPModel, GCO₂Mode, PCO₂Mode, Q10, Q10Peak
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
 using ..Namespace: AbstractStomataModel, BallBerrySM, BetaFunction, BetaParameterG1, BetaParameterVcmax, GentineSM, LeuningSM, MedlynSM
-using ..Namespace: AirLayer, Leaf2, Leaves2D
+using ..Namespace: AirLayer, Leaves2D
 using ..Namespace: MultiLayerSPAC
 
 

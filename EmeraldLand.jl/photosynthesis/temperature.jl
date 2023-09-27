@@ -181,8 +181,6 @@ Return the marginal increase in respiration rate per temperature, given
 """
 function ∂R∂T end
 
-∂R∂T(leaf::Leaf2{FT}) where {FT} = ∂R∂T(leaf.PSM, leaf.t);
-
 ∂R∂T(leaves::Leaves2D{FT}) where {FT} = ∂R∂T(leaves.PSM, leaves.t);
 
 ∂R∂T(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}, t::FT) where {FT} = ∂R∂T(psm.TD_R, psm.r_d25, t);

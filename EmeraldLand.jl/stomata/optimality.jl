@@ -15,7 +15,6 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
     ∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}) where {FT}
     ∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int) where {FT}
 
@@ -27,29 +26,6 @@ Return the partial derivative of A per E, given
 
 """
 function ∂A∂E end
-
-∂A∂E(leaf::Leaf2{FT}, air::AirLayer{FT}) where {FT} = (
-    (; P_AIR) = air;
-
-    _p_s = saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.p_H₂O);
-
-    # compute the A and E at the current setting
-    _gs1 = leaf.g_H₂O_s;
-    _gh1 = 1 / (1 / _gs1 + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e1  = _gh1 * _d / P_AIR;
-    _a1  = leaf.a_net;
-
-    # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
-    _gs2 = _gs1 + FT(0.0001);
-    _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaf.g_CO₂_b);
-    leaf_photosynthesis!(leaf, air, _gc2, leaf.ppar, leaf.t);
-    _e2 = _gh2 * _d / P_AIR;
-    _a2 = leaf.PSM.a_net;
-
-    return (_a2 - _a1) / (_e2 - _e1)
-);
 
 ∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = (
     (; P_AIR) = air;
@@ -122,9 +98,9 @@ Returns the marginal increase in leaf respiration rate per transpiration rate, g
 """
 function ∂R∂E end
 
-∂R∂E(lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT} = ∂R∂E(lf.SM, lf, air);
+∂R∂E(lf::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = ∂R∂E(lf.SM, lf, air);
 
-∂R∂E(sm::WangSM{FT}, lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT} = ∂R∂T(lf) * ∂T∂E(lf, air, sm.f_view);
+∂R∂E(sm::WangSM{FT}, lf::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = ∂R∂T(lf) * ∂T∂E(lf, air, sm.f_view);
 
 
 #######################################################################################################################################################################################################
@@ -146,9 +122,7 @@ Returns the marginal increase in leaf temperature per transpiration rate, given
 """
 function ∂T∂E end
 
-∂T∂E(lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(lf.BIO, lf, air, f_view);
-
-∂T∂E(bio::HyperLeafBio{FT}, leaf::Leaf2{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaf.t, leaf.WIDTH, air.wind, 1 - bio.auxil.τ_LW);
+∂T∂E(lf::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(lf.BIO, lf, air, f_view);
 
 ∂T∂E(bio::HyperLeafBio{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, 1 - bio.auxil.τ_LW);
 
@@ -176,133 +150,6 @@ This function returns the marginal risk for stomatal opening. This function supp
 
 """
 function ∂Θ∂E end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
-#     2022-Jul-08: add method for AndereggSM model on Leaf
-#     2022-Jul-08: add method for EllerSM model on Leaf
-#     2022-Jul-08: add method for SperrySM model on Leaf
-#     2022-Jul-08: add method for WangSM model on Leaf
-#     2022-Jul-08: add method for Wang2SM model on Leaf
-#     2022-Jul-08: use ∂E∂P from PlantHydraulics.jl
-#     2023-Jun-16: compute saturated vapor pressure based on water water potential
-#     2023-Aug-27: make sure D >= 1 when compute dΘdE
-#
-#######################################################################################################################################################################################################
-"""
-
-    ∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-
-Return the marginal risk for stomatal opening, given
-- `sm` `AndereggSM`, `EllerSM`, `SperrySM`, `WangSM`, or `Wang2SM` type optimality model
-- `leaf` `Leaf` type struct
-- `air` `AirLayer` for environmental conditions
-- `δe` Incremental flow rate to compute ∂E∂P
-
-"""
-∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; A, B) = sm;
-    (; HS) = leaf;
-    (; P_AIR) = air;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.p_H₂O);
-
-    # compute the E at the current setting
-    _gs = leaf.g_H₂O_s;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * _d / P_AIR;
-
-    _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
-
-    return (-2 * A * HS._p_element[end] + B) / _∂E∂P
-);
-
-∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaf;
-    (; P_AIR) = air;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.p_H₂O);
-
-    # compute the E at the current setting
-    _gs = leaf.g_H₂O_s;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * _d / P_AIR;
-
-    _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
-    _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
-    _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
-
-    return _∂K∂E * leaf.a_net / _∂E∂P_1
-);
-
-∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaf;
-    (; P_AIR) = air;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.p_H₂O);
-
-    # compute the E at the current setting
-    _gs = leaf.g_H₂O_s;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * _d / P_AIR;
-
-    _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
-    _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
-    _∂E∂P_m = ∂E∂P(leaf, FT(0); δe = δe);
-    _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
-
-    # compute maximum A
-    _ghm = HS._e_crit / _d * P_AIR;
-    _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _gcm = 1 / (FT(1.6) / _gsm + 1 / leaf.g_CO₂_b);
-    leaf_photosynthesis!(leaf, air, _gcm, leaf.ppar, leaf.t);
-    _am = leaf.PSM.a_net;
-
-    return _∂K∂E * _am / _∂E∂P_m
-);
-
-∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaf;
-    (; P_AIR) = air;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.p_H₂O);
-
-    # compute the A and E at the current setting
-    _gs = leaf.g_H₂O_s;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * _d / P_AIR;
-
-    return leaf.a_net / max(eps(FT), (HS._e_crit - _e))
-);
-
-∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; A) = sm;
-    (; HS) = leaf;
-    (; P_AIR) = air;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.p_H₂O);
-
-    # compute the E at the current setting
-    _gs = leaf.g_H₂O_s;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _e  = _gh * _d / P_AIR;
-
-    _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
-
-    return (-1 * A * HS._p_element[end] * leaf.a_net) / _∂E∂P
-);
 
 
 #######################################################################################################################################################################################################
@@ -589,26 +436,7 @@ Return the ∂Θ∂E for nocturnal stomatal opening, given
 - `air` `AirLayer` type environmental conditions
 
 """
-∂Θₙ∂E(lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(lf.SM, lf, air);
-
-∂Θₙ∂E(sm::WangSM{FT}, leaf::Leaf2{FT}, air::AirLayer{FT}) where {FT} = (
-    (; F_FITNESS) = sm;
-    (; HS) = leaf;
-    (; P_AIR) = air;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.p_H₂O);
-
-    # compute the A and E at the current setting
-    _gs = leaf.g_H₂O_s;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.g_CO₂_b));
-    _gc = 1 / (FT(1.6) / _gs + 1 / leaf.g_CO₂_b);
-    _e  = _gh * _d / P_AIR;
-    leaf_photosynthesis!(leaf, air, _gc, sm.ppar_mem, leaf.t);
-    _a  = leaf.PSM.a_net;
-
-    return _a / max(eps(FT), (HS._e_crit - _e)) * F_FITNESS
-);
+∂Θₙ∂E(lf::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(lf.SM, lf, air);
 
 ∂Θₙ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = (
     (; F_FITNESS) = sm;

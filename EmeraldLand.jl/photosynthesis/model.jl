@@ -30,17 +30,17 @@ function leaf_photosynthesis! end
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT}
+    leaf_photosynthesis!(lf::Leaves2D{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT}
 
 Updates leaf photosynthetic rates based on CO₂ partial pressure (for StomataModels.jl temporary use), given
-- `lf` `Leaf2`, `Leaves2D` type structure that stores biophysical, reaction center, and photosynthesis model structures
+- `lf` `Leaves2D` type structure that stores biophysical, reaction center, and photosynthesis model structures
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`, default is `leaf._g_CO₂`
 - `ppar` APAR used for photosynthesis
 - `t` Leaf temperature in `[K]`
 
 """
-leaf_photosynthesis!(lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT} = (
+leaf_photosynthesis!(lf::Leaves2D{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT} = (
     (; PRC, PSM) = lf;
 
     photosystem_temperature_dependence!(PSM, PRC, air, t);
@@ -64,7 +64,7 @@ leaf_photosynthesis!(lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}, g_lc
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(lf::Union{Leaf{FT}, Leaves2D{FT}}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT}
+    leaf_photosynthesis!(lf::Leaves2D{FT}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT}
 
 Updates leaf photosynthetic rates based on CO₂ partial pressure or CO₂ conductance, given
 - `lf` `Leaf`, `Leaves2D` type structure that stores biophysical, reaction center, and photosynthesis model structures
@@ -73,11 +73,11 @@ Updates leaf photosynthetic rates based on CO₂ partial pressure or CO₂ condu
 - `rd_only` Whether to compute respiration rate only
 
 """
-leaf_photosynthesis!(lf::Union{Leaf2{FT}, Leaves2D{FT}}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT} =
+leaf_photosynthesis!(lf::Leaves2D{FT}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT} =
     leaf_photosynthesis!(lf, air, mode, lf.SM; rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf2{FT}, Leaves2D{FT}},
+            lf::Leaves2D{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             sm::AbstractStomataModel{FT};
@@ -85,7 +85,7 @@ leaf_photosynthesis!(
 ) where {FT} = leaf_photosynthesis!(lf, air, mode, FT(1); rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf2{FT}, Leaves2D{FT}},
+            lf::Leaves2D{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}};
@@ -93,7 +93,7 @@ leaf_photosynthesis!(
 ) where {FT} = leaf_photosynthesis!(lf, air, mode, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf2{FT}, Leaves2D{FT}},
+            lf::Leaves2D{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             β::BetaFunction{FT},
@@ -102,7 +102,7 @@ leaf_photosynthesis!(
 ) where {FT} = leaf_photosynthesis!(lf, air, mode, FT(1); rd_only = rd_only);
 
 leaf_photosynthesis!(
-            lf::Union{Leaf2{FT}, Leaves2D{FT}},
+            lf::Leaves2D{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             β::BetaFunction{FT},
@@ -137,13 +137,10 @@ leaf_photosynthesis!(
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(leaf::Leaf2{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
     leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
-    leaf_photosynthesis!(leaf::Leaf2{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
     leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT}
 
 Updates leaf photosynthetic rates (this method not meant for public usage, use it with caution), given
-- `leaf` `Leaf2` type structure that stores biophysical, reaction center, and photosynthesis model structures
 - `leaves` `Leaves2D` type structure that stores biophysical, reaction center, and photosynthesis model structures
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `mode` `GCO₂Mode` or `PCO₂Mode` that uses CO₂ partial pressure to compute photosynthetic rates
@@ -151,36 +148,6 @@ Updates leaf photosynthetic rates (this method not meant for public usage, use i
 - `rd_only` Whether to compute respiration rate only
 
 """
-leaf_photosynthesis!(leaf::Leaf2{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
-    (; PRC, PSM) = leaf;
-
-    if rd_only
-        PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaf.t);
-        leaf.a_net = -PSM._r_d;
-        leaf.a_gross = 0;
-        leaf.etr = 0;
-
-        return nothing
-    end;
-
-    photosystem_temperature_dependence!(PSM, PRC, air, leaf.t);
-    photosystem_electron_transport!(PSM, PRC, leaf.ppar, leaf._p_CO₂_i; β = β);
-    rubisco_limited_rate!(PSM, leaf._p_CO₂_i; β = β);
-    light_limited_rate!(PSM);
-    product_limited_rate!(PSM, leaf._p_CO₂_i; β = β);
-    colimit_photosynthesis!(PSM; β = β);
-
-    # update the fluorescence related parameters
-    photosystem_coefficients!(PSM, PRC, leaf.ppar; β = β);
-
-    # save the rates and to leaf
-    leaf.a_net = PSM.a_net;
-    leaf.a_gross = PSM.a_gross;
-    leaf.etr = PSM.a_gross / PSM._e_to_c;
-
-    return nothing
-);
-
 leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
     (; PRC, PSM) = leaves;
 
@@ -240,44 +207,6 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::PCO₂Mode, 
     leaves.ϕ_f_shaded = PRC.ϕ_f;
     leaves.ϕ_n_shaded = PRC.ϕ_n;
     leaves.ϕ_p_shaded = PRC.ϕ_p;
-
-    return nothing
-);
-
-leaf_photosynthesis!(leaf::Leaf2{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
-    (; PRC, PSM) = leaf;
-
-    if rd_only
-        PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaf.t);
-        leaf.a_net = -PSM._r_d;
-        leaf.a_gross = 0;
-        leaf.etr = 0;
-
-        return nothing
-    end;
-
-    # leaf._p_CO₂_i is not accurate here in the first call, thus need a second call after p_CO₂_i is analytically resolved
-    photosystem_temperature_dependence!(PSM, PRC, air, leaf.t);
-    photosystem_electron_transport!(PSM, PRC, leaf.ppar, leaf._p_CO₂_i; β = β);
-    rubisco_limited_rate!(PSM, air, leaf._g_CO₂; β = β);
-    light_limited_rate!(PSM, PRC, air, leaf._g_CO₂; β = β);
-    product_limited_rate!(PSM, air, leaf._g_CO₂; β = β);
-    colimit_photosynthesis!(PSM; β = β);
-
-    # update CO₂ partial pressures at the leaf surface and internal airspace (evaporative front)
-    leaf._p_CO₂_i = air.p_CO₂ - PSM.a_net / leaf._g_CO₂   * air.P_AIR * FT(1e-6);
-    leaf._p_CO₂_s = air.p_CO₂ - PSM.a_net / leaf.g_CO₂_b * air.P_AIR * FT(1e-6);
-
-    # update leaf ETR again to ensure that j_pot and e_to_c are correct for C3CytochromeModel
-    photosystem_electron_transport!(PSM, PRC, leaf.ppar, leaf._p_CO₂_i; β = β);
-
-    # update the fluorescence related parameters
-    photosystem_coefficients!(PSM, PRC, leaf.ppar; β = β);
-
-    # save the rates and to leaf
-    leaf.a_net = PSM.a_net;
-    leaf.a_gross = PSM.a_gross;
-    leaf.etr = PSM.a_gross / PSM._e_to_c;
 
     return nothing
 );

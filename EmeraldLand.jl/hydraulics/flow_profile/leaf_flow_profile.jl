@@ -37,8 +37,6 @@ leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt:
 );
 
 # wrapper methods to call leaf_flow_profile! for different types of organ
-leaf_flow_profile!(organ::Leaf2{FT}, Δt::FT) where {FT} = leaf_flow_profile!(organ.HS, organ.t, Δt);
-
 leaf_flow_profile!(organ::Leaves2D{FT}, Δt::FT) where {FT} = (
     leaf_flow_profile!(organ.HS, organ.t, Δt);
     organ.∫∂w∂t_in += flow_in(organ) * Δt;

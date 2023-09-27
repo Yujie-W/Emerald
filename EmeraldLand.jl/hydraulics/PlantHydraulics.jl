@@ -13,7 +13,7 @@ using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapa
 using ..Namespace: Root, Root2, SoilLayer
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
-using ..Namespace: Leaf, Leaf2, Leaves2D, Soil, Stem, Stem2
+using ..Namespace: Leaf, Leaves2D, Soil, Stem, Stem2
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..SoilHydraulics: relative_hydraulic_conductance, soil_θ, soil_ψ_25
 
@@ -36,6 +36,7 @@ include("stem/pressure_profile.jl");
 
 # leaf (dependent on xylem)
 include("leaf/capacitor.jl");
+include("leaf/flow_profile.jl");
 include("leaf/pressure_profile.jl");
 
 

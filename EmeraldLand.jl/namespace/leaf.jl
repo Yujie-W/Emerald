@@ -820,130 +820,6 @@ end
 
 #######################################################################################################################################################################################################
 #
-# Changes to this type
-# General
-#     2022-Jul-19: abstractize the leaf
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Abstract type for leaf
-
-Hierarchy of the `AbstractLeaf`
-- [`Leaf`](@ref)
-- [`Leaves2D`](@ref)
-
-"""
-abstract type AbstractLeaf{FT<:AbstractFloat} end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this structure
-# General
-#     2022-Jan-14: refactor the Leaf structure within BIO, PRC, PSM as fields
-#     2022-Jan-24: add p_CO₂_s to the structure
-#     2022-Feb-07: moved FLM to PRC
-#     2022-May-25: add new field HS, WIDTH
-#     2022-Jun-14: use Union instead of Abstract... for type definition
-#     2022-Jun-15: add support to BroadbandLeafBiophysics and HyperspectralLeafBiophysics types
-#     2022-Jun-29: add APAR_CAR as a field
-#     2022-Jun-30: add SM as a field
-#     2022-Jul-01: add fields: G_LIMITS, a_gross and a_net
-#     2022-Jul-12: add field: ∂g∂t
-#     2022-Jul-14: add field: CP, e, cp, and ∂e∂t
-#     2022-Jul-19: remove field p_H₂O_sat
-#     2022-Jul-28: move field _t to PSM
-#     2022-Nov-18: use Union type for SM
-#     2023-Mar-02: set minimum G to 1e-4 instead of 1e-2
-#     2023-Apr-13: move field APAR_CAR to SPACConfiguration
-#     2023-Jun-13: add field: etr
-#     2023-Sep-11: set minimum G to 0 instead of 1e-4
-#     2023-Sep-18: use HyperLeafBio instead of HyperspectralLeafBiophysics
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Structure to save leaf parameters. This structure is meant for leaf level research and canopy radiative transfer scheme without sunlit and shaded partitioning (ppar and ppar-dependent variables).
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct Leaf2{FT<:AbstractFloat} <: AbstractLeaf{FT}
-    # Constants
-    # "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
-    # CP::FT = 1780
-    "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    G_LIMITS::Vector{FT} = FT[1e-3, 0.3]
-    "Leaf width `[m]`"
-    WIDTH::FT = 0.05
-
-    # Embedded structures
-    "New leaf struct, will replace Leaf2 in the next major refactor"
-    NS::Leaf{FT} = Leaf{FT}()
-    # "[`AbstractLeafBiophysics`](@ref) type leaf biophysical parameters"
-    # BIO::Union{BroadbandLeafBiophysics{FT}, HyperLeafBio{FT}}
-    # "[`LeafHydraulics`](@ref) type leaf hydraulic system"
-    # HS::LeafHydraulics{FT} = LeafHydraulics{FT}()
-    "[`AbstractReactionCenter`](@ref) type photosynthesis reaction center"
-    PRC::Union{VJPReactionCenter{FT}, CytochromeReactionCenter{FT}} = VJPReactionCenter{FT}()
-    "[`AbstractPhotosynthesisModel`](@ref) type photosynthesis model"
-    PSM::Union{C3VJPModel{FT}, C4VJPModel{FT}, C3CytochromeModel{FT}} = C3VJPModel{FT}()
-    "Stomatal model"
-    SM::Union{AndereggSM{FT}, BallBerrySM{FT}, EllerSM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}} = WangSM{FT}()
-
-    # Prognostic variables (not used for ∂y∂t)
-    "Boundary leaf diffusive conductance to CO₂ `[mol m⁻² s⁻¹]`"
-    g_CO₂_b::FT = 3
-    "Absorbed photosynthetically active radiation used for photosynthesis `[μmol m⁻² s⁻¹]`"
-    ppar::FT = 1000
-    # "Current leaf temperature"
-    # t::FT = T₂₅(FT)
-
-    # Prognostic variables (used for ∂y∂t)
-    # "Total stored energy per area `[J m⁻²]`"
-    # e::FT = (CP * BIO.state.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
-    "Stomatal conductance to water vapor `[mol m⁻² s⁻¹]`"
-    g_H₂O_s::FT = 0.01
-    # "Marginal increase in energy `[W m⁻²]`"
-    # ∂e∂t::FT = 0
-    "Marginal increase of conductance per time `[mol m⁻² s⁻²]`"
-    ∂g∂t::FT = 0
-
-    # Diagnostic variables
-    "Gross photosynthetic rate `[μmol m⁻² s⁻¹]`"
-    a_gross::FT = 0
-    "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
-    a_net::FT = 0
-    "Actual electron transport `[μmol m⁻² s⁻¹]`"
-    etr::FT = 0
-
-    # Cache variables
-    "Combined specific heat capacity of leaf per area `[J K⁻¹ m⁻²]`"
-    _cp::FT = 0
-    "Total leaf diffusive conductance to CO₂ `[mol m⁻² s⁻¹]`"
-    _g_CO₂::FT = 0
-    "Leaf internal CO₂ partial pressure `[Pa]`"
-    _p_CO₂_i::FT = 0
-    "Leaf surface CO₂ partial pressure `[Pa]`"
-    _p_CO₂_s::FT = 0
-end
-
-Leaf2(config::SPACConfiguration{FT}) where {FT} = (
-    return Leaf2{FT}(
-                NS = Leaf(config)
-    )
-);
-
-
-#######################################################################################################################################################################################################
-#
 # Changes to this structure
 # General
 #     2022-Jun-27: add new structure for leaves with 2D Matrix of parameters for sunlit partitioning and point value for shaded partitioning
@@ -981,7 +857,7 @@ Structure to save leaf parameters for a single canopy layer. This structure is m
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
+Base.@kwdef mutable struct Leaves2D{FT}
     # Constants
     "Specific heat capacity of leaf `[J K⁻¹ kg⁻¹]`"
     CP::FT = 1780
@@ -991,7 +867,7 @@ Base.@kwdef mutable struct Leaves2D{FT<:AbstractFloat} <: AbstractLeaf{FT}
     WIDTH::FT = 0.05
 
     # Embedded structures
-    "New leaf struct, will replace Leaf2 in the next major refactor"
+    "New leaf struct, will replace Leaves2D in the next major refactor"
     NS::Leaf{FT}
     # "[`HyperLeafBio`](@ref) type leaf biophysical parameters"
     # BIO::HyperLeafBio{FT}
