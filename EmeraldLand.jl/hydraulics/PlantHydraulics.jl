@@ -14,7 +14,7 @@ using ..Namespace: Root, Root2, SoilLayer
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
 using ..Namespace: Leaf, Leaf2, Leaves2D, Soil, Stem, Stem2
-using ..Namespace: MonoElementSPAC, MultiLayerSPAC, SPACConfiguration
+using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..SoilHydraulics: relative_hydraulic_conductance, soil_θ, soil_ψ_25
 
 

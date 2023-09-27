@@ -210,22 +210,13 @@ function stomatal_conductance! end
 #######################################################################################################################################################################################################
 """
 
-    stomatal_conductance!(spac::MonoElementSPAC{FT}; β::FT = FT(1)) where {FT}
     stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT}
 
 Update marginal stomatal conductance, given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 - `β` Tuning factor
 
 """
-stomatal_conductance!(spac::MonoElementSPAC{FT}; β::FT = FT(1)) where {FT} = (
-    (; AIR, LEAF) = spac;
-
-    stomatal_conductance!(LEAF, AIR; β = β);
-
-    return nothing
-);
-
 stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT} = (
     (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
@@ -274,22 +265,13 @@ stomatal_conductance!(leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) w
 #######################################################################################################################################################################################################
 """
 
-    stomatal_conductance!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT}
     stomatal_conductance!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
 
 Update stomatal conductance for H₂O based on computed ∂g∂t, given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 - `Δt` Time step length `[s]`
 
 """
-stomatal_conductance!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT} = (
-    (; LEAF) = spac;
-
-    stomatal_conductance!(LEAF, Δt);
-
-    return nothing
-);
-
 stomatal_conductance!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
@@ -334,22 +316,13 @@ stomatal_conductance!(leaves::Leaves2D{FT}, Δt::FT) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    stomatal_conductance_profile!(spac::MonoElementSPAC{FT}) where {FT}
     stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT}
 
 Update stomatal conductance for CO₂ based on that for H₂O, given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 
 """
 function stomatal_conductance_profile! end
-
-stomatal_conductance_profile!(spac::MonoElementSPAC{FT}) where {FT} = (
-    (; LEAF) = spac;
-
-    stomatal_conductance_profile!(LEAF);
-
-    return nothing
-);
 
 stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;

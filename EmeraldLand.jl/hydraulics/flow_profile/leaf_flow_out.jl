@@ -7,30 +7,14 @@
 #######################################################################################################################################################################################################
 """
 
-    set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT}
     set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Set the flow out from each leaf, given
 - `config` `SPACConfiguration` type struct
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 
 """
 function set_leaf_flow_out! end
-
-# compute the flow rate exiting the leaf and update it to the leaf of a MonoElementSPAC
-set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT} = (
-    (; ALLOW_LEAF_CONDENSATION) = config;
-    (; AIR, LEAF) = spac;
-
-    g = 1 / (1 / LEAF.g_H₂O_s + 1 / (FT(1.35) * LEAF.g_CO₂_b));
-    d = saturation_vapor_pressure(LEAF.t, LEAF.HS.p_leaf * 1000000) - AIR.p_H₂O;
-    ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
-    f = g * d / AIR.P_AIR;
-    # set_flow_out!(LEAF.HS.FLOW, f);
-    set_flow_profile!(LEAF.NS.xylem, f);
-
-    return nothing
-);
 
 # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a MultiLayerSPAC
 #     LEAVES index is from lower to upper, and thus the sunlit leaves fraction is DIM_LAYER + 1 - i

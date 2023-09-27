@@ -8,22 +8,13 @@
 #######################################################################################################################################################################################################
 """
 
-    set_stem_flow_out!(spac::MonoElementSPAC{FT}) where {FT}
     set_stem_flow_out!(spac::MultiLayerSPAC{FT}) where {FT}
 
 Set the flow out from each stem, given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 
 """
 function set_stem_flow_out! end
-
-set_stem_flow_out!(spac::MonoElementSPAC{FT}) where {FT} = (
-    (; LEAF, STEM) = spac;
-
-    set_flow_out!(STEM.HS.FLOW, flow_in(LEAF) * LEAF.HS.AREA);
-
-    return nothing
-);
 
 set_stem_flow_out!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; BRANCHES, CANOPY, LEAVES) = spac;

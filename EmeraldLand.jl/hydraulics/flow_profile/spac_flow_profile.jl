@@ -12,7 +12,6 @@
 #     2022-May-27: add method for leaf, root, and stem hydraulic system at steady and non-steady state mode (for dispatching purpose)
 #     2022-May-27: add method for leaf, root, and stem organ at steady and non-steady state mode (for dispatching purpose)
 #     2022-May-27: add method to solve root flow rate partition at both steady and non-steady state modes
-#     2022-May-27: add method for MonoElementSPAC (blank)
 #     2022-May-31: remove hydraulic system from input variables, thus supporting leaf and stem
 #     2022-May-31: use reformulate methods for setting up flow rate
 #     2022-May-31: set up the flow rate profile using the network
@@ -36,17 +35,17 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT}
+    spac_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
 
 Update flow profiles for the soil-plant-air continuum (set up leaf flow rate from stomatal conductance first), given
 - `config` `SPACConfiguration` type struct
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type SPAC system
+- `spac` `MultiLayerSPAC` type SPAC system
 - `Δt` Time step length
 
 """
 function spac_flow_profile! end
 
-spac_flow_profile!(config::SPACConfiguration{FT}, spac::Union{MonoElementSPAC{FT},MultiLayerSPAC{FT}}, Δt::FT) where {FT} = (
+spac_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     # 1. update the leaf flow profile
     leaf_flow_profile!(config, spac, Δt);
 

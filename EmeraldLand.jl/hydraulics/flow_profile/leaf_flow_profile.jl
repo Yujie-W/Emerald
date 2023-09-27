@@ -8,12 +8,11 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT}
     leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
 
 Set the flow profile of the leaf, given
 - `config` `SPACConfiguration` type struct
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 - `Δt` time step
 
 """
@@ -25,13 +24,6 @@ function leaf_flow_profile! end
 #         leaf_flow_profile!(organ, Δt)
 #             leaf_flow_profile!(hs, t, Δt)
 #                 leaf_flow_profile!(hs, mode, t, Δt)
-leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT} = (
-    set_leaf_flow_out!(config, spac);
-    leaf_flow_profile!(spac.LEAF, Δt);
-
-    return nothing
-);
-
 leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     if spac.CANOPY.lai > 0
         set_leaf_flow_out!(config, spac);

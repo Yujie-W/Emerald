@@ -8,7 +8,7 @@ using ..Namespace: Arrhenius, ArrheniusPeak, C3VJPModel, C3CytochromeModel, C4VJ
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
 using ..Namespace: AbstractStomataModel, BallBerrySM, BetaFunction, BetaParameterG1, BetaParameterVcmax, GentineSM, LeuningSM, MedlynSM
 using ..Namespace: AirLayer, Leaf2, Leaves2D
-using ..Namespace: MonoElementSPAC, MultiLayerSPAC
+using ..Namespace: MultiLayerSPAC
 
 
 include("photosynthesis/colimit.jl");

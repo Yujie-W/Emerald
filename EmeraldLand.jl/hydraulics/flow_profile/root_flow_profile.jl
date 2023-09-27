@@ -7,24 +7,14 @@
 #######################################################################################################################################################################################################
 """
 
-    set_root_flow_out!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT}
     set_root_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Set the flow profile of each root, given
 - `config` `SPACConfiguration` type struct
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 
 """
 function root_flow_profile! end
-
-root_flow_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}, Δt::FT) where {FT} = (
-    (; ROOT) = spac;
-
-    set_root_flow_out!(spac);
-    root_flow_profile!(ROOT, Δt);
-
-    return nothing
-);
 
 root_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     (; ROOTS) = spac;

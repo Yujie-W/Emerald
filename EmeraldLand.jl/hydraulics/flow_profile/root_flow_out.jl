@@ -10,24 +10,15 @@
 #######################################################################################################################################################################################################
 """
 
-    set_root_flow_out!(spac::MonoElementSPAC{FT}) where {FT}
     set_root_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Set the flow out from each root, given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type struct
+- `spac` `MultiLayerSPAC` type struct
 - `config` `SPACConfiguration` type struct
 
 """
 function set_root_flow_out! end
 
-# if there is only one root that is simple, just set the flow out
-set_root_flow_out!(spac::MonoElementSPAC{FT}) where {FT} = (
-    (; STEM, ROOT) = spac;
-
-    set_flow_out!(ROOT.HS.FLOW, flow_in(STEM));
-
-    return nothing
-);
 
 # the problem with the multiple layered roots system is that we need to make sure that pressure at the end of each root is the same
 # therefore, we need to find an algorithm to find the flow rates of each root

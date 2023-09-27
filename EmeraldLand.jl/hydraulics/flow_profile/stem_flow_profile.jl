@@ -2,13 +2,6 @@
 
 function stem_flow_profile! end
 
-stem_flow_profile!(spac::MonoElementSPAC{FT}, Δt::FT) where {FT} = (
-    set_stem_flow_out!(spac);
-    stem_flow_profile!(spac.STEM, Δt);
-
-    return nothing
-);
-
 stem_flow_profile!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     (; BRANCHES, TRUNK) = spac;
 

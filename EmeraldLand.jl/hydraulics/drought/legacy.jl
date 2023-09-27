@@ -13,17 +13,14 @@
 #######################################################################################################################################################################################################
 """
 
-    clear_legacy!(spac::MonoElementSPAC{FT}) where {FT}
     clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT}
     clear_legacy!(organ::Union{Leaf2{FT}, Leaves2D{FT}, Root{FT}, Stem{FT}}) where {FT}
 
 Clear the legacy for hydraulic organ or system, given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type structure
+- `spac` `MultiLayerSPAC` type structure
 - `organ` `Leaf2`, `Leaves2D`, `Root`, or `Stem` type structure
 """
 function clear_legacy! end
-
-clear_legacy!(spac::MonoElementSPAC{FT}) where {FT} = (clear_legacy!(spac.LEAF); clear_legacy!(spac.ROOT); clear_legacy!(spac.STEM););
 
 clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
 

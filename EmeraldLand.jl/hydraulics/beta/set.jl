@@ -3,7 +3,6 @@
 # Changes to this function
 # General
 #     2022-Jul-12: add function to update beta factor for empirical models
-#     2022-Jul-12: add methods for MonoElementSPAC
 #     2022-Jul-15: rename xylem_flow to flow_in to be more descriptive
 #     2022-Oct-19: fix sm.Β to sm.β
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
@@ -16,77 +15,10 @@
 #######################################################################################################################################################################################################
 """
 This function updates the beta factor for SPAC if empirical models are used. The method is meant to support all SPAC defined in EmeraldNamespace.jl:
-- `MonoElementSPAC`
 - `MultiLayerSPAC`
 
 """
 function β_factor! end
-
-"""
-
-    β_factor!(spac::MonoElementSPAC{FT}) where {FT}
-
-Update the beta factor for the LEAF component in SPAC, given
-- `spac` `MonoElementSPAC` type SPAC
-
-"""
-β_factor!(spac::MonoElementSPAC{FT}) where {FT} = β_factor!(spac, spac.LEAF.SM);
-
-β_factor!(spac::MonoElementSPAC{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
-
-β_factor!(spac::MonoElementSPAC{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = β_factor!(spac, sm.β);
-
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(spac, β, β.PARAM_X);
-
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
-    (; LEAF) = spac;
-
-    _f_st = relative_surface_tension(LEAF.t);
-
-    β.β₁ = β_factor(β.FUNC, LEAF.HS.VC, LEAF.HS._p_element[end] / _f_st);
-
-    return nothing
-);
-
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
-    (; ROOT, SOIL) = spac;
-
-    _f_st = relative_surface_tension(ROOT.t);
-
-    β.β₁ = β_factor(β.FUNC, SOIL.LAYERS[1].VC, ROOT.HS.p_ups / _f_st);
-
-    return nothing
-);
-
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
-    (; LEAF) = spac;
-
-    _f_st = relative_surface_tension(LEAF.t);
-
-    β.β₁ = β_factor(β.FUNC, LEAF.HS._p_element[end] / _f_st);
-
-    return nothing
-);
-
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
-    (; ROOT) = spac;
-
-    _f_st = relative_surface_tension(ROOT.t);
-
-    β.β₁ = β_factor(β.FUNC, ROOT.HS.p_ups / _f_st);
-
-    return nothing
-);
-
-β_factor!(spac::MonoElementSPAC{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
-    (; ROOT, SOIL) = spac;
-
-    _f_st = relative_surface_tension(ROOT.t);
-
-    β.β₁ = β_factor(β.FUNC, soil_θ(SOIL.LAYERS[1].VC, ROOT.HS.p_ups / _f_st));
-
-    return nothing
-);
 
 
 """

@@ -364,7 +364,6 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
 #
 # Changes to this method
 # General
-#     2022-Jun-29: add method for MonoElementSPAC
 #     2022-Jun-29: add method for MultiLayerSPAC
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2022-Jul-13: redirect the wrapper function to the method at leaf level
@@ -374,16 +373,13 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(spac::MonoElementSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT}
     leaf_photosynthesis!(spac::MultiLayerSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT}
 
 Updates leaf photosynthetic rates for SPAC, given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type SPAC
+- `spac` `MultiLayerSPAC` type SPAC
 - `mode` `GCO₂Mode` or `PCO₂Mode`
 
 """
-leaf_photosynthesis!(spac::MonoElementSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT} = leaf_photosynthesis!(spac.LEAF, spac.AIR, mode);
-
 leaf_photosynthesis!(spac::MultiLayerSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT} = (
     (; AIR, ANGLES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 

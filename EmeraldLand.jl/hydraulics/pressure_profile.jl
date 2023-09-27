@@ -8,7 +8,6 @@
 #     2022-May-25: add method for RootHydraulics
 #     2022-May-25: add method for StemHydraulics
 #     2022-May-25: add method for Leaf, Root, and Stem
-#     2022-May-25: add method for MonoElementSPAC (without partitioning)
 #     2022-Oct-20: use add SoilLayer to function variables, because of the removal of SH from RootHydraulics
 #     2023-Mar-28: set p_ups of root to p_crit of root if disconnected
 # Bug fixes
@@ -22,26 +21,14 @@
 
     xylem_end_pressure(organ::Union{Leaf2{FT}, Stem2{FT}}, flow::FT) where {FT}
     xylem_end_pressure(organ::Root{FT}, slayer::SoilLayer{FT}, flow::FT) where {FT}
-    xylem_end_pressure(spac::MonoElementSPAC{FT}, flow::FT) where {FT}
 
 Return the xylem end water pressure in MPa, given
 - `organ` `Leaf2`, `Root2`, or `Stem2` type struct
 - `slayer` Soil layer corresponded to root
 - `flow` Flow rate (per leaf area for Leaf2) `[mol (m⁻²) s⁻¹]`
-- `spac` `MonoElementSPAC` type struct
 
 """
 function xylem_end_pressure end
-
-xylem_end_pressure(spac::MonoElementSPAC{FT}, flow::FT) where {FT} = (
-    (; LEAF, ROOT, SOIL, STEM) = spac;
-
-    # calculate the p_dos for root and stem
-    STEM.HS.p_ups = xylem_end_pressure(ROOT, SOIL.LAYERS[1], flow);
-    LEAF.HS.p_ups = xylem_end_pressure(STEM, flow);
-
-    return xylem_end_pressure(LEAF, flow / LEAF.HS.AREA);
-);
 
 xylem_end_pressure(organ::Union{Leaf2{FT}, Stem2{FT}}, flow::FT) where {FT} = xylem_end_pressure(organ.HS, flow, organ.t);
 
@@ -157,42 +144,6 @@ xylem_end_pressure(hs::StemHydraulics{FT}, flow::FT, T::FT) where {FT} = (
 );
 
 
-#=
-#######################################################################################################################################################################################################
-#
-# Changes to the method
-# General
-#     2022-May-25: add method for MonoElementSPAC (with sunlit and shaded partitioning)
-# To do
-#     TODO: abstractize the flow rates with canopy RT module
-#
-#######################################################################################################################################################################################################
-"""
-
-    xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) where {FT}
-
-Return the xylem end water pressure in MPa for sunlit and shaded leaves, given
-- `spac` `MonoElementSPAC` type struct
-- `f_sl` Sunlit leaves flow rate `[mol s⁻¹]`
-- `f_sh` Shaded leaves flow rate `[mol s⁻¹]`
-- `r_sl` Sunlit leaves fraction
-"""
-xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) where {FT} = (
-    (; LEAF, ROOT, STEM) = spac;
-
-    # calculate the p_dos for root and stem
-    STEM.HS.p_ups = xylem_end_pressure(ROOT, f_sl + f_sh;);
-    LEAF.HS.p_ups = xylem_end_pressure(STEM, f_sl + f_sh;);
-
-    # calculate the p_dos for leaves
-    p_sl = xylem_end_pressure(LEAF, f_sl / (LEAF.HS.AREA * r_sl));
-    p_sh = xylem_end_pressure(LEAF, f_sh / (LEAF.HS.AREA * (1 - r_sl)));
-
-    return p_sl, p_sh
-);
-=#
-
-
 #######################################################################################################################################################################################################
 #
 # Changes to the function
@@ -207,7 +158,6 @@ xylem_end_pressure(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT) wher
 #     2022-May-27: add method for StemHydraulics at non steady state
 #     2022-May-27: add method for Leaf, Root, and Stem (for both steady and non-steady states)
 #     2022-Jun-30: add support to Leaves2D
-#     2022-May-27: add method for MonoElementSPAC
 #     2022-May-27: add method for MonoGrassSPAC
 #     2022-May-27: add method for MonoPalmSPAC
 #     2022-May-27: add method for MonoTreeSPAC
@@ -563,33 +513,13 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, hs::StemHydraulics{FT}, m
 # TODO: add soil ion concentration
 """
 
-    xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT}
     xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Update xylem pressure profile (flow profile needs to be updated a priori), given
-- `spac` `MonoElementSPAC` or `MultiLayerSPAC` type spac
+- `spac` `MultiLayerSPAC` type spac
 - `drought_legacy` If true, update xylem cavitation legacy
 
 """
-xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MonoElementSPAC{FT}) where {FT} = (
-    (; LEAF, ROOT, SOIL, STEM) = spac;
-
-    # update water potential from SOIL
-    ROOT.HS.p_ups = soil_ψ_25(SOIL.LAYERS[1].VC, SOIL.LAYERS[1].θ) * relative_surface_tension(SOIL.LAYERS[1].t);
-
-    # update pressure profiles for organs
-    xylem_pressure_profile!(config, ROOT, SOIL.LAYERS[1]);
-    STEM.HS.p_ups = ROOT.HS.p_dos;
-    xylem_pressure_profile!(config, STEM);
-    LEAF.HS.p_ups = STEM.HS.p_dos;
-    xylem_pressure_profile!(config, LEAF);
-
-    # update the β factor for empirical models
-    β_factor!(spac);
-
-    return nothing
-);
-
 xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; KR_THRESHOLD) = config;
     (; BRANCHES, LEAVES, ROOTS, ROOTS_INDEX, SOIL, TRUNK) = spac;
@@ -636,20 +566,3 @@ xylem_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT})
 
     return nothing
 );
-
-
-# TODO: f_sl and f_sh are not saved correctly here, a change over Leaf structure may be required
-#=
-xylem_pressure_profile!(spac::MonoElementSPAC{FT}, f_sl::FT, f_sh::FT, r_sl::FT; update::Bool = true) where {FT} = (
-    (; LEAF, ROOT, STEM) = spac;
-
-    xylem_pressure_profile!(ROOT, f_sl + f_sh; update = update);
-    STEM.HS.p_ups = ROOT.HS.p_dos;
-    xylem_pressure_profile!(STEM, f_sl + f_sh; update = update);
-    LEAF.HS.p_ups = STEM.HS.p_dos;
-    xylem_pressure_profile!(LEAF, f_sl / (LEAF.HS.AREA * r_sl); update = update);
-    xylem_pressure_profile!(LEAF, f_sh / (LEAF.HS.AREA * (1 - r_sl)); update = update);
-
-    return nothing
-);
-=#

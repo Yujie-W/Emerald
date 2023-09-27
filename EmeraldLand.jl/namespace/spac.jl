@@ -29,77 +29,6 @@ end
 
 #######################################################################################################################################################################################################
 #
-# Changes to this type
-# General
-#     2022-May-25: add abstract type for soil-plant-air continuum
-#     2022-Jun-29: rename grass, palm, and tree SPAC to ML*SPAC
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Hierarchy of AbstractSPACSystem:
-- [`MonoElementSPAC`](@ref)
-- [`MultiLayerSPAC`](@ref)
-
-"""
-abstract type AbstractSPACSystem{FT<:AbstractFloat} end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2022-May-25: toy SPAC system
-#     2022-May-25: use Root and Stem structures with temperatures
-#     2022-Jun-29: add AirLayer to SPAC
-#     2022-Jul-14: add Meteorology to SPAC
-#     2022-Mar-11: add MEMORY field
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Struct for simplest SPAC system
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct MonoElementSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
-    # Embedded structures
-    "Air conditions"
-    AIR::AirLayer{FT} = AirLayer{FT}()
-    "Leaf system"
-    LEAF::Leaf2{FT}
-    "Memory cache"
-    MEMORY::SPACMemory{FT} = SPACMemory{FT}()
-    "Meteorology information"
-    METEO::Meteorology{FT} = Meteorology{FT}()
-    "Root system"
-    ROOT::Root2{FT}
-    "Soil component"
-    SOIL::Soil{FT} = Soil{FT}(ZS = FT[0, -1])
-    "Stem system"
-    STEM::Stem2{FT}
-
-    # Cache variables
-    "Relative hydraulic conductance"
-    _krs::Vector{FT} = ones(FT, 4)
-end
-
-MonoElementSPAC(config::SPACConfiguration{FT}) where {FT} = MonoElementSPAC{FT}(
-            LEAF = Leaf2(config),
-            ROOT = Root2(config),
-            STEM = Stem2(config),
-);
-
-
-#######################################################################################################################################################################################################
-#
 # Changes to this struct
 # General
 #     2022-May-25: SPAC system for monospecies tree
@@ -129,7 +58,7 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-mutable struct MultiLayerSPAC{FT<:AbstractFloat} <: AbstractSPACSystem{FT}
+mutable struct MultiLayerSPAC{FT}
     # Geometry information
     "Corresponding air layer per canopy layer"
     LEAVES_INDEX::Vector{Int}
