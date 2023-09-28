@@ -43,8 +43,12 @@ include("leaf/flow_profile.jl");
 include("leaf/pressure_profile.jl");
 include("leaf/water_budget.jl");
 
-# plant
+# junction
+include("junction/water_budget.jl");
+
+# plant (dependent on root, junction, stem, leaf)
 include("plant/flow_profile.jl");
+include("plant/water_budget.jl");
 
 
 

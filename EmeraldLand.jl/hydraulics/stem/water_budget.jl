@@ -4,23 +4,23 @@
 #
 # Changes to this function
 # General
-#     2023-Sep-27: add root_water_budget! function
+#     2023-Sep-27: add root_water_budgets! function
 #
 #######################################################################################################################################################################################################
 """
 
-    stem_water_budget!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
+    stem_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
 
 Set the flow profile of each stem (trunk and branches), given
 - `spac` `MultiLayerSPAC` type struct
-- `Δt` time step
+- `δt` time step
 
 """
-function stem_water_budget(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
-    xylem_water_budget!(spac.TRUNK, (spac.TRUNK).NS, (spac.TRUNK).NS.xylem.auxil, (spac.TRUNK).NS.energy.t, Δt);
+function stem_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    xylem_water_budget!(spac.TRUNK, (spac.TRUNK).NS, (spac.TRUNK).NS.xylem.auxil, (spac.TRUNK).NS.energy.t, δt);
 
     for stem in spac.BRANCHES
-        xylem_water_budget!(stem, (stem).NS, (stem).NS.xylem.auxil, (stem).NS.energy.t, Δt);
+        xylem_water_budget!(stem, (stem).NS, (stem).NS.xylem.auxil, (stem).NS.energy.t, δt);
     end;
 
     return nothing

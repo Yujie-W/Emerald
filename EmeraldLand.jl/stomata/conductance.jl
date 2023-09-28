@@ -214,14 +214,14 @@ stomatal_conductance!(leaves::Leaves2D{FT}, air::AirLayer{FT}; β::FT = FT(1)) w
 #######################################################################################################################################################################################################
 """
 
-    stomatal_conductance!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT}
+    stomatal_conductance!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
 
 Update stomatal conductance for H₂O based on computed ∂g∂t, given
 - `spac` `MultiLayerSPAC` type struct
-- `Δt` Time step length `[s]`
+- `δt` Time step length `[s]`
 
 """
-stomatal_conductance!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
+stomatal_conductance!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # if lai = 0 or roots are not connected, do nothing
@@ -230,16 +230,16 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}, Δt::FT) where {FT} = (
     end;
 
     for _leaves in LEAVES
-        stomatal_conductance!(_leaves, Δt);
+        stomatal_conductance!(_leaves, δt);
     end;
 
     return nothing
 );
 
-stomatal_conductance!(leaves::Leaves2D{FT}, Δt::FT) where {FT} = (
-    leaves.g_H₂O_s_shaded += leaves.∂g∂t_shaded * Δt;
+stomatal_conductance!(leaves::Leaves2D{FT}, δt::FT) where {FT} = (
+    leaves.g_H₂O_s_shaded += leaves.∂g∂t_shaded * δt;
     for _i in eachindex(leaves.g_H₂O_s_sunlit)
-        leaves.g_H₂O_s_sunlit[_i] += leaves.∂g∂t_sunlit[_i] * Δt;
+        leaves.g_H₂O_s_sunlit[_i] += leaves.∂g∂t_sunlit[_i] * δt;
     end;
     limit_stomatal_conductance!(leaves);
     stomatal_conductance_profile!(leaves);
