@@ -140,12 +140,12 @@ update!(config::SPACConfiguration{FT},
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
         for _leaf in LEAVES
-            _leaf.BIO.state.cab = cab;
+            _leaf.NS.bio.state.cab = cab;
         end;
     end;
     if !isnothing(car)
         for _leaf in LEAVES
-            _leaf.BIO.state.car = car;
+            _leaf.NS.bio.state.car = car;
         end;
     end;
     if !isnothing(cab) || !isnothing(car)
@@ -158,7 +158,7 @@ update!(config::SPACConfiguration{FT},
         CANOPY.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
         CANOPY._x_bnds = (lai ==0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(CANOPY.δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai));
         for _i in 1:DIM_LAYER
-            LEAVES[_i].HS.AREA = SOIL.AREA * CANOPY.δlai[_i];
+            LEAVES[_i].NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
         end;
     end;
     if !isnothing(vcmax)
@@ -250,8 +250,9 @@ update!(config::SPACConfiguration{FT},
     # prescribe leaf temperature
     if !isnothing(t_leaf)
         for _leaf in LEAVES
-            _leaf.t = t_leaf;
-            _leaf.e = (_leaf.CP * _leaf.BIO.state.lma * 10 + _leaf.HS.v_storage * CP_L_MOL(FT)) * _leaf.t;
+            _leaf.NS.energy.auxil.t = t_leaf;
+            _leaf.NS.energy.auxil.cp = _leaf.NS.capacitor.state.v_storage * CP_L_MOL(FT) + _leaf.NS.xylem.state.area * _leaf.NS.bio.state.lma * 10;
+            _leaf.NS.energy.state.energy = _leaf.NS.energy.auxil.cp * _leaf.NS.energy.auxil.t;
         end;
     end;
 

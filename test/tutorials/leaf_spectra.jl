@@ -1,3 +1,7 @@
+using Emerald;
+using Test;
+
+
 @testset "Run Leaf Level Spectra" begin
     FT = Float64;
 

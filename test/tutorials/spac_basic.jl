@@ -1,3 +1,7 @@
+using Emerald;
+using Test;
+
+
 @testset "Run SPAC Model" begin
     FT = Float64;
 

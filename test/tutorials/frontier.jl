@@ -1,3 +1,7 @@
+using Emerald;
+using Test;
+
+
 @testset verbose = true "EmeraldFrontier" begin
     # Firstly, users need to prepare the files required first (download the files using provided functions in EmeraldData).
     # Secondly, users need to specify

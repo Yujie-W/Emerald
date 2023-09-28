@@ -215,7 +215,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
     (; PRC, PSM) = leaves;
 
     if rd_only
-        PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaves.t);
+        PSM._r_d = PSM.r_d25 * temperature_correction(PSM.TD_R, leaves.NS.energy.auxil.t);
         leaves.a_net_sunlit .= -PSM._r_d;
         leaves.a_gross_sunlit .= 0;
         leaves.etr_sunlit .= 0;

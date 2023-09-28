@@ -1,3 +1,7 @@
+using Emerald;
+using Test;
+
+
 @testset "Modify Leaf Biophysical Parameters" begin
     FT = Float64;
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
@@ -11,11 +15,11 @@
     # Also, remember to change the cache variable _v_storage to a different value.
     # Otherwise, leaf spectra would not be updated.
     for leaf in spac.LEAVES
-        leaf.BIO.state.cab = 40;        # chlorophyll a and b content
-        leaf.BIO.state.car = 10;        # carotenoid content
-        leaf.BIO.state.cbc = 0.011;     # strutural carbon content
-        leaf.BIO.state.lma = 0.012;     # leaf mass per area lma = cbc + pro
-        leaf.BIO.state.pro = 0.001;     # protein content
+        leaf.NS.bio.state.cab = 40;        # chlorophyll a and b content
+        leaf.NS.bio.state.car = 10;        # carotenoid content
+        leaf.NS.bio.state.cbc = 0.011;     # strutural carbon content
+        leaf.NS.bio.state.lma = 0.012;     # leaf mass per area lma = cbc + pro
+        leaf.NS.bio.state.pro = 0.001;     # protein content
     end;
     EmeraldLand.LeafOptics.leaf_spectra!(config, spac);
     @test true;

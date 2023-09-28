@@ -1,3 +1,7 @@
+using Emerald;
+using Test;
+
+
 @testset "Modify Sun Sensor Geometry" begin
     FT = Float64;
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
