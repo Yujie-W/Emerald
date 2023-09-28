@@ -307,7 +307,7 @@ leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
     (; LEAVES) = spac;
 
     for _leaf in LEAVES
-        leaf_spectra!(config, _leaf.NS.bio, _leaf.NS.capacitor.v_storage);
+        leaf_spectra!(config, _leaf.NS.bio, _leaf.NS.capacitor.state.v_storage);
     end;
 
     return nothing

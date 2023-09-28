@@ -53,8 +53,8 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     spac.SOIL.runoff = 0;
 
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
-    spac_flow_profile!(config, spac, FT(0));
-    xylem_pressure_profile!(config, spac);
+    plant_flow_profile!(config, spac);
+    plant_pressure_profile!(config, spac);
     (!spac._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(config, spac; lai = 0) : nothing;
 
     # 2. run canopy RT
@@ -85,28 +85,6 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
 );
 
 soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) = nothing;
-
-soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    # 0. set total runoff to 0 so as to accumulate with sub-timestep
-    spac.SOIL.runoff = 0;
-
-    # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
-    spac_flow_profile!(config, spac, FT(0));
-    xylem_pressure_profile!(config, spac);
-    spac._root_connection ? nothing : update!(config, spac; lai = 0);
-
-    # 2. run canopy RT
-    canopy_radiation!(config, spac);
-
-    # 3. update the prognostic variables (except for soil water and temperature)
-    time_stepper!(config, spac);
-
-    # save the result at this stage for the results at the steady state
-
-    return nothing
-);
-
-soil_plant_air_continuum!(config::Nothing, spac::Nothing) = nothing;
 
 
 # add an alias for soil_plant_air_continuum!

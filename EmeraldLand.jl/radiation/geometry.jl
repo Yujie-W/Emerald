@@ -198,13 +198,13 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 
     # 1. update the scattering coefficients for different layers
     for _i in eachindex(leaves)
-        OPTICS.σ_ddb[:,_i] .= OPTICS.ddb * leaves[_i].BIO.auxil.ρ_leaf .+ OPTICS.ddf * leaves[_i].BIO.auxil.τ_leaf;
-        OPTICS.σ_ddf[:,_i] .= OPTICS.ddf * leaves[_i].BIO.auxil.ρ_leaf .+ OPTICS.ddb * leaves[_i].BIO.auxil.τ_leaf;
-        OPTICS.σ_sdb[:,_i] .= OPTICS.sdb * leaves[_i].BIO.auxil.ρ_leaf .+ OPTICS.sdf * leaves[_i].BIO.auxil.τ_leaf;
-        OPTICS.σ_sdf[:,_i] .= OPTICS.sdf * leaves[_i].BIO.auxil.ρ_leaf .+ OPTICS.sdb * leaves[_i].BIO.auxil.τ_leaf;
-        OPTICS.σ_dob[:,_i] .= OPTICS.dob * leaves[_i].BIO.auxil.ρ_leaf .+ OPTICS.dof * leaves[_i].BIO.auxil.τ_leaf;
-        OPTICS.σ_dof[:,_i] .= OPTICS.dof * leaves[_i].BIO.auxil.ρ_leaf .+ OPTICS.dob * leaves[_i].BIO.auxil.τ_leaf;
-        OPTICS.σ_so[:,_i]  .= OPTICS.sob * leaves[_i].BIO.auxil.ρ_leaf .+ OPTICS.sof * leaves[_i].BIO.auxil.τ_leaf;
+        OPTICS.σ_ddb[:,_i] .= OPTICS.ddb * leaves[_i].NS.bio.auxil.ρ_leaf .+ OPTICS.ddf * leaves[_i].NS.bio.auxil.τ_leaf;
+        OPTICS.σ_ddf[:,_i] .= OPTICS.ddf * leaves[_i].NS.bio.auxil.ρ_leaf .+ OPTICS.ddb * leaves[_i].NS.bio.auxil.τ_leaf;
+        OPTICS.σ_sdb[:,_i] .= OPTICS.sdb * leaves[_i].NS.bio.auxil.ρ_leaf .+ OPTICS.sdf * leaves[_i].NS.bio.auxil.τ_leaf;
+        OPTICS.σ_sdf[:,_i] .= OPTICS.sdf * leaves[_i].NS.bio.auxil.ρ_leaf .+ OPTICS.sdb * leaves[_i].NS.bio.auxil.τ_leaf;
+        OPTICS.σ_dob[:,_i] .= OPTICS.dob * leaves[_i].NS.bio.auxil.ρ_leaf .+ OPTICS.dof * leaves[_i].NS.bio.auxil.τ_leaf;
+        OPTICS.σ_dof[:,_i] .= OPTICS.dof * leaves[_i].NS.bio.auxil.ρ_leaf .+ OPTICS.dob * leaves[_i].NS.bio.auxil.τ_leaf;
+        OPTICS.σ_so[:,_i]  .= OPTICS.sob * leaves[_i].NS.bio.auxil.ρ_leaf .+ OPTICS.sof * leaves[_i].NS.bio.auxil.τ_leaf;
     end;
 
     # 2. update the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -241,8 +241,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     # 4. compute longwave effective emissivity, reflectance, and transmittance (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
     for _i in 1:DIM_LAYER
         _ilai = can.δlai[_i] * can.ci;
-        _σ_lw_b = OPTICS.ddb * leaves[_i].BIO.auxil.ρ_LW + OPTICS.ddf * leaves[_i].BIO.auxil.τ_LW;
-        _σ_lw_f = OPTICS.ddf * leaves[_i].BIO.auxil.ρ_LW + OPTICS.ddb * leaves[_i].BIO.auxil.τ_LW;
+        _σ_lw_b = OPTICS.ddb * leaves[_i].NS.bio.auxil.ρ_LW + OPTICS.ddf * leaves[_i].NS.bio.auxil.τ_LW;
+        _σ_lw_f = OPTICS.ddf * leaves[_i].NS.bio.auxil.ρ_LW + OPTICS.ddb * leaves[_i].NS.bio.auxil.τ_LW;
         OPTICS._τ_lw[_i] = exp(-1 * (1 - _σ_lw_f) * _ilai);
         OPTICS._ρ_lw[_i] = 1 - exp(-1 * _σ_lw_b * _ilai);
         OPTICS.ϵ[_i] = 1 - OPTICS._τ_lw[_i] - OPTICS._ρ_lw[_i];

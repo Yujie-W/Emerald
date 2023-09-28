@@ -24,7 +24,7 @@ function limit_stomatal_conductance! end
 limit_stomatal_conductance!(leaves::Leaves2D{FT}) where {FT} = (
     (; G_LIMITS) = leaves;
 
-    _ratio = relative_diffusive_coefficient(leaves.t);
+    _ratio = relative_diffusive_coefficient(leaves.NS.energy.auxil.t);
     _g_min = G_LIMITS[1] * _ratio;
     _g_max = G_LIMITS[2] * _ratio;
 

@@ -15,16 +15,17 @@
 #######################################################################################################################################################################################################
 """
 
-    plant_pressure_profile!(spac::MultiLayerSPAC{FT}) where {FT}
+    plant_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Set up the pressure profile of the plant, given
+- `config` `SPACConfiguration` type struct
 - `spac` `MultiLayerSPAC` type struct
 
 """
-function plant_pressure_profile!(spac::MultiLayerSPAC{FT}) where {FT}
+function plant_pressure_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     root_pressure_profiles!(spac);
     stem_pressure_profiles!(spac);
-    leaf_pressure_profiles!(spac);
+    leaf_pressure_profiles!(config, spac);
 
     return nothing
 end;

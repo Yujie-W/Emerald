@@ -58,7 +58,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 
     # 0. compute chloroplast SIF emissions for different layers
     for _i in 1:DIM_LAYER
-        _k_chl = view(leaves[_i].BIO.auxil.f_sife, SPECTRA.IΛ_SIFE);
+        _k_chl = view(leaves[_i].NS.bio.auxil.f_sife, SPECTRA.IΛ_SIFE);
 
         # integrate the energy absorbed by chl (and car) in each wave length bins
         OPTICS._tmp_vec_sife_1 .= view(RADIATION.e_net_diffuse,SPECTRA.IΛ_SIFE,_i) .* SPECTRA.ΔΛ_SIFE .* _k_chl;
@@ -105,8 +105,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 
     # 1. compute SIF emissions for different layers
     for _i in 1:DIM_LAYER
-        OPTICS._mat⁺ .= (leaves[_i].BIO.auxil.mat_b .+ leaves[_i].BIO.auxil.mat_f) ./ 2;
-        OPTICS._mat⁻ .= (leaves[_i].BIO.auxil.mat_b .- leaves[_i].BIO.auxil.mat_f) ./ 2;
+        OPTICS._mat⁺ .= (leaves[_i].NS.bio.auxil.mat_b .+ leaves[_i].NS.bio.auxil.mat_f) ./ 2;
+        OPTICS._mat⁻ .= (leaves[_i].NS.bio.auxil.mat_b .- leaves[_i].NS.bio.auxil.mat_f) ./ 2;
 
         # integrate the energy in each wave length bins
         OPTICS._tmp_vec_sife_1 .= view(RADIATION.e_direct      ,SPECTRA.IΛ_SIFE,1 ) .* SPECTRA.ΔΛ_SIFE;

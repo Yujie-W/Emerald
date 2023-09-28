@@ -20,7 +20,7 @@ config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
 spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
 spac.METEO.rad_lw = 300;
 EmeraldLand.SPAC.initialize!(config, spac);
-EmeraldLand.SPAC.spac!(config, spac, FT(360));ß
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 
 
 #

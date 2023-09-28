@@ -30,7 +30,7 @@ function ∂A∂E end
 ∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}) where {FT} = (
     (; P_AIR) = air;
 
-    _p_s = saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000);
+    _p_s = saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000);
     _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
@@ -43,7 +43,7 @@ function ∂A∂E end
     _gs2 = _gs1 + FT(0.0001);
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaves.g_CO₂_b);
-    leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_shaded, leaves.t);
+    leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_shaded, leaves.NS.energy.auxil.t);
     _e2 = _gh2 * _d / P_AIR;
     _a2 = leaves.PSM.a_net;
 
@@ -53,7 +53,7 @@ function ∂A∂E end
 ∂A∂E(leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int) where {FT} = (
     (; P_AIR) = air;
 
-    _p_s = saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000);
+    _p_s = saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000);
     _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
@@ -66,7 +66,7 @@ function ∂A∂E end
     _gs2 = _gs1 + FT(0.0001);
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaves.g_CO₂_b);
-    leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_sunlit[ind], leaves.t);
+    leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_sunlit[ind], leaves.NS.energy.auxil.t);
     _e2 = _gh2 * _d / P_AIR;
     _a2 = leaves.PSM.a_net;
 
@@ -244,10 +244,9 @@ Return the marginal risk for stomatal opening, given
 );
 
 ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaves;
     (; P_AIR) = air;
 
-    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _p_s = saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000);
     _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
@@ -255,7 +254,7 @@ Return the marginal risk for stomatal opening, given
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _e  = _gh * _d / P_AIR;
 
-    return leaves.a_net_shaded / max(eps(FT), (HS._e_crit - _e))
+    return leaves.a_net_shaded / max(eps(FT), (leaves.NS.xylem.auxil.e_crit - _e))
 );
 
 ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
@@ -370,10 +369,9 @@ Return the marginal risk for stomatal opening, given
 );
 
 ∂Θ∂E(sm::WangSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaves;
     (; P_AIR) = air;
 
-    _p_s = saturation_vapor_pressure(leaves.t, HS.p_leaf * 1000000);
+    _p_s = saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000);
     _d = max(1, _p_s - air.p_H₂O);
 
     # compute the A and E at the current setting
@@ -381,7 +379,7 @@ Return the marginal risk for stomatal opening, given
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _e  = _gh * _d / P_AIR;
 
-    return leaves.a_net_sunlit[ind] / max(eps(FT), (HS._e_crit - _e))
+    return leaves.a_net_sunlit[ind] / max(eps(FT), (leaves.NS.xylem.auxil.e_crit - _e))
 );
 
 ∂Θ∂E(sm::Wang2SM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (

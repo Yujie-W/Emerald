@@ -228,7 +228,7 @@ leaf_photosynthesis!(leaves::Leaves2D{FT}, air::AirLayer{FT}, mode::GCO₂Mode, 
         return nothing
     end;
 
-    photosystem_temperature_dependence!(PSM, PRC, air, leaves.t);
+    photosystem_temperature_dependence!(PSM, PRC, air, leaves.NS.energy.auxil.t);
 
     # leaf._p_CO₂_i is not accurate here in the first call, thus need a second call after p_CO₂_i is analytically resolved
     # loop through sunlit leaves

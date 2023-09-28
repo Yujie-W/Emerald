@@ -216,7 +216,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
     for _i in 1:DIM_LAYER
-        _α_apar = view(leaves[_i].BIO.auxil.f_ppar, SPECTRA.IΛ_PAR);
+        _α_apar = view(leaves[_i].NS.bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_diffuse,SPECTRA.IΛ_PAR,_i)) .* 1000;
@@ -305,7 +305,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}
 
     # 1. compute longwave radiation out from the leaves and soil
     for _i in eachindex(leaves)
-        RADIATION.r_lw[_i] = K_STEFAN(FT) * OPTICS.ϵ[_i] * leaves[_i].t ^ 4;
+        RADIATION.r_lw[_i] = K_STEFAN(FT) * OPTICS.ϵ[_i] * leaves[_i].NS.energy.auxil.t ^ 4;
     end;
 
     _r_lw_soil = K_STEFAN(FT) * (1 - ALBEDO.ρ_LW) * LAYERS[1].t ^ 4;

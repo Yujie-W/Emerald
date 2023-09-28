@@ -71,7 +71,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     # make sure trunk temperatures do not change more than 1 K per time step
     _δt_4 = _δt_3;
     if ENABLE_ENERGY_BUDGET
-        _∂T∂t = TRUNK.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.HS.v_storage));
+        _∂T∂t = TRUNK.NS.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.NS.xylem.state.v_storage));
         _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
 
         if DEBUG
@@ -86,7 +86,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     _δt_5 = _δt_4;
     if ENABLE_ENERGY_BUDGET
         for _branch in BRANCHES
-            _∂T∂t = _branch.∂e∂t / (CP_L_MOL(FT) * sum(_branch.HS.v_storage));
+            _∂T∂t = _branch.NS.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(_branch.NS.xylem.state.v_storage));
             _δt_5 = min(1 / abs(_∂T∂t), _δt_5);
 
             if DEBUG
@@ -102,7 +102,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     _δt_6 = _δt_5;
     if ENABLE_ENERGY_BUDGET && spac.CANOPY.lai > 0
         for _clayer in LEAVES
-            _∂T∂t = _clayer.∂e∂t / (_clayer.CP * _clayer.BIO.state.lma * 10 + CP_L_MOL(FT) * _clayer.HS.v_storage);
+            _∂T∂t = _clayer.NS.energy.auxil.∂e∂t / (_clayer.NS.xylem.state.cp * _clayer.NS.bio.state.lma * 10 + CP_L_MOL(FT) * _clayer.NS.capacitor.state.v_storage);
             _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
 
             if DEBUG
@@ -186,7 +186,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         stomatal_conductance!(spac, _δt);
         plant_energy!(config, spac, _δt);
         if spac._root_connection
-            spac_flow_profile!(config, spac, _δt);
+            plant_water_budget!(spac, _δt);
         end;
 
         _t_res -= _δt;
@@ -195,7 +195,8 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         if _t_res > 0
             longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
             if spac._root_connection
-                xylem_pressure_profile!(config, spac);
+                plant_flow_profile!(config, spac);
+                plant_pressure_profile!(config, spac);
             end;
             leaf_photosynthesis!(spac, GCO₂Mode());
             soil_budget!(config, spac);
@@ -211,51 +212,6 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
             break;
         end;
     end;
-
-    return nothing
-);
-
-time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES, METEO, SOIL) = spac;
-
-    # run the update function until the gpp is stable
-    _count = 0;
-    _gpp_last = -1;
-    while true
-        # compute the dxdt (not shortwave radiation simulation)
-        longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
-        if spac._root_connection
-            xylem_pressure_profile!(config, spac);
-            leaf_photosynthesis!(spac, GCO₂Mode());
-        end;
-        soil_budget!(config, spac);
-        if spac._root_connection
-            stomatal_conductance!(spac);
-            plant_energy!(config, spac);
-        end;
-
-        # determine whether to break the while loop
-        _gpp = GPP(spac);
-        _count += 1;
-        if abs(_gpp - _gpp_last) < 1e-6 || _count > 5000
-            break;
-        end;
-        _gpp_last = _gpp;
-
-        # use adjusted time to make sure no numerical issues
-        _δts = adjusted_time(config, spac, FT(30));
-        _δt = _δts[1];
-
-        # run the budgets for all ∂x∂t (except for soil)
-        if spac._root_connection
-            stomatal_conductance!(spac, _δt);
-            plant_energy!(config, spac, _δt);
-            spac_flow_profile!(config, spac, _δt);
-        end;
-    end;
-
-    # run canopy fluorescence
-    canopy_fluorescence!(config, spac);
 
     return nothing
 );
