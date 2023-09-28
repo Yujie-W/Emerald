@@ -18,7 +18,7 @@ Set the flow profile of each root, given
 """
 function root_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     for root in spac.ROOTS
-        xylem_water_budget!(root, (root).NS, (root).NS.xylem.auxil, (root).NS.energy.t, δt);
+        xylem_water_budget!(root, (root).NS.xylem, (root).NS.xylem.auxil, (root).NS.energy.auxil.t, δt);
     end;
 
     return nothing

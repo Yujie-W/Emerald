@@ -44,7 +44,7 @@ function root_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
     (; ROOTS, ROOTS_INDEX, SOIL) = spac;
 
     for i in eachindex(ROOTS)
-        root_pressure_profile!(ROOTS[i], SOIL[ROOTS_INDEX[i]]);
+        root_pressure_profile!(ROOTS[i].NS, SOIL.LAYERS[ROOTS_INDEX[i]]);
     end;
 
     return nothing

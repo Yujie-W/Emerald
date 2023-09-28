@@ -21,11 +21,11 @@ function stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
 
     sum_f::FT = 0;
     for i in eachindex(BRANCHES)
-        set_flow_profile!(BRANCHES[i].xylem, flow_in(LEAVES[i].xylem));
-        sum_f += flow_out(BRANCHES[i].xylem);
+        set_flow_profile!(BRANCHES[i].NS.xylem, flow_in(LEAVES[i].NS.xylem));
+        sum_f += flow_out(BRANCHES[i].NS.xylem);
     end;
 
-    set_flow_profile!(TRUNK.xylem, sum_f);
+    set_flow_profile!(TRUNK.NS.xylem, sum_f);
 
     return nothing
 end;

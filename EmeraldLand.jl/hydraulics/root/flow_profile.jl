@@ -65,7 +65,7 @@ function root_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
     (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL) = spac;
 
     for i in eachindex(ROOTS)
-        root_flow_profile!(ROOTS[i], SOIL[ROOTS_INDEX[i]], JUNCTION.auxil.pressure);
+        root_flow_profile!(ROOTS[i].NS, SOIL.LAYERS[ROOTS_INDEX[i]], JUNCTION.auxil.pressure);
     end;
 
     return nothing

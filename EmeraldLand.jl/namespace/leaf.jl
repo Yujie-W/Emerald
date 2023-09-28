@@ -959,7 +959,7 @@ Leaves2D(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_AZI, DIM_INCL) = config;
 
     return Leaves2D{FT}(
-                BIO             = HyperLeafBio(config),
+                NS              = Leaf(config),
                 ppar_sunlit     = 1000 .* ones(FT, DIM_INCL, DIM_AZI),
                 g_H₂O_s_sunlit  = FT(0.01) .* ones(FT, DIM_INCL, DIM_AZI),
                 ∂g∂t_sunlit     = zeros(FT, DIM_INCL, DIM_AZI),

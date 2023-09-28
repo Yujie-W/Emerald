@@ -110,13 +110,33 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
     @testset "Leaf flow and pressure profile" begin
         config1 = NS.SPACConfiguration{Float64}();
         config2 = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
-        leaf1 = NS.Leaf(config);
-        leaf2 = NS.Leaf(config);
+        leaf1 = NS.Leaf(config1);
+        leaf2 = NS.Leaf(config2);
         PH.leaf_pressure_profile!(leaf1, -0.1);
         PH.leaf_pressure_profile!(leaf2, -0.1);
 
         @test all(leaf1.xylem.auxil.pressure .<= -0.1);
         @test all(leaf2.xylem.auxil.pressure .<= -0.1);
+    end;
+
+    @testset "Plant hydraulics (steady state)" begin
+        # steady state
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+        for leaf in spac.LEAVES
+            leaf.g_H₂O_s_sunlit .= 0.1;
+            leaf.g_H₂O_s_shaded = 0.1;
+        end;
+        PH.plant_water_budget!(spac, 1.0);
+        PH.plant_flow_profile!(config, spac);
+        PH.plant_pressure_profile!(spac);
+        for i in eachindex(spac.LEAVES)
+            @test PH.flow_out(spac.LEAVES[i].NS.xylem) == PH.flow_in(spac.LEAVES[i].NS.xylem) == PH.flow_out(spac.BRANCHES[i].NS.xylem) == PH.flow_in(spac.BRANCHES[i].NS.xylem);
+        end;
+        @test PH.flow_in(spac.TRUNK.NS.xylem) == PH.flow_out(spac.TRUNK.NS.xylem) == sum([PH.flow_in(branch.NS.xylem) for branch in spac.BRANCHES]);
+        for i in eachindex(spac.ROOTS)
+            @test PH.flow_in(spac.ROOTS[i].NS.xylem) == PH.flow_out(spac.ROOTS[i].NS.xylem);
+        end;
     end;
 
 end;

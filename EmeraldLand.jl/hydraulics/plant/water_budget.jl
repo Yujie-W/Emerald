@@ -26,7 +26,7 @@ function plant_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     leaf_water_budgets!(spac, δt);
     stem_water_budgets!(spac, δt);
     root_water_budgets!(spac, δt);
-    junction_water_budget!(spac);
+    junction_water_budget!(spac, δt);
 
     return nothing
 end;
