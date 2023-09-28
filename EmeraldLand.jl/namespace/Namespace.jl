@@ -33,7 +33,6 @@ include("config/config.jl");
 
 # Plant hydraulics (dependent on config)
 include("xylem/energy.jl");
-include("xylem/flow.jl");
 include("xylem/pv.jl");
 include("xylem/vc.jl");
 

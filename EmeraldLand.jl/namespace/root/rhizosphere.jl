@@ -43,7 +43,7 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct RhizosphereAuxil{FT}
-    "Rhizosphere pressure `[mol s⁻¹ MPa⁻¹]`"
+    "Rhizosphere pressure `[MPa]`"
     p_rhizo::FT = 0
 end;
 

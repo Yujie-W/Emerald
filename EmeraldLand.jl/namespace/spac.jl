@@ -124,55 +124,57 @@ MultiLayerSPAC(
             soil_bounds::Vector{<:Number} = [0,-0.1,-0.25,-0.5,-1,-3],
             zs::Vector{<:Number} = [-1,6,12]
 ) where {FT} = (
-    _mask_air = findall(zs[2] .< air_bounds .< zs[3]);
-    _mask_soil = findall(zs[1] .< soil_bounds .< 0);
+    mask_air = findall(zs[2] .< air_bounds .< zs[3]);
+    mask_soil = findall(zs[1] .< soil_bounds .< 0);
     config.DIM_AIR = length(air_bounds) - 1;
-    config.DIM_LAYER = length(_mask_air) + 1;
-    config.DIM_ROOT = length(_mask_soil) + 1;
+    config.DIM_LAYER = length(mask_air) + 1;
+    config.DIM_ROOT = length(mask_soil) + 1;
     config.DIM_SOIL = length(soil_bounds) - 1;
-    _ind_layer = config.DIM_LAYER > 1 ? [findfirst(zs[2] .< air_bounds .< zs[3])[1] - 1; _mask_air] : _mask_air;
-    _ind_root = config.DIM_ROOT > 1 ? [findfirst(zs[1] .< soil_bounds .< 0) - 1; _mask_soil] : _mask_soil;
+    ind_layer = config.DIM_LAYER > 1 ? [findfirst(zs[2] .< air_bounds .< zs[3])[1] - 1; mask_air] : mask_air;
+    ind_root = config.DIM_ROOT > 1 ? [findfirst(zs[1] .< soil_bounds .< 0) - 1; mask_soil] : mask_soil;
 
-    _air_layers = AirLayer{FT}[
+    air_layers = AirLayer{FT}[
         AirLayer{FT}(
-            Z = (air_bounds[_i] + air_bounds[_i+1]) / 2,
-            ΔZ = (air_bounds[_i+1] - air_bounds[_i])
-        ) for _i in 1:config.DIM_AIR];
-    # TODO: fix the k and h set up
-    _branches = Stem2{FT}[Stem2(config) for _i in 1:config.DIM_LAYER];
-        #Stem2{FT}(
-        #    HS = StemHydraulics{FT}(
-        #        AREA = basal_area / config.DIM_LAYER,
-        #        ΔH = (min(zs[3], air_bounds[_ind_layer[_i]+1]) - zs[2])
-        #    )
-        #) for _i in 1:config.DIM_LAYER];
-    # TODO: fix the k and h set up
-    _roots = Root2{FT}[Root2(config) for _i in 1:config.DIM_ROOT];
-        # Root2{FT}(
-        #     HS = RootHydraulics{FT}(
-        #         AREA = basal_area / config.DIM_ROOT,
-        #         ΔH = (0 - max(zs[1], soil_bounds[_ind_root[_i]+1]))
-        #     )
-        # ) for _i in 1:config.DIM_ROOT];
+            Z = (air_bounds[i] + air_bounds[i+1]) / 2,
+            ΔZ = (air_bounds[i+1] - air_bounds[i])
+        ) for i in 1:config.DIM_AIR];
+    branches = Stem2{FT}[Stem2(config) for _ in 1:config.DIM_LAYER];
+    for i in eachindex(branches)
+        branches[i].NS.xylem.state.area = basal_area / config.DIM_LAYER;
+        branches[i].NS.xylem.state.Δh = (min(zs[3], air_bounds[ind_layer[i]+1]) - zs[2]);
+    end;
+    roots = Root2{FT}[Root2(config) for _ in 1:config.DIM_ROOT];
+    for i in eachindex(roots)
+        roots[i].NS.xylem.state.area = basal_area / config.DIM_ROOT;
+        roots[i].NS.xylem.state.Δh = 0 - max(zs[1], soil_bounds[ind_root[i]+1]);
+    end;
+
+    # initialize the energy and water storage
+    for i in eachindex(roots)
+        initialize_energy_storage!(roots[i].NS);
+    end;
+    for i in eachindex(branches)
+        initialize_energy_storage!(branches[i].NS);
+    end;
 
     return MultiLayerSPAC{FT}(
-                _ind_layer,                                                                 # LEAVES_INDEX
-                _ind_root,                                                                  # ROOTS_INDEX
+                ind_layer,                                                                  # LEAVES_INDEX
+                ind_root,                                                                   # ROOTS_INDEX
                 zs,                                                                         # Z
                 air_bounds,                                                                 # Z_AIR
                 elevation,                                                                  # ELEVATION
                 latitude,                                                                   # LATITUDE
                 longitude,                                                                  # LONGITUDE
-                _air_layers,                                                                # AIR
+                air_layers,                                                                 # AIR
                 SunSensorGeometry{FT}(),                                                    # ANGLES
-                _branches,                                                                  # BRANCHES
+                branches,                                                                   # BRANCHES
                 HyperspectralMLCanopy(config),                                              # CANOPY
                 Leaves2D{FT}[Leaves2D(config) for _i in 1:config.DIM_LAYER],                # LEAVES
                 SPACMemory{FT}(),                                                           # MEMORY
                 Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),       # METEO
-                _roots,                                                                     # ROOTS
+                roots,                                                                      # ROOTS
                 Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),         # SOIL
-                #Stem2{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])),  # TRUNK
+                #Stem2{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])), # TRUNK
                 Stem2(config),                                                              # TRUNK (TODO: fix the k and h set up)
                 JunctionCapacitor{FT}(),                                                    # JUNCTION
                 zeros(FT, config.DIM_ROOT),                                                 # _fs

@@ -47,7 +47,7 @@ Base.@kwdef mutable struct LeafEnergyAuxil{FT}
     "Combined heat capacity of root and water `[J K⁻¹]`"
     cp::FT = 0
     "Temperature `[K]`"
-    t::FT = 298.15
+    t::FT = T₂₅()
     "Partial derivative of the energy per time `[J s⁻¹]`"
     ∂e∂t::FT = 0
 end;

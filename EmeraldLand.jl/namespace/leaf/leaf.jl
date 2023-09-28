@@ -22,9 +22,9 @@ Base.@kwdef mutable struct Leaf{FT}
     "Leaf biophysics struct"
     bio::HyperLeafBio{FT}
     "Extraxylary capacitor struct"
-    capacitor::ExtraXylemCapacitor{FT}
+    capacitor::ExtraXylemCapacitor{FT} = ExtraXylemCapacitor{FT}()
     "Leaf energy struct"
-    energy::LeafEnergy{FT}
+    energy::LeafEnergy{FT} = LeafEnergy{FT}()
     "Leaf xylem hydraulics struct"
     xylem::XylemHydraulics{FT}
 end
@@ -39,21 +39,17 @@ Return the leaf struct with initialized energy states, given
 
 """
 Leaf(config::SPACConfiguration{FT}) where {FT} = (
-    l_bio = HyperLeafBio(config);
-    l_capacitor = ExtraXylemCapacitor{FT}(state = ExtraXylemCapacitorState{FT}(pv = SegmentedPVCurve{FT}(), v_max = 5));
-    l_energy = LeafEnergy{FT}();
-    l_xylem = XylemHydraulics(config);
+    leaf = Leaf{FT}(bio = HyperLeafBio(config), xylem = XylemHydraulics(config));
+    initialize_energy_storage!(leaf);
 
-    # now update the energy state of the leaf before returning the leaf struct
-    l_xylem.state.cp = 1780;
-    l_capacitor.state.v_storage = l_capacitor.state.v_max * l_xylem.state.area;
-    l_energy.auxil.cp = l_capacitor.state.v_storage * CP_L_MOL(FT) + l_bio.state.lma * l_xylem.state.area * l_xylem.state.cp;
-    l_energy.state.energy = l_energy.auxil.cp * l_energy.auxil.t;
+    return leaf
+);
 
-    return Leaf{FT}(
-                bio       = l_bio,
-                capacitor = l_capacitor,
-                energy    = l_energy,
-                xylem     = l_xylem
-    )
+initialize_energy_storage!(leaf::Leaf{FT}) where {FT} = (
+    leaf.xylem.state.cp = 1780;
+    leaf.capacitor.state.v_storage = leaf.capacitor.state.v_max * leaf.xylem.state.area;
+    leaf.energy.auxil.cp = leaf.capacitor.state.v_storage * CP_L_MOL(FT) + leaf.bio.state.lma * leaf.xylem.state.area * leaf.xylem.state.cp;
+    leaf.energy.state.energy = leaf.energy.auxil.cp * leaf.energy.auxil.t;
+
+    return nothing
 );

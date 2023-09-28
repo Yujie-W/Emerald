@@ -20,7 +20,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct Stem{FT}
     "Stem energy struct"
-    energy::XylemEnergy{FT}
+    energy::XylemEnergy{FT} = XylemEnergy{FT}()
     "Stem hydraulics struct"
     xylem::XylemHydraulics{FT}
 end
@@ -35,15 +35,16 @@ Return the stem struct with initialized energy states, given
 
 """
 Stem(config::SPACConfiguration{FT}) where {FT} = (
-    s_energy = XylemEnergy{FT}();
-    s_xylem = XylemHydraulics(config);
+    stem = Stem{FT}(xylem = XylemHydraulics(config));
+    initialize_energy_storage!(stem);
 
-    # now update the energy state of the stem before returning the stem struct
-    s_energy.auxil.cp = sum(s_xylem.state.v_storage) * CP_L_MOL(FT) + (s_xylem.state.cp * s_xylem.state.area * s_xylem.state. l);
-    s_energy.state.energy = s_energy.auxil.cp * s_energy.auxil.t;
+    return stem
+);
 
-    return Stem{FT}(
-                energy = s_energy,
-                xylem  = s_xylem
-    )
+initialize_energy_storage!(stem::Stem{FT}) where {FT} = (
+    stem.xylem.state.v_storage .= (stem.xylem.state.v_max * stem.xylem.state.area * stem.xylem.state.l) / length(stem.xylem.state.v_storage);
+    stem.energy.auxil.cp = sum(stem.xylem.state.v_storage) * CP_L_MOL(FT) + (stem.xylem.state.cp * stem.xylem.state.area * stem.xylem.state. l);
+    stem.energy.state.energy = stem.energy.auxil.cp * stem.energy.auxil.t;
+
+    return nothing
 );

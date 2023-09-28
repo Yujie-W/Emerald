@@ -129,6 +129,8 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         PH.plant_water_budget!(spac, 1.0);
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(spac);
+
+        # make sure the flow in and out are the same
         for i in eachindex(spac.LEAVES)
             @test PH.flow_out(spac.LEAVES[i].NS.xylem) == PH.flow_in(spac.LEAVES[i].NS.xylem) == PH.flow_out(spac.BRANCHES[i].NS.xylem) == PH.flow_in(spac.BRANCHES[i].NS.xylem);
         end;
@@ -136,6 +138,14 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         for i in eachindex(spac.ROOTS)
             @test PH.flow_in(spac.ROOTS[i].NS.xylem) == PH.flow_out(spac.ROOTS[i].NS.xylem);
         end;
+
+        # make sure the water in the junction capacitor changes with the total water in (from roots) and total water out (to air)
+        Σf_root = sum([PH.flow_in(root.NS.xylem) for root in spac.ROOTS]);
+        Σf_leaf = sum([PH.flow_out(leaf.NS.xylem) + leaf.NS.capacitor.auxil.flow for leaf in spac.LEAVES]);
+        q1_junc = spac.JUNCTION.state.v_storage;
+        PH.plant_water_budget!(spac, 1.0);
+        q2_junc = spac.JUNCTION.state.v_storage;
+        @test q2_junc - q1_junc ≈ Σf_root - Σf_leaf;
     end;
 
     @testset "Plant hydraulics (non-steady state)" begin
@@ -148,10 +158,62 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         PH.plant_water_budget!(spac, 1.0);
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(spac);
+
+        # make sure the flow in and out are the same
         for i in eachindex(spac.LEAVES)
             @test PH.flow_out(spac.BRANCHES[i].NS.xylem) == PH.flow_in(spac.LEAVES[i].NS.xylem);
         end;
         @test PH.flow_out(spac.TRUNK.NS.xylem) == sum([PH.flow_in(branch.NS.xylem) for branch in spac.BRANCHES]);
+
+        # make sure the water in the leaf capacitor changes with the total water in (from stem) and total water out (to air)
+        q1s = [leaf.NS.capacitor.state.v_storage for leaf in spac.LEAVES];
+        fis = [PH.flow_in(leaf.NS.xylem) for leaf in spac.LEAVES];
+        fos = [PH.flow_out(leaf.NS.xylem) + leaf.NS.capacitor.auxil.flow for leaf in spac.LEAVES];
+        PH.plant_water_budget!(spac, 1.0);
+        PH.plant_flow_profile!(config, spac);
+        PH.plant_pressure_profile!(spac);
+        q2s = [leaf.NS.capacitor.state.v_storage for leaf in spac.LEAVES];
+        @test all(q2s .- q1s .≈ fis .- fos);
+
+        # make sure the water in the branch capacitor changes with the total water in (from trunk) and total water out (to leaf)
+        q1s = [sum(branch.NS.xylem.state.v_storage) for branch in spac.BRANCHES];
+        fis = [PH.flow_in(branch.NS.xylem) for branch in spac.BRANCHES];
+        fos = [PH.flow_out(branch.NS.xylem) for branch in spac.BRANCHES];
+        PH.plant_water_budget!(spac, 1.0);
+        PH.plant_flow_profile!(config, spac);
+        PH.plant_pressure_profile!(spac);
+        q2s = [sum(branch.NS.xylem.state.v_storage) for branch in spac.BRANCHES];
+        @test all(q2s .- q1s .≈ fis .- fos);
+
+        # make sure the water in the trunk capacitor changes with the total water in (from junction) and total water out (to branches)
+        q1_trunk = sum(spac.TRUNK.NS.xylem.state.v_storage);
+        f_junc = PH.flow_in(spac.TRUNK.NS.xylem);
+        f_stem = PH.flow_out(spac.TRUNK.NS.xylem);
+        PH.plant_water_budget!(spac, 1.0);
+        PH.plant_flow_profile!(config, spac);
+        PH.plant_pressure_profile!(spac);
+        q2_trunk = sum(spac.TRUNK.NS.xylem.state.v_storage);
+        @test q2_trunk - q1_trunk ≈ f_junc - f_stem;
+
+        # make sure the water in the junction capacitor changes with the total water in (from roots) and total water out (to trunk)
+        q1_junc = spac.JUNCTION.state.v_storage;
+        Σf_root = sum([PH.flow_out(root.NS.xylem) for root in spac.ROOTS]);
+        Σf_stem = PH.flow_in(spac.TRUNK.NS.xylem);
+        PH.plant_water_budget!(spac, 1.0);
+        PH.plant_flow_profile!(config, spac);
+        PH.plant_pressure_profile!(spac);
+        q2_junc = spac.JUNCTION.state.v_storage;
+        @test q2_junc - q1_junc ≈ Σf_root - Σf_stem;
+
+        # make sure the water in the root capacitor changes with the total water in (from soil) and total water out (to junction)
+        q1s = [sum(root.NS.xylem.state.v_storage) for root in spac.ROOTS];
+        fis = [PH.flow_in(root.NS.xylem) for root in spac.ROOTS];
+        fos = [PH.flow_out(root.NS.xylem) for root in spac.ROOTS];
+        PH.plant_water_budget!(spac, 1.0);
+        PH.plant_flow_profile!(config, spac);
+        PH.plant_pressure_profile!(spac);
+        q2s = [sum(root.NS.xylem.state.v_storage) for root in spac.ROOTS];
+        @test all(q2s .- q1s .≈ fis .- fos);
     end;
 
 end;

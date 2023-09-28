@@ -23,7 +23,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct Root{FT}
     "Root energy struct"
-    energy::XylemEnergy{FT}
+    energy::XylemEnergy{FT} = XylemEnergy{FT}()
     "Rhizosphere struct"
     rhizosphere::Rhizosphere{FT} = Rhizosphere{FT}()
     "Root xylem struct"
@@ -40,15 +40,16 @@ Return the root struct with initialized energy states, given
 
 """
 Root(config::SPACConfiguration{FT}) where {FT} = (
-    r_energy = XylemEnergy{FT}();
-    r_xylem = XylemHydraulics(config);
+    root = Root{FT}(xylem = XylemHydraulics(config));
+    initialize_energy_storage!(root);
 
-    # now update the energy state of the root before returning the root struct
-    r_energy.auxil.cp = sum(r_xylem.state.v_storage) * CP_L_MOL(FT) + (r_xylem.state.cp * r_xylem.state.area * r_xylem.state. l);
-    r_energy.state.energy = r_energy.auxil.cp * r_energy.auxil.t;
+    return root
+);
 
-    return Root{FT}(
-                energy = r_energy,
-                xylem  = r_xylem
-    )
+initialize_energy_storage!(root::Root{FT}) where {FT} = (
+    root.xylem.state.v_storage .= (root.xylem.state.v_max * root.xylem.state.area * root.xylem.state.l) / length(root.xylem.state.v_storage);
+    root.energy.auxil.cp = sum(root.xylem.state.v_storage) * CP_L_MOL(FT) + (root.xylem.state.cp * root.xylem.state.area * root.xylem.state. l);
+    root.energy.state.energy = root.energy.auxil.cp * root.energy.auxil.t;
+
+    return nothing
 );
