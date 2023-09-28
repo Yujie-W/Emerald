@@ -3,6 +3,7 @@
 # Changes to the function
 # General
 #     2023-Sep-11: add function leaf_flow_profiles!
+#     2023-Sep-28: account for the buffer from capacitor when running under non-steady state mode
 #
 #######################################################################################################################################################################################################
 """
@@ -38,7 +39,7 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
         f = g * d / AIR[LEAVES_INDEX[i]].P_AIR;
 
         # set_flow_out!(LEAVES[i].HS.FLOW, f);
-        set_flow_profile!(LEAVES[i].NS.xylem, f);
+        set_flow_profile!(LEAVES[i].NS.xylem, f - LEAVES[i].NS.capacitor.auxil.flow);
     end;
 
     return nothing

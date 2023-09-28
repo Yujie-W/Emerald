@@ -27,7 +27,7 @@ xylem_water_budget!(organ::Union{Root2{FT}, Stem2{FT}}, xylem::XylemHydraulics{F
     f_vis = relative_viscosity(t);
 
     # make sure the buffer rate does not drain or overflow the capacictance
-    N = xylem.state.v_storage;
+    N = length(xylem.state.v_storage);
     for i in 1:N
         if xylem.auxil.flow_buffer[i] > 0 && xylem.state.v_storage[i] <= xylem.auxil.flow_buffer[i] * δt
             @warn "The capacitance buffer is drained, use only half of the remaining water in the buffer!";
@@ -43,8 +43,8 @@ xylem_water_budget!(organ::Union{Root2{FT}, Stem2{FT}}, xylem::XylemHydraulics{F
     v_max_i = xylem.state.v_max * xylem.state.area * xylem.state.l / N;
     for i in 1:N
         xylem.state.v_storage[i] -= xylem.auxil.flow_buffer[i] * δt;
-        xylem.state.p_storage[i] = capacitance_pressure(xylem.state.pv, xylem.state.v_storage[i] / v_max_i, t);
-        xylem.auxil.flow_buffer[i] = (xylem.state.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * xylem.state.pv.k_refill / f_vis * xylem.state.v_storage[i];
+        xylem.auxil.p_storage[i] = capacitance_pressure(xylem.state.pv, xylem.state.v_storage[i] / v_max_i, t);
+        xylem.auxil.flow_buffer[i] = (xylem.auxil.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * xylem.state.pv.k_refill / f_vis * xylem.state.v_storage[i];
     end;
 
     return nothing

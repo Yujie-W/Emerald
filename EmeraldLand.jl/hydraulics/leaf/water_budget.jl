@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Sep-27: add leaf_water_budget! function
+#     2023-Sep-28: make the buffer flow to be flow out from the capacitor
 #
 #######################################################################################################################################################################################################
 """
@@ -21,8 +22,8 @@ Set the flow profile of the leaf, given
 function leaf_water_budget! end
 
 leaf_water_budget!(leaf::Leaves2D{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
-    f_vis = relative_viscosity(leaf.energy.auxil.t);
     ns = leaf.NS;
+    f_vis = relative_viscosity(ns.energy.auxil.t);
 
     # make sure the buffer rate does not drain or overflow the capacictance
     # TODO: add this to time_stepper! function, otherwise the water budget will not be consvered
@@ -37,8 +38,8 @@ leaf_water_budget!(leaf::Leaves2D{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::
 
     # update storage and the tissue pressure (p_storage)
     ns.capacitor.state.v_storage -= ns.capacitor.auxil.flow * δt / ns.xylem.state.area;
-    ns.capacitor.state.p = capacitance_pressure(ns.capacitor.state.pv, ns.capacitor.state.v_storage / ns.capacitor.state.v_max, ns.energy.auxil.t);
-    ns.capacitor.auxil.flow = (x_aux.pressure[end] - ns.capacitor.state.p) * ns.capacitor.state.pv.k_refill / f_vis * ns.capacitor.state.v_storage * ns.xylem.state.area;
+    ns.capacitor.auxil.p = capacitance_pressure(ns.capacitor.state.pv, ns.capacitor.state.v_storage / ns.capacitor.state.v_max, ns.energy.auxil.t);
+    ns.capacitor.auxil.flow = (ns.capacitor.auxil.p - x_aux.pressure[end]) * ns.capacitor.state.pv.k_refill / f_vis * ns.capacitor.state.v_storage * ns.xylem.state.area;
 
     return nothing
 );
