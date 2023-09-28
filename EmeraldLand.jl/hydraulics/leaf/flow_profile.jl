@@ -2,19 +2,19 @@
 #
 # Changes to the function
 # General
-#     2023-Sep-11: add function leaf_flow_profile!
+#     2023-Sep-11: add function leaf_flow_profiles!
 #
 #######################################################################################################################################################################################################
 """
 
-    set_leaf_flow_out!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Set the flow out from each leaf, given
 - `config` `SPACConfiguration` type struct
 - `spac` `MultiLayerSPAC` type struct
 
 """
-function leaf_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a MultiLayerSPAC
     #     LEAVES index is from lower to upper, and thus the sunlit leaves fraction is DIM_LAYER + 1 - i
     #     AIR index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX

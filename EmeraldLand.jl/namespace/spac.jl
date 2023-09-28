@@ -45,6 +45,7 @@ end
 #     2023-Apr-26: use a constructor rather than @kwdef
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Aug-27: make corrections over the delta height of the xylem
+#     2023-Sep-28: add field JUNCTION
 #
 #######################################################################################################################################################################################################
 """
@@ -98,6 +99,8 @@ mutable struct MultiLayerSPAC{FT}
     SOIL::Soil{FT}
     "Trunk hydraulic system"
     TRUNK::Stem2{FT}
+    "Root-trunk junction capacitor used for roots flow calculations"
+    JUNCTION::JunctionCapacitor{FT}
 
     # Cache variables
     "Flow rate per root layer"
@@ -171,6 +174,7 @@ MultiLayerSPAC(
                 Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),         # SOIL
                 #Stem2{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])),  # TRUNK
                 Stem2(config),                                                              # TRUNK (TODO: fix the k and h set up)
+                JunctionCapacitor{FT}(),                                                    # JUNCTION
                 zeros(FT, config.DIM_ROOT),                                                 # _fs
                 zeros(FT, config.DIM_ROOT),                                                 # _ks
                 zeros(FT, config.DIM_ROOT),                                                 # _ps

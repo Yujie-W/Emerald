@@ -44,3 +44,29 @@ function root_flow_profile!(root::Root{FT}, soil::SoilLayer{FT}, p_target::FT) w
 
     return nothing
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-28: add function root_flow_profiles!
+#
+#######################################################################################################################################################################################################
+"""
+
+    root_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+
+Set up root flow profile for each root, given
+- `spac` `MultiLayerSPAC` type struct
+
+"""
+function root_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL) = spac;
+
+    for i in eachindex(ROOTS)
+        root_flow_profile!(ROOTS[i], SOIL[ROOTS_INDEX[i]], JUNCTION.auxil.pressure);
+    end;
+
+    return nothing
+end;

@@ -15,11 +15,11 @@ Return root water update, given
 """
 function root_sink end
 
-root_sink(root::Root{FT}) where {FT} = root_sink(root.HS.FLOW);
+root_sink(root::Root{FT}) where {FT} = root_sink(root.NS.xylem.auxil);
 
-root_sink(mode::SteadyStateFlow{FT}) where {FT} = mode.flow;
+flow_in(x_aux::XylemHydraulicsAuxilNSS{FT}) where {FT} = x_aux.flow[1];
 
-root_sink(mode::NonSteadyStateFlow{FT}) where {FT} = mode.f_in;
+flow_in(x_aux::XylemHydraulicsAuxilSS{FT}) where {FT} = x_aux.flow;
 
 
 #######################################################################################################################################################################################################

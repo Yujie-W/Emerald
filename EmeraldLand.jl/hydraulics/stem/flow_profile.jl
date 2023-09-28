@@ -4,20 +4,28 @@
 #
 # Changes to this function
 # General
-#     2023-Sep-5: add function stem_flow_profile!
+#     2023-Sep-05: add function stem_flow_profiles!
+#     2023-Sep-28: update the branch and trunk flow profile at the same time
 #
 #######################################################################################################################################################################################################
 """
 
-    stem_flow_profile!(stem::Stem{FT}, flow::FT) where {FT}
+    stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
 
 Set up stem flow profile, given
-- `stem` `Stem` type struct
-- `flow` Flow rate out of the stem
+- `spac` `MultiLayerSPAC` type struct
 
 """
-function stem_flow_profile!(stem::Stem{FT}, flow::FT) where {FT}
-    set_flow_profile!(stem.xylem, flow);
+function stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    (; BRANCHES, LEAVES, TRUNK) = spac;
+
+    sum_f::FT = 0;
+    for i in eachindex(BRANCHES)
+        set_flow_profile!(BRANCHES[i].xylem, flow_in(LEAVES[i].xylem));
+        sum_f += flow_out(BRANCHES[i].xylem);
+    end;
+
+    set_flow_profile!(TRUNK.xylem, sum_f);
 
     return nothing
-end
+end;

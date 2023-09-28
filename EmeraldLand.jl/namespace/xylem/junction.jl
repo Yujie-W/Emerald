@@ -22,9 +22,9 @@ Base.@kwdef mutable struct JunctionCapacitorState{FT}
     "Pressure volume curve of the capacitor"
     pv::AbstractPVCurve{FT} = ExponentialPVCurve{FT}()
     "Current volume of the capacitor `[mol m⁻²]`"
-    v_storage::FT = 0
+    v_storage::FT = 5000
     "Capacitor maximum volume per basal area or per leaf area `[mol m⁻²]`"
-    v_max::FT = 0
+    v_max::FT = 5000
 end
 
 
@@ -48,7 +48,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct JunctionCapacitorAuxil{FT}
     "Pressure of the capacitor `[MPa]`"
-    p::FT = 0
+    pressure::FT = 0
 end
 
 
