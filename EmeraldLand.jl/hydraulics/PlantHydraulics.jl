@@ -48,6 +48,7 @@ include("junction/water_budget.jl");
 
 # plant (dependent on root, junction, stem, leaf)
 include("plant/flow_profile.jl");
+include("plant/pressure_profile.jl");
 include("plant/water_budget.jl");
 
 
@@ -64,12 +65,6 @@ include("drought/legacy.jl");
 
 # include function related to stomtal optimality
 include("optimality/derivative.jl");
-
-# include functions related to flow and pressure profiles
-include("flow_profile/root_flow_profile.jl");
-include("flow_profile/spac_flow_profile.jl");
-include("flow_profile/stem_flow_out.jl");
-include("flow_profile/stem_flow_profile.jl");
 
 include("budget.jl");
 include("pressure_profile.jl");

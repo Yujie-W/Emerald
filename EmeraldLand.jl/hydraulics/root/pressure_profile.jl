@@ -23,3 +23,29 @@ function root_pressure_profile!(root::Root{FT}, soil::SoilLayer{FT}) where {FT}
 
     return nothing
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-28: add function root_pressure_profiles!
+#
+#######################################################################################################################################################################################################
+"""
+
+    root_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+
+Set up root pressure profile for each root, given
+- `spac` `MultiLayerSPAC` type struct
+
+"""
+function root_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    (; ROOTS, ROOTS_INDEX, SOIL) = spac;
+
+    for i in eachindex(ROOTS)
+        root_pressure_profile!(ROOTS[i], SOIL[ROOTS_INDEX[i]]);
+    end;
+
+    return nothing
+end;

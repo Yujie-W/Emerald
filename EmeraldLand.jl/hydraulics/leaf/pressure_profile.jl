@@ -23,3 +23,29 @@ function leaf_pressure_profile!(leaf::Leaf{FT}, p_dos::FT) where {FT}
 
     return nothing
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-28: add function leaf_pressure_profiles!
+#
+#######################################################################################################################################################################################################
+"""
+
+    leaf_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+
+Set up leaf pressure profile for each leaf, given
+- `spac` `MultiLayerSPAC` type struct
+
+"""
+function leaf_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    (; BRANCHES, LEAVES) = spac;
+
+    for i in eachindex(BRANCHES)
+        leaf_pressure_profile!(LEAVES[i], BRANCHES[i].xylem.auxil.pressure[end]);
+    end;
+
+    return nothing
+end;

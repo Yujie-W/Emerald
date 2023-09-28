@@ -6,7 +6,22 @@
 #     4. update the water budget of the root water storage
 #     5. update the water budget of the root-trunk junction water storage
 
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-28: add function plant_water_budget!
+#
+#######################################################################################################################################################################################################
+"""
 
+    plant_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+
+Set up the water budget of the plant, given
+- `spac` `MultiLayerSPAC` type struct
+- `δt` time step
+
+"""
 function plant_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     leaf_water_budgets!(spac, δt);
     stem_water_budgets!(spac, δt);
