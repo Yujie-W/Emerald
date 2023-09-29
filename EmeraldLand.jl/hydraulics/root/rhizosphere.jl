@@ -21,7 +21,7 @@ function rhizosphere_pressure_profile!(root::Root{FT}, soil::SoilLayer{FT}) wher
     k_rhizo_max = root.rhizosphere.state.k_max * root.xylem.state.area;
     f_st_soil = relative_surface_tension(soil.t);
     f_vis_soil = relative_viscosity(soil.t);
-    f = flow_in(root.xylem);
+    f = flow_in(root);
     p = soil.ψ;
     for _ in 1:5
         k = relative_hydraulic_conductance(soil.VC, true, p / f_st_soil) * k_rhizo_max * 5 / f_vis_soil;

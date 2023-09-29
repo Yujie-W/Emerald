@@ -1,5 +1,14 @@
 # This function contains functions to set up root flow profile
 
+flow_in(root::Root{FT}) where {FT} = flow_in(root.xylem);
+
+flow_in(root::Root2{FT}) where {FT} = flow_in(root.NS);
+
+flow_out(root::Root{FT}) where {FT} = flow_out(root.xylem);
+
+flow_out(root::Root2{FT}) where {FT} = flow_out(root.NS);
+
+
 #######################################################################################################################################################################################################
 #
 # Changes to this function

@@ -21,9 +21,9 @@ function junction_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     # compute the total flow into the junction as the sum of root flow out minus the trunk flow in
     sum_q::FT = 0;
     for root in ROOTS
-        sum_q += flow_out(root.NS.xylem) * δt;
+        sum_q += flow_out(root) * δt;
     end;
-    sum_q -= flow_in(TRUNK.NS.xylem) * δt;
+    sum_q -= flow_in(TRUNK) * δt;
 
     JUNCTION.state.v_storage += sum_q;
     JUNCTION.auxil.pressure = capacitance_pressure(JUNCTION.state.pv, JUNCTION.state.v_storage / JUNCTION.state.v_max, JUNCTION.auxil.t);

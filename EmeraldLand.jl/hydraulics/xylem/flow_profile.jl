@@ -9,10 +9,9 @@
 #######################################################################################################################################################################################################
 """
 
-    flow_in(xylem::XylemHydraulics{FT}) where {FT}
+    flow_in(organ)
 
-Return the flow rate into the xylem, given
-- `xylem` `XylemHydraulics` type struct
+Return the flow rate into the organ
 
 """
 function flow_in end;
@@ -33,10 +32,9 @@ flow_in(flow::XylemHydraulicsAuxilSS{FT}) where {FT} = flow.flow;
 #######################################################################################################################################################################################################
 """
 
-    flow_out(xylem::XylemHydraulics{FT}) where {FT}
+    flow_out(organ)
 
-Return the flow rate out of the xylem, given
-- `xylem` `XylemHydraulics` type struct
+Return the flow rate out of the organ
 
 """
 function flow_out end;

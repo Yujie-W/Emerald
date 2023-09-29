@@ -6,4 +6,4 @@ heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(
     return leaf.capacitor.state.v_storage * CP_L_MOL(FT) + leaf.xylem.state.cp * leaf.xylem.state.area * leaf.bio.state.lma * 10
 );
 
-heat_capacitance(leaf::Leaves2D{FT}) where {FT} = heat_capacitance(leaf.NS.);
+heat_capacitance(leaf::Leaves2D{FT}) where {FT} = heat_capacitance(leaf.NS);

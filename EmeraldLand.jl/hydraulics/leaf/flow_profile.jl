@@ -1,3 +1,14 @@
+# This file contains functions related to leaf flow profile
+
+flow_in(leaf::Leaf{FT}) where {FT} = flow_in(leaf.xylem);
+
+flow_in(leaf::Leaves2D{FT}) where {FT} = flow_in(leaf.NS);
+
+flow_out(leaf::Leaf{FT}) where {FT} = flow_out(leaf.xylem) + leaf.capacitor.auxil.flow;
+
+flow_out(leaf::Leaves2D{FT}) where {FT} = flow_out(leaf.NS);
+
+
 #######################################################################################################################################################################################################
 #
 # Changes to the function

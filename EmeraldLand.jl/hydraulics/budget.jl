@@ -42,24 +42,24 @@ plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
     TRUNK.NS.energy.auxil.∂e∂t = 0;
     for _i in 1:DIM_ROOT
         ROOTS[_i].NS.energy.auxil.∂e∂t = 0;
-        if flow_in(ROOTS[_i].NS.xylem) >= 0
-            ROOTS[_i].NS.energy.auxil.∂e∂t += flow_in(ROOTS[_i].NS.xylem) * CP_L_MOL(FT) * SOIL.LAYERS[ROOTS_INDEX[_i]].t;
+        if flow_in(ROOTS[_i]) >= 0
+            ROOTS[_i].NS.energy.auxil.∂e∂t += flow_in(ROOTS[_i]) * CP_L_MOL(FT) * SOIL.LAYERS[ROOTS_INDEX[_i]].t;
         else
-            ROOTS[_i].NS.energy.auxil.∂e∂t += flow_in(ROOTS[_i].NS.xylem) * CP_L_MOL(FT) * ROOTS[_i].NS.energy.auxil.t;
+            ROOTS[_i].NS.energy.auxil.∂e∂t += flow_in(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].NS.energy.auxil.t;
         end;
-        if flow_out(ROOTS[_i].NS.xylem) >= 0
-            ROOTS[_i].NS.energy.auxil.∂e∂t -= flow_out(ROOTS[_i].NS.xylem) * CP_L_MOL(FT) * ROOTS[_i].NS.energy.auxil.t;
-            TRUNK.NS.energy.auxil.∂e∂t     += flow_out(ROOTS[_i].NS.xylem) * CP_L_MOL(FT) * ROOTS[_i].NS.energy.auxil.t;
+        if flow_out(ROOTS[_i]) >= 0
+            ROOTS[_i].NS.energy.auxil.∂e∂t -= flow_out(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].NS.energy.auxil.t;
+            TRUNK.NS.energy.auxil.∂e∂t     += flow_out(ROOTS[_i]) * CP_L_MOL(FT) * ROOTS[_i].NS.energy.auxil.t;
         else
-            ROOTS[_i].NS.energy.auxil.∂e∂t -= flow_out(ROOTS[_i].NS.xylem) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
-            TRUNK.NS.energy.auxil.∂e∂t     += flow_out(ROOTS[_i].NS.xylem) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
+            ROOTS[_i].NS.energy.auxil.∂e∂t -= flow_out(ROOTS[_i]) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
+            TRUNK.NS.energy.auxil.∂e∂t     += flow_out(ROOTS[_i]) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
         end;
 
         if isnan(ROOTS[_i].NS.energy.auxil.∂e∂t) || isnan(TRUNK.NS.energy.auxil.∂e∂t)
             @info "Debugging" ROOTS[_i].NS.energy.auxil.∂e∂t \
                               TRUNK.NS.energy.auxil.∂e∂t \
-                              flow_in(ROOTS[_i].NS.xylem) \
-                              flow_out(ROOTS[_i].NS.xylem) \
+                              flow_in(ROOTS[_i]) \
+                              flow_out(ROOTS[_i]) \
                               ROOTS[_i].NS.energy.auxil.t \
                               TRUNK.NS.energy.auxil.t \
                               SOIL.LAYERS[ROOTS_INDEX[_i]].t;
@@ -71,27 +71,27 @@ plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
     for _i in 1:DIM_LAYER
         BRANCHES[_i].NS.energy.auxil.∂e∂t = 0;
         LEAVES[_i].NS.energy.auxil.∂e∂t   = 0;
-        if flow_in(BRANCHES[_i].NS.xylem) >= 0
-            TRUNK.NS.energy.auxil.∂e∂t        -= flow_in(BRANCHES[_i].NS.xylem) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
-            BRANCHES[_i].NS.energy.auxil.∂e∂t += flow_in(BRANCHES[_i].NS.xylem) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
+        if flow_in(BRANCHES[_i]) >= 0
+            TRUNK.NS.energy.auxil.∂e∂t        -= flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
+            BRANCHES[_i].NS.energy.auxil.∂e∂t += flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * TRUNK.NS.energy.auxil.t;
         else
-            TRUNK.NS.energy.auxil.∂e∂t        -= flow_in(BRANCHES[_i].NS.xylem) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
-            BRANCHES[_i].NS.energy.auxil.∂e∂t += flow_in(BRANCHES[_i].NS.xylem) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
+            TRUNK.NS.energy.auxil.∂e∂t        -= flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
+            BRANCHES[_i].NS.energy.auxil.∂e∂t += flow_in(BRANCHES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
         end;
-        if flow_out(BRANCHES[_i].NS.xylem) >= 0
-            BRANCHES[_i].NS.energy.auxil.∂e∂t -= flow_out(BRANCHES[_i].NS.xylem) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
-            LEAVES[_i].NS.energy.auxil.∂e∂t   += flow_in(LEAVES[_i].NS.xylem) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
+        if flow_out(BRANCHES[_i]) >= 0
+            BRANCHES[_i].NS.energy.auxil.∂e∂t -= flow_out(BRANCHES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
+            LEAVES[_i].NS.energy.auxil.∂e∂t   += flow_in(LEAVES[_i]) * CP_L_MOL(FT) * BRANCHES[_i].NS.energy.auxil.t;
         else
-            BRANCHES[_i].NS.energy.auxil.∂e∂t -= flow_out(BRANCHES[_i].NS.xylem) * CP_L_MOL(FT) * LEAVES[_i].NS.energy.auxil.t;
-            LEAVES[_i].NS.energy.auxil.∂e∂t   += flow_in(LEAVES[_i].NS.xylem) * CP_L_MOL(FT) * LEAVES[_i].NS.energy.auxil.t;
+            BRANCHES[_i].NS.energy.auxil.∂e∂t -= flow_out(BRANCHES[_i]) * CP_L_MOL(FT) * LEAVES[_i].NS.energy.auxil.t;
+            LEAVES[_i].NS.energy.auxil.∂e∂t   += flow_in(LEAVES[_i]) * CP_L_MOL(FT) * LEAVES[_i].NS.energy.auxil.t;
         end;
 
         if isnan(BRANCHES[_i].NS.energy.auxil.∂e∂t) || isnan(LEAVES[_i].NS.energy.auxil.∂e∂t) || isnan(TRUNK.NS.energy.auxil.∂e∂t)
             @info "Debugging" BRANCHES[_i].NS.energy.auxil.∂e∂t \
                               LEAVES[_i].NS.energy.auxil.∂e∂t \
                               TRUNK.NS.energy.auxil.∂e∂t \
-                              flow_in(BRANCHES[_i].NS.xylem) \
-                              flow_out(BRANCHES[_i].NS.xylem) \
+                              flow_in(BRANCHES[_i]) \
+                              flow_out(BRANCHES[_i]) \
                               TRUNK.t \
                               BRANCHES[_i].energy.auxil.t \
                               LEAVES[_i].energy.auxil.t;
@@ -110,8 +110,8 @@ plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT
 
             LEAVES[_i].NS.energy.auxil.∂e∂t  = 0;
             LEAVES[_i].NS.energy.auxil.∂e∂t += (CANOPY.RADIATION.r_net_sw[DIM_LAYER+1-_i] + CANOPY.RADIATION.r_net_lw[DIM_LAYER+1-_i]) / CANOPY.δlai[_i];
-            LEAVES[_i].NS.energy.auxil.∂e∂t -= flow_out(LEAVES[_i].NS.xylem) * M_H₂O(FT) * latent_heat_vapor(LEAVES[_i].NS.energy.auxil.t);
-            LEAVES[_i].NS.energy.auxil.∂e∂t -= flow_out(LEAVES[_i].NS.xylem) * CP_V_MOL(FT) * LEAVES[_i].NS.energy.auxil.t; # note here that CP_L_MOL is included in the latent_heat_vapor TD function
+            LEAVES[_i].NS.energy.auxil.∂e∂t -= flow_out(LEAVES[_i]) * M_H₂O(FT) * latent_heat_vapor(LEAVES[_i].NS.energy.auxil.t);
+            LEAVES[_i].NS.energy.auxil.∂e∂t -= flow_out(LEAVES[_i]) * CP_V_MOL(FT) * LEAVES[_i].NS.energy.auxil.t; # note here that CP_L_MOL is included in the latent_heat_vapor TD function
             LEAVES[_i].NS.energy.auxil.∂e∂t -= 2 * _g_be * CP_D_MOL(FT) * (LEAVES[_i].NS.energy.auxil.t - AIR[LEAVES_INDEX[_i]].t);
 
             if isnan(LEAVES[_i].NS.energy.auxil.∂e∂t)
