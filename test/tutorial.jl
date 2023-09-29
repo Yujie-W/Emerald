@@ -5,6 +5,7 @@
     end;
 
     include("tutorials/leaf_spectra.jl");
+    include("tutorials/leaf_sif_spectra.jl");
 
     include("tutorials/spac_basic.jl");
     include("tutorials/spac_canopy_structure.jl");
