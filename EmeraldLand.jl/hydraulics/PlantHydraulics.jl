@@ -13,13 +13,14 @@ using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapa
 using ..Namespace: Root, Root2, SoilLayer
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
-using ..Namespace: Leaf, Leaves2D, Soil, Stem, Stem2
+using ..Namespace: Leaf, Leaves2D, Soil, Stem, Stem2, JunctionCapacitor
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..SoilHydraulics: relative_hydraulic_conductance, soil_θ, soil_ψ_25
 
 
 # xylem
 include("xylem/critical_flow.jl");
+include("xylem/energy.jl");
 include("xylem/flow_profile.jl");
 include("xylem/pressure_profile.jl");
 include("xylem/pv.jl");
@@ -27,23 +28,27 @@ include("xylem/vc.jl");
 include("xylem/water_budget.jl");
 
 # root (dependent on xylem)
+include("root/energy.jl");
 include("root/flow_profile.jl");
 include("root/pressure_profile.jl");
 include("root/rhizosphere.jl");
 include("root/water_budget.jl");
 
 # stem (dependent on xylem)
+include("stem/energy.jl");
 include("stem/flow_profile.jl");
 include("stem/pressure_profile.jl");
 include("stem/water_budget.jl");
 
 # leaf (dependent on xylem)
 include("leaf/capacitor.jl");
+include("leaf/energy.jl");
 include("leaf/flow_profile.jl");
 include("leaf/pressure_profile.jl");
 include("leaf/water_budget.jl");
 
 # junction
+include("junction/energy.jl");
 include("junction/water_budget.jl");
 
 # plant (dependent on root, junction, stem, leaf)
