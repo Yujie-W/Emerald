@@ -27,11 +27,11 @@ DF_VARIABLES   = ["F_H2O", "F_CO2", "F_GPP", "BETA", "SIF683", "SIF740", "SIF757
                   "ΣSIF_CHL", "ΣSIF_LEAF"];
 
 
-include("../EmeraldFrontier.jl/config.jl");
-include("../EmeraldFrontier.jl/driver.jl");
-include("../EmeraldFrontier.jl/griddingmachine.jl");
-include("../EmeraldFrontier.jl/simulation.jl");
-include("../EmeraldFrontier.jl/spac.jl");
+include("config.jl");
+include("driver.jl");
+include("griddingmachine.jl");
+include("simulation.jl");
+include("spac.jl");
 
 
 end # EmeraldFrontier

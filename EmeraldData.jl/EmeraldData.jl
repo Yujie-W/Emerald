@@ -6,8 +6,8 @@ using ..EmeraldMath
 using ..EmeraldUtility
 
 
-include("../EmeraldData.jl/ERA5.jl");
-include("../EmeraldData.jl/GriddingMachineData.jl");
+include("ERA5.jl");
+include("GriddingMachineData.jl");
 
 
 end # module
