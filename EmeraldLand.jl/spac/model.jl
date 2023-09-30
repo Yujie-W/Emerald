@@ -51,6 +51,7 @@ function soil_plant_air_continuum! end
 soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.SOIL.runoff = 0;
+    clear_∂X∂t!(spac);
 
     # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
     plant_flow_profile!(config, spac);
@@ -76,7 +77,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     stomatal_conductance!(spac);
 
     # 7. run plant energy budget
-    plant_energy!(config, spac);
+    plant_energy_flow!(spac);
 
     # 8. update the prognostic variables
     time_stepper!(config, spac, δt);

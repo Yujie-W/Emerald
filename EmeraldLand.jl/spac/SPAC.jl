@@ -11,16 +11,18 @@ using ..CanopyOptics: MODIS_EVI, MODIS_NDVI, MODIS_NIRv, OCO2_SIF759, OCO2_SIF77
 using ..CanopyOptics: canopy_fluorescence!, canopy_radiation!, longwave_radiation!, soil_albedo!
 using ..Photosynthesis: leaf_photosynthesis!
 using ..SoilHydraulics: soil_budget!
-using ..PlantHydraulics: flow_out, plant_energy!, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, read_β
+using ..PlantHydraulics: flow_out, plant_energy!, plant_energy_flow!, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, read_β
 using ..StomatalModels: stomatal_conductance!, stomatal_conductance_profile!
 
 
-include("spac/budget.jl");
-include("spac/initialize.jl");
-include("spac/model.jl");
-include("spac/quantity.jl");
-include("spac/state.jl");
-include("spac/update.jl");
+include("instructions/clear_cache.jl");
+
+include("budget.jl");
+include("initialize.jl");
+include("model.jl");
+include("quantity.jl");
+include("state.jl");
+include("update.jl");
 
 
 end # module

@@ -24,6 +24,13 @@ This function has two major functionalities:
 """
 function plant_energy! end
 
+
+# for _i in 1:DIM_LAYER
+#     _g_be = FT(1.4) * FT(0.135) * sqrt(AIR[LEAVES_INDEX[_i]].wind / (FT(0.72) * LEAVES[_i].WIDTH));
+#     LEAVES[_i].NS.energy.auxil.∂e∂t += (CANOPY.RADIATION.r_net_sw[DIM_LAYER+1-_i] + CANOPY.RADIATION.r_net_lw[DIM_LAYER+1-_i]) / CANOPY.δlai[_i];
+#     LEAVES[_i].NS.energy.auxil.∂e∂t -= 2 * _g_be * CP_D_MOL(FT) * (LEAVES[_i].NS.energy.auxil.t - AIR[LEAVES_INDEX[_i]].t);
+
+
 """
 
     plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}

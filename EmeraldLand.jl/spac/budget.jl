@@ -193,6 +193,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
 
         # if _t_res > 0 rerun the budget functions (shortwave radiation not included) and etc., else break
         if _t_res > 0
+            clear_∂X∂t!(spac);
             longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
             if spac._root_connection
                 plant_flow_profile!(config, spac);
@@ -201,7 +202,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
             leaf_photosynthesis!(spac, GCO₂Mode());
             soil_budget!(config, spac);
             stomatal_conductance!(spac);
-            plant_energy!(config, spac);
+            plant_energy_flow!(spac);
         else
             break;
         end;
