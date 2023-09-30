@@ -35,6 +35,7 @@ end
 # Changes to this struct
 # General
 #     2023-Sep-26: define the struct to store the auxilary variables used in junction capacitor
+#     2023-Sep-30: add field ∂e∂t (without adding an extra energy struct)
 #
 #######################################################################################################################################################################################################
 """
@@ -53,6 +54,8 @@ Base.@kwdef mutable struct JunctionCapacitorAuxil{FT}
     pressure::FT = 0
     "Temperature of the capacitor `[K]`"
     t::FT = T₂₅()
+    "Partial derivative of the energy per time `[J s⁻¹]`"
+    ∂e∂t::FT = 0
 end
 
 

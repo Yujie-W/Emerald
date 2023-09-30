@@ -3,3 +3,50 @@
 heat_capacitance(root::Root{FT}) where {FT} = heat_capacitance(root.xylem);
 
 heat_capacitance(root::Root2{FT}) where {FT} = heat_capacitance(root.NS.xylem);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2022-Jun-13: add function to calculate the energy flow of the root
+#
+#######################################################################################################################################################################################################
+"""
+
+    root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+
+Calculate the energy flows of the root, given
+- `spac` `MultiLayerSPAC` type SPAC
+
+"""
+function root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+    (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL) = spac;
+
+    # compute the energy flow per layer
+    # the energy flow is computed as the difference between
+    #     energy of the water flow from soil
+    #     energy of the water flow to the root-trunk junction
+    for i in eachindex(ROOTS)
+        root = ROOTS[i];
+        soil = SOIL.LAYERS[ROOTS_INDEX[i]];
+
+        # if the flow into the root is positive, then the energy flow is positive
+        f_i = flow_in(root);
+        if f_i >= 0
+            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.t;
+        else
+            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.energy.auxil.t;
+        end;
+
+        # if the flow into the junction is positive, then the energy flow is negative
+        f_o = flow_out(root);
+        if f_o >= 0
+            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * root.energy.auxil.t;
+        else
+            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * JUNCTION.auxil.t;
+        end;
+    end;
+
+    return nothing
+end;

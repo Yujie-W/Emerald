@@ -34,6 +34,10 @@ include("root/pressure_profile.jl");
 include("root/rhizosphere.jl");
 include("root/water_budget.jl");
 
+# junction
+include("junction/energy.jl");
+include("junction/water_budget.jl");
+
 # stem (dependent on xylem)
 include("stem/energy.jl");
 include("stem/flow_profile.jl");
@@ -47,11 +51,8 @@ include("leaf/flow_profile.jl");
 include("leaf/pressure_profile.jl");
 include("leaf/water_budget.jl");
 
-# junction
-include("junction/energy.jl");
-include("junction/water_budget.jl");
-
 # plant (dependent on root, junction, stem, leaf)
+include("plant/energy.jl");
 include("plant/flow_profile.jl");
 include("plant/pressure_profile.jl");
 include("plant/water_budget.jl");
@@ -72,7 +73,6 @@ include("drought/legacy.jl");
 include("optimality/derivative.jl");
 
 include("budget.jl");
-include("pressure_profile.jl");
 
 
 end # module
