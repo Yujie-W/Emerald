@@ -21,7 +21,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafEnergyState{FT}
     "Total energy `[J]`"
-    energy::FT = 0
+    Σe::FT = 0
 end;
 
 
@@ -44,6 +44,9 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafEnergyAuxil{FT}
+    #
+    # these variables are to be initialized at sub steps
+    #
     "Combined heat capacity of root and water `[J K⁻¹]`"
     cp::FT = 0
     "Temperature `[K]`"

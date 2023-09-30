@@ -57,18 +57,18 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
             _jlayer.TRACES.n_CO₂ += _n_mass * _ilayer.TRACES.n_CO₂ / _i_dry;
             _jlayer.TRACES.n_N₂  += _n_mass * _ilayer.TRACES.n_N₂  / _i_dry;
             _jlayer.TRACES.n_O₂  += _n_mass * _ilayer.TRACES.n_O₂  / _i_dry;
-            _jlayer.e += _n_mass * CP_D_MOL(FT) * _ilayer.t / _jlayer.ΔZ;
+            _jlayer.Σe += _n_mass * CP_D_MOL(FT) * _ilayer.t / _jlayer.ΔZ;
             _ilayer.TRACES.n_CH₄ -= _n_mass * _ilayer.TRACES.n_CH₄ / _i_dry;
             _ilayer.TRACES.n_CO₂ -= _n_mass * _ilayer.TRACES.n_CO₂ / _i_dry;
             _ilayer.TRACES.n_N₂  -= _n_mass * _ilayer.TRACES.n_N₂  / _i_dry;
             _ilayer.TRACES.n_O₂  -= _n_mass * _ilayer.TRACES.n_O₂  / _i_dry;
-            _ilayer.e -= _n_mass * CP_D_MOL(FT) * _ilayer.t / _ilayer.ΔZ;
+            _ilayer.Σe -= _n_mass * CP_D_MOL(FT) * _ilayer.t / _ilayer.ΔZ;
 
             if DEBUG
-                if any(isnan, (_jlayer.TRACES.n_CH₄, _jlayer.TRACES.n_CO₂, _jlayer.TRACES.n_N₂, _jlayer.TRACES.n_O₂, _jlayer.e,
-                               _ilayer.TRACES.n_CH₄, _ilayer.TRACES.n_CO₂, _ilayer.TRACES.n_N₂, _ilayer.TRACES.n_O₂, _ilayer.e))
-                    @info "Debugging" _jlayer.TRACES.n_CH₄ _jlayer.TRACES.n_CO₂ _jlayer.TRACES.n_N₂ _jlayer.TRACES.n_O₂ _jlayer.e;
-                    @info "Debugging" _ilayer.TRACES.n_CH₄ _ilayer.TRACES.n_CO₂ _ilayer.TRACES.n_N₂ _ilayer.TRACES.n_O₂ _ilayer.e;
+                if any(isnan, (_jlayer.TRACES.n_CH₄, _jlayer.TRACES.n_CO₂, _jlayer.TRACES.n_N₂, _jlayer.TRACES.n_O₂, _jlayer.Σe,
+                               _ilayer.TRACES.n_CH₄, _ilayer.TRACES.n_CO₂, _ilayer.TRACES.n_N₂, _ilayer.TRACES.n_O₂, _ilayer.Σe))
+                    @info "Debugging" _jlayer.TRACES.n_CH₄ _jlayer.TRACES.n_CO₂ _jlayer.TRACES.n_N₂ _jlayer.TRACES.n_O₂ _jlayer.Σe;
+                    @info "Debugging" _ilayer.TRACES.n_CH₄ _ilayer.TRACES.n_CO₂ _ilayer.TRACES.n_N₂ _ilayer.TRACES.n_O₂ _ilayer.Σe;
                     error("NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving air from upper layer to lower layer");
                 end;
             end;
@@ -81,12 +81,12 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
             _v_mass = min((_j_max - _j_dry) * GAS_R(FT) * _jlayer.t / _alayer.P_AIR, (_ilayer.VC.Θ_SAT - _θ_fc_up) * _ilayer.ΔZ);
             _jlayer.θ += _v_mass / _jlayer.ΔZ;
             _ilayer.θ -= _v_mass / _ilayer.ΔZ;
-            _jlayer.e += _v_mass * ρ_H₂O(FT) * CP_L(FT) * _ilayer.t / _jlayer.ΔZ;
-            _ilayer.e -= _v_mass * ρ_H₂O(FT) * CP_L(FT) * _ilayer.t / _ilayer.ΔZ;
+            _jlayer.Σe += _v_mass * ρ_H₂O(FT) * CP_L(FT) * _ilayer.t / _jlayer.ΔZ;
+            _ilayer.Σe -= _v_mass * ρ_H₂O(FT) * CP_L(FT) * _ilayer.t / _ilayer.ΔZ;
 
             if DEBUG
-                if any(isnan, (_jlayer.θ, _ilayer.θ, _jlayer.e, _ilayer.e))
-                    @info "Debugging" _jlayer.θ _ilayer.θ _jlayer.e _ilayer.e;
+                if any(isnan, (_jlayer.θ, _ilayer.θ, _jlayer.Σe, _ilayer.Σe))
+                    @info "Debugging" _jlayer.θ _ilayer.θ _jlayer.Σe _ilayer.Σe;
                     error("NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving water from upper layer to lower layer");
                 end;
             end;
@@ -99,18 +99,18 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
             _jlayer.TRACES.n_CO₂ -= _n_mass * _jlayer.TRACES.n_CO₂ / _j_dry;
             _jlayer.TRACES.n_N₂  -= _n_mass * _jlayer.TRACES.n_N₂  / _j_dry;
             _jlayer.TRACES.n_O₂  -= _n_mass * _jlayer.TRACES.n_O₂  / _j_dry;
-            _jlayer.e -= _n_mass * CP_D_MOL(FT) * _jlayer.t / _jlayer.ΔZ;
+            _jlayer.Σe -= _n_mass * CP_D_MOL(FT) * _jlayer.t / _jlayer.ΔZ;
             _ilayer.TRACES.n_CH₄ += _n_mass * _jlayer.TRACES.n_CH₄ / _j_dry;
             _ilayer.TRACES.n_CO₂ += _n_mass * _jlayer.TRACES.n_CO₂ / _j_dry;
             _ilayer.TRACES.n_N₂  += _n_mass * _jlayer.TRACES.n_N₂  / _j_dry;
             _ilayer.TRACES.n_O₂  += _n_mass * _jlayer.TRACES.n_O₂  / _j_dry;
-            _ilayer.e += _n_mass * CP_D_MOL(FT) * _jlayer.t / _ilayer.ΔZ;
+            _ilayer.Σe += _n_mass * CP_D_MOL(FT) * _jlayer.t / _ilayer.ΔZ;
 
             if DEBUG
-                if any(isnan, (_jlayer.TRACES.n_CH₄, _jlayer.TRACES.n_CO₂, _jlayer.TRACES.n_N₂, _jlayer.TRACES.n_O₂, _jlayer.e,
-                               _ilayer.TRACES.n_CH₄, _ilayer.TRACES.n_CO₂, _ilayer.TRACES.n_N₂, _ilayer.TRACES.n_O₂, _ilayer.e))
-                    @info "Debugging" _jlayer.TRACES.n_CH₄ _jlayer.TRACES.n_CO₂ _jlayer.TRACES.n_N₂ _jlayer.TRACES.n_O₂ _jlayer.e;
-                    @info "Debugging" _ilayer.TRACES.n_CH₄ _ilayer.TRACES.n_CO₂ _ilayer.TRACES.n_N₂ _ilayer.TRACES.n_O₂ _ilayer.e;
+                if any(isnan, (_jlayer.TRACES.n_CH₄, _jlayer.TRACES.n_CO₂, _jlayer.TRACES.n_N₂, _jlayer.TRACES.n_O₂, _jlayer.Σe,
+                               _ilayer.TRACES.n_CH₄, _ilayer.TRACES.n_CO₂, _ilayer.TRACES.n_N₂, _ilayer.TRACES.n_O₂, _ilayer.Σe))
+                    @info "Debugging" _jlayer.TRACES.n_CH₄ _jlayer.TRACES.n_CO₂ _jlayer.TRACES.n_N₂ _jlayer.TRACES.n_O₂ _jlayer.Σe;
+                    @info "Debugging" _ilayer.TRACES.n_CH₄ _ilayer.TRACES.n_CO₂ _ilayer.TRACES.n_N₂ _ilayer.TRACES.n_O₂ _ilayer.Σe;
                     error("NaN detected in volume_balance! between layer $(_i) and layer $(_i+1) when moving air from lower layer to upper layer");
                 end;
             end;
@@ -137,21 +137,21 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         _slayer.TRACES.n_CO₂ += _n_mass * _alayer.n_CO₂ / _a_dry;
         _slayer.TRACES.n_N₂  += _n_mass * _alayer.n_N₂  / _a_dry;
         _slayer.TRACES.n_O₂  += _n_mass * _alayer.n_O₂  / _a_dry;
-        _slayer.e += _n_mass * CP_D_MOL(FT) * _alayer.t / _slayer.ΔZ;
+        _slayer.Σe += _n_mass * CP_D_MOL(FT) * _alayer.t / _slayer.ΔZ;
         if !PRESCRIBE_AIR
             _alayer.n_CH₄ -= _n_mass * _alayer.n_CH₄ / _a_dry;
             _alayer.n_CO₂ -= _n_mass * _alayer.n_CO₂ / _a_dry;
             _alayer.n_N₂  -= _n_mass * _alayer.n_N₂  / _a_dry;
             _alayer.n_O₂  -= _n_mass * _alayer.n_O₂  / _a_dry;
-            _alayer.e -= _n_mass * CP_D_MOL(FT) * _alayer.t;
+            _alayer.Σe -= _n_mass * CP_D_MOL(FT) * _alayer.t;
         end;
 
         if DEBUG
-            if any(isnan, (_slayer.TRACES.n_CH₄, _slayer.TRACES.n_CO₂, _slayer.TRACES.n_N₂, _slayer.TRACES.n_O₂, _slayer.e,
-                           _alayer.n_CH₄, _alayer.n_CO₂, _alayer.n_N₂, _alayer.n_O₂, _alayer.e))
+            if any(isnan, (_slayer.TRACES.n_CH₄, _slayer.TRACES.n_CO₂, _slayer.TRACES.n_N₂, _slayer.TRACES.n_O₂, _slayer.Σe,
+                           _alayer.n_CH₄, _alayer.n_CO₂, _alayer.n_N₂, _alayer.n_O₂, _alayer.Σe))
                 @info "Debugging" _n_mass _a_dry;
-                @info "Debugging" _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂ _slayer.e;
-                @info "Debugging" _alayer.n_CH₄ _alayer.n_CO₂ _alayer.n_N₂ _alayer.n_O₂ _alayer.e;
+                @info "Debugging" _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂ _slayer.Σe;
+                @info "Debugging" _alayer.n_CH₄ _alayer.n_CO₂ _alayer.n_N₂ _alayer.n_O₂ _alayer.Σe;
                 error("NaN detected in volume_balance! when moving air from atmosphere to top soil");
             end;
         end;
@@ -161,20 +161,20 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         _slayer.TRACES.n_CO₂ -= _n_mass * _slayer.TRACES.n_CO₂ / _s_dry;
         _slayer.TRACES.n_N₂  -= _n_mass * _slayer.TRACES.n_N₂  / _s_dry;
         _slayer.TRACES.n_O₂  -= _n_mass * _slayer.TRACES.n_O₂  / _s_dry;
-        _slayer.e -= _n_mass * CP_D_MOL(FT) * _slayer.t / _slayer.ΔZ;
+        _slayer.Σe -= _n_mass * CP_D_MOL(FT) * _slayer.t / _slayer.ΔZ;
         if !PRESCRIBE_AIR
             _alayer.n_CH₄ += _n_mass * _slayer.TRACES.n_CH₄ / _s_dry;
             _alayer.n_CO₂ += _n_mass * _slayer.TRACES.n_CO₂ / _s_dry;
             _alayer.n_N₂  += _n_mass * _slayer.TRACES.n_N₂  / _s_dry;
             _alayer.n_O₂  += _n_mass * _slayer.TRACES.n_O₂  / _s_dry;
-            _alayer.e += _n_mass * CP_D_MOL(FT) * _slayer.t;
+            _alayer.Σe += _n_mass * CP_D_MOL(FT) * _slayer.t;
         end;
 
         if DEBUG
-            if any(isnan, (_slayer.TRACES.n_CH₄, _slayer.TRACES.n_CO₂, _slayer.TRACES.n_N₂, _slayer.TRACES.n_O₂, _slayer.e,
-                           _alayer.n_CH₄, _alayer.n_CO₂, _alayer.n_N₂, _alayer.n_O₂, _alayer.e))
-                @info "Debugging" _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂ _slayer.e;
-                @info "Debugging" _alayer.n_CH₄ _alayer.n_CO₂ _alayer.n_N₂ _alayer.n_O₂ _alayer.e;
+            if any(isnan, (_slayer.TRACES.n_CH₄, _slayer.TRACES.n_CO₂, _slayer.TRACES.n_N₂, _slayer.TRACES.n_O₂, _slayer.Σe,
+                           _alayer.n_CH₄, _alayer.n_CO₂, _alayer.n_N₂, _alayer.n_O₂, _alayer.Σe))
+                @info "Debugging" _slayer.TRACES.n_CH₄ _slayer.TRACES.n_CO₂ _slayer.TRACES.n_N₂ _slayer.TRACES.n_O₂ _slayer.Σe;
+                @info "Debugging" _alayer.n_CH₄ _alayer.n_CO₂ _alayer.n_N₂ _alayer.n_O₂ _alayer.Σe;
                 error("NaN detected in volume_balance! when moving air from top soil to atmosphere");
             end;
         end;
@@ -211,16 +211,16 @@ function surface_runoff!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         # compute top soil temperature and top soil energy out due to runoff
         _cp_gas = (LAYERS[1].TRACES.n_H₂O * CP_V_MOL(FT) + (LAYERS[1].TRACES.n_CH₄ + LAYERS[1].TRACES.n_CO₂ + LAYERS[1].TRACES.n_N₂ + LAYERS[1].TRACES.n_O₂) * CP_D_MOL(FT)) / LAYERS[1].ΔZ;
         _cp = LAYERS[1].CP * LAYERS[1].ρ + LAYERS[1].θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas;
-        _t  = LAYERS[1].e / _cp;
+        _t  = LAYERS[1].Σe / _cp;
         _runoff = (LAYERS[1].θ - LAYERS[1].VC.Θ_SAT) * LAYERS[1].ΔZ * ρ_H₂O(FT) / M_H₂O(FT);
 
         LAYERS[1].θ = LAYERS[1].VC.Θ_SAT;
-        LAYERS[1].e -= _runoff / LAYERS[1].ΔZ * CP_L_MOL(FT) * _t;
+        LAYERS[1].Σe -= _runoff / LAYERS[1].ΔZ * CP_L_MOL(FT) * _t;
         SOIL.runoff += _runoff;
 
         if DEBUG
-            if any(isnan, (_cp, _t, _runoff, LAYERS[1].θ, LAYERS[1].e, SOIL.runoff))
-                @info "Debugging" _cp _t _runoff LAYERS[1].θ LAYERS[1].e SOIL.runoff;
+            if any(isnan, (_cp, _t, _runoff, LAYERS[1].θ, LAYERS[1].Σe, SOIL.runoff))
+                @info "Debugging" _cp _t _runoff LAYERS[1].θ LAYERS[1].Σe SOIL.runoff;
                 error("NaN detected in surface_runoff!");
             end;
         end;

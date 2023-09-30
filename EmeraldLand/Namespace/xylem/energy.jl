@@ -21,7 +21,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct XylemEnergyState{FT}
     "Total energy `[J]`"
-    energy::FT = 0
+    Σe::FT = 0
 end;
 
 

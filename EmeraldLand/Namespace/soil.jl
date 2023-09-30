@@ -414,7 +414,7 @@ Base.@kwdef mutable struct SoilLayer{FT<:AbstractFloat}
 
     # Prognostic variables (used for ∂y∂t)
     "Total stored energy per volume `[J m⁻³]`"
-    e::FT = (CP * ρ + VC.Θ_SAT * CP_L(FT) * ρ_H₂O(FT)) * t
+    Σe::FT = (CP * ρ + VC.Θ_SAT * CP_L(FT) * ρ_H₂O(FT)) * t
     "Soil water content"
     θ::FT = VC.Θ_SAT
     "Marginal increase in energy `[W m⁻²]`"

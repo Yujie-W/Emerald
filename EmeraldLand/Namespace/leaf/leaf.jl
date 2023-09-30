@@ -50,7 +50,7 @@ initialize_energy_storage!(leaf::Leaf{FT}) where {FT} = (
     leaf.xylem.state.k_max = 0.04;
     leaf.capacitor.state.v_storage = leaf.capacitor.state.v_max * leaf.xylem.state.area;
     leaf.energy.auxil.cp = leaf.capacitor.state.v_storage * CP_L_MOL(FT) + leaf.bio.state.lma * 10 * leaf.xylem.state.area * leaf.xylem.state.cp;
-    leaf.energy.state.energy = leaf.energy.auxil.cp * leaf.energy.auxil.t;
+    leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
 
     return nothing
 );

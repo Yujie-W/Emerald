@@ -44,7 +44,7 @@ Stem(config::SPACConfiguration{FT}) where {FT} = (
 initialize_energy_storage!(stem::Stem{FT}) where {FT} = (
     stem.xylem.state.v_storage .= (stem.xylem.state.v_max * stem.xylem.state.area * stem.xylem.state.l) / length(stem.xylem.state.v_storage);
     stem.energy.auxil.cp = sum(stem.xylem.state.v_storage) * CP_L_MOL(FT) + (stem.xylem.state.cp * stem.xylem.state.area * stem.xylem.state. l);
-    stem.energy.state.energy = stem.energy.auxil.cp * stem.energy.auxil.t;
+    stem.energy.state.Σe = stem.energy.auxil.cp * stem.energy.auxil.t;
 
     return nothing
 );

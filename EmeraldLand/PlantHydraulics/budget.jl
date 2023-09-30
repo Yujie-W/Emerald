@@ -47,38 +47,38 @@ plant_energy!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) 
 
     # update the temperature for roots
     for _i in 1:DIM_ROOT
-        ROOTS[_i].energy.state.energy += ROOTS[_i].energy.auxil.∂e∂t * δt;
+        ROOTS[_i].energy.state.Σe += ROOTS[_i].energy.auxil.∂e∂t * δt;
         ROOTS[_i].energy.auxil.cp = sum(ROOTS[_i].xylem.state.v_storage) * CP_L_MOL(FT) + ROOTS[_i].xylem.state.cp * ROOTS[_i].xylem.state.area * ROOTS[_i].xylem.state.l;
-        ROOTS[_i].energy.auxil.t = ROOTS[_i].energy.state.energy / ROOTS[_i].energy.auxil.cp;
+        ROOTS[_i].energy.auxil.t = ROOTS[_i].energy.state.Σe / ROOTS[_i].energy.auxil.cp;
 
-        if isnan(ROOTS[_i].energy.auxil.t) || isnan(ROOTS[_i].energy.state.energy)
-            @info "Debugging" ROOTS[_i].energy.auxil.t ROOTS[_i].energy.state.energy sum(ROOTS[_i].xylem.state.v_storage);
+        if isnan(ROOTS[_i].energy.auxil.t) || isnan(ROOTS[_i].energy.state.Σe)
+            @info "Debugging" ROOTS[_i].energy.auxil.t ROOTS[_i].energy.state.Σe sum(ROOTS[_i].xylem.state.v_storage);
             error("NaN detected when updating temperature for root");
         end;
     end;
 
     # update the temperature for trunk
-    TRUNK.energy.state.energy += TRUNK.energy.auxil.∂e∂t * δt;
+    TRUNK.energy.state.Σe += TRUNK.energy.auxil.∂e∂t * δt;
     TRUNK.energy.auxil.cp = sum(TRUNK.xylem.state.v_storage) * CP_L_MOL(FT) + TRUNK.xylem.state.cp * TRUNK.xylem.state.area * TRUNK.xylem.state.l;
-    TRUNK.energy.auxil.t = TRUNK.energy.state.energy / TRUNK.energy.auxil.cp;
+    TRUNK.energy.auxil.t = TRUNK.energy.state.Σe / TRUNK.energy.auxil.cp;
 
-    if isnan(TRUNK.energy.auxil.t) || isnan(TRUNK.energy.state.energy)
-        @info "Debugging" TRUNK.energy.auxil.t TRUNK.energy.state.energy sum(TRUNK.xylem.state.v_storage);
+    if isnan(TRUNK.energy.auxil.t) || isnan(TRUNK.energy.state.Σe)
+        @info "Debugging" TRUNK.energy.auxil.t TRUNK.energy.state.Σe sum(TRUNK.xylem.state.v_storage);
         error("NaN detected when updating temperature for trunk");
     end;
 
     # update the temperature for branches and leaves
     for _i in 1:DIM_LAYER
-        BRANCHES[_i].energy.state.energy += BRANCHES[_i].energy.auxil.∂e∂t * δt;
+        BRANCHES[_i].energy.state.Σe += BRANCHES[_i].energy.auxil.∂e∂t * δt;
         BRANCHES[_i].energy.auxil.cp = sum(BRANCHES[_i].xylem.state.v_storage) * CP_L_MOL(FT) + BRANCHES[_i].xylem.state.cp * BRANCHES[_i].xylem.state.area * BRANCHES[_i].xylem.state.l;
-        BRANCHES[_i].energy.auxil.t = BRANCHES[_i].energy.state.energy / BRANCHES[_i].energy.auxil.cp;
-        LEAVES[_i].NS.energy.state.energy += LEAVES[_i].NS.energy.auxil.∂e∂t * δt;
+        BRANCHES[_i].energy.auxil.t = BRANCHES[_i].energy.state.Σe / BRANCHES[_i].energy.auxil.cp;
+        LEAVES[_i].NS.energy.state.Σe += LEAVES[_i].NS.energy.auxil.∂e∂t * δt;
         LEAVES[_i].NS.energy.auxil.cp = LEAVES[_i].NS.capacitor.state.v_storage * CP_L_MOL(FT) + LEAVES[_i].NS.xylem.state.cp * LEAVES[_i].NS.xylem.state.area * LEAVES[_i].NS.bio.state.lma * 10;
-        LEAVES[_i].NS.energy.auxil.t = LEAVES[_i].NS.energy.state.energy / LEAVES[_i].NS.energy.auxil.cp;
+        LEAVES[_i].NS.energy.auxil.t = LEAVES[_i].NS.energy.state.Σe / LEAVES[_i].NS.energy.auxil.cp;
 
-        if isnan(BRANCHES[_i].energy.auxil.t) || isnan(BRANCHES[_i].energy.state.energy) || isnan(LEAVES[_i].NS.energy.auxil.t) || isnan(LEAVES[_i].NS.energy.state.energy)
-            @info "Debugging" BRANCHES[_i].energy.auxil.t BRANCHES[_i].energy.state.energy;
-            @info "Debugging" LEAVES[_i].NS.energy.auxil.t LEAVES[_i].NS.energy.state.energy;
+        if isnan(BRANCHES[_i].energy.auxil.t) || isnan(BRANCHES[_i].energy.state.Σe) || isnan(LEAVES[_i].NS.energy.auxil.t) || isnan(LEAVES[_i].NS.energy.state.Σe)
+            @info "Debugging" BRANCHES[_i].energy.auxil.t BRANCHES[_i].energy.state.Σe;
+            @info "Debugging" LEAVES[_i].NS.energy.auxil.t LEAVES[_i].NS.energy.state.Σe;
             error("NaN detected when updating temperature for branch and leaf");
         end;
     end;

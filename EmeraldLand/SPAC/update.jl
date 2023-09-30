@@ -228,7 +228,7 @@ update!(config::SPACConfiguration{FT},
                 _slayer.TRACES.n_O₂  = AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt
             end;
             _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
-            _slayer.e = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
+            _slayer.Σe = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
         end;
     end;
 
@@ -243,7 +243,7 @@ update!(config::SPACConfiguration{FT},
             _slayer.TRACES.n_N₂  = AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
             _slayer.TRACES.n_O₂  = AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt
             _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
-            _slayer.e = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
+            _slayer.Σe = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
         end;
     end;
 
@@ -252,7 +252,7 @@ update!(config::SPACConfiguration{FT},
         for _leaf in LEAVES
             _leaf.NS.energy.auxil.t = t_leaf;
             _leaf.NS.energy.auxil.cp = _leaf.NS.capacitor.state.v_storage * CP_L_MOL(FT) + _leaf.NS.xylem.state.area * _leaf.NS.bio.state.lma * 10;
-            _leaf.NS.energy.state.energy = _leaf.NS.energy.auxil.cp * _leaf.NS.energy.auxil.t;
+            _leaf.NS.energy.state.Σe = _leaf.NS.energy.auxil.cp * _leaf.NS.energy.auxil.t;
         end;
     end;
 

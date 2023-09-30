@@ -128,12 +128,12 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt:
             _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
 
             _slayer.θ += _δθ_v;
-            _slayer.e += _δθ_v * ρ_H₂O(FT) * CP_V(FT) * _slayer.t; # this energy is transferred from/to air, so use CP_V
-            _slayer.e += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
+            _slayer.Σe += _δθ_v * ρ_H₂O(FT) * CP_V(FT) * _slayer.t; # this energy is transferred from/to air, so use CP_V
+            _slayer.Σe += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
 
             if DEBUG
-                if any(isnan, (_ps, _δθ_v, _slayer.θ, _slayer.e))
-                    @info "Debugging" _ps _δθ_v _slayer.θ _slayer.e;
+                if any(isnan, (_ps, _δθ_v, _slayer.θ, _slayer.Σe))
+                    @info "Debugging" _ps _δθ_v _slayer.θ _slayer.Σe;
                     error("NaN detected in soil_infiltration! when computing water budget from condensation and mass flow");
                 end;
             end;
@@ -141,11 +141,11 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt:
 
         # account for mass flow
         _slayer.θ += _slayer.∂θ∂t * δt;
-        _slayer.e += _slayer.∂e∂t * δt / _slayer.ΔZ;
+        _slayer.Σe += _slayer.∂e∂t * δt / _slayer.ΔZ;
 
         if DEBUG
-            if any(isnan, (_slayer.θ, _slayer.e))
-                @info "Debugging" _slayer.θ _slayer.e;
+            if any(isnan, (_slayer.θ, _slayer.Σe))
+                @info "Debugging" _slayer.θ _slayer.Σe;
                 error("NaN detected in soil_infiltration! when computing water budget from condensation and mass flow");
             end;
         end;

@@ -56,7 +56,7 @@ Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
 
     # Prognostic variables (used for ∂y∂t)
     "Total energy within the air layer `[J m⁻²]`"
-    e::FT = CP_D_MOL(FT) * (P_AIR - p_H₂O) * ΔZ / GAS_R(FT) + CP_V_MOL(FT) * p_H₂O * ΔZ / GAS_R(FT)
+    Σe::FT = CP_D_MOL(FT) * (P_AIR - p_H₂O) * ΔZ / GAS_R(FT) + CP_V_MOL(FT) * p_H₂O * ΔZ / GAS_R(FT)
     "Mole of CH₄ per surface area `[mol m⁻²]`"
     n_CH₄::FT = p_CH₄ * ΔZ / (GAS_R(FT) * t)
     "Mole of CO₂ per surface area `[mol m⁻²]`"
