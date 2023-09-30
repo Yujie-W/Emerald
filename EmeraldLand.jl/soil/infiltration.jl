@@ -142,10 +142,6 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt:
         # account for mass flow
         _slayer.θ += _slayer.∂θ∂t * δt;
         _slayer.e += _slayer.∂e∂t * δt / _slayer.ΔZ;
-        _slayer.∫∂w∂t_out -= _slayer.∂θ∂t * _slayer.ΔZ * δt *  ρ_H₂O(FT) / M_H₂O(FT);
-        if _i == 1
-            _slayer.∫∂w∂t_out += METEO.rain * δt;
-        end;
 
         if DEBUG
             if any(isnan, (_slayer.θ, _slayer.e))

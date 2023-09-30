@@ -15,6 +15,7 @@ flow_out(stem::Stem2{FT}) where {FT} = flow_out(stem.NS);
 # General
 #     2023-Sep-05: add function stem_flow_profiles!
 #     2023-Sep-28: update the branch and trunk flow profile at the same time
+#     2023-Sep-30: subtract the flow into TRUNK from the JUNCTION.auxil.∂w∂t
 #
 #######################################################################################################################################################################################################
 """
@@ -26,7 +27,7 @@ Set up stem flow profile, given
 
 """
 function stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
-    (; BRANCHES, LEAVES, TRUNK) = spac;
+    (; BRANCHES, JUNCTION, LEAVES, TRUNK) = spac;
 
     sum_f::FT = 0;
     for i in eachindex(BRANCHES)
@@ -35,6 +36,7 @@ function stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
     end;
 
     set_flow_profile!(TRUNK.NS.xylem, sum_f);
+    JUNCTION.auxil.∂w∂t -= flow_in(TRUNK);
 
     return nothing
 end;

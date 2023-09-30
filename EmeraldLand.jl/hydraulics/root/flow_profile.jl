@@ -60,6 +60,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-28: add function root_flow_profiles!
+#     2023-Sep-30: add root flow out into JUNCTION.auxil.∂w∂t
 #
 #######################################################################################################################################################################################################
 """
@@ -75,6 +76,7 @@ function root_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
 
     for i in eachindex(ROOTS)
         root_flow_profile!(ROOTS[i].NS, SOIL.LAYERS[ROOTS_INDEX[i]], JUNCTION.auxil.pressure);
+        JUNCTION.auxil.∂w∂t += flow_out(ROOTS[i]);
     end;
 
     return nothing

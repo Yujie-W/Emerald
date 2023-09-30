@@ -887,18 +887,12 @@ Base.@kwdef mutable struct Leaves2D{FT}
     ppar_shaded::FT = 200
     "Absorbed photosynthetically active radiation used for photosynthesis for sunlit leaves `[μmol m⁻² s⁻¹]`"
     ppar_sunlit::Matrix{FT} =
-    # "Current leaf temperature `[K]`"
-    # t::FT = T₂₅(FT)
 
     # Prognostic variables (used for ∂y∂t)
-    # "Total stored energy per area `[J m⁻²]`"
-    # e::FT = (CP * BIO.state.lma * 10 + HS.v_storage * CP_L_MOL(FT)) * t
     "Stomatal conductance to water vapor for shaded leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_shaded::FT = 0.01
     "Stomatal conductance to water vapor for sunlit leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_sunlit::Matrix{FT}
-    # "Marginal increase in energy `[W m⁻²]`"
-    # ∂e∂t::FT = 0
     "Marginal increase of conductance per time for shaded leaves `[mol m⁻² s⁻²]`"
     ∂g∂t_shaded::FT = 0
     "Marginal increase of conductance per timefor sunlit leaves `[mol m⁻² s⁻²]`"
@@ -933,8 +927,6 @@ Base.@kwdef mutable struct Leaves2D{FT}
     ϕ_p_shaded::FT = 0
     "Photochemical quantum yield for sunlit leaves `[-]`"
     ϕ_p_sunlit::Matrix{FT}
-    "Integrator for transpiration in"
-    ∫∂w∂t_in = 0
     "Integrator for transpiration out"
     ∫∂w∂t_out = 0
 

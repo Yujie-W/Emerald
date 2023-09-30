@@ -372,7 +372,6 @@ end
 #     2022-Jul-14: add field ∂G∂t (renamed to ∂e∂t), ΔZ
 #     2022-Jul-26: move field K_MAX to structure VanGenuchten and BrooksCorey
 #     2023-Jun-13: add field TRACES for SoilTraceGasses, and ∂n∂t for the gas diffusion
-#     2023-Aug-27: add field ∫∂w∂t_out
 #
 #######################################################################################################################################################################################################
 """
@@ -430,8 +429,6 @@ Base.@kwdef mutable struct SoilLayer{FT<:AbstractFloat}
     k::FT = 0
     "Matric potential `[MPa]`"
     ψ::FT = 0
-    "Integrator for soil water content change `[mol m⁻² s⁻¹]`"
-    ∫∂w∂t_out::FT = 0
 
     # Cache variables
     "Combined specific heat capacity of soil `[J K⁻¹ kg⁻¹]`"

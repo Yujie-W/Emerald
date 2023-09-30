@@ -33,8 +33,7 @@ leaf_water_budget!(leaf::Leaves2D{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::
     end;
 
     # update the integrators of the flow
-    leaf.∫∂w∂t_in += flow_in(leaf) * δt;
-    leaf.∫∂w∂t_out += (flow_out(leaf) + ns.capacitor.auxil.flow) * δt;
+    leaf.∫∂w∂t_out += flow_out(leaf) * δt;
 
     # update storage and the tissue pressure (p_storage)
     ns.capacitor.state.v_storage -= ns.capacitor.auxil.flow * δt / ns.xylem.state.area;
@@ -45,7 +44,6 @@ leaf_water_budget!(leaf::Leaves2D{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::
 );
 
 leaf_water_budget!(leaf::Leaves2D{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT} = (
-    leaf.∫∂w∂t_in += flow_in(leaf) * δt;
     leaf.∫∂w∂t_out += flow_out(leaf) * δt;
 
     return nothing

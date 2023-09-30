@@ -226,13 +226,7 @@ simulation!(config::SPACConfiguration{FT},
     _df_dir::FT = dfr.RAD_DIR;
 
     # initialize the integrators
-    for _slayer in spac.SOIL.LAYERS
-        _slayer.∫∂w∂t_out = 0;
-    end;
-    for _rlayer in [spac.ROOTS; spac.TRUNK; spac.BRANCHES; spac.LEAVES]
-        _rlayer.∫∂w∂t_in = 0;
-        _rlayer.∫∂w∂t_out = 0;
-    end;
+    clear_∫∂X∂t!(spac);
 
     # prescribe parameters
     prescribe!(config, spac, dfr);
@@ -245,16 +239,8 @@ simulation!(config::SPACConfiguration{FT},
     # test if the integrated water flow is conserved
     #=
     if DEBUG
-        _sum_soil_out = sum([_slayer.∫∂w∂t_out for _slayer in spac.SOIL.LAYERS]);
-        _sum_root_in = sum([_rlayer.∫∂w∂t_in for _rlayer in spac.ROOTS]) / spac.SOIL.AREA;
-        _sum_root_out = sum([_rlayer.∫∂w∂t_out for _rlayer in spac.ROOTS]) / spac.SOIL.AREA;
-        _sum_trnk_in = spac.TRUNK.∫∂w∂t_in / spac.SOIL.AREA;
-        _sum_trnk_out = spac.TRUNK.∫∂w∂t_out / spac.SOIL.AREA;
-        _sum_stem_in = sum([_slayer.∫∂w∂t_in for _slayer in spac.BRANCHES]) / spac.SOIL.AREA;
-        _sum_stem_out = sum([_slayer.∫∂w∂t_out for _slayer in spac.BRANCHES]) / spac.SOIL.AREA;
-        _sum_leaf_in = [_slayer.∫∂w∂t_in for _slayer in spac.LEAVES]' * spac.CANOPY.δlai;
         _sum_leaf_out = [_clayer.∫∂w∂t_out for _clayer in spac.LEAVES]' * spac.CANOPY.δlai;
-        @info "Debugging" _sum_soil_out _sum_root_in _sum_root_out _sum_trnk_in _sum_trnk_out _sum_stem_in _sum_stem_out _sum_leaf_in _sum_leaf_out spac.METEO.rain;
+        @info "Debugging" _sum_leaf_out spac.METEO.rain;
     end;
     =#
 

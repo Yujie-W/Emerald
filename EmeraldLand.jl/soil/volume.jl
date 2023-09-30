@@ -217,7 +217,6 @@ function surface_runoff!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         LAYERS[1].θ = LAYERS[1].VC.Θ_SAT;
         LAYERS[1].e -= _runoff / LAYERS[1].ΔZ * CP_L_MOL(FT) * _t;
         SOIL.runoff += _runoff;
-        LAYERS[1].∫∂w∂t_out -= _runoff;
 
         if DEBUG
             if any(isnan, (_cp, _t, _runoff, LAYERS[1].θ, LAYERS[1].e, SOIL.runoff))

@@ -23,7 +23,7 @@ Set the flow profile of the root or stem xylem, given
 """
 function xylem_water_budget! end
 
-xylem_water_budget!(organ::Union{Root2{FT}, Stem2{FT}}, xylem::XylemHydraulics{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT, δt::FT) where {FT} = (
+xylem_water_budget!(xylem::XylemHydraulics{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT, δt::FT) where {FT} = (
     f_vis = relative_viscosity(t);
 
     # make sure the buffer rate does not drain or overflow the capacictance
@@ -34,10 +34,6 @@ xylem_water_budget!(organ::Union{Root2{FT}, Stem2{FT}}, xylem::XylemHydraulics{F
             xylem.auxil.flow_buffer[i] = xylem.state.v_storage[i] / 2 / δt;
         end;
     end;
-
-    # update the integrators of the flow (do not use flow_out here as it may be higher than the flow_in + sum_flow_buffer)
-    organ.∫∂w∂t_in += flow_in(xylem) * δt;
-    organ.∫∂w∂t_out += (flow_in(xylem) + sum(xylem.auxil.flow_buffer)) * δt;
 
     # update storage and the tissue pressure (p_storage)
     v_max_i = xylem.state.v_max * xylem.state.area * xylem.state.l / N;
@@ -50,10 +46,4 @@ xylem_water_budget!(organ::Union{Root2{FT}, Stem2{FT}}, xylem::XylemHydraulics{F
     return nothing
 );
 
-xylem_water_budget!(organ::Union{Root2{FT}, Stem2{FT}}, xylem::XylemHydraulics{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT, δt::FT) where {FT} = (
-    # update the integrators of the flow
-    organ.∫∂w∂t_in += flow_in(xylem) * δt;
-    organ.∫∂w∂t_out += flow_out(xylem) * δt;
-
-    return nothing
-);
+xylem_water_budget!(xylem::XylemHydraulics{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT, δt::FT) where {FT} = nothing;

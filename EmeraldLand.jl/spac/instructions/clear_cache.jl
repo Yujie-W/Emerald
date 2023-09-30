@@ -31,7 +31,8 @@ function clear_∂X∂t!(spac::MultiLayerSPAC{FT}) where {FT}
     end;
 
     # clear the dXdt cache in junction
-    JUNCTION.NS.energy.auxil.∂e∂t = 0;
+    JUNCTION.auxil.∂e∂t = 0;
+    JUNCTION.auxil.∂w∂t = 0;
 
     # clear the dXdt cache in trunk
     TRUNK.NS.energy.auxil.∂e∂t = 0;
@@ -44,6 +45,32 @@ function clear_∂X∂t!(spac::MultiLayerSPAC{FT}) where {FT}
     # clear the dXdt cache in leaves
     for leaf in LEAVES
         leaf.NS.energy.auxil.∂e∂t = 0;
+    end;
+
+    return nothing
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-30: add clear_∫∂X∂t! function
+#
+#######################################################################################################################################################################################################
+"""
+
+    clear_∫∂X∂t!(spac::MultiLayerSPAC{FT}) where {FT}
+
+Clear the cache of ∫∂X∂t in each component of the SPAC, given
+- `spac` `MultiLayerSPAC` SPAC
+
+"""
+function clear_∫∂X∂t!(spac::MultiLayerSPAC{FT}) where {FT}
+    (; LEAVES) = spac;
+
+    for leaf in LEAVES
+        leaf.∫∂w∂t_out = 0;
     end;
 
     return nothing
