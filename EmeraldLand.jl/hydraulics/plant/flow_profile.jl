@@ -26,7 +26,7 @@ Set up the flow profile along the rhizosphere-root-stem-leaf continuum, given
 function plant_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     leaf_flow_profiles!(config, spac);
     stem_flow_profiles!(spac);
-    root_flow_profiles!(spac);
+    root_flow_profiles!(config, spac);
 
     return nothing
 end;

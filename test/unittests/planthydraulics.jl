@@ -83,14 +83,16 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         config = NS.SPACConfiguration{Float64}();
         root = NS.Root(config);
         soil = NS.SoilLayer{Float64}();
+        junc = NS.JunctionCapacitor{Float64}();
         flow = 1.0;
         PH.set_flow_profile!(root.xylem, flow);
-        PH.root_pressure_profile!(root, soil);
+        PH.root_pressure_profile!(soil, root, junc);
 
         p_target = root.xylem.auxil.pressure[end];
-        PH.root_flow_profile!(root, soil, p_target);
+        junc.auxil.pressure = p_target;
+        PH.root_flow_profile!(config, root, soil, junc);
         f_target = PH.flow_out(root);
-        PH.root_pressure_profile!(root, soil);
+        PH.root_pressure_profile!(soil, root, junc);
 
         @test PH.flow_out(root) ≈ f_target;
         @test root.xylem.auxil.pressure[end] ≈ p_target;

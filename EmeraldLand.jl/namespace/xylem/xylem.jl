@@ -57,6 +57,7 @@ XylemHydraulicsState(config::SPACConfiguration{FT}; area::Number = 1, l::Number 
 # Changes to this struct
 # General
 #     2023-Sep-22: define the struct to store the non-steady state auxilary variables used in xylem hydraulics
+#     2023-Sep-30: add field connected
 #
 #######################################################################################################################################################################################################
 """
@@ -71,6 +72,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemHydraulicsAuxilNSS{FT}
+    "Connected to the soil (for root only)"
+    connected::Bool = true
     "Critical flow rate `[mol s⁻¹ m⁻²]`"
     e_crit::FT = 0
     "Flow rates at each plane (N+1) `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"
@@ -99,6 +102,7 @@ XylemHydraulicsAuxilNSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraul
 # Changes to this struct
 # General
 #     2023-Sep-22: define the struct to store the steady state auxilary variables used in xylem hydraulics
+#     2023-Sep-30: add field connected
 #
 #######################################################################################################################################################################################################
 """
@@ -113,6 +117,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemHydraulicsAuxilSS{FT}
+    "Connected to the soil (for root only)"
+    connected::Bool = true
     "Critical flow rate `[mol s⁻¹ m⁻²]`"
     e_crit::FT = 0
     "Flow rates through the system `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"

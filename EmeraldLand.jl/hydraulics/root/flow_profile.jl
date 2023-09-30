@@ -18,35 +18,46 @@ flow_out(root::Root2{FT}) where {FT} = flow_out(root.NS);
 #######################################################################################################################################################################################################
 """
 
-    root_flow_profile!(root::Root{FT}, soil::SoilLayer{FT}, p_target::FT) where {FT}
+    root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, p_target::FT) where {FT}
 
 Use solver to determine the root flow rate, given
+- `config` `SPACConfiguration` type struct
 - `root` `Root` type struct
 - `soil` `SoilLayer` type struct
 - `p_target` Target pressure at the end of root xylem
 
 """
-function root_flow_profile!(root::Root{FT}, soil::SoilLayer{FT}, p_target::FT) where {FT}
-    # 1. set a max and min flow rate to use a bisection method to find the root flow rate
-    p = abs(soil.ψ - p_target - ρg_MPa(FT) * root.xylem.state.Δh);
-    k = 1 / (1 / (root.rhizosphere.state.k_max * root.xylem.state.area) + 1 / (root.xylem.state.k_max * root.xylem.state.area / root.xylem.state.l));
-    f_max = k * p;
-    f_min = -f_max;
+function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, junction::JunctionCapacitor{FT}) where {FT}
+    # if the root is not connected to the soil, set the flow to be the sum from the buffer system
+    # else, use a solver to find the root flow rate
+    if soil.ψ <= xylem_pressure(root.xylem.state.vc, config.KR_THRESHOLD)
+        root.xylem.auxil.connected = false;
 
-    # 2. set up a target function to find zero
-    @inline root_pressure_diff(x::FT) where {FT} = (
-        set_flow_profile!(root.xylem, x);
-        root_pressure_profile!(root, soil);
+        sol = sum(root.xylem.auxil.flow_buffer);
+    else
+        root.xylem.auxil.connected = true;
 
-        return root.xylem.auxil.pressure[end] - p_target
-    );
+        # 1. set a max and min flow rate to use a bisection method to find the root flow rate
+        p = abs(soil.ψ - junction.auxil.pressure - ρg_MPa(FT) * root.xylem.state.Δh);
+        k = 1 / (1 / (root.rhizosphere.state.k_max * root.xylem.state.area) + 1 / (root.xylem.state.k_max * root.xylem.state.area / root.xylem.state.l));
+        f_max = k * p;
+        f_min = -f_max;
 
-    # 3. define method and solve for the root flow rate
-    ms = NewtonBisectionMethod{FT}(x_min=f_min, x_max=f_max, x_ini=(f_min+f_max)/2);
-    stol = SolutionTolerance{FT}(eps(FT)*100, 50);
+        # 2. set up a target function to find zero
+        @inline root_pressure_diff(x::FT) where {FT} = (
+            set_flow_profile!(root.xylem, x);
+            root_pressure_profile!(soil, root, junction);
 
-    # 4. solve for the target flow rate
-    sol = find_zero(root_pressure_diff, ms, stol);
+            return root.xylem.auxil.pressure[end] - junction.auxil.pressure
+        );
+
+        # 3. define method and solve for the root flow rate
+        ms = NewtonBisectionMethod{FT}(x_min=f_min, x_max=f_max, x_ini=(f_min+f_max)/2);
+        stol = SolutionTolerance{FT}(eps(FT)*100, 50);
+
+        # 4. solve for the target flow rate
+        sol = find_zero(root_pressure_diff, ms, stol);
+    end;
 
     # 5. set up the flow rate using the solution from the solver
     set_flow_profile!(root.xylem, sol);
@@ -65,17 +76,18 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    root_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    root_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Set up root flow profile for each root, given
+- `config` `SPACConfiguration` type struct
 - `spac` `MultiLayerSPAC` type struct
 
 """
-function root_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+function root_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL) = spac;
 
     for i in eachindex(ROOTS)
-        root_flow_profile!(ROOTS[i].NS, SOIL.LAYERS[ROOTS_INDEX[i]], JUNCTION.auxil.pressure);
+        root_flow_profile!(config, ROOTS[i].NS, SOIL.LAYERS[ROOTS_INDEX[i]], JUNCTION);
         JUNCTION.auxil.∂w∂t += flow_out(ROOTS[i]);
     end;
 
