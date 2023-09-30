@@ -11,12 +11,12 @@ include("EarthGeometry.jl");
 include("Optics.jl");
 include("PhysicalChemistry.jl");
 
-include("LeafOptics.jl");
-include("CanopyOptics.jl");
-include("Photosynthesis.jl");
-include("SoilHydraulics.jl");
-include("hydraulics/PlantHydraulics.jl");
-include("StomatalModels.jl");
+include("optics/LeafOptics.jl");
+include("radiation/CanopyOptics.jl");
+include("photosynthesis/Photosynthesis.jl");
+include("soil/SoilHydraulics.jl");
+include("PlantHydraulics/PlantHydraulics.jl");
+include("stomata/StomatalModels.jl");
 include("spac/SPAC.jl");
 
 

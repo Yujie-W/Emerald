@@ -13,18 +13,18 @@ export EmeraldUtility
 
 
 # include the submodules
-include("../EmeraldIO.jl/EmeraldIO.jl");
-include("../EmeraldTest.jl/EmeraldTest.jl");
-include("../EmeraldUtility.jl/EmeraldUtility.jl");
+include("../EmeraldIO/EmeraldIO.jl");
+include("../EmeraldTest/EmeraldTest.jl");
+include("../EmeraldUtility/EmeraldUtility.jl");
 
-include("../EmeraldMath.jl/EmeraldMath.jl");
+include("../EmeraldMath/EmeraldMath.jl");
 
-include("../EmeraldLand.jl/EmeraldLand.jl");
+include("../EmeraldLand/EmeraldLand.jl");
 
-include("../EmeraldData.jl/EmeraldData.jl");
+include("../EmeraldData/EmeraldData.jl");
 
-include("../EmeraldEarth.jl/EmeraldEarth.jl");
-include("../EmeraldFrontier.jl/EmeraldFrontier.jl");
+include("../EmeraldEarth/EmeraldEarth.jl");
+include("../EmeraldFrontier/EmeraldFrontier.jl");
 
 
 end # module

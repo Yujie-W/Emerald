@@ -11,14 +11,14 @@ using ..Namespace: AirLayer, Leaves2D
 using ..Namespace: MultiLayerSPAC
 
 
-include("photosynthesis/colimit.jl");
-include("photosynthesis/etr.jl");
-include("photosynthesis/fluorescence.jl");
-include("photosynthesis/light_limited.jl");
-include("photosynthesis/model.jl");
-include("photosynthesis/product_limited.jl");
-include("photosynthesis/rubisco_limited.jl");
-include("photosynthesis/temperature.jl");
+include("colimit.jl");
+include("etr.jl");
+include("fluorescence.jl");
+include("light_limited.jl");
+include("model.jl");
+include("product_limited.jl");
+include("rubisco_limited.jl");
+include("temperature.jl");
 
 
 end # module

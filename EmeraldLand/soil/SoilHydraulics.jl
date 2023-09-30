@@ -9,13 +9,13 @@ using ..PhysicalChemistry: diffusive_coefficient, latent_heat_vapor, relative_su
 import ..Namespace: BrooksCorey
 
 
-include("soil/budget.jl");
-include("soil/constructor.jl");
-include("soil/diffusion.jl");
-include("soil/infiltration.jl");
-include("soil/sink.jl");
-include("soil/volume.jl");
-include("soil/vulnerability.jl");
+include("budget.jl");
+include("constructor.jl");
+include("diffusion.jl");
+include("infiltration.jl");
+include("sink.jl");
+include("volume.jl");
+include("vulnerability.jl");
 
 
 end # module
