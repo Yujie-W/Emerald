@@ -38,7 +38,7 @@ function leaf_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
         # if flow in is positive, then energy flow is positive for leaf
         f_i = flow_in(leaf);
         if f_i >= 0
-            leaf.NS.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * stem.NS.energy.auxil.t;
+            leaf.NS.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * stem.energy.auxil.t;
         else
             leaf.NS.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * leaf.NS.energy.auxil.t;
         end;

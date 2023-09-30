@@ -42,9 +42,9 @@ Set up stem pressure profile for trunk and branches, given
 function stem_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
     (; BRANCHES, JUNCTION, TRUNK) = spac;
 
-    stem_pressure_profile!(TRUNK.NS, JUNCTION.auxil.pressure);
+    stem_pressure_profile!(TRUNK, JUNCTION.auxil.pressure);
     for stem in BRANCHES
-        stem_pressure_profile!(stem.NS, TRUNK.NS.xylem.auxil.pressure[end]);
+        stem_pressure_profile!(stem, TRUNK.xylem.auxil.pressure[end]);
     end;
 
     return nothing

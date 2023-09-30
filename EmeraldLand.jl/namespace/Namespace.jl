@@ -76,8 +76,6 @@ include("xylem.jl");
 
 include("canopy.jl");
 include("leaf.jl");
-include("root.jl");
-include("stem.jl");
 
 include("spac.jl");
 

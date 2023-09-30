@@ -84,7 +84,7 @@ mutable struct MultiLayerSPAC{FT}
     "Sun sensor geometry"
     ANGLES::SunSensorGeometry{FT}
     "Branch hydraulic system"
-    BRANCHES::Vector{Stem2{FT}}
+    BRANCHES::Vector{Stem{FT}}
     "Canopy used for radiation calculations"
     CANOPY::HyperspectralMLCanopy{FT}
     "Leaf per layer"
@@ -94,11 +94,11 @@ mutable struct MultiLayerSPAC{FT}
     "Meteorology information"
     METEO::Meteorology{FT}
     "Root hydraulic system"
-    ROOTS::Vector{Root2{FT}}
+    ROOTS::Vector{Root{FT}}
     "Soil component"
     SOIL::Soil{FT}
     "Trunk hydraulic system"
-    TRUNK::Stem2{FT}
+    TRUNK::Stem{FT}
     "Root-trunk junction capacitor used for roots flow calculations"
     JUNCTION::JunctionCapacitor{FT}
 
@@ -138,49 +138,51 @@ MultiLayerSPAC(
             Z = (air_bounds[i] + air_bounds[i+1]) / 2,
             ΔZ = (air_bounds[i+1] - air_bounds[i])
         ) for i in 1:config.DIM_AIR];
-    branches = Stem2{FT}[Stem2(config) for _ in 1:config.DIM_LAYER];
+    branches = Stem{FT}[Stem(config) for _ in 1:config.DIM_LAYER];
     for i in eachindex(branches)
-        branches[i].NS.xylem.state.area = basal_area / config.DIM_LAYER;
-        branches[i].NS.xylem.state.Δh = (min(zs[3], air_bounds[ind_layer[i]+1]) - zs[2]);
+        branches[i].xylem.state.area = basal_area / config.DIM_LAYER;
+        branches[i].xylem.state.Δh = (min(zs[3], air_bounds[ind_layer[i]+1]) - zs[2]);
     end;
-    roots = Root2{FT}[Root2(config) for _ in 1:config.DIM_ROOT];
+    roots = Root{FT}[Root(config) for _ in 1:config.DIM_ROOT];
     for i in eachindex(roots)
-        roots[i].NS.xylem.state.area = basal_area / config.DIM_ROOT;
-        roots[i].NS.xylem.state.Δh = 0 - max(zs[1], soil_bounds[ind_root[i]+1]);
+        roots[i].xylem.state.area = basal_area / config.DIM_ROOT;
+        roots[i].xylem.state.Δh = 0 - max(zs[1], soil_bounds[ind_root[i]+1]);
     end;
+    trunk = Stem(config);
+    trunk.xylem.state.area = basal_area;
+    trunk.xylem.state.Δh = zs[2] - zs[1];
 
     # initialize the energy and water storage
     for i in eachindex(roots)
-        initialize_energy_storage!(roots[i].NS);
+        initialize_energy_storage!(roots[i]);
     end;
     for i in eachindex(branches)
-        initialize_energy_storage!(branches[i].NS);
+        initialize_energy_storage!(branches[i]);
     end;
 
     return MultiLayerSPAC{FT}(
-                ind_layer,                                                                  # LEAVES_INDEX
-                ind_root,                                                                   # ROOTS_INDEX
-                zs,                                                                         # Z
-                air_bounds,                                                                 # Z_AIR
-                elevation,                                                                  # ELEVATION
-                latitude,                                                                   # LATITUDE
-                longitude,                                                                  # LONGITUDE
-                air_layers,                                                                 # AIR
-                SunSensorGeometry{FT}(),                                                    # ANGLES
-                branches,                                                                   # BRANCHES
-                HyperspectralMLCanopy(config),                                              # CANOPY
-                Leaves2D{FT}[Leaves2D(config) for _i in 1:config.DIM_LAYER],                # LEAVES
-                SPACMemory{FT}(),                                                           # MEMORY
-                Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),       # METEO
-                roots,                                                                      # ROOTS
-                Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),         # SOIL
-                #Stem2{FT}(HS = StemHydraulics{FT}(AREA = basal_area, ΔH = zs[2] - zs[1])), # TRUNK
-                Stem2(config),                                                              # TRUNK (TODO: fix the k and h set up)
-                JunctionCapacitor{FT}(),                                                    # JUNCTION
-                zeros(FT, config.DIM_ROOT),                                                 # _fs
-                zeros(FT, config.DIM_ROOT),                                                 # _ks
-                zeros(FT, config.DIM_ROOT),                                                 # _ps
-                true,                                                                       # _root_connection
+                ind_layer,                                                              # LEAVES_INDEX
+                ind_root,                                                               # ROOTS_INDEX
+                zs,                                                                     # Z
+                air_bounds,                                                             # Z_AIR
+                elevation,                                                              # ELEVATION
+                latitude,                                                               # LATITUDE
+                longitude,                                                              # LONGITUDE
+                air_layers,                                                             # AIR
+                SunSensorGeometry{FT}(),                                                # ANGLES
+                branches,                                                               # BRANCHES
+                HyperspectralMLCanopy(config),                                          # CANOPY
+                Leaves2D{FT}[Leaves2D(config) for _i in 1:config.DIM_LAYER],            # LEAVES
+                SPACMemory{FT}(),                                                       # MEMORY
+                Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),   # METEO
+                roots,                                                                  # ROOTS
+                Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),     # SOIL
+                trunk,                                                                  # TRUNK
+                JunctionCapacitor{FT}(),                                                # JUNCTION
+                zeros(FT, config.DIM_ROOT),                                             # _fs
+                zeros(FT, config.DIM_ROOT),                                             # _ks
+                zeros(FT, config.DIM_ROOT),                                             # _ps
+                true,                                                                   # _root_connection
     )
 );
 

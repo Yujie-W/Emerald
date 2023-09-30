@@ -27,7 +27,7 @@ function clear_∂X∂t!(spac::MultiLayerSPAC{FT}) where {FT}
 
     # clear the dXdt cache in roots
     for root in ROOTS
-        root.NS.energy.auxil.∂e∂t = 0;
+        root.energy.auxil.∂e∂t = 0;
     end;
 
     # clear the dXdt cache in junction
@@ -35,11 +35,11 @@ function clear_∂X∂t!(spac::MultiLayerSPAC{FT}) where {FT}
     JUNCTION.auxil.∂w∂t = 0;
 
     # clear the dXdt cache in trunk
-    TRUNK.NS.energy.auxil.∂e∂t = 0;
+    TRUNK.energy.auxil.∂e∂t = 0;
 
     # clear the dXdt cache in branches
     for branch in BRANCHES
-        branch.NS.energy.auxil.∂e∂t = 0;
+        branch.energy.auxil.∂e∂t = 0;
     end;
 
     # clear the dXdt cache in leaves

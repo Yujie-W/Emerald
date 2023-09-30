@@ -2,8 +2,6 @@
 
 heat_capacitance(root::Root{FT}) where {FT} = heat_capacitance(root.xylem);
 
-heat_capacitance(root::Root2{FT}) where {FT} = heat_capacitance(root.NS.xylem);
-
 
 #######################################################################################################################################################################################################
 #
@@ -34,17 +32,17 @@ function root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
         # if the flow into the root is positive, then the energy flow is positive
         f_i = flow_in(root);
         if f_i >= 0
-            root.NS.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.t;
+            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.t;
         else
-            root.NS.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.NS.energy.auxil.t;
+            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.energy.auxil.t;
         end;
 
         # if the flow into the junction is positive, then the energy flow is negative
         f_o = flow_out(root);
         if f_o >= 0
-            root.NS.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * root.NS.energy.auxil.t;
+            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * root.energy.auxil.t;
         else
-            root.NS.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * JUNCTION.auxil.t;
+            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * JUNCTION.auxil.t;
         end;
     end;
 

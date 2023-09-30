@@ -49,7 +49,7 @@ function leaf_pressure_profiles!(config::SPACConfiguration{FT}, spac::MultiLayer
     (; BRANCHES, LEAVES) = spac;
 
     for i in eachindex(BRANCHES)
-        leaf_pressure_profile!(config, LEAVES[i].NS, BRANCHES[i].NS.xylem.auxil.pressure[end]);
+        leaf_pressure_profile!(config, LEAVES[i].NS, BRANCHES[i].xylem.auxil.pressure[end]);
     end;
 
     return nothing

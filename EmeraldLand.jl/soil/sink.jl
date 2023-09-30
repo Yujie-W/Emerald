@@ -15,7 +15,7 @@ Return root water update, given
 """
 function root_sink end
 
-root_sink(root::Root2{FT}) where {FT} = root_sink(root.NS.xylem.auxil);
+root_sink(root::Root{FT}) where {FT} = root_sink(root.xylem.auxil);
 
 root_sink(x_aux::XylemHydraulicsAuxilNSS{FT}) where {FT} = x_aux.flow[1];
 

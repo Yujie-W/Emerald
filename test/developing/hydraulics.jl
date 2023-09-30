@@ -17,8 +17,8 @@ for i in 1:1000
     PH.plant_water_budget!(spac, 2.0);
     PH.plant_flow_profile!(config, spac);
     PH.plant_pressure_profile!(spac);
-    f_in = sum([PH.flow_out(root.NS.xylem) for root in spac.ROOTS]);
-    # @info "Flow out and into the junction" PH.flow_in(spac.TRUNK.NS.xylem) f_in spac.JUNCTION.auxil.pressure spac.JUNCTION.state.v_storage;
+    f_in = sum([PH.flow_out(root.xylem) for root in spac.ROOTS]);
+    # @info "Flow out and into the junction" PH.flow_in(spac.TRUNK.xylem) f_in spac.JUNCTION.auxil.pressure spac.JUNCTION.state.v_storage;
     @show spac.JUNCTION.state.v_storage;
 end;
 
@@ -38,7 +38,7 @@ for i in 1:1000
     PH.plant_water_budget!(spac, 2.0);
     PH.plant_flow_profile!(config, spac);
     PH.plant_pressure_profile!(spac);
-    f_in = sum([PH.flow_out(root.NS.xylem) for root in spac.ROOTS]);
-    # @info "Flow out and into the junction" PH.flow_in(spac.TRUNK.NS.xylem) f_in spac.JUNCTION.auxil.pressure spac.JUNCTION.state.v_storage;
+    f_in = sum([PH.flow_out(root.xylem) for root in spac.ROOTS]);
+    # @info "Flow out and into the junction" PH.flow_in(spac.TRUNK.xylem) f_in spac.JUNCTION.auxil.pressure spac.JUNCTION.state.v_storage;
     @show spac.JUNCTION.state.v_storage;
 end;

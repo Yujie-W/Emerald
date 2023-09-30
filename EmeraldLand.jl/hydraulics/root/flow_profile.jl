@@ -2,11 +2,7 @@
 
 flow_in(root::Root{FT}) where {FT} = flow_in(root.xylem);
 
-flow_in(root::Root2{FT}) where {FT} = flow_in(root.NS);
-
 flow_out(root::Root{FT}) where {FT} = flow_out(root.xylem);
-
-flow_out(root::Root2{FT}) where {FT} = flow_out(root.NS);
 
 
 #######################################################################################################################################################################################################
@@ -87,7 +83,7 @@ function root_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
     (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL) = spac;
 
     for i in eachindex(ROOTS)
-        root_flow_profile!(config, ROOTS[i].NS, SOIL.LAYERS[ROOTS_INDEX[i]], JUNCTION);
+        root_flow_profile!(config, ROOTS[i], SOIL.LAYERS[ROOTS_INDEX[i]], JUNCTION);
         JUNCTION.auxil.∂w∂t += flow_out(ROOTS[i]);
     end;
 

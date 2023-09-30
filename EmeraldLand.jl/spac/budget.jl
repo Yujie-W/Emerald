@@ -72,7 +72,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     # make sure trunk temperatures do not change more than 1 K per time step
     _δt_4 = _δt_3;
     if ENABLE_ENERGY_BUDGET
-        _∂T∂t = TRUNK.NS.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.NS.xylem.state.v_storage));
+        _∂T∂t = TRUNK.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.xylem.state.v_storage));
         _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
 
         if DEBUG
@@ -100,7 +100,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     _δt_6 = _δt_5;
     if ENABLE_ENERGY_BUDGET
         for _branch in BRANCHES
-            _∂T∂t = _branch.NS.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(_branch.NS.xylem.state.v_storage));
+            _∂T∂t = _branch.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(_branch.xylem.state.v_storage));
             _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
 
             if DEBUG

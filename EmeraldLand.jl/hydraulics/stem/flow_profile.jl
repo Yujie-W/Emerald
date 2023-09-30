@@ -2,11 +2,7 @@
 
 flow_in(stem::Stem{FT}) where {FT} = flow_in(stem.xylem);
 
-flow_in(stem::Stem2{FT}) where {FT} = flow_in(stem.NS);
-
 flow_out(stem::Stem{FT}) where {FT} = flow_out(stem.xylem);
-
-flow_out(stem::Stem2{FT}) where {FT} = flow_out(stem.NS);
 
 
 #######################################################################################################################################################################################################
@@ -31,11 +27,11 @@ function stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
 
     sum_f::FT = 0;
     for i in eachindex(BRANCHES)
-        set_flow_profile!(BRANCHES[i].NS.xylem, flow_in(LEAVES[i]));
+        set_flow_profile!(BRANCHES[i].xylem, flow_in(LEAVES[i]));
         sum_f += flow_out(BRANCHES[i]);
     end;
 
-    set_flow_profile!(TRUNK.NS.xylem, sum_f);
+    set_flow_profile!(TRUNK.xylem, sum_f);
     JUNCTION.auxil.∂w∂t -= flow_in(TRUNK);
 
     return nothing
