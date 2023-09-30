@@ -15,7 +15,7 @@ using ..EmeraldLand.CanopyOptics: MODIS_BLUE, MODIS_EVI, MODIS_NDVI, MODIS_NIR, 
 using ..EmeraldLand.Constant: M_H₂O, ρ_H₂O
 using ..EmeraldLand.EarthGeometry: solar_zenith_angle
 using ..EmeraldLand.Namespace: MultiLayerSPAC, SPACConfiguration, Soil
-using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PPAR, T_VEG, ΦDFNP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF, clear_∫∂X∂t!, initialize!, soil_plant_air_continuum!, update!
+using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PPAR, T_VEG, ΦDFNP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF, initialize!, soil_plant_air_continuum!, update!, update_step_auxils!
 using ..EmeraldMath.Data: interpolate_data, interpolate_data!
 using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 using ..EmeraldUtility.Time: month_days

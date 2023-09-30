@@ -251,7 +251,7 @@ update!(config::SPACConfiguration{FT},
     if !isnothing(t_leaf)
         for _leaf in LEAVES
             _leaf.NS.energy.auxil.t = t_leaf;
-            _leaf.NS.energy.auxil.cp = _leaf.NS.capacitor.state.v_storage * CP_L_MOL(FT) + _leaf.NS.xylem.state.area * _leaf.NS.bio.state.lma * 10;
+            _leaf.NS.energy.auxil.cp = heat_capacitance(_leaf);
             _leaf.NS.energy.state.Σe = _leaf.NS.energy.auxil.cp * _leaf.NS.energy.auxil.t;
         end;
     end;

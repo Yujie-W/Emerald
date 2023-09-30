@@ -226,7 +226,7 @@ simulation!(config::SPACConfiguration{FT},
     _df_dir::FT = dfr.RAD_DIR;
 
     # initialize the integrators
-    clear_∫∂X∂t!(spac);
+    update_step_auxils!(spac);
 
     # prescribe parameters
     prescribe!(config, spac, dfr);

@@ -4,7 +4,7 @@ using Statistics: mean
 
 using ..Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, P_ATM, T₀, ρ_H₂O
 using ..PhysicalChemistry: latent_heat_vapor, saturation_vapor_pressure
-using ..Namespace: JunctionCapacitor, Leaves2D, Root, Stem
+using ..Namespace: JunctionCapacitor, Leaves2D, Root, SoilLayer, Stem
 using ..Namespace: AirLayer, GCO₂Mode, MultiLayerSPAC, SPACConfiguration, MultiLayerSPACState
 using ..Namespace: initialize_energy_storage!
 using ..LeafOptics: leaf_spectra!
@@ -16,7 +16,6 @@ using ..PlantHydraulics: flow_out, heat_capacitance, plant_energy!, plant_energy
 using ..StomatalModels: stomatal_conductance!, stomatal_conductance_profile!
 
 
-include("instructions/clear_cache.jl");
 include("instructions/update_auxil.jl");
 
 include("budget.jl");
