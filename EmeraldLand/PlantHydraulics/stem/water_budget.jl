@@ -17,10 +17,10 @@ Set the flow profile of each stem (trunk and branches), given
 
 """
 function stem_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
-    xylem_water_budget!(spac.TRUNK.xylem, spac.TRUNK.xylem.auxil, spac.TRUNK.energy.auxil.t, δt);
+    xylem_water_budget!(spac.TRUNK.xylem, spac.TRUNK.xylem.auxil, δt);
 
     for stem in spac.BRANCHES
-        xylem_water_budget!(stem.xylem, stem.xylem.auxil, stem.energy.auxil.t, δt);
+        xylem_water_budget!(stem.xylem, stem.xylem.auxil, δt);
     end;
 
     return nothing

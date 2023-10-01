@@ -7,6 +7,7 @@
 # Changes to this function
 # General
 #     2023-Sep-30: add update_substep_auxils! function
+#     2023-Sep-30: add buffer pressure and flow calculations
 #
 #######################################################################################################################################################################################################
 """
@@ -58,16 +59,38 @@ update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
 );
 
 update_substep_auxils!(root::Root{FT}) where {FT} = (
+    # update root cp and temperature
     root.energy.auxil.cp = heat_capacitance(root);
     root.energy.auxil.t = root.energy.state.Σe / root.energy.auxil.cp;
+
+    # update the root buffer pressure and flow
+    x_aux = root.xylem.auxil;
+    x_sta = root.xylem.state;
+    if x_aux isa XylemHydraulicsAuxilNSS
+        N = length(x_sta.v_storage);
+        f_vis = relative_viscosity(root.energy.auxil.t);
+        v_max_i = x_sta.v_max * x_sta.area * x_sta.l / N;
+        for i in 1:N
+            x_aux.p_storage[i] = capacitance_pressure(x_sta.pv, x_sta.v_storage[i] / v_max_i, root.energy.auxil.t);
+            x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_sta.pv.k_refill / f_vis * x_sta.v_storage[i];
+        end;
+    end;
+
+    # clear the partial derivatives
     root.energy.auxil.∂e∂t = 0;
 
     return nothing
 );
 
 update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
+    # update junction cp and temperature
     junc.auxil.cp = heat_capacitance(junc);
     junc.auxil.t = junc.state.Σe / junc.energy.auxil.cp;
+
+    # update the junction buffer pressure
+    junc.auxil.pressure = capacitance_pressure(junc.state.pv, junc.state.v_storage / junc.state.v_max, junc.auxil.t);
+
+    # clear the partial derivatives
     junc.auxil.∂e∂t = 0;
     junc.auxil.∂w∂t = 0;
 
@@ -75,16 +98,48 @@ update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
 );
 
 update_substep_auxils!(stem::Stem{FT}) where {FT} = (
+    # update stem cp and temperature
     stem.energy.auxil.cp = heat_capacitance(stem);
     stem.energy.auxil.t = stem.energy.state.Σe / stem.energy.auxil.cp;
+
+    # update the stem buffer pressure and flow
+    x_aux = stem.xylem.auxil;
+    x_sta = stem.xylem.state;
+    if x_aux isa XylemHydraulicsAuxilNSS
+        N = length(x_sta.v_storage);
+        f_vis = relative_viscosity(stem.energy.auxil.t);
+        v_max_i = x_sta.v_max * x_sta.area * x_sta.l / N;
+        for i in 1:N
+            x_aux.p_storage[i] = capacitance_pressure(x_sta.pv, x_sta.v_storage[i] / v_max_i, stem.energy.auxil.t);
+            x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_sta.pv.k_refill / f_vis * x_sta.v_storage[i];
+        end;
+    end;
+
+    # clear the partial derivatives
     stem.energy.auxil.∂e∂t = 0;
 
     return nothing
 );
 
 update_substep_auxils!(leaf::Leaves2D{FT}) where {FT} = (
+    # update leaf cp and temperature
     leaf.NS.energy.auxil.cp = heat_capacitance(leaf);
     leaf.NS.energy.auxil.t = leaf.NS.energy.state.Σe / leaf.NS.energy.auxil.cp;
+
+    # update the leaf buffer pressure and flow
+    x_aux = leaf.NS.xylem.auxil;
+    c_aux = leaf.NS.capacitor.auxil;
+    if x_aux isa XylemHydraulicsAuxilNSS
+        x_sta = leaf.NS.xylem.state;
+        c_sta = leaf.NS.capacitor.state;
+        f_vis = relative_viscosity(leaf.NS.energy.auxil.t);
+        c_aux.p = capacitance_pressure(c_sta.pv, c_sta.v_storage / c_sta.v_max, leaf.NS.energy.auxil.t);
+        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_sta.pv.k_refill / f_vis * c_sta.v_storage * x_sta.area;
+    else
+        c_aux.flow = 0;
+    end;
+
+    # clear the partial derivatives
     leaf.NS.energy.auxil.∂e∂t = 0;
 
     return nothing

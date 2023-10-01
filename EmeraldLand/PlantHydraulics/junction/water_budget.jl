@@ -26,7 +26,6 @@ function junction_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     sum_q -= flow_in(TRUNK) * δt;
 
     JUNCTION.state.v_storage += sum_q;
-    JUNCTION.auxil.pressure = capacitance_pressure(JUNCTION.state.pv, JUNCTION.state.v_storage / JUNCTION.state.v_max, JUNCTION.auxil.t);
 
     return nothing
 end;
