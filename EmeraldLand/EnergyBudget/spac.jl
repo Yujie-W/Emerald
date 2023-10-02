@@ -9,13 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    plant_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
+    spac_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
 
 Calculate the energy flows of the plant, given
 - `spac` `MultiLayerSPAC` type SPAC
 
 """
-function plant_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
+function spac_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
     root_energy_flows!(spac);
     junction_energy_flows!(spac);
     stem_energy_flows!(spac);

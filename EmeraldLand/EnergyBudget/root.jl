@@ -1,8 +1,5 @@
 # This file contains function to calculate energy budgets of the root
 
-heat_capacitance(root::Root{FT}) where {FT} = heat_capacitance(root.xylem);
-
-
 #######################################################################################################################################################################################################
 #
 # Changes to the function

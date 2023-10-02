@@ -216,7 +216,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
             leaf_photosynthesis!(spac, GCO₂Mode());
             soil_budget!(config, spac);
             stomatal_conductance!(spac);
-            plant_energy_flow!(spac);
+            spac_energy_flow!(spac);
         else
             break;
         end;

@@ -77,7 +77,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     stomatal_conductance!(spac);
 
     # 7. run plant energy budget
-    plant_energy_flow!(spac);
+    spac_energy_flow!(spac);
 
     # 8. update the prognostic variables
     time_stepper!(config, spac, δt);

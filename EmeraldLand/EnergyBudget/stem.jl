@@ -1,8 +1,5 @@
 # This file contains function to calculate energy budgets of the stem
 
-heat_capacitance(root::Stem{FT}) where {FT} = heat_capacitance(root.xylem);
-
-
 #######################################################################################################################################################################################################
 #
 # Changes to the function
