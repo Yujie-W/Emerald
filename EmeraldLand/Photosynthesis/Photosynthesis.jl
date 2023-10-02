@@ -1,8 +1,8 @@
 module Photosynthesis
 
 using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
+using ..EmeraldPhysics.Constant: F_O₂, GAS_R
 
-using ..Constant: F_O₂, GAS_R
 using ..Namespace: CytochromeReactionCenter, VJPReactionCenter, VanDerTolFluorescenceModel
 using ..Namespace: Arrhenius, ArrheniusPeak, C3VJPModel, C3CytochromeModel, C4VJPModel, GCO₂Mode, PCO₂Mode, Q10, Q10Peak
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit

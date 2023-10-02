@@ -2,10 +2,11 @@ module LeafOptics
 
 using SpecialFunctions: expint
 
-using ..Constant: M_H₂O, ρ_H₂O
+using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
+using ..EmeraldPhysics.Optics: energy, energy!, photon, photon!
+
 using ..Namespace: HyperspectralRadiation, ReferenceSpectra
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
-using ..Optics: energy, energy!, photon, photon!
 
 
 using ..Namespace: HyperLeafBio, HyperLeafBioState

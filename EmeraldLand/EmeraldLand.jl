@@ -2,13 +2,12 @@ module EmeraldLand
 
 using ..EmeraldIO
 using ..EmeraldMath
+using ..EmeraldPhysics
 
 
-include("Constant.jl");
 include("Namespace/Namespace.jl");
 
 include("EarthGeometry.jl");
-include("Optics.jl");
 include("PhysicalChemistry.jl");
 
 include("LeafOptics/LeafOptics.jl");

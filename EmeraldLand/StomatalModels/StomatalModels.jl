@@ -1,6 +1,7 @@
 module StomatalModels
 
-using ..Constant: CP_D_MOL, K_STEFAN, M_H₂O
+using ..EmeraldPhysics.Constant: CP_D_MOL, K_STEFAN, M_H₂O
+
 using ..Namespace: AbstractSoilVC, AbstractXylemVC
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, BetaParameterG1, BetaParameterVcmax, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
 using ..Namespace: AirLayer, C4VJPModel, GCO₂Mode, HyperLeafBio, Leaves2D
