@@ -16,11 +16,14 @@ Calculate the energy flows of the leaf, given
 
 """
 function leaf_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
-    (; AIR, BRANCHES, LEAVES, LEAVES_INDEX) = spac;
-    # the total energy change of the leaf is the difference between
+    (; AIR, BRANCHES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+    # the total energy change of the leaf is the sum of
     #     the energy of the flow from the stem
-    #     the energy of the flow to the air
+    #     the energy of the flow from the air
+    #     the sensible heat from the air
+    #     the net radiation energy from shortwave and longwave radiation
 
+    N = length(BRANCHES)
     for i in eachindex(BRANCHES)
         stem = BRANCHES[i];
         leaf = LEAVES[i];
@@ -45,6 +48,13 @@ function leaf_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
         else
             leaf.NS.energy.auxil.∂e∂t -= f_o * CP_V_MOL(FT) * air.t;
         end;
+
+        # add the sensible heat flux from the leaf to air (to total leaf area)
+        g_be = FT(1.4) * FT(0.135) * sqrt(AIR[LEAVES_INDEX[i]].wind / (FT(0.72) * LEAVES[i].WIDTH));
+        leaf.NS.energy.auxil.∂e∂t -= 2 * g_be * CP_D_MOL(FT) * (leaf.NS.energy.auxil.t - air.t) * leaf.NS.xylem.state.area;
+
+        # add the net radiation energy to the leaf (to total leaf area)
+        leaf.NS.energy.auxil.∂e∂t += (CANOPY.RADIATION.r_net_sw[N+1-i] + CANOPY.RADIATION.r_net_lw[N+1-i]) / CANOPY.δlai[N+1-i] * leaf.NS.xylem.state.area;
     end;
 
     return nothing
