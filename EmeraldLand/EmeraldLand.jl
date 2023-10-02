@@ -6,7 +6,6 @@ using ..EmeraldPhysics
 
 
 # no internal inter-dependencies
-include("EarthGeometry.jl");
 include("Namespace/Namespace.jl");
 
 # depends on Namespace
