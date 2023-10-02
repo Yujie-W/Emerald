@@ -23,3 +23,42 @@ function spac_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
 
     return nothing
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2023-Oct-02: add function to run spac energy budget
+#
+#######################################################################################################################################################################################################
+"""
+
+    spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+
+Calculate the energy budgets of the spac, given
+- `config` `SPACConfiguration` type configuration
+- `spac` `MultiLayerSPAC` type SPAC
+- `δt` time step
+
+"""
+function spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    (; DIM_LAYER, DIM_ROOT) = config;
+    (; BRANCHES, LEAVES, ROOTS, TRUNK) = spac;
+
+    # update the temperature for roots
+    for _i in 1:DIM_ROOT
+        ROOTS[_i].energy.state.Σe += ROOTS[_i].energy.auxil.∂e∂t * δt;
+    end;
+
+    # update the temperature for trunk
+    TRUNK.energy.state.Σe += TRUNK.energy.auxil.∂e∂t * δt;
+
+    # update the temperature for branches and leaves
+    for _i in 1:DIM_LAYER
+        BRANCHES[_i].energy.state.Σe += BRANCHES[_i].energy.auxil.∂e∂t * δt;
+        LEAVES[_i].NS.energy.state.Σe += LEAVES[_i].NS.energy.auxil.∂e∂t * δt;
+    end;
+
+    return nothing
+end;

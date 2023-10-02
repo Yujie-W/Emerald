@@ -198,7 +198,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         # run the budgets for all ∂x∂t
         soil_budget!(config, spac, _δt);
         stomatal_conductance!(spac, _δt);
-        plant_energy!(config, spac, _δt);
+        spac_energy_budget!(config, spac, _δt);
         if spac._root_connection
             plant_water_budget!(spac, _δt);
         end;
