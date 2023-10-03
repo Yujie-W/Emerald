@@ -60,7 +60,7 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; �
     (; P_AIR) = air;
 
     _γ_s = (typeof(leaves.PSM) <: C4VJPModel) ? 0 : leaves.PSM._γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net_shaded * FT(1e-6) / (leaves._p_CO₂_s_shaded - _γ_s) * P_AIR
 );
@@ -69,7 +69,7 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}; β
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaves.a_net_shaded * FT(1e-6) / air.p_CO₂ * P_AIR
 );
@@ -121,7 +121,7 @@ empirical_equation(sm::LeuningSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, i
     (; P_AIR) = air;
 
     _γ_s = (typeof(leaves.PSM) <: C4VJPModel) ? 0 : leaves.PSM._γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + β * G1 / (1 + _vpd / D0) * leaves.a_net_sunlit[ind] * FT(1e-6) / (leaves._p_CO₂_s_sunlit[ind] - _γ_s) * P_AIR
 );
@@ -130,7 +130,7 @@ empirical_equation(sm::MedlynSM{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, in
     (; G0, G1) = sm;
     (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaves.t, leaves.HS.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaves.NS.energy.auxil.t, leaves.NS.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
 
     return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaves.a_net_sunlit[ind] * FT(1e-6) / air.p_CO₂ * P_AIR
 );

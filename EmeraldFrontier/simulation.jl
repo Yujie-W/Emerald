@@ -184,7 +184,7 @@ simulation!(config::SPACConfiguration{FT},
             initialial_state::Union{Nothing,Bool} = true,
             saving::Union{Nothing,String} = nothing,
             selection = :) where {FT} = (
-    (; DEBUG) = config;
+    (; MESSAGE_LEVEL) = config;
 
     _wdfr = eachrow(wdf);
 
@@ -194,15 +194,21 @@ simulation!(config::SPACConfiguration{FT},
     end;
 
     # iterate through the time steps
-    if DEBUG
+    if MESSAGE_LEVEL == 0
+        for _dfr in _wdfr[selection]
+            simulation!(config, spac, _dfr);
+        end;
+    elseif MESSAGE_LEVEL == 1
+        @showprogress for _dfr in _wdfr[selection]
+            simulation!(config, spac, _dfr);
+        end;
+    elseif MESSAGE_LEVEL == 2
         for _dfr in _wdfr[selection]
             @show _dfr.ind;
             @time simulation!(config, spac, _dfr);
         end;
     else
-        @showprogress for _dfr in _wdfr[selection]
-            simulation!(config, spac, _dfr);
-        end;
+        error("MESSAGE_LEVEL should be 0, 1, or 2");
     end;
 
     # save simulation results to hard drive

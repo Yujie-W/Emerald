@@ -18,6 +18,7 @@
 #     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
 #     2023-Sep-22: remove APAR_CAR (now a state variable in HyperLeafBioState)
+#     2023-Oct-02: add field MESSAGE_LEVEL
 #
 #######################################################################################################################################################################################################
 """
@@ -35,6 +36,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # Debug mode
     "Whether to print debug information"
     DEBUG::Bool = false
+    "Message level (0 for no, 1 for progress bar, and 2 for ind)"
+    MESSAGE_LEVEL::Int = 0
 
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"

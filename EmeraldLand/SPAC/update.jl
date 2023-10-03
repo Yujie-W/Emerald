@@ -42,6 +42,7 @@ function update! end
 #     2023-Aug-25: add option to set yo hydraulic conductance profiles for root, trunk, branches, and leaves
 #     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
 #     2023-Sep-07: add ALLOW_LEAF_CONDENSATION and T_CLM checks
+#     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
 #
 #######################################################################################################################################################################################################
 """
@@ -160,6 +161,13 @@ update!(config::SPACConfiguration{FT},
         for _i in 1:DIM_LAYER
             LEAVES[_i].NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
         end;
+
+        # make sure leaf area index setup and energy are correct
+        for _i in eachindex(LEAVES)
+            _clayer = LEAVES[_i];
+            _clayer.NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+            initialize_energy_storage!(_clayer.NS);
+        end;
     end;
     if !isnothing(vcmax)
         LEAVES[1].PSM.v_cmax25 = vcmax;
@@ -253,6 +261,13 @@ update!(config::SPACConfiguration{FT},
             _leaf.NS.energy.auxil.t = t_leaf;
             _leaf.NS.energy.auxil.cp = heat_capacitance(_leaf);
             _leaf.NS.energy.state.Σe = _leaf.NS.energy.auxil.cp * _leaf.NS.energy.auxil.t;
+        end;
+
+        # make sure leaf area index setup and energy are correct
+        for _i in eachindex(LEAVES)
+            _clayer = LEAVES[_i];
+            _clayer.NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+            initialize_energy_storage!(_clayer.NS);
         end;
     end;
 

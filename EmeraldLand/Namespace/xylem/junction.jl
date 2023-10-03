@@ -36,6 +36,7 @@ end
 # General
 #     2023-Sep-26: define the struct to store the auxilary variables used in junction capacitor
 #     2023-Sep-30: add fields ∂e∂t and ∂w∂t
+#     2023-Oct-02: add field cp
 #
 #######################################################################################################################################################################################################
 """
@@ -50,6 +51,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct JunctionCapacitorAuxil{FT}
+    "Heat capacitance of the capacitor `[J K⁻¹]`"
+    cp::FT = 0
     "Pressure of the capacitor `[MPa]`"
     pressure::FT = 0
     "Temperature of the capacitor `[K]`"
