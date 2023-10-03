@@ -29,7 +29,11 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
     if soil.ψ <= xylem_pressure(root.xylem.state.vc, config.KR_THRESHOLD)
         root.xylem.auxil.connected = false;
 
-        sol = sum(root.xylem.auxil.flow_buffer);
+        if root.xylem.auxil isa XylemHydraulicsAuxilNSS
+            sol =  sum(root.xylem.auxil.flow_buffer);
+        else
+            sol = FT(0);
+        end;
     else
         root.xylem.auxil.connected = true;
 
