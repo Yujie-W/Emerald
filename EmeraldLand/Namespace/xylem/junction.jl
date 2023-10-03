@@ -22,7 +22,7 @@ Base.@kwdef mutable struct JunctionCapacitorState{FT}
     "Total energy storage of the capacitor `[J]`"
     Σe::FT = 5000 * CP_L_MOL() * T₂₅()
     "Pressure volume curve of the capacitor"
-    pv::AbstractPVCurve{FT} = ExponentialPVCurve{FT}()
+    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = ExponentialPVCurve{FT}()
     "Current volume of the capacitor `[mol]`"
     v_storage::FT = 5000
     "Capacitor maximum volume per basal area or per leaf area `[mol]`"

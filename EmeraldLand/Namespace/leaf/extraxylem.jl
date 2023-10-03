@@ -22,13 +22,13 @@ Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
     "Maximum extraxylary hydraulic conductance `[mol s⁻¹ MPa⁻¹ m⁻²]`"
     k_max::FT = 100
     "Pressure volume curve of the capacitor"
-    pv::AbstractPVCurve{FT} = SegmentedPVCurve{FT}()
+    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = SegmentedPVCurve{FT}()
     "Current volume of the capacitor `[mol]`"
     v_storage::FT = 0
     "Capacitor maximum volume per basal area or per leaf area `[mol m⁻²]`"
     v_max::FT = 5
     "Vulnerability curve of the extraxylary capacitor"
-    vc::AbstractXylemVC{FT} = WeibullVC{FT}(5,1)
+    vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}(5,1)
 end
 
 

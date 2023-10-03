@@ -32,13 +32,13 @@ Base.@kwdef mutable struct XylemHydraulicsState{FT}
     "Vector of xylem water pressure history (normalized to 298.15 K) `[MPa]`"
     p_history::Vector{FT}
     "Pressure volume curve"
-    pv::AbstractPVCurve{FT} = LinearPVCurve{FT}()
+    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
     "Storage per element `[mol]`"
     v_storage::Vector{FT}
     "Maximum capaciatance per volume of wood `[mol m⁻³]`"
     v_max::FT
     "Vulnerability curve"
-    vc::AbstractXylemVC{FT} = WeibullVC{FT}()
+    vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}()
     "Height change `[m]`"
     Δh::FT = 1
 end;

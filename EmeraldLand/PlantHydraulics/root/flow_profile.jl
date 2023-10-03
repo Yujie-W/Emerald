@@ -29,6 +29,7 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
     if soil.ψ <= xylem_pressure(root.xylem.state.vc, config.KR_THRESHOLD)
         root.xylem.auxil.connected = false;
 
+        # if at non-steady state, set the flow rate to be the sum of the buffer system so that flow from the soil is zero
         if root.xylem.auxil isa XylemHydraulicsAuxilNSS
             sol =  sum(root.xylem.auxil.flow_buffer);
         else
