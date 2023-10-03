@@ -12,15 +12,15 @@ using ..Namespace: AirLayer, Leaves2D
 using ..Namespace: MultiLayerSPAC
 
 
-# leaf level model
-include("leaf/etr.jl");
-include("leaf/light_limited.jl");
-include("leaf/rubisco_limited.jl");
-include("leaf/product_limited.jl");
-include("leaf/td.jl");
+# photosystem level model (order by the step in photosynthesis model)
+include("photosystem/td.jl");
+include("photosystem/etr.jl");
+include("photosystem/rubisco_limited.jl");
+include("photosystem/light_limited.jl");
+include("photosystem/product_limited.jl");
+include("photosystem/colimit.jl");
+include("photosystem/fluorescence.jl");
 
-include("colimit.jl");
-include("fluorescence.jl");
 include("model.jl");
 include("temperature.jl");
 

@@ -4,9 +4,7 @@
 # General
 #     2022-Jan-14: rename the function to photosystem_coefficients!
 #     2022-Jan-14: add function that operates PSM, PRC, and FLM directly so as to be more modular (reduce memory allocations)
-#     2022-Feb-07: remove the wrapper function method
-#     2022-Feb-07: use ppar in fluorescence model (not used in this method)
-#     2022-Feb-07: remove fluorescence model from input variables (in reaction center since ClimaCache v0.1.2)
+#     2022-Feb-07: use ppar in fluorescence model
 #     2022-Feb-07: add support for Johnson and Berry (2021) model
 #     2022-Feb-07: use a_gross and j_pot rather than a series of j_p680 and j_p700
 #     2022-Feb-10: scale fluorescence quantum yield based on F_PSI and reabsorption factor
@@ -26,12 +24,10 @@
 #######################################################################################################################################################################################################
 """
 
-    photosystem_coefficients!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, ppar::FT; β::FT = FT(1)) where {FT}
-    photosystem_coefficients!(psm::Union{C3VJPModel{FT}, C4VJPModel{FT}}, rc::VJPReactionCenter{FT}, ppar::FT; β::FT = FT(1)) where {FT}
+    photosystem_coefficients!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, ppar::FT; β::FT = FT(1)) where {FT}
 
 Update the rate constants and coefficients in reaction center, given
-- `psm` `C3CytochromeModel`, `C3VJPModel`, or `C4VJPModel` type photosynthesis model
-- `rc` `CytochromeReactionCenter` or `VJPReactionCenter` type photosynthesis system reaction center
+- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis system
 - `ppar` Absorbed photosynthetically active radiation in `μmol m⁻² s⁻¹`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
@@ -40,39 +36,37 @@ function photosystem_coefficients! end
 
 photosystem_coefficients!(psm::C3Cyto{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
-        rc.ϕ_f = 0;
-        rc.ϕ_p = 0;
+        psm.auxil.ϕ_f = 0;
+        psm.auxil.ϕ_p = 0;
 
         return nothing
     end;
 
-    (; F_PSI, K_D, K_F, K_PSI, K_PSII, K_U, K_X, Φ_PSI_MAX) = rc;
-
     # adapted from https://github.com/jenjohnson/johnson-berry-2021-pres/blob/main/scripts/model_fun.m
-    _ϕ_P1_a = psm.a_gross * psm._η / (psm._e_to_c * ppar * F_PSI);
-    _ϕ_P2_a = psm.a_gross / (psm._e_to_c * ppar * (1 - F_PSI));
-    _q1     = _ϕ_P1_a / Φ_PSI_MAX;
-    _q2     = 1 - psm._j_psi / (β * psm._v_qmax);
+    ϕ_P1_a = psm.auxil.a_g * psm.auxil.η / (psm.auxil.e2c * ppar * psm.state.F_PSI);
+    ϕ_P2_a = psm.auxil.a_g / (psm.auxil.e2c * ppar * (1 - psm.state.F_PSI));
+    q1     = ϕ_P1_a / psm.state.Φ_PSI_MAX;
+    q2     = 1 - psm.auxil.j_psi / (β * psm.auxil.v_qmax);
 
     # solve PSII K_N
-    _k_sum_na = _ϕ_P2_a;
-    _k_sum_nb = -1 * (K_U * _ϕ_P2_a + K_PSII * (_q2 - _ϕ_P2_a));
-    _k_sum_nc = -1 * (_ϕ_P2_a * (1 - _q2) * K_U * K_PSII);
-    _k_sum    = upper_quadratic(_k_sum_na, _k_sum_nb, _k_sum_nc);
-    _k_n      = _k_sum - K_F - K_U - K_D;
+    k_sum_na = ϕ_P2_a;
+    k_sum_nb = -1 * (psm.state.K_U * ϕ_P2_a + psm.state.K_PSII * (q2 - ϕ_P2_a));
+    k_sum_nc = -1 * (ϕ_P2_a * (1 - q2) * psm.state.K_U * psm.state.K_PSII);
+    k_sum    = upper_quadratic(k_sum_na, k_sum_nb, k_sum_nc);
+    k_n      = k_sum - psm.state.K_F - psm.state.K_U - psm.state.K_D;
 
     # compute PSII and PSI yeilds
-    _k_sum_1 = K_D + K_F + K_U + _k_n;
-    _k_sum_2 = K_D + K_F + K_U + _k_n + K_PSII;
-    _k_sum_3 = K_D + K_F + K_PSI;
-    _k_sum_4 = K_D + K_F + K_X;
-    _ϕ_U2_a  =  _q2 * K_U / _k_sum_2 + (1 - _q2) * K_U  / _k_sum_1;
-    _ϕ_F2_a  = (_q2 * K_F / _k_sum_2 + (1 - _q2) * K_F  / _k_sum_1) / (1 - _ϕ_U2_a);
-    _ϕ_F1_a  = K_F / _k_sum_3 * _q1 + K_F / _k_sum_4 * (1 - _q1);
+    k_sum_1 = psm.state.K_D + psm.state.K_F + psm.state.K_U + k_n;
+    k_sum_2 = psm.state.K_D + psm.state.K_F + psm.state.K_U + k_n + psm.state.K_PSII;
+    k_sum_3 = psm.state.K_D + psm.state.K_F + psm.state.K_PSI;
+    k_sum_4 = psm.state.K_D + psm.state.K_F + psm.state.K_X;
+    ϕ_U2_a  =  q2 * psm.state.K_U / k_sum_2 + (1 - q2) * psm.state.K_U / k_sum_1;
+    ϕ_F2_a  = (q2 * psm.state.K_F / k_sum_2 + (1 - q2) * psm.state.K_F / k_sum_1) / (1 - ϕ_U2_a);
+    ϕ_F1_a  = psm.state.K_F / k_sum_3 * q1 + psm.state.K_F / k_sum_4 * (1 - q1);
 
     # save the weighted fluorescence and photosynthesis yields in reaction center
-    rc.ϕ_f = _ϕ_F1_a * rc.ϵ_1 * F_PSI + _ϕ_F2_a * rc.ϵ_2 * (1 - F_PSI);
-    rc.ϕ_p = _ϕ_P1_a * F_PSI + _ϕ_P2_a * (1 - F_PSI);
+    psm.auxil.ϕ_f = ϕ_F1_a * psm.auxil.ϵ_1 * psm.state.F_PSI + ϕ_F2_a * psm.auxil.ϵ_2 * (1 - psm.state.F_PSI);
+    psm.auxil.ϕ_p = ϕ_P1_a * psm.state.F_PSI + ϕ_P2_a * (1 - psm.state.F_PSI);
 
     return nothing
 
@@ -103,23 +97,20 @@ photosystem_coefficients!(psm::C3Cyto{FT}, ppar::FT; β::FT = FT(1)) where {FT} 
 
 photosystem_coefficients!(psm::Union{C3VJP{FT}, C4VJP{FT}}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
-        rc.ϕ_f = 0;
-        rc.ϕ_p = 0;
+        psm.auxil.ϕ_f = 0;
+        psm.auxil.ϕ_p = 0;
 
         return nothing
     end;
 
-    (; K_0, K_A, K_B) = rc.FLM;
-    (; F_PSII, K_F, K_P_MAX) = rc;
-
     # calculate photochemical yield
-    rc.ϕ_p = psm.a_gross / (psm._e_to_c * F_PSII * ppar);
+    psm.auxil.ϕ_p = psm.auxil.a_g / (psm.auxil.e2c * psm.state.F_PSII * ppar);
 
     # calculate rate constants
-    _x            = max(0, 1 - rc.ϕ_p / rc._ϕ_psii_max);
-    _xᵅ           = _x ^ K_A;
-    rc._k_npq_rev = K_0 * (1 + K_B) * _xᵅ / (K_B + _xᵅ);
-    rc._k_p       = max(0, rc.ϕ_p * (K_F + rc._k_d + rc._k_npq_rev + rc.k_npq_sus) / (1 - rc.ϕ_p) );
+    x  = max(0, 1 - psm.auxil.ϕ_p / psm.auxil.ϕ_psii_max);
+    xᵅ = x ^ psm.state.FLM.K_A;
+    psm.auxil.k_npq_rev = psm.state.FLM.K_0 * (1 + psm.state.FLM.K_B) * xᵅ / (psm.state.FLM.K_B + xᵅ);
+    psm.auxil.k_p       = max(0, psm.auxil.ϕ_p * (psm.state.K_F + psm.auxil.k_d + psm.auxil.k_npq_rev + psm.state.k_npq_sus) / (1 - psm.auxil.ϕ_p) );
 
     # TODO: whether to consider sustained K_N in the calculations of f_o and f_m
     # rc._f_o  = K_F / (K_F + K_P_MAX + rc._k_d + rc.k_npq_sus);
@@ -128,21 +119,21 @@ photosystem_coefficients!(psm::Union{C3VJP{FT}, C4VJP{FT}}, ppar::FT; β::FT = F
     # rc._f_m′ = K_F / (K_F + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
 
     # calculate fluorescence quantum yield
-    rc._f_o  = K_F / (K_F + K_P_MAX + rc._k_d);
-    rc._f_o′ = K_F / (K_F + K_P_MAX + rc._k_d + rc._k_npq_rev + rc.k_npq_sus);
-    rc._f_m  = K_F / (K_F + rc._k_d);
-    rc._f_m′ = K_F / (K_F + rc._k_d + rc._k_npq_rev + rc.k_npq_sus);
-    rc.ϕ_f   = rc._f_m′ * (1 - rc.ϕ_p);
-    rc.ϕ_d   = rc._k_d / K_F * rc.ϕ_f;
-    rc.ϕ_n   = (rc._k_npq_rev + rc.k_npq_sus) / K_F * rc.ϕ_f;
+    psm.auxil.f_o  = psm.state.K_F / (psm.state.K_F + psm.state.K_P_MAX + psm.auxil.k_d);
+    psm.auxil.f_o′ = psm.state.K_F / (psm.state.K_F + psm.state.K_P_MAX + psm.auxil.k_d + psm.auxil.k_npq_rev + psm.state.k_npq_sus);
+    psm.auxil.f_m  = psm.state.K_F / (psm.state.K_F + psm.auxil.k_d);
+    psm.auxil.f_m′ = psm.state.K_F / (psm.state.K_F + psm.auxil.k_d + psm.auxil.k_npq_rev + psm.state.k_npq_sus);
+    psm.auxil.ϕ_f  = psm.auxil.f_m′ * (1 - psm.auxil.ϕ_p);
+    psm.auxil.ϕ_d  = psm.auxil.k_d / psm.state.K_F * psm.auxil.ϕ_f;
+    psm.auxil.ϕ_n  = (psm.auxil.k_npq_rev + psm.state.k_npq_sus) / psm.state.K_F * psm.auxil.ϕ_f;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
 
     # calculate quenching rates
-    rc._q_e = 1 - (rc._f_m - rc._f_o′) / (rc._f_m′ - rc._f_o);
-    rc._q_p = 1 - (rc.ϕ_f - rc._f_o′) / (rc._f_m - rc._f_o′);
-    rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d);
+    psm.auxil.q_e = 1 - (psm.auxil.f_m - psm.auxil.f_o′) / (psm.auxil.f_m′ - psm.auxil.f_o);
+    psm.auxil.q_p = 1 - (psm.auxil.ϕ_f - psm.auxil.f_o′) / (psm.auxil.f_m - psm.auxil.f_o′);
+    psm.auxil.npq = (psm.auxil.k_npq_rev + psm.state.k_npq_sus) / (psm.state.K_F + psm.auxil.k_d);
 
     return nothing
 );
