@@ -21,38 +21,6 @@ Per refactored Photosynthesis module, the only things one need to know is the pu
 function leaf_photosynthesis! end
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
-#     2022-Jul-07: add method to compute photosynthetic rates only
-#
-#######################################################################################################################################################################################################
-"""
-
-    leaf_photosynthesis!(lf::Leaves2D{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT}
-
-Updates leaf photosynthetic rates based on CO₂ partial pressure (for StomataModels.jl temporary use), given
-- `lf` `Leaves2D` type structure that stores biophysical, reaction center, and photosynthesis model structures
-- `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
-- `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`, default is `leaf._g_CO₂`
-- `ppar` APAR used for photosynthesis
-- `t` Leaf temperature in `[K]`
-
-"""
-leaf_photosynthesis!(lf::Leaves2D{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT = lf.t) where {FT} = (
-    (; PRC, PSM) = lf;
-
-    photosystem_temperature_dependence!(PSM, PRC, air, t);
-    photosystem_electron_transport!(PSM, PRC, ppar, FT(20); β = FT(1));
-    rubisco_limited_rate!(PSM, air, g_lc; β = FT(1));
-    light_limited_rate!(PSM, PRC, air, g_lc; β = FT(1));
-    product_limited_rate!(PSM, air, g_lc; β = FT(1));
-    colimit_photosynthesis!(PSM; β = FT(1));
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #

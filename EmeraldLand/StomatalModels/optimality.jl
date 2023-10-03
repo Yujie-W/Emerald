@@ -43,7 +43,7 @@ function ∂A∂E end
     _gs2 = _gs1 + FT(0.0001);
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaves.g_CO₂_b);
-    leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_shaded, leaves.NS.energy.auxil.t);
+    photosynthesis_only!(leaves.NS.photosystem, air, _gc2, leaves.ppar_shaded, leaves.NS.energy.auxil.t);
     _e2 = _gh2 * _d / P_AIR;
     _a2 = leaves.PSM.a_net;
 
@@ -66,7 +66,7 @@ function ∂A∂E end
     _gs2 = _gs1 + FT(0.0001);
     _gh2 = 1 / (1 / _gs2 + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc2 = 1 / (FT(1.6) / _gs2 + 1 / leaves.g_CO₂_b);
-    leaf_photosynthesis!(leaves, air, _gc2, leaves.ppar_sunlit[ind], leaves.NS.energy.auxil.t);
+    photosynthesis_only!(leaves.NS.photosystem, air, _gc2, leaves.ppar_sunlit[ind], leaves.NS.energy.auxil.t);
     _e2 = _gh2 * _d / P_AIR;
     _a2 = leaves.PSM.a_net;
 
@@ -237,7 +237,7 @@ Return the marginal risk for stomatal opening, given
     _ghm = HS._e_crit / _d * P_AIR;
     _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gcm = 1 / (FT(1.6) / _gsm + 1 / leaves.g_CO₂_b);
-    leaf_photosynthesis!(leaves, air, _gcm, leaves.ppar_shaded, leaves.t);
+    photosynthesis_only!(leaves.NS.photosystem, air, _gcm, leaves.ppar_shaded, leaves.t);
     _am = leaves.PSM.a_net;
 
     return _∂K∂E * _am / _∂E∂P_m
@@ -362,7 +362,7 @@ Return the marginal risk for stomatal opening, given
     _ghm = HS._e_crit / _d * P_AIR;
     _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gcm = 1 / (FT(1.6) / _gsm + 1 / leaves.g_CO₂_b);
-    leaf_photosynthesis!(leaves, air, _gcm, leaves.ppar_sunlit[ind], leaves.t);
+    photosynthesis_only!(leaves.NS.photosystem, air, _gcm, leaves.ppar_sunlit[ind], leaves.t);
     _am = leaves.PSM.a_net;
 
     return _∂K∂E * _am / _∂E∂P_m
@@ -449,7 +449,7 @@ Return the ∂Θ∂E for nocturnal stomatal opening, given
     _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaves.g_CO₂_b));
     _gc = 1 / (FT(1.6) / _gs + 1 / leaves.g_CO₂_b);
     _e  = _gh * _d / P_AIR;
-    leaf_photosynthesis!(leaves, air, _gc, sm.ppar_mem, leaves.t);
+    photosynthesis_only!(leaves.NS.photosystem, air, _gc, sm.ppar_mem, leaves.t);
     _a  = leaves.PSM.a_net;
 
     return _a / max(eps(FT), (HS._e_crit - _e)) * F_FITNESS
