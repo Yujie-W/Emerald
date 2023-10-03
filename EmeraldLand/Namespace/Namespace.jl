@@ -33,6 +33,7 @@ include("config/config.jl");
 # General methods
 include("method/colimit.jl");
 include("method/kinetics.jl");
+include("method/mode.jl");
 
 
 # Plant hydraulics (dependent on config)

@@ -96,7 +96,7 @@ Update the temperature dependencies of C3 photosynthesis model, given
 """
 function photosystem_temperature_dependence! end
 
-photosystem_temperature_dependence!(psm::C3CytochromeModel{FT}, prc::CytochromeReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(psm::C3Cyto, air::AirLayer{FT}, t::FT) where {FT} = (
     if psm._t == t
         return nothing
     end;
@@ -117,7 +117,7 @@ photosystem_temperature_dependence!(psm::C3CytochromeModel{FT}, prc::CytochromeR
     return nothing
 );
 
-photosystem_temperature_dependence!(psm::C3VJPModel{FT}, prc::VJPReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(psm::C3VJP{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     if psm._t == t
         return nothing
     end;
@@ -140,7 +140,7 @@ photosystem_temperature_dependence!(psm::C3VJPModel{FT}, prc::VJPReactionCenter{
     return nothing
 );
 
-photosystem_temperature_dependence!(psm::C4VJPModel{FT}, prc::VJPReactionCenter{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(psm::C4VJP{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     if psm._t == t
         return nothing
     end;
@@ -183,7 +183,7 @@ function ∂R∂T end
 
 ∂R∂T(leaves::Leaves2D{FT}) where {FT} = ∂R∂T(leaves.PSM, leaves.t);
 
-∂R∂T(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}, t::FT) where {FT} = ∂R∂T(psm.TD_R, psm.r_d25, t);
+∂R∂T(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}, t::FT) where {FT} = ∂R∂T(psm.TD_R, psm.r_d25, t);
 
 ∂R∂T(td::Arrhenius{FT}, r_ref::FT, t::FT) where {FT} = r_ref * exp(td.ΔHA / GAS_R(FT) * (1/td.T_REF - 1/t)) * td.ΔHA / (GAS_R(FT) * t ^ 2);
 

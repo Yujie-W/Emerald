@@ -34,13 +34,13 @@ Update the RubisCO limited photosynthetic rate, given
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-rubisco_limited_rate!(psm::Union{C3CytochromeModel{FT},C3VJPModel{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (
+rubisco_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psm._a_c = β * psm._v_cmax * (p_i - psm._γ_star) / (p_i + psm._k_m);
 
     return nothing
 );
 
-rubisco_limited_rate!(psm::C4VJPModel{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psm._a_c = β * psm._v_cmax; return nothing);
+rubisco_limited_rate!(psm::C4VJP{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psm._a_c = β * psm._v_cmax; return nothing);
 
 
 #######################################################################################################################################################################################################
@@ -67,7 +67,7 @@ Update the RubisCO limited photosynthetic rate in conductance mode, given
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-rubisco_limited_rate!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+rubisco_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     _a = β * psm._v_cmax;
     _b = β * psm._v_cmax * psm._γ_star;
     _d = psm._k_m;
@@ -89,4 +89,4 @@ rubisco_limited_rate!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}}, air::Ai
     return nothing
 );
 
-rubisco_limited_rate!(psm::C4VJPModel{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm._a_c = β * psm._v_cmax; return nothing);
+rubisco_limited_rate!(psm::C4VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm._a_c = β * psm._v_cmax; return nothing);

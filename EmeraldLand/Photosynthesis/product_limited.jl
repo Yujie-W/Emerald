@@ -34,9 +34,9 @@ Update the product limited photosynthetic rate, given
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-product_limited_rate!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (psm._a_p = β * psm._v_cmax / 2; return nothing);
+product_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (psm._a_p = β * psm._v_cmax / 2; return nothing);
 
-product_limited_rate!(psm::C4VJPModel{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psm._a_p = β * psm._v_pmax * p_i / (p_i + psm._k_pep); return nothing);
+product_limited_rate!(psm::C4VJP{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psm._a_p = β * psm._v_pmax * p_i / (p_i + psm._k_pep); return nothing);
 
 
 #######################################################################################################################################################################################################
@@ -63,9 +63,9 @@ Update the electron transport limited photosynthetic rate in conductance mode, g
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-product_limited_rate!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm._a_p = β * psm._v_cmax / 2; return nothing);
+product_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm._a_p = β * psm._v_cmax / 2; return nothing);
 
-product_limited_rate!(psm::C4VJPModel{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(psm::C4VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     _a = β * psm._v_pmax;
     _d = psm._k_pep;
     _f = air.P_AIR / g_lc * FT(1e-6);

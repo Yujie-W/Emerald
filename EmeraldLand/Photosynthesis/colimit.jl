@@ -4,24 +4,24 @@
 # General
 #     2022-Jan-14: add colimit function back
 #     2022-Jan-24: use colimit from psm to abstractize the MinimumColimit and QuadraticColimit methods
-#     2022-Feb-07: add C3CytochromeModel support
+#     2022-Feb-07: add C3Cyto support
 #     2022-Feb-11: add a wrapper function to step through COLIMIT_CJ and COLIMIT_IP
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #
 #######################################################################################################################################################################################################
 """
 
-    colimit_photosynthesis!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}; β::FT = FT(1)) where {FT}
+    colimit_photosynthesis!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}; β::FT = FT(1)) where {FT}
 
 Colimit the photosynthesis by rubisco-, light-, and product-limited photosynthetic rates, given
-- `psm` `C3CytochromeModel`, `C3VJPModel`, or `C4VJPModel` type photosynthesis model
+- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis model
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd (default is 1)
 
 """
-function colimit_photosynthesis!(psm::Union{C3CytochromeModel{FT}, C3VJPModel{FT}, C4VJPModel{FT}}; β::FT = FT(1)) where {FT}
-    _a_i        = colimited_rate(psm._a_c, psm._a_j, psm.COLIMIT_CJ);
-    psm.a_gross = colimited_rate(psm._a_p, _a_i, psm.COLIMIT_IP);
-    psm.a_net   = psm.a_gross - β * psm._r_d;
+function colimit_photosynthesis!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}; β::FT = FT(1)) where {FT}
+    a_i = colimited_rate(psm.a_c, psm.a_j, psm.state.COLIMIT_CJ);
+    psm.a_g = colimited_rate(psm.a_p, a_i, psm.COLIMIT_IP);
+    psm.a_n = psm.a_gross - β * psm.r_d;
 
     return nothing
 end

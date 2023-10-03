@@ -38,7 +38,7 @@ Update the rate constants and coefficients in reaction center, given
 """
 function photosystem_coefficients! end
 
-photosystem_coefficients!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCenter{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(psm::C3Cyto{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
         rc.ϕ_f = 0;
         rc.ϕ_p = 0;
@@ -101,7 +101,7 @@ photosystem_coefficients!(psm::C3CytochromeModel{FT}, rc::CytochromeReactionCent
     =#
 );
 
-photosystem_coefficients!(psm::Union{C3VJPModel{FT}, C4VJPModel{FT}}, rc::VJPReactionCenter{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(psm::Union{C3VJP{FT}, C4VJP{FT}}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
         rc.ϕ_f = 0;
         rc.ϕ_p = 0;
