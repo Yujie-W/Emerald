@@ -14,14 +14,14 @@ using ..Namespace: MultiLayerSPAC
 
 # leaf level model
 include("leaf/etr.jl");
+include("leaf/light_limited.jl");
+include("leaf/rubisco_limited.jl");
+include("leaf/product_limited.jl");
 include("leaf/td.jl");
 
 include("colimit.jl");
 include("fluorescence.jl");
-include("light_limited.jl");
 include("model.jl");
-include("product_limited.jl");
-include("rubisco_limited.jl");
 include("temperature.jl");
 
 
