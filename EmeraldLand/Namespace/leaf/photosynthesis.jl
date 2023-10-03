@@ -120,7 +120,7 @@ Base.@kwdef mutable struct C3CytoState{FT}
     "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
     TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDJohnson(FT)
     "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
-    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)\
+    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)
 
     # Constant coefficients
     "Fraction of absorbed light used by PSI ETR"

@@ -12,8 +12,11 @@ using ..Namespace: AirLayer, Leaves2D
 using ..Namespace: MultiLayerSPAC
 
 
+# leaf level model
+include("leaf/etr.jl");
+include("leaf/td.jl");
+
 include("colimit.jl");
-include("etr.jl");
 include("fluorescence.jl");
 include("light_limited.jl");
 include("model.jl");
