@@ -28,7 +28,7 @@ function plant_photosynthesis!(spac::MultiLayerSPAC{FT}, mode::Union{GCO₂Mode,
 
     _rd_only = ANGLES.sza < 89 ? false : true;
     for _i in eachindex(LEAVES)
-        leaf_photosynthesis!(LEAVES[_i], AIR[LEAVES_INDEX[_i]], mode; rd_only = _rd_only);
+        leaf_photosynthesis!(LEAVES[_i].NS, AIR[LEAVES_INDEX[_i]], mode; rd_only = _rd_only);
     end;
 
     return nothing

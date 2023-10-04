@@ -22,13 +22,12 @@ include("photosystem/colimit.jl");
 include("photosystem/fluorescence.jl");
 
 # functions to use with stomatal models
+include("stomata/derivative.jl");
 include("stomata/photo_only.jl");
 
 # functions to use with SPAC
 include("plant/leaf.jl");
 include("plant/plant.jl");
-
-include("temperature.jl");
 
 
 end # module

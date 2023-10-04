@@ -116,6 +116,19 @@ import Emerald.EmeraldLand.Photosynthesis as PS
         end;
     end;
 
+    @testset "Derivatives (for stomatal models)" begin
+        config = NS.SPACConfiguration{Float64}();
+        leaf = NS.Leaf(config);
+        @test PS.∂R∂T(leaf) > 0;
+
+        for td in [NS.Arrhenius{Float64}(T_REF = 298.15, VAL_REF = NaN , ΔHA = 46390.0),
+                   NS.ArrheniusPeak{Float64}(T_REF = 298.15, VAL_REF = NaN , ΔHA = 46390.0, ΔHD = 150650.0, ΔSV = 490.0),
+                   NS.Q10{Float64}(Q_10 = 1.4, T_REF = 298.15, VAL_REF = 0.0140/8760),
+                   NS.Q10Peak{Float64}(Q_10 = 1.4, T_REF = 298.15, VAL_REF = 0.0140/8760, ΔHD = 150650.0, ΔSV = 490.0)]
+            @test PS.∂R∂T(td, 1.0, 298.15) > 0;
+        end;
+    end;
+
     @testset "Leaf Photosynthesis (Respiration only)" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
@@ -166,4 +179,27 @@ import Emerald.EmeraldLand.Photosynthesis as PS
         @test true;
     end;
 
+    @testset "Plant Photosynthesis" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+
+        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
+        @test true;
+        PS.plant_photosynthesis!(spac, NS.PCO₂Mode());
+        @test true;
+
+        spac = NS.MultiLayerSPAC(config);
+        spac.CANOPY.lai = 0.0;
+        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
+        @test true;
+        PS.plant_photosynthesis!(spac, NS.PCO₂Mode());
+        @test true;
+
+        spac = NS.MultiLayerSPAC(config);
+        spac.ANGLES.sza = 90;
+        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
+        @test true;
+        PS.plant_photosynthesis!(spac, NS.PCO₂Mode());
+        @test true;
+    end;
 end;

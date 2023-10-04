@@ -47,19 +47,6 @@ Leaves2D(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_AZI, DIM_INCL) = config;
 
     return Leaves2D{FT}(
-                NS              = Leaf(config),
-                ppar_sunlit     = 1000 .* ones(FT, DIM_INCL, DIM_AZI),
-                g_H₂O_s_sunlit  = FT(0.01) .* ones(FT, DIM_INCL, DIM_AZI),
-                ∂g∂t_sunlit     = zeros(FT, DIM_INCL, DIM_AZI),
-                a_gross_sunlit  = zeros(FT, DIM_INCL, DIM_AZI),
-                a_net_sunlit    = zeros(FT, DIM_INCL, DIM_AZI),
-                etr_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
-                ϕ_d_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
-                ϕ_f_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
-                ϕ_n_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
-                ϕ_p_sunlit      = zeros(FT, DIM_INCL, DIM_AZI),
-                _g_CO₂_sunlit   = zeros(FT, DIM_INCL, DIM_AZI),
-                _p_CO₂_i_sunlit = zeros(FT, DIM_INCL, DIM_AZI),
-                _p_CO₂_s_sunlit = zeros(FT, DIM_INCL, DIM_AZI),
+                NS = Leaf(config)
     )
 );
