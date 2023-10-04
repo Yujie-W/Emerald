@@ -7,7 +7,7 @@ using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
 using ..Namespace: GCO₂Mode, PCO₂Mode
 using ..Namespace: C3Cyto, C3VJP, C4VJP
-using ..Namespace: AirLayer, Leaves2D
+using ..Namespace: AirLayer, Leaf, Leaves2D
 using ..Namespace: AbstractStomataModel, BallBerrySM, BetaFunction, BetaParameterG1, BetaParameterVcmax, GentineSM, LeuningSM, MedlynSM
 using ..Namespace: MultiLayerSPAC
 
@@ -21,10 +21,13 @@ include("photosystem/product_limited.jl");
 include("photosystem/colimit.jl");
 include("photosystem/fluorescence.jl");
 
-# function to use with stomatal models
+# functions to use with stomatal models
 include("stomata/photo_only.jl");
 
-include("model.jl");
+# functions to use with SPAC
+include("plant/leaf.jl");
+include("plant/plant.jl");
+
 include("temperature.jl");
 
 

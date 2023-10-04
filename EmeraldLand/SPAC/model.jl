@@ -53,7 +53,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     spac.SOIL.runoff = 0;
     update_substep_auxils!(spac);
 
-    # 1. run plant hydraulic model (must be run before leaf_photosynthesis! as the latter may need β for empirical models)
+    # 1. run plant hydraulic model (must be run before plant_photosynthesis! as the latter may need β for empirical models)
     plant_flow_profile!(config, spac);
     plant_pressure_profile!(config, spac);
     (!spac._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(config, spac; lai = 0) : nothing;
@@ -63,7 +63,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
 
     # 3. run photosynthesis model
     stomatal_conductance_profile!(spac);
-    leaf_photosynthesis!(spac, GCO₂Mode());
+    plant_photosynthesis!(spac, GCO₂Mode());
 
     # 4. run canopy fluorescence
     canopy_fluorescence!(config, spac);

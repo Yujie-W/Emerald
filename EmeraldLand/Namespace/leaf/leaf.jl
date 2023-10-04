@@ -44,7 +44,7 @@ Return the leaf struct with initialized energy states, given
 
 """
 Leaf(config::SPACConfiguration{FT}) where {FT} = (
-    leaf = Leaf{FT}(bio = HyperLeafBio(config), xylem = XylemHydraulics(config));
+    leaf = Leaf{FT}(bio = HyperLeafBio(config), flux = LeafFlux(config), xylem = XylemHydraulics(config));
     initialize_energy_storage!(leaf);
 
     return leaf
