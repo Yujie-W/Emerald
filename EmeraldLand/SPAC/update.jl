@@ -164,21 +164,21 @@ update!(config::SPACConfiguration{FT},
 
         # make sure leaf area index setup and energy are correct
         for _i in eachindex(LEAVES)
-            _clayer = LEAVES[_i];
-            _clayer.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
-            initialize_energy_storage!(_clayer);
+            leaf = LEAVES[_i];
+            leaf.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+            initialize_energy_storage!(leaf);
         end;
     end;
     if !isnothing(vcmax)
-        LEAVES[1].PSM.v_cmax25 = vcmax;
+        LEAVES[1].photosystem.state.v_cmax25 = vcmax;
     end;
     if !isnothing(vcmax) || !isnothing(lai)
         for _i in 2:DIM_LAYER
             _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(CANOPY.δlai[1:_i-1]));
-            LEAVES[_i].PSM.v_cmax25 = LEAVES[1].PSM.v_cmax25 * _scaling;
-            LEAVES[_i].PSM.j_max25 = LEAVES[1].PSM.v_cmax25 * 1.67 * _scaling;
-            LEAVES[_i].PSM.r_d25 = LEAVES[1].PSM.v_cmax25 * 0.015 * _scaling;
-            LEAVES[_i].PSM._t = 0;
+            LEAVES[_i].photosystem.state.v_cmax25 = LEAVES[1].photosystem.state.v_cmax25 * _scaling;
+            LEAVES[_i].photosystem.state.j_max25 = LEAVES[1].photosystem.state.v_cmax25 * 1.67 * _scaling;
+            LEAVES[_i].photosystem.state.r_d25 = LEAVES[1].photosystem.state.v_cmax25 * 0.015 * _scaling;
+            LEAVES[_i].photosystem.auxil._t = 0;
         end;
     end;
 
@@ -193,8 +193,8 @@ update!(config::SPACConfiguration{FT},
     if !isnothing(t_clm)
         for _leaf in LEAVES
             if T_CLM
-                _leaf.PSM.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-                _leaf.PSM.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+                _leaf.photosystem.state.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+                _leaf.photosystem.state.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
             end;
         end;
     end;
@@ -265,9 +265,9 @@ update!(config::SPACConfiguration{FT},
 
         # make sure leaf area index setup and energy are correct
         for _i in eachindex(LEAVES)
-            _clayer = LEAVES[_i];
-            _clayer.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
-            initialize_energy_storage!(_clayer);
+            leaf = LEAVES[_i];
+            leaf.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+            initialize_energy_storage!(leaf);
         end;
     end;
 

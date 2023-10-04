@@ -19,12 +19,12 @@ BETA(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;
 
     # compute the mean beta
-    _βs = 0;
+    βs = 0;
     for _leaves in LEAVES
-        _βs += read_β(_leaves.SM);
+        βs += read_β(_leaves.flux.state.stomatal_model);
     end;
 
-    return _βs / length(LEAVES)
+    return βs / length(LEAVES)
 );
 
 
@@ -50,12 +50,14 @@ CNPP(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
-    _cnpp::FT = 0;
-    for _i in eachindex(LEAVES)
-        _cnpp += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_net_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_net_shaded) * CANOPY.δlai[_i];
+    cnpp::FT = 0;
+    N = length(LEAVES);
+    for i in eachindex(LEAVES)
+        j = N - i + 1;
+        cnpp += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_n_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.a_n_shaded) * CANOPY.δlai[j];
     end;
 
-    return _cnpp
+    return cnpp
 );
 
 
@@ -81,12 +83,14 @@ GPP(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
-    _gpp::FT = 0;
-    for _i in eachindex(LEAVES)
-        _gpp += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded) * CANOPY.δlai[_i];
+    gpp::FT = 0;
+    N = length(LEAVES);
+    for i in eachindex(LEAVES)
+        j = N - i + 1;
+        gpp += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded) * CANOPY.δlai[j];
     end;
 
-    return _gpp
+    return gpp
 );
 
 
@@ -112,12 +116,14 @@ PPAR(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
-    _ppar::FT = 0;
-    for _i in eachindex(LEAVES)
-        _ppar += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded) * CANOPY.δlai[_i];
+    ppar::FT = 0;
+    N = length(LEAVES);
+    for i in eachindex(LEAVES)
+        j = N - i + 1;
+        ppar += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.ppar_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.ppar_shaded) * CANOPY.δlai[i];
     end;
 
-    return _ppar
+    return ppar
 );
 
 
@@ -143,12 +149,14 @@ T_VEG(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute transpiration rate
-    _tran::FT = 0;
-    for _i in eachindex(LEAVES)
-        _tran += (flow_out(LEAVES[_i].xylem) - LEAVES[_i].capacitor.auxil.flow) * CANOPY.δlai[_i];
+    tran::FT = 0;
+    N = length(LEAVES);
+    for i in eachindex(LEAVES)
+        j = N - i + 1;
+        tran += flow_out(LEAVES[i]) * CANOPY.δlai[j];
     end;
 
-    return _tran
+    return tran
 );
 
 
@@ -165,24 +173,26 @@ function ΦDFNP end
 ΦDFNP(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
-    _sum_ϕda::FT = 0;
-    _sum_ϕfa::FT = 0;
-    _sum_ϕna::FT = 0;
-    _sum_ϕpa::FT = 0;
-    _sum_a::FT = 0;
-    for _i in eachindex(LEAVES)
-        _sum_ϕda += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_d_sunlit) +
-                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_d_shaded) * CANOPY.δlai[_i];
-        _sum_ϕfa += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_f_sunlit) +
-                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_f_shaded) * CANOPY.δlai[_i];
-        _sum_ϕna += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_n_sunlit) +
-                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_n_shaded) * CANOPY.δlai[_i];
-        _sum_ϕpa += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit .* LEAVES[_i].ϕ_p_sunlit) +
-                    (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded * LEAVES[_i].ϕ_p_shaded) * CANOPY.δlai[_i];
-        _sum_a += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].a_gross_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].a_gross_shaded) * CANOPY.δlai[_i];
+    sum_ϕda::FT = 0;
+    sum_ϕfa::FT = 0;
+    sum_ϕna::FT = 0;
+    sum_ϕpa::FT = 0;
+    sum_a::FT = 0;
+    N = length(LEAVES);
+    for i in eachindex(LEAVES)
+        j = N - i + 1;
+        sum_ϕda += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_d_sunlit) +
+                   (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_d_shaded) * CANOPY.δlai[j];
+        sum_ϕfa += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_f_sunlit) +
+                   (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_f_shaded) * CANOPY.δlai[j];
+        sum_ϕna += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_n_sunlit) +
+                   (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_n_shaded) * CANOPY.δlai[j];
+        sum_ϕpa += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_p_sunlit) +
+                   (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_p_shaded) * CANOPY.δlai[j];
+        sum_a   += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded) * CANOPY.δlai[j];
     end;
 
-    return (_sum_ϕda, _sum_ϕfa, _sum_ϕna, _sum_ϕpa) ./ _sum_a
+    return (sum_ϕda, sum_ϕfa, sum_ϕna, sum_ϕpa) ./ sum_a
 );
 
 
@@ -207,12 +217,14 @@ function ΣETR end
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
-    _Σetr::FT = 0;
-    for _i in eachindex(LEAVES)
-        _Σetr += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].etr_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].etr_shaded) * CANOPY.δlai[_i];
+    Σetr::FT = 0;
+    N = length(LEAVES);
+    for i in eachindex(LEAVES)
+        j = N - i + 1;
+        Σetr += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.etr_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.etr_shaded) * CANOPY.δlai[j];
     end;
 
-    return _Σetr
+    return Σetr
 );
 
 
@@ -237,13 +249,15 @@ function ΣSIF end
     (; CANOPY, LEAVES) = spac;
 
     # compute SIF in photons unit
-    _Σsif::FT = 0;
-    for _i in eachindex(LEAVES)
-        _Σsif += (CANOPY.OPTICS.p_sunlit[_i] * mean(LEAVES[_i].ppar_sunlit .* LEAVES[_i].ϕ_f_sunlit) + (1 - CANOPY.OPTICS.p_sunlit[_i]) * LEAVES[_i].ppar_shaded * LEAVES[_i].ϕ_f_shaded) *
-                 CANOPY.δlai[_i];
+    Σsif::FT = 0;
+    N = length(LEAVES);
+    for i in eachindex(LEAVES)
+        j = N - i + 1;
+        Σsif += (CANOPY.OPTICS.p_sunlit[j] * mean(LEAVES[i].flux.auxil.ppar_sunlit .* LEAVES[i].flux.auxil.ϕ_f_sunlit) +
+                 (1 - CANOPY.OPTICS.p_sunlit[j]) * LEAVES[i].flux.auxil.ppar_shaded * LEAVES[i].flux.auxil.ϕ_f_shaded) * CANOPY.δlai[j];
     end;
 
-    return _Σsif
+    return Σsif
 );
 
 
@@ -271,12 +285,12 @@ function ΣSIF_CHL end
     (; CANOPY, LEAVES) = spac;
 
     # compute SIF in energy unit before reabsorption within leaves (W m⁻²)
-    _Σsif::FT = 0;
-    for _i in eachindex(LEAVES)
-        _Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,_i] .+ CANOPY.RADIATION.s_layer_up_chl[:,_i])' * SPECTRA.ΔΛ_SIF / 1000;
+    Σsif::FT = 0;
+    for i in eachindex(LEAVES)
+        Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,i] .+ CANOPY.RADIATION.s_layer_up_chl[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
-    return _Σsif
+    return Σsif
 );
 
 
@@ -304,10 +318,10 @@ function ΣSIF_LEAF end
     (; CANOPY, LEAVES) = spac;
 
     # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
-    _Σsif::FT = 0;
-    for _i in eachindex(LEAVES)
-        _Σsif += (CANOPY.RADIATION.s_layer_down[:,_i] .+ CANOPY.RADIATION.s_layer_up[:,_i])' * SPECTRA.ΔΛ_SIF / 1000;
+    Σsif::FT = 0;
+    for i in eachindex(LEAVES)
+        Σsif += (CANOPY.RADIATION.s_layer_down[:,i] .+ CANOPY.RADIATION.s_layer_up[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
-    return _Σsif
+    return Σsif
 );

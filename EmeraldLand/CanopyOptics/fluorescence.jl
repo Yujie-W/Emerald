@@ -85,8 +85,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         end;
 
         # add up the fluorescence at various wavelength bins for sunlit and (up- and down-ward) diffuse SIF
-        _ϕ_sunlit = leaves[_i].ϕ_f_sunlit;
-        _ϕ_shaded = leaves[_i].ϕ_f_shaded;
+        _ϕ_sunlit = leaves[_i].flux.auxil.ϕ_f_sunlit;
+        _ϕ_shaded = leaves[_i].flux.auxil.ϕ_f_shaded;
 
         # compute the weights
         _sh_1_ = lidf_weight(_ϕ_shaded, 1);
@@ -141,8 +141,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         end;
 
         # add up the fluorescence at various wavelength bins for sunlit and (up- and down-ward) diffuse SIF
-        _ϕ_sunlit = leaves[_i].ϕ_f_sunlit;
-        _ϕ_shaded = leaves[_i].ϕ_f_shaded;
+        _ϕ_sunlit = leaves[_i].flux.auxil.ϕ_f_sunlit;
+        _ϕ_shaded = leaves[_i].flux.auxil.ϕ_f_shaded;
 
         # compute the weights
         _sh_1_ = lidf_weight(_ϕ_shaded, 1);

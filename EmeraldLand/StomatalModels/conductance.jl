@@ -33,7 +33,7 @@ Return the marginal increase of stomatal conductance, given
 - `δe` Incremental flow rate to compute ∂E∂P (only used for optimality models)
 
 """
-∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.SM, leaf, air; β = β, δe = δe);
+∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.flux.state.stomatal_model, leaf, air; β = β, δe = δe);
 
 ∂g∂t(sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT} = (
     return max(-0.001, min(0.001, sm.K * (∂A∂E(leaf, air) - ∂Θ∂E(sm, leaf, air; δe = δe))))
@@ -76,7 +76,7 @@ Return the marginal increase of stomatal conductance, given
 - `δe` Incremental flow rate to compute ∂E∂P (only used for optimality models)
 
 """
-∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.SM, leaf, air, ind; β = β, δe = δe);
+∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.flux.state.stomatal_model, leaf, air, ind; β = β, δe = δe);
 
 ∂g∂t(sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1), δe::FT = FT(1e-7)) where {FT} = (
     _dade = ∂A∂E(leaf, air, ind);
@@ -99,13 +99,13 @@ Return the marginal increase of stomatal conductance, given
 ∂g∂t(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterG1, ind::Int; β::FT = FT(1)) where {FT} = (
     _gsw = empirical_equation(sm, leaf, air, ind; β = β);
 
-    return max(-0.001, min(0.001, (_gsw - leaf.g_H₂O_s_sunlit[ind]) / sm.τ))
+    return max(-0.001, min(0.001, (_gsw - leaf.flux.state.g_H₂O_s_sunlit[ind]) / sm.τ))
 );
 
 ∂g∂t(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterVcmax, ind::Int; β::FT = FT(1)) where {FT} = (
     _gsw = empirical_equation(sm, leaf, air, ind; β = FT(1));
 
-    return max(-0.001, min(0.001, (_gsw - leaf.g_H₂O_s_sunlit[ind]) / sm.τ))
+    return max(-0.001, min(0.001, (_gsw - leaf.flux.state.g_H₂O_s_sunlit[ind]) / sm.τ))
 );
 
 
@@ -120,18 +120,18 @@ Return the marginal increase of stomatal conductance, given
 #######################################################################################################################################################################################################
 """
 
-    ∂gₙ∂t(lf::Union{Leaf{FT}, Leaf{FT}}, air::AirLayer{FT}) where {FT}
+    ∂gₙ∂t(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
 
 Return the marginal increase of stomatal conductance, given
-- `lf` `Leaf` type struct
+- `leaf` `Leaf` type struct
 - `air` `AirLayer` type environmental conditions
 
 """
 function ∂gₙ∂t end
 
-∂gₙ∂t(lf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂gₙ∂t(lf.SM, lf, air);
+∂gₙ∂t(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂gₙ∂t(leaf.flux.state.stomatal_model, leaf, air);
 
-∂gₙ∂t(sm::WangSM{FT}, lf::Leaf{FT}, air::AirLayer{FT}) where {FT} = max(-0.001, min(0.001, sm.K * (∂R∂E(lf, air) - ∂Θₙ∂E(lf, air))));
+∂gₙ∂t(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = max(-0.001, min(0.001, sm.K * (∂R∂E(leaf, air) - ∂Θₙ∂E(leaf, air))));
 
 
 #######################################################################################################################################################################################################
@@ -159,7 +159,7 @@ function stomatal_conductance! end
 #     2022-Jul-12: add new method to update marginal stomatal conductance for SPAC
 #     2023-Sep-14: add root disconnection control
 # To do
-#     TODO: be careful with the β here (need to used the value stored in empirical SM)
+#     TODO: be careful with the β here (need to used the value stored in empirical stomtal model)
 #     TODO: use ∂gₙ∂t for nighttime conditions
 #
 #######################################################################################################################################################################################################
@@ -189,9 +189,9 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT} = (
 );
 
 stomatal_conductance!(leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
-    leaf.∂g∂t_shaded = ∂g∂t(leaf, air; β = β);
-    for _i in eachindex(leaf.∂g∂t_sunlit)
-        leaf.∂g∂t_sunlit[_i] = ∂g∂t(leaf, air, _i; β = β);
+    leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air; β = β);
+    for _i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
+        leaf.flux.auxil.∂g∂t_sunlit[_i] = ∂g∂t(leaf, air, _i; β = β);
     end;
 
     return nothing

@@ -11,17 +11,17 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂E∂P(lf::Leaf{FT}, flow::FT; δe::FT = FT(1e-7)) where {FT}
+    ∂E∂P(leaf::Leaf{FT}, flow::FT; δe::FT = FT(1e-7)) where {FT}
 
 Return the marginal hydraulic conductance, given
-- `lf` `Leaf` type struct
+- `leaf` `Leaf` type struct
 - `flow` Flow rate through the leaf xylem `[mol m⁻² s⁻¹]`
 - `δe` Incremental flow rate, default is 1e-7
 
 """
 function ∂E∂P end
 
-∂E∂P(lf::Leaf{FT}, flow::FT; δe::FT = FT(1e-7)) where {FT} = ∂E∂P(lf.HS, flow, lf.t; δe = δe);
+∂E∂P(leaf::Leaf{FT}, flow::FT; δe::FT = FT(1e-7)) where {FT} = ∂E∂P(leaf.HS, flow, leaf.t; δe = δe);
 
 ∂E∂P(xylem::XylemHydraulics{FT}, flow::FT, t::FT; δe::FT = FT(1e-7)) where {FT} = (
     @assert δe != 0 "δe must not be 0";

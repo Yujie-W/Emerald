@@ -115,8 +115,8 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     # make sure leaf temperatures do not change more than 1 K per time step
     _δt_7 = _δt_6;
     if ENABLE_ENERGY_BUDGET && spac.CANOPY.lai > 0
-        for _clayer in LEAVES
-            _∂T∂t = _clayer.energy.auxil.∂e∂t / (_clayer.xylem.state.cp * _clayer.bio.state.lma * 10 + CP_L_MOL(FT) * _clayer.capacitor.state.v_storage);
+        for leaf in LEAVES
+            _∂T∂t = leaf.energy.auxil.∂e∂t / (leaf.xylem.state.cp * leaf.bio.state.lma * 10 + CP_L_MOL(FT) * leaf.capacitor.state.v_storage);
             _δt_7 = min(1 / abs(_∂T∂t), _δt_7);
 
             if DEBUG
@@ -131,15 +131,15 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     # make sure leaf stomatal conductances do not change more than 0.06 mol m⁻² s⁻¹
     _δt_8 = _δt_7;
     if spac.CANOPY.lai > 0
-        for _clayer in LEAVES
-            for _∂g∂t in _clayer.∂g∂t_sunlit
+        for leaf in LEAVES
+            for _∂g∂t in leaf.flux.auxil.∂g∂t_sunlit
                 _δt_8 = min(FT(0.06) / abs(_∂g∂t), _δt_8);
             end;
-            _δt_8 = min(FT(0.06) / abs(_clayer.∂g∂t_shaded), _δt_8);
+            _δt_8 = min(FT(0.06) / abs(leaf.flux.auxil.∂g∂t_shaded), _δt_8);
 
             if DEBUG
-                if any(isnan, (_δt_8, _clayer.∂g∂t_shaded, mean(_clayer.∂g∂t_sunlit)))
-                    @info "Debugging" _δt_8 _clayer.∂g∂t_shaded mean(_clayer.∂g∂t_sunlit);
+                if any(isnan, (_δt_8, leaf.flux.auxil.∂g∂t_shaded, mean(leaf.flux.auxil.∂g∂t_sunlit)))
+                    @info "Debugging" _δt_8 leaf.flux.auxil.∂g∂t_shaded mean(leaf.flux.auxil.∂g∂t_sunlit);
                     error("NaN in adjusted_time at leaf stomatal conductance");
                 end;
             end;

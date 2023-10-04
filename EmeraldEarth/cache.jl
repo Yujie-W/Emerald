@@ -34,15 +34,15 @@ function initialize_cache!(FT)
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
     # for _organ in [CACHE_SPAC.LEAVES; CACHE_SPAC.BRANCHES; CACHE_SPAC.TRUNK; CACHE_SPAC.ROOTS]
-    #     _organ.HS.VC.B = 3;
-    #     _organ.HS.VC.C = 1;
+    #     _organ.xylem.state.vc.B = 3;
+    #     _organ.xylem.state.vc.C = 1;
     # end;
 
     # update leaf mass per area and stomtal model
     @inline linear_p_soil(x) = min(1, max(eps(FT), 1 + x / 5));
     _bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
-    for _leaves in CACHE_SPAC.LEAVES
-        _leaves.SM = MedlynSM{FT}(G0 = 0.005, β = _bt);
+    for leaf in CACHE_SPAC.LEAVES
+        leaf.flux.state.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = _bt);
     end;
 
     # initialize the spac with non-saturated soil
@@ -108,9 +108,9 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     end;
 
     # update leaf mass per area and stomtal model
-    for _leaves in CACHE_SPAC.LEAVES
-        _leaves.BIO.state.lma = gm_params["LMA"];
-        _leaves.SM.G1 = gm_params["MEDLYN_G1"];
+    for leaf in CACHE_SPAC.LEAVES
+        leaf.BIO.state.lma = gm_params["LMA"];
+        leaf.flux.state.stomatal_model.G1 = gm_params["MEDLYN_G1"];
     end;
 
     # update environmental conditions

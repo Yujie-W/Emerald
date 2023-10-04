@@ -36,7 +36,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     (; LEAVES, ROOTS, SOIL) = spac;
 
     for _i in eachindex(LEAVES)
-        β_factor!(ROOTS, SOIL, LEAVES[_i], LEAVES[_i].SM);
+        β_factor!(ROOTS, SOIL, LEAVES[_i], LEAVES[_i].flux.state.stomatal_model);
     end;
 
     return nothing
