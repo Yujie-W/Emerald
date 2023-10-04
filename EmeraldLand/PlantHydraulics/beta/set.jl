@@ -10,7 +10,7 @@
 #     2023-Mar-27: weigh the beta among root layers only if flow rate is positive (if all flows are negative, beta = 1)
 #     2023-Aug-27: add nan check for beta calculation of empirical models
 # Bug fixes
-#     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaves, β, β.PARAM_X) as I forgot to write β_factor! before `()`
+#     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaf, β, β.PARAM_X) as I forgot to write β_factor! before `()`
 #
 #######################################################################################################################################################################################################
 """
@@ -42,22 +42,22 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
-    β_factor!(roots, soil, leaves, sm.β);
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
+    β_factor!(roots, soil, leaf, sm.β);
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soil, leaves, β, β.PARAM_X);
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soil, leaf, β, β.PARAM_X);
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
-    _f_st = relative_surface_tension(leaves.t);
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
+    _f_st = relative_surface_tension(leaf.t);
 
-    β.β = β_factor(β.FUNC, leaves.HS.VC, leaves.HS._p_element[end] / _f_st);
+    β.β = β_factor(β.FUNC, leaf.HS.VC, leaf.HS._p_element[end] / _f_st);
 
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
@@ -85,15 +85,15 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
-    _f_st = relative_surface_tension(leaves.t);
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
+    _f_st = relative_surface_tension(leaf.t);
 
-    β.β = β_factor(β.FUNC, leaves.HS._p_element[end] / _f_st);
+    β.β = β_factor(β.FUNC, leaf.HS._p_element[end] / _f_st);
 
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
@@ -121,7 +121,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     _norm = 0;
     _deno = 0;
