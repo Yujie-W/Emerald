@@ -76,7 +76,7 @@ leaf_photosynthesis!(
             β::BetaFunction{FT},
             param_y::BetaParameterVcmax;
             rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(lf, air, mode, β.β₁; rd_only = rd_only);
+) where {FT} = leaf_photosynthesis!(lf, air, mode, β.β; rd_only = rd_only);
 
 
 #######################################################################################################################################################################################################

@@ -31,9 +31,11 @@ include("config/config.jl");
 
 
 # General methods
+include("method/beta.jl");
 include("method/colimit.jl");
 include("method/kinetics.jl");
 include("method/mode.jl");
+include("method/stomata.jl");
 
 
 # Plant hydraulics (dependent on config)
@@ -60,6 +62,7 @@ include("leaf/biophysics.jl");
 include("leaf/energy.jl");
 include("leaf/extraxylem.jl");
 include("leaf/fluorescence.jl");
+include("leaf/flux.jl");
 
 include("leaf/photosynthesis.jl");
 
@@ -77,8 +80,6 @@ include("air.jl");
 include("geometry.jl");
 include("meteorology.jl");
 include("soil.jl");
-include("stomata.jl");
-include("xylem.jl");
 
 include("canopy.jl");
 include("leaf.jl");

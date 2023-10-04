@@ -22,4 +22,4 @@ function read_β end
 
 read_β(sm::AbstractStomataModel{FT}) where {FT} = FT(NaN);
 
-read_β(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = sm.β.β₁;
+read_β(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = sm.β.β;

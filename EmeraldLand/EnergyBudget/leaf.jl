@@ -50,7 +50,7 @@ function leaf_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
         end;
 
         # add the sensible heat flux from the leaf to air (to total leaf area)
-        g_be = FT(1.4) * FT(0.135) * sqrt(AIR[LEAVES_INDEX[i]].wind / (FT(0.72) * LEAVES[i].WIDTH));
+        g_be = FT(1.4) * FT(0.135) * sqrt(AIR[LEAVES_INDEX[i]].wind / (FT(0.72) * LEAVES[i].NS.bio.width));
         leaf.NS.energy.auxil.∂e∂t -= 2 * g_be * CP_D_MOL(FT) * (leaf.NS.energy.auxil.t - air.t) * leaf.NS.xylem.state.area;
 
         # add the net radiation energy to the leaf (to total leaf area)

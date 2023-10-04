@@ -124,7 +124,7 @@ function ∂T∂E end
 
 ∂T∂E(lf::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(lf.BIO, lf, air, f_view);
 
-∂T∂E(bio::HyperLeafBio{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaves.t, leaves.WIDTH, air.wind, 1 - bio.auxil.τ_LW);
+∂T∂E(bio::HyperLeafBio{FT}, leaves::Leaves2D{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(f_view, leaves.t, leaves.NS.bio.width, air.wind, 1 - bio.auxil.τ_LW);
 
 ∂T∂E(f_view::FT, t::FT, width::FT, wind::FT, ϵ::FT) where {FT} = (
     _λ = latent_heat_vapor(t) * M_H₂O(FT);

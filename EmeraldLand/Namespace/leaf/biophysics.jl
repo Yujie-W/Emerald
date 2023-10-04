@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-14: add struct HyperLeafBioState
 #     2023-Sep-14: add fields ϕ_car and ϕ_car_ppar
+#     2023-Oct-03: add field width
 #
 #######################################################################################################################################################################################################
 """
@@ -38,6 +39,8 @@ Base.@kwdef mutable struct HyperLeafBioState{FT<:AbstractFloat}
     meso_n::FT = 1.4
     "Protein content in lma (pro = lma - cbc) `[g cm⁻²]`"
     pro::FT = 0
+    "leaf width `[m]`"
+    width::FT = 0.05
     "Fraction of carotenoid aborption into SIF `[-]`"
     ϕ_car::FT = 0
     "Fraction of carotenoid aborption into PPAR `[-]`"

@@ -52,7 +52,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
     _f_st = relative_surface_tension(leaves.t);
 
-    β.β₁ = β_factor(β.FUNC, leaves.HS.VC, leaves.HS._p_element[end] / _f_st);
+    β.β = β_factor(β.FUNC, leaves.HS.VC, leaves.HS._p_element[end] / _f_st);
 
     return nothing
 );
@@ -75,11 +75,11 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
 
     if _deno > 0
-        β.β₁ = _norm / _deno;
+        β.β = _norm / _deno;
     elseif _sumf < 0
-        β.β₁ = 1
+        β.β = 1
     else
-        β.β₁ = eps(FT);
+        β.β = eps(FT);
     end;
 
     return nothing
@@ -88,7 +88,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 β_factor!(roots::Vector{Root{FT}}, soil::Soil{FT}, leaves::Leaves2D{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
     _f_st = relative_surface_tension(leaves.t);
 
-    β.β₁ = β_factor(β.FUNC, leaves.HS._p_element[end] / _f_st);
+    β.β = β_factor(β.FUNC, leaves.HS._p_element[end] / _f_st);
 
     return nothing
 );
@@ -111,11 +111,11 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
 
     if _deno > 0
-        β.β₁ = _norm / _deno;
+        β.β = _norm / _deno;
     elseif _sumf < 0
-        β.β₁ = 1
+        β.β = 1
     else
-        β.β₁ = eps(FT);
+        β.β = eps(FT);
     end;
 
     return nothing
@@ -139,11 +139,11 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
 
     if _deno > 0
-        β.β₁ = _norm / _deno;
+        β.β = _norm / _deno;
     elseif _sumf < 0
-        β.β₁ = 1
+        β.β = 1
     else
-        β.β₁ = eps(FT);
+        β.β = eps(FT);
     end;
 
     return nothing
