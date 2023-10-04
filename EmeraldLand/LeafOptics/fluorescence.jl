@@ -265,7 +265,7 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
+    leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::Int) where {FT}
 
 Update the SIF conversion matrix of the leaf, given
 - `config` SPAC configuration
@@ -273,7 +273,7 @@ Update the SIF conversion matrix of the leaf, given
 - `N` number of sublayers of each layer
 
 """
-function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, N::Int) where {FT}
+function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::Int) where {FT}
     (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE, Φ_PS, Φ_PSI, Φ_PSII) = SPECTRA;
 

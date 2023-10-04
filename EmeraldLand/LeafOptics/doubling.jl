@@ -7,15 +7,15 @@
 #######################################################################################################################################################################################################
 """
 
-    doubling_sif_matrices(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}; NDUB = 10) where {FT}
+    doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; NDUB = 10) where {FT}
 
 Return the matrices for fluorescence calculation using doubling adding method, given
 - `config` `SPACConfiguration` type struct
-- `bio` `HyperLeafBio` type struct
+- `bio` `LeafBio` type struct
 - `NDUB` Number of doubling adding steps
 
 """
-function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}; NDUB = 10) where {FT}
+function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; NDUB = 10) where {FT}
     (; DIM_SIF, DIM_SIFE, SPECTRA) = config;
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
     auxil = bio.auxil;

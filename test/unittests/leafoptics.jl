@@ -32,7 +32,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
     @testset "Leaf interface ρ and τ" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        bio = NS.HyperLeafBio(config);
+        bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
 
         @test all(0 .< bio.auxil.ρ_interface_θ  .< 1);
@@ -45,7 +45,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
     @testset "Leaf sublayer τ and f" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        bio = NS.HyperLeafBio(config);
+        bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
         LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
 
@@ -57,7 +57,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
     @testset "Leaf layer ρ and τ" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        bio = NS.HyperLeafBio(config);
+        bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
         LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
         LO.leaf_layer_ρ_τ!(bio, 10);
@@ -75,7 +75,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
     @testset "Leaf layer effective interface ρ" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        bio = NS.HyperLeafBio(config);
+        bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
         LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
         LO.leaf_layer_ρ_τ!(bio, 10);
@@ -100,7 +100,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
     @testset "Leaf ρ and τ" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        bio = NS.HyperLeafBio(config);
+        bio = NS.LeafBio(config);
 
         LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
         @test all(0 .< bio.auxil.ρ_leaf .< 1);
@@ -115,7 +115,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
     @testset "Leaf SIF backward and forward matrices" begin
         config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
-        bio = NS.HyperLeafBio(config);
+        bio = NS.LeafBio(config);
         LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
         rad = ones(Float64, size(bio.auxil.mat_b,2));
         sif_b = bio.auxil.mat_b * rad;

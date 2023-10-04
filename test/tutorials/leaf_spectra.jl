@@ -12,7 +12,7 @@ using Test;
     #     - Hyperspectral absorption feature of leaf biophysical traits
     #     - Leaf water content in [mol m⁻²] (yes, as an input)
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
-    bio = EmeraldLand.Namespace.HyperLeafBio(config);
+    bio = EmeraldLand.Namespace.LeafBio(config);
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 

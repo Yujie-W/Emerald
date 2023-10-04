@@ -17,7 +17,7 @@
 #     2023-Sep-18: add field Φ_SIF_WL
 #     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
-#     2023-Sep-22: remove APAR_CAR (now a state variable in HyperLeafBioState)
+#     2023-Sep-22: remove APAR_CAR (now a state variable in LeafBioState)
 #     2023-Oct-02: add field MESSAGE_LEVEL
 #
 #######################################################################################################################################################################################################

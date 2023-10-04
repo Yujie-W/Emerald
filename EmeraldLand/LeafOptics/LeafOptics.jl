@@ -9,7 +9,7 @@ using ..Namespace: HyperspectralRadiation, ReferenceSpectra
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 
-using ..Namespace: HyperLeafBio, HyperLeafBioState
+using ..Namespace: LeafBio, LeafBioState
 include("doubling.jl");
 include("effective.jl");
 include("fluorescence.jl");

@@ -21,7 +21,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct Leaf{FT}
     "Leaf biophysics struct"
-    bio::HyperLeafBio{FT}
+    bio::LeafBio{FT}
     "Extraxylary capacitor struct"
     capacitor::ExtraXylemCapacitor{FT} = ExtraXylemCapacitor{FT}()
     "Leaf energy struct"
@@ -44,7 +44,7 @@ Return the leaf struct with initialized energy states, given
 
 """
 Leaf(config::SPACConfiguration{FT}) where {FT} = (
-    leaf = Leaf{FT}(bio = HyperLeafBio(config), flux = LeafFlux(config), xylem = XylemHydraulics(config));
+    leaf = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), xylem = XylemHydraulics(config));
     initialize_energy_storage!(leaf);
 
     return leaf

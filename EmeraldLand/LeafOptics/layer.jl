@@ -132,14 +132,14 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_layer_ρ_τ!(bio::HyperLeafBio{FT}, N::Int) where {FT}
+    leaf_layer_ρ_τ!(bio::LeafBio{FT}, N::Int) where {FT}
 
 Update the reflectance and transmittance of the leaf layers, given
 - `bio` leaf hyperspectral biophysics
 - `N` number of sublayers of each layer
 
 """
-function leaf_layer_ρ_τ!(bio::HyperLeafBio{FT}, N::Int) where {FT}
+function leaf_layer_ρ_τ!(bio::LeafBio{FT}, N::Int) where {FT}
     bio.auxil.ρ_layer_θ .= layer_1_ρ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
     bio.auxil.τ_layer_θ .= layer_1_τ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
     bio.auxil.ρ_layer_1 .= layer_1_ρ.(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);

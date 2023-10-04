@@ -7,7 +7,7 @@
 #######################################################################################################################################################################################################
 """
 
-    sublayer_f_cab(bios::HyperLeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+    sublayer_f_cab(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
 
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `bios` leaf biophysical state variables
@@ -23,7 +23,7 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `lwc` leaf water content
 
 """
-function sublayer_f_cab(bios::HyperLeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+function sublayer_f_cab(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
     Σkx = k_ant * bios.ant +                            # anthocynanin absorption absorption
           k_brown * bios.brown +                        # brown pigments
           k_cab * bios.cab +                            # chlorophyll a + b absorption
@@ -47,7 +47,7 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    sublayer_f_car(bios::HyperLeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+    sublayer_f_car(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
 
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `bios` leaf biophysical state variables
@@ -63,7 +63,7 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `lwc` leaf water content
 
 """
-function sublayer_f_car(bios::HyperLeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+function sublayer_f_car(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
     Σkx = k_ant * bios.ant +
           k_brown * bios.brown +
           k_cab * bios.cab +
@@ -87,7 +87,7 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    sublayer_τ(bios::HyperLeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT, x::FT, N::Int) where {FT}
+    sublayer_τ(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT, x::FT, N::Int) where {FT}
 
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `bios` leaf biophysical state variables
@@ -105,7 +105,7 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `N` number of sublayers of each layer
 
 """
-function sublayer_τ(bios::HyperLeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT, x::FT, N::Int) where {FT}
+function sublayer_τ(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT, x::FT, N::Int) where {FT}
     Σkx = k_ant * bios.ant +
           k_brown * bios.brown +
           k_cab * bios.cab +
@@ -152,7 +152,7 @@ end;
 #
 # Changes to this function
 # General
-#     2023-Sep-15: add function to update the sublayer absorption and transmittance within HyperLeafBio
+#     2023-Sep-15: add function to update the sublayer absorption and transmittance within LeafBio
 #     2023-Sep-15: save f_sife as well as f_cab and f_car
 #     2023-Sep-16: fix a typo related to f_car (was using 1 - f_car)
 #     2023-Sep-18: save τ_all_i after computing τ_sub_i
@@ -161,12 +161,12 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT}
-    leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT}
+    leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT}
+    leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT}
 
 Update the sublayer absorption and transmittance within `bio`, given
 - `config` SPAC configuration
-- `bio` HyperLeafBio struct
+- `bio` LeafBio struct
 - `lwc` leaf water content
 - `N` number of sublayers of each layer
 - `spectra` ReferenceSpectra struct
@@ -174,9 +174,9 @@ Update the sublayer absorption and transmittance within `bio`, given
 """
 function leaf_sublayer_f_τ! end;
 
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = leaf_sublayer_f_τ!(config.SPECTRA, bio, lwc, N);
+leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT} = leaf_sublayer_f_τ!(config.SPECTRA, bio, lwc, N);
 
-leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, lwc::FT, N::Int) where {FT} = (
+leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT} = (
     (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = spectra;
 
     x = 1 / bio.state.meso_n;

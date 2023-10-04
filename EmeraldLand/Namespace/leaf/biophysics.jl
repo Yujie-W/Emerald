@@ -4,7 +4,7 @@
 #
 # Changes to this struct
 # General
-#     2023-Sep-14: add struct HyperLeafBioState
+#     2023-Sep-14: add struct LeafBioState
 #     2023-Sep-14: add fields ϕ_car and ϕ_car_ppar
 #     2023-Oct-03: add field width
 #
@@ -20,7 +20,7 @@ Struct that contains the state variables of leaf biophysical traits.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperLeafBioState{FT<:AbstractFloat}
+Base.@kwdef mutable struct LeafBioState{FT<:AbstractFloat}
     "Anthocyanin content `[μg cm⁻²]`"
     ant::FT = 0
     "Senescent material (brown pigments) fraction `[-]`"
@@ -52,7 +52,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-14: add struct HyperLeafBioAuxil
+#     2023-Sep-14: add struct LeafBioAuxil
 #     2023-Sep-14: add fields to store the interface, layer, and leaf reflectance and transmittance; SIF calculation matrices
 #     2023-Sep-16: add fields f_sife, mat_b_i and mat_f_i
 #     2023-Sep-18: add fields τ_all_i, mat_x_i_out, and _ϕ_sif
@@ -71,7 +71,7 @@ Struct that contains the auxiliary variables of leaf biophysical traits (to save
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
+Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     # shortwave radiation
     # pigment absorption fractions
     "Chlorophyll a and b absorption fraction `[-]`"
@@ -164,10 +164,10 @@ Base.@kwdef mutable struct HyperLeafBioAuxil{FT<:AbstractFloat}
     _ϕ_sif::Vector{FT}
 end;
 
-HyperLeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
+LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_SIF, DIM_SIFE, DIM_WL) = config;
 
-    return HyperLeafBioAuxil{FT}(
+    return LeafBioAuxil{FT}(
                 f_cab            = zeros(FT, DIM_WL),
                 f_car            = zeros(FT, DIM_WL),
                 f_ppar           = zeros(FT, DIM_WL),
@@ -225,12 +225,12 @@ Struct that contains leaf biophysical traits used to run leaf reflectance and tr
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperLeafBio{FT<:AbstractFloat}
+Base.@kwdef mutable struct LeafBio{FT<:AbstractFloat}
     # state variables (prognostic or structural)
     "State variables"
-    state::HyperLeafBioState{FT} = HyperLeafBioState{FT}()
+    state::LeafBioState{FT} = LeafBioState{FT}()
     "Auxiliary variables"
-    auxil::HyperLeafBioAuxil{FT}
+    auxil::LeafBioAuxil{FT}
 end;
 
-HyperLeafBio(config::SPACConfiguration{FT}) where {FT} = return HyperLeafBio{FT}(auxil = HyperLeafBioAuxil(config));
+LeafBio(config::SPACConfiguration{FT}) where {FT} = return LeafBio{FT}(auxil = LeafBioAuxil(config));

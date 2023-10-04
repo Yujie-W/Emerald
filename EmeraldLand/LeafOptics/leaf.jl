@@ -53,19 +53,19 @@ end;
 #
 # Changes to this function
 # General
-#     2023-Sep-15: add function to update the leaf reflectance and transmittance within HyperLeafBio
+#     2023-Sep-15: add function to update the leaf reflectance and transmittance within LeafBio
 #     2023-Sep-16: save leaf aborption as well
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_ρ_τ!(bio::HyperLeafBio{FT}) where {FT}
+    leaf_ρ_τ!(bio::LeafBio{FT}) where {FT}
 
 Update the leaf reflectance and transmittance within `bio`, given
-- `bio` HyperLeafBio struct
+- `bio` LeafBio struct
 
 """
-function leaf_ρ_τ!(bio::HyperLeafBio{FT}) where {FT}
+function leaf_ρ_τ!(bio::LeafBio{FT}) where {FT}
     bio.auxil.ρ_leaf .= leaf_ρ.(bio.auxil.ρ_layer_θ, bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, bio.auxil.ρ_layer_2);
     bio.auxil.τ_leaf .= leaf_τ.(bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2);
     bio.auxil.α_leaf .= 1 .- bio.auxil.ρ_leaf .- bio.auxil.τ_leaf;
@@ -84,16 +84,16 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+    leaf_ρ_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
 
 Update the interface, sublayer, layer, and leaf level reflectance and transmittance within `bio`, given
 - `config` SPAC configuration
-- `bio` HyperLeafBio struct
+- `bio` LeafBio struct
 
 """
 function leaf_spectra! end;
 
-leaf_spectra!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT} = (
+leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT} = (
     leaf_interface_ρ_τ!(config, bio, θ);
     leaf_sublayer_f_τ!(config, bio, lwc, N);
     leaf_layer_ρ_τ!(bio, N);

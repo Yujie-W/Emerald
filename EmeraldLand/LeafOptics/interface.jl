@@ -122,26 +122,26 @@ end;
 #
 # Changes to this function
 # General
-#     2023-Sep-15: add function to update the auxiliary variables in HyperLeafBio struct
+#     2023-Sep-15: add function to update the auxiliary variables in LeafBio struct
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT}
-    leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT}
+    leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, θ::FT) where {FT}
+    leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, θ::FT) where {FT}
 
 Update the interface reflectance and transmittance in `bio`, given
 - `config` SPAC configuration
-- `bio` HyperLeafBio struct
+- `bio` LeafBio struct
 - `θ` average angle of the incident radiation
 - `spectra` ReferenceSpectra struct
 
 """
 function leaf_interface_ρ_τ! end;
 
-leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = leaf_interface_ρ_τ!(config.SPECTRA, bio, θ);
+leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, θ::FT) where {FT} = leaf_interface_ρ_τ!(config.SPECTRA, bio, θ);
 
-leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::HyperLeafBio{FT}, θ::FT) where {FT} = (
+leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, θ::FT) where {FT} = (
     (; NR) = spectra;
 
     bio.auxil.τ_interface_θ  .= interface_isotropic_τ.(FT(1), NR, θ);

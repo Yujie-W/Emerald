@@ -47,6 +47,10 @@ include("xylem/junction.jl");
 include("xylem/xylem.jl");
 
 
+# Soil
+include("soil/vc.jl");
+
+
 # Root system (dependent on xylem)
 include("root/rhizosphere.jl");
 
