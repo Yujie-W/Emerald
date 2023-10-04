@@ -141,12 +141,12 @@ update!(config::SPACConfiguration{FT},
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
         for _leaf in LEAVES
-            _leaf.NS.bio.state.cab = cab;
+            _leaf.bio.state.cab = cab;
         end;
     end;
     if !isnothing(car)
         for _leaf in LEAVES
-            _leaf.NS.bio.state.car = car;
+            _leaf.bio.state.car = car;
         end;
     end;
     if !isnothing(cab) || !isnothing(car)
@@ -159,14 +159,14 @@ update!(config::SPACConfiguration{FT},
         CANOPY.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
         CANOPY._x_bnds = (lai ==0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(CANOPY.δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -lai));
         for _i in 1:DIM_LAYER
-            LEAVES[_i].NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+            LEAVES[_i].xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
         end;
 
         # make sure leaf area index setup and energy are correct
         for _i in eachindex(LEAVES)
             _clayer = LEAVES[_i];
-            _clayer.NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
-            initialize_energy_storage!(_clayer.NS);
+            _clayer.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+            initialize_energy_storage!(_clayer);
         end;
     end;
     if !isnothing(vcmax)
@@ -258,16 +258,16 @@ update!(config::SPACConfiguration{FT},
     # prescribe leaf temperature
     if !isnothing(t_leaf)
         for _leaf in LEAVES
-            _leaf.NS.energy.auxil.t = t_leaf;
-            _leaf.NS.energy.auxil.cp = heat_capacitance(_leaf);
-            _leaf.NS.energy.state.Σe = _leaf.NS.energy.auxil.cp * _leaf.NS.energy.auxil.t;
+            _leaf.energy.auxil.t = t_leaf;
+            _leaf.energy.auxil.cp = heat_capacitance(_leaf);
+            _leaf.energy.state.Σe = _leaf.energy.auxil.cp * _leaf.energy.auxil.t;
         end;
 
         # make sure leaf area index setup and energy are correct
         for _i in eachindex(LEAVES)
             _clayer = LEAVES[_i];
-            _clayer.NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
-            initialize_energy_storage!(_clayer.NS);
+            _clayer.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+            initialize_energy_storage!(_clayer);
         end;
     end;
 

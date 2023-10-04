@@ -145,7 +145,7 @@ T_VEG(spac::MultiLayerSPAC{FT}) where {FT} = (
     # compute transpiration rate
     _tran::FT = 0;
     for _i in eachindex(LEAVES)
-        _tran += (flow_out(LEAVES[_i].NS.xylem) - LEAVES[_i].NS.capacitor.auxil.flow) * CANOPY.δlai[_i];
+        _tran += (flow_out(LEAVES[_i].xylem) - LEAVES[_i].capacitor.auxil.flow) * CANOPY.δlai[_i];
     end;
 
     return _tran

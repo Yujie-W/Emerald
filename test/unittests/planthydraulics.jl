@@ -143,7 +143,7 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
 
         # make sure the water in the junction capacitor changes with the total water in (from roots) and total water out (to air)
         Σf_root = sum([PH.flow_in(root) for root in spac.ROOTS]);
-        Σf_leaf = sum([PH.flow_out(leaf) + leaf.NS.capacitor.auxil.flow for leaf in spac.LEAVES]);
+        Σf_leaf = sum([PH.flow_out(leaf) + leaf.capacitor.auxil.flow for leaf in spac.LEAVES]);
         q1_junc = spac.JUNCTION.state.v_storage;
         PH.plant_water_budget!(spac, 1.0);
         q2_junc = spac.JUNCTION.state.v_storage;
@@ -168,13 +168,13 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
         @test PH.flow_out(spac.TRUNK) == sum([PH.flow_in(branch) for branch in spac.BRANCHES]);
 
         # make sure the water in the leaf capacitor changes with the total water in (from stem) and total water out (to air)
-        q1s = [leaf.NS.capacitor.state.v_storage for leaf in spac.LEAVES];
+        q1s = [leaf.capacitor.state.v_storage for leaf in spac.LEAVES];
         fis = [PH.flow_in(leaf) for leaf in spac.LEAVES];
         fos = [PH.flow_out(leaf) for leaf in spac.LEAVES];
         PH.plant_water_budget!(spac, 1.0);
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
-        q2s = [leaf.NS.capacitor.state.v_storage for leaf in spac.LEAVES];
+        q2s = [leaf.capacitor.state.v_storage for leaf in spac.LEAVES];
         @test all(q2s .- q1s .≈ fis .- fos);
 
         # make sure the water in the branch capacitor changes with the total water in (from trunk) and total water out (to leaf)

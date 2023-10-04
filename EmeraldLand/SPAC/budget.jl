@@ -116,7 +116,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     _δt_7 = _δt_6;
     if ENABLE_ENERGY_BUDGET && spac.CANOPY.lai > 0
         for _clayer in LEAVES
-            _∂T∂t = _clayer.NS.energy.auxil.∂e∂t / (_clayer.NS.xylem.state.cp * _clayer.NS.bio.state.lma * 10 + CP_L_MOL(FT) * _clayer.NS.capacitor.state.v_storage);
+            _∂T∂t = _clayer.energy.auxil.∂e∂t / (_clayer.xylem.state.cp * _clayer.bio.state.lma * 10 + CP_L_MOL(FT) * _clayer.capacitor.state.v_storage);
             _δt_7 = min(1 / abs(_∂T∂t), _δt_7);
 
             if DEBUG

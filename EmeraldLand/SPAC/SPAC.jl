@@ -9,7 +9,7 @@ using ..CanopyOptics: canopy_fluorescence!, canopy_radiation!, longwave_radiatio
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: leaf_spectra!
 using ..Namespace: XylemHydraulicsAuxilNSS
-using ..Namespace: JunctionCapacitor, Leaves2D, Root, SoilLayer, Stem
+using ..Namespace: JunctionCapacitor, Leaf, Root, SoilLayer, Stem
 using ..Namespace: AirLayer, GCO₂Mode, MultiLayerSPAC, SPACConfiguration, MultiLayerSPACState
 using ..Namespace: initialize_energy_storage!
 using ..Photosynthesis: plant_photosynthesis!

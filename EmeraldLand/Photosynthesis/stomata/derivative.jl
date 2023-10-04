@@ -11,11 +11,9 @@
 """
 
     ∂R∂T(leaf::Leaf{FT}) where {FT}
-    ∂R∂T(leaves::Leaves2D{FT}) where {FT}
 
 Return the marginal increase in respiration rate per temperature, given
 - `leaf` `Leaf` type leaf
-- `leaves` `Leaves2D` type leaf
 
 """
 function ∂R∂T end

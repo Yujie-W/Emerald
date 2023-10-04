@@ -71,7 +71,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 #     2022-Jun-10: add PAR calculation (before absorption)
 #     2022-Jun-10: compute shortwave net radiation
 #     2022-Jun-13: use DIM_LAYER instead of _end
-#     2022-Jun-29: use Leaves2D for the hyperspectral RT
+#     2022-Jun-29: use Leaf for the hyperspectral RT
 #     2023-Mar-11: add code to account for the case of LAI == 0
 #     2023-Apr-13: rename option APAR_car to apar_car
 #     2023-Apr-13: name the method to shortwave_radiation! to be more specific
@@ -87,17 +87,17 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}) where {FT}
+    shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave radiation, given
 - `config` Configuration for `MultiLayerSPAC`
 - `can` `HyperspectralMLCanopy` type struct
-- `leaves` Vector of `Leaves2D`
+- `leaves` Vector of `Leaf`
 - `rad` Incoming shortwave radiation
 - `soil` Bottom soil boundary layer
 
 """
-shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}) where {FT} = (
+shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::HyperspectralRadiation{FT}, soil::Soil{FT}) where {FT} = (
     (; DIM_LAYER, SPECTRA) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
     (; ALBEDO) = soil;
@@ -216,7 +216,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
     for _i in 1:DIM_LAYER
-        _α_apar = view(leaves[_i].NS.bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
+        _α_apar = view(leaves[_i].bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_diffuse,SPECTRA.IΛ_PAR,_i)) .* 1000;
@@ -272,22 +272,22 @@ function longwave_radiation! end
 # General
 #     2022-Jun-10: migrate the function thermal_fluxes! from CanopyLayers
 #     2022-Jun-10: update net lw radiation for leaves and soil
-#     2022-Jun-29: use Leaves2D for the hyperspectral RT
+#     2022-Jun-29: use Leaf for the hyperspectral RT
 #     2023-Mar-11: add code to account for the case of LAI == 0
 #
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT}
+    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT, soil::Soil{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave or longwave radiation, given
 - `can` `HyperspectralMLCanopy` type struct
-- `leaves` Vector of `Leaves2D`
+- `leaves` Vector of `Leaf`
 - `rad` Incoming longwave radiation
 - `soil` Bottom soil boundary layer
 
 """
-longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}, rad::FT, soil::Soil{FT}) where {FT} = (
+longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT, soil::Soil{FT}) where {FT} = (
     (; OPTICS, RADIATION) = can;
     (; ALBEDO, LAYERS) = soil;
 
@@ -305,7 +305,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaves2D{FT}}
 
     # 1. compute longwave radiation out from the leaves and soil
     for _i in eachindex(leaves)
-        RADIATION.r_lw[_i] = K_STEFAN(FT) * OPTICS.ϵ[_i] * leaves[_i].NS.energy.auxil.t ^ 4;
+        RADIATION.r_lw[_i] = K_STEFAN(FT) * OPTICS.ϵ[_i] * leaves[_i].energy.auxil.t ^ 4;
     end;
 
     _r_lw_soil = K_STEFAN(FT) * (1 - ALBEDO.ρ_LW) * LAYERS[1].t ^ 4;

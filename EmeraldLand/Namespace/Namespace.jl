@@ -70,11 +70,9 @@ include("leaf/leaf.jl");
 
 
 
+
+
 include("radiation.jl");
-
-
-
-
 
 include("air.jl");
 include("geometry.jl");
@@ -82,7 +80,6 @@ include("meteorology.jl");
 include("soil.jl");
 
 include("canopy.jl");
-include("leaf.jl");
 
 include("spac.jl");
 

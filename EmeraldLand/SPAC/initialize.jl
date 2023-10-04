@@ -46,8 +46,8 @@ initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} 
     # make sure leaf area index setup and energy are correct
     for _i in eachindex(LEAVES)
         _clayer = LEAVES[_i];
-        _clayer.NS.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
-        initialize_energy_storage!(_clayer.NS);
+        _clayer.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
+        initialize_energy_storage!(_clayer);
     end;
 
     # initialize leaf level spectra

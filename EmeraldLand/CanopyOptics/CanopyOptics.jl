@@ -11,7 +11,7 @@ using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BroadbandRadiation, BroadbandSLCanopy, BroadbandSoilAlbedo
 using ..Namespace: HyperspectralMLCanopy, HyperspectralRadiation, HyperspectralSoilAlbedo, ReferenceSpectra
-using ..Namespace: BetaLIDF, Leaves2D, Soil, SunSensorGeometry, VerhoefLIDF
+using ..Namespace: BetaLIDF, Leaf, Soil, SunSensorGeometry, VerhoefLIDF
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 

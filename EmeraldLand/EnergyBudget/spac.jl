@@ -57,7 +57,7 @@ function spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
     # update the temperature for branches and leaves
     for _i in 1:DIM_LAYER
         BRANCHES[_i].energy.state.Σe += BRANCHES[_i].energy.auxil.∂e∂t * δt;
-        LEAVES[_i].NS.energy.state.Σe += LEAVES[_i].NS.energy.auxil.∂e∂t * δt;
+        LEAVES[_i].energy.state.Σe += LEAVES[_i].energy.auxil.∂e∂t * δt;
     end;
 
     return nothing

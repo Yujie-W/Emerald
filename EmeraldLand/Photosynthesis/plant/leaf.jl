@@ -11,14 +11,13 @@
 #     2022-Jan-18: add p_i to electron transport function input variables
 #     2022-Feb-28: add support to C3CytochromeModel
 #     2022-Jun-27: remove ppar from input variable list of light_limited_rate!
-#     2022-Jun-28: add method for Leaves2D
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2022-Jul-07: save a_net and a_gross to Leaf (as PSM may be used for temporary calculations)
 #     2022-Jul-12: use β as a must have option (and thus this function becomes a core function of the one above)
 #     2022-Jul-28: move temperature control to function photosystem_temperature_dependence!
 #     2023-Mar-11: add option to compute respiration rate only
 #     2023-Jun-13: save actual etr as well
-#     2023-Sep-09: save ϕ_d, ϕ_n, and ϕ_p to Leaves2D
+#     2023-Sep-09: save ϕ_d, ϕ_n, and ϕ_p to Leaf
 #
 #######################################################################################################################################################################################################
 """

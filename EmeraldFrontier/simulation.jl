@@ -41,7 +41,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr
     _df_wnd::FT = dfr.WIND;
 
     # adjust optimum t based on 10 day moving average skin temperature
-    _tleaf = nanmean([_layer.NS.energy.auxil.t for _layer in spac.LEAVES]);
+    _tleaf = nanmean([_layer.energy.auxil.t for _layer in spac.LEAVES]);
     push!(spac.MEMORY.tem, _tleaf);
     if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
     update!(config, spac; t_clm = nanmean(spac.MEMORY.tem));
@@ -306,7 +306,7 @@ simulation!(config::SPACConfiguration{FT},
         end;
     end;
     if ENABLE_ENERGY_BUDGET
-        _tleaf = [_leaf.NS.energy.auxil.t for _leaf in spac.LEAVES];
+        _tleaf = [_leaf.energy.auxil.t for _leaf in spac.LEAVES];
         dfr.MOD_T_L_MAX  = nanmax(_tleaf);
         dfr.MOD_T_L_MEAN = nanmean(_tleaf);
         dfr.MOD_T_L_MIN  = nanmin(_tleaf);

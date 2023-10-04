@@ -331,7 +331,7 @@ BroadbandSLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} = (
 #     2022-Jun-10: add more fields for SIF
 #     2022-Jun-13: add more fields for sif calculations
 #     2022-Jun-15: rename to HyperspectralMLCanopyRadiationProfile
-#     2022-Jun-27: move ppar_sunlit and ppar_shaded to Leaves2D
+#     2022-Jun-27: move ppar_sunlit and ppar_shaded to Leaf
 #     2022-Jul-19: add dimension control to struct
 #     2022-Aug-30: rename sif_obs_ssoil to sif_obs_soil (typo fix, non-breaking)
 #     2023-Jun-16: remove fields DIM_*

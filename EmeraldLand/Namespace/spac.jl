@@ -34,7 +34,7 @@ end
 #     2022-May-25: SPAC system for monospecies tree
 #     2022-May-25: use Root and Stem structures with temperatures
 #     2022-May-31: rename _qs to _fs
-#     2022-Jun-29: rename struct to MultiLayerSPAC, and use Leaves2D
+#     2022-Jun-29: rename struct to MultiLayerSPAC, and use Leaf
 #     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
@@ -88,7 +88,7 @@ mutable struct MultiLayerSPAC{FT}
     "Canopy used for radiation calculations"
     CANOPY::HyperspectralMLCanopy{FT}
     "Leaf per layer"
-    LEAVES::Vector{Leaves2D{FT}}
+    LEAVES::Vector{Leaf{FT}}
     "Memory cache"
     MEMORY::SPACMemory{FT}
     "Meteorology information"
@@ -172,7 +172,7 @@ MultiLayerSPAC(
                 SunSensorGeometry{FT}(),                                                # ANGLES
                 branches,                                                               # BRANCHES
                 HyperspectralMLCanopy(config),                                          # CANOPY
-                Leaves2D{FT}[Leaves2D(config) for _i in 1:config.DIM_LAYER],            # LEAVES
+                Leaf{FT}[Leaf(config) for _i in 1:config.DIM_LAYER],                    # LEAVES
                 SPACMemory{FT}(),                                                       # MEMORY
                 Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),   # METEO
                 roots,                                                                  # ROOTS

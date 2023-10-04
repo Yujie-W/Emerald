@@ -2,11 +2,7 @@
 
 flow_in(leaf::Leaf{FT}) where {FT} = flow_in(leaf.xylem);
 
-flow_in(leaf::Leaves2D{FT}) where {FT} = flow_in(leaf.NS);
-
 flow_out(leaf::Leaf{FT}) where {FT} = flow_out(leaf.xylem) + leaf.capacitor.auxil.flow;
-
-flow_out(leaf::Leaves2D{FT}) where {FT} = flow_out(leaf.NS);
 
 
 #######################################################################################################################################################################################################
@@ -45,12 +41,12 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
         g_sl /= length(LEAVES[i].g_H₂O_s_sunlit);
 
         g = g_sh * (1 - f_sl) + g_sl * f_sl;
-        d = saturation_vapor_pressure(LEAVES[i].NS.energy.auxil.t, LEAVES[i].NS.capacitor.auxil.p_leaf * 1000000) - AIR[LEAVES_INDEX[i]].p_H₂O;
+        d = saturation_vapor_pressure(LEAVES[i].energy.auxil.t, LEAVES[i].capacitor.auxil.p_leaf * 1000000) - AIR[LEAVES_INDEX[i]].p_H₂O;
         ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
         f = g * d / AIR[LEAVES_INDEX[i]].P_AIR;
 
         # set_flow_out!(LEAVES[i].HS.FLOW, f);
-        set_flow_profile!(LEAVES[i].NS.xylem, f - LEAVES[i].NS.capacitor.auxil.flow);
+        set_flow_profile!(LEAVES[i].xylem, f - LEAVES[i].capacitor.auxil.flow);
     end;
 
     return nothing
