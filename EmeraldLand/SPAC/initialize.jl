@@ -40,7 +40,8 @@ initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} 
             soil.state.ns[5] = spac.AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
         end;
         cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
-        soil.state.Σe = (soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + cp_gas) * soil.auxil.t;
+        soil.auxil.cp = heat_capacitance(soil);
+        soil.state.Σe = soil.auxil.cp * soil.auxil.t;
     end;
 
     # make sure leaf area index setup and energy are correct

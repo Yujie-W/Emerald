@@ -235,8 +235,8 @@ update!(config::SPACConfiguration{FT},
                 soil.state.ns[4] = AIR[1].P_AIR * 0.79 * soil.auxil.δz * _δθ / _rt;
                 soil.state.ns[4] = AIR[1].P_AIR * 0.209 * soil.auxil.δz * _δθ / _rt
             end;
-            _cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
-            soil.state.Σe = (soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * soil.auxil.t;
+            soil.auxil.cp = heat_capacitance(soil);
+            soil.state.Σe = soil.auxil.cp * soil.auxil.t;
         end;
     end;
 
@@ -250,8 +250,8 @@ update!(config::SPACConfiguration{FT},
             soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * _δθ / _rt;
             soil.state.ns[4]  = AIR[1].P_AIR * 0.79 * soil.auxil.δz * _δθ / _rt;
             soil.state.ns[5]  = AIR[1].P_AIR * 0.209 * soil.auxil.δz * _δθ / _rt
-            _cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
-            soil.state.Σe = (soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * soil.auxil.t;
+            soil.auxil.cp = heat_capacitance(soil);
+            soil.state.Σe = soil.auxil.cp * soil.auxil.t;
         end;
     end;
 

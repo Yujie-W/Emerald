@@ -26,7 +26,7 @@ Base.@kwdef mutable struct SoilLayerState{FT}
     "Soil moisture retention curve"
     vc::Union{BrooksCorey{FT}, VanGenuchten{FT}} = VanGenuchten{FT}("Loam")
     "Soil thermal conductivity `[W m⁻¹ K⁻¹]`"
-    λ_thermal::FT = 3
+    λ_soil::FT = 3
     "Dry soil density `[kg m⁻³]`"
     ρ::FT = 2650
     "Soil water content"
@@ -72,7 +72,7 @@ Base.@kwdef mutable struct SoilLayerAuxil{FT}
     "Layer thickness `[m]`"
     δz::FT = 1
     "Combined soil thermal conductance `[W m⁻² K⁻¹]`"
-    λ_thermal::FT = 0
+    λ_soil_water::FT = 0
     "Marginal increase in energy `[W m⁻²]`"
     ∂e∂t::FT = 0
     "Marginal increase in trace gas moles `[mol s⁻¹]`"

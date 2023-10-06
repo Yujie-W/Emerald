@@ -2,15 +2,16 @@
 
 module EnergyBudget
 
-using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L_MOL, CP_V_MOL, M_H₂O
+using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, M_H₂O, ρ_H₂O
 
-using ..Namespace: JunctionCapacitor, Leaf, Root, Stem, XylemHydraulics
+using ..Namespace: JunctionCapacitor, Leaf, Root, SoilLayer, Stem, XylemHydraulics
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..PhysicalChemistry: latent_heat_vapor
 using ..PlantHydraulics: flow_in, flow_out
 
 
 include("cp.jl");
+include("soil.jl");
 include("junction.jl");
 include("leaf.jl");
 include("root.jl");

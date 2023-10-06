@@ -44,7 +44,7 @@ Calculate the energy budgets of the spac, given
 """
 function spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     (; DIM_LAYER, DIM_ROOT) = config;
-    (; AIR, BRANCHES, LEAVES, LEAVES_INDEX, ROOTS, TRUNK) = spac;
+    (; BRANCHES, LEAVES, ROOTS, TRUNK) = spac;
 
     # update the temperature for roots
     for i in 1:DIM_ROOT

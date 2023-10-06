@@ -228,6 +228,7 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct PSMAuxil{FT}
+    # photosynthetic rates
     "RubisCO limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
     a_c::FT = 0
     "Gross photosynthetic rate `[μmol m⁻² s⁻¹]`"
@@ -238,6 +239,8 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     a_n::FT = 0
     "Product limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
     a_p::FT = 0
+
+    # electron transport rates
     "Electron to CO₂ coefficient"
     e2c::FT = 0
     "Electron transport `[μmol m⁻² s⁻¹]`"
@@ -248,6 +251,8 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     j_pot::FT = 0
     "PSI electron transport rate after colimitation"
     j_psi::FT = 0
+
+    # photosynthesis rate coefficients
     "RubisCO coefficient Kc `[Pa]`"
     k_c::FT = 0
     "Michaelis-Menten's coefficient `[Pa]`"
@@ -258,6 +263,10 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     k_pep::FT = 0
     "Maximal turnover rate of Cytochrome b₆f `[e⁻ s⁻¹]`"
     k_q::FT = 0
+    "CO₂ compensation point with the absence of Rd `[Pa]`"
+    γ_star::FT = 0
+
+    # respiration and carboxylation
     "Respiration rate at leaf temperature `[μmol m⁻² s⁻¹]`"
     r_d::FT = 0
     "Maximal carboxylation rate at leaf temperature `[μmol m⁻² s⁻¹]`"
@@ -266,16 +275,16 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     v_pmax::FT = 0
     "Maximal Cytochrome b₆f activity `[μmol e⁻ m⁻² s⁻¹]`"
     v_qmax::FT = 0
+
+    # C3 Cytochrome model variables
     "ratio between J_P700 and J_P680"
     η::FT = 0
     "Coupling efficiency of cyclic electron flow `[mol ATP mol⁻¹ e⁻]`"
     η_c::FT = 0
     "Coupling efficiency of linear electron flow `[mol ATP mol⁻¹ e⁻]`"
     η_l::FT = 0
-    "CO₂ compensation point with the absence of Rd `[Pa]`"
-    γ_star::FT = 0
 
-    # VJP reaction center vars
+    # yield variables
     "Heat dissipation yield"
     ϕ_d::FT = 0
     "Fluorescence yield"
@@ -284,6 +293,8 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     ϕ_n::FT = 0
     "Photochemical yield"
     ϕ_p::FT = 0
+
+    # fluorescence variables
     "Dark adapted yield (`Kp=0`)"
     f_m::FT = 0
     "Light adapted yield (`Kp=0`)"
@@ -292,18 +303,20 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     f_o::FT = 0
     "Light-adapted fluorescence yield in the dark (`Kp=max`)"
     f_o′::FT = 0
-    "Rate constant for thermal dissipation"
-    k_d::FT = 0
-    "Reversible NPQ rate constant (initially zero)"
-    k_npq_rev::FT = 0
-    "Rate constant for photochemistry"
-    k_p::FT = 0
     "Non-Photochemical quenching "
     npq::FT = 0
     "Energy quenching"
     q_e::FT = 0
     "Photochemical quenching"
     q_p::FT = 0
+
+    # fluorescence rate coefficients
+    "Rate constant for thermal dissipation"
+    k_d::FT = 0
+    "Reversible NPQ rate constant (initially zero)"
+    k_npq_rev::FT = 0
+    "Rate constant for photochemistry"
+    k_p::FT = 0
     "max PSII yield (_k_npq_rev = 0, all RC open)"
     ϕ_psii_max::FT = 0
 

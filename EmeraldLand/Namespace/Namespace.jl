@@ -30,7 +30,7 @@ include("config/trace.jl");
 include("config/config.jl");
 
 
-# General methods
+# General methods (for users to choose from)
 include("method/beta.jl");
 include("method/colimit.jl");
 include("method/kinetics.jl");
@@ -41,7 +41,7 @@ include("method/stomata.jl");
 include("method/xylem.jl");
 
 
-# Plant hydraulics (dependent on config)
+# Plant hydraulics (dependent on config and method)
 include("xylem/energy.jl");
 
 include("xylem/junction.jl");

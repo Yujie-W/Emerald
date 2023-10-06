@@ -24,7 +24,7 @@ import Emerald.EmeraldLand.SoilHydraulics as SH
     @testset "Vulnerability curve (fitting)" begin
         for vg in [NS.VanGenuchten{Float64}("Loam"), NS.VanGenuchten{Float64}("Sand")]
             bc = NS.BrooksCorey{Float64}(vg);
-            @show bc;
+            @test true;
         end;
     end;
 

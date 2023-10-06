@@ -44,7 +44,7 @@ Run soil water and energy budget, given
 function soil_budget! end
 
 soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    soil_infiltration!(config, spac);
+    soil_water_infiltration!(spac);
     soil_diffusion!(config, spac);
     soil_source_sink!(config, spac);
 
@@ -61,6 +61,7 @@ soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) w
     (; SOILS) = spac;
 
     # update soil temperature at each layer (top layer t will be same as _t above)
+    # TODO: use heat_capacitance function
     for i in eachindex(SOILS)
         soil = SOILS[i];
         _cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;

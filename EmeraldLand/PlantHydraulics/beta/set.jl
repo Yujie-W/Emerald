@@ -42,14 +42,14 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
-    β_factor!(roots, slayers, leaf, sm.β);
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
+    β_factor!(roots, soils, leaf, sm.β);
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, slayers, leaf, β, β.PARAM_X);
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
     f_st = relative_surface_tension(leaf.t);
 
     β.β = β_factor(β.FUNC, leaf.HS.VC, leaf.HS._p_element[end] / f_st);
@@ -57,14 +57,14 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
         f_st = relative_surface_tension(roots[i].t);
-        beta = β_factor(β.FUNC, slayers[i].state.vc, roots[i].HS.p_ups / f_st);
+        beta = β_factor(β.FUNC, soils[i].state.vc, roots[i].HS.p_ups / f_st);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
         norm += beta * kmax;
@@ -85,7 +85,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
     f_st = relative_surface_tension(leaf.t);
 
     β.β = β_factor(β.FUNC, leaf.HS._p_element[end] / f_st);
@@ -93,7 +93,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
@@ -121,14 +121,14 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
         f_st = relative_surface_tension(roots[i].t);
-        beta = β_factor(β.FUNC, soil_θ(slayers[i].state.vc, roots[i].HS.p_ups / f_st));
+        beta = β_factor(β.FUNC, soil_θ(soils[i].state.vc, roots[i].HS.p_ups / f_st));
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
         norm += beta * kmax;

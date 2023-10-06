@@ -10,9 +10,12 @@ import ..Namespace: BrooksCorey
 
 
 # vc
+include("vc/fitting.jl");
 include("vc/vulnerability.jl");
 
-include("vc/fitting.jl");
+# soil liquid water mass flow
+include("liquid/infiltration.jl");
+
 
 include("budget.jl");
 include("diffusion.jl");

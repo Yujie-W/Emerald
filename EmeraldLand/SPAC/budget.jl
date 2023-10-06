@@ -49,8 +49,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     _δt_3 = _δt_2;
     if ENABLE_ENERGY_BUDGET
         for soil in SOILS
-            _cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
-            _∂T∂t = soil.auxil.∂e∂t / (soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas);
+            _∂T∂t = soil.auxil.∂e∂t / soil.auxil.cp;
             _δt_3 = min(1 / abs(_∂T∂t), _δt_3);
         end;
     end;
