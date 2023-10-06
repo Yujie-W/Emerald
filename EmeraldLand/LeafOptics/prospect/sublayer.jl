@@ -172,12 +172,8 @@ Update the sublayer absorption and transmittance within `bio`, given
 - `spectra` ReferenceSpectra struct
 
 """
-function leaf_sublayer_f_τ! end;
-
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT} = leaf_sublayer_f_τ!(config.SPECTRA, bio, lwc, N);
-
-leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT} = (
-    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = spectra;
+function leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT}
+    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = config.SPECTRA;
 
     x = 1 / bio.state.meso_n;
     bio.auxil.f_cab  .= sublayer_f_cab.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
@@ -192,4 +188,4 @@ leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, lwc::FT, N:
     bio.auxil.τ_all_2 .= bio.auxil.τ_sub_2 .^ N;
 
     return nothing
-);
+end;

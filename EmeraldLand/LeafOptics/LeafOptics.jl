@@ -3,13 +3,10 @@ module LeafOptics
 using SpecialFunctions: expint
 
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
-using ..EmeraldPhysics.Optics: energy, energy!, photon, photon!
-
-using ..Namespace: HyperspectralRadiation, ReferenceSpectra
-using ..Namespace: MultiLayerSPAC, SPACConfiguration
-
 
 using ..Namespace: LeafBio, LeafBioState
+using ..Namespace: MultiLayerSPAC, SPACConfiguration
+
 
 include("prospect/interface.jl");
 include("prospect/sublayer.jl");

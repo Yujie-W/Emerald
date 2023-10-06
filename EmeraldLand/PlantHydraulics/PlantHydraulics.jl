@@ -1,21 +1,22 @@
 module PlantHydraulics
 
-using Statistics: mean
-
+using ..EmeraldMath.Math: upper_quadratic
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
-using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
-using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
-using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L_MOL, CP_V_MOL, GAS_R, M_H₂O, T₂₅, ρg_MPa
+using ..EmeraldPhysics.Constant: GAS_R, ρg_MPa
 
-using ..Namespace: AbstractSoilVC, AbstractXylemVC, ComplexVC, ExponentialPVCurve, LinearPVCurve, LogisticVC, PowerVC, SegmentedPVCurve, WeibullVC
-using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState, XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
-using ..Namespace: Root, SoilLayer
+using ..Namespace: AbstractSoilVC
+using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, MedlynSM
+using ..Namespace: AbstractXylemVC, ComplexVC, LogisticVC, PowerVC, WeibullVC
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
-using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
-using ..Namespace: JunctionCapacitor, Leaf, Stem
+using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve
+
+using ..Namespace: ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState
+using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
+using ..Namespace: JunctionCapacitor, Leaf, Root, SoilLayer, Stem
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
-using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using ..SoilHydraulics: relative_hydraulic_conductance, soil_θ, soil_ψ_25
+
+using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
+using ..SoilHydraulics: relative_soil_k, soil_θ
 
 
 # xylem

@@ -128,29 +128,23 @@ end;
 """
 
     leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, θ::FT) where {FT}
-    leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, θ::FT) where {FT}
 
 Update the interface reflectance and transmittance in `bio`, given
 - `config` SPAC configuration
 - `bio` LeafBio struct
 - `θ` average angle of the incident radiation
-- `spectra` ReferenceSpectra struct
 
 """
-function leaf_interface_ρ_τ! end;
+function leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, θ::FT) where {FT}
+    (; SPECTRA) = config;
 
-leaf_interface_ρ_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, θ::FT) where {FT} = leaf_interface_ρ_τ!(config.SPECTRA, bio, θ);
-
-leaf_interface_ρ_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, θ::FT) where {FT} = (
-    (; NR) = spectra;
-
-    bio.auxil.τ_interface_θ  .= interface_isotropic_τ.(FT(1), NR, θ);
-    bio.auxil.τ_interface_12 .= interface_isotropic_τ.(FT(1), NR, FT(90));
-    bio.auxil.τ_interface_21 .= interface_isotropic_τ.(NR, FT(1), FT(90));
+    bio.auxil.τ_interface_θ  .= interface_isotropic_τ.(FT(1), SPECTRA.NR, θ);
+    bio.auxil.τ_interface_12 .= interface_isotropic_τ.(FT(1), SPECTRA.NR, FT(90));
+    bio.auxil.τ_interface_21 .= interface_isotropic_τ.(SPECTRA.NR, FT(1), FT(90));
 
     bio.auxil.ρ_interface_θ  .= 1 .- bio.auxil.τ_interface_θ;
     bio.auxil.ρ_interface_12 .= 1 .- bio.auxil.τ_interface_12;
     bio.auxil.ρ_interface_21 .= 1 .- bio.auxil.τ_interface_21;
 
     return nothing
-);
+end;

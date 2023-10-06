@@ -35,21 +35,20 @@ include("method/beta.jl");
 include("method/colimit.jl");
 include("method/kinetics.jl");
 include("method/mode.jl");
+include("method/pv.jl");
+include("method/soil.jl");
 include("method/stomata.jl");
+include("method/xylem.jl");
 
 
 # Plant hydraulics (dependent on config)
 include("xylem/energy.jl");
-include("xylem/pv.jl");
-include("xylem/vc.jl");
 
 include("xylem/junction.jl");
 include("xylem/xylem.jl");
 
 
 # Soil
-include("soil/vc.jl");
-
 include("soil/bulk.jl");
 include("soil/layer.jl");
 

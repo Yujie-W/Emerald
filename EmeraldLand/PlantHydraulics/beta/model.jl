@@ -26,8 +26,8 @@ Here, we pass a `f` (Function) into the function call so that we can easily cust
 """
 function β_factor end
 
-β_factor(f::Function, vc::AbstractXylemVC{FT}, x_25::FT) where {FT} = max(eps(FT), min(1, f(relative_hydraulic_conductance(vc, x_25))));
+β_factor(f::Function, vc::AbstractXylemVC{FT}, x_25::FT) where {FT} = max(eps(FT), min(1, f(relative_soil_k(vc, x_25))));
 
-β_factor(f::Function, vc::AbstractSoilVC{FT}, x_25::FT) where {FT} = max(eps(FT), min(1, f(relative_hydraulic_conductance(vc, true, x_25))));
+β_factor(f::Function, vc::AbstractSoilVC{FT}, x_25::FT) where {FT} = max(eps(FT), min(1, f(relative_soil_k(vc, true, x_25))));
 
 β_factor(f::Function, x_25::FT) where {FT} = max(eps(FT), min(1, f(x_25)));

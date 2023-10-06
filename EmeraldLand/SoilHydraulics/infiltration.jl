@@ -35,7 +35,7 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
 
     # update soil k, kd, ψ, and λ_thermal for each soil layer (0.5 for tortuosity factor)
     for soil in SOILS
-        soil.auxil.k         = relative_hydraulic_conductance(soil.state.vc, soil.state.θ) * soil.state.vc.K_MAX * relative_viscosity(soil.auxil.t) / soil.auxil.δz;
+        soil.auxil.k         = relative_soil_k(soil.state.vc, soil.state.θ) * soil.state.vc.K_MAX * relative_viscosity(soil.auxil.t) / soil.auxil.δz;
         soil.auxil.ψ         = soil_ψ_25(soil.state.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.auxil.t);
         soil.auxil.kd        = 0.5 * max(0, soil.state.vc.Θ_SAT - soil.state.θ) / soil.auxil.δz;
         soil.auxil.λ_thermal = (soil.state.λ_thermal + soil.state.θ * Λ_THERMAL_H₂O(FT)) / soil.auxil.δz;
