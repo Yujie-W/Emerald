@@ -5,6 +5,7 @@
 # Changes to the function
 # General
 #     2022-Jun-13: add function to calculate the energy flow of the root
+#     2023-Oct-06: add function to calculate the energy flow between root and soil
 #
 #######################################################################################################################################################################################################
 """
@@ -16,7 +17,7 @@ Calculate the energy flows of the root, given
 
 """
 function root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
-    (; JUNCTION, ROOTS, ROOTS_INDEX, SOILS) = spac;
+    (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL_BULK, SOILS) = spac;
 
     # compute the energy flow per layer
     # the energy flow is computed as the difference between
@@ -30,8 +31,10 @@ function root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
         f_i = flow_in(root);
         if f_i >= 0
             root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.auxil.t;
+            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * soil.auxil.t / SOIL_BULK.state.area;
         else
             root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.energy.auxil.t;
+            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * root.energy.auxil.t / SOIL_BULK.state.area;
         end;
 
         # if the flow into the junction is positive, then the energy flow is negative

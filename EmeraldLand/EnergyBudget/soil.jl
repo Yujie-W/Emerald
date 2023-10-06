@@ -22,6 +22,7 @@ function soil_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
     SOILS[1].auxil.∂e∂t += METEO.rain * CP_L_MOL(FT) * METEO.t_precip;
     SOILS[1].auxil.∂e∂t += SOIL_BULK.auxil.r_net_lw + SOIL_BULK.auxil.r_net_sw;
 
+    # water and energy exchange among layers
     N = length(SOIL_BULK.auxil.q);
     for i in 1:N
         SOILS[i  ].auxil.∂e∂t -= SOIL_BULK.auxil.q_layers[i];

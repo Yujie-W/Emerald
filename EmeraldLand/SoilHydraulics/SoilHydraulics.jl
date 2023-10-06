@@ -15,12 +15,12 @@ include("vc/vulnerability.jl");
 
 # soil liquid water mass flow
 include("liquid/infiltration.jl");
+include("liquid/root.jl");
 
 
 include("budget.jl");
 include("diffusion.jl");
 include("infiltration.jl");
-include("sink.jl");
 include("volume.jl");
 
 

@@ -45,8 +45,8 @@ function soil_budget! end
 
 soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     soil_water_infiltration!(spac);
+    root_source_sink!(spac);
     soil_diffusion!(config, spac);
-    soil_source_sink!(config, spac);
 
     return nothing
 );
