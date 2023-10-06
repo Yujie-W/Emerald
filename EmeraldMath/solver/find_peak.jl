@@ -28,7 +28,7 @@ function next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, step
         _yn = f(_xn);
         if stepping
             push!(history, [_xn, _yn]);
-        end
+        end;
         xy[3,1] = _x2;
         xy[3,2] = _y2;
         xy[2,1] = _xn;
@@ -42,7 +42,7 @@ function next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, step
         _yn = f(_xn);
         if stepping
             push!(history, [_xn, _yn]);
-        end
+        end;
         xy[1,1] = _x2;
         xy[1,2] = _y2;
         xy[2,1] = _xn;
@@ -56,7 +56,7 @@ function next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, step
         _yn = f(_xn);
         if stepping
             push!(history, [_xn, _yn]);
-        end
+        end;
         if _yn >= _y2
             xy[3,1] = _x2;
             xy[3,2] = _y2;
@@ -70,7 +70,7 @@ function next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, step
             _yn = f(_xn);
             if stepping
                 push!(history, [_xn, _yn]);
-            end
+            end;
             if _yn > _y2
                 xy[1,1] = _x2;
                 xy[1,2] = _y2;
@@ -79,12 +79,12 @@ function next_xy!(f::Function, xy::Matrix{FT}, history::Vector{Vector{FT}}, step
             else
                 xy[3,1] = _xn;
                 xy[3,2] = _yn;
-            end
-        end
+            end;
+        end;
 
         return true
-    end
-end
+    end;
+end;
 
 
 #######################################################################################################################################################################################################
@@ -109,7 +109,7 @@ Find the solution that the y is maximum, given
 - `stepping` Optional. If true, save the optimization steps to the history field in method struct.
 
 """
-function find_peak end
+function find_peak end;
 
 find_peak(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT} = (
     # create matrix to store data
@@ -153,7 +153,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
         simplex[_irow][end] = f(simplex[_irow]);
         if stepping
             push!(history, simplex[_irow]);
-        end
+        end;
     end;
 
     # find the optimal simplex
@@ -179,7 +179,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
         ref_x[end] = f(ref_x);
         if stepping
             push!(history, ref_x);
-        end
+        end;
 
         if simplex[1][end] >= ref_x[end] > simplex[_nX][end]
             simplex[end] .= ref_x;
@@ -192,7 +192,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
             exp_x[end] = f(exp_x);
             if stepping
                 push!(history, exp_x);
-            end
+            end;
 
             if exp_x[end] > ref_x[end]
                 simplex[end] .= exp_x;
@@ -208,7 +208,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
             con_x[end] = f(con_x);
             if stepping
                 push!(history, con_x);
-            end
+            end;
 
             if con_x[end] > simplex[_nS][end]
                 simplex[end] .= con_x;
@@ -221,7 +221,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
                     simplex[_irow][end] = f(simplex[_irow]);
                     if stepping
                         push!(history, simplex[_irow]);
-                    end
+                    end;
                 end;
             end;
         end;
@@ -246,11 +246,11 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
         simplex[_irow] .= x_inis
         if _irow < _nS
             simplex[_irow][_irow] = x_inis[_irow] / 2;
-        end
+        end;
         simplex[_irow][end] = f(simplex[_irow])
         if stepping
             push!(history, simplex[_irow]);
-        end
+        end;
     end;
 
     # find the optimal simplex
@@ -268,7 +268,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
         cen_x .= FT(0)
         for irow in 1:_nX
             cen_x .+= simplex[irow]
-        end
+        end;
         cen_x ./= _nX;
 
         # 3. reflection of the worst
@@ -278,7 +278,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
         ref_y   = f(ref_x);
         if stepping
             push!(history, ref_x);
-        end
+        end;
 
         if simplex[1][end] >= ref_y > simplex[_nX][end]
             simplex[end]     .= ref_x;
@@ -292,7 +292,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
             exp_y   = f(exp_x);
             if stepping
                 push!(history, exp_x);
-            end
+            end;
 
             if exp_y > ref_y
                 simplex[end]     .= exp_x;
@@ -310,7 +310,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
             con_y   = f(con_x);
             if stepping
                 push!(history, con_x);
-            end
+            end;
 
             if con_y > simplex[_nS][end]
                 simplex[end]     .= con_x;
@@ -323,7 +323,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
                     simplex[_irow][end] = f(simplex[_irow]);
                     if stepping
                         push!(history, simplex[_irow]);
-                    end
+                    end;
                 end;
             end;
         end;

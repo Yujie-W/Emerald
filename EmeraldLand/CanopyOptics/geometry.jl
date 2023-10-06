@@ -113,48 +113,6 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 #
 # Changes to this method
 # General
-#     2022-Jun-14: add method to use broadband PAR and NIR soil albedo for canopy_optical_properties!
-#     2022-Jun-14: add method to use hyperspectral soil albedo for canopy_optical_properties!
-#     2023-Mar-16: update both dd and sd from broadband values
-#
-#######################################################################################################################################################################################################
-"""
-
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT}
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT}
-
-Updates lower soil boundary reflectance, given
-- `config` Configuration for `MultiLayerSPAC`
-- `can` `HyperspectralMLCanopy` type struct
-- `albedo` `BroadbandSoilAlbedo` or `HyperspectralSoilAlbedo` type soil albedo
-
-"""
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::BroadbandSoilAlbedo{FT}) where {FT} = (
-    (; SPECTRA) = config;
-    (; OPTICS) = can;
-
-    OPTICS.ρ_dd[SPECTRA.IΛ_PAR,end] .= albedo.ρ_sw[1];
-    OPTICS.ρ_dd[SPECTRA.IΛ_NIR,end] .= albedo.ρ_sw[2];
-    OPTICS.ρ_sd[SPECTRA.IΛ_PAR,end] .= albedo.ρ_sw[1];
-    OPTICS.ρ_sd[SPECTRA.IΛ_NIR,end] .= albedo.ρ_sw[2];
-
-    return nothing
-);
-
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, albedo::HyperspectralSoilAlbedo{FT}) where {FT} = (
-    (; OPTICS) = can;
-
-    OPTICS.ρ_dd[:,end] .= albedo.ρ_sw;
-    OPTICS.ρ_sd[:,end] .= albedo.ρ_sw;
-
-    return nothing
-);
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
 #     2022-Jun-08: migrate the function from CanopyLayers
 #     2022-Jun-09: rename the function from canopy_matrices! to canopy_optical_properties!
 #     2022-Jun-09: move part of the short_wave! code into canopy_optical_properties!
@@ -167,19 +125,18 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, soil::Soil{FT}) where {FT}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, sbulk::SoilBulk{FT}) where {FT}
 
 Updates canopy optical properties (scattering coefficient matrices), given
 - `config` Configuration for `MultiLayerSPAC`
 - `can` `HyperspectralMLCanopy` type struct
 - `leaves` Vector of `Leaf`
-- `soil` Bottom soil boundary layer
+- `sbulk` `SoilBulk` type struct
 
 """
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, soil::Soil{FT}) where {FT} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, sbulk::SoilBulk{FT}) where {FT} = (
     (; DIM_LAYER) = config;
     (; OPTICS) = can;
-    (; ALBEDO) = soil;
     @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";
 
     if can.lai == 0
@@ -190,8 +147,9 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
         OPTICS.τ_lw  .= 0;
         OPTICS.τ_sd  .= 0;
         OPTICS._τ_ss .= 0;
-        canopy_optical_properties!(config, can, ALBEDO);
-        OPTICS.ρ_lw[end] = ALBEDO.ρ_LW;
+        OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
+        OPTICS.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
+        OPTICS.ρ_lw[end] = sbulk.auxil.ρ_lw;
 
         return nothing
     end;
@@ -215,7 +173,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     OPTICS._ρ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdb .* can.δlai' .* can.ci);
 
     # 3. update the effective reflectance per layer
-    canopy_optical_properties!(config, can, ALBEDO);
+    OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
+    OPTICS.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
 
     for _i in DIM_LAYER:-1:1
         _r_dd__ = view(OPTICS._ρ_dd,:,_i  );    # reflectance without correction
@@ -249,7 +208,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     end;
 
     # 5. update the effective longwave reflectance and transmittance
-    OPTICS.ρ_lw[end] = ALBEDO.ρ_LW;
+    OPTICS.ρ_lw[end] = sbulk.auxil.ρ_lw;
 
     for _i in DIM_LAYER:-1:1
         _dnorm = 1 - OPTICS._ρ_lw[_i] * OPTICS.ρ_lw[_i+1];

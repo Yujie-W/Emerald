@@ -9,9 +9,9 @@ using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
-using ..Namespace: BroadbandRadiation, BroadbandSLCanopy, BroadbandSoilAlbedo
-using ..Namespace: HyperspectralMLCanopy, HyperspectralRadiation, HyperspectralSoilAlbedo, ReferenceSpectra
-using ..Namespace: BetaLIDF, Leaf, Soil, SunSensorGeometry, VerhoefLIDF
+using ..Namespace: BroadbandRadiation, BroadbandSLCanopy
+using ..Namespace: HyperspectralMLCanopy, HyperspectralRadiation, ReferenceSpectra
+using ..Namespace: BetaLIDF, Leaf, SoilBulk, SoilLayer, SunSensorGeometry, VerhoefLIDF
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 

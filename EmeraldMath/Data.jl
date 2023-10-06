@@ -68,7 +68,7 @@ function interpolate_data!(data::Union{FT, Vector{FT}}) where {FT}
     data .= _data_3x[(length(data)+1):(length(data)*2)];
 
     return nothing
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -111,8 +111,8 @@ function interpolate_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::S
         return repeat(_dat_1d; inner = 24)
     elseif out_reso == "1D"
         return _dat_1d
-    end
-end
+    end;
+end;
 
 
-end
+end;

@@ -23,7 +23,7 @@ Return the maximum of array ommiting the NaN, given
 - `x` Array of numbers, can be NaN
 
 """
-function nanmax end
+function nanmax end;
 
 nanmax(x::Array) = (
     _x = filter(!isnan, x);
@@ -43,7 +43,7 @@ Return the mean of array by ommiting the NaN, given
 - `x` Array of numbers, can be NaN
 
 """
-function nanmean end
+function nanmean end;
 
 nanmean(x::Array) = (
     _x = filter(!isnan, x);
@@ -63,7 +63,7 @@ Return the median of array by ommiting the NaN, given
 - `x` Array of numbers, can be NaN
 
 """
-function nanmedian end
+function nanmedian end;
 
 nanmedian(x::Array) = (
     _x = filter(!isnan, x);
@@ -83,7 +83,8 @@ Return the maximum of array ommiting the NaN, given
 - `x` Array of numbers, can be NaN
 
 """
-function nanmin end
+function nanmin end;
+
 nanmin(x::Array) = (
     _x = filter(!isnan, x);
 
@@ -103,7 +104,7 @@ Return the percentile by excluding the NaN of given
 - `p` Percentile in `[%]`
 
 """
-function nanpercentile end
+function nanpercentile end;
 
 nanpercentile(x::Array, p::Number) = (
     @assert 0 <= p <= 100;
@@ -125,7 +126,7 @@ Return the std of array by ommiting the NaN, given
 - `x` Array of numbers, can be NaN
 
 """
-function nanstd end
+function nanstd end;
 
 nanstd(x::Array) = (
     _x = filter(!isnan, x);
@@ -145,7 +146,7 @@ Return the sum of array by ommiting the NaN, given
 - `x` Array of numbers, can be NaN
 
 """
-function nansum end
+function nansum end;
 
 nansum(x::Array) = (
     _x = filter(!isnan, x);
@@ -175,7 +176,7 @@ Return the mean absolute error by ommiting the NaN, given
 """
 function mae(y::Array, pred::Array)
     return nanmean( abs.(y .- pred) )
-end
+end;
 
 
 """
@@ -192,7 +193,7 @@ function mape(y::Array, pred::Array)
     _diff = abs.(y .- pred) ./ _mean .* 100;
 
     return nanmean( _diff )
-end
+end;
 
 
 """
@@ -209,7 +210,7 @@ function mase(y::Array, pred::Array)
     _diff = abs.(y .- pred) ./ _nstd .* 100;
 
     return nanmean( _diff )
-end
+end;
 
 
 """
@@ -223,7 +224,7 @@ Return the root mean square error by ommiting the NaN, given
 """
 function rmse(y::Array, pred::Array)
     return sqrt( nanmean( (y .- pred) .^ 2 ) )
-end
+end;
 
 
-end
+end;

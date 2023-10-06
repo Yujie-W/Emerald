@@ -46,6 +46,7 @@ end
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Aug-27: make corrections over the delta height of the xylem
 #     2023-Sep-28: add field JUNCTION
+#     2023-Oct-05: add fields SOIL_BULK and SOILS
 #
 #######################################################################################################################################################################################################
 """
@@ -95,8 +96,10 @@ mutable struct MultiLayerSPAC{FT}
     METEO::Meteorology{FT}
     "Root hydraulic system"
     ROOTS::Vector{Root{FT}}
-    "Soil component"
-    SOIL::Soil{FT}
+    "Soil bulk variables"
+    SOIL_BULK::SoilBulk{FT}
+    "Soil layers"
+    SOILS::Vector{SoilLayer{FT}}
     "Trunk hydraulic system"
     TRUNK::Stem{FT}
     "Root-trunk junction capacitor used for roots flow calculations"
@@ -133,32 +136,43 @@ MultiLayerSPAC(
     ind_layer = config.DIM_LAYER > 1 ? [findfirst(zs[2] .< air_bounds .< zs[3])[1] - 1; mask_air] : mask_air;
     ind_root = config.DIM_ROOT > 1 ? [findfirst(zs[1] .< soil_bounds .< 0) - 1; mask_soil] : mask_soil;
 
-    air_layers = AirLayer{FT}[
-        AirLayer{FT}(
-            Z = (air_bounds[i] + air_bounds[i+1]) / 2,
-            ΔZ = (air_bounds[i+1] - air_bounds[i])
-        ) for i in 1:config.DIM_AIR];
-    branches = Stem{FT}[Stem(config) for _ in 1:config.DIM_LAYER];
-    for i in eachindex(branches)
-        branches[i].xylem.state.area = basal_area / config.DIM_LAYER;
-        branches[i].xylem.state.Δh = (min(zs[3], air_bounds[ind_layer[i]+1]) - zs[2]);
+    # set up the soil layers
+    soil_layers = SoilLayer{FT}[SoilLayer(config) for _ in 1:config.DIM_SOIL];
+    for i in eachindex(soil_layers)
+        soil_layers[i].state.zs = soil_bounds[i:i+1];
+        soil_layers[i].auxil.z = (soil_bounds[i] + soil_bounds[i+1]) / 2;
+        soil_layers[i].auxil.δz = (soil_bounds[i+1] - soil_bounds[i]);
+        initialize_energy_storage!(soil_layers[i]);
     end;
+
+    # set up the roots
     roots = Root{FT}[Root(config) for _ in 1:config.DIM_ROOT];
     for i in eachindex(roots)
         roots[i].xylem.state.area = basal_area / config.DIM_ROOT;
         roots[i].xylem.state.Δh = 0 - max(zs[1], soil_bounds[ind_root[i]+1]);
+        initialize_energy_storage!(roots[i]);
     end;
+
+    # set up the trunk
     trunk = Stem(config);
     trunk.xylem.state.area = basal_area;
     trunk.xylem.state.Δh = zs[2] - zs[1];
+    initialize_energy_storage!(trunk);
 
-    # initialize the energy and water storage
-    for i in eachindex(roots)
-        initialize_energy_storage!(roots[i]);
-    end;
+    # set up the branches
+    branches = Stem{FT}[Stem(config) for _ in 1:config.DIM_LAYER];
     for i in eachindex(branches)
+        branches[i].xylem.state.area = basal_area / config.DIM_LAYER;
+        branches[i].xylem.state.Δh = (min(zs[3], air_bounds[ind_layer[i]+1]) - zs[2]);
         initialize_energy_storage!(branches[i]);
     end;
+
+    # set up the air layers
+    air_layers = AirLayer{FT}[
+                AirLayer{FT}(
+                    Z = (air_bounds[i] + air_bounds[i+1]) / 2,
+                    ΔZ = (air_bounds[i+1] - air_bounds[i])
+                ) for i in 1:config.DIM_AIR];
 
     return MultiLayerSPAC{FT}(
                 ind_layer,                                                              # LEAVES_INDEX
@@ -176,7 +190,8 @@ MultiLayerSPAC(
                 SPACMemory{FT}(),                                                       # MEMORY
                 Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),   # METEO
                 roots,                                                                  # ROOTS
-                Soil(config; ground_area = ground_area, soil_bounds = soil_bounds),     # SOIL
+                SoilBulk(config),                                                       # SOIL_BULK
+                soil_layers,                                                            # SOILS
                 trunk,                                                                  # TRUNK
                 JunctionCapacitor{FT}(),                                                # JUNCTION
                 zeros(FT, config.DIM_ROOT),                                             # _fs

@@ -31,7 +31,7 @@ Return the integral of given
 - `y_tol` Tolerance of the integral solution
 
 """
-function numerical∫ end
+function numerical∫ end;
 
 numerical∫(f::Vector{FT}, Δx::Vector{FT}) where {FT} = (
     if length(Δx) == length(f)
@@ -106,8 +106,8 @@ function lower_quadratic(a::FT, b::FT, c::FT) where {FT}
         return (-b + sqrt(discr)) / (2 * a)
     else
         return FT(NaN)
-    end
-end
+    end;
+end;
 
 
 """
@@ -129,8 +129,8 @@ function upper_quadratic(a::FT, b::FT, c::FT) where {FT}
         return (-b - sqrt(discr)) / (2 * a)
     else
         return FT(NaN)
-    end
-end
+    end;
+end;
 
 
 end # Math

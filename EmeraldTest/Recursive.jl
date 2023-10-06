@@ -34,7 +34,7 @@ Example
 struct SA
     a
     b
-end
+end;
 sa = SA(1, 2.0);
 
 ft_1 = FT_test([1, 2, 3], Float64);
@@ -44,7 +44,7 @@ ft_4 = FT_test(sa, Float64);
 ```
 
 """
-function FT_test end
+function FT_test end;
 
 FT_test(para::Array, FT) = (
     # fail if para is float but not FT
@@ -111,7 +111,7 @@ Example
 struct SA
     a
     b
-end
+end;
 
 nan_1 = NaN_test(SA(1,2));
 nan_2 = NaN_test(SA(1,NaN));
@@ -121,7 +121,7 @@ nan_5 = NaN_test([1,2,"a"]);
 ```
 
 """
-function NaN_test end
+function NaN_test end;
 
 NaN_test(para::Array) = all(NaN_test.(para));
 
@@ -148,4 +148,4 @@ NaN_test(para::Any) = (
 );
 
 
-end
+end;

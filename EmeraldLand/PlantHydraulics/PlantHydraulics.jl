@@ -12,7 +12,7 @@ using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapa
 using ..Namespace: Root, SoilLayer
 using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
-using ..Namespace: JunctionCapacitor, Leaf, Soil, Stem
+using ..Namespace: JunctionCapacitor, Leaf, Stem
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..SoilHydraulics: relative_hydraulic_conductance, soil_θ, soil_ψ_25

@@ -50,6 +50,9 @@ include("xylem/xylem.jl");
 # Soil
 include("soil/vc.jl");
 
+include("soil/bulk.jl");
+include("soil/layer.jl");
+
 
 # Root system (dependent on xylem)
 include("root/rhizosphere.jl");
@@ -81,7 +84,6 @@ include("radiation.jl");
 include("air.jl");
 include("geometry.jl");
 include("meteorology.jl");
-include("soil.jl");
 
 include("canopy.jl");
 

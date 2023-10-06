@@ -29,8 +29,8 @@ function day_length(lat::FT, fdoy::FT) where {FT}
         return FT(0)
     else
         return 2 * acosd(-tand(lat) * tand(_decl)) / 15
-    end
-end
+    end;
+end;
 
 
 #######################################################################################################################################################################################################
@@ -56,7 +56,7 @@ Return the solar azimuth angle, given
 - `fdoy` Day of year (digits after decimal for time of day)
 
 """
-function solar_azimuth_angle end
+function solar_azimuth_angle end;
 
 solar_azimuth_angle(lat::FT, decl::FT, lha::FT) where {FT} = (
     _cos_sza = sind(lat) * sind(decl) + cosd(lat) * cosd(decl) * cosd(lha);
@@ -103,7 +103,7 @@ Return the solar declination angle, given
 """
 function solar_declination_angle(fdoy::FT) where {FT}
     return -FT(23.44) * cosd(360 / YEAR_D(FT) * (fdoy + 10))
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -131,7 +131,7 @@ Return the solar zenith angle, given
 - `fdoy` Day of year (digits after decimal for time of day)
 
 """
-function solar_zenith_angle end
+function solar_zenith_angle end;
 
 solar_zenith_angle(lat::FT, decl::FT, lha::FT) where {FT} = (
     _cos_sza = sind(lat) * sind(decl) + cosd(lat) * cosd(decl) * cosd(lha);
