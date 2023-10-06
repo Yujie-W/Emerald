@@ -8,7 +8,7 @@
 #     2022-Feb-07: add support for Johnson and Berry (2021) model
 #     2022-Feb-07: use a_gross and j_pot rather than a series of j_p680 and j_p700
 #     2022-Feb-10: scale fluorescence quantum yield based on F_PSI and reabsorption factor
-#     2022-Feb-10: _q1 needs to be multiply by η
+#     2022-Feb-10: q1 needs to be multiply by η
 #     2022-Mar-04: add support to sustained NPQ
 #     2022-Mar-04: use the weighted yield for photosynthesis
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5

@@ -19,6 +19,7 @@
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
 #     2023-Sep-22: remove APAR_CAR (now a state variable in LeafBioState)
 #     2023-Oct-02: add field MESSAGE_LEVEL
+#     2023-Oct-05: add field ENABLE_SIF
 #
 #######################################################################################################################################################################################################
 """
@@ -48,6 +49,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(DATASET = DATASET)
 
     # features related to the leaf optics and fluorescence
+    "Whether to compute fluorescence"
+    ENABLE_SIF::Bool = true
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
     "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"

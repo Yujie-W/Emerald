@@ -50,33 +50,33 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, slayers, leaf, β, β.PARAM_X);
 
 β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
-    _f_st = relative_surface_tension(leaf.t);
+    f_st = relative_surface_tension(leaf.t);
 
-    β.β = β_factor(β.FUNC, leaf.HS.VC, leaf.HS._p_element[end] / _f_st);
+    β.β = β_factor(β.FUNC, leaf.HS.VC, leaf.HS._p_element[end] / f_st);
 
     return nothing
 );
 
 β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
-    _norm = 0;
-    _deno = 0;
-    _sumf = 0;
+    norm = 0;
+    sumf = 0;
+    denom = 0;
     for i in eachindex(roots)
-        _f_st = relative_surface_tension(roots[i].t);
-        _beta = β_factor(β.FUNC, slayers[i].state.vc, roots[i].HS.p_ups / _f_st);
-        _f_in = flow_in(roots[i]);
-        _kmax = _f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
-        _norm += _beta * _kmax;
-        _deno += _kmax;
-        _sumf += _f_in;
+        f_st = relative_surface_tension(roots[i].t);
+        beta = β_factor(β.FUNC, slayers[i].state.vc, roots[i].HS.p_ups / f_st);
+        f_in = flow_in(roots[i]);
+        kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
+        norm += beta * kmax;
+        sumf += f_in;
+        denom += kmax;
     end;
 
-    @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
+    @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
 
-    if _deno > 0
-        β.β = _norm / _deno;
-    elseif _sumf < 0
+    if denom > 0
+        β.β = norm / denom;
+    elseif sumf < 0
         β.β = 1
     else
         β.β = eps(FT);
@@ -86,33 +86,33 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 );
 
 β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
-    _f_st = relative_surface_tension(leaf.t);
+    f_st = relative_surface_tension(leaf.t);
 
-    β.β = β_factor(β.FUNC, leaf.HS._p_element[end] / _f_st);
+    β.β = β_factor(β.FUNC, leaf.HS._p_element[end] / f_st);
 
     return nothing
 );
 
 β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
-    _norm = 0;
-    _deno = 0;
-    _sumf = 0;
+    norm = 0;
+    sumf = 0;
+    denom = 0;
     for i in eachindex(roots)
-        _f_st = relative_surface_tension(roots[i].t);
-        _beta = β_factor(β.FUNC, roots[i].HS.p_ups / _f_st);
-        _f_in = flow_in(roots[i]);
-        _kmax = _f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
-        _norm += _beta * _kmax;
-        _deno += _kmax;
-        _sumf += _f_in;
+        f_st = relative_surface_tension(roots[i].t);
+        beta = β_factor(β.FUNC, roots[i].HS.p_ups / f_st);
+        f_in = flow_in(roots[i]);
+        kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
+        norm += beta * kmax;
+        sumf += f_in;
+        denom += kmax;
     end;
 
-    @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
+    @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
 
-    if _deno > 0
-        β.β = _norm / _deno;
-    elseif _sumf < 0
+    if denom > 0
+        β.β = norm / denom;
+    elseif sumf < 0
         β.β = 1
     else
         β.β = eps(FT);
@@ -123,24 +123,24 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 
 β_factor!(roots::Vector{Root{FT}}, slayers::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
-    _norm = 0;
-    _deno = 0;
-    _sumf = 0;
+    norm = 0;
+    sumf = 0;
+    denom = 0;
     for i in eachindex(roots)
-        _f_st = relative_surface_tension(roots[i].t);
-        _beta = β_factor(β.FUNC, soil_θ(slayers[i].state.vc, roots[i].HS.p_ups / _f_st));
-        _f_in = flow_in(roots[i]);
-        _kmax = _f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
-        _norm += _beta * _kmax;
-        _deno += _kmax;
-        _sumf += _f_in;
+        f_st = relative_surface_tension(roots[i].t);
+        beta = β_factor(β.FUNC, soil_θ(slayers[i].state.vc, roots[i].HS.p_ups / f_st));
+        f_in = flow_in(roots[i]);
+        kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
+        norm += beta * kmax;
+        sumf += f_in;
+        denom += kmax;
     end;
 
-    @assert !isnan(_norm) && !isnan(_deno) && !isnan(_sumf) "NaN detected in beta calculation!";
+    @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
 
-    if _deno > 0
-        β.β = _norm / _deno;
-    elseif _sumf < 0
+    if denom > 0
+        β.β = norm / denom;
+    elseif sumf < 0
         β.β = 1
     else
         β.β = eps(FT);

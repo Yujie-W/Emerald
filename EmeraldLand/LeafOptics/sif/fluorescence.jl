@@ -40,8 +40,8 @@ function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_
     #    here the radiation is directly from the environment, as the reflection from the first layer will not hit back, no scaling of the light source is required
     #    however, the rescaling from the reflectance within the layer is required (we will do it at the last step)
     #    for the emitted SIF, we need to account for the reabsorption within the leaf layer
-    #        - the SIF up will be downscaled by _t_sub ^ (i - 0.5) times
-    #        - the SIF down will be downscaled by _t_sub ^ (N - i + 0.5) times
+    #        - the SIF up will be downscaled by t_sub ^ (i - 0.5) times
+    #        - the SIF down will be downscaled by t_sub ^ (N - i + 0.5) times
     #    ϕ_sif to account for the contribution to SIF excitation
     #    now the radiation goes from up to down
     rad_i = τ_i_θ * f_sife;

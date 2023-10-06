@@ -12,8 +12,6 @@ using Test;
     # There are two ways to change leaf biophysical parameters.
     # The first method is to do it manually.
     # However, users need to run function leaf_spectra! to force the model update leaf level spectra.
-    # Also, remember to change the cache variable _v_storage to a different value.
-    # Otherwise, leaf spectra would not be updated.
     for leaf in spac.LEAVES
         leaf.bio.state.cab = 40;        # chlorophyll a and b content
         leaf.bio.state.car = 10;        # carotenoid content
@@ -21,7 +19,7 @@ using Test;
         leaf.bio.state.lma = 0.012;     # leaf mass per area lma = cbc + pro
         leaf.bio.state.pro = 0.001;     # protein content
     end;
-    EmeraldLand.LeafOptics.leaf_spectra!(config, spac);
+    EmeraldLand.LeafOptics.plant_leaf_spectra!(config, spac);
     @test true;
 
     # The second method is to use the embedded function update! from submodule SPAC.

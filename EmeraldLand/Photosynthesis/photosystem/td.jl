@@ -29,11 +29,11 @@ temperature_correction(td::Arrhenius{FT}, t::FT; t_ref::FT = td.T_REF) where {FT
 temperature_correction(td::ArrheniusPeak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = (
     (; ΔHA, ΔHD, ΔSV) = td;
 
-    # _f_a: activation correction, _f_b: de-activation correction
-    _f_a = exp( ΔHA / GAS_R(FT) * (1 / t_ref - 1 / t) );
-    _f_b = (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t_ref))) / (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t)));
+    # f_a: activation correction, f_b: de-activation correction
+    f_a = exp( ΔHA / GAS_R(FT) * (1 / t_ref - 1 / t) );
+    f_b = (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t_ref))) / (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t)));
 
-    return _f_a * _f_b
+    return f_a * f_b
 );
 
 temperature_correction(td::Q10{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = td.Q_10 ^ ( (t - t_ref) / 10 );
@@ -41,11 +41,11 @@ temperature_correction(td::Q10{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = td
 temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = (
     (; ΔHD, ΔSV) = td;
 
-    # _f_a: activation correction, _f_b: de-activation correction
-    _f_a = td.Q_10 ^ ( (t - t_ref) / 10 );
-    _f_b = (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t_ref))) / (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t)));
+    # f_a: activation correction, f_b: de-activation correction
+    f_a = td.Q_10 ^ ( (t - t_ref) / 10 );
+    f_b = (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t_ref))) / (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t)));
 
-    return _f_a * _f_b
+    return f_a * f_b
 );
 
 

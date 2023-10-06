@@ -150,7 +150,7 @@ update!(config::SPACConfiguration{FT},
         end;
     end;
     if !isnothing(cab) || !isnothing(car)
-        leaf_spectra!(config, spac);
+        plant_leaf_spectra!(config, spac);
     end;
 
     # update LAI and Vcmax (with scaling factor)

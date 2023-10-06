@@ -69,7 +69,7 @@ function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}
     f_vis = relative_viscosity(t);
     p_crt = xylem_pressure(xylem.state.vc, KR_THRESHOLD) * f_st;
 
-    # add a judgement to make sure p_ups is higher than _p_crt
+    # add a judgement to make sure p_ups is higher than p_crt
     if xylem.auxil.pressure[1] < p_crt
         return eps(FT)
     end;

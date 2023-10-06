@@ -51,7 +51,7 @@ initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} 
     end;
 
     # initialize leaf level spectra
-    leaf_spectra!(config, spac);
+    plant_leaf_spectra!(config, spac);
 
     # initialize stomatal conductance
     stomatal_conductance!(spac, FT(0));

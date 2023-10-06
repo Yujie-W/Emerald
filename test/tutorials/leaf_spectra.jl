@@ -16,8 +16,7 @@ using Test;
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 
-    # Note that, to avoid unnecessary computing, leaf water content is saved in bio._v_storage.
-    # If you change leaf biophysical traits such as chlorophyll content, you need to set _v_storage to 0 (or any different water content value).
+    # Change the leaf biophysical parameters
     bio.state.cab = 20;
     bio.state.car = 5;
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));

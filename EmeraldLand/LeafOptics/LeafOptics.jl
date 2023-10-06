@@ -10,56 +10,49 @@ using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 
 using ..Namespace: LeafBio, LeafBioState
-include("doubling.jl");
-include("effective.jl");
-include("fluorescence.jl");
-include("interface.jl");
-include("layer.jl");
-include("leaf.jl");
-include("sublayer.jl");
+
+include("prospect/interface.jl");
+include("prospect/sublayer.jl");
+include("prospect/layer.jl");
+include("prospect/leaf.jl");
+
+include("sif/doubling.jl");
+include("sif/effective.jl");
+include("sif/fluorescence.jl");
 
 
-#=
 #######################################################################################################################################################################################################
 #
-# Changes made to this method
+# Changes to this function
 # General
-#     2021-Oct-22: add another method to prescribe leaf spectra such as transmittance and reflectance from broadband method
+#     2023-Sep-15: add function to run all the step within one function all
+#     2023-Sep-16: compute SIF conversion matrices within this function
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT}
+    leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
 
-Update leaf reflectance and transmittance (e.g., prescribe broadband PAR and NIR values), given
-- `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
-- `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
-- `ρ_par` Reflectance at PAR region
-- `ρ_nir` Reflectance at NIR region
-- `τ_par` Transmittance at PAR region
-- `τ_nir` Transmittance at NIR region
-
-# Examples
-```julia
-bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
-spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
-leaf_spectra!(bio, spectra, 0.1, 0.45, 0.05, 0.25);
-```
+Update the interface, sublayer, layer, and leaf level reflectance and transmittance within `bio`, given
+- `config` SPAC configuration
+- `bio` LeafBio struct
+- `lwc` Leaf water content
+- `θ` Incoming radiation angle
+- `N` Number of sublayers
 
 """
-leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, ρ_par::FT, ρ_nir::FT, τ_par::FT, τ_nir::FT) where {FT} = (
-    (; IΛ_NIR, IΛ_PAR) = spectra;
+function leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+    leaf_interface_ρ_τ!(config, bio, θ);
+    leaf_sublayer_f_τ!(config, bio, lwc, N);
+    leaf_layer_ρ_τ!(bio, N);
+    leaf_ρ_τ!(bio);
 
-    bio.ρ_sw[IΛ_PAR] .= ρ_par;
-    bio.ρ_sw[IΛ_NIR] .= ρ_nir;
-    bio.τ_sw[IΛ_PAR] .= τ_par;
-    bio.τ_sw[IΛ_NIR] .= τ_nir;
-
-    bio.α_sw = 1 .- bio.τ_sw .- bio.ρ_sw;
+    if config.ENABLE_SIF
+        leaf_sif_matrices!(config, bio, N);
+    end;
 
     return nothing
-);
-=#
+end;
 
 
 #######################################################################################################################################################################################################
@@ -71,22 +64,20 @@ leaf_spectra!(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Update leaf reflectance and transmittance for SPAC, given
 - `config` Configurations of spac model
 - `spac` `MultiLayerSPAC` type SPAC
 
 """
-leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; LEAVES) = spac;
-
-    for _leaf in LEAVES
-        leaf_spectra!(config, _leaf.bio, _leaf.capacitor.state.v_storage);
+function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    for leaf in spac.LEAVES
+        leaf_spectra!(config, leaf.bio, leaf.capacitor.state.v_storage);
     end;
 
     return nothing
-);
+end;
 
 
 #=

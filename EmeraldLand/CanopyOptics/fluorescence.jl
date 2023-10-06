@@ -12,6 +12,7 @@
 #     2023-Sep-11: compute the SIF at chloroplast level at the same time
 #     2023-Sep-11: redo the calculation of SIF for different layers using the SIF excitation radiation directly
 #     2023-Sep-19: recompute the SIF at chlorophyll level using the net absorbed radiation
+#     2023-Oct-05: add option to enable/disable SIF calculation
 # Bug fixes
 #     2023-Mar-16: ddb ddf to dob and dof for observed SIF
 #     2023-Sep-11: set ilai to lai rather than lai*ci
@@ -29,7 +30,14 @@ Updates canopy fluorescence, given
 function canopy_fluorescence! end
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
+    (; ENABLE_SIF) = config;
     (; ANGLES, CANOPY, LEAVES) = spac;
+
+    if !ENABLE_SIF
+        CANOPY.RADIATION.sif_obs .= 0;
+
+        return nothing
+    end;
 
     if (ANGLES.sza < 89)
         canopy_fluorescence!(config, CANOPY, LEAVES);

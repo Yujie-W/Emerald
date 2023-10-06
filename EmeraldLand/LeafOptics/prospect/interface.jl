@@ -99,19 +99,19 @@ function interface_isotropic_τ(n₁::FT, n₂::FT, θ₁::FT) where {FT}
     if m > 1
         s₁, p₁ = interface_integrated_τ(m, FT(0));
         s₂, p₂ = interface_integrated_τ(m, θ₁);
-        _denom = FT(2) * FT(π) * sind(θ₁)^2;
+        denom = FT(2) * FT(π) * sind(θ₁)^2;
 
-        τ_s = (s₂ - s₁) / _denom;
-        τ_p = (p₁ - p₂) / _denom; # seems like the original equation made a mistake in the sign
+        τ_s = (s₂ - s₁) / denom;
+        τ_p = (p₁ - p₂) / denom; # seems like the original equation made a mistake in the sign
 
         return (τ_s + τ_p) / 2
     else
         s₁, p₁ = interface_integrated_τ(1 / m, FT(0));
         s₂, p₂ = interface_integrated_τ(1 / m, θ₁);
-        _denom = FT(2) * FT(π) * sind(θ₁)^2;
+        denom = FT(2) * FT(π) * sind(θ₁)^2;
 
-        τ_s = (s₂ - s₁) / _denom;
-        τ_p = (p₁ - p₂) / _denom;
+        τ_s = (s₂ - s₁) / denom;
+        τ_p = (p₁ - p₂) / denom;
 
         return (τ_s + τ_p) / 2 * m ^ 2
     end;

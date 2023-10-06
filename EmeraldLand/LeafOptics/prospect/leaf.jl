@@ -72,33 +72,3 @@ function leaf_ρ_τ!(bio::LeafBio{FT}) where {FT}
 
     return nothing
 end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2023-Sep-15: add function to run all the step within one function all
-#     2023-Sep-16: compute SIF conversion matrices within this function
-#
-#######################################################################################################################################################################################################
-"""
-
-    leaf_ρ_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
-
-Update the interface, sublayer, layer, and leaf level reflectance and transmittance within `bio`, given
-- `config` SPAC configuration
-- `bio` LeafBio struct
-
-"""
-function leaf_spectra! end;
-
-leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT} = (
-    leaf_interface_ρ_τ!(config, bio, θ);
-    leaf_sublayer_f_τ!(config, bio, lwc, N);
-    leaf_layer_ρ_τ!(bio, N);
-    leaf_ρ_τ!(bio);
-    leaf_sif_matrices!(config, bio, N);
-
-    return nothing
-);
