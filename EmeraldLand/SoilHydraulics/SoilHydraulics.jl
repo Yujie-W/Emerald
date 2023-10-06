@@ -9,13 +9,16 @@ using ..PhysicalChemistry: diffusive_coefficient, latent_heat_vapor, relative_su
 import ..Namespace: BrooksCorey
 
 
+# vc
+include("vc/vulnerability.jl");
+
+include("vc/fitting.jl");
+
 include("budget.jl");
-include("constructor.jl");
 include("diffusion.jl");
 include("infiltration.jl");
 include("sink.jl");
 include("volume.jl");
-include("vulnerability.jl");
 
 
 end # module
