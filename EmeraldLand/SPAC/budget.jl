@@ -29,25 +29,18 @@ Return adjusted time that soil does not over saturate or drain, given
 """
 function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
-    (; BRANCHES, JUNCTION, LEAVES, SOIL, TRUNK) = spac;
+    (; BRANCHES, JUNCTION, LEAVES, SOILS, TRUNK) = spac;
 
     _δt_1 = δt;
 
     # make sure each layer does not drain (allow for oversaturation), and θ change is less than 0.01
     _δt_2 = _δt_1;
     if ENABLE_SOIL_WATER_BUDGET
-        for _slayer in SOIL.LAYERS
-            _δt_2 = min(FT(0.01) / abs(_slayer.∂θ∂t), _δt_2);
-            if _slayer.∂θ∂t < 0
-                _δt_dra = (_slayer.VC.Θ_RES - _slayer.θ) / _slayer.∂θ∂t;
+        for soil in SOILS
+            _δt_2 = min(FT(0.01) / abs(soil.auxil.∂θ∂t), _δt_2);
+            if soil.auxil.∂θ∂t < 0
+                _δt_dra = (soil.state.vc.Θ_RES - soil.state.θ) / soil.auxil.∂θ∂t;
                 _δt_2 = min(_δt_dra, _δt_2);
-            end;
-
-            if DEBUG
-                if any(isnan, (_δt_2, _slayer.∂θ∂t, _slayer.θ))
-                    @info "Debugging" _δt_2 _slayer.∂θ∂t _slayer.θ;
-                    error("NaN in adjusted_time at layer 1");
-                end;
             end;
         end;
     end;
@@ -55,17 +48,10 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     # make sure soil temperatures do not change more than 1 K per time step
     _δt_3 = _δt_2;
     if ENABLE_ENERGY_BUDGET
-        for _slayer in SOIL.LAYERS
-            _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
-            _∂T∂t = _slayer.∂e∂t / (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas);
+        for soil in SOILS
+            _cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
+            _∂T∂t = soil.auxil.∂e∂t / (soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas);
             _δt_3 = min(1 / abs(_∂T∂t), _δt_3);
-
-            if DEBUG
-                if any(isnan, (_δt_3, _∂T∂t, _cp_gas))
-                    @info "Debugging" _δt_3 _∂T∂t _cp_gas;
-                    error("NaN in adjusted_time at layer 2");
-                end;
-            end;
         end;
     end;
 
@@ -185,7 +171,7 @@ Move forward in time for SPAC with time stepper controller, given
 function time_stepper! end
 
 time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT} = (
-    (; CANOPY, LEAVES, METEO, SOIL) = spac;
+    (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
 
     # run the update function until time elapses
     _count = 0;
@@ -208,7 +194,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         # if _t_res > 0 rerun the budget functions (shortwave radiation not included) and etc., else break
         if _t_res > 0
             update_substep_auxils!(spac);
-            longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL);
+            longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL_BULK, SOILS[1]);
             if spac._root_connection
                 plant_flow_profile!(config, spac);
                 plant_pressure_profile!(config, spac);

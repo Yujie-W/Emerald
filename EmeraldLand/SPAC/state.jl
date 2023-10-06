@@ -21,9 +21,9 @@ function spac_state! end
 spac_state!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT} = (
     (; LEAVES, MEMORY) = spac;
 
-    for _i in eachindex(LEAVES)
-        state.gs_shaded[_i] = LEAVES[_i].g_H₂O_s_shaded;
-        state.gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
+    for i in eachindex(LEAVES)
+        state.gs_shaded[i] = LEAVES[i].g_H₂O_s_shaded;
+        state.gs_sunlit[:,:,i] .= LEAVES[i].g_H₂O_s_sunlit;
     end;
 
     state.t_clm .= MEMORY.tem;
@@ -50,9 +50,9 @@ spac_state!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, state::Mult
 spac_state!(state::MultiLayerSPACState{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES, MEMORY) = spac;
 
-    for _i in eachindex(LEAVES)
-        LEAVES[_i].g_H₂O_s_shaded = state.gs_shaded[_i];
-        LEAVES[_i].g_H₂O_s_sunlit .= state.gs_sunlit[:,:,_i];
+    for i in eachindex(LEAVES)
+        LEAVES[i].g_H₂O_s_shaded = state.gs_shaded[i];
+        LEAVES[i].g_H₂O_s_sunlit .= state.gs_sunlit[:,:,i];
     end;
 
     MEMORY.tem .= state.t_clm;

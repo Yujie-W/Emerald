@@ -100,10 +100,10 @@ function disconnect_roots!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{F
     (; ROOTS, ROOTS_INDEX, SOIL) = spac;
 
     # very first step here: if soil is too dry, disconnect root from soil
-    for _i in eachindex(ROOTS)
-        _root = ROOTS[_i];
-        _slayer = SOIL.LAYERS[ROOTS_INDEX[_i]];
-        _ψ_soil = soil_ψ_25(_slayer.VC, _slayer.θ) * relative_surface_tension(_slayer.t);
+    for i in eachindex(ROOTS)
+        _root = ROOTS[i];
+        soil = SOIL.LAYERS[ROOTS_INDEX[i]];
+        _ψ_soil = soil_ψ_25(soil.VC, soil.θ) * relative_surface_tension(soil.t);
         _p_crit = xylem_pressure(_root.HS.VC, KR_THRESHOLD) * relative_surface_tension(_root.t);
         if _ψ_soil <= _p_crit
             disconnect!(_root);

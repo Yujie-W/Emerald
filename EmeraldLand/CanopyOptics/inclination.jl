@@ -77,8 +77,8 @@ inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) whe
 inclination_angles!(config::SPACConfiguration{FT}, can::Union{BroadbandSLCanopy{FT}, HyperspectralMLCanopy{FT}}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT} = (
     (; Θ_INCL_BNDS) = config;
 
-    for _i in eachindex(can.P_INCL)
-        can.P_INCL[_i] = lidf_cdf(lidf, Θ_INCL_BNDS[_i,2]) - lidf_cdf(lidf, Θ_INCL_BNDS[_i,1]);
+    for i in eachindex(can.P_INCL)
+        can.P_INCL[i] = lidf_cdf(lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(lidf, Θ_INCL_BNDS[i,1]);
     end;
 
     return nothing

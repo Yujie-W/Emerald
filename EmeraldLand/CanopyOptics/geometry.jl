@@ -82,9 +82,9 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     # 3. update the viewing fraction ps, po, pso, and p_sunlit
     OPTICS.po = exp.(OPTICS.ko .* can.ci * can.lai .* can._x_bnds);
     OPTICS.ps = exp.(OPTICS.ks .* can.ci * can.lai .* can._x_bnds);
-    for _i in 1:DIM_LAYER
-        _ilai = can.ci * can.δlai[_i];
-        OPTICS.p_sunlit[_i] = 1 / (OPTICS.ks * _ilai) * (exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[_i]) - exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[_i+1]));
+    for i in 1:DIM_LAYER
+        _ilai = can.ci * can.δlai[i];
+        OPTICS.p_sunlit[i] = 1 / (OPTICS.ks * _ilai) * (exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[i]) - exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[i+1]));
     end;
 
     _dso = sqrt( tand(angles.sza) ^ 2 + tand(angles.vza) ^ 2 - 2 * tand(angles.sza) * tand(angles.vza) * cosd(angles.vaa - angles.saa) );
@@ -101,8 +101,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
         return exp( _Σk * _cl * x + sqrt(_Πk) * _cl / _α * (1 - exp(_α * x)) )
     );
 
-    for _i in eachindex(can._x_bnds)
-        OPTICS.pso[_i] = quadgk(_pdf, can._x_bnds[_i] - FT(1)/DIM_LAYER, can._x_bnds[_i]; rtol = 1e-2)[1] * DIM_LAYER;
+    for i in eachindex(can._x_bnds)
+        OPTICS.pso[i] = quadgk(_pdf, can._x_bnds[i] - FT(1)/DIM_LAYER, can._x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
     end;
 
     return nothing
@@ -155,14 +155,14 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     end;
 
     # 1. update the scattering coefficients for different layers
-    for _i in eachindex(leaves)
-        OPTICS.σ_ddb[:,_i] .= OPTICS.ddb * leaves[_i].bio.auxil.ρ_leaf .+ OPTICS.ddf * leaves[_i].bio.auxil.τ_leaf;
-        OPTICS.σ_ddf[:,_i] .= OPTICS.ddf * leaves[_i].bio.auxil.ρ_leaf .+ OPTICS.ddb * leaves[_i].bio.auxil.τ_leaf;
-        OPTICS.σ_sdb[:,_i] .= OPTICS.sdb * leaves[_i].bio.auxil.ρ_leaf .+ OPTICS.sdf * leaves[_i].bio.auxil.τ_leaf;
-        OPTICS.σ_sdf[:,_i] .= OPTICS.sdf * leaves[_i].bio.auxil.ρ_leaf .+ OPTICS.sdb * leaves[_i].bio.auxil.τ_leaf;
-        OPTICS.σ_dob[:,_i] .= OPTICS.dob * leaves[_i].bio.auxil.ρ_leaf .+ OPTICS.dof * leaves[_i].bio.auxil.τ_leaf;
-        OPTICS.σ_dof[:,_i] .= OPTICS.dof * leaves[_i].bio.auxil.ρ_leaf .+ OPTICS.dob * leaves[_i].bio.auxil.τ_leaf;
-        OPTICS.σ_so[:,_i]  .= OPTICS.sob * leaves[_i].bio.auxil.ρ_leaf .+ OPTICS.sof * leaves[_i].bio.auxil.τ_leaf;
+    for i in eachindex(leaves)
+        OPTICS.σ_ddb[:,i] .= OPTICS.ddb * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.ddf * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_ddf[:,i] .= OPTICS.ddf * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.ddb * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_sdb[:,i] .= OPTICS.sdb * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.sdf * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_sdf[:,i] .= OPTICS.sdf * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.sdb * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_dob[:,i] .= OPTICS.dob * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.dof * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_dof[:,i] .= OPTICS.dof * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.dob * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_so[:,i]  .= OPTICS.sob * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.sof * leaves[i].bio.auxil.τ_leaf;
     end;
 
     # 2. update the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -176,18 +176,18 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
     OPTICS.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
 
-    for _i in DIM_LAYER:-1:1
-        _r_dd__ = view(OPTICS._ρ_dd,:,_i  );    # reflectance without correction
-        _r_dd_i = view(OPTICS.ρ_dd ,:,_i  );    # reflectance of the upper boundary (i)
-        _r_dd_j = view(OPTICS.ρ_dd ,:,_i+1);    # reflectance of the lower boundary (i+1)
-        _r_sd__ = view(OPTICS._ρ_sd,:,_i  );    # reflectance without correction
-        _r_sd_i = view(OPTICS.ρ_sd ,:,_i  );    # reflectance of the upper boundary (i)
-        _r_sd_j = view(OPTICS.ρ_sd ,:,_i+1);    # reflectance of the lower boundary (i+1)
-        _t_dd__ = view(OPTICS._τ_dd,:,_i  );    # transmittance without correction
-        _t_dd_i = view(OPTICS.τ_dd ,:,_i  );    # transmittance of the layer (i)
-        _t_sd__ = view(OPTICS._τ_sd,:,_i  );    # transmittance without correction
-        _t_sd_i = view(OPTICS.τ_sd ,:,_i  );    # transmittance of the layer (i)
-        _t_ss__ = view(OPTICS._τ_ss,_i);        # transmittance for directional->directional
+    for i in DIM_LAYER:-1:1
+        _r_dd__ = view(OPTICS._ρ_dd,:,i  );    # reflectance without correction
+        _r_dd_i = view(OPTICS.ρ_dd ,:,i  );    # reflectance of the upper boundary (i)
+        _r_dd_j = view(OPTICS.ρ_dd ,:,i+1);    # reflectance of the lower boundary (i+1)
+        _r_sd__ = view(OPTICS._ρ_sd,:,i  );    # reflectance without correction
+        _r_sd_i = view(OPTICS.ρ_sd ,:,i  );    # reflectance of the upper boundary (i)
+        _r_sd_j = view(OPTICS.ρ_sd ,:,i+1);    # reflectance of the lower boundary (i+1)
+        _t_dd__ = view(OPTICS._τ_dd,:,i  );    # transmittance without correction
+        _t_dd_i = view(OPTICS.τ_dd ,:,i  );    # transmittance of the layer (i)
+        _t_sd__ = view(OPTICS._τ_sd,:,i  );    # transmittance without correction
+        _t_sd_i = view(OPTICS.τ_sd ,:,i  );    # transmittance of the layer (i)
+        _t_ss__ = view(OPTICS._τ_ss,i);        # transmittance for directional->directional
 
         OPTICS._tmp_vec_λ .= 1 .- _r_dd__ .* _r_dd_j;
 
@@ -198,23 +198,23 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     end;
 
     # 4. compute longwave effective emissivity, reflectance, and transmittance (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    for _i in 1:DIM_LAYER
-        _ilai = can.δlai[_i] * can.ci;
-        _σ_lw_b = OPTICS.ddb * leaves[_i].bio.auxil.ρ_LW + OPTICS.ddf * leaves[_i].bio.auxil.τ_LW;
-        _σ_lw_f = OPTICS.ddf * leaves[_i].bio.auxil.ρ_LW + OPTICS.ddb * leaves[_i].bio.auxil.τ_LW;
-        OPTICS._τ_lw[_i] = exp(-1 * (1 - _σ_lw_f) * _ilai);
-        OPTICS._ρ_lw[_i] = 1 - exp(-1 * _σ_lw_b * _ilai);
-        OPTICS.ϵ[_i] = 1 - OPTICS._τ_lw[_i] - OPTICS._ρ_lw[_i];
+    for i in 1:DIM_LAYER
+        _ilai = can.δlai[i] * can.ci;
+        _σ_lw_b = OPTICS.ddb * leaves[i].bio.auxil.ρ_LW + OPTICS.ddf * leaves[i].bio.auxil.τ_LW;
+        _σ_lw_f = OPTICS.ddf * leaves[i].bio.auxil.ρ_LW + OPTICS.ddb * leaves[i].bio.auxil.τ_LW;
+        OPTICS._τ_lw[i] = exp(-1 * (1 - _σ_lw_f) * _ilai);
+        OPTICS._ρ_lw[i] = 1 - exp(-1 * _σ_lw_b * _ilai);
+        OPTICS.ϵ[i] = 1 - OPTICS._τ_lw[i] - OPTICS._ρ_lw[i];
     end;
 
     # 5. update the effective longwave reflectance and transmittance
     OPTICS.ρ_lw[end] = sbulk.auxil.ρ_lw;
 
-    for _i in DIM_LAYER:-1:1
-        _dnorm = 1 - OPTICS._ρ_lw[_i] * OPTICS.ρ_lw[_i+1];
+    for i in DIM_LAYER:-1:1
+        _dnorm = 1 - OPTICS._ρ_lw[i] * OPTICS.ρ_lw[i+1];
 
-        OPTICS.τ_lw[_i] = OPTICS._τ_lw[_i] / _dnorm;                                                    # it, then rescale
-        OPTICS.ρ_lw[_i] = OPTICS._ρ_lw[_i] + OPTICS._τ_lw[_i] * OPTICS.ρ_lw[_i+1] * OPTICS.τ_lw[_i];    # ir + it-jr-it
+        OPTICS.τ_lw[i] = OPTICS._τ_lw[i] / _dnorm;                                                    # it, then rescale
+        OPTICS.ρ_lw[i] = OPTICS._ρ_lw[i] + OPTICS._τ_lw[i] * OPTICS.ρ_lw[i+1] * OPTICS.τ_lw[i];    # ir + it-jr-it
     end;
 
     return nothing

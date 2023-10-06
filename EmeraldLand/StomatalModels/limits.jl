@@ -24,12 +24,12 @@ limit_stomatal_conductance!(leaf::Leaf{FT}) where {FT} = (
     _g_max = leaf.flux.state.g_limits[2] * _ratio;
 
     # for sunlit leaf
-    for _i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
-        if leaf.flux.state.g_H₂O_s_sunlit[_i] < _g_min
-            leaf.flux.state.g_H₂O_s_sunlit[_i] = _g_min
+    for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
+        if leaf.flux.state.g_H₂O_s_sunlit[i] < _g_min
+            leaf.flux.state.g_H₂O_s_sunlit[i] = _g_min
         end;
-        if leaf.flux.state.g_H₂O_s_sunlit[_i] > _g_max
-            leaf.flux.state.g_H₂O_s_sunlit[_i] = _g_max
+        if leaf.flux.state.g_H₂O_s_sunlit[i] > _g_max
+            leaf.flux.state.g_H₂O_s_sunlit[i] = _g_max
         end;
     end;
 

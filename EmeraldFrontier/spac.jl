@@ -28,16 +28,16 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
                 longitude = gmdict["LONGITUDE"],
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
                 zs = [-2, _z_canopy/2, _z_canopy]);
-    _spac.SOIL.COLOR = gmdict["SOIL_COLOR"];
+    _spac.SOIL_BULK.state.color = gmdict["SOIL_COLOR"];
 
     # update soil type information per layer
-    for _i in eachindex(_spac.SOIL.LAYERS)
+    for i in eachindex(_spac.SOILS)
         # TODO: add a line to parameterize K_MAX
-        _spac.SOIL.LAYERS[_i].VC.α = gmdict["SOIL_α"][_i];
-        _spac.SOIL.LAYERS[_i].VC.N = gmdict["SOIL_N"][_i];
-        _spac.SOIL.LAYERS[_i].VC.M = 1 - 1 / _spac.SOIL.LAYERS[_i].VC.N;
-        _spac.SOIL.LAYERS[_i].VC.Θ_RES = gmdict["SOIL_ΘR"][_i];
-        _spac.SOIL.LAYERS[_i].VC.Θ_SAT = gmdict["SOIL_ΘS"][_i];
+        _spac.SOILS[i].state.vc.α = gmdict["SOIL_α"][i];
+        _spac.SOILS[i].state.vc.N = gmdict["SOIL_N"][i];
+        _spac.SOILS[i].state.vc.M = 1 - 1 / _spac.SOILS[i].state.vc.N;
+        _spac.SOILS[i].state.vc.Θ_RES = gmdict["SOIL_ΘR"][i];
+        _spac.SOILS[i].state.vc.Θ_SAT = gmdict["SOIL_ΘS"][i];
     end;
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)

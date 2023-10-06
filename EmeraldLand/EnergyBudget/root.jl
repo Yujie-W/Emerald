@@ -16,7 +16,7 @@ Calculate the energy flows of the root, given
 
 """
 function root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
-    (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL) = spac;
+    (; JUNCTION, ROOTS, ROOTS_INDEX, SOILS) = spac;
 
     # compute the energy flow per layer
     # the energy flow is computed as the difference between
@@ -24,12 +24,12 @@ function root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
     #     energy of the water flow to the root-trunk junction
     for i in eachindex(ROOTS)
         root = ROOTS[i];
-        soil = SOIL.LAYERS[ROOTS_INDEX[i]];
+        soil = SOILS[ROOTS_INDEX[i]];
 
         # if the flow into the root is positive, then the energy flow is positive
         f_i = flow_in(root);
         if f_i >= 0
-            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.t;
+            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.auxil.t;
         else
             root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.energy.auxil.t;
         end;

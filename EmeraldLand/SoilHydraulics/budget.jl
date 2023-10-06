@@ -58,22 +58,14 @@ soil_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) w
     surface_runoff!(config, spac);
 
     (; DEBUG) = config;
-    (; SOIL) = spac;
-    LAYERS = SOIL.LAYERS;
+    (; SOILS) = spac;
 
     # update soil temperature at each layer (top layer t will be same as _t above)
-    for _i in eachindex(LAYERS)
-        _slayer = LAYERS[_i];
-        _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
-        _slayer._cp = _slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas;
-        _slayer.t = _slayer.Σe / _slayer._cp;
-
-        if DEBUG
-            if any(isnan, (_cp_gas, _slayer._cp, _slayer.t))
-                @info "Debugging" _cp_gas _slayer._cp _slayer.t;
-                error("NaN detected when computing soil temperature at layer $(_i)");
-            end;
-        end;
+    for i in eachindex(SOILS)
+        soil = SOILS[i];
+        _cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
+        soil.auxil.cp = soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas;
+        soil.auxil.t = soil.state.Σe / soil.auxil.cp;
     end;
 
     return nothing

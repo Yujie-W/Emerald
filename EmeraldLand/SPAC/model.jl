@@ -50,7 +50,7 @@ function soil_plant_air_continuum! end
 # TODO: add top soil evaporation
 soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
-    spac.SOIL.runoff = 0;
+    spac.SOIL_BULK.auxil.runoff = 0;
     update_substep_auxils!(spac);
 
     # 1. run plant hydraulic model (must be run before plant_photosynthesis! as the latter may need β for empirical models)

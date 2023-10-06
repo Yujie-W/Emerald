@@ -12,8 +12,8 @@
     reprocess_data!(
                 dict::Dict;
                 file_name_function::Union{Function,Nothing} = nothing,
-                data_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])],
-                std_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])])
+                data_scaling_functions::Vector = [nothing for i in eachindex(dict["VARIABLE_SETTINGS"])],
+                std_scaling_functions::Vector = [nothing for i in eachindex(dict["VARIABLE_SETTINGS"])])
 
 Reprocess the data to use in GriddingMachine artifacts, given
 - `dict` JSON dict
@@ -25,8 +25,8 @@ Reprocess the data to use in GriddingMachine artifacts, given
 function reprocess_data!(
             dict::Dict;
             file_name_function::Union{Function,Nothing} = nothing,
-            data_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])],
-            std_scaling_functions::Vector = [nothing for _i in eachindex(dict["VARIABLE_SETTINGS"])])
+            data_scaling_functions::Vector = [nothing for i in eachindex(dict["VARIABLE_SETTINGS"])],
+            std_scaling_functions::Vector = [nothing for i in eachindex(dict["VARIABLE_SETTINGS"])])
     _dict_file = dict["INPUT_MAP_SETS"];
     _dict_grid = dict["GRIDDINGMACHINE"];
     _dict_vars = dict["INPUT_VAR_SETS"];

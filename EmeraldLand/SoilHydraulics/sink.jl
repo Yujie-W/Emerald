@@ -41,20 +41,12 @@ Update the source/sink terms for the soil layers, given
 """
 function soil_source_sink!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; DEBUG) = config;
-    (; ROOTS, ROOTS_INDEX, SOIL) = spac;
-    LAYERS = SOIL.LAYERS;
+    (; ROOTS, ROOTS_INDEX, SOIL_BULK, SOILS) = spac;
 
     # loop through the roots and compute the source/sink terms
-    for _i in eachindex(ROOTS)
-        LAYERS[ROOTS_INDEX[_i]].∂θ∂t -= root_sink(ROOTS[_i]) * M_H₂O(FT) / ρ_H₂O(FT) / SOIL.AREA / LAYERS[ROOTS_INDEX[_i]].ΔZ;
-        LAYERS[ROOTS_INDEX[_i]].∂e∂t -= root_sink(ROOTS[_i]) / SOIL.AREA * CP_L_MOL(FT) * LAYERS[_i].t;
-
-        if DEBUG
-            if any(isnan, (LAYERS[ROOTS_INDEX[_i]].∂θ∂t, LAYERS[ROOTS_INDEX[_i]].∂e∂t))
-                @info "Debugging" LAYERS[ROOTS_INDEX[_i]].∂θ∂t LAYERS[ROOTS_INDEX[_i]].∂e∂t;
-                error("NaN detected in soil_source_sink! at layer $(ROOTS_INDEX[_i])");
-            end;
-        end;
+    for i in eachindex(ROOTS)
+        SOILS[ROOTS_INDEX[i]].auxil.∂θ∂t -= root_sink(ROOTS[i]) * M_H₂O(FT) / ρ_H₂O(FT) / SOIL_BULK.state.area / SOILS[ROOTS_INDEX[i]].auxil.δz;
+        SOILS[ROOTS_INDEX[i]].auxil.∂e∂t -= root_sink(ROOTS[i]) / SOIL_BULK.state.area * CP_L_MOL(FT) * SOILS[i].auxil.t;
     end;
 
     return nothing

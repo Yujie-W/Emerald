@@ -197,9 +197,9 @@ extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::Hyperspe
     (; Θ_INCL) = config;
     (; OPTICS) = can;
 
-    for _i in eachindex(Θ_INCL)
-        OPTICS._ks[_i], OPTICS._ko[_i], OPTICS._sb[_i], OPTICS._sf[_i], OPTICS._Co[_i], OPTICS._Cs[_i], OPTICS._So[_i], OPTICS._Ss[_i] =
-            extinction_coefficient(angles.sza, angles.vza, angles.vaa - angles.saa, Θ_INCL[_i]);
+    for i in eachindex(Θ_INCL)
+        OPTICS._ks[i], OPTICS._ko[i], OPTICS._sb[i], OPTICS._sf[i], OPTICS._Co[i], OPTICS._Cs[i], OPTICS._So[i], OPTICS._Ss[i] =
+            extinction_coefficient(angles.sza, angles.vza, angles.vaa - angles.saa, Θ_INCL[i]);
     end;
 
     return nothing

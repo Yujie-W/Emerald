@@ -137,7 +137,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Bounds of inclination angles `[°]`"
     Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ]
     "Mean inclination angles `[°]`"
-    Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[_i,1] + Θ_INCL_BNDS[_i,2]) / 2 for _i in 1:DIM_INCL ]
+    Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
 
     # Trace gas information
     "Trace gas air"

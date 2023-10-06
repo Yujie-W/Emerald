@@ -48,8 +48,8 @@ numerical∫(f::Vector{FT}, Δx::FT) where {FT} = sum(f) * abs(Δx);
 numerical∫(f::Function, x_min::FT, x_max::FT, n::Int) where {FT} = (
     _sum = 0;
     _dx  = (x_max - x_min) / n;
-    for _i in 1:n
-        _x = x_min + FT(_i-0.5) * _dx;
+    for i in 1:n
+        _x = x_min + FT(i-0.5) * _dx;
         _sum += f(_x);
     end;
 

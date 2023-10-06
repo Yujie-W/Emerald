@@ -21,7 +21,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct SoilLayerState{FT}
     "Specific heat capacity of soil `[J K⁻¹ kg⁻¹]`"
     cp::FT = 760
-    "Moles of soil trace gasses `[mol]`"
+    "Moles of soil trace gasses (CH₄, CO₂, H₂O, N₂, O₂) `[mol]`"
     ns::Vector{FT} = zeros(FT,5)
     "Soil moisture retention curve"
     vc::Union{BrooksCorey{FT}, VanGenuchten{FT}} = VanGenuchten{FT}("Loam")
@@ -81,10 +81,6 @@ Base.@kwdef mutable struct SoilLayerAuxil{FT}
     ∂θ∂t::FT = 0
     "Matric potential `[MPa]`"
     ψ::FT = 0
-
-    # cache variables
-    "Last soil moisture used to compute albedo"
-    _θ::FT = -1
 end;
 
 

@@ -23,8 +23,8 @@ function update_substep_auxils! end;
 update_substep_auxils!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ROOTS, JUNCTION, TRUNK, BRANCHES, LEAVES) = spac;
 
-    # update the soil auxiliary variables
-    for soil in spac.SOIL.LAYERS
+    # update the soil layer auxiliary variables
+    for soil in spac.SOILS
         update_substep_auxils!(soil);
     end;
 
@@ -51,9 +51,9 @@ update_substep_auxils!(spac::MultiLayerSPAC{FT}) where {FT} = (
 );
 
 update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
-    soil.∂e∂t = 0;
-    soil.∂n∂t .= 0;
-    soil.∂θ∂t = 0;
+    soil.auxil.∂e∂t = 0;
+    soil.auxil.∂n∂t .= 0;
+    soil.auxil.∂θ∂t = 0;
 
     return nothing
 );

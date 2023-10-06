@@ -28,10 +28,10 @@ function interpolate_data!(data::Union{FT, Vector{FT}}) where {FT}
     @inline find_last_number(vec_in::Vector{FT}, ind::Int) where {FT} = (
         _x = ind;
         _y = vec_in[ind];
-        for _i in ind:-1:1
-            if !isnan(vec_in[_i])
-                _x = _i;
-                _y = vec_in[_i];
+        for i in ind:-1:1
+            if !isnan(vec_in[i])
+                _x = i;
+                _y = vec_in[i];
                 break;
             end;
         end;
@@ -42,10 +42,10 @@ function interpolate_data!(data::Union{FT, Vector{FT}}) where {FT}
     @inline find_next_number(vec_in::Vector{FT}, ind::Int) where {FT} = (
         _x = ind;
         _y = vec_in[ind];
-        for _i in ind:1:length(vec_in)
-            if !isnan(vec_in[_i])
-                _x = _i;
-                _y = vec_in[_i];
+        for i in ind:1:length(vec_in)
+            if !isnan(vec_in[i])
+                _x = i;
+                _y = vec_in[i];
                 break;
             end;
         end;

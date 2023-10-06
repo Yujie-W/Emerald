@@ -293,10 +293,10 @@ simulation!(config::SPACConfiguration{FT},
 
     # save water contents and temperatures based on t_on and θ_on
     if ENABLE_SOIL_WATER_BUDGET
-        dfr.MOD_SWC_1 = spac.SOIL.LAYERS[1].θ;
-        dfr.MOD_SWC_2 = spac.SOIL.LAYERS[2].θ;
-        dfr.MOD_SWC_3 = spac.SOIL.LAYERS[3].θ;
-        dfr.MOD_SWC_4 = spac.SOIL.LAYERS[4].θ;
+        dfr.MOD_SWC_1 = spac.SOILS[1].state.θ;
+        dfr.MOD_SWC_2 = spac.SOILS[2].state.θ;
+        dfr.MOD_SWC_3 = spac.SOILS[3].state.θ;
+        dfr.MOD_SWC_4 = spac.SOILS[4].state.θ;
 
         if DEBUG
             if any(isnan, (dfr.MOD_SWC_1, dfr.MOD_SWC_2, dfr.MOD_SWC_3, dfr.MOD_SWC_4))
@@ -310,10 +310,10 @@ simulation!(config::SPACConfiguration{FT},
         dfr.MOD_T_L_MAX  = nanmax(_tleaf);
         dfr.MOD_T_L_MEAN = nanmean(_tleaf);
         dfr.MOD_T_L_MIN  = nanmin(_tleaf);
-        dfr.MOD_T_S_1    = spac.SOIL.LAYERS[1].t;
-        dfr.MOD_T_S_2    = spac.SOIL.LAYERS[2].t;
-        dfr.MOD_T_S_3    = spac.SOIL.LAYERS[3].t;
-        dfr.MOD_T_S_4    = spac.SOIL.LAYERS[4].t;
+        dfr.MOD_T_S_1    = spac.SOILS[1].auxil.t;
+        dfr.MOD_T_S_2    = spac.SOILS[2].auxil.t;
+        dfr.MOD_T_S_3    = spac.SOILS[3].auxil.t;
+        dfr.MOD_T_S_4    = spac.SOILS[4].auxil.t;
 
         if DEBUG
             if any(isnan, (dfr.MOD_T_L_MAX, dfr.MOD_T_L_MEAN, dfr.MOD_T_L_MIN, dfr.MOD_T_S_1, dfr.MOD_T_S_2, dfr.MOD_T_S_3, dfr.MOD_T_S_4))

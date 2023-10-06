@@ -33,30 +33,30 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, slayer::SoilLayer{FT}) where {FT}
+    soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `config` Configurations of spac model
 - `sbulk` `SoilBulk` type struct
-- `slayer` `SoilLayer` type struct
+- `soil` `SoilLayer` type struct
 
 """
-function soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, slayer::SoilLayer{FT}) where {FT}
+function soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT}
     (; SPECTRA, α_CLM, α_FITTING) = config;
     @assert 1 <= sbulk.state.color <=20;
 
     # if the change of swc is lower than 0.001, do nothing
-    if abs(slayer.state.θ - sbulk.auxil._θ) < 0.001
+    if abs(soil.state.θ - sbulk.auxil._θ) < 0.001
         return nothing
     end;
 
     # use CLM method or Yujie's method
-    _rwc::FT = slayer.state.θ / slayer.state.vc.Θ_SAT;
+    _rwc::FT = soil.state.θ / soil.state.vc.Θ_SAT;
     _par::FT = SOIL_ALBEDOS[sbulk.state.color,1] * (1 - _rwc) + _rwc * SOIL_ALBEDOS[sbulk.state.color,3];
     _nir::FT = SOIL_ALBEDOS[sbulk.state.color,2] * (1 - _rwc) + _rwc * SOIL_ALBEDOS[sbulk.state.color,4];
 
     if α_CLM
-        _delta = max(0, FT(0.11) - FT(0.4) * slayer.state.θ);
+        _delta = max(0, FT(0.11) - FT(0.4) * soil.state.θ);
         _par = max(SOIL_ALBEDOS[sbulk.state.color,1], SOIL_ALBEDOS[sbulk.state.color,3] + _delta);
         _nir = max(SOIL_ALBEDOS[sbulk.state.color,2], SOIL_ALBEDOS[sbulk.state.color,4] + _delta);
     end;
@@ -94,7 +94,7 @@ function soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, slayer
     mul!(sbulk.auxil.ρ_sw, SPECTRA.MAT_SOIL, sbulk.auxil.weight);
 
     # update the albedo._θ to avoid calling this function too many times
-    sbulk.auxil._θ = slayer.state.θ;
+    sbulk.auxil._θ = soil.state.θ;
 
     return nothing
 end;

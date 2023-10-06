@@ -34,8 +34,8 @@ simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
             displaying::Bool = true
 ) where {FT} = (
 #    @tinfo "Debugging the code using one core...";
-#    @showprogress for _i in eachindex(gm_mat)
-#        simulation!(gm_mat[_i], wd_mat[_i], state_mat[_i]);
+#    @showprogress for i in eachindex(gm_mat)
+#        simulation!(gm_mat[i], wd_mat[i], state_mat[i]);
 #        if !(0 <= CACHE_STATE.beta <= 1) ||
 #           !(CACHE_STATE.csif >= 0) ||
 #           !(CACHE_STATE.etr >= 0) ||

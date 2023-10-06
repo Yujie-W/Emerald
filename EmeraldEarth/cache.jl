@@ -46,7 +46,7 @@ function initialize_cache!(FT)
     end;
 
     # initialize the spac with non-saturated soil
-    update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(max(_slayer.VC.Θ_SAT - 0.02, (_slayer.VC.Θ_SAT + _slayer.VC.Θ_RES) / 2) for _slayer in CACHE_SPAC.SOIL.LAYERS));
+    update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(max(soil.VC.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.SOILS));
     initialize!(CACHE_SPAC, CACHE_CONFIG);
 
     # create a state struct based on the spac
@@ -92,18 +92,18 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     CACHE_SPAC.ELEVATION = gm_params["ELEVATION"];
     CACHE_SPAC.Z .= [-2, _z_canopy/2, _z_canopy];
     CACHE_SPAC.Z_AIR .= collect(0:21) * _z_canopy / 20;
-    CACHE_SPAC.SOIL.COLOR = gm_params["SOIL_COLOR"];
+    CACHE_SPAC.SOIL_BULK.state.color = gm_params["SOIL_COLOR"];
 
     # update soil type information per layer
-    for _i in eachindex(CACHE_SPAC.SOIL.LAYERS)
+    for i in eachindex(CACHE_SPAC.SOILS)
         # TODO: add a line to parameterize K_MAX
         # TODO: fix these later with better data source
-        if !isnan(gm_params["SOIL_α"][_i]) && !isnan(gm_params["SOIL_N"][_i]) && !isnan(gm_params["SOIL_ΘR"][_i]) && !isnan(gm_params["SOIL_ΘS"][_i])
-            CACHE_SPAC.SOIL.LAYERS[_i].VC.α = gm_params["SOIL_α"][_i];
-            CACHE_SPAC.SOIL.LAYERS[_i].VC.N = gm_params["SOIL_N"][_i];
-            CACHE_SPAC.SOIL.LAYERS[_i].VC.M = 1 - 1 / CACHE_SPAC.SOIL.LAYERS[_i].VC.N;
-            CACHE_SPAC.SOIL.LAYERS[_i].VC.Θ_RES = gm_params["SOIL_ΘR"][_i];
-            CACHE_SPAC.SOIL.LAYERS[_i].VC.Θ_SAT = gm_params["SOIL_ΘS"][_i];
+        if !isnan(gm_params["SOIL_α"][i]) && !isnan(gm_params["SOIL_N"][i]) && !isnan(gm_params["SOIL_ΘR"][i]) && !isnan(gm_params["SOIL_ΘS"][i])
+            CACHE_SPAC.SOILS[i].state.vc.α = gm_params["SOIL_α"][i];
+            CACHE_SPAC.SOILS[i].state.vc.N = gm_params["SOIL_N"][i];
+            CACHE_SPAC.SOILS[i].state.vc.M = 1 - 1 / CACHE_SPAC.SOILS[i].state.vc.N;
+            CACHE_SPAC.SOILS[i].state.vc.Θ_RES = gm_params["SOIL_ΘR"][i];
+            CACHE_SPAC.SOILS[i].state.vc.Θ_SAT = gm_params["SOIL_ΘS"][i];
         end;
     end;
 
@@ -141,7 +141,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     if "SWC" in keys(wd_params)
         update!(CACHE_SPAC, CACHE_CONFIG; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
         # TODO: remove this when soil diffusion problem is fixed
-        update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(min(_slayer.VC.Θ_SAT - 0.001, _slayer.θ) for _slayer in CACHE_SPAC.SOIL.LAYERS));
+        update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(min(soil.state.vc.Θ_SAT - 0.001, soil.state.θ) for soil in CACHE_SPAC.SOILS));
     end;
 
     # synchronize the state if state is not nothing, otherwise set all values to NaN (do thing before prescribing T_SKIN)

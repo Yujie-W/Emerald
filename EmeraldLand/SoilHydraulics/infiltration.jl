@@ -31,83 +31,53 @@ function soil_infiltration! end
 
 soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; DEBUG, DIM_SOIL) = config;
-    (; METEO, SOIL) = spac;
-    LAYERS = SOIL.LAYERS;
+    (; METEO, SOIL_BULK, SOILS) = spac;
 
     # update soil k, kd, ψ, and λ_thermal for each soil layer (0.5 for tortuosity factor)
-    for _slayer in LAYERS
-        _slayer.k          = relative_hydraulic_conductance(_slayer.VC, _slayer.θ) * _slayer.VC.K_MAX * relative_viscosity(_slayer.t) / _slayer.ΔZ;
-        _slayer.ψ          = soil_ψ_25(_slayer.VC, _slayer.θ; oversaturation = true) * relative_surface_tension(_slayer.t);
-        _slayer._kd        = 0.5 * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / _slayer.ΔZ;
-        _slayer._λ_thermal = (_slayer.Λ_THERMAL + _slayer.θ * Λ_THERMAL_H₂O(FT)) / _slayer.ΔZ;
-        _slayer.∂e∂t       = 0;
-        _slayer.∂n∂t      .= 0;
-        _slayer.∂θ∂t       = 0;
-
-        if DEBUG
-            if any(isnan, (_slayer.k, _slayer.ψ, _slayer._kd, _slayer._λ_thermal))
-                @info "Debugging" _slayer.θ;
-                @info "Debugging" _slayer.k _slayer.ψ _slayer._kd _slayer._λ_thermal;
-                error("NaN detected in soil_infiltration! when computing soil layer hydraulic and thermal properties");
-            end;
-        end;
+    for soil in SOILS
+        soil.auxil.k         = relative_hydraulic_conductance(soil.state.vc, soil.state.θ) * soil.state.vc.K_MAX * relative_viscosity(soil.auxil.t) / soil.auxil.δz;
+        soil.auxil.ψ         = soil_ψ_25(soil.state.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.auxil.t);
+        soil.auxil.kd        = 0.5 * max(0, soil.state.vc.Θ_SAT - soil.state.θ) / soil.auxil.δz;
+        soil.auxil.λ_thermal = (soil.state.λ_thermal + soil.state.θ * Λ_THERMAL_H₂O(FT)) / soil.auxil.δz;
+        soil.auxil.∂e∂t      = 0;
+        soil.auxil.∂n∂t     .= 0;
+        soil.auxil.∂θ∂t      = 0;
     end;
 
     # update k, δψ, and flow rate among layers
-    LAYERS[1].∂θ∂t += METEO.rain * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[1].ΔZ;
-    LAYERS[1].∂e∂t += METEO.rain * CP_L_MOL(FT) * METEO.t_precip;
-    LAYERS[1].∂e∂t += SOIL.ALBEDO.r_net_lw + SOIL.ALBEDO.r_net_sw;
+    SOILS[1].auxil.∂θ∂t += METEO.rain * M_H₂O(FT) / ρ_H₂O(FT) / SOILS[1].auxil.δz;
+    SOILS[1].auxil.∂e∂t += METEO.rain * CP_L_MOL(FT) * METEO.t_precip;
+    SOILS[1].auxil.∂e∂t += SOIL_BULK.auxil.r_net_lw + SOIL_BULK.auxil.r_net_sw;
 
-    if DEBUG
-        if any(isnan, (LAYERS[1].∂θ∂t, LAYERS[1].∂e∂t))
-            @info "Debugging" LAYERS[1].∂θ∂t LAYERS[1].∂e∂t;
-            error("NaN detected in soil_infiltration! when computing top layer water and energy budget from rain and radiation");
-        end;
-    end;
-
-    for _i in 1:DIM_SOIL-1
-        SOIL._k[_i]         = 1 / (2 / LAYERS[_i].k + 2 / LAYERS[_i+1].k);
-        SOIL._δψ[_i]        = LAYERS[_i].ψ - LAYERS[_i+1].ψ + ρg_MPa(FT) * (LAYERS[_i].Z - LAYERS[_i+1].Z);
-        SOIL._q[_i]         = SOIL._k[_i] * SOIL._δψ[_i];
-        SOIL._λ_thermal[_i] = 1 / (2 / LAYERS[_i]._λ_thermal + 2 / LAYERS[_i+1]._λ_thermal);
-        SOIL._δt[_i]        = LAYERS[_i].t - LAYERS[_i+1].t;
-        SOIL._q_thermal[_i] = SOIL._λ_thermal[_i] * SOIL._δt[_i];
+    for i in 1:DIM_SOIL-1
+        SOIL_BULK.auxil.k[i]         = 1 / (2 / SOILS[i].auxil.k + 2 / SOILS[i+1].auxil.k);
+        SOIL_BULK.auxil.δψ[i]        = SOILS[i].auxil.ψ - SOILS[i+1].auxil.ψ + ρg_MPa(FT) * (SOILS[i].auxil.z - SOILS[i+1].auxil.z);
+        SOIL_BULK.auxil.q[i]         = SOIL_BULK.auxil.k[i] * SOIL_BULK.auxil.δψ[i];
+        SOIL_BULK.auxil.λ_thermal[i] = 1 / (2 / SOILS[i].auxil.λ_thermal + 2 / SOILS[i+1].auxil.λ_thermal);
+        SOIL_BULK.auxil.δt[i]        = SOILS[i].auxil.t - SOILS[i+1].auxil.t;
+        SOIL_BULK.auxil.q_thermal[i] = SOIL_BULK.auxil.λ_thermal[i] * SOIL_BULK.auxil.δt[i];
 
         # if flow into the lower > 0, but the lower layer is already saturated, set the flow to 0
-        if (SOIL._q[_i] > 0) && (LAYERS[_i+1].θ >= LAYERS[_i+1].VC.Θ_SAT)
-            SOIL._q[_i] = 0;
+        if (SOIL_BULK.auxil.q[i] > 0) && (SOILS[i+1].state.θ >= SOILS[i+1].state.vc.Θ_SAT)
+            SOIL_BULK.auxil.q[i] = 0;
         end;
 
         # if flow into the lower < 0, but the upper layer is already saturated, set the flow to 0
-        if (SOIL._q[_i] < 0) && (LAYERS[_i].θ >= LAYERS[_i].VC.Θ_SAT)
-            SOIL._q[_i] = 0;
+        if (SOIL_BULK.auxil.q[i] < 0) && (SOILS[i].state.θ >= SOILS[i].state.vc.Θ_SAT)
+            SOIL_BULK.auxil.q[i] = 0;
         end;
 
         # if both layers are oversaturated, move the oversaturated part from lower layer to upper layer
-        if (LAYERS[_i].θ >= LAYERS[_i].VC.Θ_SAT) && (LAYERS[_i+1].θ > LAYERS[_i+1].VC.Θ_SAT)
-            SOIL._q[_i] = -1 * (LAYERS[_i+1].θ - LAYERS[_i+1].VC.Θ_SAT) * LAYERS[_i+1].ΔZ * ρ_H₂O(FT) / M_H₂O(FT);
+        if (SOILS[i].state.θ >= SOILS[i].state.vc.Θ_SAT) && (SOILS[i+1].state.θ > SOILS[i+1].state.vc.Θ_SAT)
+            SOIL_BULK.auxil.q[i] = -1 * (SOILS[i+1].state.θ - SOILS[i+1].state.vc.Θ_SAT) * SOILS[i+1].auxil.δz * ρ_H₂O(FT) / M_H₂O(FT);
         end;
 
-        if DEBUG
-            if any(isnan, (SOIL._k[_i], SOIL._δψ[_i], SOIL._q[_i], SOIL._λ_thermal[_i], SOIL._δt[_i], SOIL._q_thermal[_i]))
-                @info "Debugging" SOIL._k[_i] SOIL._δψ[_i] SOIL._q[_i] SOIL._λ_thermal[_i] SOIL._δt[_i] SOIL._q_thermal[_i];
-                error("NaN detected in soil_infiltration! when computing water and energy flow between soil layers");
-            end;
-        end;
-
-        LAYERS[_i  ].∂θ∂t -= SOIL._q[_i] * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[_i].ΔZ;
-        LAYERS[_i+1].∂θ∂t += SOIL._q[_i] * M_H₂O(FT) / ρ_H₂O(FT) / LAYERS[_i+1].ΔZ;
-        LAYERS[_i  ].∂e∂t -= SOIL._q_thermal[_i];
-        LAYERS[_i+1].∂e∂t += SOIL._q_thermal[_i];
-        LAYERS[_i  ].∂e∂t -= SOIL._q[_i] * CP_L_MOL(FT) * LAYERS[_i].t;
-        LAYERS[_i+1].∂e∂t += SOIL._q[_i] * CP_L_MOL(FT) * LAYERS[_i].t;
-
-        if DEBUG
-            if any(isnan, (LAYERS[_i].∂θ∂t, LAYERS[_i+1].∂θ∂t, LAYERS[_i].∂e∂t, LAYERS[_i+1].∂e∂t))
-                @info "Debugging" LAYERS[_i].∂θ∂t LAYERS[_i+1].∂θ∂t LAYERS[_i].∂e∂t LAYERS[_i+1].∂e∂t;
-                error("NaN detected in soil_infiltration! when computing water and energy budget from flow between soil layers");
-            end;
-        end;
+        SOILS[i  ].auxil.∂θ∂t -= SOIL_BULK.auxil.q[i] * M_H₂O(FT) / ρ_H₂O(FT) / SOILS[i].auxil.δz;
+        SOILS[i+1].auxil.∂θ∂t += SOIL_BULK.auxil.q[i] * M_H₂O(FT) / ρ_H₂O(FT) / SOILS[i+1].auxil.δz;
+        SOILS[i  ].auxil.∂e∂t -= SOIL_BULK.auxil.q_thermal[i];
+        SOILS[i+1].auxil.∂e∂t += SOIL_BULK.auxil.q_thermal[i];
+        SOILS[i  ].auxil.∂e∂t -= SOIL_BULK.auxil.q[i] * CP_L_MOL(FT) * SOILS[i].auxil.t;
+        SOILS[i+1].auxil.∂e∂t += SOIL_BULK.auxil.q[i] * CP_L_MOL(FT) * SOILS[i].auxil.t;
     end;
 
     return nothing
@@ -115,40 +85,25 @@ soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wher
 
 soil_infiltration!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
     (; ENABLE_SOIL_EVAPORATION, DEBUG) = config;
-    (; METEO, SOIL) = spac;
-    LAYERS = SOIL.LAYERS;
+    (; SOILS) = spac;
 
     # run the water transport (condensation + mass flow)
-    for _i in eachindex(LAYERS)
-        _slayer = LAYERS[_i];
+    for i in eachindex(SOILS)
+        soil = SOILS[i];
 
         # account for evaporation and condensation to/from the air space
         if ENABLE_SOIL_EVAPORATION
-            _ps = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000);
-            _δθ_v = (_slayer.TRACES.n_H₂O / _slayer.ΔZ - _ps * max(0, _slayer.VC.Θ_SAT - _slayer.θ) / (GAS_R(FT) * _slayer.t)) * M_H₂O(FT) / ρ_H₂O(FT);
+            _ps = saturation_vapor_pressure(soil.t, soil.auxil.ψ * 1000000);
+            _δθ_v = (soil.state.ns[3] / soil.auxil.δz - _ps * max(0, soil.state.vc.Θ_SAT - soil.θ) / (GAS_R(FT) * soil.t)) * M_H₂O(FT) / ρ_H₂O(FT);
 
-            _slayer.θ += _δθ_v;
-            _slayer.Σe += _δθ_v * ρ_H₂O(FT) * CP_V(FT) * _slayer.t; # this energy is transferred from/to air, so use CP_V
-            _slayer.Σe += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(_slayer.t);
-
-            if DEBUG
-                if any(isnan, (_ps, _δθ_v, _slayer.θ, _slayer.Σe))
-                    @info "Debugging" _ps _δθ_v _slayer.θ _slayer.Σe;
-                    error("NaN detected in soil_infiltration! when computing water budget from condensation and mass flow");
-                end;
-            end;
+            soil.state.θ += _δθ_v;
+            soil.state.Σe += _δθ_v * ρ_H₂O(FT) * CP_V(FT) * soil.t; # this energy is transferred from/to air, so use CP_V
+            soil.state.Σe += _δθ_v * ρ_H₂O(FT) * latent_heat_vapor(soil.t);
         end;
 
         # account for mass flow
-        _slayer.θ += _slayer.∂θ∂t * δt;
-        _slayer.Σe += _slayer.∂e∂t * δt / _slayer.ΔZ;
-
-        if DEBUG
-            if any(isnan, (_slayer.θ, _slayer.Σe))
-                @info "Debugging" _slayer.θ _slayer.Σe;
-                error("NaN detected in soil_infiltration! when computing water budget from condensation and mass flow");
-            end;
-        end;
+        soil.state.θ += soil.auxil.∂θ∂t * δt;
+        soil.state.Σe += soil.auxil.∂e∂t * δt / soil.auxil.δz;
     end;
 
     return nothing

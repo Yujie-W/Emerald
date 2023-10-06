@@ -40,8 +40,8 @@ Base.@kwdef mutable struct LinearRegressionResult
     XY::DataFrame = (
         _df = DataFrame();
         _pred = predict(LM, LM.pp.X; interval=:confidence);
-        for _i in axes(LM.pp.X,2)
-            _df[!,"X$(_i)"] = LM.pp.X[:,_i];
+        for i in axes(LM.pp.X,2)
+            _df[!,"X$(i)"] = LM.pp.X[:,i];
         end;
         _df[!,"Y"     ] = LM.rr.y;
         _df[!,"predY" ] = _pred.prediction;
@@ -82,26 +82,26 @@ lr4 = linear_regress((x1,x2,1), yy);
 """
 function linear_regress(xs::Tuple, y::Vector)
     # make sure that the vectors match in dimensions
-    for _i in eachindex(xs)
-        @assert (length(xs[_i]) == 1) || (length(xs[_i]) == length(y) > 1) "X and Y must have the same dimension";
+    for i in eachindex(xs)
+        @assert (length(xs[i]) == 1) || (length(xs[i]) == length(y) > 1) "X and Y must have the same dimension";
     end;
 
     # create a mask to mask out NaN values
     _mask = .!isnan.(y);
-    for _i in eachindex(xs)
-        if length(xs[_i]) > 1
-            _mask .= _mask .&& .!isnan.(xs[_i]);
+    for i in eachindex(xs)
+        if length(xs[i]) > 1
+            _mask .= _mask .&& .!isnan.(xs[i]);
         end;
     end;
 
     # copy xs to _matx
     _matx = zeros(sum(_mask), length(xs));
     _vecy = zeros(sum(_mask));
-    for _i in eachindex(xs)
-        if length(xs[_i]) > 1
-            _matx[:,_i] .= xs[_i][_mask];
+    for i in eachindex(xs)
+        if length(xs[i]) > 1
+            _matx[:,i] .= xs[i][_mask];
         else
-            _matx[:,_i] .= xs[_i];
+            _matx[:,i] .= xs[i];
         end;
     end;
     _vecy .= y[_mask];
@@ -140,27 +140,27 @@ p2 = test_slope((x1,1), yy; slope = 1);
 """
 function test_slope(xs::Tuple, y::Vector; slope::Number = 0)
     # make sure that the vectors match in dimensions
-    for _i in eachindex(xs)
-        @assert (length(xs[_i]) == 1) || (length(xs[_i]) == length(y) > 1) "X and Y must have the same dimension";
+    for i in eachindex(xs)
+        @assert (length(xs[i]) == 1) || (length(xs[i]) == length(y) > 1) "X and Y must have the same dimension";
     end;
     @assert length(xs[1]) > 1 "First X cannot be 1";
 
     # create a mask to mask out NaN values
     _mask = .!isnan.(y);
-    for _i in eachindex(xs)
-        if length(xs[_i]) > 1
-            _mask .= _mask .&& .!isnan.(xs[_i]);
+    for i in eachindex(xs)
+        if length(xs[i]) > 1
+            _mask .= _mask .&& .!isnan.(xs[i]);
         end;
     end;
 
     # copy xs to _matx
     _matx = zeros(sum(_mask), length(xs));
     _vecy = zeros(sum(_mask));
-    for _i in eachindex(xs)
-        if length(xs[_i]) > 1
-            _matx[:,_i] .= xs[_i][_mask];
+    for i in eachindex(xs)
+        if length(xs[i]) > 1
+            _matx[:,i] .= xs[i][_mask];
         else
-            _matx[:,_i] .= xs[_i];
+            _matx[:,i] .= xs[i];
         end;
     end;
     _vecy .= y[_mask] .- slope .* xs[1][_mask];

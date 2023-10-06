@@ -26,7 +26,7 @@ Use solver to determine the root flow rate, given
 function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, junction::JunctionCapacitor{FT}) where {FT}
     # if the root is not connected to the soil, set the flow to be the sum from the buffer system
     # else, use a solver to find the root flow rate
-    if soil.ψ <= xylem_pressure(root.xylem.state.vc, config.KR_THRESHOLD)
+    if soil.auxil.ψ <= xylem_pressure(root.xylem.state.vc, config.KR_THRESHOLD)
         root.xylem.auxil.connected = false;
 
         # if at non-steady state, set the flow rate to be the sum of the buffer system so that flow from the soil is zero
@@ -39,7 +39,7 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
         root.xylem.auxil.connected = true;
 
         # 1. set a max and min flow rate to use a bisection method to find the root flow rate
-        p = abs(soil.ψ - junction.auxil.pressure - ρg_MPa(FT) * root.xylem.state.Δh);
+        p = abs(soil.auxil.ψ - junction.auxil.pressure - ρg_MPa(FT) * root.xylem.state.Δh);
         k = 1 / (1 / (root.rhizosphere.state.k_max * root.xylem.state.area) + 1 / (root.xylem.state.k_max * root.xylem.state.area / root.xylem.state.l));
         f_max = k * p;
         f_min = -f_max;
@@ -85,10 +85,10 @@ Set up root flow profile for each root, given
 
 """
 function root_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
-    (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL) = spac;
+    (; JUNCTION, ROOTS, ROOTS_INDEX, SOILS) = spac;
 
     for i in eachindex(ROOTS)
-        root_flow_profile!(config, ROOTS[i], SOIL.LAYERS[ROOTS_INDEX[i]], JUNCTION);
+        root_flow_profile!(config, ROOTS[i], SOILS[ROOTS_INDEX[i]], JUNCTION);
         JUNCTION.auxil.∂w∂t += flow_out(ROOTS[i]);
     end;
 

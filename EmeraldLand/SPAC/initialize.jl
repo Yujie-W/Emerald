@@ -28,26 +28,26 @@ function initialize! end
 
 initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ENABLE_SOIL_EVAPORATION) = config;
-    (; CANOPY, LEAVES, SOIL) = spac;
+    (; CANOPY, LEAVES, SOIL_BULK, SOILS) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
-    for _slayer in SOIL.LAYERS
+    for soil in SOILS
         if ENABLE_SOIL_EVAPORATION
-            _δθ = max(0, _slayer.VC.Θ_SAT - _slayer.θ);
-            _rt = GAS_R(FT) * _slayer.t;
-            _slayer.TRACES.n_H₂O = saturation_vapor_pressure(_slayer.t, _slayer.ψ * 1000000) * _slayer.ΔZ * _δθ / _rt;
-            _slayer.TRACES.n_N₂  = spac.AIR[1].P_AIR * 0.79 * _slayer.ΔZ * _δθ / _rt;
-            _slayer.TRACES.n_O₂  = spac.AIR[1].P_AIR * 0.209 * _slayer.ΔZ * _δθ / _rt;
+            δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
+            rt = GAS_R(FT) * soil.auxil.t;
+            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * δθ / rt;
+            soil.state.ns[4] = spac.AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
+            soil.state.ns[5] = spac.AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
         end;
-        _cp_gas = (_slayer.TRACES.n_H₂O * CP_V_MOL(FT) + (_slayer.TRACES.n_CH₄ + _slayer.TRACES.n_CO₂ + _slayer.TRACES.n_N₂ + _slayer.TRACES.n_O₂) * CP_D_MOL(FT)) / _slayer.ΔZ;
-        _slayer.Σe = (_slayer.ρ * _slayer.CP + _slayer.θ * ρ_H₂O(FT) * CP_L(FT) + _cp_gas) * _slayer.t;
+        cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
+        soil.state.Σe = (soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + cp_gas) * soil.auxil.t;
     end;
 
     # make sure leaf area index setup and energy are correct
-    for _i in eachindex(LEAVES)
-        _clayer = LEAVES[_i];
-        _clayer.xylem.state.area = SOIL.AREA * CANOPY.δlai[_i];
-        initialize_energy_storage!(_clayer);
+    for i in eachindex(LEAVES)
+        leaf = LEAVES[i];
+        leaf.xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+        initialize_energy_storage!(leaf);
     end;
 
     # initialize leaf level spectra

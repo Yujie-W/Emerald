@@ -136,13 +136,12 @@ MultiLayerSPAC(
     ind_layer = config.DIM_LAYER > 1 ? [findfirst(zs[2] .< air_bounds .< zs[3])[1] - 1; mask_air] : mask_air;
     ind_root = config.DIM_ROOT > 1 ? [findfirst(zs[1] .< soil_bounds .< 0) - 1; mask_soil] : mask_soil;
 
-    # set up the soil layers
-    soil_layers = SoilLayer{FT}[SoilLayer(config) for _ in 1:config.DIM_SOIL];
+    # set up the soil layers (energy updated in initialize! function)
+    soil_layers = SoilLayer{FT}[SoilLayer{FT}() for _ in 1:config.DIM_SOIL];
     for i in eachindex(soil_layers)
         soil_layers[i].state.zs = soil_bounds[i:i+1];
         soil_layers[i].auxil.z = (soil_bounds[i] + soil_bounds[i+1]) / 2;
         soil_layers[i].auxil.δz = (soil_bounds[i+1] - soil_bounds[i]);
-        initialize_energy_storage!(soil_layers[i]);
     end;
 
     # set up the roots
@@ -186,7 +185,7 @@ MultiLayerSPAC(
                 SunSensorGeometry{FT}(),                                                # ANGLES
                 branches,                                                               # BRANCHES
                 HyperspectralMLCanopy(config),                                          # CANOPY
-                Leaf{FT}[Leaf(config) for _i in 1:config.DIM_LAYER],                    # LEAVES
+                Leaf{FT}[Leaf(config) for i in 1:config.DIM_LAYER],                    # LEAVES
                 SPACMemory{FT}(),                                                       # MEMORY
                 Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),   # METEO
                 roots,                                                                  # ROOTS
@@ -264,8 +263,8 @@ MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;
 
     _gs_sunlit = zeros(FT, size(LEAVES[1].g_H₂O_s_sunlit,1), size(LEAVES[1].g_H₂O_s_sunlit,2), length(LEAVES));
-    for _i in eachindex(LEAVES)
-        _gs_sunlit[:,:,_i] .= LEAVES[_i].g_H₂O_s_sunlit;
+    for i in eachindex(LEAVES)
+        _gs_sunlit[:,:,i] .= LEAVES[i].g_H₂O_s_sunlit;
     end;
 
     return MultiLayerSPACState{FT}(

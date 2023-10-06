@@ -75,18 +75,22 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     δψ::Vector{FT}
     "Soil thermal conductance between layers per area `[W m⁻² K⁻¹]`"
     λ_thermal::Vector{FT}
+
+    # cache variables
+    "Last soil moisture used to compute albedo"
+    _θ::FT = -1
 end;
 
 SoilBulkAuxil(config::SPACConfiguration{FT}) where {FT} = SoilBulkAuxil{FT}(
             e_net_diffuse = zeros(FT, config.DIM_WL),
             e_net_direct  = zeros(FT, config.DIM_WL),
             ρ_sw          = zeros(FT, config.DIM_WL),
-            k             = zeros(FT, config.DIM_ROOT - 1),
-            q             = zeros(FT, config.DIM_ROOT - 1),
-            q_thermal     = zeros(FT, config.DIM_ROOT - 1),
-            δt            = zeros(FT, config.DIM_ROOT - 1),
-            δψ            = zeros(FT, config.DIM_ROOT - 1),
-            λ_thermal     = zeros(FT, config.DIM_ROOT - 1)
+            k             = zeros(FT, config.DIM_SOIL - 1),
+            q             = zeros(FT, config.DIM_SOIL - 1),
+            q_thermal     = zeros(FT, config.DIM_SOIL - 1),
+            δt            = zeros(FT, config.DIM_SOIL - 1),
+            δψ            = zeros(FT, config.DIM_SOIL - 1),
+            λ_thermal     = zeros(FT, config.DIM_SOIL - 1)
 );
 
 

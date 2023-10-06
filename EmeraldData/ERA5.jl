@@ -306,11 +306,11 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
         end;
 
         _existed_varnames = varname_nc(_nc_path);
-        for _i in eachindex(ERA5_LABELS)
-            if !(ERA5_NETCDF[_i] in _existed_varnames)
-                _nc_var = "$(ERA5_FOLDER)/reprocessed/$(ERA5_LABELS[_i])_SL_$(_year)_$(_gz).nc";
-                _nc_vec = read_nc(_nc_var, ERA5_LAYERS[_i], _lon_ind, _lat_ind);
-                append_nc!(_nc_path, ERA5_NETCDF[_i], _nc_vec, Dict{String,String}("longname" => ERA5_LABELS[_i] * "_SL"), ["ind"]);
+        for i in eachindex(ERA5_LABELS)
+            if !(ERA5_NETCDF[i] in _existed_varnames)
+                _nc_var = "$(ERA5_FOLDER)/reprocessed/$(ERA5_LABELS[i])_SL_$(_year)_$(_gz).nc";
+                _nc_vec = read_nc(_nc_var, ERA5_LAYERS[i], _lon_ind, _lat_ind);
+                append_nc!(_nc_path, ERA5_NETCDF[i], _nc_vec, Dict{String,String}("longname" => ERA5_LABELS[i] * "_SL"), ["ind"]);
             end;
         end;
 
@@ -339,7 +339,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
     _df[!,"WIND"   ] = sqrt.( _df.WIND_X .^ 2 .+ _df.WIND_Y .^2 );
     _df[!,"RAD_DIF"] = _df.RAD .- _df.RAD_DIR;
     _df[!,"VPD"    ] = saturation_vapor_pressure.(_df.T_AIR) .- saturation_vapor_pressure.(_df.T_DEW);
-    _var_attrs = Dict{String,String}[[Dict{String,String}("longname" => ERA5_LABELS[_i] * "_SL") for _i in eachindex(ERA5_LABELS)];
+    _var_attrs = Dict{String,String}[[Dict{String,String}("longname" => ERA5_LABELS[i] * "_SL") for i in eachindex(ERA5_LABELS)];
                                      Dict{String,String}("longname" => "Day of year");
                                      Dict{String,String}("longname" => "Wind speed");
                                      Dict{String,String}("longname" => "Diffuse radiation");

@@ -47,17 +47,17 @@ function spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
     (; AIR, BRANCHES, LEAVES, LEAVES_INDEX, ROOTS, TRUNK) = spac;
 
     # update the temperature for roots
-    for _i in 1:DIM_ROOT
-        ROOTS[_i].energy.state.Σe += ROOTS[_i].energy.auxil.∂e∂t * δt;
+    for i in 1:DIM_ROOT
+        ROOTS[i].energy.state.Σe += ROOTS[i].energy.auxil.∂e∂t * δt;
     end;
 
     # update the temperature for trunk
     TRUNK.energy.state.Σe += TRUNK.energy.auxil.∂e∂t * δt;
 
     # update the temperature for branches and leaves
-    for _i in 1:DIM_LAYER
-        BRANCHES[_i].energy.state.Σe += BRANCHES[_i].energy.auxil.∂e∂t * δt;
-        LEAVES[_i].energy.state.Σe += LEAVES[_i].energy.auxil.∂e∂t * δt;
+    for i in 1:DIM_LAYER
+        BRANCHES[i].energy.state.Σe += BRANCHES[i].energy.auxil.∂e∂t * δt;
+        LEAVES[i].energy.state.Σe += LEAVES[i].energy.auxil.∂e∂t * δt;
     end;
 
     return nothing

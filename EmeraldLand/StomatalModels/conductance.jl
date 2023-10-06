@@ -181,8 +181,8 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT} = (
         return nothing
     end;
 
-    for _i in eachindex(LEAVES_INDEX)
-        stomatal_conductance!(LEAVES[_i], AIR[LEAVES_INDEX[_i]]; β = β);
+    for i in eachindex(LEAVES_INDEX)
+        stomatal_conductance!(LEAVES[i], AIR[LEAVES_INDEX[i]]; β = β);
     end;
 
     return nothing
@@ -190,8 +190,8 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT} = (
 
 stomatal_conductance!(leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air; β = β);
-    for _i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
-        leaf.flux.auxil.∂g∂t_sunlit[_i] = ∂g∂t(leaf, air, _i; β = β);
+    for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
+        leaf.flux.auxil.∂g∂t_sunlit[i] = ∂g∂t(leaf, air, i; β = β);
     end;
 
     return nothing
@@ -238,8 +238,8 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
 
 stomatal_conductance!(leaf::Leaf{FT}, δt::FT) where {FT} = (
     leaf.flux.state.g_H₂O_s_shaded += leaf.flux.auxil.∂g∂t_shaded * δt;
-    for _i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
-        leaf.flux.state.g_H₂O_s_sunlit[_i] += leaf.flux.auxil.∂g∂t_sunlit[_i] * δt;
+    for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
+        leaf.flux.state.g_H₂O_s_sunlit[i] += leaf.flux.auxil.∂g∂t_sunlit[i] * δt;
     end;
     limit_stomatal_conductance!(leaf);
     stomatal_conductance_profile!(leaf);
@@ -281,8 +281,8 @@ stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
 
 stomatal_conductance_profile!(leaf::Leaf{FT}) where {FT} = (
     leaf.flux.auxil.g_CO₂_shaded = 1 / (1 / leaf.flux.auxil.g_CO₂_b + FT(1.6) / leaf.flux.state.g_H₂O_s_shaded);
-    for _i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
-        leaf.flux.auxil.g_CO₂_sunlit[_i] = 1 / (1 / leaf.flux.auxil.g_CO₂_b + FT(1.6) / leaf.flux.state.g_H₂O_s_sunlit[_i]);
+    for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
+        leaf.flux.auxil.g_CO₂_sunlit[i] = 1 / (1 / leaf.flux.auxil.g_CO₂_b + FT(1.6) / leaf.flux.state.g_H₂O_s_sunlit[i]);
     end;
 
     return nothing

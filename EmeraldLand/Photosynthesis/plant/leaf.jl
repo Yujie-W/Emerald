@@ -93,31 +93,31 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
 
     # leaf._p_CO₂_i is not accurate here in the first call, thus need a second call after p_CO₂_i is analytically resolved
     # loop through sunlit leaf
-    for _i in eachindex(leaf.flux.auxil.ppar_sunlit)
-        photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[_i], leaf.flux.auxil.p_CO₂_i_sunlit[_i]; β = β);
-        rubisco_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[_i]; β = β);
-        light_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[_i]; β = β);
-        product_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[_i]; β = β);
+    for i in eachindex(leaf.flux.auxil.ppar_sunlit)
+        photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i], leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
+        rubisco_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
+        light_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
+        product_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
         colimit_photosynthesis!(leaf.photosystem; β = β);
 
         # update CO₂ partial pressures at the leaf surface and internal airspace (evaporative front)
-        leaf.flux.auxil.p_CO₂_i_sunlit[_i] = air.p_CO₂ - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_sunlit[_i] * air.P_AIR * FT(1e-6);
-        leaf.flux.auxil.p_CO₂_s_sunlit[_i] = air.p_CO₂ - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_b          * air.P_AIR * FT(1e-6);
+        leaf.flux.auxil.p_CO₂_i_sunlit[i] = air.p_CO₂ - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_sunlit[i] * air.P_AIR * FT(1e-6);
+        leaf.flux.auxil.p_CO₂_s_sunlit[i] = air.p_CO₂ - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_b          * air.P_AIR * FT(1e-6);
 
         # update leaf ETR again to ensure that j_pot and e_to_c are correct for C3CytochromeModel
-        photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[_i], leaf.flux.auxil.p_CO₂_i_sunlit[_i]; β = β);
+        photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i], leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
 
         # update the fluorescence related parameters
-        photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[_i]; β = β);
+        photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i]; β = β);
 
         # save the rates and to leaf
-        leaf.flux.auxil.a_n_sunlit[_i] = leaf.photosystem.auxil.a_n;
-        leaf.flux.auxil.a_g_sunlit[_i] = leaf.photosystem.auxil.a_g;
-        leaf.flux.auxil.etr_sunlit[_i] = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-        leaf.flux.auxil.ϕ_d_sunlit[_i] = leaf.photosystem.auxil.ϕ_d;
-        leaf.flux.auxil.ϕ_f_sunlit[_i] = leaf.photosystem.auxil.ϕ_f;
-        leaf.flux.auxil.ϕ_n_sunlit[_i] = leaf.photosystem.auxil.ϕ_n;
-        leaf.flux.auxil.ϕ_p_sunlit[_i] = leaf.photosystem.auxil.ϕ_p;
+        leaf.flux.auxil.a_n_sunlit[i] = leaf.photosystem.auxil.a_n;
+        leaf.flux.auxil.a_g_sunlit[i] = leaf.photosystem.auxil.a_g;
+        leaf.flux.auxil.etr_sunlit[i] = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
+        leaf.flux.auxil.ϕ_d_sunlit[i] = leaf.photosystem.auxil.ϕ_d;
+        leaf.flux.auxil.ϕ_f_sunlit[i] = leaf.photosystem.auxil.ϕ_f;
+        leaf.flux.auxil.ϕ_n_sunlit[i] = leaf.photosystem.auxil.ϕ_n;
+        leaf.flux.auxil.ϕ_p_sunlit[i] = leaf.photosystem.auxil.ϕ_p;
     end;
 
     # run the model for shaded leaf
@@ -168,25 +168,25 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT
     photosystem_temperature_dependence!(leaf.photosystem, air, leaf.energy.auxil.t);
 
     # loop through the ppars for sunlit leaf
-    for _i in eachindex(leaf.flux.auxil.ppar_sunlit)
+    for i in eachindex(leaf.flux.auxil.ppar_sunlit)
         # calculate the photosynthetic rates
-        photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[_i], leaf.flux.auxil.p_CO₂_i_sunlit[_i]; β = β);
-        rubisco_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_sunlit[_i]; β = β);
+        photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i], leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
+        rubisco_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
         light_limited_rate!(leaf.photosystem);
-        product_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_sunlit[_i]; β = β);
+        product_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
         colimit_photosynthesis!(leaf.photosystem; β = β);
 
         # update the fluorescence related parameters
-        photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[_i]; β = β);
+        photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i]; β = β);
 
         # save the rates and to leaf
-        leaf.flux.auxil.a_n_sunlit[_i] = leaf.photosystem.auxil.a_n;
-        leaf.flux.auxil.a_g_sunlit[_i] = leaf.photosystem.auxil.a_g;
-        leaf.flux.auxil.etr_sunlit[_i] = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-        leaf.flux.auxil.ϕ_d_sunlit[_i] = leaf.photosystem.auxil.ϕ_d;
-        leaf.flux.auxil.ϕ_f_sunlit[_i] = leaf.photosystem.auxil.ϕ_f;
-        leaf.flux.auxil.ϕ_n_sunlit[_i] = leaf.photosystem.auxil.ϕ_n;
-        leaf.flux.auxil.ϕ_p_sunlit[_i] = leaf.photosystem.auxil.ϕ_p;
+        leaf.flux.auxil.a_n_sunlit[i] = leaf.photosystem.auxil.a_n;
+        leaf.flux.auxil.a_g_sunlit[i] = leaf.photosystem.auxil.a_g;
+        leaf.flux.auxil.etr_sunlit[i] = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
+        leaf.flux.auxil.ϕ_d_sunlit[i] = leaf.photosystem.auxil.ϕ_d;
+        leaf.flux.auxil.ϕ_f_sunlit[i] = leaf.photosystem.auxil.ϕ_f;
+        leaf.flux.auxil.ϕ_n_sunlit[i] = leaf.photosystem.auxil.ϕ_n;
+        leaf.flux.auxil.ϕ_p_sunlit[i] = leaf.photosystem.auxil.ϕ_p;
     end;
 
     # run the model for shaded leaf

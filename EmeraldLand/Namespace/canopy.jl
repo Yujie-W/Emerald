@@ -744,6 +744,6 @@ HyperspectralMLCanopy(config::SPACConfiguration{FT}) where {FT} = (
                 P_INCL      = ones(FT, DIM_INCL) ./ DIM_INCL,
                 lai         = _lai,
                 δlai        = _δlai,
-                _x_bnds     = ([0; [sum(_δlai[1:_i]) for _i in 1:DIM_LAYER]] ./ -_lai),
+                _x_bnds     = ([0; [sum(_δlai[1:i]) for i in 1:DIM_LAYER]] ./ -_lai),
     )
 );

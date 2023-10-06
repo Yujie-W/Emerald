@@ -53,9 +53,9 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
 
     # iterate through the spectrum and find the index
     _ind = 0;
-    for _i in 1:length(x)-1
-        if x[_i] <= target <= x[_i+1]
-            _ind = _i;
+    for i in 1:length(x)-1
+        if x[i] <= target <= x[i+1]
+            _ind = i;
             break;
         end;
     end;
@@ -86,8 +86,8 @@ Return the spectrum value at target wavelength bin, given
 read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) where {FT} = (
     _ys = 0;
     _δx = (x₂ - x₁) / steps;
-    for _i in 1:(steps+1)
-        _x = x₁ + (_i - 1) * _δx;
+    for i in 1:(steps+1)
+        _x = x₁ + (i - 1) * _δx;
         _ys += read_spectrum(x, y, _x);
     end;
 
