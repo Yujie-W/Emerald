@@ -8,6 +8,7 @@
 #     2023-Jul-06: sort the order of gas volume balance and water volume balance
 #     2023-Jul-06: add DEBUG code block
 #     2023-Jul-06: add PRESCRIBE_AIR mode to avoid the errors due to mass balance in air
+#     2023-Oct-07: limit the volume change from the source to 1/2 of the total dry air (soil and air)
 #
 #######################################################################################################################################################################################################
 """
@@ -39,7 +40,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
 
         # if nmax_j > ndry_j and ndry_i > 0, air needs to be transferred from the upper layer
         if (nmax_j > ndry_j) && (ndry_i > 0)
-            n_mass = min(nmax_j - ndry_j, ndry_i);
+            n_mass = min(nmax_j - ndry_j, ndry_i / 2);
             soil_j.state.ns[1] += n_mass * soil_i.state.ns[1] / ndry_i;
             soil_j.state.ns[2] += n_mass * soil_i.state.ns[2] / ndry_i;
             soil_j.state.ns[4] += n_mass * soil_i.state.ns[4] / ndry_i;
@@ -87,7 +88,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
 
     # if soil air is not saturated, it can absorb more air from the atmosphere
     if s_max > s_dry
-        n_mass = min(s_max - s_dry, a_dry);
+        n_mass = min(s_max - s_dry, a_dry / 2);
         soil.state.ns[1] += n_mass * air.n_CH₄ / a_dry;
         soil.state.ns[2] += n_mass * air.n_CO₂ / a_dry;
         soil.state.ns[4] += n_mass * air.n_N₂  / a_dry;
