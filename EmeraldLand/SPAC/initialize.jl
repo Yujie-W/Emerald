@@ -12,6 +12,7 @@
 #     2023-Jun-13: add soil gas energy into soil e
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
+#     2023-Oct-07: add 0.01 to the water vapor volume per soil layer
 #
 #######################################################################################################################################################################################################
 """
@@ -32,7 +33,7 @@ initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} 
     for soil in SOILS
         δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
         rt = GAS_R(FT) * soil.auxil.t;
-        soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * δθ / rt;
+        soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
         soil.state.ns[4] = spac.AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
         soil.state.ns[5] = spac.AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
         soil.auxil.cp = heat_capacitance(soil);

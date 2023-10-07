@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Oct-07: add function to run the soil water condensation or evaporation
+#     2023-Oct-07: add 0.01 to the water vapor volume per soil layer
 #
 #######################################################################################################################################################################################################
 """
@@ -17,7 +18,7 @@ Run the soil water condensation or evaporation, given
 """
 function soil_water_condensation!(soil::SoilLayer{FT}) where {FT}
     p_sat = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000);
-    n_con = soil.state.ns[3] - p_sat * max(0, soil.state.vc.Θ_SAT - soil.state.θ) * soil.auxil.δz / (GAS_R(FT) * soil.auxil.t);
+    n_con = soil.state.ns[3] - p_sat * (max(0, soil.state.vc.Θ_SAT - soil.state.θ) * soil.auxil.δz + FT(0.01)) / (GAS_R(FT) * soil.auxil.t);
     v_liq = n_con * M_H₂O(FT) / ρ_H₂O(FT);
 
     soil.auxil.n_con = n_con;

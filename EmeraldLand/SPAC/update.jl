@@ -43,6 +43,7 @@ function update! end
 #     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
 #     2023-Sep-07: add ALLOW_LEAF_CONDENSATION and T_CLM checks
 #     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
+#     2023-Oct-07: add 0.01 to the water vapor volume per soil layer
 #
 #######################################################################################################################################################################################################
 """
@@ -228,11 +229,11 @@ update!(config::SPACConfiguration{FT},
         for i in eachindex(swcs)
             soil = SOILS[i];
             soil.state.θ = max(soil.state.vc.Θ_RES + eps(FT), min(soil.state.vc.Θ_SAT - eps(FT), swcs[i]));
-            _δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-            _rt = GAS_R(FT) * soil.auxil.t;
-            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * _δθ / _rt;
-            soil.state.ns[4] = AIR[1].P_AIR * 0.79 * soil.auxil.δz * _δθ / _rt;
-            soil.state.ns[4] = AIR[1].P_AIR * 0.209 * soil.auxil.δz * _δθ / _rt
+            δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
+            rt = GAS_R(FT) * soil.auxil.t;
+            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
+            soil.state.ns[4] = AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
+            soil.state.ns[4] = AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
             soil.auxil.cp = heat_capacitance(soil);
             soil.state.Σe = soil.auxil.cp * soil.auxil.t;
         end;
@@ -243,11 +244,11 @@ update!(config::SPACConfiguration{FT},
         for i in eachindex(t_soils)
             soil = SOILS[i];
             soil.auxil.t = t_soils[i];
-            _δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-            _rt = GAS_R(FT) * soil.auxil.t;
-            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * _δθ / _rt;
-            soil.state.ns[4]  = AIR[1].P_AIR * 0.79 * soil.auxil.δz * _δθ / _rt;
-            soil.state.ns[5]  = AIR[1].P_AIR * 0.209 * soil.auxil.δz * _δθ / _rt
+            δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
+            rt = GAS_R(FT) * soil.auxil.t;
+            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
+            soil.state.ns[4]  = AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
+            soil.state.ns[5]  = AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
             soil.auxil.cp = heat_capacitance(soil);
             soil.state.Σe = soil.auxil.cp * soil.auxil.t;
         end;

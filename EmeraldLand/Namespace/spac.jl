@@ -141,7 +141,7 @@ MultiLayerSPAC(
     for i in eachindex(soil_layers)
         soil_layers[i].state.zs = soil_bounds[i:i+1];
         soil_layers[i].auxil.z = (soil_bounds[i] + soil_bounds[i+1]) / 2;
-        soil_layers[i].auxil.δz = (soil_bounds[i+1] - soil_bounds[i]);
+        soil_layers[i].auxil.δz = (soil_bounds[i] - soil_bounds[i+1]);
     end;
 
     # set up the roots
@@ -155,7 +155,7 @@ MultiLayerSPAC(
     # set up the trunk
     trunk = Stem(config);
     trunk.xylem.state.area = basal_area;
-    trunk.xylem.state.Δh = zs[2] - zs[1];
+    trunk.xylem.state.Δh = zs[2];
     initialize_energy_storage!(trunk);
 
     # set up the branches
