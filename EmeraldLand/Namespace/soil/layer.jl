@@ -46,6 +46,7 @@ end;
 # General
 #     2023-Oct-05: add struct SoilLayerAuxil
 #     2023-Oct-05: add field kv
+#     2023-Oct-05: add field n_con
 #
 #######################################################################################################################################################################################################
 """
@@ -68,6 +69,8 @@ Base.@kwdef mutable struct SoilLayerAuxil{FT}
     kd::FT = 0
     "Relative soil diffusive coefficient for water vapor (distance accounted for already)"
     kv::FT = 0
+    "Moles of condensated water vapor `[mol]`"
+    n_con::FT = 0
     "Temperature `[K]`"
     t::FT = T₂₅(FT)
     "Mean depth `[m]`"

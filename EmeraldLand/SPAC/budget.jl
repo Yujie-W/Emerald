@@ -181,7 +181,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         _δt = _δts[1];
 
         # run the budgets for all ∂x∂t
-        soil_budget!(config, spac, _δt);
+        soil_budgets!(config, spac, _δt);
         stomatal_conductance!(spac, _δt);
         spac_energy_budget!(config, spac, _δt);
         if spac._root_connection
@@ -199,7 +199,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
                 plant_pressure_profile!(config, spac);
             end;
             plant_photosynthesis!(spac, GCO₂Mode());
-            soil_budget!(config, spac);
+            soil_profiles!(config, spac);
             stomatal_conductance!(spac);
             spac_energy_flow!(spac);
         else

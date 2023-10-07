@@ -32,6 +32,7 @@ end;
 # Changes to the function
 # General
 #     2023-Oct-02: add function to run spac energy budget
+#     2023-Oct-07: add soil energy budget
 #
 #######################################################################################################################################################################################################
 """
@@ -45,21 +46,40 @@ Calculate the energy budgets of the spac, given
 
 """
 function spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
-    (; DIM_LAYER, DIM_ROOT) = config;
-    (; BRANCHES, LEAVES, ROOTS, TRUNK) = spac;
+    (; BRANCHES, LEAVES, ROOTS, SOILS, TRUNK) = spac;
+
+    # update the temperature for soil
+    for soil in SOILS
+        # water mass and energy flow
+        soil.state.Σe += soil.auxil.∂e∂t * δt / soil.auxil.δz;
+
+        # soil water condensation or evaporation
+        soil.state.Σe += soil.auxil.n_con * M_H₂O(FT) * latent_heat_vapor(soil.auxil.t) / soil.auxil.δz;
+    end;
+
+    # update the energy loss related to surface runoff
+    if SOILS[1].state.θ > SOILS[1].state.vc.Θ_SAT
+        cp = heat_capacitance(SOILS[1]; runoff = SOILS[1].auxil.runoff);
+        t  = SOILS[1].state.Σe / cp;
+        SOILS[1].state.Σe -= SOILS[1].auxil.runoff / SOILS[1].auxil.δz * CP_L_MOL(FT) * t;
+    end;
 
     # update the temperature for roots
-    for i in 1:DIM_ROOT
-        ROOTS[i].energy.state.Σe += ROOTS[i].energy.auxil.∂e∂t * δt;
+    for root in ROOTS
+        root.energy.state.Σe += root.energy.auxil.∂e∂t * δt;
     end;
 
     # update the temperature for trunk
     TRUNK.energy.state.Σe += TRUNK.energy.auxil.∂e∂t * δt;
 
-    # update the temperature for branches and leaves
-    for i in 1:DIM_LAYER
-        BRANCHES[i].energy.state.Σe += BRANCHES[i].energy.auxil.∂e∂t * δt;
-        LEAVES[i].energy.state.Σe += LEAVES[i].energy.auxil.∂e∂t * δt;
+    # update the temperature for branches
+    for stem in BRANCHES
+        stem.energy.state.Σe += stem.energy.auxil.∂e∂t * δt;
+    end;
+
+    # update the temperature for leaves
+    for leaf in LEAVES
+        leaf.energy.state.Σe += leaf.energy.auxil.∂e∂t * δt;
     end;
 
     return nothing

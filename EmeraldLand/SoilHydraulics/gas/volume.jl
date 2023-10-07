@@ -24,95 +24,95 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
     (; AIR, SOILS) = spac;
 
     # balance the air volume among soil layers from lower to upper layers
-    _alayer = AIR[1];
+    air = AIR[1];
     for i in length(SOILS)-1:-1:1
-        # upper layer is _ilayer and lower is _jlayer
-        _ilayer = SOILS[i];
-        _jlayer = SOILS[i+1];
+        # upper layer is soil_i and lower is soil_j
+        soil_i = SOILS[i];
+        soil_j = SOILS[i+1];
 
         # compute the air moles in the lower layer
-        _i_dry = _ilayer.state.ns[1] + _ilayer.state.ns[2] + _ilayer.state.ns[4] + _ilayer.state.ns[5];
-        _j_dry = _jlayer.state.ns[1] + _jlayer.state.ns[2] + _jlayer.state.ns[4] + _jlayer.state.ns[5];
-        _j_max = (_alayer.P_AIR - saturation_vapor_pressure(_jlayer.t, _jlayer.ψ * 1000000)) * _jlayer.ΔZ * (_jlayer.VC.Θ_SAT - _jlayer.θ) / (GAS_R(FT) * _jlayer.t);
+        ndry_i = soil_i.state.ns[1] + soil_i.state.ns[2] + soil_i.state.ns[4] + soil_i.state.ns[5];
+        ndry_j = soil_j.state.ns[1] + soil_j.state.ns[2] + soil_j.state.ns[4] + soil_j.state.ns[5];
+        nmax_j = (air.P_AIR - saturation_vapor_pressure(soil_j.t, soil_j.ψ * 1000000)) * soil_j.ΔZ * (soil_j.VC.Θ_SAT - soil_j.θ) / (GAS_R(FT) * soil_j.t);
 
-        # if _j_dry == _j_max, no air needs to be transferred from/to the upper layer
+        # if ndry_j == nmax_j, no air needs to be transferred from/to the upper layer
 
-        # if _j_max > _j_dry and _i_dry > 0, air needs to be transferred from the upper layer
-        if (_j_max > _j_dry) && (_i_dry > 0)
-            _n_mass = min(_j_max - _j_dry, _i_dry);
-            _jlayer.state.ns[1] += _n_mass * _ilayer.state.ns[1] / _i_dry;
-            _jlayer.state.ns[2] += _n_mass * _ilayer.state.ns[2] / _i_dry;
-            _jlayer.state.ns[4]  += _n_mass * _ilayer.state.ns[4]  / _i_dry;
-            _jlayer.state.ns[5]  += _n_mass * _ilayer.state.ns[5]  / _i_dry;
-            _jlayer.Σe += _n_mass * CP_D_MOL(FT) * _ilayer.t / _jlayer.ΔZ;
-            _ilayer.state.ns[1] -= _n_mass * _ilayer.state.ns[1] / _i_dry;
-            _ilayer.state.ns[2] -= _n_mass * _ilayer.state.ns[2] / _i_dry;
-            _ilayer.state.ns[4]  -= _n_mass * _ilayer.state.ns[4]  / _i_dry;
-            _ilayer.state.ns[5]  -= _n_mass * _ilayer.state.ns[5]  / _i_dry;
-            _ilayer.Σe -= _n_mass * CP_D_MOL(FT) * _ilayer.t / _ilayer.ΔZ;
+        # if nmax_j > ndry_j and ndry_i > 0, air needs to be transferred from the upper layer
+        if (nmax_j > ndry_j) && (ndry_i > 0)
+            n_mass = min(nmax_j - ndry_j, ndry_i);
+            soil_j.state.ns[1] += n_mass * soil_i.state.ns[1] / ndry_i;
+            soil_j.state.ns[2] += n_mass * soil_i.state.ns[2] / ndry_i;
+            soil_j.state.ns[4] += n_mass * soil_i.state.ns[4]  / ndry_i;
+            soil_j.state.ns[5] += n_mass * soil_i.state.ns[5]  / ndry_i;
+            soil_j.state.Σe += n_mass * CP_D_MOL(FT) * soil_i.t / soil_j.ΔZ;
+            soil_i.state.ns[1] -= n_mass * soil_i.state.ns[1] / ndry_i;
+            soil_i.state.ns[2] -= n_mass * soil_i.state.ns[2] / ndry_i;
+            soil_i.state.ns[4] -= n_mass * soil_i.state.ns[4]  / ndry_i;
+            soil_i.state.ns[5] -= n_mass * soil_i.state.ns[5]  / ndry_i;
+            soil_i.state.Σe -= n_mass * CP_D_MOL(FT) * soil_i.t / soil_i.ΔZ;
         end;
 
-        # if _j_max > _j_dry but _i_dry == 0, the lower layer will need to suck some water from upper layer to balance the air volume
+        # if nmax_j > ndry_j but ndry_i == 0, the lower layer will need to suck some water from upper layer to balance the air volume
         # compute the equilibrate mole of air from upper layer when it reaches its field capacity
-        if (_j_max > _j_dry) && (_j_dry > 0) && (_i_dry == 0)
-            _θ_fc_up = soil_θ(_ilayer.VC, -1 * ρ_H₂O(FT) * GRAVITY(FT) * _ilayer.ΔZ / relative_surface_tension(_ilayer.t));
-            _v_mass = min((_j_max - _j_dry) * GAS_R(FT) * _jlayer.t / _alayer.P_AIR, (_ilayer.VC.Θ_SAT - _θ_fc_up) * _ilayer.ΔZ);
-            _jlayer.θ += _v_mass / _jlayer.ΔZ;
-            _ilayer.θ -= _v_mass / _ilayer.ΔZ;
-            _jlayer.Σe += _v_mass * ρ_H₂O(FT) * CP_L(FT) * _ilayer.t / _jlayer.ΔZ;
-            _ilayer.Σe -= _v_mass * ρ_H₂O(FT) * CP_L(FT) * _ilayer.t / _ilayer.ΔZ;
+        if (nmax_j > ndry_j) && (ndry_j > 0) && (ndry_i == 0)
+            θ_fc_up = soil_θ(soil_i.VC, -1 * ρ_H₂O(FT) * GRAVITY(FT) * soil_i.ΔZ / relative_surface_tension(soil_i.t));
+            v_mass = min((nmax_j - ndry_j) * GAS_R(FT) * soil_j.t / air.P_AIR, (soil_i.VC.Θ_SAT - θ_fc_up) * soil_i.ΔZ);
+            soil_j.θ += v_mass / soil_j.ΔZ;
+            soil_i.θ -= v_mass / soil_i.ΔZ;
+            soil_j.Σe += v_mass * ρ_H₂O(FT) * CP_L(FT) * soil_i.t / soil_j.ΔZ;
+            soil_i.Σe -= v_mass * ρ_H₂O(FT) * CP_L(FT) * soil_i.t / soil_i.ΔZ;
         end;
 
-        # if _j_max < _j_dry and _j_dry > 0, air needs to be transferred to the upper layer (does not matter whether upper layer is saturated or not)
-        if (_j_max < _j_dry) && (_j_dry > 0)
-            _n_mass = _j_dry - _j_max;
-            _jlayer.state.ns[1] -= _n_mass * _jlayer.state.ns[1] / _j_dry;
-            _jlayer.state.ns[2] -= _n_mass * _jlayer.state.ns[2] / _j_dry;
-            _jlayer.state.ns[4]  -= _n_mass * _jlayer.state.ns[4]  / _j_dry;
-            _jlayer.state.ns[5]  -= _n_mass * _jlayer.state.ns[5]  / _j_dry;
-            _jlayer.Σe -= _n_mass * CP_D_MOL(FT) * _jlayer.t / _jlayer.ΔZ;
-            _ilayer.state.ns[1] += _n_mass * _jlayer.state.ns[1] / _j_dry;
-            _ilayer.state.ns[2] += _n_mass * _jlayer.state.ns[2] / _j_dry;
-            _ilayer.state.ns[4]  += _n_mass * _jlayer.state.ns[4]  / _j_dry;
-            _ilayer.state.ns[5]  += _n_mass * _jlayer.state.ns[5]  / _j_dry;
-            _ilayer.Σe += _n_mass * CP_D_MOL(FT) * _jlayer.t / _ilayer.ΔZ;
+        # if nmax_j < ndry_j and ndry_j > 0, air needs to be transferred to the upper layer (does not matter whether upper layer is saturated or not)
+        if (nmax_j < ndry_j) && (ndry_j > 0)
+            n_mass = ndry_j - nmax_j;
+            soil_j.state.ns[1] -= n_mass * soil_j.state.ns[1] / ndry_j;
+            soil_j.state.ns[2] -= n_mass * soil_j.state.ns[2] / ndry_j;
+            soil_j.state.ns[4]  -= n_mass * soil_j.state.ns[4]  / ndry_j;
+            soil_j.state.ns[5]  -= n_mass * soil_j.state.ns[5]  / ndry_j;
+            soil_j.Σe -= n_mass * CP_D_MOL(FT) * soil_j.t / soil_j.ΔZ;
+            soil_i.state.ns[1] += n_mass * soil_j.state.ns[1] / ndry_j;
+            soil_i.state.ns[2] += n_mass * soil_j.state.ns[2] / ndry_j;
+            soil_i.state.ns[4]  += n_mass * soil_j.state.ns[4]  / ndry_j;
+            soil_i.state.ns[5]  += n_mass * soil_j.state.ns[5]  / ndry_j;
+            soil_i.Σe += n_mass * CP_D_MOL(FT) * soil_j.t / soil_i.ΔZ;
         end;
     end;
 
     # balance the air volume between top soil and atmosphere
     soil = SOILS[1];
-    _s_dry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
-    _a_dry = _alayer.n_CH₄ + _alayer.n_CO₂ + _alayer.n_N₂ + _alayer.n_O₂;
-    _s_max = (_alayer.P_AIR - saturation_vapor_pressure(soil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.VC.Θ_SAT - soil.θ) / (GAS_R(FT) * soil.t);
+    s_dry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
+    a_dry = air.n_CH₄ + air.n_CO₂ + air.n_N₂ + air.n_O₂;
+    s_max = (air.P_AIR - saturation_vapor_pressure(soil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.VC.Θ_SAT - soil.θ) / (GAS_R(FT) * soil.t);
 
     # if soil air is not saturated, it can absorb more air from the atmosphere
-    if _s_max > _s_dry
-        _n_mass = min(_s_max - _s_dry, _a_dry);
-        soil.state.ns[1] += _n_mass * _alayer.n_CH₄ / _a_dry;
-        soil.state.ns[2] += _n_mass * _alayer.n_CO₂ / _a_dry;
-        soil.state.ns[4]  += _n_mass * _alayer.n_N₂  / _a_dry;
-        soil.state.ns[5]  += _n_mass * _alayer.n_O₂  / _a_dry;
-        soil.state.Σe += _n_mass * CP_D_MOL(FT) * _alayer.t / soil.auxil.δz;
+    if s_max > s_dry
+        n_mass = min(s_max - s_dry, a_dry);
+        soil.state.ns[1] += n_mass * air.n_CH₄ / a_dry;
+        soil.state.ns[2] += n_mass * air.n_CO₂ / a_dry;
+        soil.state.ns[4]  += n_mass * air.n_N₂  / a_dry;
+        soil.state.ns[5]  += n_mass * air.n_O₂  / a_dry;
+        soil.state.Σe += n_mass * CP_D_MOL(FT) * air.t / soil.auxil.δz;
         if !PRESCRIBE_AIR
-            _alayer.n_CH₄ -= _n_mass * _alayer.n_CH₄ / _a_dry;
-            _alayer.n_CO₂ -= _n_mass * _alayer.n_CO₂ / _a_dry;
-            _alayer.n_N₂  -= _n_mass * _alayer.n_N₂  / _a_dry;
-            _alayer.n_O₂  -= _n_mass * _alayer.n_O₂  / _a_dry;
-            _alayer.Σe -= _n_mass * CP_D_MOL(FT) * _alayer.t;
+            air.n_CH₄ -= n_mass * air.n_CH₄ / a_dry;
+            air.n_CO₂ -= n_mass * air.n_CO₂ / a_dry;
+            air.n_N₂  -= n_mass * air.n_N₂  / a_dry;
+            air.n_O₂  -= n_mass * air.n_O₂  / a_dry;
+            air.Σe -= n_mass * CP_D_MOL(FT) * air.t;
         end;
-    elseif _s_max < _s_dry
-        _n_mass = _s_dry - _s_max;
-        soil.state.ns[1] -= _n_mass * soil.state.ns[1] / _s_dry;
-        soil.state.ns[2] -= _n_mass * soil.state.ns[2] / _s_dry;
-        soil.state.ns[4]  -= _n_mass * soil.state.ns[4]  / _s_dry;
-        soil.state.ns[5]  -= _n_mass * soil.state.ns[5]  / _s_dry;
-        soil.state.Σe -= _n_mass * CP_D_MOL(FT) * soil.t / soil.auxil.δz;
+    elseif s_max < s_dry
+        n_mass = s_dry - s_max;
+        soil.state.ns[1] -= n_mass * soil.state.ns[1] / s_dry;
+        soil.state.ns[2] -= n_mass * soil.state.ns[2] / s_dry;
+        soil.state.ns[4]  -= n_mass * soil.state.ns[4]  / s_dry;
+        soil.state.ns[5]  -= n_mass * soil.state.ns[5]  / s_dry;
+        soil.state.Σe -= n_mass * CP_D_MOL(FT) * soil.t / soil.auxil.δz;
         if !PRESCRIBE_AIR
-            _alayer.n_CH₄ += _n_mass * soil.state.ns[1] / _s_dry;
-            _alayer.n_CO₂ += _n_mass * soil.state.ns[2] / _s_dry;
-            _alayer.n_N₂  += _n_mass * soil.state.ns[4]  / _s_dry;
-            _alayer.n_O₂  += _n_mass * soil.state.ns[5]  / _s_dry;
-            _alayer.Σe += _n_mass * CP_D_MOL(FT) * soil.t;
+            air.n_CH₄ += n_mass * soil.state.ns[1] / s_dry;
+            air.n_CO₂ += n_mass * soil.state.ns[2] / s_dry;
+            air.n_N₂  += n_mass * soil.state.ns[4]  / s_dry;
+            air.n_O₂  += n_mass * soil.state.ns[5]  / s_dry;
+            air.Σe += n_mass * CP_D_MOL(FT) * soil.t;
         end;
     end;
 

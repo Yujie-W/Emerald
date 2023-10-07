@@ -9,6 +9,7 @@
 #     2023-Sep-30: add update_substep_auxils! function
 #     2023-Sep-30: add buffer pressure and flow calculations
 #     2023-Oct-06: add soil auxiliary variable calculations
+#     2023-Oct-07: add soil bulk auxiliary variable calculations
 #
 #######################################################################################################################################################################################################
 """
@@ -55,6 +56,9 @@ update_substep_auxils!(spac::MultiLayerSPAC{FT}) where {FT} = (
 );
 
 update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
+    soil.auxil.cp = heat_capacitance(soil);
+    soil.auxil.t = soil.state.Σe / soil.auxil.cp;
+
     # update the conductance, potential, diffusivity, and thermal conductivity (0.5 for tortuosity factor)
     soil.auxil.k = relative_soil_k(soil.state.vc, soil.state.θ) * soil.state.vc.K_MAX * relative_viscosity(soil.auxil.t) / soil.auxil.δz;
     soil.auxil.ψ = soil_ψ_25(soil.state.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.auxil.t);
@@ -73,6 +77,7 @@ update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
 update_substep_auxils!(sbulk::SoilBulk{FT}) where {FT} = (
     # clear the dndt cahche
     sbulk.auxil.dndt .= 0;
+    sbulk.auxil.runoff = 0;
 
     return nothing
 );

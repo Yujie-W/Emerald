@@ -71,7 +71,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     # save the result at this stage for the results at the beginning of this time step
 
     # 5. run soil energy water budget
-    soil_budget!(config, spac);
+    soil_profiles!(config, spac);
 
     # 6. run leaf stomatal conductance budget
     stomatal_conductance!(spac);

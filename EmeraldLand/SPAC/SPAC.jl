@@ -15,7 +15,7 @@ using ..Namespace: initialize_energy_storage!
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, read_β
-using ..SoilHydraulics: relative_soil_k, soil_budget!, soil_ψ_25
+using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25
 using ..StomatalModels: stomatal_conductance!, stomatal_conductance_profile!
 
 
