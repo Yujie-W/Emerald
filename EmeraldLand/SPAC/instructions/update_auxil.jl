@@ -30,7 +30,7 @@ update_substep_auxils!(spac::MultiLayerSPAC{FT}) where {FT} = (
     end;
 
     # update soil bulk auxiliary variables
-    update_substep_auxils!(SOIL_BULK, SOILS);
+    update_substep_auxils!(SOIL_BULK);
 
     # update the root auxiliary variables
     for root in ROOTS
@@ -59,6 +59,7 @@ update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
     soil.auxil.k = relative_soil_k(soil.state.vc, soil.state.θ) * soil.state.vc.K_MAX * relative_viscosity(soil.auxil.t) / soil.auxil.δz;
     soil.auxil.ψ = soil_ψ_25(soil.state.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.auxil.t);
     soil.auxil.kd = 0.5 * max(0, soil.state.vc.Θ_SAT - soil.state.θ) / soil.auxil.δz;
+    soil.auxil.kv = 0.5 * soil.state.vc.Θ_SAT / max(FT(0.01), soil.state.vc.Θ_SAT - soil.state.θ) / soil.auxil.δz;
     soil.auxil.λ_soil_water = (soil.state.λ_soil + soil.state.θ * Λ_THERMAL_H₂O(FT)) / soil.auxil.δz;
 
     # clean up the partial derivatives
@@ -69,31 +70,9 @@ update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
     return nothing
 );
 
-update_substep_auxils!(sbulk::SoilBulk{FT}, soils::Vector{SoilLayer{FT}}) where {FT} = (
-    N = length(sbulk.auxil.k);
-    for i in 1:N
-        sbulk.auxil.k[i]        = 1 / (2 / soils[i].auxil.k + 2 / soils[i+1].auxil.k);
-        sbulk.auxil.δψ[i]       = soils[i].auxil.ψ - soils[i+1].auxil.ψ + ρg_MPa(FT) * (soils[i].auxil.z - soils[i+1].auxil.z);
-        sbulk.auxil.q[i]        = sbulk.auxil.k[i] * sbulk.auxil.δψ[i];
-        sbulk.auxil.λ_layers[i] = 1 / (2 / soils[i].auxil.λ_soil_water + 2 / soils[i+1].auxil.λ_soil_water);
-        sbulk.auxil.δt[i]       = soils[i].auxil.t - soils[i+1].auxil.t;
-        sbulk.auxil.q_layers[i] = sbulk.auxil.λ_layers[i] * sbulk.auxil.δt[i];
-
-        # if flow into the lower > 0, but the lower layer is already saturated, set the flow to 0
-        if (sbulk.auxil.q[i] > 0) && (soils[i+1].state.θ >= soils[i+1].state.vc.Θ_SAT)
-            sbulk.auxil.q[i] = 0;
-        end;
-
-        # if flow into the lower < 0, but the upper layer is already saturated, set the flow to 0
-        if (sbulk.auxil.q[i] < 0) && (soils[i].state.θ >= soils[i].state.vc.Θ_SAT)
-            sbulk.auxil.q[i] = 0;
-        end;
-
-        # if both layers are oversaturated, move the oversaturated part from lower layer to upper layer
-        if (soils[i].state.θ >= soils[i].state.vc.Θ_SAT) && (soils[i+1].state.θ > soils[i+1].state.vc.Θ_SAT)
-            sbulk.auxil.q[i] = -1 * (soils[i+1].state.θ - soils[i+1].state.vc.Θ_SAT) * soils[i+1].auxil.δz * ρ_H₂O(FT) / M_H₂O(FT);
-        end;
-    end;
+update_substep_auxils!(sbulk::SoilBulk{FT}) where {FT} = (
+    # clear the dndt cahche
+    sbulk.auxil.dndt .= 0;
 
     return nothing
 );

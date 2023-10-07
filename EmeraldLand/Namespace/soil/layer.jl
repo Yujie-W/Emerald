@@ -45,6 +45,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-05: add struct SoilLayerAuxil
+#     2023-Oct-05: add field kv
 #
 #######################################################################################################################################################################################################
 """
@@ -65,6 +66,8 @@ Base.@kwdef mutable struct SoilLayerAuxil{FT}
     k::FT = 0
     "Relative soil diffusive coefficient per area based on air fraction (distance accounted for already)"
     kd::FT = 0
+    "Relative soil diffusive coefficient for water vapor (distance accounted for already)"
+    kv::FT = 0
     "Temperature `[K]`"
     t::FT = T₂₅(FT)
     "Mean depth `[m]`"

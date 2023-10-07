@@ -135,7 +135,7 @@ update!(config::SPACConfiguration{FT},
         vcmax::Union{Number,Nothing} = nothing,
         vcmax_expo::Union{Number,Nothing} = nothing
 ) where {FT} = (
-    (; ENABLE_SOIL_EVAPORATION, DIM_LAYER, T_CLM) = config;
+    (; DIM_LAYER, T_CLM) = config;
     (; AIR, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL_BULK, SOILS, TRUNK) = spac;
 
     # update chlorophyll and carotenoid contents (and spectra)
@@ -228,13 +228,11 @@ update!(config::SPACConfiguration{FT},
         for i in eachindex(swcs)
             soil = SOILS[i];
             soil.state.θ = max(soil.state.vc.Θ_RES + eps(FT), min(soil.state.vc.Θ_SAT - eps(FT), swcs[i]));
-            if ENABLE_SOIL_EVAPORATION
-                _δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-                _rt = GAS_R(FT) * soil.auxil.t;
-                soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * _δθ / _rt;
-                soil.state.ns[4] = AIR[1].P_AIR * 0.79 * soil.auxil.δz * _δθ / _rt;
-                soil.state.ns[4] = AIR[1].P_AIR * 0.209 * soil.auxil.δz * _δθ / _rt
-            end;
+            _δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
+            _rt = GAS_R(FT) * soil.auxil.t;
+            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * _δθ / _rt;
+            soil.state.ns[4] = AIR[1].P_AIR * 0.79 * soil.auxil.δz * _δθ / _rt;
+            soil.state.ns[4] = AIR[1].P_AIR * 0.209 * soil.auxil.δz * _δθ / _rt
             soil.auxil.cp = heat_capacitance(soil);
             soil.state.Σe = soil.auxil.cp * soil.auxil.t;
         end;

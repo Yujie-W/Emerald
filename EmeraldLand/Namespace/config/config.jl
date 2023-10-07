@@ -12,12 +12,11 @@
 #     2023-Jun-20: add fields LHA, Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI, α_CLM, α_FITTING, and MAT_ρ
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
-#     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, ENABLE_SOIL_EVAPORATION, and T_CLM
+#     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, and T_CLM
 #     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD, ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
 #     2023-Sep-18: add field Φ_SIF_WL
 #     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
-#     2023-Sep-22: remove APAR_CAR (now a state variable in LeafBioState)
 #     2023-Oct-02: add field MESSAGE_LEVEL
 #     2023-Oct-05: add field ENABLE_SIF
 #
@@ -95,8 +94,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     ENABLE_PLANT_HYDRAULICS::Bool = true
     "Enable soil water budget (θ_on)"
     ENABLE_SOIL_WATER_BUDGET::Bool = true
-    "Enable soil evaporation"
-    ENABLE_SOIL_EVAPORATION::Bool = false
     "Whether to acclimate leaf Vcmax and Jmax TD"
     T_CLM::Bool = true
     "Whether to use CLM soil albedo scheme"

@@ -31,6 +31,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-05: add struct SoilBulkAuxil
+#     2023-Oct-07: add field dndt
 #
 #######################################################################################################################################################################################################
 """
@@ -45,6 +46,7 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SoilBulkAuxil{FT}
+    # soil energy budget
     "Net diffuse radiation at top soil `[mW m⁻² nm⁻¹]`"
     e_net_diffuse::Vector{FT}
     "Net direct radiation at top soil `[mW m⁻² nm⁻¹]`"
@@ -53,8 +55,6 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     r_net_lw::FT = 0
     "Net shortwave energy absorption `[W m⁻²]`"
     r_net_sw::FT = 0
-    "Surface runoff due to heavy precipitation during the time step `[mol m⁻²]`"
-    runoff::FT = 0
     "Weights of the four characteristic curves"
     weight::Vector{FT} = zeros(FT, 4)
     "Reflectance for longwave radiation"
@@ -63,12 +63,16 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     ρ_sw::Vector{FT}
 
     # the effective rate among soil layers
+    "Diffusion rate between layers per area `[mol s⁻¹]`"
+    dndt::Matrix{FT}
     "Soil hydraulic conductance between layers per area `[mol m⁻² s⁻¹ MPa⁻¹]`"
     k::Vector{FT}
     "Flux between layers per area `[mol m⁻² s⁻¹]`"
     q::Vector{FT}
     "Thermal flux between layers per area `[mol m⁻² s⁻¹]`"
     q_layers::Vector{FT}
+    "Surface runoff due to heavy precipitation during the time step `[mol m⁻²]`"
+    runoff::FT = 0
     "Soil temperature difference between layers `[MPa]`"
     δt::Vector{FT}
     "Soil metric potential difference between layers `[MPa]`"
@@ -85,12 +89,13 @@ SoilBulkAuxil(config::SPACConfiguration{FT}) where {FT} = SoilBulkAuxil{FT}(
             e_net_diffuse = zeros(FT, config.DIM_WL),
             e_net_direct  = zeros(FT, config.DIM_WL),
             ρ_sw          = zeros(FT, config.DIM_WL),
-            k             = zeros(FT, config.DIM_SOIL - 1),
-            q             = zeros(FT, config.DIM_SOIL - 1),
-            q_layers      = zeros(FT, config.DIM_SOIL - 1),
-            δt            = zeros(FT, config.DIM_SOIL - 1),
-            δψ            = zeros(FT, config.DIM_SOIL - 1),
-            λ_layers      = zeros(FT, config.DIM_SOIL - 1)
+            dndt          = zeros(FT, config.DIM_SOIL, 5),
+            k             = zeros(FT, config.DIM_SOIL-1),
+            q             = zeros(FT, config.DIM_SOIL-1),
+            q_layers      = zeros(FT, config.DIM_SOIL-1),
+            δt            = zeros(FT, config.DIM_SOIL-1),
+            δψ            = zeros(FT, config.DIM_SOIL-1),
+            λ_layers      = zeros(FT, config.DIM_SOIL-1)
 );
 
 

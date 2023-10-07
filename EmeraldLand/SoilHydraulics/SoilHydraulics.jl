@@ -17,6 +17,10 @@ include("vc/vulnerability.jl");
 include("liquid/infiltration.jl");
 include("liquid/root.jl");
 
+# soil trace gas diffusion
+include("gas/diffusion.jl");
+include("gas/volume.jl");
+
 
 include("budget.jl");
 include("diffusion.jl");

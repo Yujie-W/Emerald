@@ -12,7 +12,6 @@
 #     2023-Jun-13: add soil gas energy into soil e
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
-#     2023-Sep-11: rename ALLOW_SOIL_EVAPORATION to ENABLE_SOIL_EVAPORATION
 #
 #######################################################################################################################################################################################################
 """
@@ -27,19 +26,15 @@ Initialize the SPAC, given
 function initialize! end
 
 initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; ENABLE_SOIL_EVAPORATION) = config;
     (; CANOPY, LEAVES, SOIL_BULK, SOILS) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
     for soil in SOILS
-        if ENABLE_SOIL_EVAPORATION
-            δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-            rt = GAS_R(FT) * soil.auxil.t;
-            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * δθ / rt;
-            soil.state.ns[4] = spac.AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
-            soil.state.ns[5] = spac.AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
-        end;
-        cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
+        δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
+        rt = GAS_R(FT) * soil.auxil.t;
+        soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * δθ / rt;
+        soil.state.ns[4] = spac.AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
+        soil.state.ns[5] = spac.AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
         soil.auxil.cp = heat_capacitance(soil);
         soil.state.Σe = soil.auxil.cp * soil.auxil.t;
     end;
