@@ -89,7 +89,7 @@ const UNIVERSAL_CONSTANTS = UniversalConstants();
 AVOGADRO(FT=Float64) = FT(UNIVERSAL_CONSTANTS.AVOGADRO);
 
 """ Isobaric specific heat of dry air `[J kg⁻¹ K⁻¹]` """
-CP_D(FT=Float64) = FT(UNIVERSAL_CONSTANTS.CP_D);;
+CP_D(FT=Float64) = FT(UNIVERSAL_CONSTANTS.CP_D);
 
 """ Isobaric specific heat of dry air per mole `[J mol⁻¹ K⁻¹]` """
 CP_D_MOL(FT=Float64) = CP_D(FT) * M_DRYAIR(FT);

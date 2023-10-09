@@ -46,8 +46,9 @@ Run the soil budgets for water and gas, given
 
 """
 function soil_budgets!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
-    (; SOIL_BULK, SOILS) = spac;
+    (; SOILS) = spac;
 
+    # per soil layer, run the gas diffusion, mass flow, and condensation or evaporation budgets
     for i in eachindex(SOILS)
         # run the soil gas budget
         for j in 1:5
@@ -61,13 +62,9 @@ function soil_budgets!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
         soil_water_condensation!(SOILS[i]);
     end;
 
+    # compute surface runoff and volume balance for the air
+    soil_water_runoff!(spac);
     volume_balance!(config, spac);
-
-    # compute surface runoff
-    if SOILS[1].state.θ > SOILS[1].state.vc.Θ_SAT
-        SOIL_BULK.auxil.runoff = (SOILS[1].state.θ - SOILS[1].state.vc.Θ_SAT) * SOILS[1].auxil.δz * ρ_H₂O(FT) / M_H₂O(FT);;
-        SOILS[1].state.θ = SOILS[1].state.vc.Θ_SAT;
-    end;
 
     return nothing
 end;

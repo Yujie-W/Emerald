@@ -8,6 +8,7 @@ using Test;
     spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
     EmeraldLand.SPAC.initialize!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
+    EmeraldLand.SPAC.spac!(config, spac, FT(1));
 
     # Changing canopy structure may result in changes in other parameters, such as Vcmax profile.
     # Thus, it is not recommended to modify those parametes manually unless otherwise told to by developers.

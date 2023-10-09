@@ -16,13 +16,14 @@ import ..Namespace: BrooksCorey
 include("vc/fitting.jl");
 include("vc/vulnerability.jl");
 
-# soil liquid water mass flow
-include("liquid/infiltration.jl");
-include("liquid/root.jl");
-
 # soil trace gas diffusion
 include("gas/diffusion.jl");
 include("gas/volume.jl");
+
+# soil liquid water mass flow
+include("liquid/infiltration.jl");
+include("liquid/root.jl");
+include("liquid/runoff.jl");
 
 # soil flow profiles
 include("soil/profile.jl");

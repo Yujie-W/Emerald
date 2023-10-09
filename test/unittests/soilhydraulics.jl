@@ -31,7 +31,7 @@ import Emerald.EmeraldLand.SPAC
         end;
     end;
 
-    @testset "Trace Gas Diffusion" begin
+    @testset "Trace gas diffusion" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
         SPAC.initialize!(config, spac);
@@ -76,7 +76,29 @@ import Emerald.EmeraldLand.SPAC
         end;
     end;
 
-    @testset "Soil Gas and Water Volume" begin
+    @testset "Soil infiltration" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
+
+        # set the soil to be not saturated
+        SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
+        SPAC.update_substep_auxils!(spac);
+        SH.soil_water_infiltration!(spac);
+
+        # total water mole change by infiltration should be 0 (no water is lost or gained)
+        @test sum([soil.auxil.∂θ∂t * soil.auxil.δz for soil in spac.SOILS]) ≈ 0 atol = 1e-10;
+
+        # set the soil to be almost saturated (controlled by the soil water content)
+        SPAC.update!(config, spac; swcs = (0.5, 0.5, 0.5, 0.5, 0.5));
+        SPAC.update_substep_auxils!(spac);
+        SH.soil_water_infiltration!(spac);
+
+        # total water mole change by infiltration should be 0 (no water is lost or gained)
+        @test sum([soil.auxil.∂θ∂t * soil.auxil.δz for soil in spac.SOILS]) ≈ 0 atol = 1e-10;
+    end;
+
+    @testset "Soil gas and water volume" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
         SPAC.initialize!(config, spac);
