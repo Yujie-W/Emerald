@@ -169,30 +169,14 @@ function extinction_scattering_coefficients! end
 #######################################################################################################################################################################################################
 """
 
-    extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
     extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
 
 Update the extinction and scattering coefficients, given
 - `config` SPAC configurations
-- `can` `BroadbandSLCanopy` or `HyperspectralMLCanopy` type canopy
+- `can` `HyperspectralMLCanopy` type canopy
 - `angles` `SunSensorGeometry` type angles
 
 """
-extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::BroadbandSLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
-    (; Θ_INCL) = config;
-    (; P_INCL, RADIATION) = can;
-
-    # the extinction coefficients for direct radiation at different inclination angles
-    RADIATION._k_diffuse .= extinction_coefficient.(Θ_INCL);
-    RADIATION._k_direct .= extinction_coefficient.(angles.sza, Θ_INCL);
-
-    # take the weighted mean
-    RADIATION.k_diffuse = P_INCL' * RADIATION._k_diffuse;
-    RADIATION.k_direct = P_INCL' * RADIATION._k_direct;
-
-    return nothing
-);
-
 extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
     (; Θ_INCL) = config;
     (; OPTICS) = can;

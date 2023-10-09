@@ -174,29 +174,29 @@ MultiLayerSPAC(
                 ) for i in 1:config.DIM_AIR];
 
     return MultiLayerSPAC{FT}(
-                ind_layer,                                                              # LEAVES_INDEX
-                ind_root,                                                               # ROOTS_INDEX
-                zs,                                                                     # Z
-                air_bounds,                                                             # Z_AIR
-                elevation,                                                              # ELEVATION
-                latitude,                                                               # LATITUDE
-                longitude,                                                              # LONGITUDE
-                air_layers,                                                             # AIR
-                SunSensorGeometry{FT}(),                                                # ANGLES
-                branches,                                                               # BRANCHES
-                HyperspectralMLCanopy(config),                                          # CANOPY
-                Leaf{FT}[Leaf(config) for i in 1:config.DIM_LAYER],                    # LEAVES
-                SPACMemory{FT}(),                                                       # MEMORY
-                Meteorology{FT}(rad_sw = HyperspectralRadiation{FT}(config.DATASET)),   # METEO
-                roots,                                                                  # ROOTS
-                SoilBulk(config),                                                       # SOIL_BULK
-                soil_layers,                                                            # SOILS
-                trunk,                                                                  # TRUNK
-                JunctionCapacitor{FT}(),                                                # JUNCTION
-                zeros(FT, config.DIM_ROOT),                                             # _fs
-                zeros(FT, config.DIM_ROOT),                                             # _ks
-                zeros(FT, config.DIM_ROOT),                                             # _ps
-                true,                                                                   # _root_connection
+                ind_layer,                                              # LEAVES_INDEX
+                ind_root,                                               # ROOTS_INDEX
+                zs,                                                     # Z
+                air_bounds,                                             # Z_AIR
+                elevation,                                              # ELEVATION
+                latitude,                                               # LATITUDE
+                longitude,                                              # LONGITUDE
+                air_layers,                                             # AIR
+                SunSensorGeometry{FT}(),                                # ANGLES
+                branches,                                               # BRANCHES
+                HyperspectralMLCanopy(config),                          # CANOPY
+                Leaf{FT}[Leaf(config) for i in 1:config.DIM_LAYER],     # LEAVES
+                SPACMemory{FT}(),                                       # MEMORY
+                Meteorology{FT}(rad_sw = ShortwaveRadiation(config)),   # METEO
+                roots,                                                  # ROOTS
+                SoilBulk(config),                                       # SOIL_BULK
+                soil_layers,                                            # SOILS
+                trunk,                                                  # TRUNK
+                JunctionCapacitor{FT}(),                                # JUNCTION
+                zeros(FT, config.DIM_ROOT),                             # _fs
+                zeros(FT, config.DIM_ROOT),                             # _ks
+                zeros(FT, config.DIM_ROOT),                             # _ps
+                true,                                                   # _root_connection
     )
 );
 

@@ -603,65 +603,10 @@ end
 $(TYPEDEF)
 
 Hierarchy of AbstractCanopy:
-- [`BroadbandSLCanopy`](@ref)
 - [`HyperspectralMLCanopy`](@ref)
 
 """
 abstract type AbstractCanopy{FT<:AbstractFloat} end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this structure
-# General
-#     2022-Jun-15: add struct for broadband radiative transfer scheme such as two leaf model
-#     2022-Jun-15: add more cache variables
-#     2022-Jun-15: add radiation profile
-#     2022-Jun-15: remove RATIO_HV to compute the coefficient numerically
-#     2022-Jun-16: remove some cache variables
-#     2022-Jun-16: add fields: Θ_INCL_BNDS
-#     2023-May-22: add sypport to BetaLIDF
-#     2023-Jun-16: remove fields DIM_*
-#     2023-Jun-20: move fields Θ_INCL and Θ_INCL_BNDS to SPACConfiguration
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Structure to save single layer broadband canopy parameters
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct BroadbandSLCanopy{FT<:AbstractFloat} <: AbstractCanopy{FT}
-    # Embedded structures
-    "Leaf inclination angle distribution function algorithm"
-    LIDF::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
-    "Canopy radiation profiles"
-    RADIATION::BroadbandSLCanopyRadiationProfile{FT}
-
-    # Geometry information
-    "Inclination angle distribution"
-    P_INCL::Vector{FT}
-
-    # Prognostic variables
-    "Clumping index"
-    ci::FT = 1
-    "Leaf area index"
-    lai::FT = 3
-end
-
-BroadbandSLCanopy(config::SPACConfiguration{FT}) where {FT} = (
-    (; DIM_INCL) = config;
-
-    return BroadbandSLCanopy{FT}(
-                RADIATION   = BroadbandSLCanopyRadiationProfile(config),
-                P_INCL      = ones(FT, DIM_INCL) ./ DIM_INCL,
-    )
-);
 
 
 #######################################################################################################################################################################################################

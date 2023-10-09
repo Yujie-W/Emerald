@@ -10,7 +10,7 @@ using Emerald;
     EmeraldLand.LeafOptics.leaf_spectra!(bio, spectra, FT(5));
 
     # Test the photon conservation
-    rad = EmeraldLand.Namespace.HyperspectralRadiation{FT}(config.DATASET);
+    rad = EmeraldLand.Namespace.ShortwaveRadiation(config);
     rad_e = config.SPECTRA.SOLAR_RAD[:,1];
     rad_photon = EmeraldLand.Optics.photon.(spectra.Λ, rad_e);
     _,_,ppar = EmeraldLand.LeafOptics.leaf_PAR(bio, spectra, rad);

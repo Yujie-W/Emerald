@@ -38,7 +38,7 @@ function shortwave_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::HyperspectralRadiation{FT}, sbulk::SoilBulk{FT}) where {FT}
+    shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::ShortwaveRadiation{FT}, sbulk::SoilBulk{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave radiation, given
 - `config` Configuration for `MultiLayerSPAC`
@@ -48,7 +48,7 @@ Updates canopy radiation profiles for shortwave radiation, given
 - `sbulk` Soil bulk parameters
 
 """
-shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::HyperspectralRadiation{FT}, sbulk::SoilBulk{FT}) where {FT} = (
+shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::ShortwaveRadiation{FT}, sbulk::SoilBulk{FT}) where {FT} = (
     (; DIM_LAYER, SPECTRA) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 

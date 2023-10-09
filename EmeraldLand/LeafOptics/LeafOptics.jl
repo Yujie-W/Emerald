@@ -89,12 +89,12 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT}
+    leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::ShortwaveRadiation{FT}; apar_car::Bool = true) where {FT}
 
 Return leaf level PAR, APAR, and PPAR, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
 - `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
-- `rad` `HyperspectralRadiation` type struct that contains incoming radiation information
+- `rad` `ShortwaveRadiation` type struct that contains incoming radiation information
 - `apar_car` If true (default), account carotenoid absorption as PPAR; otherwise, PPAR is only by chlorophyll
 
 ---
@@ -102,13 +102,13 @@ Return leaf level PAR, APAR, and PPAR, given
 ```julia
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
 spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
-rad = EmeraldNamespace.HyperspectralRadiation{Float64}();
+rad = EmeraldNamespace.ShortwaveRadiation{Float64}();
 par,apar,ppar = leaf_PAR(bio, spectra, rad);
 par,apar,ppar = leaf_PAR(bio, spectra, rad; apar_car=false);
 ```
 
 """
-function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}; apar_car::Bool = true) where {FT}
+function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::ShortwaveRadiation{FT}; apar_car::Bool = true) where {FT}
     (; IΛ_PAR, ΔΛ_PAR, Λ_PAR) = spectra;
 
     # PPAR absorption feature (after APAR is computed)
@@ -154,12 +154,12 @@ end
 #######################################################################################################################################################################################################
 """
 
-    leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT}
+    leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::ShortwaveRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT}
 
 Return the leaf level SIF at backward and forward directions, given
 - `bio` `HyperspectralLeafBiophysics` type struct that contains leaf biophysical parameters
 - `spectra` `ReferenceSpectra` type struct that contains absorption characteristic curves
-- `rad` `HyperspectralRadiation` type struct that contains incoming radiation information
+- `rad` `ShortwaveRadiation` type struct that contains incoming radiation information
 - `ϕ` Fluorescence quantum yield
 - `ϕ_photon` If true (default), convert photon to photon when computing SIF; otherwise, convert energy to energy
 
@@ -168,13 +168,13 @@ Return the leaf level SIF at backward and forward directions, given
 ```julia
 bio = EmeraldNamespace.HyperspectralLeafBiophysics{Float64}();
 spectra = EmeraldNamespace.ReferenceSpectra{Float64}();
-rad = EmeraldNamespace.HyperspectralRadiation{Float64}();
+rad = EmeraldNamespace.ShortwaveRadiation{Float64}();
 sif_b,sif_f = leaf_SIF(bio, spectra, 0.01);
 sif_b,sif_f = leaf_SIF(bio, spectra, 0.01; ϕ_photon=false);
 ```
 
 """
-function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::HyperspectralRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT}
+function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectra{FT}, rad::ShortwaveRadiation{FT}, ϕ::FT = FT(0.01); ϕ_photon::Bool = true) where {FT}
     (; IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = spectra;
 
     # calculate the excitation energy and photons
