@@ -5,29 +5,35 @@ import Emerald.EmeraldLand.Namespace as NS
 
 @testset verbose = true "Leaf Optics Model" begin
     @testset "Interface ρ and τ for direct radiation" begin
-        n₁ = 1.0
-        n₂ = 1.33
-        for θ₁ in collect(Float64, 0:1:89)
-            ρ,τ = LO.interface_ρ_τ(n₁, n₂, θ₁);
-            @test ρ + τ == 1.0;
-            @test 0 <= ρ <= 1;
-            @test 0 <= τ <= 1;
-            ρ,τ = LO.interface_ρ_τ(n₂, n₁, θ₁);
-            @test ρ + τ == 1.0;
-            @test 0 <= ρ <= 1;
-            @test 0 <= τ <= 1;
-        end;
+        n₁ = 1.0;
+        n₂ = 1.33;
+        θs = collect(Float64, 0:1:89);
+
+        ρτs = LO.interface_ρ_τ.(n₁, n₂, θs);
+        ρs = [rt[1] for rt in ρτs];
+        τs = [rt[2] for rt in ρτs];
+        @test all(0 .<= ρs .<= 1);
+        @test all(0 .<= τs .<= 1);
+        @test all(ρs .+ τs .== 1);
+
+        ρτs = LO.interface_ρ_τ.(n₂, n₁, θs);
+        ρs = [rt[1] for rt in ρτs];
+        τs = [rt[2] for rt in ρτs];
+        @test all(0 .<= ρs .<= 1);
+        @test all(0 .<= τs .<= 1);
+        @test all(ρs .+ τs .== 1);
     end;
 
     @testset "Interface τ for isotropic radiation" begin
-        n₁ = 1.0
-        n₂ = 1.33
-        for θ₁ in collect(Float64, 1:1:90)
-            τ = LO.interface_isotropic_τ(n₁, n₂, θ₁);
-            @test 0 <= τ <= 1;
-            τ = LO.interface_isotropic_τ(n₂, n₁, θ₁);
-            @test 0 <= τ <= 1;
-        end;
+        n₁ = 1.0;
+        n₂ = 1.33;
+        θs = collect(Float64, 1:1:90);
+
+        τs = LO.interface_isotropic_τ.(n₁, n₂, θs);
+        @test all(0 .<= τs .<= 1);
+
+        τs = LO.interface_isotropic_τ.(n₂, n₁, θs);
+        @test all(0 .<= τs .<= 1);
     end;
 
     @testset "Leaf interface ρ and τ" begin

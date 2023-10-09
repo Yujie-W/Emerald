@@ -63,7 +63,7 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     ρ_sw::Vector{FT}
 
     # the effective rate among soil layers
-    "Diffusion rate between layers per area `[mol s⁻¹]`"
+    "Diffusion rate between layers per area `[mol m⁻² s⁻¹]`"
     dndt::Matrix{FT}
     "Soil hydraulic conductance between layers per area `[mol m⁻² s⁻¹ MPa⁻¹]`"
     k::Vector{FT}
