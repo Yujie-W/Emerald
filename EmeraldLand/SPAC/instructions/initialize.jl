@@ -28,7 +28,7 @@ initialize_struct!(soil::SoilLayer{FT}, air::AirLayer{FT}) where {FT} = (
 
 initialize_struct!(root::Root{FT}) where {FT} = (
     root.xylem.state.v_storage .= (root.xylem.state.v_max * root.xylem.state.area * root.xylem.state.l) / length(root.xylem.state.v_storage);
-    root.energy.auxil.cp = sum(root.xylem.state.v_storage) * CP_L_MOL(FT) + (root.xylem.state.cp * root.xylem.state.area * root.xylem.state. l);
+    root.energy.auxil.cp = heat_capacitance(root);
     root.energy.state.Σe = root.energy.auxil.cp * root.energy.auxil.t;
 
     return nothing
@@ -36,7 +36,7 @@ initialize_struct!(root::Root{FT}) where {FT} = (
 
 initialize_struct!(stem::Stem{FT}) where {FT} = (
     stem.xylem.state.v_storage .= (stem.xylem.state.v_max * stem.xylem.state.area * stem.xylem.state.l) / length(stem.xylem.state.v_storage);
-    stem.energy.auxil.cp = sum(stem.xylem.state.v_storage) * CP_L_MOL(FT) + (stem.xylem.state.cp * stem.xylem.state.area * stem.xylem.state. l);
+    stem.energy.auxil.cp = heat_capacitance(stem);
     stem.energy.state.Σe = stem.energy.auxil.cp * stem.energy.auxil.t;
 
     return nothing
@@ -46,7 +46,7 @@ initialize_struct!(leaf::Leaf{FT}) where {FT} = (
     leaf.xylem.state.cp = 1780;
     leaf.xylem.state.k_max = 0.04;
     leaf.capacitor.state.v_storage = leaf.capacitor.state.v_max * leaf.xylem.state.area;
-    leaf.energy.auxil.cp = leaf.capacitor.state.v_storage * CP_L_MOL(FT) + leaf.bio.state.lma * 10 * leaf.xylem.state.area * leaf.xylem.state.cp;
+    leaf.energy.auxil.cp = heat_capacitance(leaf);
     leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
 
     return nothing

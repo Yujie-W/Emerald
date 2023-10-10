@@ -1,3 +1,6 @@
+using Test
+
+
 @testset verbose = true "Tutorial" begin
     # Note that running these tutorials requires data to be prepared a priori, so we make an if statement to avoid it in automated CI tests.
     if isdir("/home/wyujie")

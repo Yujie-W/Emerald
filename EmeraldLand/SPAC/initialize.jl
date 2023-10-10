@@ -13,6 +13,7 @@
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Sep-07: add ALLOW_SOIL_EVAPORATION check
 #     2023-Oct-07: add 0.01 to the water vapor volume per soil layer
+#     2023-Oct-09: add root and stem initialization in the initialization of SPAC
 #
 #######################################################################################################################################################################################################
 """
@@ -27,11 +28,22 @@ Initialize the SPAC, given
 function initialize! end
 
 initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; AIRS, CANOPY, LEAVES, SOIL_BULK, SOILS) = spac;
+    (; AIRS, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL_BULK, SOILS, TRUNK) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
     for soil in SOILS
         initialize_struct!(soil, AIRS[1]);
+    end;
+
+    # make sure the root energy is correctly scaled with temperature
+    for root in ROOTS
+        initialize_struct!(root);
+    end;
+
+    # make sure the stem energy is correctly scaled with temperature
+    initialize_struct!(TRUNK);
+    for stem in BRANCHES
+        initialize_struct!(stem);
     end;
 
     # make sure leaf area index setup and energy are correct

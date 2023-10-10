@@ -118,6 +118,7 @@ import Emerald.EmeraldLand.SPAC
         # set first layer to be saturated, and let the second layer to suck some water from the first layer
         spac.SOILS[1].state.θ = spac.SOILS[1].state.vc.Θ_SAT;
         spac.SOILS[1].state.ns .= 0;
+        spac.SOILS[2].state.ns[5] = 0;
         θ_1 = spac.SOILS[1].state.θ;
         θ_2 = spac.SOILS[2].state.θ;
         SH.volume_balance!(config, spac);
