@@ -60,6 +60,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureAuxil{FT}
+    "Weighted sum of cos²(inclination)"
+    bf::FT = 0
     "Clumping index"
     ci::FT = 1
     "Canopy level boundary locations"

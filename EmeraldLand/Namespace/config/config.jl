@@ -9,7 +9,7 @@
 #     2023-Apr-13: add fields Φ_PHOTON, RAD_SW_REF, and APAR_CAR
 #     2023-Jun-13: add trace gasses as fields
 #     2023-Jun-16: add fields WLSET, DIM_*
-#     2023-Jun-20: add fields LHA, Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI, α_CLM, α_FITTING, and MAT_ρ
+#     2023-Jun-20: add fields LHA, Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI, α_CLM, α_FITTING, and MAT_ρ
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, and T_CLM
@@ -76,6 +76,18 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
     SUNLIT_FRACTION::Bool = true
 
+    # Settings related to the canopy geometry angles (inclination and azimuth settings)
+    "Dimension of azimuth angles"
+    DIM_AZI::Int = 36
+    "Dimension of inclination angles"
+    DIM_INCL::Int = 9
+    "Mean azimuth angles `[°]`"
+    Θ_AZI::Vector{FT} = collect(FT, range(0, 360; length=DIM_AZI+1))[1:end-1] .+ 360 / DIM_AZI / 2
+    "Bounds of inclination angles `[°]`"
+    Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ]
+    "Mean inclination angles `[°]`"
+    Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
+
 
 
 
@@ -108,10 +120,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # Dimensions of the spac system
     "Dimension of air layers"
     DIM_AIR::Int = 20
-    "Dimension of azimuth angles"
-    DIM_AZI::Int = 36
-    "Dimension of inclination angles"
-    DIM_INCL::Int = 9
     "Dimension of canopy layers"
     DIM_LAYER::Int = 12
     "Number of wavelength bins for NIR"
@@ -131,14 +139,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
     DIM_XYLEM::Int = 5
 
-    # Canopy geometry related angles
-    "Mean azimuth angles `[°]`"
-    Θ_AZI::Vector{FT} = collect(FT, range(0, 360; length=DIM_AZI+1))[1:end-1] .+ 360 / DIM_AZI / 2
-    "Bounds of inclination angles `[°]`"
-    Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ]
-    "Mean inclination angles `[°]`"
-    Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
-
     # Trace gas information
     "Trace gas air"
     TRACE_AIR::TraceGasAir = TraceGasAir{FT}()
@@ -154,12 +154,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     TRACE_O₂::TraceGasO₂ = TraceGasO₂{FT}()
 
     # Cache variables
-    "Ones with the length of Θ_AZI"
-    _1_AZI::Vector{FT} = ones(FT, DIM_AZI)
-    "Cosine of Θ_AZI"
-    _COS_Θ_AZI::Vector{FT} = cosd.(Θ_AZI)
-    "Square of cosine of Θ_INCL"
-    _COS²_Θ_INCL::Vector{FT} = cosd.(Θ_INCL) .^ 2
     "Square of cosine of Θ_INCL at different azimuth angles"
-    _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * _1_AZI'
+    _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * ones(FT, 1, DIM_AZI)
 end;

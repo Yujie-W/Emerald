@@ -99,7 +99,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         # compute the weights
         _sh_1_ = lidf_weight(_ϕ_shaded, 1);
         _sl_1_ = lidf_weight(_ϕ_sunlit, 1);
-        _sl_S_ = lidf_weight(_ϕ_sunlit, OPTICS._abs_fs);
+        _sl_S_ = lidf_weight(_ϕ_sunlit, can.sun_geometry.auxil.fs_abs);
 
         # upward and downward SIF from direct and diffuse radiation per leaf area
         RADIATION._s_sunlit_up .= OPTICS._tmp_vec_sif_2 .* _sl_1_ .+ OPTICS._tmp_vec_sif_1 .* _sl_S_;
@@ -157,7 +157,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         _sl_1_ = lidf_weight(_ϕ_sunlit, 1);
         _sh_O_ = lidf_weight(_ϕ_shaded, OPTICS._abs_fo);
         _sl_O_ = lidf_weight(_ϕ_sunlit, OPTICS._abs_fo);
-        _sl_S_ = lidf_weight(_ϕ_sunlit, OPTICS._abs_fs);
+        _sl_S_ = lidf_weight(_ϕ_sunlit, can.sun_geometry.auxil.fs_abs);
         _sh_oθ = lidf_weight(_ϕ_shaded, OPTICS._fo_cos_θ_incl);
         _sl_oθ = lidf_weight(_ϕ_sunlit, OPTICS._fo_cos_θ_incl);
         _sl_sθ = lidf_weight(_ϕ_sunlit, OPTICS._fs_cos_θ_incl);

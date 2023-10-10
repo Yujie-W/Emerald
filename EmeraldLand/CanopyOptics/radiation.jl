@@ -163,7 +163,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
     RADIATION.par_in_direct = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR;
     RADIATION.par_in = RADIATION.par_in_diffuse + RADIATION.par_in_direct;
 
-    mul!(OPTICS._tmp_vec_azi, OPTICS._abs_fs', can.structure.state.p_incl);
+    mul!(OPTICS._tmp_vec_azi, can.sun_geometry.auxil.fs_abs', can.structure.state.p_incl);
     _normi = 1 / mean(OPTICS._tmp_vec_azi);
 
     for i in 1:DIM_LAYER

@@ -40,7 +40,14 @@ extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::MultiLay
     (; OPTICS) = can;
 
     for i in eachindex(Θ_INCL)
-        OPTICS._ks[i], OPTICS._ko[i], OPTICS._sb[i], OPTICS._sf[i], OPTICS._Co[i], OPTICS._Cs[i], OPTICS._So[i], OPTICS._Ss[i] =
+        can.sun_geometry.auxil.ks_incl[i],
+        OPTICS._ko[i],
+        OPTICS._sb[i],
+        OPTICS._sf[i],
+        OPTICS._Co[i],
+        can.sun_geometry.auxil.Cs_incl[i],
+        OPTICS._So[i],
+        can.sun_geometry.auxil.Ss_incl[i] =
             extinction_coefficient(can.sun_geometry.state.sza, can.sensor_geometry.state.vza, can.sensor_geometry.state.vaa - can.sun_geometry.state.saa, Θ_INCL[i]);
     end;
 

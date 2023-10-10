@@ -38,7 +38,7 @@ Updates canopy optical properties (extinction coefficients for direct and diffus
 
 """
 canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
-    (; DIM_LAYER, Θ_AZI, _1_AZI, _COS_Θ_AZI, _COS²_Θ_INCL, _COS²_Θ_INCL_AZI) = config;
+    (; DIM_LAYER, Θ_AZI, _COS²_Θ_INCL_AZI) = config;
     (; OPTICS) = can;
 
     if can.structure.state.lai == 0
@@ -49,44 +49,28 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     extinction_scattering_coefficients!(config, can);
 
     can.sensor_geometry.auxil.ko = can.structure.state.p_incl' * OPTICS._ko;
-    can.sun_geometry.auxil.ks = can.structure.state.p_incl' * OPTICS._ks;
-    OPTICS._bf = can.structure.state.p_incl' * _COS²_Θ_INCL;
-
-    can.sun_geometry.auxil.ddb = (1 + OPTICS._bf) / 2;
-    can.sun_geometry.auxil.ddf = (1 - OPTICS._bf) / 2;
-    can.sun_geometry.auxil.sdb = (can.sun_geometry.auxil.ks + OPTICS._bf) / 2;
-    can.sun_geometry.auxil.sdf = (can.sun_geometry.auxil.ks - OPTICS._bf) / 2;
-    can.sensor_geometry.auxil.dob = (can.sensor_geometry.auxil.ko + OPTICS._bf) / 2;
-    can.sensor_geometry.auxil.dof = (can.sensor_geometry.auxil.ko - OPTICS._bf) / 2;
+    can.sensor_geometry.auxil.dob = (can.sensor_geometry.auxil.ko + can.structure.auxil.bf) / 2;
+    can.sensor_geometry.auxil.dof = (can.sensor_geometry.auxil.ko - can.structure.auxil.bf) / 2;
     can.sensor_geometry.auxil.sob = can.structure.state.p_incl' * OPTICS._sb;
     can.sensor_geometry.auxil.sof = can.structure.state.p_incl' * OPTICS._sf;
 
     # 2. update the matrices fs and fo
     OPTICS._cos_θ_azi_raa .= cosd.(Θ_AZI .- (can.sensor_geometry.state.vaa - can.sun_geometry.state.saa));
-    mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Co, _1_AZI');
-    mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._So, OPTICS._cos_θ_azi_raa');
-    OPTICS.fo .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(can.sensor_geometry.state.vza);
+    for i in eachindex(Θ_AZI)
+        view(OPTICS.fo,:,i) .= OPTICS._Co .+ OPTICS._So .* OPTICS._cos_θ_azi_raa[i];
+    end;
+    # mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Co, _1_AZI');
+    # mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._So, OPTICS._cos_θ_azi_raa');
+    OPTICS.fo ./= cosd(can.sensor_geometry.state.vza);
     OPTICS._abs_fo .= abs.(OPTICS.fo);
 
-    mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Cs, _1_AZI');
-    mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._Ss, _COS_Θ_AZI');
-    OPTICS.fs .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(can.sun_geometry.state.sza);
-    OPTICS._abs_fs .= abs.(OPTICS.fs);
-
     OPTICS._fo_cos_θ_incl .= OPTICS.fo .* _COS²_Θ_INCL_AZI;
-    OPTICS._fs_cos_θ_incl .= OPTICS.fs .* _COS²_Θ_INCL_AZI;
-    OPTICS._fs_fo .= OPTICS.fs .* OPTICS.fo;
+    OPTICS._fs_cos_θ_incl .= can.sun_geometry.auxil.fs .* _COS²_Θ_INCL_AZI;
+    OPTICS._fs_fo .= can.sun_geometry.auxil.fs .* OPTICS.fo;
     OPTICS._abs_fs_fo .= abs.(OPTICS._fs_fo);
 
     # 3. update the viewing fraction ps, po, pso, and p_sunlit
     can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
-    can.sun_geometry.auxil.ps = exp.(can.sun_geometry.auxil.ks .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
-    for i in 1:DIM_LAYER
-        _ilai = can.structure.auxil.ci * can.structure.state.δlai[i];
-        can.sun_geometry.auxil.p_sunlit[i] = 1 / (can.sun_geometry.auxil.ks * _ilai) *
-                                             (exp(can.sun_geometry.auxil.ks * can.structure.auxil.ci * can.structure.state.lai * can.structure.auxil.x_bnds[i]) -
-                                              exp(can.sun_geometry.auxil.ks * can.structure.auxil.ci * can.structure.state.lai * can.structure.auxil.x_bnds[i+1]));
-    end;
 
     _dso = sqrt( tand(can.sun_geometry.state.sza) ^ 2 +
                  tand(can.sensor_geometry.state.vza) ^ 2 -

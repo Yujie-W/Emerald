@@ -62,11 +62,33 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     p_sunlit::Vector{FT}
     "Probability of directly viewing a leaf in solar direction at different layer boundaries"
     ps::Vector{FT}
+
+    # Extinction coefficient related (for different inclination angles)
+    "cos(inclination) * cos(sza) at different inclination angles"
+    Cs_incl::Vector{FT}
+    "sin(inclination) * sin(sza) at different inclination angles"
+    Ss_incl::Vector{FT}
+    "Solar beam extinction coefficient weights at different inclination angles"
+    ks_incl::Vector{FT}
+    "Cs >= Ss ? FT(π) : acos(-Cs/Ss)"
+    βs_incl::Vector{FT}
+
+    # Matrix used for solar radiation
+    "Conversion factor fs for angles from solar at different inclination and azimuth angles"
+    fs::Matrix{FT}
+    "Absolute value of fs"
+    fs_abs::Matrix{FT}
 end;
 
 SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT}(
             p_sunlit = zeros(FT, config.DIM_LAYER),
-            ps = zeros(FT, config.DIM_LAYER + 1)
+            ps       = zeros(FT, config.DIM_LAYER + 1),
+            Cs_incl  = zeros(FT, config.DIM_INCL),
+            Ss_incl  = zeros(FT, config.DIM_INCL),
+            ks_incl  = zeros(FT, config.DIM_INCL),
+            βs_incl  = zeros(FT, config.DIM_INCL),
+            fs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_abs   = zeros(FT, config.DIM_INCL, config.DIM_AZI),
 );
 
 

@@ -28,25 +28,26 @@ Return the extinction coefficient for direct radiation (when sza provided) and d
 function extinction_coefficient end;
 
 extinction_coefficient(sza::FT, lia::FT) where {FT} = (
-    _π = FT(pi);
+    Cs = cosd(lia) * cosd(sza);
+    Ss = sind(lia) * sind(sza);
+    βs = (Cs >= Ss ? FT(π) : acos(-Cs/Ss));
 
-    _Cs = cosd(lia) * cosd(sza);
-    _Ss = sind(lia) * sind(sza);
-    _βs = (_Cs >= _Ss ? _π : acos(-_Cs/_Ss));
-
-    return 2/_π / cosd(sza) * (_Cs * (_βs - _π/2) + _Ss * sin(_βs))
+    return 2 / FT(π) / cosd(sza) * (Cs * (βs - FT(π) / 2) + Ss * sin(βs))
 );
 
 extinction_coefficient(lia::FT) where {FT} = (
     # compute the mean extinction coefficient for diffuse solar radiation from 18 angles
-    _kd::FT = 0;
-    for _sza in 0:5:89
-        _kd += extinction_coefficient(_sza + FT(2.5), lia) * sind(_sza);
+    kd::FT = 0;
+    for sza in 0:5:89
+        kd += extinction_coefficient(sza + FT(2.5), lia) * sind(sza);
     end;
 
-    return _kd / 18
+    return kd / 18
 );
 
+
+
+# this will be removed in the near future
 extinction_coefficient(sza::FT, vza::FT, raa::FT, lia::FT) where {FT} = (
     _π = FT(pi);
 
@@ -89,34 +90,3 @@ extinction_coefficient(sza::FT, vza::FT, raa::FT, lia::FT) where {FT} = (
 
     return _ks, _ko, _sb, _sf, _Co, _Cs, _So, _Ss
 );
-
-"""
-
-    extinction_coefficient(sza::FT, vza::FT, raa::FT, lia::FT) where {FT}
-
-Return the extinction and scattering coefficients (extinction coefficients from solar and viewing directions, and scattering coefficients for backward and forward directions, and some sin and cos
-    products: _Co, _Cs, _So, _Ss), given
-- `sza` Solar zenith angle in `°`
-- `vza` Viewing zenith angle in `°`
-- `raa` Relative azimuth angle in `°`
-- `lia` Leaf inclination angle in `°`
-
-"""
-function sun_extinction_coefficient(sza::FT, lia::FT) where {FT}
-    Cs = cosd(lia) * cosd(sza);
-    Ss = sind(lia) * sind(sza);
-    βs = (Cs >= Ss ? FT(π) : acos(-Cs/Ss));
-    ks = 2 / FT(π) / cosd(sza) * (Cs * (βs - FT(π)/2) + Ss * sin(βs));
-
-    return ks, Cs, Ss
-end;
-
-
-function sensor_extinction_coefficient(vza::FT, lia::FT) where {FT}
-    Co = cosd(lia) * cosd(vza);
-    So = sind(lia) * sind(vza);
-    βo = (Co >= So ? FT(π) : acos(-Co/So));
-    ko = 2 / FT(π) / cosd(vza) * (Co * (βo - FT(π) / 2) + So * sin(βo));
-
-    return ko, Co, So
-end;
