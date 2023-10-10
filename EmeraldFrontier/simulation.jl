@@ -245,7 +245,7 @@ simulation!(config::SPACConfiguration{FT},
     # test if the integrated water flow is conserved
     #=
     if DEBUG
-        _sum_leaf_out = [_clayer.∫∂w∂t_out for _clayer in spac.LEAVES]' * spac.CANOPY.δlai;
+        _sum_leaf_out = [_clayer.∫∂w∂t_out for _clayer in spac.LEAVES]' * spac.CANOPY.structure.state.δlai;
         @info "Debugging" _sum_leaf_out spac.METEO.rain;
     end;
     =#

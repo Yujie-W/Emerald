@@ -446,14 +446,12 @@ Base.@kwdef mutable struct MultiLayerCanopy{FT<:AbstractFloat}
     "Sun geometry information"
     sun_geometry::SunGeometry{FT}
     "Canopy structure"
-    structure::CanopyStructure{FT} = CanopyStructure{FT}()
+    structure::CanopyStructure{FT}
 
 
 
 
     # General model information
-    "Hot spot parameter"
-    HOT_SPOT::FT = 0.05
 
     # Embedded structures
     "Canopy optical properties"
@@ -464,38 +462,17 @@ Base.@kwdef mutable struct MultiLayerCanopy{FT<:AbstractFloat}
     # Geometry information
     "Inclination angle distribution"
     P_INCL::Vector{FT}
-    "Clumping structure a"
-    Ω_A::FT = 1
-    "Clumping structure b"
-    Ω_B::FT = 0
-
-    # Prognostic variables
-    "Clumping index"
-    ci::FT = 1
-    "Leaf area index"
-    lai::FT
-    "Leaf area index distribution"
-    δlai::Vector{FT}
-
-    # Cache variables
-    "Cache for level boundary locations"
-    _x_bnds::Vector{FT}
 end;
 
 MultiLayerCanopy(config::SPACConfiguration{FT}) where {FT} = (
-    (; DIM_INCL, DIM_LAYER) = config;
-
-    _lai = 3;
-    _δlai = _lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
+    (; DIM_INCL) = config;
 
     return MultiLayerCanopy{FT}(
                 sensor_geometry = SensorGeometry(config),
                 sun_geometry    = SunGeometry(config),
+                structure       = CanopyStructure(config),
                 OPTICS          = HyperspectralMLCanopyOpticalProperty(config),
                 RADIATION       = HyperspectralMLCanopyRadiationProfile(config),
                 P_INCL          = ones(FT, DIM_INCL) ./ DIM_INCL,
-                lai             = _lai,
-                δlai            = _δlai,
-                _x_bnds         = ([0; [sum(_δlai[1:i]) for i in 1:DIM_LAYER]] ./ -_lai),
     )
 );

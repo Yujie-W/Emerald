@@ -419,7 +419,7 @@ find_peak(f::Function, ms::ReduceStepMethodND{FT}, tol::SolutionToleranceND{FT};
             x_temp .= x_targ;
 
             # 2. decrease the x by Δx till tar_y is bigger
-            while count_inc==0
+            while count_inc == 0
                 x_temp[ith] = x_targ[ith] - Δ_oper[ith];
                 x_temp[ith] < x_mins[ith] ? break : nothing;
                 new_y = f(x_temp);
@@ -430,7 +430,7 @@ find_peak(f::Function, ms::ReduceStepMethodND{FT}, tol::SolutionToleranceND{FT};
         end;
 
         # 3. if no update, then 10% the Δx
-        if count_all==0
+        if count_all == 0
             for ith in 1:Nxs
                 Δ_oper[ith] > tol.tol[ith] ? (Δ_oper[ith] /= 10) : (Δjd[ith] = true);
             end;

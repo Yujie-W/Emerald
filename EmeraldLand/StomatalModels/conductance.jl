@@ -177,7 +177,7 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT} = (
 
     # if lai = 0 or roots are not connected, do nothing
     # TODO: redo this later to foce dgdt to 0
-    if CANOPY.lai == 0 || !spac._root_connection
+    if CANOPY.structure.state.lai == 0 || !spac._root_connection
         return nothing
     end;
 
@@ -225,7 +225,7 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # if lai = 0 or roots are not connected, do nothing
-    if CANOPY.lai == 0 || !spac._root_connection
+    if CANOPY.structure.state.lai == 0 || !spac._root_connection
         return nothing
     end;
 
@@ -268,7 +268,7 @@ function stomatal_conductance_profile! end;
 stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
-    if CANOPY.lai == 0
+    if CANOPY.structure.state.lai == 0
         return nothing
     end;
 

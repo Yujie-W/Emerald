@@ -15,9 +15,7 @@ Update the clumping index, given
 
 """
 function clumping_index!(can::MultiLayerCanopy{FT}) where {FT}
-    (; Ω_A, Ω_B) = can;
-
-    can.ci = Ω_A + Ω_B * (1 - cosd(can.sun_geometry.state.sza));
+    can.structure.auxil.ci = can.structure.state.Ω_A + can.structure.state.Ω_B * (1 - cosd(can.sun_geometry.state.sza));
 
     return nothing
 end;

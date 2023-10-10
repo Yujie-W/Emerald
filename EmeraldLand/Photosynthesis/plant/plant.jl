@@ -22,7 +22,7 @@ Updates leaf photosynthetic rates for SPAC, given
 function plant_photosynthesis!(spac::MultiLayerSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT}
     (; AIRS, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
-    if CANOPY.lai == 0
+    if CANOPY.structure.state.lai == 0
         return nothing
     end;
 

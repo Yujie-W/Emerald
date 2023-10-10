@@ -54,7 +54,7 @@ function leaf_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
         leaf.energy.auxil.∂e∂t -= 2 * g_be * CP_D_MOL(FT) * (leaf.energy.auxil.t - air.auxil.t) * leaf.xylem.state.area;
 
         # add the net radiation energy to the leaf (to total leaf area)
-        leaf.energy.auxil.∂e∂t += (CANOPY.RADIATION.r_net_sw[N+1-i] + CANOPY.RADIATION.r_net_lw[N+1-i]) / CANOPY.δlai[N+1-i] * leaf.xylem.state.area;
+        leaf.energy.auxil.∂e∂t += (CANOPY.RADIATION.r_net_sw[N+1-i] + CANOPY.RADIATION.r_net_lw[N+1-i]) / CANOPY.structure.state.δlai[N+1-i] * leaf.xylem.state.area;
     end;
 
     return nothing

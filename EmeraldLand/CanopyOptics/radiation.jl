@@ -52,7 +52,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
     (; DIM_LAYER, SPECTRA) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 
-    if can.lai == 0
+    if can.structure.state.lai == 0
         for i in 1:(DIM_LAYER+1)
             RADIATION.e_direct[:,i] .= rad.e_direct;
             RADIATION.e_diffuse_down[:,i] .= rad.e_diffuse;
@@ -133,7 +133,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         _e_v_i  .= can.sensor_geometry.auxil.po[i] .* _dob_i .* _e_d_i;
         _e_v_i .+= can.sensor_geometry.auxil.po[i] .* _dof_i .* _e_u_i;
         _e_v_i .+= can.sensor_geometry.auxil.pso[i] .* _so__i .* rad.e_direct;
-        _e_v_i .*= can.δlai[i] * can.ci;
+        _e_v_i .*= can.structure.state.δlai[i] * can.structure.auxil.ci;
     end;
     RADIATION.e_v[:,end] .= can.sensor_geometry.auxil.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
 
@@ -145,8 +145,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
 
     # 4. compute net absorption for leaves and soil
     for i in 1:DIM_LAYER
-        _Σ_shaded = view(RADIATION.e_net_diffuse,:,i)' * SPECTRA.ΔΛ / 1000 / can.δlai[i];
-        _Σ_sunlit = view(RADIATION.e_net_direct ,:,i)' * SPECTRA.ΔΛ / 1000 / can.δlai[i];
+        _Σ_shaded = view(RADIATION.e_net_diffuse,:,i)' * SPECTRA.ΔΛ / 1000 / can.structure.state.δlai[i];
+        _Σ_sunlit = view(RADIATION.e_net_direct ,:,i)' * SPECTRA.ΔΛ / 1000 / can.structure.state.δlai[i];
         RADIATION.r_net_sw_shaded[i] = _Σ_shaded;
         RADIATION.r_net_sw_sunlit[i] = _Σ_sunlit / can.sun_geometry.auxil.p_sunlit[i] + _Σ_shaded;
         RADIATION.r_net_sw[i] = _Σ_shaded * (1 - can.sun_geometry.auxil.p_sunlit[i]) + _Σ_sunlit * can.sun_geometry.auxil.p_sunlit[i];
@@ -172,8 +172,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_diffuse,SPECTRA.IΛ_PAR,i)) .* 1000;
         RADIATION._par_sunlit  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.sun_geometry.auxil.p_sunlit[i];
-        RADIATION._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_diffuse,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.δlai[i];
-        RADIATION._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.δlai[i] ./ can.sun_geometry.auxil.p_sunlit[i];
+        RADIATION._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_diffuse,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.structure.state.δlai[i];
+        RADIATION._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.structure.state.δlai[i] ./ can.sun_geometry.auxil.p_sunlit[i];
         RADIATION._ppar_shaded .= RADIATION._apar_shaded .* _α_apar;
         RADIATION._ppar_sunlit .= RADIATION._apar_sunlit .* _α_apar;
 
@@ -244,7 +244,7 @@ longwave_radiation!(can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT
 
     _nlayers = length(leaves);
 
-    if can.lai == 0
+    if can.structure.state.lai == 0
         _r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * soil.auxil.t ^ 4;
         RADIATION.r_lw .= 0;
         RADIATION.r_net_lw .= 0;

@@ -39,9 +39,9 @@ Updates canopy optical properties (extinction coefficients for direct and diffus
 """
 canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
     (; DIM_LAYER, Θ_AZI, _1_AZI, _COS_Θ_AZI, _COS²_Θ_INCL, _COS²_Θ_INCL_AZI) = config;
-    (; HOT_SPOT, OPTICS, P_INCL) = can;
+    (; OPTICS, P_INCL) = can;
 
-    if can.lai == 0
+    if can.structure.state.lai == 0
         return nothing
     end;
 
@@ -79,12 +79,13 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     OPTICS._abs_fs_fo .= abs.(OPTICS._fs_fo);
 
     # 3. update the viewing fraction ps, po, pso, and p_sunlit
-    can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.ci * can.lai .* can._x_bnds);
-    can.sun_geometry.auxil.ps = exp.(can.sun_geometry.auxil.ks .* can.ci * can.lai .* can._x_bnds);
+    can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
+    can.sun_geometry.auxil.ps = exp.(can.sun_geometry.auxil.ks .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
     for i in 1:DIM_LAYER
-        _ilai = can.ci * can.δlai[i];
+        _ilai = can.structure.auxil.ci * can.structure.state.δlai[i];
         can.sun_geometry.auxil.p_sunlit[i] = 1 / (can.sun_geometry.auxil.ks * _ilai) *
-                                             (exp(can.sun_geometry.auxil.ks * can.ci * can.lai * can._x_bnds[i]) - exp(can.sun_geometry.auxil.ks * can.ci * can.lai * can._x_bnds[i+1]));
+                                             (exp(can.sun_geometry.auxil.ks * can.structure.auxil.ci * can.structure.state.lai * can.structure.auxil.x_bnds[i]) -
+                                              exp(can.sun_geometry.auxil.ks * can.structure.auxil.ci * can.structure.state.lai * can.structure.auxil.x_bnds[i+1]));
     end;
 
     _dso = sqrt( tand(can.sun_geometry.state.sza) ^ 2 +
@@ -93,8 +94,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     @inline _pdf(x::FT) where {FT} = (
         _Σk = can.sensor_geometry.auxil.ko + can.sun_geometry.auxil.ks;
         _Πk = can.sensor_geometry.auxil.ko * can.sun_geometry.auxil.ks;
-        _cl = can.ci * can.lai;
-        _α  = _dso / HOT_SPOT * 2 / _Σk;
+        _cl = can.structure.auxil.ci * can.structure.state.lai;
+        _α  = _dso / can.structure.state.hot_spot * 2 / _Σk;
 
         if _dso == 0
             return exp( (_Σk - sqrt(_Πk)) * _cl * x )
@@ -103,8 +104,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
         return exp( _Σk * _cl * x + sqrt(_Πk) * _cl / _α * (1 - exp(_α * x)) )
     );
 
-    for i in eachindex(can._x_bnds)
-        can.sensor_geometry.auxil.pso[i] = quadgk(_pdf, can._x_bnds[i] - FT(1)/DIM_LAYER, can._x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
+    for i in eachindex(can.structure.auxil.x_bnds)
+        can.sensor_geometry.auxil.pso[i] = quadgk(_pdf, can.structure.auxil.x_bnds[i] - FT(1)/DIM_LAYER, can.structure.auxil.x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
     end;
 
     return nothing
@@ -141,7 +142,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     (; OPTICS) = can;
     @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";
 
-    if can.lai == 0
+    if can.structure.state.lai == 0
         OPTICS.ρ_dd  .= 0;
         OPTICS.ρ_lw  .= 0;
         OPTICS.ρ_sd  .= 0;
@@ -168,11 +169,11 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     end;
 
     # 2. update the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    OPTICS._τ_ss .= exp.(-1 .* can.sun_geometry.auxil.ks .* can.δlai .* can.ci);
-    OPTICS._τ_dd .= exp.(-1 .* (1 .- OPTICS.σ_ddf) .* can.δlai' .* can.ci);
-    OPTICS._τ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdf .* can.δlai' .* can.ci);
-    OPTICS._ρ_dd .= 1 .- exp.(-1 .* OPTICS.σ_ddb .* can.δlai' .* can.ci);
-    OPTICS._ρ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdb .* can.δlai' .* can.ci);
+    OPTICS._τ_ss .= exp.(-1 .* can.sun_geometry.auxil.ks .* can.structure.state.δlai .* can.structure.auxil.ci);
+    OPTICS._τ_dd .= exp.(-1 .* (1 .- OPTICS.σ_ddf) .* can.structure.state.δlai' .* can.structure.auxil.ci);
+    OPTICS._τ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdf .* can.structure.state.δlai' .* can.structure.auxil.ci);
+    OPTICS._ρ_dd .= 1 .- exp.(-1 .* OPTICS.σ_ddb .* can.structure.state.δlai' .* can.structure.auxil.ci);
+    OPTICS._ρ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdb .* can.structure.state.δlai' .* can.structure.auxil.ci);
 
     # 3. update the effective reflectance per layer
     OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
@@ -201,7 +202,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
 
     # 4. compute longwave effective emissivity, reflectance, and transmittance (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
     for i in 1:DIM_LAYER
-        _ilai = can.δlai[i] * can.ci;
+        _ilai = can.structure.state.δlai[i] * can.structure.auxil.ci;
         _σ_lw_b = can.sun_geometry.auxil.ddb * leaves[i].bio.auxil.ρ_LW + can.sun_geometry.auxil.ddf * leaves[i].bio.auxil.τ_LW;
         _σ_lw_f = can.sun_geometry.auxil.ddf * leaves[i].bio.auxil.ρ_LW + can.sun_geometry.auxil.ddb * leaves[i].bio.auxil.τ_LW;
         OPTICS._τ_lw[i] = exp(-1 * (1 - _σ_lw_f) * _ilai);

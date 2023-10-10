@@ -99,7 +99,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
 
     # make sure leaf temperatures do not change more than 1 K per time step
     _δt_7 = _δt_6;
-    if ENABLE_ENERGY_BUDGET && spac.CANOPY.lai > 0
+    if ENABLE_ENERGY_BUDGET && spac.CANOPY.structure.state.lai > 0
         for leaf in LEAVES
             _∂T∂t = leaf.energy.auxil.∂e∂t / (leaf.xylem.state.cp * leaf.bio.state.lma * 10 + CP_L_MOL(FT) * leaf.capacitor.state.v_storage);
             _δt_7 = min(1 / abs(_∂T∂t), _δt_7);
@@ -115,7 +115,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
 
     # make sure leaf stomatal conductances do not change more than 0.06 mol m⁻² s⁻¹
     _δt_8 = _δt_7;
-    if spac.CANOPY.lai > 0
+    if spac.CANOPY.structure.state.lai > 0
         for leaf in LEAVES
             for _∂g∂t in leaf.flux.auxil.∂g∂t_sunlit
                 _δt_8 = min(FT(0.06) / abs(_∂g∂t), _δt_8);
@@ -208,7 +208,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
 
         # if total count exceeds 100
         if (_count > 1000) && (_δt < 0.01) && (_t_res > 10)
-            @info "Number of steppers exceeds 1000, breaking..." spac.LATITUDE spac.LONGITUDE spac.CANOPY.lai _t_res _δts;
+            @info "Number of steppers exceeds 1000, breaking..." spac.LATITUDE spac.LONGITUDE spac.CANOPY.structure.state.lai _t_res _δts;
             break;
         end;
     end;

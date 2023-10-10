@@ -156,16 +156,16 @@ update!(config::SPACConfiguration{FT},
 
     # update LAI and Vcmax (with scaling factor)
     if !isnothing(lai)
-        CANOPY.lai = lai;
-        CANOPY.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
-        CANOPY._x_bnds = (lai ==0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(CANOPY.δlai[1:i]) for i in 1:DIM_LAYER]] ./ -lai));
+        CANOPY.structure.state.lai = lai;
+        CANOPY.structure.state.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
+        CANOPY.structure.auxil.x_bnds = (lai == 0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(CANOPY.structure.state.δlai[1:i]) for i in 1:DIM_LAYER]] ./ -lai));
         for i in 1:DIM_LAYER
-            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.structure.state.δlai[i];
         end;
 
         # make sure leaf area index setup and energy are correct
         for i in eachindex(LEAVES)
-            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.structure.state.δlai[i];
             initialize_struct!(LEAVES[i]);
         end;
     end;
@@ -174,7 +174,7 @@ update!(config::SPACConfiguration{FT},
     end;
     if !isnothing(vcmax) || !isnothing(lai)
         for i in 2:DIM_LAYER
-            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(CANOPY.δlai[1:i-1]));
+            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(CANOPY.structure.state.δlai[1:i-1]));
             LEAVES[i].photosystem.state.v_cmax25 = LEAVES[1].photosystem.state.v_cmax25 * _scaling;
             LEAVES[i].photosystem.state.j_max25 = LEAVES[1].photosystem.state.v_cmax25 * 1.67 * _scaling;
             LEAVES[i].photosystem.state.r_d25 = LEAVES[1].photosystem.state.v_cmax25 * 0.015 * _scaling;
@@ -184,9 +184,9 @@ update!(config::SPACConfiguration{FT},
 
     # update CI
     if !isnothing(ci)
-        CANOPY.ci = ci;
-        CANOPY.Ω_A = ci;
-        CANOPY.Ω_B = 0;
+        CANOPY.structure.auxil.ci = ci;
+        CANOPY.structure.state.Ω_A = ci;
+        CANOPY.structure.state.Ω_B = 0;
     end;
 
     # update Vcmax and Jmax TD
@@ -219,7 +219,7 @@ update!(config::SPACConfiguration{FT},
             _ilayer.HS.K_X = _ilayer.HS.AREA / TRUNK.HS.AREA * _ks[3] * _ilayer.HS.L / _ilayer.HS.AREA;
         end;
         for _ilayer in LEAVES
-            _ilayer.HS.K_SLA = _ks[4] / (CANOPY.lai * SOIL_BULK.state.area);
+            _ilayer.HS.K_SLA = _ks[4] / (CANOPY.structure.state.lai * SOIL_BULK.state.area);
         end;
     end;
 
@@ -249,7 +249,7 @@ update!(config::SPACConfiguration{FT},
 
         # make sure leaf area index setup and energy are correct
         for i in eachindex(LEAVES)
-            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.structure.state.δlai[i];
             initialize_struct!(LEAVES[i]);
         end;
     end;

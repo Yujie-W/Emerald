@@ -48,7 +48,7 @@ find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}
         end;
 
     # if y_min is 0
-    elseif _y_min==0
+    elseif _y_min == 0
         _solution = _x_min;
 
     # if y_min and y_max are on different side, or one of them is 0
@@ -76,10 +76,10 @@ find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}
                 _y_max = _y_mid;
 
             # if y_mid = 0 and one of y_min and y_max is 0
-            elseif (_y_min==0) && (_y_mid==0)
+            elseif (_y_min == 0) && (_y_mid == 0)
                 _x_min = _x_mid;
                 _y_min = _y_mid;
-            elseif (_y_max==0) && (_y_mid==0)
+            elseif (_y_max == 0) && (_y_mid == 0)
                 _x_max = _x_mid;
                 _y_max = _y_mid;
 
@@ -126,7 +126,7 @@ find_zero(f::Function, ms::NewtonBisectionMethod{FT}, tol::Union{ResidualToleran
         end;
 
     # if y_min is 0
-    elseif _y_min==0
+    elseif _y_min == 0
         _solution = _x_min;
 
     # if y_min and y_max are on different side, or one of them is 0
@@ -154,10 +154,10 @@ find_zero(f::Function, ms::NewtonBisectionMethod{FT}, tol::Union{ResidualToleran
                 _y_max = _y_ntr;
 
             # if y_ntr = 0 and one of y_min and y_max is 0
-            elseif (_y_min==0) && (_y_ntr==0)
+            elseif (_y_min == 0) && (_y_ntr == 0)
                 _x_min = _x_ntr;
                 _y_min = _y_ntr;
-            elseif (_y_max==0) && (_y_ntr==0)
+            elseif (_y_max == 0) && (_y_ntr == 0)
                 _x_max = _x_ntr;
                 _y_max = _y_ntr;
 

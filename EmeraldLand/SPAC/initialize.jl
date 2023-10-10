@@ -48,7 +48,7 @@ initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} 
 
     # make sure leaf area index setup and energy are correct
     for i in eachindex(LEAVES)
-        LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+        LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.structure.state.δlai[i];
         initialize_struct!(LEAVES[i]);
     end;
 
