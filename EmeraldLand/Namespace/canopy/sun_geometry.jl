@@ -78,17 +78,20 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     fs::Matrix{FT}
     "Absolute value of fs"
     fs_abs::Matrix{FT}
+    "fs * cos Θ_INCL"
+    fs_cos²_incl::Matrix{FT}
 end;
 
 SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT}(
-            p_sunlit = zeros(FT, config.DIM_LAYER),
-            ps       = zeros(FT, config.DIM_LAYER + 1),
-            Cs_incl  = zeros(FT, config.DIM_INCL),
-            Ss_incl  = zeros(FT, config.DIM_INCL),
-            ks_incl  = zeros(FT, config.DIM_INCL),
-            βs_incl  = zeros(FT, config.DIM_INCL),
-            fs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fs_abs   = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            p_sunlit     = zeros(FT, config.DIM_LAYER),
+            ps           = zeros(FT, config.DIM_LAYER + 1),
+            Cs_incl      = zeros(FT, config.DIM_INCL),
+            Ss_incl      = zeros(FT, config.DIM_INCL),
+            ks_incl      = zeros(FT, config.DIM_INCL),
+            βs_incl      = zeros(FT, config.DIM_INCL),
+            fs           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
 );
 
 

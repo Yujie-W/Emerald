@@ -3,7 +3,7 @@
 # Changes to this structure
 # General
 #     2022-Jun-07: add CanopyOptics struct (will be a field for canopy structure)
-#     2022-Jun-07: add more fields: fo, fs, po, ps, pso, _Co, _Cs, _So, _Ss, _abs_fo, _abs_fs_fo, _cos_θ_azi_raa, _fs_fo, _tmp_mat_incl_azi_1, _tmp_mat_incl_azi_2
+#     2022-Jun-07: add more fields: fo, fs, po, ps, pso
 #     2022-Jun-08: add more fields: ρ_dd, ρ_sd, σ_ddb, σ_ddf, σ_dob, σ_dof, σ_sdb, σ_sdf, σ_so, τ_dd, τ_sd, _tmp_vec_λ, _ρ_dd, _ρ_sd, _τ_dd, _τ_sd
 #     2022-Jun-09: rename variables to be more descriptive
 #     2022-Jun-10: add more fields: p_sunlit, ϵ, ρ_lw, τ_lw, _mat_down, _mat_down, _tmp_vec_azi, _ρ_lw, _τ_lw
@@ -30,8 +30,6 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloat}
     # Diagnostic variables
-    "Conversion factor fo for angle towards observer at different inclination and azimuth angles"
-    fo::Matrix{FT}
     "Effective emissivity for different layers"
     ϵ::Vector{FT}
     "Effective reflectance for diffuse->diffuse"
@@ -62,32 +60,10 @@ Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloa
     τ_sd::Matrix{FT}
 
     # Cache variables
-    "cos(inclination) * cos(vza) at different inclination angles"
-    _Co::Vector{FT}
-    "sin(inclination) * sin(vza) at different inclination angles"
-    _So::Vector{FT}
-    "abs of fo"
-    _abs_fo::Matrix{FT}
-    "abs of fs * fo"
-    _abs_fs_fo::Matrix{FT}
-    "Cosine of Θ_AZI - raa"
-    _cos_θ_azi_raa::Vector{FT}
-    "fo * cos Θ_INCL"
-    _fo_cos_θ_incl::Matrix{FT}
-    "fs * cos Θ_INCL"
-    _fs_cos_θ_incl::Matrix{FT}
-    "fs * fo"
-    _fs_fo::Matrix{FT}
-    "Outgoing beam extinction coefficient weights at different inclination angles"
-    _ko::Vector{FT}
     "Upwelling matrix for SIF excitation"
     _mat⁺::Matrix{FT}
     "Downwelling matrix for SIF excitation"
     _mat⁻::Matrix{FT}
-    "Backward scattering coefficients at different inclination angles"
-    _sb::Vector{FT}
-    "Forward scattering coefficients at different inclination angles"
-    _sf::Vector{FT}
     "Temporary cache used for matrix adding up purpose (DIM_INCL * DIM_AZI)"
     _tmp_mat_incl_azi_1::Matrix{FT}
     "Temporary cache used for matrix adding up purpose (DIM_INCL * DIM_AZI)"
@@ -136,7 +112,6 @@ HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} =
     (; DIM_AZI, DIM_INCL, DIM_LAYER, DIM_SIF, DIM_SIFE, DIM_WL) = config;
 
     return HyperspectralMLCanopyOpticalProperty{FT}(
-                fo                  = zeros(FT, DIM_INCL, DIM_AZI),
                 ϵ                   = zeros(FT, DIM_LAYER),
                 ρ_dd                = zeros(FT, DIM_WL, DIM_LAYER+1),
                 ρ_lw                = zeros(FT, DIM_LAYER+1),
@@ -151,19 +126,8 @@ HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} =
                 τ_dd                = zeros(FT, DIM_WL, DIM_LAYER),
                 τ_lw                = zeros(FT, DIM_LAYER),
                 τ_sd                = zeros(FT, DIM_WL, DIM_LAYER),
-                _Co                 = zeros(FT, DIM_INCL),
-                _So                 = zeros(FT, DIM_INCL),
-                _abs_fo             = zeros(FT, DIM_INCL, DIM_AZI),
-                _abs_fs_fo          = zeros(FT, DIM_INCL, DIM_AZI),
-                _cos_θ_azi_raa      = zeros(FT, DIM_AZI),
-                _fo_cos_θ_incl      = zeros(FT, DIM_INCL, DIM_AZI),
-                _fs_cos_θ_incl      = zeros(FT, DIM_INCL, DIM_AZI),
-                _fs_fo              = zeros(FT, DIM_INCL, DIM_AZI),
-                _ko                 = zeros(FT, DIM_INCL),
                 _mat⁺               = zeros(FT, DIM_SIF, DIM_SIFE),
                 _mat⁻               = zeros(FT, DIM_SIF, DIM_SIFE),
-                _sb                 = zeros(FT, DIM_INCL),
-                _sf                 = zeros(FT, DIM_INCL),
                 _tmp_mat_incl_azi_1 = zeros(FT, DIM_INCL, DIM_AZI),
                 _tmp_mat_incl_azi_2 = zeros(FT, DIM_INCL, DIM_AZI),
                 _tmp_vec_azi        = zeros(FT, DIM_AZI),
@@ -395,8 +359,8 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
 # General
 #     2022-Jun-02: migrate from CanopyLayers
 #     2022-Jun-02: rename Canopy4RT to MultiLayerCanopy
-#     2022-Jun-07: add cache variable _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI
-#     2022-Jun-07: remove cache variable _cos_θ_azi_raa, _vol_scatter
+#     2022-Jun-07: add cache variable _COS_Θ_INCL_AZI
+#     2022-Jun-07: remove cache variable _vol_scatter
 #     2022-Jun-09: add new field: APAR_CAR, RADIATION, WLSET
 #     2022-Jun-13: use Union instead of Abstract... for type definition
 #     2022-Jun-15: rename to HyperspectralMLCanopyOpticalProperty and HyperspectralMLCanopyRadiationProfile
@@ -408,7 +372,7 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
 #     2023-Jun-16: move field WLSET to SPACConfiguration
 #     2023-Jun-16: remove fields DIM_*
 #     2023-Jun-20: move LHA to SPACConfiguration
-#     2023-Jun-20: move fields Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _COS_Θ_INCL_AZI, and _COS²_Θ_INCL_AZI to SPACConfiguration
+#     2023-Jun-20: move fields Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _COS_Θ_INCL_AZI to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """

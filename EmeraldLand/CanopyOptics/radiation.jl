@@ -181,21 +181,21 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         _Σ_par_dif = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
         _Σ_par_dir = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
         RADIATION.par_shaded[i] = _Σ_par_dif;
-        RADIATION.par_sunlit[:,:,i] .= OPTICS._abs_fs_fo .* _Σ_par_dir;
+        RADIATION.par_sunlit[:,:,i] .= can.sensor_geometry.auxil.fo_fs_abs .* _Σ_par_dir;
         RADIATION.par_sunlit[:,:,i] .+= _Σ_par_dif;
 
         # APAR for leaves
         _Σ_apar_dif = RADIATION._apar_shaded' * SPECTRA.ΔΛ_PAR;
         _Σ_apar_dir = RADIATION._apar_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
         RADIATION.apar_shaded[i] = _Σ_apar_dif;
-        RADIATION.apar_sunlit[:,:,i] .= OPTICS._abs_fs_fo .* _Σ_apar_dir;
+        RADIATION.apar_sunlit[:,:,i] .= can.sensor_geometry.auxil.fo_fs_abs .* _Σ_apar_dir;
         RADIATION.apar_sunlit[:,:,i] .+= _Σ_apar_dif;
 
         # PPAR for leaves
         _Σ_ppar_dif = RADIATION._ppar_shaded' * SPECTRA.ΔΛ_PAR;
         _Σ_ppar_dir = RADIATION._ppar_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
         leaves[DIM_LAYER+1-i].flux.auxil.ppar_shaded  = _Σ_ppar_dif;
-        leaves[DIM_LAYER+1-i].flux.auxil.ppar_sunlit .= OPTICS._abs_fs_fo .* _Σ_ppar_dir .+ _Σ_ppar_dif;
+        leaves[DIM_LAYER+1-i].flux.auxil.ppar_sunlit .= can.sensor_geometry.auxil.fo_fs_abs .* _Σ_ppar_dir .+ _Σ_ppar_dif;
     end;
 
     return nothing

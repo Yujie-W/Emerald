@@ -15,7 +15,7 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(kd .>= 0);
     end;
 
-    @test "Canopy structure" begin
+    @testset "Canopy structure" begin
         config = NS.SPACConfiguration{Float64}();
         can = NS.MultiLayerCanopy(config);
         CO.canopy_structure!(config, can);
@@ -33,8 +33,23 @@ import Emerald.EmeraldLand.Namespace as NS
         @test can.sun_geometry.auxil.ddf >= 0;
         @test can.sun_geometry.auxil.sdb >= 0;
         @test can.sun_geometry.auxil.sdf >= 0;
+        @test 0 < can.structure.auxil.ci <= 1;
         @test all(0 .< can.sun_geometry.auxil.ps .<= 1);
         @test all(0 .< can.sun_geometry.auxil.p_sunlit .< 1);
+    end;
+
+    @testset "Canopy sensor geometry" begin
+        config = NS.SPACConfiguration{Float64}();
+        can = NS.MultiLayerCanopy(config);
+        CO.canopy_structure!(config, can);
+        CO.sun_geometry!(config, can);
+        CO.sensor_geometry!(config, can);
+
+        @test can.sensor_geometry.auxil.ko >= 0;
+        @test can.sensor_geometry.auxil.dob >= 0;
+        @test can.sensor_geometry.auxil.dof >= 0;
+        @test can.sensor_geometry.auxil.sob >= 0;
+        @test can.sensor_geometry.auxil.sof >= 0;
     end;
 
 end;

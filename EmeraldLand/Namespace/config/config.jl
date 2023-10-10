@@ -9,7 +9,7 @@
 #     2023-Apr-13: add fields Φ_PHOTON, RAD_SW_REF, and APAR_CAR
 #     2023-Jun-13: add trace gasses as fields
 #     2023-Jun-16: add fields WLSET, DIM_*
-#     2023-Jun-20: add fields LHA, Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI, α_CLM, α_FITTING, and MAT_ρ
+#     2023-Jun-20: add fields LHA, Θ_AZI, Θ_INCL, Θ_INCL_BNDS, _COS_Θ_INCL_AZI, α_CLM, α_FITTING, and MAT_ρ
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, and T_CLM
@@ -141,19 +141,15 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
 
     # Trace gas information
     "Trace gas air"
-    TRACE_AIR::TraceGasAir = TraceGasAir{FT}()
+    TRACE_AIR::TraceGasAir{FT} = TraceGasAir{FT}()
     "Trace gas CH₄"
-    TRACE_CH₄::TraceGasCH₄ = TraceGasCH₄{FT}()
+    TRACE_CH₄::TraceGasCH₄{FT} = TraceGasCH₄{FT}()
     "Trace gas CO₂"
-    TRACE_CO₂::TraceGasCO₂ = TraceGasCO₂{FT}()
+    TRACE_CO₂::TraceGasCO₂{FT} = TraceGasCO₂{FT}()
     "Trace gas H₂O"
-    TRACE_H₂O::TraceGasH₂O = TraceGasH₂O{FT}()
+    TRACE_H₂O::TraceGasH₂O{FT} = TraceGasH₂O{FT}()
     "Trace gas N₂"
-    TRACE_N₂::TraceGasN₂ = TraceGasN₂{FT}()
+    TRACE_N₂::TraceGasN₂{FT} = TraceGasN₂{FT}()
     "Trace gas O₂"
-    TRACE_O₂::TraceGasO₂ = TraceGasO₂{FT}()
-
-    # Cache variables
-    "Square of cosine of Θ_INCL at different azimuth angles"
-    _COS²_Θ_INCL_AZI::Matrix{FT} = (cosd.(Θ_INCL) .^ 2) * ones(FT, 1, DIM_AZI)
+    TRACE_O₂::TraceGasO₂{FT} = TraceGasO₂{FT}()
 end;

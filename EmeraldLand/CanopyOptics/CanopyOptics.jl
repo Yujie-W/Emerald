@@ -16,11 +16,10 @@ using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 # functions related to canopy geometry
 include("geometry/extinction.jl");
+include("geometry/sensor.jl");
 include("geometry/sun.jl");
 include("geometry/structure.jl");
 
-include("clumping.jl");
-include("coefficients.jl");
 include("fluorescence.jl");
 include("geometry.jl");
 include("inclination.jl");

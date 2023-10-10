@@ -62,11 +62,48 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     po::Vector{FT}
     "Bi-directional probability of directly viewing a leaf at different layer boundaries (solar->canopy->observer)"
     pso::Vector{FT}
+
+    # Extinction coefficient related (for different inclination angles)
+    "cos(inclination) * cos(vza) at different inclination angles"
+    Co_incl::Vector{FT}
+    "sin(inclination) * sin(vza) at different inclination angles"
+    So_incl::Vector{FT}
+    "Outgoing beam extinction coefficient weights at different inclination angles"
+    ko_incl::Vector{FT}
+    "Backward scattering coefficients at different inclination angles"
+    sb_incl::Vector{FT}
+    "Forward scattering coefficients at different inclination angles"
+    sf_incl::Vector{FT}
+    "Co >= So ? FT(π) : acos(-Co/So)"
+    βo_incl::Vector{FT}
+
+    # Matrix used for radiation to sensor
+    "Conversion factor fo for angle towards observer at different inclination and azimuth angles"
+    fo::Matrix{FT}
+    "Absolute value of fo"
+    fo_abs::Matrix{FT}
+    "fo * cos² Θ_INCL"
+    fo_cos²_incl::Matrix{FT}
+    "fo * fs"
+    fo_fs::Matrix{FT}
+    "Absolute value of fo * fs"
+    fo_fs_abs::Matrix{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
-            po  = Vector{FT}(undef, config.DIM_LAYER + 1),
-            pso = Vector{FT}(undef, config.DIM_LAYER + 1)
+            po           = zeros(FT, config.DIM_LAYER + 1),
+            pso          = zeros(FT, config.DIM_LAYER + 1),
+            Co_incl      = zeros(FT, config.DIM_INCL),
+            So_incl      = zeros(FT, config.DIM_INCL),
+            ko_incl      = zeros(FT, config.DIM_INCL),
+            sb_incl      = zeros(FT, config.DIM_INCL),
+            sf_incl      = zeros(FT, config.DIM_INCL),
+            βo_incl      = zeros(FT, config.DIM_INCL),
+            fo           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs        = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs_abs    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
 );
 
 

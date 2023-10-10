@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Oct-10: add function sun_geometry! (run per solar zenith angle)
+#     2023-Oct-10: compute clumping index as part of the sun geometry function
 #
 #######################################################################################################################################################################################################
 """
@@ -43,6 +44,12 @@ function sun_geometry!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT})
     end;
     can.sun_geometry.auxil.fs ./= cosd(can.sun_geometry.state.sza);
     can.sun_geometry.auxil.fs_abs .= abs.(can.sun_geometry.auxil.fs);
+    for i in eachindex(Θ_INCL)
+        view(can.sun_geometry.auxil.fs_cos²_incl,i,:) .= view(can.sun_geometry.auxil.fs,i,:) * cosd(Θ_INCL[i]) ^ 2;
+    end;
+
+    # update the clumping index
+    can.structure.auxil.ci = can.structure.state.Ω_A + can.structure.state.Ω_B * (1 - cosd(can.sun_geometry.state.sza));
 
     # compute the sunlit leaf fraction
     can.sun_geometry.auxil.ps = exp.(can.sun_geometry.auxil.ks .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);

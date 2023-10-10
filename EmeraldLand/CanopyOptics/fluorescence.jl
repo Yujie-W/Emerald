@@ -49,7 +49,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wh
 );
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}) where {FT} = (
-    (; DIM_LAYER, SPECTRA, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
+    (; DIM_LAYER, SPECTRA, Φ_PHOTON) = config;
     (; OPTICS, RADIATION) = can;
 
     if can.structure.state.lai == 0
@@ -155,14 +155,14 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         # compute the weights
         _sh_1_ = lidf_weight(_ϕ_shaded, 1);
         _sl_1_ = lidf_weight(_ϕ_sunlit, 1);
-        _sh_O_ = lidf_weight(_ϕ_shaded, OPTICS._abs_fo);
-        _sl_O_ = lidf_weight(_ϕ_sunlit, OPTICS._abs_fo);
+        _sh_O_ = lidf_weight(_ϕ_shaded, can.sensor_geometry.auxil.fo_abs);
+        _sl_O_ = lidf_weight(_ϕ_sunlit, can.sensor_geometry.auxil.fo_abs);
         _sl_S_ = lidf_weight(_ϕ_sunlit, can.sun_geometry.auxil.fs_abs);
-        _sh_oθ = lidf_weight(_ϕ_shaded, OPTICS._fo_cos_θ_incl);
-        _sl_oθ = lidf_weight(_ϕ_sunlit, OPTICS._fo_cos_θ_incl);
-        _sl_sθ = lidf_weight(_ϕ_sunlit, OPTICS._fs_cos_θ_incl);
-        _sl_SO = lidf_weight(_ϕ_sunlit, OPTICS._abs_fs_fo);
-        _sl_so = lidf_weight(_ϕ_sunlit, OPTICS._fs_fo);
+        _sh_oθ = lidf_weight(_ϕ_shaded, can.sensor_geometry.auxil.fo_cos²_incl);
+        _sl_oθ = lidf_weight(_ϕ_sunlit, can.sensor_geometry.auxil.fo_cos²_incl);
+        _sl_sθ = lidf_weight(_ϕ_sunlit, can.sun_geometry.auxil.fs_incl);
+        _sl_SO = lidf_weight(_ϕ_sunlit, can.sensor_geometry.auxil.fo_fs_abs);
+        _sl_so = lidf_weight(_ϕ_sunlit, can.sensor_geometry.auxil.fo_fs);
         _sh_θ² = lidf_weight(_ϕ_shaded, _COS²_Θ_INCL_AZI);
         _sl_θ² = lidf_weight(_ϕ_sunlit, _COS²_Θ_INCL_AZI);
 

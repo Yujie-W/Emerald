@@ -38,7 +38,7 @@ Updates canopy optical properties (extinction coefficients for direct and diffus
 
 """
 canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
-    (; DIM_LAYER, Θ_AZI, _COS²_Θ_INCL_AZI) = config;
+    (; DIM_LAYER) = config;
     (; OPTICS) = can;
 
     if can.structure.state.lai == 0
@@ -46,28 +46,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     end;
 
     # 1. update the canopy optical properties related to extinction and scattering coefficients
-    extinction_scattering_coefficients!(config, can);
-
-    can.sensor_geometry.auxil.ko = can.structure.state.p_incl' * OPTICS._ko;
-    can.sensor_geometry.auxil.dob = (can.sensor_geometry.auxil.ko + can.structure.auxil.bf) / 2;
-    can.sensor_geometry.auxil.dof = (can.sensor_geometry.auxil.ko - can.structure.auxil.bf) / 2;
-    can.sensor_geometry.auxil.sob = can.structure.state.p_incl' * OPTICS._sb;
-    can.sensor_geometry.auxil.sof = can.structure.state.p_incl' * OPTICS._sf;
 
     # 2. update the matrices fs and fo
-    OPTICS._cos_θ_azi_raa .= cosd.(Θ_AZI .- (can.sensor_geometry.state.vaa - can.sun_geometry.state.saa));
-    for i in eachindex(Θ_AZI)
-        view(OPTICS.fo,:,i) .= OPTICS._Co .+ OPTICS._So .* OPTICS._cos_θ_azi_raa[i];
-    end;
-    # mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Co, _1_AZI');
-    # mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._So, OPTICS._cos_θ_azi_raa');
-    OPTICS.fo ./= cosd(can.sensor_geometry.state.vza);
-    OPTICS._abs_fo .= abs.(OPTICS.fo);
-
-    OPTICS._fo_cos_θ_incl .= OPTICS.fo .* _COS²_Θ_INCL_AZI;
-    OPTICS._fs_cos_θ_incl .= can.sun_geometry.auxil.fs .* _COS²_Θ_INCL_AZI;
-    OPTICS._fs_fo .= can.sun_geometry.auxil.fs .* OPTICS.fo;
-    OPTICS._abs_fs_fo .= abs.(OPTICS._fs_fo);
 
     # 3. update the viewing fraction ps, po, pso, and p_sunlit
     can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
