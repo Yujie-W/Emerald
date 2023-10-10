@@ -34,7 +34,7 @@ to_nothing_or_uppercase(x::String) = (x == "" ? nothing : uppercase(x));
 
 
 # Judge functions for terminal IO
-is_gm_mt(x::String) = has_no_space(x) && x[end;:end;] in ["H", "D", "M", "Y"];
+is_gm_mt(x::String) = has_no_space(x) && x[end:end] in ["H", "D", "M", "Y"];
 
 is_nothing_or_all_letters(x::Union{Nothing,String}) = isnothing(x) || has_no_space(x);
 

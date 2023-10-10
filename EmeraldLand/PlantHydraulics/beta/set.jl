@@ -52,7 +52,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
     f_st = relative_surface_tension(leaf.t);
 
-    β.β = β_factor(β.FUNC, leaf.HS.VC, leaf.HS._p_element[end;] / f_st);
+    β.β = β_factor(β.FUNC, leaf.HS.VC, leaf.HS._p_element[end] / f_st);
 
     return nothing
 );
@@ -88,7 +88,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
     f_st = relative_surface_tension(leaf.t);
 
-    β.β = β_factor(β.FUNC, leaf.HS._p_element[end;] / f_st);
+    β.β = β_factor(β.FUNC, leaf.HS._p_element[end] / f_st);
 
     return nothing
 );

@@ -49,7 +49,7 @@ Return the spectrum value at target wavelength bin, given
 """
 read_spectrum(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
     @assert length(x) == length(y) "Dimensions of provided spectrum x and y must match!";
-    @assert x[1] <= target <= x[end;] "Target wavelength must be within the range provided spectum!";
+    @assert x[1] <= target <= x[end] "Target wavelength must be within the range provided spectum!";
 
     # iterate through the spectrum and find the index
     _ind = 0;

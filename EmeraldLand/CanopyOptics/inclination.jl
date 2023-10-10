@@ -71,7 +71,7 @@ Update the frequency of leaf inclination angles, given
 """
 function inclination_angles! end;
 
-inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = inclination_angles!(config, spac.CANOPY, spac.CANOPY.LIDF);
+inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = inclination_angles!(config, spac.CANOPY, spac.CANOPY.structure.state.LIDF);
 
 inclination_angles!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT} = (
     (; Θ_INCL_BNDS) = config;

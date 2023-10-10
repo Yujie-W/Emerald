@@ -49,7 +49,7 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
             set_flow_profile!(root.xylem, x);
             root_pressure_profile!(soil, root, junction);
 
-            return root.xylem.auxil.pressure[end;] - junction.auxil.pressure
+            return root.xylem.auxil.pressure[end] - junction.auxil.pressure
         );
 
         # 3. define method and solve for the root flow rate

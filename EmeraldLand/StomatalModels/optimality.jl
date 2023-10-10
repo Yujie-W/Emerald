@@ -188,7 +188,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-2 * A * HS._p_element[end;] + B) / _∂E∂P
+    return (-2 * A * HS._p_element[end] + B) / _∂E∂P
 );
 
 ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
@@ -261,7 +261,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-1 * A * HS._p_element[end;] * leaf.flux.auxil.a_n_shaded) / _∂E∂P
+    return (-1 * A * HS._p_element[end] * leaf.flux.auxil.a_n_shaded) / _∂E∂P
 );
 
 
@@ -307,7 +307,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-2 * A * HS._p_element[end;] + B) / _∂E∂P
+    return (-2 * A * HS._p_element[end] + B) / _∂E∂P
 );
 
 ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
@@ -380,7 +380,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-1 * A * HS._p_element[end;] * leaf.flux.auxil.a_n_sunlit[ind]) / _∂E∂P
+    return (-1 * A * HS._p_element[end] * leaf.flux.auxil.a_n_sunlit[ind]) / _∂E∂P
 );
 
 

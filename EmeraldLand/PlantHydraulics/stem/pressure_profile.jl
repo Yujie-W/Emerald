@@ -44,7 +44,7 @@ function stem_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
 
     stem_pressure_profile!(TRUNK, JUNCTION.auxil.pressure);
     for stem in BRANCHES
-        stem_pressure_profile!(stem, TRUNK.xylem.auxil.pressure[end;]);
+        stem_pressure_profile!(stem, TRUNK.xylem.auxil.pressure[end]);
     end;
 
     return nothing

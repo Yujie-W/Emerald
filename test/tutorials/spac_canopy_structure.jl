@@ -27,8 +27,8 @@ using Test;
     #     (1,0) gives planophile distribution,
     #     (0,-1) gives plagiophile distribution, and
     #     (0,1) gives extremophile distribution.
-    spac.CANOPY.LIDF.A = -0.35;
-    spac.CANOPY.LIDF.B = -0.15;
+    spac.CANOPY.structure.state.LIDF.A = -0.35;
+    spac.CANOPY.structure.state.LIDF.B = -0.15;
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
@@ -40,16 +40,16 @@ using Test;
     #     (1.172,2.770) gives planophile distribution,
     #     (3.326,3.326) gives plagiophile distribution, and
     #     (0.433,0.433) gives extremophile distribution.
-    spac.CANOPY.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();
-    spac.CANOPY.LIDF.A = 1;
-    spac.CANOPY.LIDF.B = 1;
+    spac.CANOPY.structure.state.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();
+    spac.CANOPY.structure.state.LIDF.A = 1;
+    spac.CANOPY.structure.state.LIDF.B = 1;
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
     # By default, we use VerhoefLIDF method to compute LIDF, but we also support the use of Beta function.
     # To use the BetaLIDF, you need to change the parameter to BetaLIDF first.
-    spac.CANOPY.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();
+    spac.CANOPY.structure.state.LIDF = EmeraldLand.Namespace.BetaLIDF{FT}();
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;

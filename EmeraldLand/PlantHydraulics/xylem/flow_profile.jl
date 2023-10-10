@@ -41,7 +41,7 @@ function flow_out end;
 
 flow_out(xylem::XylemHydraulics{FT}) where {FT} = flow_out(xylem.auxil);
 
-flow_out(x_aux::XylemHydraulicsAuxilNSS{FT}) where {FT} = x_aux.flow[end;];
+flow_out(x_aux::XylemHydraulicsAuxilNSS{FT}) where {FT} = x_aux.flow[end];
 
 flow_out(x_aux::XylemHydraulicsAuxilSS{FT}) where {FT} = x_aux.flow;
 
@@ -67,7 +67,7 @@ function set_flow_profile! end;
 set_flow_profile!(xylem::XylemHydraulics{FT}, flow::FT) where {FT} = set_flow_profile!(xylem.auxil, flow);
 
 set_flow_profile!(x_aux::XylemHydraulicsAuxilNSS{FT}, flow::FT) where {FT} = (
-    x_aux.flow[end;] = flow;
+    x_aux.flow[end] = flow;
     for i in length(x_aux.flow_buffer):-1:1
         x_aux.flow[i] = x_aux.flow[i+1] - x_aux.flow_buffer[i];
     end;

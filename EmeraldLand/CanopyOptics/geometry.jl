@@ -149,9 +149,9 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
         OPTICS.τ_lw  .= 0;
         OPTICS.τ_sd  .= 0;
         OPTICS._τ_ss .= 0;
-        OPTICS.ρ_dd[:,end;] .= sbulk.auxil.ρ_sw;
-        OPTICS.ρ_sd[:,end;] .= sbulk.auxil.ρ_sw;
-        OPTICS.ρ_lw[end;] = sbulk.auxil.ρ_lw;
+        OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
+        OPTICS.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
+        OPTICS.ρ_lw[end] = sbulk.auxil.ρ_lw;
 
         return nothing
     end;
@@ -175,8 +175,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     OPTICS._ρ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdb .* can.δlai' .* can.ci);
 
     # 3. update the effective reflectance per layer
-    OPTICS.ρ_dd[:,end;] .= sbulk.auxil.ρ_sw;
-    OPTICS.ρ_sd[:,end;] .= sbulk.auxil.ρ_sw;
+    OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
+    OPTICS.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
 
     for i in DIM_LAYER:-1:1
         _r_dd__ = view(OPTICS._ρ_dd,:,i  );    # reflectance without correction
@@ -210,7 +210,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     end;
 
     # 5. update the effective longwave reflectance and transmittance
-    OPTICS.ρ_lw[end;] = sbulk.auxil.ρ_lw;
+    OPTICS.ρ_lw[end] = sbulk.auxil.ρ_lw;
 
     for i in DIM_LAYER:-1:1
         _dnorm = 1 - OPTICS._ρ_lw[i] * OPTICS.ρ_lw[i+1];

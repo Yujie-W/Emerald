@@ -158,7 +158,7 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
         c_sta = leaf.capacitor.state;
         f_vis = relative_viscosity(leaf.energy.auxil.t);
         c_aux.p = capacitance_pressure(c_sta.pv, c_sta.v_storage / c_sta.v_max, leaf.energy.auxil.t);
-        c_aux.flow = (c_aux.p - x_aux.pressure[end;]) * c_sta.pv.k_refill / f_vis * c_sta.v_storage * x_sta.area;
+        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_sta.pv.k_refill / f_vis * c_sta.v_storage * x_sta.area;
     else
         c_aux.flow = 0;
     end;

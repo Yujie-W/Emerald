@@ -77,8 +77,8 @@ include("leaf/leaf.jl");
 
 
 # Canopy
-include("canopy/geometry.jl");
 include("canopy/sensor_geometry.jl");
+include("canopy/structure.jl");
 include("canopy/sun_geometry.jl");
 
 

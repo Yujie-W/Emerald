@@ -412,7 +412,6 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
 # General
 #     2022-Jun-02: migrate from CanopyLayers
 #     2022-Jun-02: rename Canopy4RT to MultiLayerCanopy
-#     2022-Jun-02: abstractize LIDF as a field
 #     2022-Jun-07: add cache variable _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI
 #     2022-Jun-07: remove cache variable _cos_θ_azi_raa, _vol_scatter
 #     2022-Jun-09: add new field: APAR_CAR, RADIATION, WLSET
@@ -446,6 +445,8 @@ Base.@kwdef mutable struct MultiLayerCanopy{FT<:AbstractFloat}
     sensor_geometry::SensorGeometry{FT}
     "Sun geometry information"
     sun_geometry::SunGeometry{FT}
+    "Canopy structure"
+    structure::CanopyStructure{FT} = CanopyStructure{FT}()
 
 
 
@@ -455,8 +456,6 @@ Base.@kwdef mutable struct MultiLayerCanopy{FT<:AbstractFloat}
     HOT_SPOT::FT = 0.05
 
     # Embedded structures
-    "Leaf inclination angle distribution function algorithm"
-    LIDF::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
     "Canopy optical properties"
     OPTICS::HyperspectralMLCanopyOpticalProperty{FT}
     "Canopy radiation profiles"
