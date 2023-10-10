@@ -135,7 +135,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
 
     # update solar zenith angle based on the time
     _sza = solar_zenith_angle(CACHE_SPAC.LATITUDE, FT(wd_params["FDOY"]));
-    CACHE_SPAC.ANGLES.sza = (wd_params["RAD_DIR"] + wd_params["RAD_DIF"] > 10) ? min(_sza, 88.999) : _sza;
+    CACHE_SPAC.CANOPY.sun_geometry.state.sza = (wd_params["RAD_DIR"] + wd_params["RAD_DIF"] > 10) ? min(_sza, 88.999) : _sza;
 
     # prescribe soil water content
     if "SWC" in keys(wd_params)

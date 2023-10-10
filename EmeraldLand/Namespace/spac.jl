@@ -35,7 +35,7 @@ end
 #     2022-May-25: use Root and Stem structures with temperatures
 #     2022-May-31: rename _qs to _fs
 #     2022-Jun-29: rename struct to MultiLayerSPAC, and use Leaf
-#     2022-Jun-29: add CANOPY, Z, AIRS, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
+#     2022-Jun-29: add CANOPY, Z, AIRS, WLSET, LHA, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
 #     2023-Mar-11: add MEMORY and RAD_SW_REF fields
@@ -82,8 +82,6 @@ mutable struct MultiLayerSPAC{FT}
     # Embedded structures
     "Air for each layer (more than canopy layer)"
     AIRS::Vector{AirLayer{FT}}
-    "Sun sensor geometry"
-    ANGLES::SunSensorGeometry{FT}
     "Branch hydraulic system"
     BRANCHES::Vector{Stem{FT}}
     "Canopy used for radiation calculations"
@@ -174,7 +172,6 @@ MultiLayerSPAC(
                 latitude,                                               # LATITUDE
                 longitude,                                              # LONGITUDE
                 air_layers,                                             # AIRS
-                SunSensorGeometry{FT}(),                                # ANGLES
                 branches,                                               # BRANCHES
                 HyperspectralMLCanopy(config),                          # CANOPY
                 Leaf{FT}[Leaf(config) for i in 1:config.DIM_LAYER],     # LEAVES

@@ -148,7 +148,7 @@ EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI > 0 (SZA > 90)";
-spac.ANGLES.sza = 90;
+spac.CANOPY.sun_geometry.state.sza = 90;
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 

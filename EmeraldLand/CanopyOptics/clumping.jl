@@ -8,17 +8,16 @@
 #######################################################################################################################################################################################################
 """
 
-    clumping_index!(can::HyperspectralMLCanopy, angles::SunSensorGeometry{FT}) where {FT}
+    clumping_index!(can::HyperspectralMLCanopy) where {FT}
 
 Update the clumping index, given
 - `can` `HyperspectralMLCanopy` type canopy
-- `angles` `SunSensorGeometry` type angles
 
 """
-function clumping_index!(can::HyperspectralMLCanopy, angles::SunSensorGeometry{FT}) where {FT}
+function clumping_index!(can::HyperspectralMLCanopy{FT}) where {FT}
     (; Ω_A, Ω_B) = can;
 
-    can.ci = Ω_A + Ω_B * (1 - cosd(angles.sza));
+    can.ci = Ω_A + Ω_B * (1 - cosd(can.sun_geometry.state.sza));
 
     return nothing
 end

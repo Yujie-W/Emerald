@@ -30,15 +30,14 @@ function canopy_optical_properties! end
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}) where {FT}
 
 Updates canopy optical properties (extinction coefficients for direct and diffuse light) based on the SAIL model, given
 - `config` SPAC configurations
 - `can` `HyperspectralMLCanopy` type struct
-- `angles` `SunSensorGeometry` type struct
 
 """
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}) where {FT} = (
     (; DIM_LAYER, Θ_AZI, _1_AZI, _COS_Θ_AZI, _COS²_Θ_INCL, _COS²_Θ_INCL_AZI) = config;
     (; HOT_SPOT, OPTICS, P_INCL) = can;
 
@@ -47,7 +46,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     end;
 
     # 1. update the canopy optical properties related to extinction and scattering coefficients
-    extinction_scattering_coefficients!(config, can, angles);
+    extinction_scattering_coefficients!(config, can);
 
     OPTICS.ko  = P_INCL' * OPTICS._ko;
     OPTICS.ks  = P_INCL' * OPTICS._ks;
@@ -63,15 +62,15 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     OPTICS.ddf = (1 - OPTICS._bf) / 2;
 
     # 2. update the matrices fs and fo
-    OPTICS._cos_θ_azi_raa .= cosd.(Θ_AZI .- (angles.vaa - angles.saa));
+    OPTICS._cos_θ_azi_raa .= cosd.(Θ_AZI .- (can.sensor_geometry.state.vaa - can.sun_geometry.state.saa));
     mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Co, _1_AZI');
     mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._So, OPTICS._cos_θ_azi_raa');
-    OPTICS.fo .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(angles.vza);
+    OPTICS.fo .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(can.sensor_geometry.state.vza);
     OPTICS._abs_fo .= abs.(OPTICS.fo);
 
     mul!(OPTICS._tmp_mat_incl_azi_1, OPTICS._Cs, _1_AZI');
     mul!(OPTICS._tmp_mat_incl_azi_2, OPTICS._Ss, _COS_Θ_AZI');
-    OPTICS.fs .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(angles.sza);
+    OPTICS.fs .= (OPTICS._tmp_mat_incl_azi_1 .+ OPTICS._tmp_mat_incl_azi_2) ./ cosd(can.sun_geometry.state.sza);
     OPTICS._abs_fs .= abs.(OPTICS.fs);
 
     OPTICS._fo_cos_θ_incl .= OPTICS.fo .* _COS²_Θ_INCL_AZI;
@@ -87,7 +86,9 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
         OPTICS.p_sunlit[i] = 1 / (OPTICS.ks * _ilai) * (exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[i]) - exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[i+1]));
     end;
 
-    _dso = sqrt( tand(angles.sza) ^ 2 + tand(angles.vza) ^ 2 - 2 * tand(angles.sza) * tand(angles.vza) * cosd(angles.vaa - angles.saa) );
+    _dso = sqrt( tand(can.sun_geometry.state.sza) ^ 2 +
+                 tand(can.sensor_geometry.state.vza) ^ 2 -
+                 2 * tand(can.sun_geometry.state.sza) * tand(can.sensor_geometry.state.vza) * cosd(can.sensor_geometry.state.vaa - can.sun_geometry.state.saa) );
     @inline _pdf(x::FT) where {FT} = (
         _Σk = OPTICS.ko + OPTICS.ks;
         _Πk = OPTICS.ko * OPTICS.ks;

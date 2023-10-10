@@ -104,7 +104,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr
 
     # update solar zenith angle based on the time
     _sza = solar_zenith_angle(spac.LATITUDE, FT(_df_doy));
-    spac.ANGLES.sza = (_df_dir + _df_dif > 10) ? min(_sza, 88.999) : _sza;
+    spac.CANOPY.sun_geometry.state.sza = (_df_dir + _df_dif > 10) ? min(_sza, 88.999) : _sza;
 
     return nothing
 end

@@ -184,7 +184,7 @@ import Emerald.EmeraldLand.SPAC
 
         spac = NS.MultiLayerSPAC(config);
         SPAC.initialize!(config, spac);
-        spac.ANGLES.sza = 90;
+        spac.CANOPY.sun_geometry.state.sza = 90;
         PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         @test true;
         PS.plant_photosynthesis!(spac, NS.PCO₂Mode());

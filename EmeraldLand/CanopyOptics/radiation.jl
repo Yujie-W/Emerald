@@ -337,13 +337,13 @@ Updates canopy radiation profiles for shortwave and longwave radiation, given
 
 """
 canopy_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; ANGLES, CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
+    (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
     (; DIM_LAYER) = config;
 
     soil_albedo!(config, SOIL_BULK, SOILS[1]);
     # TODO: note here that this will disable the optical properties of longwave radiation and result in bugs
-    if ANGLES.sza < 89
-        canopy_optical_properties!(config, CANOPY, ANGLES);
+    if CANOPY.sun_geometry.state.sza < 89
+        canopy_optical_properties!(config, CANOPY);
         canopy_optical_properties!(config, CANOPY, LEAVES, SOIL_BULK);
         shortwave_radiation!(config, CANOPY, LEAVES, METEO.rad_sw, SOIL_BULK);
     else

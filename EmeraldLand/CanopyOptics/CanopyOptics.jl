@@ -10,7 +10,7 @@ using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: HyperspectralMLCanopy, ReferenceSpectra, ShortwaveRadiation
-using ..Namespace: BetaLIDF, Leaf, SoilBulk, SoilLayer, SunSensorGeometry, VerhoefLIDF
+using ..Namespace: BetaLIDF, Leaf, SoilBulk, SoilLayer, VerhoefLIDF
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 

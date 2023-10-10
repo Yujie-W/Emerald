@@ -473,6 +473,15 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat}
+    # sun-sensor geometry related structs
+    "Sensor geometry information"
+    sensor_geometry::SensorGeometry{FT} = SensorGeometry{FT}()
+    "Sun geometry information"
+    sun_geometry::SunGeometry{FT} = SunGeometry{FT}()
+
+
+
+
     # General model information
     "Hot spot parameter"
     HOT_SPOT::FT = 0.05

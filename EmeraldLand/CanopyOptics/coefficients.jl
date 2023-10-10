@@ -169,21 +169,20 @@ function extinction_scattering_coefficients! end
 #######################################################################################################################################################################################################
 """
 
-    extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT}
+    extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}) where {FT}
 
 Update the extinction and scattering coefficients, given
 - `config` SPAC configurations
 - `can` `HyperspectralMLCanopy` type canopy
-- `angles` `SunSensorGeometry` type angles
 
 """
-extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, angles::SunSensorGeometry{FT}) where {FT} = (
+extinction_scattering_coefficients!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}) where {FT} = (
     (; Θ_INCL) = config;
     (; OPTICS) = can;
 
     for i in eachindex(Θ_INCL)
         OPTICS._ks[i], OPTICS._ko[i], OPTICS._sb[i], OPTICS._sf[i], OPTICS._Co[i], OPTICS._Cs[i], OPTICS._So[i], OPTICS._Ss[i] =
-            extinction_coefficient(angles.sza, angles.vza, angles.vaa - angles.saa, Θ_INCL[i]);
+            extinction_coefficient(can.sun_geometry.state.sza, can.sensor_geometry.state.vza, can.sensor_geometry.state.vaa - can.sun_geometry.state.saa, Θ_INCL[i]);
     end;
 
     return nothing

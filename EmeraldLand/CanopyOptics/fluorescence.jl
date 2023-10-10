@@ -31,7 +31,7 @@ function canopy_fluorescence! end
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ENABLE_SIF) = config;
-    (; ANGLES, CANOPY, LEAVES) = spac;
+    (; CANOPY, LEAVES) = spac;
 
     if !ENABLE_SIF
         CANOPY.RADIATION.sif_obs .= 0;
@@ -39,7 +39,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wh
         return nothing
     end;
 
-    if (ANGLES.sza < 89)
+    if (CANOPY.sun_geometry.state.sza < 89)
         canopy_fluorescence!(config, CANOPY, LEAVES);
     else
         CANOPY.RADIATION.sif_obs .= 0;
