@@ -35,12 +35,12 @@ function dynamic_workers!(threads::Int)
     elseif length(workers())<_MaxThreads && (threads > _MaxThreads)
         addprocs(_MaxThreads-length(workers()); exeflags = "--project");
     else
-        _to_remove = workers()[(threads + 1):end];
+        _to_remove = workers()[(threads + 1):end;];
         rmprocs(_to_remove...);
     end;
 
     return nothing
-end
+end;
 
 
-end # module
+end; # module

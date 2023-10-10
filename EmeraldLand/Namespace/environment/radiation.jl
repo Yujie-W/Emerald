@@ -26,7 +26,7 @@ mutable struct ShortwaveRadiation{FT<:AbstractFloat}
     e_diffuse::Vector{FT}
     "Direct radiation `[mW m⁻² nm⁻¹]`"
     e_direct::Vector{FT}
-end
+end;
 
 ShortwaveRadiation(config::SPACConfiguration{FT}) where {FT} = ShortwaveRadiation{FT}(read_nc(config.DATASET, "E_DIFF"), read_nc(config.DATASET, "E_DIR"));
 

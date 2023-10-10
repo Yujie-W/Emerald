@@ -21,7 +21,7 @@ Set the flow profile of the root or stem xylem, given
 - `δt` time step
 
 """
-function xylem_water_budget! end
+function xylem_water_budget! end;
 
 xylem_water_budget!(xylem::XylemHydraulics{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
     # make sure the buffer rate does not drain or overflow the capacictance

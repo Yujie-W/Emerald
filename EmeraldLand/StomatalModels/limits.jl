@@ -16,7 +16,7 @@ Limit stomatal conductance for H₂O for
 - `leaf` `Leaf` type struct
 
 """
-function limit_stomatal_conductance! end
+function limit_stomatal_conductance! end;
 
 limit_stomatal_conductance!(leaf::Leaf{FT}) where {FT} = (
     _ratio = relative_diffusive_coefficient(leaf.energy.auxil.t);

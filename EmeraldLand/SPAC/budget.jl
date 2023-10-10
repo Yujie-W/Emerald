@@ -135,7 +135,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     @assert !isnan(_δt_8) "NaN in adjusted_time";
 
     return (_δt_8, _δt_7, _δt_6, _δt_5, _δt_4, _δt_3, _δt_2, _δt_1)
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -167,7 +167,7 @@ Move forward in time for SPAC with time stepper controller, given
 - `δt` Time step (if not given, solve for steady state solution)
 
 """
-function time_stepper! end
+function time_stepper! end;
 
 time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT} = (
     (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;

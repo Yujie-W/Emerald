@@ -150,7 +150,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
         if _irow < _nS
             simplex[_irow][_irow] = x_inis[_irow] / 2;
         end;
-        simplex[_irow][end] = f(simplex[_irow]);
+        simplex[_irow][end;] = f(simplex[_irow]);
         if stepping
             push!(history, simplex[_irow]);
         end;
@@ -160,8 +160,8 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
     _count_all = 0;
     while true
         # 1. sort the simplex from high to low
-        sort!(simplex, by=x->x[end], rev=true);
-        if (simplex[1][end] - simplex[end][end]) < tol.tol
+        sort!(simplex, by=x->x[end;], rev=true);
+        if (simplex[1][end;] - simplex[end;][end;]) < tol.tol
             break;
         end;
 
@@ -176,28 +176,28 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
         ref_x  .= cen_x;
         ref_x .*= 2;
         ref_x .-= simplex[_nS];
-        ref_x[end] = f(ref_x);
+        ref_x[end;] = f(ref_x);
         if stepping
             push!(history, ref_x);
         end;
 
-        if simplex[1][end] >= ref_x[end] > simplex[_nX][end]
-            simplex[end] .= ref_x;
+        if simplex[1][end;] >= ref_x[end;] > simplex[_nX][end;]
+            simplex[end;] .= ref_x;
 
         # 4. expansion of the reflection
-        elseif ref_x[end] > simplex[1][end]
+        elseif ref_x[end;] > simplex[1][end;]
             exp_x  .= ref_x;
             exp_x .*= 2;
             exp_x .-= cen_x;
-            exp_x[end] = f(exp_x);
+            exp_x[end;] = f(exp_x);
             if stepping
                 push!(history, exp_x);
             end;
 
-            if exp_x[end] > ref_x[end]
-                simplex[end] .= exp_x;
+            if exp_x[end;] > ref_x[end;]
+                simplex[end;] .= exp_x;
             else
-                simplex[end] .= ref_x;
+                simplex[end;] .= ref_x;
             end;
 
         # 5. contraction of the worst
@@ -205,20 +205,20 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::ResidualTolerance{FT}; ste
             con_x  .= cen_x;
             con_x .+= simplex[_nS];
             con_x ./= 2;
-            con_x[end] = f(con_x);
+            con_x[end;] = f(con_x);
             if stepping
                 push!(history, con_x);
             end;
 
-            if con_x[end] > simplex[_nS][end]
-                simplex[end] .= con_x;
+            if con_x[end;] > simplex[_nS][end;]
+                simplex[end;] .= con_x;
 
             # 6. shrink
             else
                 for _irow in 2:_nS
                     simplex[_irow] .+= simplex[1];
                     simplex[_irow] ./= 2;
-                    simplex[_irow][end] = f(simplex[_irow]);
+                    simplex[_irow][end;] = f(simplex[_irow]);
                     if stepping
                         push!(history, simplex[_irow]);
                     end;
@@ -247,7 +247,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
         if _irow < _nS
             simplex[_irow][_irow] = x_inis[_irow] / 2;
         end;
-        simplex[_irow][end] = f(simplex[_irow])
+        simplex[_irow][end;] = f(simplex[_irow])
         if stepping
             push!(history, simplex[_irow]);
         end;
@@ -258,7 +258,7 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
     judges = [false for i in 1:_nX];
     while true
         # 1. sort the simplex from high to low
-        sort!(simplex, by=x->x[end], rev=true);
+        sort!(simplex, by=x->x[end;], rev=true);
         for icol in 1:_nX
             judges[icol] = ( abs(simplex[1][icol] - simplex[_nS][icol]) <= tol.tol[icol]);
         end;
@@ -280,12 +280,12 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
             push!(history, ref_x);
         end;
 
-        if simplex[1][end] >= ref_y > simplex[_nX][end]
-            simplex[end]     .= ref_x;
-            simplex[end][end] = ref_y;
+        if simplex[1][end;] >= ref_y > simplex[_nX][end;]
+            simplex[end;]     .= ref_x;
+            simplex[end;][end;] = ref_y;
 
         # 4. expansion of the reflection
-        elseif ref_y > simplex[1][end]
+        elseif ref_y > simplex[1][end;]
             exp_x  .= ref_x;
             exp_x .*= 2;
             exp_x .-= cen_x;
@@ -295,11 +295,11 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
             end;
 
             if exp_y > ref_y
-                simplex[end]     .= exp_x;
-                simplex[end][end] = exp_y;
+                simplex[end;]     .= exp_x;
+                simplex[end;][end;] = exp_y;
             else
-                simplex[end]     .= ref_x;
-                simplex[end][end] = ref_y;
+                simplex[end;]     .= ref_x;
+                simplex[end;][end;] = ref_y;
             end;
 
         # 5. contraction of the worst
@@ -312,15 +312,15 @@ find_peak(f::Function, ms::NelderMeadMethod{FT}, tol::SolutionToleranceND{FT}; s
                 push!(history, con_x);
             end;
 
-            if con_y > simplex[_nS][end]
-                simplex[end]     .= con_x;
-                simplex[end][end] = con_y;
+            if con_y > simplex[_nS][end;]
+                simplex[end;]     .= con_x;
+                simplex[end;][end;] = con_y;
 
             # 6. shrink
             else
                 for _irow in 2:_nS
                     simplex[_irow]    .+= simplex[1];
-                    simplex[_irow][end] = f(simplex[_irow]);
+                    simplex[_irow][end;] = f(simplex[_irow]);
                     if stepping
                         push!(history, simplex[_irow]);
                     end;

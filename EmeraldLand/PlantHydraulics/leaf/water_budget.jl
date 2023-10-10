@@ -19,7 +19,7 @@ Set the flow profile of the leaf, given
 - `δt` time step
 
 """
-function leaf_water_budget! end
+function leaf_water_budget! end;
 
 leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
     # make sure the buffer rate does not drain or overflow the capacictance

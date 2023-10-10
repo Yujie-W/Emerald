@@ -16,7 +16,7 @@ Return the marginal increase in respiration rate per temperature, given
 - `leaf` `Leaf` type leaf
 
 """
-function ∂R∂T end
+function ∂R∂T end;
 
 ∂R∂T(leaf::Leaf{FT}) where {FT} = ∂R∂T(leaf.photosystem, leaf.energy.auxil.t);
 

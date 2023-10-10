@@ -51,8 +51,8 @@ function read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector, resox
     end;
 
     # flip the lat and lons
-    _fata = flipping[1] ? _eata[:,end:-1:1] : _eata;
-    _gata = flipping[2] ? _fata[end:-1:1,:] : _fata;
+    _fata = flipping[1] ? _eata[:,end;:-1:1] : _eata;
+    _gata = flipping[2] ? _fata[end;:-1:1,:] : _fata;
 
     # add a scaling function
     _hata = isnothing(scaling_function) ? _gata : scaling_function.(_gata);
@@ -72,7 +72,7 @@ function read_data_2d(data::Array, ind::Int, dict::Dict, flipping::Vector, resox
     _data[_ilons,_ilats] .= _hata;
 
     return _data
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -110,4 +110,4 @@ function read_data(filename::String, dict::Dict, flipping::Vector, resox::Int; c
 
         return _eata
     end;
-end
+end;

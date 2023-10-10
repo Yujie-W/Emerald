@@ -170,7 +170,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     update!(CACHE_SPAC, CACHE_CONFIG; cab = _chl, car = _chl / 7, ci = _cli, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
 
     return nothing
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -205,9 +205,9 @@ function griddingmachine_data(data::Vector, year::Int, d::Int)
         _bounds = [collect(0:7:361); 367]
     else
         error("This temporal resolution is not supported: $(_n)!");
-    end
+    end;
 
     _ind = findfirst(d .<= _bounds) - 1
 
     return data[_ind]
-end
+end;

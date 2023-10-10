@@ -78,7 +78,7 @@ function weather_drivers(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver; leaf
     end;
 
     return _drivers
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -105,7 +105,7 @@ Prepare a matrix of weather driver data to feed SPAC, given
 - `soil` Whether to prescribe soil water and temperature conditions, default is true
 
 """
-function wd_grids end
+function wd_grids end;
 
 wd_grids(dts::LandDatasets{FT}, wd::ERA5SingleLevelsDriver, ind::Int; displaying::Bool = true, leaf::Bool = true, soil::Bool = true) where {FT} = (
     if displaying

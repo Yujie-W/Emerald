@@ -107,7 +107,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr
     spac.CANOPY.sun_geometry.state.sza = (_df_dir + _df_dif > 10) ? min(_sza, 88.999) : _sza;
 
     return nothing
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -152,7 +152,7 @@ Run simulation on site level, given
 - `displaying` If true, displaying information regarding the steps
 - `initialial_state` Initial state of spac: if is a bool, load the first data from the weather driver
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
-- `selection` Run selection of data, default is : (namely 1:end)
+- `selection` Run selection of data, default is : (namely 1:end;)
 
 The second method can be used to run externally prepared config, spac, and weather driver, given
 - `config` SPAC configuration
@@ -160,7 +160,7 @@ The second method can be used to run externally prepared config, spac, and weath
 - `wdf` Weather driver dataframe
 
 """
-function simulation! end
+function simulation! end;
 
 simulation!(wd_tag::String,
             gmdict::Dict{String,Any};

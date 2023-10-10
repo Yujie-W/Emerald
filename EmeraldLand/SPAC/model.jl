@@ -44,7 +44,7 @@ Run SPAC model and move forward in time with time stepper controller, given
 - `δt` Time step (if not given, solve for steady state solution)
 
 """
-function soil_plant_air_continuum! end
+function soil_plant_air_continuum! end;
 
 # TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
 # TODO: add top soil evaporation

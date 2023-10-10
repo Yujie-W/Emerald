@@ -6,10 +6,10 @@ include("Recursive.jl");
 
 function parse_file(file::String)
     # detect the doc block
-end
+end;
 
 
-function test! end
+function test! end;
 
 
-end # module
+end; # module

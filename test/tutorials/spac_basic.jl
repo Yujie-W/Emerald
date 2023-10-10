@@ -14,4 +14,4 @@ using Test;
     EmeraldLand.SPAC.initialize!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
-end
+end;

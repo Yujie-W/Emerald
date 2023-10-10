@@ -16,7 +16,7 @@ Hierarchy of AbstractLIDFAlgorithm:
 - [`VerhoefLIDF`](@ref)
 
 """
-abstract type AbstractLIDFAlgorithm{FT<:AbstractFloat} end
+abstract type AbstractLIDFAlgorithm{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################
@@ -51,7 +51,6 @@ end;
 # Changes to this structure
 # General
 #     2022-Jun-02: migrate from CanopyLayers
-#     2022-Jun-02: rename Canopy4RT to HyperspectralMLCanopy
 #     2022-Jun-02: abstractize LIDF as a field
 #
 #######################################################################################################################################################################################################

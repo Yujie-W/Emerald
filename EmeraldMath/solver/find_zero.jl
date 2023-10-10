@@ -19,7 +19,7 @@ Function to find the first root that gives a target function result of zero. If 
 - `stepping` Optional. If true, save the optimization steps to the history field in method struct.
 
 """
-function find_zero end
+function find_zero end;
 
 find_zero(f::Function, ms::BisectionMethod{FT}, tol::Union{ResidualTolerance{FT}, SolutionTolerance{FT}}; stepping::Bool = false) where {FT} = (
     # create variable to store steps

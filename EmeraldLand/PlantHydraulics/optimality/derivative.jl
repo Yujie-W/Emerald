@@ -19,7 +19,7 @@ Return the marginal hydraulic conductance, given
 - `δe` Incremental flow rate, default is 1e-7
 
 """
-function ∂E∂P end
+function ∂E∂P end;
 
 ∂E∂P(leaf::Leaf{FT}, flow::FT; δe::FT = FT(1e-7)) where {FT} = ∂E∂P(leaf.HS, flow, leaf.t; δe = δe);
 

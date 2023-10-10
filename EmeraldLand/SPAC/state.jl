@@ -16,7 +16,7 @@ Synchronize state variables from 1st to 2nd struct, given
 - `state` `MultiLayerSPACState` struct for states
 
 """
-function spac_state! end
+function spac_state! end;
 
 spac_state!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT} = (
     (; LEAVES, MEMORY) = spac;

@@ -24,7 +24,7 @@ Base.@kwdef mutable struct SPACMemory{FT<:AbstractFloat}
     tem::Vector{FT} = ones(FT, 240) .* NaN
     "Vcmax25"
     vcm::FT = -9999
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -85,7 +85,7 @@ mutable struct MultiLayerSPAC{FT}
     "Branch hydraulic system"
     BRANCHES::Vector{Stem{FT}}
     "Canopy used for radiation calculations"
-    CANOPY::HyperspectralMLCanopy{FT}
+    CANOPY::MultiLayerCanopy{FT}
     "Leaf per layer"
     LEAVES::Vector{Leaf{FT}}
     "Memory cache"
@@ -106,7 +106,7 @@ mutable struct MultiLayerSPAC{FT}
     # Cache variables
     "Whether there is any root connected to soil"
     _root_connection::Bool
-end
+end;
 
 MultiLayerSPAC(
             config::SPACConfiguration{FT};
@@ -173,7 +173,7 @@ MultiLayerSPAC(
                 longitude,                                              # LONGITUDE
                 air_layers,                                             # AIRS
                 branches,                                               # BRANCHES
-                HyperspectralMLCanopy(config),                          # CANOPY
+                MultiLayerCanopy(config),                               # CANOPY
                 Leaf{FT}[Leaf(config) for i in 1:config.DIM_LAYER],     # LEAVES
                 SPACMemory{FT}(),                                       # MEMORY
                 Meteorology{FT}(rad_sw = ShortwaveRadiation(config)),   # METEO
@@ -243,7 +243,7 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     tropomi_sif₆₈₃::FT = 0
     "TROPOMI SIF at 740 nm"
     tropomi_sif₇₄₀::FT = 0
-end
+end;
 
 MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;

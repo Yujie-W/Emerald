@@ -113,4 +113,4 @@ function map_info_dict()
     end;
 
     return _map_info_dict
-end
+end;

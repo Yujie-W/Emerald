@@ -29,7 +29,7 @@ Capillary pressure of trace liquid in `[Pa]`, given
 - `α` Contact angle in `[°]`
 
 """
-function capillary_pressure end
+function capillary_pressure end;
 
 capillary_pressure(r::FT, T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = 2 * surface_tension(T, med) / r;
 
@@ -72,7 +72,7 @@ Diffusive coefficient of trace molecule in `[m² s⁻¹]`, given
 - `med` Diffusion medium (liquid water)
 
 """
-function diffusive_coefficient end
+function diffusive_coefficient end;
 
 diffusive_coefficient(T::FT, mol::Union{TraceGasCH₄{FT}, TraceGasCO₂{FT}, TraceGasH₂O{FT}, TraceGasN₂{FT}, TraceGasO₂{FT}}, med::TraceGasAir{FT}) where {FT} = (
     return mol.d_air * relative_diffusive_coefficient(T, mol, med)
@@ -110,7 +110,7 @@ Relative diffusive coefficient of trace gas in medium, given
 - `med` Medium (liquid water)
 
 """
-function relative_diffusive_coefficient end
+function relative_diffusive_coefficient end;
 
 relative_diffusive_coefficient(T::FT, mol::AbstractTraceGas{FT} = TraceGasH₂O{FT}(), med::AbstractTraceGas{FT} = TraceGasAir{FT}()) where {FT} = (T / T₂₅(FT)) ^ FT(1.8);
 
@@ -135,7 +135,7 @@ Latent heat of vaporization in `[J kg⁻¹]`, given
 - `med` Medium. Optional. Default is liquid water
 
 """
-function latent_heat_vapor end
+function latent_heat_vapor end;
 
 latent_heat_vapor(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = LH_V₀(FT) + (CP_V(FT) - CP_L(FT)) * (T - T_TRIPLE(FT));
 
@@ -164,7 +164,7 @@ Kelvin correction factor for saturation vapor pressure, given
 - `med` Medium. Optional. Default is liquid water
 
 """
-function pressure_correction end
+function pressure_correction end;
 
 pressure_correction(T::FT, Ψ::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = exp((Ψ * V_H₂O(FT)) / (GAS_R(FT) * T))
 
@@ -182,7 +182,7 @@ Saturation vapor pressure in `[Pa]`, given
 - `Ψ` Liquid water pressure in `[Pa]`, positive/negative for convex/concave interface; if `Ψ` is given, [`pressure_correction`](@ref) is made
 
 """
-function saturation_vapor_pressure end
+function saturation_vapor_pressure end;
 
 saturation_vapor_pressure(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = (
     _LH_v0       ::FT = LH_V₀(FT);
@@ -217,7 +217,7 @@ First order derivative of saturation vapor pressure in `[Pa K⁻¹]`, given
 - `Ψ` Liquid water pressure in `[Pa]`, positive/negative for convex/concave interface; if `Ψ` is given, [`pressure_correction`](@ref) is made
 
 """
-function saturation_vapor_pressure_slope end
+function saturation_vapor_pressure_slope end;
 
 saturation_vapor_pressure_slope(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = (
     _LH_v0::FT = LH_V₀(FT);
@@ -259,7 +259,7 @@ Surface tension of trace liquid in `[N m⁻¹]`, given
 - `med` Medium. Optional. Default is liquid water
 
 """
-function surface_tension end
+function surface_tension end;
 
 surface_tension(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = (
     (; γ_cor, γ_exp, γ_k, γ_T_c) = med;
@@ -278,7 +278,7 @@ Relative surface tension of trace liquid relative to 298.15 K, given
 - `med` Medium. Optional. Default is liquid water
 
 """
-function relative_surface_tension end
+function relative_surface_tension end;
 
 relative_surface_tension(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = surface_tension(T, med) / med.γ_ref
 
@@ -317,7 +317,7 @@ Viscosity in `[Pa s]`, given
 - `med` Medium. Optional. Default is liquid water
 
 """
-function viscosity end
+function viscosity end;
 
 viscosity(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = med.υ_A * exp( med.υ_B/T + med.υ_C*T + med.υ_D*T^2 );
 
@@ -331,7 +331,7 @@ Viscosity relative to 298.15 K, given
 - `liquid` Optional. Default is liquid water
 
 """
-function relative_viscosity end
+function relative_viscosity end;
 
 relative_viscosity(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = (
     (; υ_B, υ_C, υ_D) = med;
@@ -341,4 +341,4 @@ relative_viscosity(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) wh
 );
 
 
-end # module
+end; # module

@@ -115,4 +115,4 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiL
     grow_nc!(filename, "TRANSPIRATION", _mat_tran, false);
 
     return nothing
-end
+end;

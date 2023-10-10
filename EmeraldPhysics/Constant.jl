@@ -72,7 +72,7 @@ Base.@kwdef mutable struct UniversalConstants
     Λ_THERMAL_H₂O::Float64 = 0.57
     "Density of liquid water `[kg m⁻³]`"
     ρ_H₂O::Float64 = 1000
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -182,4 +182,4 @@ YEAR_D(FT=Float64) = FT(UNIVERSAL_CONSTANTS.YEAR_D);
 ρg_MPa(FT=Float64) = ρ_H₂O(FT) * GRAVITY(FT) * FT(1e-6);
 
 
-end # module
+end; # module

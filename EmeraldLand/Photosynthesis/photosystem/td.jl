@@ -22,7 +22,7 @@ Return the correction ratio for a temperature dependent variable, given
 - `t_ref` Reference temperature in `K`, default is `td.T_REF` (298.15 K)
 
 """
-function temperature_correction end
+function temperature_correction end;
 
 temperature_correction(td::Arrhenius{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = exp( td.ΔHA / GAS_R(FT) * (1/t_ref - 1/t) );
 
@@ -70,7 +70,7 @@ Return the temperature corrected value, given
 """
 function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
     return td.VAL_REF * temperature_correction(td, t; t_ref=t_ref)
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -95,7 +95,7 @@ Update the temperature dependencies of C3 photosynthesis model, given
 - `t` Target temperature in `K`
 
 """
-function photosystem_temperature_dependence! end
+function photosystem_temperature_dependence! end;
 
 photosystem_temperature_dependence!(psm::C3Cyto{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     if psm.auxil._t == t

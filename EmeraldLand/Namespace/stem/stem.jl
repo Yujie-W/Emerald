@@ -23,7 +23,7 @@ Base.@kwdef mutable struct Stem{FT}
     energy::XylemEnergy{FT} = XylemEnergy{FT}()
     "Stem hydraulics struct"
     xylem::XylemHydraulics{FT}
-end
+end;
 
 
 """

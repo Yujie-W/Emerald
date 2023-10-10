@@ -28,4 +28,4 @@ using Test;
     # As to the supported options of the function update!, please check out the documentation.
     EmeraldLand.SPAC.update!(config, spac; cab = 40, car = 10);
     @test true;
-end
+end;

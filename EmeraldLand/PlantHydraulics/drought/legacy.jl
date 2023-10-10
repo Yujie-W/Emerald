@@ -20,7 +20,7 @@ Clear the legacy for hydraulic organ or system, given
 - `spac` `MultiLayerSPAC` type structure
 - `organ` `Leaf`, `Root`, or `Stem` type structure
 """
-function clear_legacy! end
+function clear_legacy! end;
 
 clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
 

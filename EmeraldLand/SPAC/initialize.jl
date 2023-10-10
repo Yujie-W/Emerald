@@ -25,7 +25,7 @@ Initialize the SPAC, given
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function initialize! end
+function initialize! end;
 
 initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; AIRS, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL_BULK, SOILS, TRUNK) = spac;

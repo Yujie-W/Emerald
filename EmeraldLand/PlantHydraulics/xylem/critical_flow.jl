@@ -4,14 +4,14 @@
 #
 # Changes to this function
 # General
-#     2023-Sep-27: add function to compute xylem end pressure at steady state (no water exchange through the capacitor along the xylem)
+#     2023-Sep-27: add function to compute xylem end; pressure at steady state (no water exchange through the capacitor along the xylem)
 #
 #######################################################################################################################################################################################################
 """
 
     xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {FT}
 
-Return the xylem pressure at the end of xylem, given
+Return the xylem pressure at the end; of xylem, given
 - `xylem` `XylemHydraulics` type struct
 - `flow` flow rate through the xylem `[mol s⁻¹]`
 - `t` Xylem water temperature `[K]`

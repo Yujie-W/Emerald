@@ -12,7 +12,7 @@ This function returns the stomatal conductance computed from empirical stomatal 
 - Leaf (ind=NA for shaded, ind>1 for sunlit leaf)
 
 """
-function empirical_equation end
+function empirical_equation end;
 
 
 #######################################################################################################################################################################################################

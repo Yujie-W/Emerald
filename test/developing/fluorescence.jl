@@ -25,4 +25,4 @@ using Emerald;
     @show sif_photon' * spectra.ΔΛ_SIF;
 
     @test true;
-end
+end;

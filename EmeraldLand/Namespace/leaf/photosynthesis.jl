@@ -147,7 +147,7 @@ Base.@kwdef mutable struct C3CytoState{FT}
     r_d25::FT = 0.75
     "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     v_cmax25::FT = 50
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -357,7 +357,7 @@ Base.@kwdef mutable struct C3VJP{FT}
     state::C3VJPState{FT} = C3VJPState{FT}()
     "Auxilary variables"
     auxil::PSMAuxil{FT} = PSMAuxil{FT}()
-end
+end;
 
 
 """
@@ -376,7 +376,7 @@ Base.@kwdef mutable struct C3Cyto{FT}
     state::C3CytoState{FT} = C3CytoState{FT}()
     "Auxilary variables"
     auxil::PSMAuxil{FT} = PSMAuxil{FT}()
-end
+end;
 
 
 """
@@ -395,4 +395,4 @@ Base.@kwdef mutable struct C4VJP{FT}
     state::C4VJPState{FT} = C4VJPState{FT}()
     "Auxilary variables"
     auxil::PSMAuxil{FT} = PSMAuxil{FT}()
-end
+end;

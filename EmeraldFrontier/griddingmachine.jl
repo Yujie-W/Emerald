@@ -45,7 +45,7 @@ Base.@kwdef mutable struct GriddingMachineLabels
     tag_t_lm::String = "LM_4X_1Y_V1"
     "GriddingMachine.jl tag for PFT"
     tag_t_pft::String = "PFT_2X_1Y_V1"
-end
+end;
 
 
 # CLM5 settings
@@ -129,4 +129,4 @@ function gm_dict(dts::GriddingMachineLabels, lat::Number, lon::Number)
     end;
 
     return error("Not Land or LAI = 0...")
-end
+end;

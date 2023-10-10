@@ -106,7 +106,7 @@ function show_spac_info(node)
             EmeraldLand.CanopyOptics.OCO2_SIF770(node));
     tran = EmeraldLand.SPAC.T_VEG(spac);
     @info "SPAC Details" beta par ppar csif etr gpp tran ndvi evi nirv sifs;
-end
+end;
 
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}();

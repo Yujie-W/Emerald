@@ -8,16 +8,16 @@
 #######################################################################################################################################################################################################
 """
 
-    clumping_index!(can::HyperspectralMLCanopy) where {FT}
+    clumping_index!(can::MultiLayerCanopy) where {FT}
 
 Update the clumping index, given
-- `can` `HyperspectralMLCanopy` type canopy
+- `can` `MultiLayerCanopy` type canopy
 
 """
-function clumping_index!(can::HyperspectralMLCanopy{FT}) where {FT}
+function clumping_index!(can::MultiLayerCanopy{FT}) where {FT}
     (; Ω_A, Ω_B) = can;
 
     can.ci = Ω_A + Ω_B * (1 - cosd(can.sun_geometry.state.sza));
 
     return nothing
-end
+end;

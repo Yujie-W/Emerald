@@ -23,7 +23,7 @@ Hierarchy of AbstractStomataModel:
 - [`Wang2SM`](@ref)
 
 """
-abstract type AbstractStomataModel{FT<:AbstractFloat} end
+abstract type AbstractStomataModel{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################

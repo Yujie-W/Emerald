@@ -12,7 +12,7 @@ Abstract type of the ConstrainedRootSolvers methods
 $(TYPEDEF)
 
 """
-abstract type AbstractCRSMethod{FT<:AbstractFloat} end
+abstract type AbstractCRSMethod{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################
@@ -44,7 +44,7 @@ Base.@kwdef mutable struct BisectionMethod{FT<:AbstractFloat} <: AbstractCRSMeth
     # history Vector
     "history of all simulations"
     history::Vector = Vector{FT}[]
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -86,7 +86,7 @@ Base.@kwdef mutable struct NelderMeadMethod{FT<:AbstractFloat} <: AbstractCRSMet
     # history Vector
     "history of all simulations"
     history::Vector{Vector{FT}} = Vector{FT}[]
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -118,7 +118,7 @@ Base.@kwdef mutable struct NewtonBisectionMethod{FT<:AbstractFloat} <: AbstractC
     # history Vector
     "history of all simulations"
     history::Vector = Vector{FT}[]
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -146,7 +146,7 @@ Base.@kwdef mutable struct NewtonRaphsonMethod{FT<:AbstractFloat} <: AbstractCRS
     # history Vector
     "history of all simulations"
     history::Vector = Vector{FT}[]
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -180,7 +180,7 @@ Base.@kwdef mutable struct ReduceStepMethod{FT<:AbstractFloat} <: AbstractCRSMet
     # history Vector
     "history of all simulations"
     history::Vector = Vector{FT}[]
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -219,4 +219,4 @@ Base.@kwdef mutable struct ReduceStepMethodND{FT<:AbstractFloat} <: AbstractCRSM
     Δ_oper::Vector{FT} = deepcopy(Δ_inis)
     "Vector of judges"
     Δjd::Vector{Bool} = [false for i in 1:length(x_inis)]
-end
+end;

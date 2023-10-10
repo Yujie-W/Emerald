@@ -24,7 +24,7 @@ Return the minimum of two rates, given
 - `colim` `MinimumColimit`, `QuadraticColimit`, or `SerialColimit` type struct
 
 """
-function colimited_rate end
+function colimited_rate end;
 
 colimited_rate(a_1::FT, a_2::FT, colim::MinimumColimit{FT}) where {FT} = min(a_1, a_2);
 
@@ -60,4 +60,4 @@ function colimit_photosynthesis!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}; Î
     psm.auxil.a_n = psm.auxil.a_g - Î² * psm.auxil.r_d;
 
     return nothing
-end
+end;

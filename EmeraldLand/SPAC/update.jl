@@ -12,7 +12,7 @@ This function updates the environmental conditions and the soil-plant-air-contin
 - SoilPlantAirContinuum
 
 """
-function update! end
+function update! end;
 
 
 #######################################################################################################################################################################################################
@@ -203,7 +203,7 @@ update!(config::SPACConfiguration{FT},
     if !isnothing(kmax)
         # set up the kmax assuming 50% resistance in root, 25% in stem, and 25% in leaves
         _ks = if kmax isa Number
-            _trunk_percent = TRUNK.HS.ΔH / (TRUNK.HS.ΔH + BRANCHES[end].HS.ΔH);
+            _trunk_percent = TRUNK.HS.ΔH / (TRUNK.HS.ΔH + BRANCHES[end;].HS.ΔH);
             (2 * kmax, 4 * kmax / _trunk_percent, 4 * kmax / (1 - _trunk_percent), 4 * kmax)
         else
             @assert length(kmax) == 4 "kmax must be a number or a tuple of length 4";

@@ -27,7 +27,7 @@ Base.@kwdef mutable struct JunctionCapacitorState{FT}
     v_storage::FT = 5000
     "Capacitor maximum volume per basal area or per leaf area `[mol]`"
     v_max::FT = 5000
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -61,7 +61,7 @@ Base.@kwdef mutable struct JunctionCapacitorAuxil{FT}
     ∂e∂t::FT = 0
     "Partial derivative of the water per time `[mol s⁻¹]`"
     ∂w∂t::FT = 0
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -87,4 +87,4 @@ Base.@kwdef mutable struct JunctionCapacitor{FT}
     state::JunctionCapacitorState{FT} = JunctionCapacitorState{FT}()
     "Auxilary variables of the capacitor"
     auxil::JunctionCapacitorAuxil{FT} = JunctionCapacitorAuxil{FT}()
-end
+end;

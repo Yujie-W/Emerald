@@ -27,4 +27,4 @@ include("griddingmachine/json_save.jl");
 include("griddingmachine/terminal.jl");
 
 
-end # module
+end; # module

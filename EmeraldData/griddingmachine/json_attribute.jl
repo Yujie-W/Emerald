@@ -51,7 +51,7 @@ function reference_attribute_dict()
     end;
 
     return _attribute_dict
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -99,4 +99,4 @@ function variable_attribute_dict()
     end;
 
     return _attribute_dict
-end
+end;

@@ -65,7 +65,7 @@ deploy_artifact!("Artifacts.toml", "test_art", "./folder", "./", ["https://publi
 ```
 
 """
-function deploy_artifact! end
+function deploy_artifact! end;
 
 deploy_artifact!(art_toml::String, art_name::String, art_locf::String, art_tarf::String, art_urls::Vector{String}) = (
     # querry all the files in the folder
@@ -113,4 +113,4 @@ deploy_artifact!(art_toml::String, art_name::String, art_locf::String, art_file:
 );
 
 
-end # module
+end; # module

@@ -10,4 +10,4 @@ include("solver/find_peak.jl");
 include("solver/find_zero.jl");
 
 
-end
+end;

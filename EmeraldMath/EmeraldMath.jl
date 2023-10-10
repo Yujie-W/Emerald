@@ -10,4 +10,4 @@ include("Solver.jl");
 include("Stats.jl");
 
 
-end #module
+end; #module

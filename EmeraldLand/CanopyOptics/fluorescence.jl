@@ -27,7 +27,7 @@ Updates canopy fluorescence, given
 - `spac` `MultiLayerSPAC` type SPAC
 
 """
-function canopy_fluorescence! end
+function canopy_fluorescence! end;
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; ENABLE_SIF) = config;
@@ -48,7 +48,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wh
     return nothing
 );
 
-canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}) where {FT} = (
+canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}) where {FT} = (
     (; DIM_LAYER, SPECTRA, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 
@@ -193,7 +193,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
     end;
 
     # 2. account for the SIF emission from bottom to up
-    RADIATION._s_emit_up[:,end] .= 0;
+    RADIATION._s_emit_up[:,end;] .= 0;
 
     for i in DIM_LAYER:-1:1
         _r__ = view(OPTICS._ρ_dd,SPECTRA.IΛ_SIF,i  );  # reflectance without correction
@@ -230,7 +230,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _a_u_i .= _a_d_i .* _r_i .+ _s_u_i;
     end;
 
-    RADIATION.sif_up[:,end] .= view(RADIATION.sif_down,:,DIM_LAYER+1) .* view(OPTICS.ρ_dd,SPECTRA.IΛ_SIF,DIM_LAYER+1) .+ view(RADIATION._s_emit_up,:,DIM_LAYER+1);
+    RADIATION.sif_up[:,end;] .= view(RADIATION.sif_down,:,DIM_LAYER+1) .* view(OPTICS.ρ_dd,SPECTRA.IΛ_SIF,DIM_LAYER+1) .+ view(RADIATION._s_emit_up,:,DIM_LAYER+1);
 
     # 4. compute SIF from the observer direction
     OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.pso,1:DIM_LAYER) .+ view(can.sensor_geometry.auxil.pso,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
@@ -246,7 +246,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
     OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.po,1:DIM_LAYER) .+ view(can.sensor_geometry.auxil.po,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
     mul!(RADIATION.sif_obs_scatter, RADIATION._sif_obs_scatter, OPTICS._tmp_vec_layer);
 
-    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* can.sensor_geometry.auxil.po[end] ./ FT(pi);
+    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* can.sensor_geometry.auxil.po[end;] ./ FT(pi);
 
     RADIATION.sif_obs .= RADIATION.sif_obs_sunlit .+ RADIATION.sif_obs_shaded .+ RADIATION.sif_obs_scatter .+ RADIATION.sif_obs_soil;
 

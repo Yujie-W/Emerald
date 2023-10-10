@@ -101,9 +101,9 @@ function interpolate_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::S
     elseif length(dat_in) == 46
         _dat_1d = repeat(dat_in; inner = 8)[1:_days];
     elseif length(dat_in) in [52,53]
-        _dat_1d = repeat([dat_in;dat_in[end]]; inner = 7)[1:_days];
+        _dat_1d = repeat([dat_in;dat_in[end;]]; inner = 7)[1:_days];
     elseif length(dat_in) in [365,366]
-        _dat_1d = [dat_in;dat_in[end]][1:_days];
+        _dat_1d = [dat_in;dat_in[end;]][1:_days];
     end;
 
     # return the data based on the output temporal resolution

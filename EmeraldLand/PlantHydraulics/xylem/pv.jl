@@ -34,7 +34,7 @@ capacitance_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, t::FT) where {FT} = (
         return max(-100, -pv.c_all * GAS_R(FT) * t / (rvol - pv.θ_apo) * FT(1e-6))
     else
         return FT(-100)
-    end
+    end;
 );
 
 
@@ -73,5 +73,5 @@ capacitance_volume(pv::SegmentedPVCurve{FT}, p::FT, t::FT) where {FT} = (
         c = pv.ϵ_bulk * pv.θ_tlp * pv.θ_apo + p * pv.θ_apo - pv.c_all * GAS_R(FT) * t * FT(1e-6);
 
         return upper_quadratic(a, b, c)
-    end
+    end;
 );

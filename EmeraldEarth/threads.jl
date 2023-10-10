@@ -23,4 +23,4 @@ function add_threads!(threads::Int, FT::DataType)
     @everywhere EmeraldEarth.initialize_cache!($FT);
 
     return nothing
-end
+end;

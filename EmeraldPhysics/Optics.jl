@@ -25,7 +25,7 @@ Return the number of moles of photons, given
 """
 function photon(λ::FT, E::FT) where {FT}
     return E * λ * FT(FAC)
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -48,7 +48,7 @@ Compute and save the number of moles of photons, given
 - `phot` Mole of photons (variable to save)
 
 """
-function photon! end
+function photon! end;
 
 photon!(λ::Vector{FT}, E::Vector{FT}, phot::Vector{FT}) where {FT} = (phot .= photon.(λ, E); return nothing);
 
@@ -73,7 +73,7 @@ Return the energy, given
 """
 function energy(λ::FT, phot::FT) where {FT}
     return phot / (λ * FT(FAC))
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -96,11 +96,11 @@ Compute and save the number of moles of photons, given
 - `E` Joules of energy (variable to save)
 
 """
-function energy! end
+function energy! end;
 
 energy!(λ::Vector{FT}, phot::Vector{FT}, E::Vector{FT}) where {FT} = (E .= energy.(λ, phot); return nothing);
 
 energy!(λ::Vector{FT}, phot::Vector{FT}) where {FT} = (phot ./= λ .* FT(FAC); return nothing);
 
 
-end # module
+end; # module

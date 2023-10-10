@@ -17,7 +17,7 @@ Return the cumulative distribution frequency, given
 - `θ` Leaf inclination angle in `[°]`
 
 """
-function lidf_cdf end
+function lidf_cdf end;
 
 lidf_cdf(lidf::BetaLIDF{FT}, θ::FT) where {FT} = (
     (; A, B) = lidf;
@@ -61,19 +61,19 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    inclination_angles!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT}
+    inclination_angles!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT}
 
 Update the frequency of leaf inclination angles, given
 - `config` SPAC configurations
-- `can` `HyperspectralMLCanopy` type multiple layer canopy
+- `can` `MultiLayerCanopy` type multiple layer canopy
 - `lidf` `BetaLIDF` or `VerhoefLIDF` type algorithm
 
 """
-function inclination_angles! end
+function inclination_angles! end;
 
 inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = inclination_angles!(config, spac.CANOPY, spac.CANOPY.LIDF);
 
-inclination_angles!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT} = (
+inclination_angles!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT} = (
     (; Θ_INCL_BNDS) = config;
 
     for i in eachindex(can.P_INCL)

@@ -133,9 +133,9 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
 
     # Canopy geometry related angles
     "Mean azimuth angles `[°]`"
-    Θ_AZI::Vector{FT} = collect(FT, range(0, 360; length=DIM_AZI+1))[1:end-1] .+ 360 / DIM_AZI / 2
+    Θ_AZI::Vector{FT} = collect(FT, range(0, 360; length=DIM_AZI+1))[1:end;-1] .+ 360 / DIM_AZI / 2
     "Bounds of inclination angles `[°]`"
-    Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ]
+    Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end;-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end;] ]
     "Mean inclination angles `[°]`"
     Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
 

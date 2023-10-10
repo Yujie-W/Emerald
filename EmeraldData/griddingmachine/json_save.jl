@@ -24,10 +24,10 @@ function griddingmachine_json!(filename::String = "test.json")
     );
 
     # save the JSON file
-    _filename = filename[end-4:end] == ".json" ? filename : "$(filename).json";
+    _filename = filename[end;-4:end;] == ".json" ? filename : "$(filename).json";
     open(_filename, "w") do f
         JSON.print(f, _json_dict, 4);
     end;
 
     return nothing
-end
+end;

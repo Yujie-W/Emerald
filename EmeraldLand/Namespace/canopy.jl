@@ -142,7 +142,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloa
     _τ_sd::Matrix{FT}
     "Tranmittance for solar directional->directional at each canopy layer"
     _τ_ss::Vector{FT}
-end
+end;
 
 HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_AZI, DIM_INCL, DIM_LAYER, DIM_SIF, DIM_SIFE, DIM_WL) = config;
@@ -345,7 +345,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
     _sif_obs_scatter::Matrix{FT}
     "Cache to compute SIF at observer direction from sunlit APAR"
     _sif_obs_sunlit::Matrix{FT}
-end
+end;
 
 HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_AZI, DIM_INCL, DIM_LAYER, DIM_PAR, DIM_SIF, DIM_WL) = config;
@@ -411,7 +411,7 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
 # Changes to this structure
 # General
 #     2022-Jun-02: migrate from CanopyLayers
-#     2022-Jun-02: rename Canopy4RT to HyperspectralMLCanopy
+#     2022-Jun-02: rename Canopy4RT to MultiLayerCanopy
 #     2022-Jun-02: abstractize LIDF as a field
 #     2022-Jun-07: add cache variable _1_AZI, _COS²_Θ_INCL, _COS_Θ_INCL_AZI, _COS²_Θ_INCL_AZI
 #     2022-Jun-07: remove cache variable _cos_θ_azi_raa, _vol_scatter
@@ -440,7 +440,7 @@ Structure to save multiple layer hyperspectral canopy parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat}
+Base.@kwdef mutable struct MultiLayerCanopy{FT<:AbstractFloat}
     # sun-sensor geometry related structs
     "Sensor geometry information"
     sensor_geometry::SensorGeometry{FT}
@@ -481,15 +481,15 @@ Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat}
     # Cache variables
     "Cache for level boundary locations"
     _x_bnds::Vector{FT}
-end
+end;
 
-HyperspectralMLCanopy(config::SPACConfiguration{FT}) where {FT} = (
+MultiLayerCanopy(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_INCL, DIM_LAYER) = config;
 
     _lai = 3;
     _δlai = _lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
 
-    return HyperspectralMLCanopy{FT}(
+    return MultiLayerCanopy{FT}(
                 sensor_geometry = SensorGeometry(config),
                 sun_geometry    = SunGeometry(config),
                 OPTICS          = HyperspectralMLCanopyOpticalProperty(config),

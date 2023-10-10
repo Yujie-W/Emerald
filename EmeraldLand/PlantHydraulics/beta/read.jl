@@ -18,7 +18,7 @@ Return the β factor based on relative conductance or soil potential/pressure, g
     content.
 
 """
-function read_β end
+function read_β end;
 
 read_β(sm::AbstractStomataModel{FT}) where {FT} = FT(NaN);
 

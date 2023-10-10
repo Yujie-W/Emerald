@@ -7,4 +7,4 @@ include("EarthGeometry.jl");
 include("Optics.jl");
 
 
-end # module
+end; # module

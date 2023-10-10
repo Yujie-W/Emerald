@@ -27,4 +27,4 @@ function deploy_griddingmachine_artifacts!(dict::Dict)
     end;
 
     return nothing
-end
+end;

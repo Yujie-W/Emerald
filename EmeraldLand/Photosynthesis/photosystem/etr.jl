@@ -23,7 +23,7 @@ Update the electron transport rates, given
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-function photosystem_electron_transport! end
+function photosystem_electron_transport! end;
 
 photosystem_electron_transport!(psm::C3Cyto{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
     psm.auxil.e2c   = (p_i - psm.auxil.γ_star) / (psm.state.EFF_1 * p_i + psm.state.EFF_2 * psm.auxil.γ_star);

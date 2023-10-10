@@ -87,7 +87,7 @@ Base.@kwdef mutable struct LandDatasets{FT<:AbstractFloat}
     mask_soil::Matrix{Bool} = zeros(Bool, size(t_lm))
     "Mask for SPAC"
     mask_spac::Matrix{Bool} = zeros(Bool, size(t_lm))
-end
+end;
 
 """
 
@@ -298,4 +298,4 @@ function gm_grids(dts::LandDatasets{FT}) where {FT}
     end;
 
     return _mat_gm
-end
+end;

@@ -127,7 +127,7 @@ Return the marginal increase of stomatal conductance, given
 - `air` `AirLayer` type environmental conditions
 
 """
-function ∂gₙ∂t end
+function ∂gₙ∂t end;
 
 ∂gₙ∂t(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂gₙ∂t(leaf.flux.state.stomatal_model, leaf, air);
 
@@ -148,7 +148,7 @@ This function updates stomatal conductance for H₂O and CO₂. Supported functi
 - Update conductance for CO₂ based on that for H₂O
 
 """
-function stomatal_conductance! end
+function stomatal_conductance! end;
 
 
 #######################################################################################################################################################################################################
@@ -263,7 +263,7 @@ Update stomatal conductance for CO₂ based on that for H₂O, given
 - `spac` `MultiLayerSPAC` type struct
 
 """
-function stomatal_conductance_profile! end
+function stomatal_conductance_profile! end;
 
 stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;

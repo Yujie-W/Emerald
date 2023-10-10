@@ -154,4 +154,4 @@ solar_zenith_angle(lat::FT, fdoy::FT) where {FT} = (
 );
 
 
-end # module
+end; # module

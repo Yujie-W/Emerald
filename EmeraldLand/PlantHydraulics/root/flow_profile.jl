@@ -20,7 +20,7 @@ Use solver to determine the root flow rate, given
 - `config` `SPACConfiguration` type struct
 - `root` `Root` type struct
 - `soil` `SoilLayer` type struct
-- `p_target` Target pressure at the end of root xylem
+- `p_target` Target pressure at the end; of root xylem
 
 """
 function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, junction::JunctionCapacitor{FT}) where {FT}
@@ -49,7 +49,7 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
             set_flow_profile!(root.xylem, x);
             root_pressure_profile!(soil, root, junction);
 
-            return root.xylem.auxil.pressure[end] - junction.auxil.pressure
+            return root.xylem.auxil.pressure[end;] - junction.auxil.pressure
         );
 
         # 3. define method and solve for the root flow rate

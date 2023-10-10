@@ -17,4 +17,4 @@ function spac_config(gmdict::Dict)
     FT = gmdict["FT"];
 
     return SPACConfiguration{FT}();
-end
+end;

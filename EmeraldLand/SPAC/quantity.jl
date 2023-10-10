@@ -13,7 +13,7 @@ Return the average beta factor for
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function BETA end
+function BETA end;
 
 BETA(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;
@@ -44,7 +44,7 @@ Return the canopy net primary productivity per ground area, given
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function CNPP end
+function CNPP end;
 
 CNPP(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
@@ -77,7 +77,7 @@ Return the gross primary productivity per ground area, given
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function GPP end
+function GPP end;
 
 GPP(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
@@ -110,7 +110,7 @@ Return the canopy integrated PPAR per ground area, given
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function PPAR end
+function PPAR end;
 
 PPAR(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
@@ -143,7 +143,7 @@ Return the transpiration rate per ground area, given
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function T_VEG end
+function T_VEG end;
 
 T_VEG(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
@@ -168,7 +168,7 @@ T_VEG(spac::MultiLayerSPAC{FT}) where {FT} = (
 #
 #######################################################################################################################################################################################################
 
-function ΦDFNP end
+function ΦDFNP end;
 
 ΦDFNP(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
@@ -211,7 +211,7 @@ Return the total ETR per ground area, given
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function ΣETR end
+function ΣETR end;
 
 ΣETR(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
@@ -243,7 +243,7 @@ Return the total SIF at chloroplast level (without any reabsorption) per ground 
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function ΣSIF end
+function ΣSIF end;
 
 ΣSIF(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
@@ -278,7 +278,7 @@ Return the total SIF at chloroplast level (without any reabsorption) in W m⁻²
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function ΣSIF_CHL end
+function ΣSIF_CHL end;
 
 ΣSIF_CHL(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;
@@ -311,7 +311,7 @@ Return the total SIF at leaf level after reabsorption in W m⁻² per ground are
 - `spac` `MultiLayerSPAC` SPAC
 
 """
-function ΣSIF_LEAF end
+function ΣSIF_LEAF end;
 
 ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;

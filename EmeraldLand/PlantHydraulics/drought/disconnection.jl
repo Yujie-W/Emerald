@@ -18,7 +18,7 @@ Disconnect root from soil (and set othes' flow to 0), given
 - `organ` Root, stem, or leaf
 
 """
-function disconnect! end
+function disconnect! end;
 
 disconnect!(organ::Leaves2D{FT}) where {FT} = (
     disconnect!(organ.HS, organ.HS.FLOW);
@@ -113,7 +113,7 @@ function disconnect_roots!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{F
     end;
 
     return nothing
-end
+end;
 
 
 #######################################################################################################################################################################################################

@@ -10,7 +10,7 @@
 Run short wave radiation.
 
 """
-function shortwave_radiation! end
+function shortwave_radiation! end;
 
 
 #######################################################################################################################################################################################################
@@ -38,17 +38,17 @@ function shortwave_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::ShortwaveRadiation{FT}, sbulk::SoilBulk{FT}) where {FT}
+    shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::ShortwaveRadiation{FT}, sbulk::SoilBulk{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave radiation, given
 - `config` Configuration for `MultiLayerSPAC`
-- `can` `HyperspectralMLCanopy` type struct
+- `can` `MultiLayerCanopy` type struct
 - `leaves` Vector of `Leaf`
 - `rad` Incoming shortwave radiation
 - `sbulk` Soil bulk parameters
 
 """
-shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::ShortwaveRadiation{FT}, sbulk::SoilBulk{FT}) where {FT} = (
+shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::ShortwaveRadiation{FT}, sbulk::SoilBulk{FT}) where {FT} = (
     (; DIM_LAYER, SPECTRA) = config;
     (; OPTICS, P_INCL, RADIATION) = can;
 
@@ -59,8 +59,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
             RADIATION.e_diffuse_up[:,i] .= 0;
             RADIATION.e_v[:,i] .= 0;
         end;
-        RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
-        RADIATION.e_v[:,end] .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
+        RADIATION.e_diffuse_up[:,end;] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
+        RADIATION.e_v[:,end;] .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
         RADIATION.e_o .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1) ./ FT(pi);
         RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
 
@@ -95,7 +95,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _e_u_i .= _r_sd_i .* _e_s_i .+ _r_dd_i .* _e_d_i;
     end;
 
-    RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
+    RADIATION.e_diffuse_up[:,end;] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
 
     # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
     for i in 1:DIM_LAYER
@@ -135,7 +135,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _e_v_i .+= can.sensor_geometry.auxil.pso[i] .* _so__i .* rad.e_direct;
         _e_v_i .*= can.δlai[i] * can.ci;
     end;
-    RADIATION.e_v[:,end] .= can.sensor_geometry.auxil.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
+    RADIATION.e_v[:,end;] .= can.sensor_geometry.auxil.po[end;] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
 
     for i in eachindex(RADIATION.e_o)
         RADIATION.e_o[i] = sum(view(RADIATION.e_v,i,:)) / FT(pi);
@@ -214,7 +214,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 Update long wave radiation profiles for canopy.
 
 """
-function longwave_radiation! end
+function longwave_radiation! end;
 
 
 #######################################################################################################################################################################################################
@@ -229,17 +229,17 @@ function longwave_radiation! end
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT}
+    longwave_radiation!(can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT}
 
 Updates canopy radiation profiles for shortwave or longwave radiation, given
-- `can` `HyperspectralMLCanopy` type struct
+- `can` `MultiLayerCanopy` type struct
 - `leaves` Vector of `Leaf`
 - `rad` Incoming longwave radiation
 - `sbulk` Soil bulk parameters
 - `soil` First soil layer
 
 """
-longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT} = (
+longwave_radiation!(can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT} = (
     (; OPTICS, RADIATION) = can;
 
     _nlayers = length(leaves);
@@ -262,7 +262,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, ra
     _r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * soil.auxil.t ^ 4;
 
     # 2. account for the longwave emission from bottom to up
-    RADIATION._r_emit_up[end] = _r_lw_soil;
+    RADIATION._r_emit_up[end;] = _r_lw_soil;
 
     for i in _nlayers:-1:1
         _r__ = OPTICS._ρ_lw[i];
@@ -286,14 +286,14 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, ra
         RADIATION.r_lw_up[i+1] = RADIATION.r_lw_down[i] * _r_i + RADIATION._r_emit_up[i];
     end;
 
-    RADIATION.r_lw_up[end] = RADIATION.r_lw_down[end] * sbulk.auxil.ρ_lw + _r_lw_soil;
+    RADIATION.r_lw_up[end;] = RADIATION.r_lw_down[end;] * sbulk.auxil.ρ_lw + _r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
     for i in 1:_nlayers
         RADIATION.r_net_lw[i] = (RADIATION.r_lw_down[i] + RADIATION.r_lw_up[i+1]) * (1 - OPTICS._ρ_lw[i] - OPTICS._τ_lw[i]) - 2 * RADIATION.r_lw[i];
     end;
 
-    sbulk.auxil.r_net_lw = RADIATION.r_lw_down[end] * (1 - sbulk.auxil.ρ_lw) - _r_lw_soil;
+    sbulk.auxil.r_net_lw = RADIATION.r_lw_down[end;] * (1 - sbulk.auxil.ρ_lw) - _r_lw_soil;
 
     return nothing
 );
@@ -312,7 +312,7 @@ longwave_radiation!(can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, ra
 Run shortwave and longwave radiation.
 
 """
-function canopy_radiation! end
+function canopy_radiation! end;
 
 
 #######################################################################################################################################################################################################

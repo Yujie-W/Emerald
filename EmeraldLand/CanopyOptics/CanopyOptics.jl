@@ -9,10 +9,14 @@ using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
-using ..Namespace: HyperspectralMLCanopy, ReferenceSpectra, ShortwaveRadiation
+using ..Namespace: MultiLayerCanopy, ReferenceSpectra, ShortwaveRadiation
 using ..Namespace: BetaLIDF, Leaf, SoilBulk, SoilLayer, VerhoefLIDF
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
+
+# functions related to canopy geometry
+include("geometry/extinction.jl");
+include("geometry/sun.jl");
 
 include("clumping.jl");
 include("coefficients.jl");
@@ -24,4 +28,4 @@ include("remote_sensing.jl");
 include("soil.jl");
 
 
-end # module
+end; # module

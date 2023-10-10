@@ -48,7 +48,7 @@ Base.@kwdef mutable struct LinearRegressionResult
         _df[!,"lowerY"] = _pred.lower[:,1];
         _df[!,"upperY"] = _pred.upper[:,1];
         _df)
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -108,7 +108,7 @@ function linear_regress(xs::Tuple, y::Vector)
 
     # run the fitting using GLM
     return LinearRegressionResult(LM = lm(_matx, _vecy))
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -169,7 +169,7 @@ function test_slope(xs::Tuple, y::Vector; slope::Number = 0)
     _lr = lm(_matx, _vecy);
 
     return coeftable(_lr).cols[4][1]
-end
+end;
 
 
-end # module
+end; # module

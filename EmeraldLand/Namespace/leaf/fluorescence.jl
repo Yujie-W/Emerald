@@ -28,7 +28,7 @@ Base.@kwdef mutable struct VanDerTolFluorescenceModel{FT<:AbstractFloat}
     K_A::FT = 1.93
     "Fitting parameter β"
     K_B::FT = 10
-end
+end;
 
 """ VanDerTolFluorescenceModel that uses data from all observations """
 VDTModelAll(FT) = VanDerTolFluorescenceModel{FT}(K_0 = 2.48, K_A = 2.83, K_B = 0.114)

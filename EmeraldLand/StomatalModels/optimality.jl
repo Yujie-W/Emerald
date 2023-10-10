@@ -24,7 +24,7 @@ Return the partial derivative of A per E, given
 - `ind` Index of the leaf
 
 """
-function ∂A∂E end
+function ∂A∂E end;
 
 ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     _p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
@@ -91,7 +91,7 @@ Returns the marginal increase in leaf respiration rate per transpiration rate, g
 - `air` `AirLayer` type environmental conditions
 
 """
-function ∂R∂E end
+function ∂R∂E end;
 
 ∂R∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂R∂E(leaf.flux.state.stomatal_model, leaf, air);
 
@@ -115,7 +115,7 @@ Returns the marginal increase in leaf temperature per transpiration rate, given
 - `f_view` Ratio that leaf area is exposed to external sources/sinks (not other leaf, e.g., 2/LAI for canopy on average)
 
 """
-function ∂T∂E end
+function ∂T∂E end;
 
 ∂T∂E(leaf::Leaf{FT}, air::AirLayer{FT}, f_view::FT) where {FT} = ∂T∂E(leaf.BIO, leaf, air, f_view);
 
@@ -144,7 +144,7 @@ This function returns the marginal risk for stomatal opening. This function supp
 - Leaf (ind=NA for shaded leaf, ind>1 for sunlit leaf)
 
 """
-function ∂Θ∂E end
+function ∂Θ∂E end;
 
 
 #######################################################################################################################################################################################################
@@ -188,7 +188,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-2 * A * HS._p_element[end] + B) / _∂E∂P
+    return (-2 * A * HS._p_element[end;] + B) / _∂E∂P
 );
 
 ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
@@ -261,7 +261,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-1 * A * HS._p_element[end] * leaf.flux.auxil.a_n_shaded) / _∂E∂P
+    return (-1 * A * HS._p_element[end;] * leaf.flux.auxil.a_n_shaded) / _∂E∂P
 );
 
 
@@ -307,7 +307,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-2 * A * HS._p_element[end] + B) / _∂E∂P
+    return (-2 * A * HS._p_element[end;] + B) / _∂E∂P
 );
 
 ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
@@ -380,7 +380,7 @@ Return the marginal risk for stomatal opening, given
 
     _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
 
-    return (-1 * A * HS._p_element[end] * leaf.flux.auxil.a_n_sunlit[ind]) / _∂E∂P
+    return (-1 * A * HS._p_element[end;] * leaf.flux.auxil.a_n_sunlit[ind]) / _∂E∂P
 );
 
 
@@ -396,7 +396,7 @@ This function returns the ∂Θₙ∂E for nocturnal stomatal opening. Currently
     Supports to other optimality models will be added later when I am ready to test those.
 
 """
-function ∂Θₙ∂E end
+function ∂Θₙ∂E end;
 
 
 #######################################################################################################################################################################################################

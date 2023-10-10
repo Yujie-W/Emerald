@@ -25,7 +25,7 @@ Update the product limited photosynthetic rate (p_i for PCO₂Mode, g_lc for GCO
 - `g_lc` Leaf conductance in `mol m⁻² s⁻¹`
 
 """
-function product_limited_rate! end
+function product_limited_rate! end;
 
 product_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (psm.auxil.a_p = β * psm.auxil.v_cmax / 2; return nothing);
 

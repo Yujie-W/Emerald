@@ -32,7 +32,7 @@ Update the rate constants and coefficients in reaction center, given
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-function photosystem_coefficients! end
+function photosystem_coefficients! end;
 
 photosystem_coefficients!(psm::C3Cyto{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0

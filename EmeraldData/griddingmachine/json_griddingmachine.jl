@@ -60,7 +60,7 @@ function griddingmachine_dict()
     end;
 
     return _griddingmachine_dict
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -97,4 +97,4 @@ function griddingmachine_tag(dict::Dict, year::Int = 0)
     end;
 
     return _tag
-end
+end;

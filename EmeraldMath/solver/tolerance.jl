@@ -12,7 +12,7 @@ Abstract tolerance type
 $(TYPEDEF)
 
 """
-abstract type AbstractTolerance{FT} end
+abstract type AbstractTolerance{FT} end;
 
 
 #######################################################################################################################################################################################################
@@ -38,7 +38,7 @@ struct ResidualTolerance{FT} <: AbstractTolerance{FT}
     tol::FT
     "limit of iterations"
     n_limit::Int
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -64,7 +64,7 @@ struct SolutionTolerance{FT} <: AbstractTolerance{FT}
     tol::FT
     "limit of iterations"
     n_limit::Int
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -90,7 +90,7 @@ struct SolutionToleranceND{FT} <: AbstractTolerance{FT}
     tol::Vector{FT}
     "limit of iterations"
     n_limit::Int
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -116,7 +116,7 @@ When the tolerance is for target function residual, if the modeled residual is l
     tolerance is for solution, if the solution range is lower than the given tolerance, or if the iteration exceeds the maximum  limit, a `true` will be returned.
 
 """
-function if_break end
+function if_break end;
 
 if_break(tol::ResidualTolerance{FT}, x1::FT, x2::FT, y::FT, n::Int) where {FT} = (abs(y) < tol.tol) || (n > tol.n_limit);
 

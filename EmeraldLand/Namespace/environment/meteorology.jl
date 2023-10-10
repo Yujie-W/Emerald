@@ -34,4 +34,4 @@ Base.@kwdef mutable struct Meteorology{FT<:AbstractFloat}
     t_air::FT = T₂₅(FT)
     "Precipitation temperature `[K]`"
     t_precip::FT = T₂₅(FT)
-end
+end;

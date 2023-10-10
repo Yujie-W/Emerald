@@ -16,4 +16,4 @@ using Test;
     df_pres = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:24);
     df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:24);
     @test true;
-end
+end;

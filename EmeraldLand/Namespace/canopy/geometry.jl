@@ -24,4 +24,4 @@ Base.@kwdef mutable struct SunSensorGeometryToDelete{FT<:AbstractFloat}
     haa::FT = 0
     "Hill slope angle `[°]`"
     hsa::FT = 0
-end
+end;

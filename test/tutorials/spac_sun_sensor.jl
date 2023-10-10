@@ -26,4 +26,4 @@ using Test;
     # For more details of this function, please refer to the documentation.
     spac.CANOPY.sun_geometry.state.sza = EmeraldPhysics.EarthGeometry.solar_zenith_angle(FT(30), FT(1), FT(13), FT(15));
     @test true;
-end
+end;

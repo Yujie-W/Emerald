@@ -6,4 +6,4 @@ include("terminal/judges.jl");
 include("terminal/operations.jl");
 
 
-end # module
+end; # module

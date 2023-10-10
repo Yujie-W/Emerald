@@ -25,7 +25,7 @@ Update the electron transport limited photosynthetic rate (none for PCO₂Mode a
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
-function light_limited_rate! end
+function light_limited_rate! end;
 
 light_limited_rate!(psm::Union{C3Cyto{FT}, C4VJP{FT}}) where {FT} = (psm.auxil.a_j = psm.auxil.j_pot * psm.auxil.e2c; return nothing);
 

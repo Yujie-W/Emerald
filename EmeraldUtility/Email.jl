@@ -32,7 +32,7 @@ function send_email!(subject::String, from_email::String, to_email::String, body
     rm(".tmp_email");
 
     return nothing
-end
+end;
 
 
-end # module
+end; # module

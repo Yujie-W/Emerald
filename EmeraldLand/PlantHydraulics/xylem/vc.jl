@@ -88,7 +88,7 @@ Return the critical xylem water pressure at 25 °C that triggers a given amount 
 - `kr` Reference conductance
 
 """
-function xylem_pressure end
+function xylem_pressure end;
 
 xylem_pressure(vc::LogisticVC{FT}, kr::FT) where {FT} = log(kr / (vc.a + 1 - kr * vc.a)) / vc.b;
 

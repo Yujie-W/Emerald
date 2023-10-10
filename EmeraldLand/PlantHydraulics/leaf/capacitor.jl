@@ -26,7 +26,7 @@ extraxylary_pressure_profile!(
             c_auxil::ExtraXylemCapacitorAuxil{FT},
             t::FT) where {FT} = (
     flow = flow_out(x_auxil) + c_auxil.flow;
-    c_auxil.p_leaf = x_auxil.pressure[end] - flow / c_auxil.k;
+    c_auxil.p_leaf = x_auxil.pressure[end;] - flow / c_auxil.k;
 
     return nothing
 );
@@ -41,8 +41,8 @@ extraxylary_pressure_profile!(
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
     flow = flow_out(x_auxil);
-    k = relative_xylem_k(c_state.vc, x_auxil.pressure[end] / f_st) / f_vis * k_max;
-    c_auxil.p_leaf = x_auxil.pressure[end] - flow / k;
+    k = relative_xylem_k(c_state.vc, x_auxil.pressure[end;] / f_st) / f_vis * k_max;
+    c_auxil.p_leaf = x_auxil.pressure[end;] - flow / k;
 
     return nothing
 );

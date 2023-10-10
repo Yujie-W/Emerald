@@ -17,7 +17,7 @@ Return a verified input, given
 - `judge_function` Function to judge if the input meets the requirements
 
 """
-function verified_input end
+function verified_input end;
 
 verified_input(message::String, operation_function::Function, judge_function::Function) = (
     _input = nothing;

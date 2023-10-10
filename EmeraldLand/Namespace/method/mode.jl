@@ -16,12 +16,12 @@ Hierarchy of AbstractPhotosynthesisMode:
 - [`PCO₂Mode`](@ref)
 
 """
-abstract type AbstractPhotosynthesisMode end
+abstract type AbstractPhotosynthesisMode end;
 
 
 """ An empty structure to signal the function to calculate photosynthetic rates based on leaf diffusive conductance to CO₂ """
-struct GCO₂Mode <: AbstractPhotosynthesisMode end
+struct GCO₂Mode <: AbstractPhotosynthesisMode end;
 
 
 """ An empty structure to signal the function to calculate photosynthetic rates based on CO₂ partial pressure """
-struct PCO₂Mode <: AbstractPhotosynthesisMode end
+struct PCO₂Mode <: AbstractPhotosynthesisMode end;

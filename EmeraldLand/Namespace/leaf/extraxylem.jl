@@ -29,7 +29,7 @@ Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
     v_max::FT = 5
     "Vulnerability curve of the extraxylary capacitor"
     vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}(5,1)
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -58,9 +58,9 @@ Base.@kwdef mutable struct ExtraXylemCapacitorAuxil{FT}
     k::FT = 100
     "pressure of the capacitor `[MPa]`"
     p::FT = 0
-    "Pressure at the end of the capacitor `[MPa]`"
+    "Pressure at the end; of the capacitor `[MPa]`"
     p_leaf::FT = 0
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -86,4 +86,4 @@ Base.@kwdef mutable struct ExtraXylemCapacitor{FT}
     state::ExtraXylemCapacitorState{FT} = ExtraXylemCapacitorState{FT}()
     "Auxilary variables of the capacitor"
     auxil::ExtraXylemCapacitorAuxil{FT} = ExtraXylemCapacitorAuxil{FT}()
-end
+end;

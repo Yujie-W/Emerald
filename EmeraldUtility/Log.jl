@@ -20,7 +20,7 @@ Add a time tag to @error expression, and display the message
 """
 macro terror(exps...)
     quote
-        @error "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n       $($(esc(exps[1])))" $(exps[2:end]...)
+        @error "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n       $($(esc(exps[1])))" $(exps[2:end;]...)
     end;
 end;
 
@@ -34,7 +34,7 @@ Add a time tag to @info expression, and display the message
 """
 macro tinfo(exps...)
     quote
-        @info "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n      $($(esc(exps[1])))" $(exps[2:end]...)
+        @info "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n      $($(esc(exps[1])))" $(exps[2:end;]...)
     end;
 end;
 
@@ -48,7 +48,7 @@ Add a time tag to @warn expression, and display the message
 """
 macro twarn(exps...)
     quote
-        @warn "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n         $($(esc(exps[1])))" $(exps[2:end]...)
+        @warn "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n         $($(esc(exps[1])))" $(exps[2:end;]...)
     end;
 end;
 
@@ -120,4 +120,4 @@ pretty_display!(pvec::Union{Vector{Pair{String,String}}, Vector{Pair{String,Any}
 );
 
 
-end # module
+end; # module

@@ -6,4 +6,4 @@ include("Terminal.jl");
 include("Text.jl");
 
 
-end # module
+end; # module

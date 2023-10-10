@@ -56,7 +56,7 @@ time = parse_timestamp(2020, 100.23435436);
 ```
 
 """
-function parse_timestamp end
+function parse_timestamp end;
 
 parse_timestamp(timestamp::Union{Int,String}; in_format::String = "YYYYMMDD", out_format::String = "DOY") = (
     _time_stamp = string(timestamp);
@@ -160,7 +160,7 @@ function month_days(year::Int, month::Int)
     @assert 1 <= month <= 12;
 
     return isleapyear(year) ? NDAYS_LEAP[month] : NDAYS[month]
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -206,7 +206,7 @@ function month_ind(year::Int, doy::Number)
     end;
 
     return _month
-end
+end;
 
 
-end # module
+end; # module

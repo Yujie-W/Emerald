@@ -29,4 +29,4 @@ include("../EmeraldEarth/EmeraldEarth.jl");
 include("../EmeraldFrontier/EmeraldFrontier.jl");
 
 
-end # module
+end; # module

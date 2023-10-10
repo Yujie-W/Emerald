@@ -26,7 +26,7 @@ Run simulations on SPAC, given
 - `displaying` Whether to display information regarding process
 
 """
-function simulation! end
+function simulation! end;
 
 simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
             wd_mat::Matrix{Union{Nothing,Dict{String,Any}}},

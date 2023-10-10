@@ -27,7 +27,7 @@ Update the RubisCO limited photosynthetic rate (p_i for PCO₂Mode and g_lc for 
 - `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
 
 """
-function rubisco_limited_rate! end
+function rubisco_limited_rate! end;
 
 rubisco_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psm.auxil.a_c = β * psm.auxil.v_cmax * (p_i - psm.auxil.γ_star) / (p_i + psm.auxil.k_m);

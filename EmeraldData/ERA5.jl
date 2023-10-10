@@ -105,7 +105,7 @@ Base.@kwdef struct ERA5SingleLevelsDriver
     WINDU::Tuple{String,String} = ("u10", "10m_u_component_of_wind")
     "Wind speed"
     WINDV::Tuple{String,String} = ("v10", "10m_v_component_of_wind")
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -132,7 +132,7 @@ function fetch_ERA5_data!(year::Int; notification::Bool = false)
     if !isdir(_dir)
         @warn "$(_dir) does not exist, skipping...";
         return nothing
-    end
+    end;
 
     # An email will be sent out per year, comment it if you do not want
     fetch_data!(_dts, year; vars=ERA5_LABELS, folder=_dir);
@@ -145,7 +145,7 @@ function fetch_ERA5_data!(year::Int; notification::Bool = false)
     end;
 
     return nothing
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -187,7 +187,7 @@ Thus, we need to regrid the dataset to ensure that the pixel orders match. For e
     when the longitude ranges from 179E to 180E, and in this case, we need to include the -180E slice. Otherwise, the mean longitude is 179.375 rather than 179.5. The general function is
 
 """
-function regrid_ERA5! end
+function regrid_ERA5! end;
 
 regrid_ERA5!(year::Int, zoom::Int = 1; notification::Bool = false) = (
     regrid_ERA5!.(year, zoom, ERA5_LABELS, ERA5_LAYERS);
@@ -347,7 +347,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
     save_nc!(_nc_path, _df, [ERA5_NETCDF; "FDOY"; "WIND"; "RAD_DIF"; "VPD"], _var_attrs);
 
     return _nc_path, _nc_name
-end
+end;
 
 
-end # module
+end; # module

@@ -17,7 +17,7 @@ Update the rhizosphere pressure profile, given
 
 """
 function rhizosphere_pressure_profile!(root::Root{FT}, soil::SoilLayer{FT}) where {FT}
-    # compute the pressure at the end of rhizosphere
+    # compute the pressure at the end; of rhizosphere
     k_rhizo_max = root.rhizosphere.state.k_max * root.xylem.state.area;
     f_st_soil = relative_surface_tension(soil.auxil.t);
     f_vis_soil = relative_viscosity(soil.auxil.t);

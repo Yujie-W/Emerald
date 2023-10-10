@@ -32,7 +32,7 @@ Base.@kwdef mutable struct Leaf{FT}
     photosystem::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}} = C3VJP{FT}()
     "Leaf xylem hydraulics struct"
     xylem::XylemHydraulics{FT}
-end
+end;
 
 
 """

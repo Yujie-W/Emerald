@@ -139,7 +139,7 @@ function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectr
     _Σppar_diff = _ppar_diff' * ΔΛ_PAR * 1000;
 
     return _Σpar_dir + _Σpar_diff, _Σapar_dir + _Σapar_diff, _Σppar_dir + _Σppar_diff
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -205,4 +205,4 @@ end;
 =#
 
 
-end # module
+end; # module

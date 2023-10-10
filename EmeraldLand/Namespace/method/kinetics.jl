@@ -17,7 +17,7 @@ Hierarchy of AbstractTemperatureDependency:
 - [`Q10`](@ref)
 
 """
-abstract type AbstractTemperatureDependency{FT<:AbstractFloat} end
+abstract type AbstractTemperatureDependency{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################
@@ -50,7 +50,7 @@ Base.@kwdef mutable struct Arrhenius{FT<:AbstractFloat} <: AbstractTemperatureDe
     VAL_REF::FT
     "Activation energy"
     ΔHA::FT
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -89,7 +89,7 @@ Base.@kwdef mutable struct ArrheniusPeak{FT<:AbstractFloat} <: AbstractTemperatu
     ΔHD::FT
     "Entropy factor"
     ΔSV::FT
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -122,7 +122,7 @@ Base.@kwdef mutable struct Q10{FT<:AbstractFloat} <: AbstractTemperatureDependen
     T_REF::FT
     "Uncorrected vakye at reference temperature"
     VAL_REF::FT
-end
+end;
 
 
 #######################################################################################################################################################################################################
@@ -160,7 +160,7 @@ Base.@kwdef mutable struct Q10Peak{FT<:AbstractFloat} <: AbstractTemperatureDepe
     ΔHD::FT
     "Entropy factor"
     ΔSV::FT
-end
+end;
 
 
 #######################################################################################################################################################################################################

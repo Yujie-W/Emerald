@@ -63,4 +63,4 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     initialize!(config, _spac);
 
     return _spac
-end
+end;

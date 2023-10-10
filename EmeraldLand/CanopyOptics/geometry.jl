@@ -13,7 +13,7 @@ This function updates canopy optical properties for canopy. The supported method
 - Update scattering coefficient matrices
 
 """
-function canopy_optical_properties! end
+function canopy_optical_properties! end;
 
 
 #######################################################################################################################################################################################################
@@ -30,14 +30,14 @@ function canopy_optical_properties! end
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}) where {FT}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT}
 
 Updates canopy optical properties (extinction coefficients for direct and diffuse light) based on the SAIL model, given
 - `config` SPAC configurations
-- `can` `HyperspectralMLCanopy` type struct
+- `can` `MultiLayerCanopy` type struct
 
 """
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}) where {FT} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
     (; DIM_LAYER, Θ_AZI, _1_AZI, _COS_Θ_AZI, _COS²_Θ_INCL, _COS²_Θ_INCL_AZI) = config;
     (; HOT_SPOT, OPTICS, P_INCL) = can;
 
@@ -127,16 +127,16 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 #######################################################################################################################################################################################################
 """
 
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, sbulk::SoilBulk{FT}) where {FT}
+    canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, sbulk::SoilBulk{FT}) where {FT}
 
 Updates canopy optical properties (scattering coefficient matrices), given
 - `config` Configuration for `MultiLayerSPAC`
-- `can` `HyperspectralMLCanopy` type struct
+- `can` `MultiLayerCanopy` type struct
 - `leaves` Vector of `Leaf`
 - `sbulk` `SoilBulk` type struct
 
 """
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{FT}, leaves::Vector{Leaf{FT}}, sbulk::SoilBulk{FT}) where {FT} = (
+canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, sbulk::SoilBulk{FT}) where {FT} = (
     (; DIM_LAYER) = config;
     (; OPTICS) = can;
     @assert length(leaves) == DIM_LAYER "Number of leaves must be equal to the canopy layers!";
@@ -149,9 +149,9 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
         OPTICS.τ_lw  .= 0;
         OPTICS.τ_sd  .= 0;
         OPTICS._τ_ss .= 0;
-        OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
-        OPTICS.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
-        OPTICS.ρ_lw[end] = sbulk.auxil.ρ_lw;
+        OPTICS.ρ_dd[:,end;] .= sbulk.auxil.ρ_sw;
+        OPTICS.ρ_sd[:,end;] .= sbulk.auxil.ρ_sw;
+        OPTICS.ρ_lw[end;] = sbulk.auxil.ρ_lw;
 
         return nothing
     end;
@@ -175,8 +175,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     OPTICS._ρ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdb .* can.δlai' .* can.ci);
 
     # 3. update the effective reflectance per layer
-    OPTICS.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
-    OPTICS.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
+    OPTICS.ρ_dd[:,end;] .= sbulk.auxil.ρ_sw;
+    OPTICS.ρ_sd[:,end;] .= sbulk.auxil.ρ_sw;
 
     for i in DIM_LAYER:-1:1
         _r_dd__ = view(OPTICS._ρ_dd,:,i  );    # reflectance without correction
@@ -210,7 +210,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     end;
 
     # 5. update the effective longwave reflectance and transmittance
-    OPTICS.ρ_lw[end] = sbulk.auxil.ρ_lw;
+    OPTICS.ρ_lw[end;] = sbulk.auxil.ρ_lw;
 
     for i in DIM_LAYER:-1:1
         _dnorm = 1 - OPTICS._ρ_lw[i] * OPTICS.ρ_lw[i+1];
