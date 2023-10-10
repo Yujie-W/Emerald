@@ -31,7 +31,7 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
     (; AIRS, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
     for i in eachindex(LEAVES)
-        f_sl = CANOPY.OPTICS.p_sunlit[DIM_LAYER + 1 - i];
+        f_sl = CANOPY.sun_geometry.auxil.p_sunlit[DIM_LAYER + 1 - i];
 
         g_sh = 1 / (1 /LEAVES[i].flux.state.g_H₂O_s_shaded + 1 / (FT(1.35) * LEAVES[i].flux.auxil.g_CO₂_b));
         g_sl = 0;

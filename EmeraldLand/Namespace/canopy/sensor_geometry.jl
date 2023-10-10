@@ -45,7 +45,29 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometryAuxil{FT}
+    # Scattering coefficients
+    "Backward diffuse->observer scatter weight"
+    dob::FT = 0
+    "Forward diffuse->observer scatter weight"
+    dof::FT = 0
+    "Backward direct->observer scatter weight"
+    sob::FT = 0
+    "Forward direct->observer scatter weight"
+    sof::FT = 0
+
+    # Extinction coefficient related
+    "Observer direction beam extinction coefficient weight (diffuse)"
+    ko::FT = 0
+    "Probability of directly viewing a leaf in observer direction at different layer boundaries"
+    po::Vector{FT}
+    "Bi-directional probability of directly viewing a leaf at different layer boundaries (solar->canopy->observer)"
+    pso::Vector{FT}
 end;
+
+SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
+            po  = Vector{FT}(undef, config.DIM_LAYER + 1),
+            pso = Vector{FT}(undef, config.DIM_LAYER + 1)
+);
 
 
 #######################################################################################################################################################################################################
@@ -70,5 +92,7 @@ Base.@kwdef mutable struct SensorGeometry{FT}
     "State variables"
     state::SensorGeometryState{FT} = SensorGeometryState{FT}()
     "Auxiliary variables"
-    auxil::SensorGeometryAuxil{FT} = SensorGeometryAuxil{FT}()
+    auxil::SensorGeometryAuxil{FT}
 end;
+
+SensorGeometry(config::SPACConfiguration{FT}) where {FT} = SensorGeometry{FT}(auxil = SensorGeometryAuxil(config));

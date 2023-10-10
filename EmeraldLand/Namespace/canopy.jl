@@ -30,38 +30,10 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloat}
     # Diagnostic variables
-    "Backward diffuse->diffuse scatter weight"
-    ddb::FT = 0
-    "Forward diffuse->diffuse scatter weight"
-    ddf::FT = 0
-    "Backward diffuse->observer scatter weight"
-    dob::FT = 0
-    "Forward diffuse->observer scatter weight"
-    dof::FT = 0
     "Conversion factor fo for angle towards observer at different inclination and azimuth angles"
     fo::Matrix{FT}
     "Conversion factor fs for angles from solar at different inclination and azimuth angles"
     fs::Matrix{FT}
-    "Observer direction beam extinction coefficient weight (diffuse)"
-    ko::FT = 0
-    "Solar direction beam extinction coefficient weight (direct)"
-    ks::FT = 0
-    "Probability of directly viewing a leaf in solar direction at different layers"
-    p_sunlit::Vector{FT}
-    "Probability of directly viewing a leaf in observer direction at different layer boundaries"
-    po::Vector{FT}
-    "Probability of directly viewing a leaf in solar direction at different layer boundaries"
-    ps::Vector{FT}
-    "Bi-directional probability of directly viewing a leaf at different layer boundaries (solar->canopy->observer)"
-    pso::Vector{FT}
-    "Directional->diffuse backscatter weight"
-    sdb::FT = 0
-    "Directional->diffuse forward scatter weight"
-    sdf::FT = 0
-    "Solar directional->observer weight of specular2directional backscatter coefficient"
-    sob::FT = 0
-    "Solar directional->observer weight of specular2directional forward coefficient"
-    sof::FT = 0
     "Effective emissivity for different layers"
     ϵ::Vector{FT}
     "Effective reflectance for diffuse->diffuse"
@@ -178,10 +150,6 @@ HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} =
     return HyperspectralMLCanopyOpticalProperty{FT}(
                 fo                  = zeros(FT, DIM_INCL, DIM_AZI),
                 fs                  = zeros(FT, DIM_INCL, DIM_AZI),
-                p_sunlit            = zeros(FT, DIM_LAYER),
-                po                  = zeros(FT, DIM_LAYER+1),
-                ps                  = zeros(FT, DIM_LAYER+1),
-                pso                 = zeros(FT, DIM_LAYER+1),
                 ϵ                   = zeros(FT, DIM_LAYER),
                 ρ_dd                = zeros(FT, DIM_WL, DIM_LAYER+1),
                 ρ_lw                = zeros(FT, DIM_LAYER+1),
@@ -475,9 +443,9 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat}
     # sun-sensor geometry related structs
     "Sensor geometry information"
-    sensor_geometry::SensorGeometry{FT} = SensorGeometry{FT}()
+    sensor_geometry::SensorGeometry{FT}
     "Sun geometry information"
-    sun_geometry::SunGeometry{FT} = SunGeometry{FT}()
+    sun_geometry::SunGeometry{FT}
 
 
 
@@ -522,11 +490,13 @@ HyperspectralMLCanopy(config::SPACConfiguration{FT}) where {FT} = (
     _δlai = _lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
 
     return HyperspectralMLCanopy{FT}(
-                OPTICS      = HyperspectralMLCanopyOpticalProperty(config),
-                RADIATION   = HyperspectralMLCanopyRadiationProfile(config),
-                P_INCL      = ones(FT, DIM_INCL) ./ DIM_INCL,
-                lai         = _lai,
-                δlai        = _δlai,
-                _x_bnds     = ([0; [sum(_δlai[1:i]) for i in 1:DIM_LAYER]] ./ -_lai),
+                sensor_geometry = SensorGeometry(config),
+                sun_geometry    = SunGeometry(config),
+                OPTICS          = HyperspectralMLCanopyOpticalProperty(config),
+                RADIATION       = HyperspectralMLCanopyRadiationProfile(config),
+                P_INCL          = ones(FT, DIM_INCL) ./ DIM_INCL,
+                lai             = _lai,
+                δlai            = _δlai,
+                _x_bnds         = ([0; [sum(_δlai[1:i]) for i in 1:DIM_LAYER]] ./ -_lai),
     )
 );

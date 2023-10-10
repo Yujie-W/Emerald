@@ -82,8 +82,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 
         # convert the excitation radiation to fluorescence components
         OPTICS._tmp_vec_sif_1 .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(_e_dir);
-        OPTICS._tmp_vec_sif_2 .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(_e_dif) * OPTICS.p_sunlit[i];
-        OPTICS._tmp_vec_sif_3 .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(_e_dif) * (1 - OPTICS.p_sunlit[i]);
+        OPTICS._tmp_vec_sif_2 .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(_e_dif) * can.sun_geometry.auxil.p_sunlit[i];
+        OPTICS._tmp_vec_sif_3 .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(_e_dif) * (1 - can.sun_geometry.auxil.p_sunlit[i]);
 
         # convert the SIF back to energy unit if ϕ_photon is true
         if Φ_PHOTON
@@ -188,8 +188,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         # total emitted SIF for upward and downward direction
         # set _ilai to LAI but not LAI * CI as this is the total emitted SIF
         _ilai = can.δlai[i];
-        RADIATION.s_layer_down[:,i] .= _ilai .* OPTICS.p_sunlit[i] .* RADIATION._s_sunlit_down .+ _ilai .* (1 - OPTICS.p_sunlit[i]) .* RADIATION._s_shaded_down;
-        RADIATION.s_layer_up[:,i]   .= _ilai .* OPTICS.p_sunlit[i] .* RADIATION._s_sunlit_up   .+ _ilai .* (1 - OPTICS.p_sunlit[i]) .* RADIATION._s_shaded_up;
+        RADIATION.s_layer_down[:,i] .= _ilai .* can.sun_geometry.auxil.p_sunlit[i] .* RADIATION._s_sunlit_down .+ _ilai .* (1 - can.sun_geometry.auxil.p_sunlit[i]) .* RADIATION._s_shaded_down;
+        RADIATION.s_layer_up[:,i]   .= _ilai .* can.sun_geometry.auxil.p_sunlit[i] .* RADIATION._s_sunlit_up   .+ _ilai .* (1 - can.sun_geometry.auxil.p_sunlit[i]) .* RADIATION._s_shaded_up;
     end;
 
     # 2. account for the SIF emission from bottom to up
@@ -233,17 +233,20 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
     RADIATION.sif_up[:,end] .= view(RADIATION.sif_down,:,DIM_LAYER+1) .* view(OPTICS.ρ_dd,SPECTRA.IΛ_SIF,DIM_LAYER+1) .+ view(RADIATION._s_emit_up,:,DIM_LAYER+1);
 
     # 4. compute SIF from the observer direction
-    OPTICS._tmp_vec_layer .= (view(OPTICS.pso,1:DIM_LAYER) .+ view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.pso,1:DIM_LAYER) .+ view(can.sensor_geometry.auxil.pso,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
     mul!(RADIATION.sif_obs_sunlit, RADIATION._sif_obs_sunlit, OPTICS._tmp_vec_layer);
 
-    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1) .- view(OPTICS.pso,1:DIM_LAYER) .- view(OPTICS.pso,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.po,1:DIM_LAYER) .+
+                              view(can.sensor_geometry.auxil.po,2:DIM_LAYER+1) .-
+                              view(can.sensor_geometry.auxil.pso,1:DIM_LAYER) .-
+                              view(can.sensor_geometry.auxil.pso,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
     mul!(RADIATION.sif_obs_shaded, RADIATION._sif_obs_shaded, OPTICS._tmp_vec_layer);
 
     RADIATION._sif_obs_scatter .= view(OPTICS.σ_dob,SPECTRA.IΛ_SIF,:) .* view(RADIATION.sif_down,:,1:DIM_LAYER) .+ view(OPTICS.σ_dof,SPECTRA.IΛ_SIF,:) .* view(RADIATION.sif_up,:,1:DIM_LAYER);
-    OPTICS._tmp_vec_layer .= (view(OPTICS.po,1:DIM_LAYER) .+ view(OPTICS.po,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
+    OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.po,1:DIM_LAYER) .+ view(can.sensor_geometry.auxil.po,2:DIM_LAYER+1)) ./ 2 .* can.δlai .* can.ci ./ FT(pi);
     mul!(RADIATION.sif_obs_scatter, RADIATION._sif_obs_scatter, OPTICS._tmp_vec_layer);
 
-    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* OPTICS.po[end] ./ FT(pi);
+    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* can.sensor_geometry.auxil.po[end] ./ FT(pi);
 
     RADIATION.sif_obs .= RADIATION.sif_obs_sunlit .+ RADIATION.sif_obs_shaded .+ RADIATION.sif_obs_scatter .+ RADIATION.sif_obs_soil;
 

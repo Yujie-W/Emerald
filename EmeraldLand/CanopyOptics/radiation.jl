@@ -130,13 +130,12 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _dof_i = view(OPTICS.σ_dof,:,i);   # scattering coefficient forward for diffuse->observer
         _so__i = view(OPTICS.σ_so ,:,i);   # bidirectional from solar to observer
 
-        # _e_v_i .= (OPTICS.po[i] .* _dob_i .* _e_d_i .+ OPTICS.po[i] .* _dof_i .* _e_u_i .+ OPTICS.pso[i] .* _so__i .* rad.e_direct) * _ilai;
-        _e_v_i  .= OPTICS.po[i] .* _dob_i .* _e_d_i;
-        _e_v_i .+= OPTICS.po[i] .* _dof_i .* _e_u_i;
-        _e_v_i .+= OPTICS.pso[i] .* _so__i .* rad.e_direct;
+        _e_v_i  .= can.sensor_geometry.auxil.po[i] .* _dob_i .* _e_d_i;
+        _e_v_i .+= can.sensor_geometry.auxil.po[i] .* _dof_i .* _e_u_i;
+        _e_v_i .+= can.sensor_geometry.auxil.pso[i] .* _so__i .* rad.e_direct;
         _e_v_i .*= can.δlai[i] * can.ci;
     end;
-    RADIATION.e_v[:,end] .= OPTICS.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
+    RADIATION.e_v[:,end] .= can.sensor_geometry.auxil.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
 
     for i in eachindex(RADIATION.e_o)
         RADIATION.e_o[i] = sum(view(RADIATION.e_v,i,:)) / FT(pi);
@@ -149,8 +148,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
         _Σ_shaded = view(RADIATION.e_net_diffuse,:,i)' * SPECTRA.ΔΛ / 1000 / can.δlai[i];
         _Σ_sunlit = view(RADIATION.e_net_direct ,:,i)' * SPECTRA.ΔΛ / 1000 / can.δlai[i];
         RADIATION.r_net_sw_shaded[i] = _Σ_shaded;
-        RADIATION.r_net_sw_sunlit[i] = _Σ_sunlit / OPTICS.p_sunlit[i] + _Σ_shaded;
-        RADIATION.r_net_sw[i] = _Σ_shaded * (1 - OPTICS.p_sunlit[i]) + _Σ_sunlit * OPTICS.p_sunlit[i];
+        RADIATION.r_net_sw_sunlit[i] = _Σ_sunlit / can.sun_geometry.auxil.p_sunlit[i] + _Σ_shaded;
+        RADIATION.r_net_sw[i] = _Σ_shaded * (1 - can.sun_geometry.auxil.p_sunlit[i]) + _Σ_sunlit * can.sun_geometry.auxil.p_sunlit[i];
     end;
 
     sbulk.auxil.e_net_direct .= view(RADIATION.e_direct,:,DIM_LAYER+1) .* (1 .- sbulk.auxil.ρ_sw);
@@ -172,9 +171,9 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::HyperspectralMLCanopy{F
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         RADIATION._par_shaded  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_diffuse,SPECTRA.IΛ_PAR,i)) .* 1000;
-        RADIATION._par_sunlit  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ OPTICS.p_sunlit[i];
+        RADIATION._par_sunlit  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.sun_geometry.auxil.p_sunlit[i];
         RADIATION._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_diffuse,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.δlai[i];
-        RADIATION._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.δlai[i] ./ OPTICS.p_sunlit[i];
+        RADIATION._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.δlai[i] ./ can.sun_geometry.auxil.p_sunlit[i];
         RADIATION._ppar_shaded .= RADIATION._apar_shaded .* _α_apar;
         RADIATION._ppar_sunlit .= RADIATION._apar_sunlit .* _α_apar;
 

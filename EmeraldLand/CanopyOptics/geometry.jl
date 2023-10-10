@@ -48,18 +48,18 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     # 1. update the canopy optical properties related to extinction and scattering coefficients
     extinction_scattering_coefficients!(config, can);
 
-    OPTICS.ko  = P_INCL' * OPTICS._ko;
-    OPTICS.ks  = P_INCL' * OPTICS._ks;
-    OPTICS.sob = P_INCL' * OPTICS._sb;
-    OPTICS.sof = P_INCL' * OPTICS._sf;
+    can.sensor_geometry.auxil.ko = P_INCL' * OPTICS._ko;
+    can.sun_geometry.auxil.ks = P_INCL' * OPTICS._ks;
     OPTICS._bf = P_INCL' * _COS²_Θ_INCL;
 
-    OPTICS.sdb = (OPTICS.ks + OPTICS._bf) / 2;
-    OPTICS.sdf = (OPTICS.ks - OPTICS._bf) / 2;
-    OPTICS.dob = (OPTICS.ko + OPTICS._bf) / 2;
-    OPTICS.dof = (OPTICS.ko - OPTICS._bf) / 2;
-    OPTICS.ddb = (1 + OPTICS._bf) / 2;
-    OPTICS.ddf = (1 - OPTICS._bf) / 2;
+    can.sun_geometry.auxil.ddb = (1 + OPTICS._bf) / 2;
+    can.sun_geometry.auxil.ddf = (1 - OPTICS._bf) / 2;
+    can.sun_geometry.auxil.sdb = (can.sun_geometry.auxil.ks + OPTICS._bf) / 2;
+    can.sun_geometry.auxil.sdf = (can.sun_geometry.auxil.ks - OPTICS._bf) / 2;
+    can.sensor_geometry.auxil.dob = (can.sensor_geometry.auxil.ko + OPTICS._bf) / 2;
+    can.sensor_geometry.auxil.dof = (can.sensor_geometry.auxil.ko - OPTICS._bf) / 2;
+    can.sensor_geometry.auxil.sob = P_INCL' * OPTICS._sb;
+    can.sensor_geometry.auxil.sof = P_INCL' * OPTICS._sf;
 
     # 2. update the matrices fs and fo
     OPTICS._cos_θ_azi_raa .= cosd.(Θ_AZI .- (can.sensor_geometry.state.vaa - can.sun_geometry.state.saa));
@@ -79,19 +79,20 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     OPTICS._abs_fs_fo .= abs.(OPTICS._fs_fo);
 
     # 3. update the viewing fraction ps, po, pso, and p_sunlit
-    OPTICS.po = exp.(OPTICS.ko .* can.ci * can.lai .* can._x_bnds);
-    OPTICS.ps = exp.(OPTICS.ks .* can.ci * can.lai .* can._x_bnds);
+    can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.ci * can.lai .* can._x_bnds);
+    can.sun_geometry.auxil.ps = exp.(can.sun_geometry.auxil.ks .* can.ci * can.lai .* can._x_bnds);
     for i in 1:DIM_LAYER
         _ilai = can.ci * can.δlai[i];
-        OPTICS.p_sunlit[i] = 1 / (OPTICS.ks * _ilai) * (exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[i]) - exp(OPTICS.ks * can.ci * can.lai * can._x_bnds[i+1]));
+        can.sun_geometry.auxil.p_sunlit[i] = 1 / (can.sun_geometry.auxil.ks * _ilai) *
+                                             (exp(can.sun_geometry.auxil.ks * can.ci * can.lai * can._x_bnds[i]) - exp(can.sun_geometry.auxil.ks * can.ci * can.lai * can._x_bnds[i+1]));
     end;
 
     _dso = sqrt( tand(can.sun_geometry.state.sza) ^ 2 +
                  tand(can.sensor_geometry.state.vza) ^ 2 -
                  2 * tand(can.sun_geometry.state.sza) * tand(can.sensor_geometry.state.vza) * cosd(can.sensor_geometry.state.vaa - can.sun_geometry.state.saa) );
     @inline _pdf(x::FT) where {FT} = (
-        _Σk = OPTICS.ko + OPTICS.ks;
-        _Πk = OPTICS.ko * OPTICS.ks;
+        _Σk = can.sensor_geometry.auxil.ko + can.sun_geometry.auxil.ks;
+        _Πk = can.sensor_geometry.auxil.ko * can.sun_geometry.auxil.ks;
         _cl = can.ci * can.lai;
         _α  = _dso / HOT_SPOT * 2 / _Σk;
 
@@ -103,7 +104,7 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     );
 
     for i in eachindex(can._x_bnds)
-        OPTICS.pso[i] = quadgk(_pdf, can._x_bnds[i] - FT(1)/DIM_LAYER, can._x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
+        can.sensor_geometry.auxil.pso[i] = quadgk(_pdf, can._x_bnds[i] - FT(1)/DIM_LAYER, can._x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
     end;
 
     return nothing
@@ -157,17 +158,17 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
 
     # 1. update the scattering coefficients for different layers
     for i in eachindex(leaves)
-        OPTICS.σ_ddb[:,i] .= OPTICS.ddb * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.ddf * leaves[i].bio.auxil.τ_leaf;
-        OPTICS.σ_ddf[:,i] .= OPTICS.ddf * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.ddb * leaves[i].bio.auxil.τ_leaf;
-        OPTICS.σ_sdb[:,i] .= OPTICS.sdb * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.sdf * leaves[i].bio.auxil.τ_leaf;
-        OPTICS.σ_sdf[:,i] .= OPTICS.sdf * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.sdb * leaves[i].bio.auxil.τ_leaf;
-        OPTICS.σ_dob[:,i] .= OPTICS.dob * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.dof * leaves[i].bio.auxil.τ_leaf;
-        OPTICS.σ_dof[:,i] .= OPTICS.dof * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.dob * leaves[i].bio.auxil.τ_leaf;
-        OPTICS.σ_so[:,i]  .= OPTICS.sob * leaves[i].bio.auxil.ρ_leaf .+ OPTICS.sof * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_ddb[:,i] .= can.sun_geometry.auxil.ddb * leaves[i].bio.auxil.ρ_leaf .+ can.sun_geometry.auxil.ddf * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_ddf[:,i] .= can.sun_geometry.auxil.ddf * leaves[i].bio.auxil.ρ_leaf .+ can.sun_geometry.auxil.ddb * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_sdb[:,i] .= can.sun_geometry.auxil.sdb * leaves[i].bio.auxil.ρ_leaf .+ can.sun_geometry.auxil.sdf * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_sdf[:,i] .= can.sun_geometry.auxil.sdf * leaves[i].bio.auxil.ρ_leaf .+ can.sun_geometry.auxil.sdb * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_dob[:,i] .= can.sensor_geometry.auxil.dob * leaves[i].bio.auxil.ρ_leaf .+ can.sensor_geometry.auxil.dof * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_dof[:,i] .= can.sensor_geometry.auxil.dof * leaves[i].bio.auxil.ρ_leaf .+ can.sensor_geometry.auxil.dob * leaves[i].bio.auxil.τ_leaf;
+        OPTICS.σ_so[:,i]  .= can.sensor_geometry.auxil.sob * leaves[i].bio.auxil.ρ_leaf .+ can.sensor_geometry.auxil.sof * leaves[i].bio.auxil.τ_leaf;
     end;
 
     # 2. update the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    OPTICS._τ_ss .= exp.(-1 .* OPTICS.ks .* can.δlai .* can.ci);
+    OPTICS._τ_ss .= exp.(-1 .* can.sun_geometry.auxil.ks .* can.δlai .* can.ci);
     OPTICS._τ_dd .= exp.(-1 .* (1 .- OPTICS.σ_ddf) .* can.δlai' .* can.ci);
     OPTICS._τ_sd .= 1 .- exp.(-1 .* OPTICS.σ_sdf .* can.δlai' .* can.ci);
     OPTICS._ρ_dd .= 1 .- exp.(-1 .* OPTICS.σ_ddb .* can.δlai' .* can.ci);
@@ -201,8 +202,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::HyperspectralMLCa
     # 4. compute longwave effective emissivity, reflectance, and transmittance (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
     for i in 1:DIM_LAYER
         _ilai = can.δlai[i] * can.ci;
-        _σ_lw_b = OPTICS.ddb * leaves[i].bio.auxil.ρ_LW + OPTICS.ddf * leaves[i].bio.auxil.τ_LW;
-        _σ_lw_f = OPTICS.ddf * leaves[i].bio.auxil.ρ_LW + OPTICS.ddb * leaves[i].bio.auxil.τ_LW;
+        _σ_lw_b = can.sun_geometry.auxil.ddb * leaves[i].bio.auxil.ρ_LW + can.sun_geometry.auxil.ddf * leaves[i].bio.auxil.τ_LW;
+        _σ_lw_f = can.sun_geometry.auxil.ddf * leaves[i].bio.auxil.ρ_LW + can.sun_geometry.auxil.ddb * leaves[i].bio.auxil.τ_LW;
         OPTICS._τ_lw[i] = exp(-1 * (1 - _σ_lw_f) * _ilai);
         OPTICS._ρ_lw[i] = 1 - exp(-1 * _σ_lw_b * _ilai);
         OPTICS.ϵ[i] = 1 - OPTICS._τ_lw[i] - OPTICS._ρ_lw[i];
