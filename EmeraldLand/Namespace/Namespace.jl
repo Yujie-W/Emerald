@@ -34,6 +34,7 @@ include("config/config.jl");
 include("method/beta.jl");
 include("method/colimit.jl");
 include("method/kinetics.jl");
+include("method/lidf.jl");
 include("method/mode.jl");
 include("method/pv.jl");
 include("method/soil.jl");
@@ -75,6 +76,10 @@ include("leaf/photosynthesis.jl");
 include("leaf/leaf.jl");
 
 
+# Canopy
+include("canopy/geometry.jl");
+
+
 # Environment
 include("environment/air.jl");
 include("environment/radiation.jl");
@@ -86,7 +91,6 @@ include("environment/meteorology.jl");
 
 
 
-include("geometry.jl");
 
 include("canopy.jl");
 

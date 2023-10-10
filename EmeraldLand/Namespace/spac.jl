@@ -106,12 +106,6 @@ mutable struct MultiLayerSPAC{FT}
     JUNCTION::JunctionCapacitor{FT}
 
     # Cache variables
-    "Flow rate per root layer"
-    _fs::Vector{FT}
-    "Conductances for each root layer at given flow"
-    _ks::Vector{FT}
-    "Pressure for each root layer at given flow"
-    _ps::Vector{FT}
     "Whether there is any root connected to soil"
     _root_connection::Bool
 end
@@ -191,9 +185,6 @@ MultiLayerSPAC(
                 soil_layers,                                            # SOILS
                 trunk,                                                  # TRUNK
                 JunctionCapacitor{FT}(),                                # JUNCTION
-                zeros(FT, config.DIM_ROOT),                             # _fs
-                zeros(FT, config.DIM_ROOT),                             # _ks
-                zeros(FT, config.DIM_ROOT),                             # _ps
                 true,                                                   # _root_connection
     )
 );

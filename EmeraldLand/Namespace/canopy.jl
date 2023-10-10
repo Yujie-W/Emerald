@@ -238,86 +238,6 @@ HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} =
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this type
-# General
-#     2022-Jun-15: add abstract type for canopy radiation profile
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Hierarchy of AbstractCanopy:
-- [`BroadbandSLCanopyRadiationProfile`](@ref)
-- [`HyperspectralMLCanopyRadiationProfile`](@ref)
-
-"""
-abstract type AbstractCanopyRadiationProfile{FT<:AbstractFloat} end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this structure
-# General
-#     2022-Jun-15: add struct for broadband radiation
-#     2022-Jun-16: add cache values for diffuse and direct radiation
-#     2022-Jun-16: add more variable to store partitions and radiations
-#     2022-Jul-19: use kwdef for the constructor
-#     2022-Jul-19: add dimension control to struct
-#     2023-Jun-16: remove fields DIM_*
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Structure to store canopy radiation profiles
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct BroadbandSLCanopyRadiationProfile{FT<:AbstractFloat} <: AbstractCanopyRadiationProfile{FT}
-    # diagnostic variables that change with time
-    "Mean shaded leaf APAR (per leaf area) in μmol m⁻² s⁻¹"
-    apar_shaded::FT = 0
-    "Mean sunlit leaf APAR (per leaf area) in μmol m⁻² s⁻¹"
-    apar_sunlit::FT = 0
-    "Weighted extinction coefficient for diffuse radiation (ratio between projected area to true leaf area)"
-    k_diffuse::FT = 0
-    "Weighted extinction coefficient for direct radiation (ratio between projected area to true leaf area)"
-    k_direct::FT = 0
-    "Total shaded leaf area index"
-    lai_shaded::FT = 0
-    "Total sunlit leaf area index"
-    lai_sunlit::FT = 0
-    "Mean shaded leaf PAR (per leaf area) in μmol m⁻² s⁻¹"
-    par_shaded::FT = 0
-    "Mean sunlit leaf PAR (per leaf area) in μmol m⁻² s⁻¹"
-    par_sunlit::FT = 0
-    "Net absorbed radiation for shaded leaves `[W m⁻²]`"
-    r_net_shaded::FT = 0
-    "Net absorbed radiation for sunlit leaves `[W m⁻²]`"
-    r_net_sunlit::FT = 0
-
-    # caches to speed up calculations
-    "Extinction coefficient for diffuse radiation at different leaf inclination angles"
-    _k_diffuse::Vector{FT}
-    "Extinction coefficient for direct radiation at different leaf inclination angles"
-    _k_direct::Vector{FT}
-end
-
-BroadbandSLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} = (
-    (; DIM_INCL) = config;
-
-    return BroadbandSLCanopyRadiationProfile{FT}(
-                _k_diffuse = zeros(FT, DIM_INCL),
-                _k_direct = zeros(FT, DIM_INCL)
-    )
-);
 
 
 #######################################################################################################################################################################################################
@@ -349,7 +269,7 @@ Structure to store canopy radiation profiles
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFloat} <: AbstractCanopyRadiationProfile{FT}
+Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFloat}
     # Diagnostic variables
     "Albedo towards the viewing direction"
     albedo::Vector{FT}
@@ -516,97 +436,6 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this type
-# General
-#     2022-Jun-02: add abstract type for LIDF algorithms
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Hierarchy of AbstractLIDFAlgorithm:
-- [`BetaLIDF`](@ref)
-- [`VerhoefLIDF`](@ref)
-
-"""
-abstract type AbstractLIDFAlgorithm{FT<:AbstractFloat} end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this structure
-# General
-#     2023-May-22: add beta function method
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Structure for Beta LIDF algorithm
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct BetaLIDF{FT<:AbstractFloat} <: AbstractLIDFAlgorithm{FT}
-    # General model information
-    "Leaf inclination angle distribution function parameter a"
-    A::FT = 1
-    "Leaf inclination angle distribution function parameter b"
-    B::FT = 1
-end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this structure
-# General
-#     2022-Jun-02: migrate from CanopyLayers
-#     2022-Jun-02: rename Canopy4RT to HyperspectralMLCanopy
-#     2022-Jun-02: abstractize LIDF as a field
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Structure for Verhoef LIDF algorithm
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct VerhoefLIDF{FT<:AbstractFloat} <: AbstractLIDFAlgorithm{FT}
-    # General model information
-    "Leaf inclination angle distribution function parameter a"
-    A::FT = 0
-    "Leaf inclination angle distribution function parameter b"
-    B::FT = 0
-end
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this type
-# General
-#     2022-Jun-02: add abstract type for canopy structure
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Hierarchy of AbstractCanopy:
-- [`HyperspectralMLCanopy`](@ref)
-
-"""
-abstract type AbstractCanopy{FT<:AbstractFloat} end
 
 
 #######################################################################################################################################################################################################
@@ -643,7 +472,7 @@ Structure to save multiple layer hyperspectral canopy parameters
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat} <: AbstractCanopy{FT}
+Base.@kwdef mutable struct HyperspectralMLCanopy{FT<:AbstractFloat}
     # General model information
     "Hot spot parameter"
     HOT_SPOT::FT = 0.05
