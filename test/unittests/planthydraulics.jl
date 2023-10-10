@@ -1,6 +1,7 @@
 using Test
 import Emerald.EmeraldLand.Namespace as NS
 import Emerald.EmeraldLand.PlantHydraulics as PH
+import Emerald.EmeraldLand.SPAC
 
 
 @testset verbose = true "Plant Hydraulics Model" begin
@@ -124,6 +125,7 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
     @testset "Plant hydraulics (steady state)" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
         for leaf in spac.LEAVES
             leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
             leaf.flux.state.g_H₂O_s_shaded = 0.1;
@@ -153,6 +155,7 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
     @testset "Plant hydraulics (non-steady state)" begin
         config = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
         spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
         for leaf in spac.LEAVES
             leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
             leaf.flux.state.g_H₂O_s_shaded = 0.1;

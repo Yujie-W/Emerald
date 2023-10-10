@@ -110,7 +110,7 @@ photosystem_temperature_dependence!(psm::C3Cyto{FT}, air::AirLayer{FT}, t::FT) w
     psm.auxil.η_l    = temperature_corrected_value(psm.state.TD_ηL, t);
     psm.auxil.r_d    = psm.state.r_d25    * temperature_correction(psm.state.TD_R, t);
     psm.auxil.v_cmax = psm.state.v_cmax25 * temperature_correction(psm.state.TD_VCMAX, t);
-    psm.auxil.k_m    = psm.auxil.k_c * (1 + air.P_AIR * F_O₂(FT) / psm.auxil.k_o);
+    psm.auxil.k_m    = psm.auxil.k_c * (1 + air.state.p_air * F_O₂(FT) / psm.auxil.k_o);
     psm.auxil.v_qmax = psm.state.b₆f * psm.auxil.k_q;
 
     psm.auxil._t = t;
@@ -129,7 +129,7 @@ photosystem_temperature_dependence!(psm::C3VJP{FT}, air::AirLayer{FT}, t::FT) wh
     psm.auxil.r_d    = psm.state.r_d25    * temperature_correction(psm.state.TD_R, t);
     psm.auxil.v_cmax = psm.state.v_cmax25 * temperature_correction(psm.state.TD_VCMAX, t);
     psm.auxil.j_max  = psm.state.j_max25  * temperature_correction(psm.state.TD_JMAX, t);
-    psm.auxil.k_m    = psm.auxil.k_c * (1 + air.P_AIR * F_O₂(FT) / psm.auxil.k_o);
+    psm.auxil.k_m    = psm.auxil.k_c * (1 + air.state.p_air * F_O₂(FT) / psm.auxil.k_o);
 
     # TODO: add a TD_KD in the model in the future like psd.TD_KC
     psm.auxil.k_d        = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);

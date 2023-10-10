@@ -5,8 +5,9 @@
 # Changes to the function
 # General
 #     2023-Sep-29: add function heat_capacitance
-#     2023-Oct-06: add support to SoilLayer
+#     2023-Oct-06: add method for SoilLayer
 #     2023-Oct-07: account for the runoff water in the heat capacitance of the top soil
+#     2023-Oct-09: add method for AirLayer
 #
 #######################################################################################################################################################################################################
 """
@@ -45,3 +46,5 @@ heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(
     # here convert lma from g cm⁻² to kg m⁻² with the factor 10
     return leaf.capacitor.state.v_storage * CP_L_MOL(FT) + leaf.xylem.state.cp * leaf.xylem.state.area * leaf.bio.state.lma * 10
 );
+
+heat_capacitance(air::AirLayer{FT}) where {FT} = (air.state.p_air - air.auxil.ps[3]) * air.auxil.δz / GAS_R(FT) * CP_D_MOL(FT) + air.state.ns[3] * CP_V_MOL(FT);

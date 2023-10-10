@@ -19,7 +19,7 @@ Note that energy associated with water movement between soil and root is account
 
 """
 function soil_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
-    (; AIR, METEO, SOIL_BULK, SOILS) = spac;
+    (; AIRS, METEO, SOIL_BULK, SOILS) = spac;
 
     # add rain and radiation energy into the first layer
     SOILS[1].auxil.∂e∂t += METEO.rain * CP_L_MOL(FT) * METEO.t_precip;
@@ -41,9 +41,9 @@ function soil_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
     # update the energy for diffusion from top soil to the first air layer
     δn1 = SOIL_BULK.auxil.dndt[1,3];
     δn4 = SOIL_BULK.auxil.dndt[1,1] + SOIL_BULK.auxil.dndt[1,2] + SOIL_BULK.auxil.dndt[1,4] + SOIL_BULK.auxil.dndt[1,5];
-    t = δn1 > 0 ? SOILS[1].auxil.t : AIR[1].t;
+    t = δn1 > 0 ? SOILS[1].auxil.t : AIRS[1].auxil.t;
     SOILS[1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * t;
-    t = δn4 > 0 ? SOILS[1].auxil.t : AIR[1].t;
+    t = δn4 > 0 ? SOILS[1].auxil.t : AIRS[1].auxil.t;
     SOILS[1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * t;
 
     # update the diffusion among soil layers

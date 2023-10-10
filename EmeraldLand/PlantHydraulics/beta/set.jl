@@ -63,7 +63,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].t);
+        f_st = relative_surface_tension(roots[i].auxil.t);
         beta = β_factor(β.FUNC, soils[i].state.vc, roots[i].HS.p_ups / f_st);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
@@ -99,7 +99,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].t);
+        f_st = relative_surface_tension(roots[i].auxil.t);
         beta = β_factor(β.FUNC, roots[i].HS.p_ups / f_st);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
@@ -127,7 +127,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].t);
+        f_st = relative_surface_tension(roots[i].auxil.t);
         beta = β_factor(β.FUNC, soil_θ(soils[i].state.vc, roots[i].HS.p_ups / f_st));
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;

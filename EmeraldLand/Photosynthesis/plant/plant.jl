@@ -20,7 +20,7 @@ Updates leaf photosynthetic rates for SPAC, given
 
 """
 function plant_photosynthesis!(spac::MultiLayerSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT}
-    (; AIR, ANGLES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+    (; AIRS, ANGLES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
     if CANOPY.lai == 0
         return nothing
@@ -28,7 +28,7 @@ function plant_photosynthesis!(spac::MultiLayerSPAC{FT}, mode::Union{GCO₂Mode,
 
     rd_only = ANGLES.sza < 89 ? false : true;
     for i in eachindex(LEAVES)
-        leaf_photosynthesis!(LEAVES[i], AIR[LEAVES_INDEX[i]], mode; rd_only = rd_only);
+        leaf_photosynthesis!(LEAVES[i], AIRS[LEAVES_INDEX[i]], mode; rd_only = rd_only);
     end;
 
     return nothing

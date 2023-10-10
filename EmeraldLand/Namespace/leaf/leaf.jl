@@ -43,19 +43,4 @@ Return the leaf struct with initialized energy states, given
 - `config` `SPACConfiguration` type struct
 
 """
-Leaf(config::SPACConfiguration{FT}) where {FT} = (
-    leaf = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), xylem = XylemHydraulics(config));
-    initialize_energy_storage!(leaf);
-
-    return leaf
-);
-
-initialize_energy_storage!(leaf::Leaf{FT}) where {FT} = (
-    leaf.xylem.state.cp = 1780;
-    leaf.xylem.state.k_max = 0.04;
-    leaf.capacitor.state.v_storage = leaf.capacitor.state.v_max * leaf.xylem.state.area;
-    leaf.energy.auxil.cp = leaf.capacitor.state.v_storage * CP_L_MOL(FT) + leaf.bio.state.lma * 10 * leaf.xylem.state.area * leaf.xylem.state.cp;
-    leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
-
-    return nothing
-);
+Leaf(config::SPACConfiguration{FT}) where {FT} = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), xylem = XylemHydraulics(config));

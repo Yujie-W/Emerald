@@ -38,8 +38,8 @@ import Emerald.EmeraldLand.SPAC
 
         # set the soil to be not saturated
         SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
-        spac.SOILS[5].state.ns[4] = spac.AIR[1].P_AIR * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
-        spac.SOILS[5].state.ns[5] = spac.AIR[1].P_AIR * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
+        spac.SOILS[5].state.ns[4] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
+        spac.SOILS[5].state.ns[5] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
         SH.volume_balance!(config, spac);
         SPAC.update_substep_auxils!(spac);
         SH.trace_gas_diffusion!(config, spac);
@@ -110,7 +110,7 @@ import Emerald.EmeraldLand.SPAC
         SH.volume_balance!(config, spac);
         for i in eachindex(spac.SOILS)
             soil = spac.SOILS[i];
-            nmax = (spac.AIR[1].P_AIR - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
+            nmax = (spac.AIRS[1].state.p_air - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
             ndry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
             @test ndry <= nmax || ndry ≈ nmax;
         end;
@@ -125,12 +125,12 @@ import Emerald.EmeraldLand.SPAC
         @test spac.SOILS[2].state.θ > θ_2;
 
         # set the last layer to be oversaturated in terms of dry air, and then air should move towards upper layers
-        spac.SOILS[5].state.ns[4] = spac.AIR[1].P_AIR * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
-        spac.SOILS[5].state.ns[5] = spac.AIR[1].P_AIR * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
+        spac.SOILS[5].state.ns[4] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
+        spac.SOILS[5].state.ns[5] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
         SH.volume_balance!(config, spac);
         for i in eachindex(spac.SOILS)
             soil = spac.SOILS[i];
-            nmax = (spac.AIR[1].P_AIR - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
+            nmax = (spac.AIRS[1].state.p_air - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
             ndry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
             @test ndry <= nmax || ndry ≈ nmax;
         end;
@@ -139,6 +139,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Surface runoff" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
 
         # set every layer to be unsaturated
         SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
@@ -177,6 +178,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Water conservation" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
         SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
 
         # the case of no root water uptake

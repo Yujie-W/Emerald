@@ -77,13 +77,13 @@ update!(air::AirLayer{FT};
         vpd::Union{Number,Nothing} = nothing,
         wind::Union{Number,Nothing} = nothing
 ) where {FT} = (
-    if !isnothing(t) air.t = t; end;
-    if !isnothing(wind) air.wind = wind; end;
-    if !isnothing(f_CO₂) air.f_CO₂ = f_CO₂; air.p_CO₂ = air.f_CO₂ * air.P_AIR * 1e-6; end;
-    if !isnothing(p_CO₂) air.p_CO₂ = p_CO₂; air.f_CO₂ = air.p_CO₂ / air.P_AIR * 1e6; end;
-    if !isnothing(p_H₂O) air.p_H₂O = p_H₂O; end;
-    if !isnothing(rh) air.p_H₂O = saturation_vapor_pressure(air.t) * rh; end;
-    if !isnothing(vpd) air.p_H₂O = max(0, saturation_vapor_pressure(air.t) - vpd); end;
+    if !isnothing(t) air.auxil.t = t; end;
+    if !isnothing(wind) air.auxil.wind = wind; end;
+    if !isnothing(f_CO₂) air.auxil.f_CO₂ = f_CO₂; air.auxil.ps[2] = air.auxil.f_CO₂ * air.state.p_air * 1e-6; end;
+    if !isnothing(p_CO₂) air.auxil.ps[2] = p_CO₂; air.auxil.f_CO₂ = air.auxil.ps[2] / air.state.p_air * 1e6; end;
+    if !isnothing(p_H₂O) air.auxil.ps[3] = p_H₂O; end;
+    if !isnothing(rh) air.auxil.ps[3] = saturation_vapor_pressure(air.auxil.t) * rh; end;
+    if !isnothing(vpd) air.auxil.ps[3] = max(0, saturation_vapor_pressure(air.auxil.t) - vpd); end;
 
     return nothing
 );
@@ -137,17 +137,17 @@ update!(config::SPACConfiguration{FT},
         vcmax_expo::Union{Number,Nothing} = nothing
 ) where {FT} = (
     (; DIM_LAYER, T_CLM) = config;
-    (; AIR, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL_BULK, SOILS, TRUNK) = spac;
+    (; AIRS, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL_BULK, SOILS, TRUNK) = spac;
 
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
-        for _leaf in LEAVES
-            _leaf.bio.state.cab = cab;
+        for leaf in LEAVES
+            leaf.bio.state.cab = cab;
         end;
     end;
     if !isnothing(car)
-        for _leaf in LEAVES
-            _leaf.bio.state.car = car;
+        for leaf in LEAVES
+            leaf.bio.state.car = car;
         end;
     end;
     if !isnothing(cab) || !isnothing(car)
@@ -165,9 +165,8 @@ update!(config::SPACConfiguration{FT},
 
         # make sure leaf area index setup and energy are correct
         for i in eachindex(LEAVES)
-            leaf = LEAVES[i];
-            leaf.xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
-            initialize_energy_storage!(leaf);
+            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+            initialize_struct!(LEAVES[i]);
         end;
     end;
     if !isnothing(vcmax)
@@ -192,10 +191,10 @@ update!(config::SPACConfiguration{FT},
 
     # update Vcmax and Jmax TD
     if !isnothing(t_clm)
-        for _leaf in LEAVES
+        for leaf in LEAVES
             if T_CLM
-                _leaf.photosystem.state.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-                _leaf.photosystem.state.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+                leaf.photosystem.state.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+                leaf.photosystem.state.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
             end;
         end;
     end;
@@ -227,46 +226,31 @@ update!(config::SPACConfiguration{FT},
     # prescribe soil water content (within [Θ_RES,Θ_SAT])
     if !isnothing(swcs)
         for i in eachindex(swcs)
-            soil = SOILS[i];
-            soil.state.θ = max(soil.state.vc.Θ_RES + eps(FT), min(soil.state.vc.Θ_SAT - eps(FT), swcs[i]));
-            δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-            rt = GAS_R(FT) * soil.auxil.t;
-            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
-            soil.state.ns[4] = AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
-            soil.state.ns[4] = AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
-            soil.auxil.cp = heat_capacitance(soil);
-            soil.state.Σe = soil.auxil.cp * soil.auxil.t;
+            SOILS[i].state.θ = max(SOILS[i].state.vc.Θ_RES + eps(FT), min(SOILS[i].state.vc.Θ_SAT - eps(FT), swcs[i]));
+            initialize_struct!(SOILS[i], AIRS[1]);
         end;
     end;
 
     # prescribe soil temperature
     if !isnothing(t_soils)
         for i in eachindex(t_soils)
-            soil = SOILS[i];
-            soil.auxil.t = t_soils[i];
-            δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-            rt = GAS_R(FT) * soil.auxil.t;
-            soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
-            soil.state.ns[4]  = AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
-            soil.state.ns[5]  = AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
-            soil.auxil.cp = heat_capacitance(soil);
-            soil.state.Σe = soil.auxil.cp * soil.auxil.t;
+            SOILS[i].auxil.t = t_soils[i];
+            initialize_struct!(SOILS[i], AIRS[1]);
         end;
     end;
 
     # prescribe leaf temperature
     if !isnothing(t_leaf)
-        for _leaf in LEAVES
-            _leaf.energy.auxil.t = t_leaf;
-            _leaf.energy.auxil.cp = heat_capacitance(_leaf);
-            _leaf.energy.state.Σe = _leaf.energy.auxil.cp * _leaf.energy.auxil.t;
+        for leaf in LEAVES
+            leaf.energy.auxil.t = t_leaf;
+            leaf.energy.auxil.cp = heat_capacitance(leaf);
+            leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
         end;
 
         # make sure leaf area index setup and energy are correct
         for i in eachindex(LEAVES)
-            leaf = LEAVES[i];
-            leaf.xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
-            initialize_energy_storage!(leaf);
+            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+            initialize_struct!(LEAVES[i]);
         end;
     end;
 

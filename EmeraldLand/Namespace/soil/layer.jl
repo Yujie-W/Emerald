@@ -114,9 +114,3 @@ Base.@kwdef mutable struct SoilLayer{FT}
     "Auxiliary variables"
     auxil::SoilLayerAuxil{FT} = SoilLayerAuxil{FT}()
 end;
-
-initialize_energy_storage!(layer::SoilLayer{FT}) where {FT} = (
-    layer.state.Σe = layer.state.ρ * layer.state.cp * layer.auxil.t + layer.state.θ * CP_L(FT) * ρ_H₂O(FT) * layer.auxil.t;
-
-    return nothing;
-);

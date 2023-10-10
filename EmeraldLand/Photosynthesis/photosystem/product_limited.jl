@@ -36,8 +36,8 @@ product_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, air::AirLayer{FT}, g_lc
 product_limited_rate!(psm::C4VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     a = β * psm.auxil.v_pmax;
     d = psm.auxil.k_pep;
-    f = air.P_AIR / g_lc * FT(1e-6);
-    p = air.p_CO₂;
+    f = air.state.p_air / g_lc * FT(1e-6);
+    p = air.auxil.ps[2];
     r = β * psm.auxil.r_d;
 
     qa = f;

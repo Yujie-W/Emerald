@@ -25,10 +25,10 @@ Set the flow out from each leaf, given
 function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a MultiLayerSPAC
     #     LEAVES index is from lower to upper, and thus the sunlit leaves fraction is DIM_LAYER + 1 - i
-    #     AIR index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX
+    #     AIRS index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX
 
     (; ALLOW_LEAF_CONDENSATION, DIM_LAYER) = config;
-    (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+    (; AIRS, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
     for i in eachindex(LEAVES)
         f_sl = CANOPY.OPTICS.p_sunlit[DIM_LAYER + 1 - i];
@@ -41,9 +41,9 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
         g_sl /= length(LEAVES[i].flux.state.g_H₂O_s_sunlit);
 
         g = g_sh * (1 - f_sl) + g_sl * f_sl;
-        d = saturation_vapor_pressure(LEAVES[i].energy.auxil.t, LEAVES[i].capacitor.auxil.p_leaf * 1000000) - AIR[LEAVES_INDEX[i]].p_H₂O;
+        d = saturation_vapor_pressure(LEAVES[i].energy.auxil.t, LEAVES[i].capacitor.auxil.p_leaf * 1000000) - AIRS[LEAVES_INDEX[i]].auxil.ps[3];
         ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
-        f = g * d / AIR[LEAVES_INDEX[i]].P_AIR;
+        f = g * d / AIRS[LEAVES_INDEX[i]].state.p_air;
 
         # set_flow_out!(LEAVES[i].HS.FLOW, f);
         set_flow_profile!(LEAVES[i].xylem, f - LEAVES[i].capacitor.auxil.flow);

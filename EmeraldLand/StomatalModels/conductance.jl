@@ -173,7 +173,7 @@ Update marginal stomatal conductance, given
 
 """
 stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT} = (
-    (; AIR, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+    (; AIRS, CANOPY, LEAVES, LEAVES_INDEX) = spac;
 
     # if lai = 0 or roots are not connected, do nothing
     # TODO: redo this later to foce dgdt to 0
@@ -182,7 +182,7 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}; β::FT = FT(1)) where {FT} = (
     end;
 
     for i in eachindex(LEAVES_INDEX)
-        stomatal_conductance!(LEAVES[i], AIR[LEAVES_INDEX[i]]; β = β);
+        stomatal_conductance!(LEAVES[i], AIRS[LEAVES_INDEX[i]]; β = β);
     end;
 
     return nothing
@@ -229,8 +229,8 @@ stomatal_conductance!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
         return nothing
     end;
 
-    for _leaf in LEAVES
-        stomatal_conductance!(_leaf, δt);
+    for leaf in LEAVES
+        stomatal_conductance!(leaf, δt);
     end;
 
     return nothing
@@ -272,8 +272,8 @@ stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
         return nothing
     end;
 
-    for _leaf in LEAVES
-        stomatal_conductance_profile!(_leaf);
+    for leaf in LEAVES
+        stomatal_conductance_profile!(leaf);
     end;
 
     return nothing

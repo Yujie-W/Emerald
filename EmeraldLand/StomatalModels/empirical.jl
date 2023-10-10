@@ -43,35 +43,31 @@ Return the stomatal conductance computed from empirical model formulation for th
 """
 empirical_equation(sm::BallBerrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
-    (; P_AIR) = air;
 
-    return G0 + β * G1 * air.p_H₂O / saturation_vapor_pressure(air.t) * leaf.a_net_shaded * FT(1e-6) / leaf._p_CO₂_s_shaded * P_AIR
+    return G0 + β * G1 * air.auxil.ps[3] / saturation_vapor_pressure(air.auxil.t) * leaf.a_net_shaded * FT(1e-6) / leaf._p_CO₂_s_shaded * air.state.p_air
 );
 
 empirical_equation(sm::GentineSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
-    (; P_AIR) = air;
 
-    return G0 + β * G1 * leaf.a_net_shaded * FT(1e-6) / leaf._p_CO₂_i_shaded * P_AIR
+    return G0 + β * G1 * leaf.a_net_shaded * FT(1e-6) / leaf._p_CO₂_i_shaded * air.state.p_air
 );
 
 empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; D0, G0, G1) = sm;
-    (; P_AIR) = air;
 
     _γ_s = (typeof(leaf.photosystem) <: C4VJP) ? 0 : leaf.photosystem.auxil.γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.auxil.ps[3]);
 
-    return G0 + β * G1 / (1 + _vpd / D0) * leaf.a_net_shaded * FT(1e-6) / (leaf._p_CO₂_s_shaded - _γ_s) * P_AIR
+    return G0 + β * G1 / (1 + _vpd / D0) * leaf.a_net_shaded * FT(1e-6) / (leaf._p_CO₂_s_shaded - _γ_s) * air.state.p_air
 );
 
 empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
-    (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.auxil.ps[3]);
 
-    return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaf.a_net_shaded * FT(1e-6) / air.p_CO₂ * P_AIR
+    return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaf.a_net_shaded * FT(1e-6) / air.auxil.ps[2] * air.state.p_air
 );
 
 
@@ -104,33 +100,29 @@ Return the stomatal conductance computed from empirical model formulation for th
 """
 empirical_equation(sm::BallBerrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
-    (; P_AIR) = air;
 
-    return G0 + β * G1 * air.p_H₂O / saturation_vapor_pressure(air.t) * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / leaf._p_CO₂_s_sunlit[ind] * P_AIR
+    return G0 + β * G1 * air.auxil.ps[3] / saturation_vapor_pressure(air.auxil.t) * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / leaf._p_CO₂_s_sunlit[ind] * air.state.p_air
 );
 
 empirical_equation(sm::GentineSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
-    (; P_AIR) = air;
 
-    return G0 + β * G1 * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / leaf._p_CO₂_i_sunlit[ind] * P_AIR
+    return G0 + β * G1 * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / leaf._p_CO₂_i_sunlit[ind] * air.state.p_air
 );
 
 empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; D0, G0, G1) = sm;
-    (; P_AIR) = air;
 
     _γ_s = (typeof(leaf.photosystem) <: C4VJP) ? 0 : leaf.photosystem.auxil.γ_star;
-    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.auxil.ps[3]);
 
-    return G0 + β * G1 / (1 + _vpd / D0) * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / (leaf._p_CO₂_s_sunlit[ind] - _γ_s) * P_AIR
+    return G0 + β * G1 / (1 + _vpd / D0) * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / (leaf._p_CO₂_s_sunlit[ind] - _γ_s) * air.state.p_air
 );
 
 empirical_equation(sm::MedlynSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT} = (
     (; G0, G1) = sm;
-    (; P_AIR) = air;
 
-    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.p_H₂O);
+    _vpd = max(1, saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - air.auxil.ps[3]);
 
-    return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / air.p_CO₂ * P_AIR
+    return G0 + FT(1.6) * (1 + β * G1 / sqrt(_vpd)) * leaf.flux.auxil.a_n_sunlit[ind] * FT(1e-6) / air.auxil.ps[2] * air.state.p_air
 );

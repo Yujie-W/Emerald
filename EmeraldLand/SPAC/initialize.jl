@@ -27,24 +27,22 @@ Initialize the SPAC, given
 function initialize! end
 
 initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES, SOIL_BULK, SOILS) = spac;
+    (; AIRS, CANOPY, LEAVES, SOIL_BULK, SOILS) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content
     for soil in SOILS
-        δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-        rt = GAS_R(FT) * soil.auxil.t;
-        soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
-        soil.state.ns[4] = spac.AIR[1].P_AIR * 0.79 * soil.auxil.δz * δθ / rt;
-        soil.state.ns[5] = spac.AIR[1].P_AIR * 0.209 * soil.auxil.δz * δθ / rt;
-        soil.auxil.cp = heat_capacitance(soil);
-        soil.state.Σe = soil.auxil.cp * soil.auxil.t;
+        initialize_struct!(soil, AIRS[1]);
     end;
 
     # make sure leaf area index setup and energy are correct
     for i in eachindex(LEAVES)
-        leaf = LEAVES[i];
-        leaf.xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
-        initialize_energy_storage!(leaf);
+        LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.δlai[i];
+        initialize_struct!(LEAVES[i]);
+    end;
+
+    # naje sure air layers are correctly initialized
+    for air in spac.AIRS
+        initialize_struct!(air);
     end;
 
     # initialize leaf level spectra

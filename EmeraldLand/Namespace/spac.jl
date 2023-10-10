@@ -35,7 +35,7 @@ end
 #     2022-May-25: use Root and Stem structures with temperatures
 #     2022-May-31: rename _qs to _fs
 #     2022-Jun-29: rename struct to MultiLayerSPAC, and use Leaf
-#     2022-Jun-29: add CANOPY, Z, AIR, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
+#     2022-Jun-29: add CANOPY, Z, AIRS, WLSET, LHA, ANGLES, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
 #     2023-Mar-11: add MEMORY and RAD_SW_REF fields
@@ -81,7 +81,7 @@ mutable struct MultiLayerSPAC{FT}
 
     # Embedded structures
     "Air for each layer (more than canopy layer)"
-    AIR::Vector{AirLayer{FT}}
+    AIRS::Vector{AirLayer{FT}}
     "Sun sensor geometry"
     ANGLES::SunSensorGeometry{FT}
     "Branch hydraulic system"
@@ -149,29 +149,27 @@ MultiLayerSPAC(
     for i in eachindex(roots)
         roots[i].xylem.state.area = basal_area / config.DIM_ROOT;
         roots[i].xylem.state.Δh = 0 - max(zs[1], soil_bounds[ind_root[i]+1]);
-        initialize_energy_storage!(roots[i]);
     end;
 
     # set up the trunk
     trunk = Stem(config);
     trunk.xylem.state.area = basal_area;
     trunk.xylem.state.Δh = zs[2];
-    initialize_energy_storage!(trunk);
 
     # set up the branches
     branches = Stem{FT}[Stem(config) for _ in 1:config.DIM_LAYER];
     for i in eachindex(branches)
         branches[i].xylem.state.area = basal_area / config.DIM_LAYER;
         branches[i].xylem.state.Δh = (min(zs[3], air_bounds[ind_layer[i]+1]) - zs[2]);
-        initialize_energy_storage!(branches[i]);
     end;
 
     # set up the air layers
-    air_layers = AirLayer{FT}[
-                AirLayer{FT}(
-                    Z = (air_bounds[i] + air_bounds[i+1]) / 2,
-                    ΔZ = (air_bounds[i+1] - air_bounds[i])
-                ) for i in 1:config.DIM_AIR];
+    air_layers = AirLayer{FT}[AirLayer{FT}() for _ in 1:config.DIM_AIR];
+    for i in eachindex(air_layers)
+        air_layers[i].state.zs = air_bounds[i:i+1];
+        air_layers[i].auxil.z = (air_bounds[i] + air_bounds[i+1]) / 2;
+        air_layers[i].auxil.δz = (air_bounds[i+1] - air_bounds[i]);
+    end;
 
     return MultiLayerSPAC{FT}(
                 ind_layer,                                              # LEAVES_INDEX
@@ -181,7 +179,7 @@ MultiLayerSPAC(
                 elevation,                                              # ELEVATION
                 latitude,                                               # LATITUDE
                 longitude,                                              # LONGITUDE
-                air_layers,                                             # AIR
+                air_layers,                                             # AIRS
                 SunSensorGeometry{FT}(),                                # ANGLES
                 branches,                                               # BRANCHES
                 HyperspectralMLCanopy(config),                          # CANOPY

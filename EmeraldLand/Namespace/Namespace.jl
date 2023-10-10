@@ -76,17 +76,17 @@ include("leaf/leaf.jl");
 
 
 # Environment
+include("environment/air.jl");
 include("environment/radiation.jl");
 
+include("environment/meteorology.jl");
 
 
 
 
-include("radiation.jl");
 
-include("air.jl");
+
 include("geometry.jl");
-include("meteorology.jl");
 
 include("canopy.jl");
 

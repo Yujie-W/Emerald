@@ -41,8 +41,8 @@ rubisco_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, air::AirLayer{FT}, g_lc
     a = β * psm.auxil.v_cmax;
     b = β * psm.auxil.v_cmax * psm.auxil.γ_star;
     d = psm.auxil.k_m;
-    f = air.P_AIR / g_lc * FT(1e-6);
-    p = air.p_CO₂;
+    f = air.state.p_air / g_lc * FT(1e-6);
+    p = air.auxil.ps[2];
     r = β * psm.auxil.r_d;
 
     qa = f;

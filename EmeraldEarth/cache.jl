@@ -114,15 +114,15 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     end;
 
     # update environmental conditions
-    for _alayer in CACHE_SPAC.AIR
-        _alayer.P_AIR = wd_params["P_ATM"];
-        update!(_alayer; t = wd_params["T_AIR"], vpd = wd_params["VPD"], wind = wd_params["WIND"]);
+    for air in CACHE_SPAC.AIRS
+        air.state.p_air = wd_params["P_ATM"];
+        update!(air; t = wd_params["T_AIR"], vpd = wd_params["VPD"], wind = wd_params["WIND"]);
     end;
 
     # sync the environmental conditions per layer for CO₂ concentration
     if !isnothing(gm_params["CO2"])
-        for _alayer in CACHE_SPAC.AIR
-            update!(_alayer; f_CO₂ = gm_params["CO2"]);
+        for air in CACHE_SPAC.AIRS
+            update!(air; f_CO₂ = gm_params["CO2"]);
         end;
     end;
 

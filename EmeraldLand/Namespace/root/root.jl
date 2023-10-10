@@ -39,17 +39,4 @@ Return the root struct with initialized energy states, given
 - `config` `SPACConfiguration` type struct
 
 """
-Root(config::SPACConfiguration{FT}) where {FT} = (
-    root = Root{FT}(xylem = XylemHydraulics(config));
-    initialize_energy_storage!(root);
-
-    return root
-);
-
-initialize_energy_storage!(root::Root{FT}) where {FT} = (
-    root.xylem.state.v_storage .= (root.xylem.state.v_max * root.xylem.state.area * root.xylem.state.l) / length(root.xylem.state.v_storage);
-    root.energy.auxil.cp = sum(root.xylem.state.v_storage) * CP_L_MOL(FT) + (root.xylem.state.cp * root.xylem.state.area * root.xylem.state. l);
-    root.energy.state.Σe = root.energy.auxil.cp * root.energy.auxil.t;
-
-    return nothing
-);
+Root(config::SPACConfiguration{FT}) where {FT} = Root{FT}(xylem = XylemHydraulics(config));

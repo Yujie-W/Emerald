@@ -1,6 +1,7 @@
 using Test
 import Emerald.EmeraldLand.Namespace as NS
 import Emerald.EmeraldLand.Photosynthesis as PS
+import Emerald.EmeraldLand.SPAC
 
 
 @testset verbose = true "Photosynthesis Model" begin
@@ -166,6 +167,7 @@ import Emerald.EmeraldLand.Photosynthesis as PS
     @testset "Plant photosynthesis" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
 
         PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         @test true;
@@ -173,6 +175,7 @@ import Emerald.EmeraldLand.Photosynthesis as PS
         @test true;
 
         spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
         spac.CANOPY.lai = 0.0;
         PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         @test true;
@@ -180,6 +183,7 @@ import Emerald.EmeraldLand.Photosynthesis as PS
         @test true;
 
         spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
         spac.ANGLES.sza = 90;
         PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         @test true;

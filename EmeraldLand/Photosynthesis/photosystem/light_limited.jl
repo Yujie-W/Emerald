@@ -47,8 +47,8 @@ light_limited_rate!(psm::C3Cyto{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)
     b = psm.auxil.j_psi * psm.auxil.γ_star;
     c = eff_1;
     d = eff_2 * psm.auxil.γ_star;
-    f = air.P_AIR / g_lc * FT(1e-6);
-    p = air.p_CO₂;
+    f = air.state.p_air / g_lc * FT(1e-6);
+    p = air.auxil.ps[2];
     r = β * psm.auxil.r_d;
 
     qa = c * f;
@@ -76,8 +76,8 @@ light_limited_rate!(psm::C3VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1))
     b = psm.auxil.j * psm.auxil.γ_star;
     c = psm.state.EFF_1;
     d = psm.state.EFF_2 * psm.auxil.γ_star;
-    f = air.P_AIR / g_lc * FT(1e-6);
-    p = air.p_CO₂;
+    f = air.state.p_air / g_lc * FT(1e-6);
+    p = air.auxil.ps[2];
     r = β * psm.auxil.r_d;
 
     qa = c * f;

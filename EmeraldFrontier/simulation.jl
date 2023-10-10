@@ -90,9 +90,9 @@ function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr
     update!(config, spac; ci = _df_cli);
 
     # update environmental conditions
-    for _alayer in spac.AIR
-        _alayer.P_AIR = _df_atm;
-        update!(_alayer; f_CO₂ = _df_co2, t = _df_tar, vpd = _df_vpd, wind = _df_wnd);
+    for air in spac.AIRS
+        air.state.p_air = _df_atm;
+        update!(air; f_CO₂ = _df_co2, t = _df_tar, vpd = _df_vpd, wind = _df_wnd);
     end;
 
     # update downward shortwave and longwave radiation
@@ -306,7 +306,7 @@ simulation!(config::SPACConfiguration{FT},
         end;
     end;
     if ENABLE_ENERGY_BUDGET
-        _tleaf = [_leaf.energy.auxil.t for _leaf in spac.LEAVES];
+        _tleaf = [leaf.energy.auxil.t for leaf in spac.LEAVES];
         dfr.MOD_T_L_MAX  = nanmax(_tleaf);
         dfr.MOD_T_L_MEAN = nanmean(_tleaf);
         dfr.MOD_T_L_MIN  = nanmin(_tleaf);

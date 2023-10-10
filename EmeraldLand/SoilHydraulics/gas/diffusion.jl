@@ -17,7 +17,7 @@ Compute the diffusion of trace gasses in the soil, given
 
 """
 function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
-    (; AIR, SOIL_BULK, SOILS) = spac;
+    (; AIRS, SOIL_BULK, SOILS) = spac;
     (; DIM_SOIL, TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
 
     #
@@ -28,19 +28,19 @@ function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
     # TODO:
     #     - the impact from wind speed on the boundary layer thickness need to be accounted for
     #
-    air = AIR[1];
-    rt_air = GAS_R(FT) * air.t;
+    air = AIRS[1];
+    rt_air = GAS_R(FT) * air.auxil.t;
     rel_kd = 2 * SOILS[1].auxil.kd;
     rel_kv = 2 * SOILS[1].auxil.kv;
     v_gas = max(0, SOILS[1].state.vc.Θ_SAT - SOILS[1].state.θ) * SOILS[1].auxil.δz;
     if v_gas > 0
-        SOIL_BULK.auxil.dndt[1,1] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_CH₄, TRACE_AIR) * (SOILS[1].state.ns[1] / v_gas - air.p_CH₄ / rt_air)
-        SOIL_BULK.auxil.dndt[1,2] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_CO₂, TRACE_AIR) * (SOILS[1].state.ns[2] / v_gas - air.p_CO₂ / rt_air)
-        SOIL_BULK.auxil.dndt[1,4] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_N₂ , TRACE_AIR) * (SOILS[1].state.ns[4] / v_gas - air.p_N₂  / rt_air)
-        SOIL_BULK.auxil.dndt[1,5] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_O₂ , TRACE_AIR) * (SOILS[1].state.ns[5] / v_gas - air.p_O₂  / rt_air)
+        SOIL_BULK.auxil.dndt[1,1] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_CH₄, TRACE_AIR) * (SOILS[1].state.ns[1] / v_gas - air.auxil.ps[1] / rt_air);
+        SOIL_BULK.auxil.dndt[1,2] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_CO₂, TRACE_AIR) * (SOILS[1].state.ns[2] / v_gas - air.auxil.ps[2] / rt_air);
+        SOIL_BULK.auxil.dndt[1,4] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_N₂ , TRACE_AIR) * (SOILS[1].state.ns[4] / v_gas - air.auxil.ps[4] / rt_air);
+        SOIL_BULK.auxil.dndt[1,5] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_O₂ , TRACE_AIR) * (SOILS[1].state.ns[5] / v_gas - air.auxil.ps[5] / rt_air);
     end;
     v_vap = v_gas + FT(0.01);
-    SOIL_BULK.auxil.dndt[1,3] = rel_kv * diffusive_coefficient(SOILS[1].auxil.t, TRACE_H₂O, TRACE_AIR) * (SOILS[1].state.ns[3] / v_vap - air.p_H₂O / rt_air)
+    SOIL_BULK.auxil.dndt[1,3] = rel_kv * diffusive_coefficient(SOILS[1].auxil.t, TRACE_H₂O, TRACE_AIR) * (SOILS[1].state.ns[3] / v_vap - air.auxil.ps[3] / rt_air);
 
     #
     # Diffusion among soi layers
