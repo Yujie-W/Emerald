@@ -76,8 +76,8 @@ inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) whe
 inclination_angles!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT} = (
     (; Θ_INCL_BNDS) = config;
 
-    for i in eachindex(can.P_INCL)
-        can.P_INCL[i] = lidf_cdf(lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(lidf, Θ_INCL_BNDS[i,1]);
+    for i in eachindex(can.structure.state.p_incl)
+        can.structure.state.p_incl[i] = lidf_cdf(lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(lidf, Θ_INCL_BNDS[i,1]);
     end;
 
     return nothing

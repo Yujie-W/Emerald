@@ -50,7 +50,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) wh
 
 canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}) where {FT} = (
     (; DIM_LAYER, SPECTRA, Φ_PHOTON, _COS²_Θ_INCL_AZI) = config;
-    (; OPTICS, P_INCL, RADIATION) = can;
+    (; OPTICS, RADIATION) = can;
 
     if can.structure.state.lai == 0
         RADIATION.sif_obs .= 0;
@@ -59,7 +59,7 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
     # function to weight matrices by inclination angles
     @inline lidf_weight(mat_0, mat_1) = (
         OPTICS._tmp_mat_incl_azi_1 .= mat_0 .* mat_1;
-        mul!(OPTICS._tmp_vec_azi, OPTICS._tmp_mat_incl_azi_1', P_INCL);
+        mul!(OPTICS._tmp_vec_azi, OPTICS._tmp_mat_incl_azi_1', can.structure.state.p_incl);
 
         return mean(OPTICS._tmp_vec_azi)
     );

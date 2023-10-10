@@ -39,7 +39,7 @@ Updates canopy optical properties (extinction coefficients for direct and diffus
 """
 canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
     (; DIM_LAYER, Θ_AZI, _1_AZI, _COS_Θ_AZI, _COS²_Θ_INCL, _COS²_Θ_INCL_AZI) = config;
-    (; OPTICS, P_INCL) = can;
+    (; OPTICS) = can;
 
     if can.structure.state.lai == 0
         return nothing
@@ -48,9 +48,9 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     # 1. update the canopy optical properties related to extinction and scattering coefficients
     extinction_scattering_coefficients!(config, can);
 
-    can.sensor_geometry.auxil.ko = P_INCL' * OPTICS._ko;
-    can.sun_geometry.auxil.ks = P_INCL' * OPTICS._ks;
-    OPTICS._bf = P_INCL' * _COS²_Θ_INCL;
+    can.sensor_geometry.auxil.ko = can.structure.state.p_incl' * OPTICS._ko;
+    can.sun_geometry.auxil.ks = can.structure.state.p_incl' * OPTICS._ks;
+    OPTICS._bf = can.structure.state.p_incl' * _COS²_Θ_INCL;
 
     can.sun_geometry.auxil.ddb = (1 + OPTICS._bf) / 2;
     can.sun_geometry.auxil.ddf = (1 - OPTICS._bf) / 2;
@@ -58,8 +58,8 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
     can.sun_geometry.auxil.sdf = (can.sun_geometry.auxil.ks - OPTICS._bf) / 2;
     can.sensor_geometry.auxil.dob = (can.sensor_geometry.auxil.ko + OPTICS._bf) / 2;
     can.sensor_geometry.auxil.dof = (can.sensor_geometry.auxil.ko - OPTICS._bf) / 2;
-    can.sensor_geometry.auxil.sob = P_INCL' * OPTICS._sb;
-    can.sensor_geometry.auxil.sof = P_INCL' * OPTICS._sf;
+    can.sensor_geometry.auxil.sob = can.structure.state.p_incl' * OPTICS._sb;
+    can.sensor_geometry.auxil.sof = can.structure.state.p_incl' * OPTICS._sf;
 
     # 2. update the matrices fs and fo
     OPTICS._cos_θ_azi_raa .= cosd.(Θ_AZI .- (can.sensor_geometry.state.vaa - can.sun_geometry.state.saa));

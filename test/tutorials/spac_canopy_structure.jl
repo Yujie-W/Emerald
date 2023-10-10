@@ -17,9 +17,9 @@ using Test;
     EmeraldLand.SPAC.update!(config, spac; lai = 3, ci = 0.8);
     @test true;
 
-    # Leaf inclination angle distribution is stored as a vector P_INCL in field CANOPY.
-    # By default, P_INCL is a uniform distribution from 0° to 90° per 10°.
-    # To change P_INCL, we use the VerhoefLIDF model to update the distribution function.
+    # Leaf inclination angle distribution is stored as a vector p_incl in field CANOPY.
+    # By default, p_incl is a uniform distribution from 0° to 90° per 10°.
+    # To change p_incl, we use the VerhoefLIDF model to update the distribution function.
     # For example, (A,B) =
     #     (0,0) gives uniform distribution,
     #     (-0.35,-0.15) gives spherical distribution,

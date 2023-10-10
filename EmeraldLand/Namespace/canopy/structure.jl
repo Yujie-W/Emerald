@@ -24,6 +24,8 @@ Base.@kwdef mutable struct CanopyStructureState{FT}
     hot_spot::FT = 0.05
     "Leaf inclination angle distribution function algorithm"
     lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
+    "Inclination angle distribution"
+    p_incl::Vector{FT}
 
     # Leaf area index
     "Leaf area index"
@@ -94,9 +96,10 @@ CanopyStructure(config::SPACConfiguration{FT}) where {FT} = (
     lai = 3;
     δlai = 3 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
     x_bnds = ([0; [sum(δlai[1:i]) for i in 1:config.DIM_LAYER]] ./ -lai);
+    p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
     return CanopyStructure{FT}(
-                state = CanopyStructureState{FT}(lai  = lai, δlai = δlai),
+                state = CanopyStructureState{FT}(p_incl = p_incl, lai = lai, δlai = δlai),
                 auxil = CanopyStructureAuxil{FT}(x_bnds = x_bnds),
     )
 );

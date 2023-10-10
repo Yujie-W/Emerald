@@ -460,19 +460,14 @@ Base.@kwdef mutable struct MultiLayerCanopy{FT<:AbstractFloat}
     RADIATION::HyperspectralMLCanopyRadiationProfile{FT}
 
     # Geometry information
-    "Inclination angle distribution"
-    P_INCL::Vector{FT}
 end;
 
 MultiLayerCanopy(config::SPACConfiguration{FT}) where {FT} = (
-    (; DIM_INCL) = config;
-
     return MultiLayerCanopy{FT}(
                 sensor_geometry = SensorGeometry(config),
                 sun_geometry    = SunGeometry(config),
                 structure       = CanopyStructure(config),
                 OPTICS          = HyperspectralMLCanopyOpticalProperty(config),
                 RADIATION       = HyperspectralMLCanopyRadiationProfile(config),
-                P_INCL          = ones(FT, DIM_INCL) ./ DIM_INCL,
     )
 );
