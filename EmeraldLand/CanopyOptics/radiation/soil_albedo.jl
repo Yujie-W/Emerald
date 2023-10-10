@@ -1,3 +1,5 @@
+# This file contains function to compute soil albedo
+
 # Soil albedo values from CLM
 const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
                       0.34 0.57 0.23 0.46;
@@ -50,45 +52,48 @@ function soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, soil::
         return nothing
     end;
 
-    # use CLM method or Yujie's method
-    _rwc::FT = soil.state.θ / soil.state.vc.Θ_SAT;
-    _par::FT = SOIL_ALBEDOS[sbulk.state.color,1] * (1 - _rwc) + _rwc * SOIL_ALBEDOS[sbulk.state.color,3];
-    _nir::FT = SOIL_ALBEDOS[sbulk.state.color,2] * (1 - _rwc) + _rwc * SOIL_ALBEDOS[sbulk.state.color,4];
+    # use linear interpolation method or CLM method (with upper limit)
+    rwc = soil.state.θ / soil.state.vc.Θ_SAT;
+    par::FT = SOIL_ALBEDOS[sbulk.state.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.state.color,3];
+    nir::FT = SOIL_ALBEDOS[sbulk.state.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.state.color,4];
 
     if α_CLM
-        _delta = max(0, FT(0.11) - FT(0.4) * soil.state.θ);
-        _par = max(SOIL_ALBEDOS[sbulk.state.color,1], SOIL_ALBEDOS[sbulk.state.color,3] + _delta);
-        _nir = max(SOIL_ALBEDOS[sbulk.state.color,2], SOIL_ALBEDOS[sbulk.state.color,4] + _delta);
+        delta = max(0, FT(0.11) - FT(0.4) * soil.state.θ);
+        par = max(SOIL_ALBEDOS[sbulk.state.color,1], SOIL_ALBEDOS[sbulk.state.color,3] + delta);
+        nir = max(SOIL_ALBEDOS[sbulk.state.color,2], SOIL_ALBEDOS[sbulk.state.color,4] + delta);
     end;
 
     # if fitting is disabled, use broadband directly
     if !α_FITTING
-        sbulk.auxil.ρ_sw[SPECTRA.IΛ_PAR] .= _par;
-        sbulk.auxil.ρ_sw[SPECTRA.IΛ_NIR] .= _nir;
+        sbulk.auxil.ρ_sw[SPECTRA.IΛ_PAR] .= par;
+        sbulk.auxil.ρ_sw[SPECTRA.IΛ_NIR] .= nir;
 
         return nothing
     end;
 
+    #
+    # TODO: use a new soil moddel for this, do not GSV which is not process-based
+    #
     # make an initial guess of the weights
-    _ρ_sw = similar(sbulk.auxil.ρ_sw);
-    _ρ_sw[SPECTRA.IΛ_PAR] .= _par;
-    _ρ_sw[SPECTRA.IΛ_NIR] .= _nir;
-    sbulk.auxil.weight .= pinv(SPECTRA.MAT_SOIL) * _ρ_sw;
+    ρ_sw = similar(sbulk.auxil.ρ_sw);
+    ρ_sw[SPECTRA.IΛ_PAR] .= par;
+    ρ_sw[SPECTRA.IΛ_NIR] .= nir;
+    sbulk.auxil.weight .= pinv(SPECTRA.MAT_SOIL) * ρ_sw;
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT} = (
-        mul!(_ρ_sw, SPECTRA.MAT_SOIL, x);
-        _tmp_vec_nir = abs.(view(_ρ_sw,SPECTRA.IΛ_NIR) .- _nir);
-        _diff = ( mean( view(_ρ_sw,SPECTRA.IΛ_PAR) ) - _par ) ^ 2 + mean( _tmp_vec_nir ) ^ 2;
+        mul!(ρ_sw, SPECTRA.MAT_SOIL, x);
+        tmp_vec_nir = abs.(view(ρ_sw,SPECTRA.IΛ_NIR) .- nir);
+        diff = ( mean( view(ρ_sw,SPECTRA.IΛ_PAR) ) - par ) ^ 2 + mean( tmp_vec_nir ) ^ 2;
 
-        return -_diff
+        return -diff
     );
 
     # solve for weights
-    _ms  = ReduceStepMethodND{FT}(x_mins = FT[-2,-2,-2,-2], x_maxs = FT[2,2,2,2], x_inis = sbulk.auxil.weight, Δ_inis = FT[0.1,0.1,0.1,0.1]);
-    _tol = SolutionToleranceND{FT}(FT[0.001,0.001,0.001,0.001], 50);
-    _sol = find_peak(_fit, _ms, _tol);
-    sbulk.auxil.weight .= _sol;
+    ms = ReduceStepMethodND{FT}(x_mins = FT[-2,-2,-2,-2], x_maxs = FT[2,2,2,2], x_inis = sbulk.auxil.weight, Δ_inis = FT[0.1,0.1,0.1,0.1]);
+    tol = SolutionToleranceND{FT}(FT[0.001,0.001,0.001,0.001], 50);
+    sol = find_peak(_fit, ms, tol);
+    sbulk.auxil.weight .= sol;
 
     # update vectors in soil
     mul!(sbulk.auxil.ρ_sw, SPECTRA.MAT_SOIL, sbulk.auxil.weight);

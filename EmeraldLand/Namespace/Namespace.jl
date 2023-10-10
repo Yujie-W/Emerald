@@ -12,6 +12,7 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using NetcdfIO: read_nc
 
 using ..EmeraldIO.Text: read_csv
+using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
 
 

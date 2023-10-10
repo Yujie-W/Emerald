@@ -21,11 +21,15 @@ include("geometry/sensor.jl");
 include("geometry/sun.jl");
 include("geometry/structure.jl");
 
+
+# function related to canopy radiation
+include("radiation/soil_albedo.jl");
+
+
 include("fluorescence.jl");
 include("geometry.jl");
 include("radiation.jl");
 include("remote_sensing.jl");
-include("soil.jl");
 
 
 end; # module

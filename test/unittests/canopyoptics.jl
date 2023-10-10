@@ -54,4 +54,27 @@ import Emerald.EmeraldLand.Namespace as NS
         @test all(0 .< can.sensor_geometry.auxil.pso .< 1);
     end;
 
+    @testset "Soil albedo" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+
+        spac.SOIL_BULK.auxil._θ = -1;
+        config.α_CLM = true;
+        config.α_FITTING = false;
+        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        @test all(0 .< spac.SOIL_BULK.auxil.ρ_sw .< 1);
+
+        spac.SOIL_BULK.auxil._θ = -1;
+        config.α_CLM = false;
+        config.α_FITTING = false;
+        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        @test all(0 .< spac.SOIL_BULK.auxil.ρ_sw .< 1);
+
+        spac.SOIL_BULK.auxil._θ = -1;
+        config.α_CLM = false;
+        config.α_FITTING = true;
+        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        @test all(0 .< spac.SOIL_BULK.auxil.ρ_sw .< 1);
+    end;
+
 end;
