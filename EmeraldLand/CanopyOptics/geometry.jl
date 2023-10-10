@@ -2,8 +2,6 @@
 #
 # Changes to this function
 # General
-#     2022-Jun-07: migrate the function from CanopyLayers
-#     2022-Jun-09: rename function to canopy_optical_properties!
 #
 #######################################################################################################################################################################################################
 """
@@ -16,72 +14,12 @@ This function updates canopy optical properties for canopy. The supported method
 function canopy_optical_properties! end;
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
-#     2022-Jun-07: migrate the function from CanopyLayers
-#     2022-Jun-09: rename function to canopy_optical_properties!
-#     2022-Jun-09: update p_sunlit
-#     2023-Mar-11: add code to account for the case of LAI == 0
-#     2023-Apr-25: use exp to compute po, ps, and p_sunlit
-#     2023-May-19: use δlai per canopy layer
-#
-#######################################################################################################################################################################################################
-"""
-
-    canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT}
-
-Updates canopy optical properties (extinction coefficients for direct and diffuse light) based on the SAIL model, given
-- `config` SPAC configurations
-- `can` `MultiLayerCanopy` type struct
-
-"""
-canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
-    (; DIM_LAYER) = config;
-    (; OPTICS) = can;
-
-    if can.structure.state.lai == 0
-        return nothing
-    end;
-
-    # 1. update the canopy optical properties related to extinction and scattering coefficients
-
-    # 2. update the matrices fs and fo
-
-    # 3. update the viewing fraction ps, po, pso, and p_sunlit
-    can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
-
-    _dso = sqrt( tand(can.sun_geometry.state.sza) ^ 2 +
-                 tand(can.sensor_geometry.state.vza) ^ 2 -
-                 2 * tand(can.sun_geometry.state.sza) * tand(can.sensor_geometry.state.vza) * cosd(can.sensor_geometry.state.vaa - can.sun_geometry.state.saa) );
-    @inline _pdf(x::FT) where {FT} = (
-        _Σk = can.sensor_geometry.auxil.ko + can.sun_geometry.auxil.ks;
-        _Πk = can.sensor_geometry.auxil.ko * can.sun_geometry.auxil.ks;
-        _cl = can.structure.auxil.ci * can.structure.state.lai;
-        _α  = _dso / can.structure.state.hot_spot * 2 / _Σk;
-
-        if _dso == 0
-            return exp( (_Σk - sqrt(_Πk)) * _cl * x )
-        end;
-
-        return exp( _Σk * _cl * x + sqrt(_Πk) * _cl / _α * (1 - exp(_α * x)) )
-    );
-
-    for i in eachindex(can.structure.auxil.x_bnds)
-        can.sensor_geometry.auxil.pso[i] = quadgk(_pdf, can.structure.auxil.x_bnds[i] - FT(1)/DIM_LAYER, can.structure.auxil.x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
-    end;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
 # Changes to this method
 # General
 #     2022-Jun-08: migrate the function from CanopyLayers
-#     2022-Jun-09: rename the function from canopy_matrices! to canopy_optical_properties!
 #     2022-Jun-09: move part of the short_wave! code into canopy_optical_properties!
 #     2022-Jun-10: add function to compute longwave reflectance, transmittance, and emissivity
 #     2022-Jun-29: use Leaf for the hyperspectral RT

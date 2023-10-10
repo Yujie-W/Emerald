@@ -50,6 +50,8 @@ import Emerald.EmeraldLand.Namespace as NS
         @test can.sensor_geometry.auxil.dof >= 0;
         @test can.sensor_geometry.auxil.sob >= 0;
         @test can.sensor_geometry.auxil.sof >= 0;
+        @test all(0 .< can.sensor_geometry.auxil.po .<= 1);
+        @test all(0 .< can.sensor_geometry.auxil.pso .< 1);
     end;
 
 end;

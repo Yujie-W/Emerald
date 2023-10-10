@@ -17,7 +17,7 @@ Update sensor geometry related auxiliary variables, given
 
 """
 function sensor_geometry!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT}
-    (; Θ_AZI, Θ_INCL) = config;
+    (; DIM_LAYER, Θ_AZI, Θ_INCL) = config;
 
     # extinction coefficients for the solar radiation
     vza = can.sensor_geometry.state.vza;
@@ -83,6 +83,29 @@ function sensor_geometry!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{F
     end;
     can.sensor_geometry.auxil.fo_fs .= can.sun_geometry.auxil.fs .* can.sensor_geometry.auxil.fo;
     can.sensor_geometry.auxil.fo_fs_abs .= abs.(can.sensor_geometry.auxil.fo_fs);
+
+    # compute po and pso for sensor geometry
+    can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
+
+    dso = sqrt( tand(can.sun_geometry.state.sza) ^ 2 +
+                 tand(can.sensor_geometry.state.vza) ^ 2 -
+                 2 * tand(can.sun_geometry.state.sza) * tand(can.sensor_geometry.state.vza) * cosd(can.sensor_geometry.state.vaa - can.sun_geometry.state.saa) );
+    @inline _pdf(x::FT) where {FT} = (
+        Σk = can.sensor_geometry.auxil.ko + can.sun_geometry.auxil.ks;
+        Πk = can.sensor_geometry.auxil.ko * can.sun_geometry.auxil.ks;
+        cl = can.structure.auxil.ci * can.structure.state.lai;
+        α  = dso / can.structure.state.hot_spot * 2 / Σk;
+
+        if dso == 0
+            return exp( (Σk - sqrt(Πk)) * cl * x )
+        end;
+
+        return exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) )
+    );
+
+    for i in eachindex(can.structure.auxil.x_bnds)
+        can.sensor_geometry.auxil.pso[i] = quadgk(_pdf, can.structure.auxil.x_bnds[i] - FT(1)/DIM_LAYER, can.structure.auxil.x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
+    end;
 
     return nothing
 end;

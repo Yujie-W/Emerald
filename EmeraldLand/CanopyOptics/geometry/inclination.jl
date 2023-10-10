@@ -1,3 +1,5 @@
+# This file contains funtion to compute leaf inclination angle distribution
+
 #######################################################################################################################################################################################################
 #
 # Changes to this function
@@ -33,19 +35,19 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT} = (
     end;
 
     # iterate to solve for CDF solution
-    _θ = deg2rad(θ);
-    _y::FT = 0;
-    _x = 2 * _θ;
-    _n = 0;
-    _δx::FT = 1;
-    while (abs(_δx) >= max(eps(FT), 1e-8)) && (_n < 50)
-        _y = A * sin(_x) + B / 2 * sin(2*_x);
-        _δx = (_y - _x) / 2 + _θ;
-        _x += _δx;
-        _n += 1;
+    θ = deg2rad(θ);
+    y::FT = 0;
+    x::FT = 2θ;
+    n = 0;
+    δx::FT = 1;
+    while (abs(δx) >= max(eps(FT), 1e-8)) && (n < 50)
+        y = A * sin(x) + B / 2 * sin(2x);
+        δx = (y - x) / 2 + θ;
+        x += δx;
+        n += 1;
     end;
 
-    return 2 * (_y + _θ) / FT(π)
+    return 2 * (y + θ) / FT(π)
 );
 
 
