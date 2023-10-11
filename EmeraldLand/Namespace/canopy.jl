@@ -4,7 +4,7 @@
 # General
 #     2022-Jun-07: add CanopyOptics struct (will be a field for canopy structure)
 #     2022-Jun-07: add more fields: fo, fs, po, ps, pso
-#     2022-Jun-08: add more fields: ρ_dd, ρ_sd, σ_ddb, σ_ddf, σ_dob, σ_dof, σ_sdb, σ_sdf, σ_so, τ_dd, τ_sd, _tmp_vec_λ, _ρ_dd, _ρ_sd, _τ_dd, _τ_sd
+#     2022-Jun-08: add more fields: ρ_dd, ρ_sd, σ_dob, σ_dof, σ_so, τ_dd, τ_sd, _ρ_dd, _ρ_sd, _τ_dd, _τ_sd
 #     2022-Jun-09: rename variables to be more descriptive
 #     2022-Jun-10: add more fields: p_sunlit, ϵ, ρ_lw, τ_lw, _mat_down, _mat_down, _tmp_vec_azi, _ρ_lw, _τ_lw
 #     2022-Jun-10: add more fields for sif calculations
@@ -29,36 +29,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloat}
-    # Diagnostic variables
-    "Effective emissivity for different layers"
-    ϵ::Vector{FT}
-    "Effective reflectance for diffuse->diffuse"
-    ρ_dd::Matrix{FT}
-    "Effective reflectance for longwave radiation"
-    ρ_lw::Vector{FT}
-    "Effective reflectance for directional->diffuse"
-    ρ_sd::Matrix{FT}
-    "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
-    σ_ddb::Matrix{FT}
-    "Forward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
-    σ_ddf::Matrix{FT}
-    "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins"
-    σ_dob::Matrix{FT}
-    "Forward scattering coefficient for diffuse->observer at different layers and wavelength bins"
-    σ_dof::Matrix{FT}
-    "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins"
-    σ_sdb::Matrix{FT}
-    "Forward scattering coefficient for solar directional->diffuse at different layers and wavelength bins"
-    σ_sdf::Matrix{FT}
-    "Bidirectional from solar to observer scattering coefficient at different layers and wavelength bins"
-    σ_so::Matrix{FT}
-    "Effective tranmittance for diffuse->diffuse"
-    τ_dd::Matrix{FT}
-    "Effective tranmittance for longwave radiation"
-    τ_lw::Vector{FT}
-    "Effective tranmittance for solar directional->diffuse"
-    τ_sd::Matrix{FT}
-
     # Cache variables
     "Upwelling matrix for SIF excitation"
     _mat⁺::Matrix{FT}
@@ -66,8 +36,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloa
     _mat⁻::Matrix{FT}
     "Temporary cache used for matrix adding up purpose (DIM_INCL * DIM_AZI)"
     _tmp_mat_incl_azi_1::Matrix{FT}
-    "Temporary cache used for matrix adding up purpose (DIM_INCL * DIM_AZI)"
-    _tmp_mat_incl_azi_2::Matrix{FT}
     "Temporary cache used for vector operations (DIM_AZI)"
     _tmp_vec_azi::Vector{FT}
     "Temporary cache used for vector operations (DIM_LAYER)"
@@ -90,46 +58,15 @@ Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloa
     _tmp_vec_sife_2::Vector{FT}
     "Cache variable to store the SIF excitation information"
     _tmp_vec_sife_3::Vector{FT}
-    "Temporary cache used for vector operations (DIM_WL)"
-    _tmp_vec_λ::Vector{FT}
-    "Reflectance for diffuse->diffuse at each canopy layer"
-    _ρ_dd::Matrix{FT}
-    "Reflectance for longwave radiation at each canopy layer"
-    _ρ_lw::Vector{FT}
-    "Reflectance for solar directional->diffuse at each canopy layer"
-    _ρ_sd::Matrix{FT}
-    "Tranmittance for diffuse->diffuse at each canopy layer"
-    _τ_dd::Matrix{FT}
-    "Tranmittance for longwave radiation at each canopy layer"
-    _τ_lw::Vector{FT}
-    "Tranmittance for solar directional->diffuse at each canopy layer"
-    _τ_sd::Matrix{FT}
-    "Tranmittance for solar directional->directional at each canopy layer"
-    _τ_ss::Vector{FT}
 end;
 
 HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} = (
     (; DIM_AZI, DIM_INCL, DIM_LAYER, DIM_SIF, DIM_SIFE, DIM_WL) = config;
 
     return HyperspectralMLCanopyOpticalProperty{FT}(
-                ϵ                   = zeros(FT, DIM_LAYER),
-                ρ_dd                = zeros(FT, DIM_WL, DIM_LAYER+1),
-                ρ_lw                = zeros(FT, DIM_LAYER+1),
-                ρ_sd                = zeros(FT, DIM_WL, DIM_LAYER+1),
-                σ_ddb               = zeros(FT, DIM_WL, DIM_LAYER),
-                σ_ddf               = zeros(FT, DIM_WL, DIM_LAYER),
-                σ_dob               = zeros(FT, DIM_WL, DIM_LAYER),
-                σ_dof               = zeros(FT, DIM_WL, DIM_LAYER),
-                σ_sdb               = zeros(FT, DIM_WL, DIM_LAYER),
-                σ_sdf               = zeros(FT, DIM_WL, DIM_LAYER),
-                σ_so                = zeros(FT, DIM_WL, DIM_LAYER),
-                τ_dd                = zeros(FT, DIM_WL, DIM_LAYER),
-                τ_lw                = zeros(FT, DIM_LAYER),
-                τ_sd                = zeros(FT, DIM_WL, DIM_LAYER),
                 _mat⁺               = zeros(FT, DIM_SIF, DIM_SIFE),
                 _mat⁻               = zeros(FT, DIM_SIF, DIM_SIFE),
                 _tmp_mat_incl_azi_1 = zeros(FT, DIM_INCL, DIM_AZI),
-                _tmp_mat_incl_azi_2 = zeros(FT, DIM_INCL, DIM_AZI),
                 _tmp_vec_azi        = zeros(FT, DIM_AZI),
                 _tmp_vec_layer      = zeros(FT, DIM_LAYER),
                 _tmp_vec_sif_1      = zeros(FT, DIM_SIF),
@@ -141,14 +78,6 @@ HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} =
                 _tmp_vec_sife_1     = zeros(FT, DIM_SIFE),
                 _tmp_vec_sife_2     = zeros(FT, DIM_SIFE),
                 _tmp_vec_sife_3     = zeros(FT, DIM_SIFE),
-                _tmp_vec_λ          = zeros(FT, DIM_WL),
-                _ρ_dd               = zeros(FT, DIM_WL, DIM_LAYER),
-                _ρ_lw               = zeros(FT, DIM_LAYER),
-                _ρ_sd               = zeros(FT, DIM_WL, DIM_LAYER),
-                _τ_dd               = zeros(FT, DIM_WL, DIM_LAYER),
-                _τ_lw               = zeros(FT, DIM_LAYER),
-                _τ_sd               = zeros(FT, DIM_WL, DIM_LAYER),
-                _τ_ss               = zeros(FT, DIM_LAYER),
     )
 );
 

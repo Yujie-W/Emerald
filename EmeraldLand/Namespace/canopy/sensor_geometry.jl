@@ -88,6 +88,14 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     fo_fs::Matrix{FT}
     "Absolute value of fo * fs"
     fo_fs_abs::Matrix{FT}
+
+    # Scattering coefficients per leaf area
+    "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins"
+    dob_leaf::Matrix{FT}
+    "Forward scattering coefficient for diffuse->observer at different layers and wavelength bins"
+    dof_leaf::Matrix{FT}
+    "Bidirectional from solar to observer scattering coefficient at different layers and wavelength bins"
+    so_leaf::Matrix{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
@@ -104,6 +112,9 @@ SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAu
             fo_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             fo_fs        = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             fo_fs_abs    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            dob_leaf     = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            dof_leaf     = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            so_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
 );
 
 

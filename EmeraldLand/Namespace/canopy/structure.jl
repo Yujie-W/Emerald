@@ -60,13 +60,40 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureAuxil{FT}
-    "Weighted sum of cos²(inclination)"
-    bf::FT = 0
     "Clumping index"
     ci::FT = 1
     "Canopy level boundary locations"
     x_bnds::Vector{FT}
+
+    # canopy scattering coefficients
+    "Weighted sum of cos²(inclination)"
+    bf::FT = 0
+    "Backward diffuse->diffuse scatter weight"
+    ddb::FT = 0
+    "Forward diffuse->diffuse scatter weight"
+    ddf::FT = 0
+
+    # Longwave radiation (sun and sensor independent)
+    "Effective emissivity for different layers"
+    ϵ_lw_layer::Vector{FT}
+    "Reflectance for longwave radiation at each canopy layer"
+    ρ_lw_layer::Vector{FT}
+    "Tranmittance for longwave radiation at each canopy layer"
+    τ_lw_layer::Vector{FT}
+    "Effective reflectance for longwave radiation"
+    ρ_lw::Vector{FT}
+    "Effective tranmittance for longwave radiation"
+    τ_lw::Vector{FT}
 end;
+
+CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructureAuxil{FT}(
+            x_bnds     = zeros(FT, config.DIM_LAYER + 1),
+            ϵ_lw_layer = zeros(FT, config.DIM_LAYER),
+            ρ_lw_layer = zeros(FT, config.DIM_LAYER),
+            τ_lw_layer = zeros(FT, config.DIM_LAYER),
+            ρ_lw       = zeros(FT, config.DIM_LAYER + 1),
+            τ_lw       = zeros(FT, config.DIM_LAYER),
+);
 
 
 #######################################################################################################################################################################################################
@@ -97,11 +124,13 @@ end;
 CanopyStructure(config::SPACConfiguration{FT}) where {FT} = (
     lai = 3;
     δlai = 3 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
-    x_bnds = ([0; [sum(δlai[1:i]) for i in 1:config.DIM_LAYER]] ./ -lai);
     p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
+
+    cs_auxil = CanopyStructureAuxil(config);
+    cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) for i in 1:config.DIM_LAYER]] ./ -lai);
 
     return CanopyStructure{FT}(
                 state = CanopyStructureState{FT}(p_incl = p_incl, lai = lai, δlai = δlai),
-                auxil = CanopyStructureAuxil{FT}(x_bnds = x_bnds),
+                auxil = cs_auxil,
     )
 );

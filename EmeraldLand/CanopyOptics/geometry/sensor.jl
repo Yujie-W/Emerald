@@ -5,37 +5,39 @@
 # Changes to this function
 # General
 #     2023-Oct-10: add function sensor_geometry! (run per viewing zenith angle)
+#     2023-Oct-11: compute canopy layer scattering
 #
 #######################################################################################################################################################################################################
 """
 
-    sensor_geometry!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT}
+    sensor_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Update sensor geometry related auxiliary variables, given
 - `config` SPAC configuration
-- `can` SPAC canopy
+- `spac` SPAC
 
 """
-function sensor_geometry!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT}
+function sensor_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; DIM_LAYER, Θ_AZI, Θ_INCL) = config;
+    (; CANOPY, LEAVES) = spac;
 
     # extinction coefficients for the solar radiation
-    vza = can.sensor_geometry.state.vza;
-    sza = can.sun_geometry.state.sza;
-    raa = can.sensor_geometry.state.vaa - can.sun_geometry.state.saa;
+    vza = CANOPY.sensor_geometry.state.vza;
+    sza = CANOPY.sun_geometry.state.sza;
+    raa = CANOPY.sensor_geometry.state.vaa - CANOPY.sun_geometry.state.saa;
     for i in eachindex(Θ_INCL)
         Co = cosd(Θ_INCL[i]) * cosd(vza);
         So = sind(Θ_INCL[i]) * sind(vza);
         βo = (Co >= So ? FT(π) : acos(-Co/So));
-        can.sensor_geometry.auxil.Co_incl[i] = Co;
-        can.sensor_geometry.auxil.So_incl[i] = So;
-        can.sensor_geometry.auxil.βo_incl[i] = βo;
-        can.sensor_geometry.auxil.ko_incl[i] = 2 / FT(π) / cosd(FT(π)) * (Co * (βo - FT(π)/2) + So * sin(βo));
+        CANOPY.sensor_geometry.auxil.Co_incl[i] = Co;
+        CANOPY.sensor_geometry.auxil.So_incl[i] = So;
+        CANOPY.sensor_geometry.auxil.βo_incl[i] = βo;
+        CANOPY.sensor_geometry.auxil.ko_incl[i] = 2 / FT(π) / cosd(FT(π)) * (Co * (βo - FT(π)/2) + So * sin(βo));
 
         # compute the scattering coefficients
-        Cs = can.sun_geometry.auxil.Cs_incl[i];
-        Ss = can.sun_geometry.auxil.Ss_incl[i];
-        βs = can.sun_geometry.auxil.βs_incl[i];
+        Cs = CANOPY.sun_geometry.auxil.Cs_incl[i];
+        Ss = CANOPY.sun_geometry.auxil.Ss_incl[i];
+        βs = CANOPY.sun_geometry.auxil.βs_incl[i];
 
         # 1 compute the Δ and β angles
         Δ₁ = abs(βs - βo);
@@ -60,41 +62,41 @@ function sensor_geometry!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{F
         F₂ = (-β₂ * T₁ + T₂) / abs(so);
 
         # 3 compute the area scattering coefficient fractions (sb for backward and sf for forward)
-        can.sensor_geometry.auxil.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
-        can.sensor_geometry.auxil.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
+        CANOPY.sensor_geometry.auxil.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
+        CANOPY.sensor_geometry.auxil.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
     end;
-    can.sensor_geometry.auxil.ko = can.structure.state.p_incl' * can.sensor_geometry.auxil.ko_incl;
+    CANOPY.sensor_geometry.auxil.ko = CANOPY.structure.state.p_incl' * CANOPY.sensor_geometry.auxil.ko_incl;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    can.sensor_geometry.auxil.dob = (can.sensor_geometry.auxil.ko + can.structure.auxil.bf) / 2;
-    can.sensor_geometry.auxil.dof = (can.sensor_geometry.auxil.ko - can.structure.auxil.bf) / 2;
-    can.sensor_geometry.auxil.sob = can.structure.state.p_incl' * can.sensor_geometry.auxil.sb_incl;
-    can.sensor_geometry.auxil.sof = can.structure.state.p_incl' * can.sensor_geometry.auxil.sf_incl;
+    CANOPY.sensor_geometry.auxil.dob = (CANOPY.sensor_geometry.auxil.ko + CANOPY.structure.auxil.bf) / 2;
+    CANOPY.sensor_geometry.auxil.dof = (CANOPY.sensor_geometry.auxil.ko - CANOPY.structure.auxil.bf) / 2;
+    CANOPY.sensor_geometry.auxil.sob = CANOPY.structure.state.p_incl' * CANOPY.sensor_geometry.auxil.sb_incl;
+    CANOPY.sensor_geometry.auxil.sof = CANOPY.structure.state.p_incl' * CANOPY.sensor_geometry.auxil.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
-        cos_azi_raa = cosd(Θ_AZI[i] .- (can.sensor_geometry.state.vaa - can.sun_geometry.state.saa));
-        view(can.sensor_geometry.auxil.fo,:,i) .= can.sensor_geometry.auxil.Co_incl .+ can.sensor_geometry.auxil.So_incl .* cos_azi_raa;
+        cos_azi_raa = cosd(Θ_AZI[i] .- (CANOPY.sensor_geometry.state.vaa - CANOPY.sun_geometry.state.saa));
+        view(CANOPY.sensor_geometry.auxil.fo,:,i) .= CANOPY.sensor_geometry.auxil.Co_incl .+ CANOPY.sensor_geometry.auxil.So_incl .* cos_azi_raa;
     end;
-    can.sensor_geometry.auxil.fo ./= cosd(can.sensor_geometry.state.vza);
-    can.sensor_geometry.auxil.fo_abs .= abs.(can.sensor_geometry.auxil.fo);
+    CANOPY.sensor_geometry.auxil.fo ./= cosd(CANOPY.sensor_geometry.state.vza);
+    CANOPY.sensor_geometry.auxil.fo_abs .= abs.(CANOPY.sensor_geometry.auxil.fo);
     for i in eachindex(Θ_INCL)
-        view(can.sensor_geometry.auxil.fo_cos²_incl,i,:) .= view(can.sensor_geometry.auxil.fo,i,:) * cosd(Θ_INCL[i]) ^ 2;
+        view(CANOPY.sensor_geometry.auxil.fo_cos²_incl,i,:) .= view(CANOPY.sensor_geometry.auxil.fo,i,:) * cosd(Θ_INCL[i]) ^ 2;
     end;
-    can.sensor_geometry.auxil.fo_fs .= can.sun_geometry.auxil.fs .* can.sensor_geometry.auxil.fo;
-    can.sensor_geometry.auxil.fo_fs_abs .= abs.(can.sensor_geometry.auxil.fo_fs);
+    CANOPY.sensor_geometry.auxil.fo_fs .= CANOPY.sun_geometry.auxil.fs .* CANOPY.sensor_geometry.auxil.fo;
+    CANOPY.sensor_geometry.auxil.fo_fs_abs .= abs.(CANOPY.sensor_geometry.auxil.fo_fs);
 
     # compute po and pso for sensor geometry
-    can.sensor_geometry.auxil.po = exp.(can.sensor_geometry.auxil.ko .* can.structure.auxil.ci * can.structure.state.lai .* can.structure.auxil.x_bnds);
+    CANOPY.sensor_geometry.auxil.po = exp.(CANOPY.sensor_geometry.auxil.ko .* CANOPY.structure.auxil.ci * CANOPY.structure.state.lai .* CANOPY.structure.auxil.x_bnds);
 
-    dso = sqrt( tand(can.sun_geometry.state.sza) ^ 2 +
-                 tand(can.sensor_geometry.state.vza) ^ 2 -
-                 2 * tand(can.sun_geometry.state.sza) * tand(can.sensor_geometry.state.vza) * cosd(can.sensor_geometry.state.vaa - can.sun_geometry.state.saa) );
+    dso = sqrt( tand(CANOPY.sun_geometry.state.sza) ^ 2 +
+                 tand(CANOPY.sensor_geometry.state.vza) ^ 2 -
+                 2 * tand(CANOPY.sun_geometry.state.sza) * tand(CANOPY.sensor_geometry.state.vza) * cosd(CANOPY.sensor_geometry.state.vaa - CANOPY.sun_geometry.state.saa) );
     @inline _pdf(x::FT) where {FT} = (
-        Σk = can.sensor_geometry.auxil.ko + can.sun_geometry.auxil.ks;
-        Πk = can.sensor_geometry.auxil.ko * can.sun_geometry.auxil.ks;
-        cl = can.structure.auxil.ci * can.structure.state.lai;
-        α  = dso / can.structure.state.hot_spot * 2 / Σk;
+        Σk = CANOPY.sensor_geometry.auxil.ko + CANOPY.sun_geometry.auxil.ks;
+        Πk = CANOPY.sensor_geometry.auxil.ko * CANOPY.sun_geometry.auxil.ks;
+        cl = CANOPY.structure.auxil.ci * CANOPY.structure.state.lai;
+        α  = dso / CANOPY.structure.state.hot_spot * 2 / Σk;
 
         if dso == 0
             return exp( (Σk - sqrt(Πk)) * cl * x )
@@ -103,8 +105,15 @@ function sensor_geometry!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{F
         return exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) )
     );
 
-    for i in eachindex(can.structure.auxil.x_bnds)
-        can.sensor_geometry.auxil.pso[i] = quadgk(_pdf, can.structure.auxil.x_bnds[i] - FT(1)/DIM_LAYER, can.structure.auxil.x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
+    for i in eachindex(CANOPY.structure.auxil.x_bnds)
+        CANOPY.sensor_geometry.auxil.pso[i] = quadgk(_pdf, CANOPY.structure.auxil.x_bnds[i] - FT(1)/DIM_LAYER, CANOPY.structure.auxil.x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
+    end;
+
+    # compute the scattering coefficients per leaf area
+    for i in eachindex(LEAVES)
+        CANOPY.sensor_geometry.auxil.dob_leaf .= CANOPY.sensor_geometry.auxil.dob * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.dof * LEAVES[i].bio.auxil.τ_leaf;
+        CANOPY.sensor_geometry.auxil.dof_leaf .= CANOPY.sensor_geometry.auxil.dof * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.dob * LEAVES[i].bio.auxil.τ_leaf;
+        CANOPY.sensor_geometry.auxil.so_leaf  .= CANOPY.sensor_geometry.auxil.sob * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.sof * LEAVES[i].bio.auxil.τ_leaf;
     end;
 
     return nothing

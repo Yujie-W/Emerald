@@ -155,9 +155,9 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
 
     # longwave radiation
     "Broadband thermal reflectance, related to blackbody emittance `[-]`"
-    ρ_LW::FT = 0.01
+    ρ_lw::FT = 0.01
     "Broadband thermal transmission, related to blackbody emittance `[-]`"
-    τ_LW::FT = 0.01
+    τ_lw::FT = 0.01
 
     # cache variables
     "SIF PDF based on the wavelength of excitation `[-]`"
