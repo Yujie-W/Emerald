@@ -125,4 +125,20 @@ import Emerald.EmeraldLand.SPAC
         end;
     end;
 
+    @testset "Longwave radiation" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
+        CO.canopy_structure!(config, spac);
+        CO.longwave_radiation!(config, spac);
+
+        @test all(spac.CANOPY.structure.auxil.lw_layer .> 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜜ .> 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜛ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜜ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜛ .>= 0);
+        @test all(!isnan, spac.CANOPY.structure.auxil.r_net_lw);
+        @test all(!isnan, spac.SOIL_BULK.auxil.r_net_lw);
+    end;
+
 end;

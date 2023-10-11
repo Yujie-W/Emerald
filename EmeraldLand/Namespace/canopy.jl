@@ -117,14 +117,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
     e_o::Vector{FT}
     "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
     e_v::Matrix{FT}
-    "Longwave energy flux from leaves per leaf area (one side) `[W m⁻²]`"
-    r_lw::Vector{FT}
-    "Downwelling longwave energy flux `[W m⁻²]`"
-    r_lw_down::Vector{FT}
-    "Upwelling longwave energy flux `[W m⁻²]`"
-    r_lw_up::Vector{FT}
-    "Net longwave energy absorption for all leaves `[W m⁻²]`"
-    r_net_lw::Vector{FT}
+
     "Downwelling SIF for sunlit leaves at each wavelength for a layer"
     s_layer_down::Matrix{FT}
     "Downwelling SIF for sunlit leaves at each wavelength for a layer at chloroplast level"
@@ -149,10 +142,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
     sif_up::Matrix{FT}
 
     # Cache variables
-    "Downwelling longwave energy flux cache `[W m⁻²]`"
-    _r_emit_down::Vector{FT}
-    "Upwelling longwave energy flux cache `[W m⁻²]`"
-    _r_emit_up::Vector{FT}
     "Downwelling SIF for sunlit leaves at each wavelength"
     _s_emit_down::Matrix{FT}
     "Upwelling SIF for sunlit leaves at each wavelength"
@@ -180,10 +169,6 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
                 albedo           = zeros(FT, DIM_WL),
                 e_o              = zeros(FT, DIM_WL),
                 e_v              = zeros(FT, DIM_WL, DIM_LAYER+1),
-                r_lw             = zeros(FT, DIM_LAYER),
-                r_lw_down        = zeros(FT, DIM_LAYER+1),
-                r_lw_up          = zeros(FT, DIM_LAYER+1),
-                r_net_lw         = zeros(FT, DIM_LAYER),
                 s_layer_down     = zeros(FT, DIM_SIF, DIM_LAYER),
                 s_layer_down_chl = zeros(FT, DIM_SIF, DIM_LAYER),
                 s_layer_up       = zeros(FT, DIM_SIF, DIM_LAYER),
@@ -195,8 +180,6 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
                 sif_obs_soil     = zeros(FT, DIM_SIF),
                 sif_obs_sunlit   = zeros(FT, DIM_SIF),
                 sif_up           = zeros(FT, DIM_SIF, DIM_LAYER+1),
-                _r_emit_down     = zeros(FT, DIM_LAYER),
-                _r_emit_up       = zeros(FT, DIM_LAYER+1),
                 _s_emit_down     = zeros(FT, DIM_SIF, DIM_LAYER),
                 _s_emit_up       = zeros(FT, DIM_SIF, DIM_LAYER+1),
                 _s_shaded_down   = zeros(FT, DIM_SIF),

@@ -73,7 +73,7 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     "Forward diffuse->diffuse scatter weight"
     ddf::FT = 0
 
-    # Longwave radiation (sun and sensor independent)
+    # Longwave radiation coefficients (sun and sensor independent)
     "Effective emissivity for different layers"
     ϵ_lw_layer::Vector{FT}
     "Reflectance for longwave radiation at each canopy layer"
@@ -84,6 +84,22 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     ρ_lw::Vector{FT}
     "Effective tranmittance for longwave radiation"
     τ_lw::Vector{FT}
+
+    # Longwave radiation flux
+    "Longwave energy flux from leaves (one side) `[W m⁻²]`"
+    lw_layer::Vector{FT}
+    "Downwelling longwave energy flux `[W m⁻²]`"
+    lwꜜ::Vector{FT}
+    "Upwelling longwave energy flux `[W m⁻²]`"
+    lwꜛ::Vector{FT}
+    "Downwelling longwave energy flux `[W m⁻²]`"
+    emitꜜ::Vector{FT}
+    "Upwelling longwave energy flux `[W m⁻²]`"
+    emitꜛ::Vector{FT}
+
+    # Net longwave radiation flux
+    "Net longwave energy absorption per leaf area `[W m⁻²]`"
+    r_net_lw::Vector{FT}
 end;
 
 CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructureAuxil{FT}(
@@ -93,6 +109,12 @@ CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructure
             τ_lw_layer = zeros(FT, config.DIM_LAYER),
             ρ_lw       = zeros(FT, config.DIM_LAYER + 1),
             τ_lw       = zeros(FT, config.DIM_LAYER),
+            lw_layer   = zeros(FT, config.DIM_LAYER),
+            lwꜜ        = zeros(FT, config.DIM_LAYER + 1),
+            lwꜛ        = zeros(FT, config.DIM_LAYER + 1),
+            emitꜜ      = zeros(FT, config.DIM_LAYER),
+            emitꜛ      = zeros(FT, config.DIM_LAYER + 1),
+            r_net_lw   = zeros(FT, config.DIM_LAYER),
 );
 
 

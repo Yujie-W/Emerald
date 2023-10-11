@@ -117,9 +117,6 @@ Updates canopy radiation profiles for shortwave or longwave radiation, given
 
 """
 longwave_radiation!(can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT} = (
-    (; OPTICS, RADIATION) = can;
-
-    _nlayers = length(leaves);
 
     if can.structure.state.lai == 0
         _r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * soil.auxil.t ^ 4;
@@ -130,47 +127,6 @@ longwave_radiation!(can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::FT
 
         return nothing
     end;
-
-    # 1. compute longwave radiation out from the leaves and soil
-    for i in eachindex(leaves)
-        RADIATION.r_lw[i] = K_STEFAN(FT) * OPTICS.ϵ[i] * leaves[i].energy.auxil.t ^ 4;
-    end;
-
-    _r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * soil.auxil.t ^ 4;
-
-    # 2. account for the longwave emission from bottom to up
-    RADIATION._r_emit_up[end] = _r_lw_soil;
-
-    for i in _nlayers:-1:1
-        _r__ = OPTICS._ρ_lw[i];
-        _r_j = OPTICS.ρ_lw[i+1];
-        _t__ = OPTICS._τ_lw[i];
-
-        _dnorm = 1 - _r__ * _r_j;
-
-        RADIATION._r_emit_down[i] = (RADIATION._r_emit_up[i+1] * _r__ + RADIATION.r_lw[i]) / _dnorm;
-        RADIATION._r_emit_up[i] = RADIATION._r_emit_down[i] * _r_j * _t__ + RADIATION._r_emit_up[i+1] * _t__ + RADIATION.r_lw[i];
-    end;
-
-    # 3. account for the longwave emission from up to bottom
-    RADIATION.r_lw_down[1] = rad;
-
-    for i in 1:_nlayers
-        _r_i = OPTICS.ρ_lw[i];
-        _t_i = OPTICS.τ_lw[i];
-
-        RADIATION.r_lw_down[i+1] = RADIATION.r_lw_down[i] * _t_i + RADIATION._r_emit_down[i];
-        RADIATION.r_lw_up[i+1] = RADIATION.r_lw_down[i] * _r_i + RADIATION._r_emit_up[i];
-    end;
-
-    RADIATION.r_lw_up[end] = RADIATION.r_lw_down[end] * sbulk.auxil.ρ_lw + _r_lw_soil;
-
-    # 4. compute the net longwave radiation per canopy layer and soil
-    for i in 1:_nlayers
-        RADIATION.r_net_lw[i] = (RADIATION.r_lw_down[i] + RADIATION.r_lw_up[i+1]) * (1 - OPTICS._ρ_lw[i] - OPTICS._τ_lw[i]) - 2 * RADIATION.r_lw[i];
-    end;
-
-    sbulk.auxil.r_net_lw = RADIATION.r_lw_down[end] * (1 - sbulk.auxil.ρ_lw) - _r_lw_soil;
 
     return nothing
 );

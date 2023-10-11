@@ -42,8 +42,8 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{F
     # update the effective longwave reflectance and transmittance
     CANOPY.structure.auxil.ρ_lw[end] = SOIL_BULK.auxil.ρ_lw;
     for i in DIM_LAYER:-1:1
-        dnorm = 1 - CANOPY.structure.auxil.ρ_lw_layer[i] * CANOPY.structure.auxil.ρ_lw[i+1];
-        CANOPY.structure.auxil.τ_lw[i] = CANOPY.structure.auxil.τ_lw_layer[i] / dnorm;                                                                          # it, rescale
+        denom = 1 - CANOPY.structure.auxil.ρ_lw_layer[i] * CANOPY.structure.auxil.ρ_lw[i+1];
+        CANOPY.structure.auxil.τ_lw[i] = CANOPY.structure.auxil.τ_lw_layer[i] / denom;                                                                          # it, rescale
         CANOPY.structure.auxil.ρ_lw[i] = CANOPY.structure.auxil.ρ_lw_layer[i] + CANOPY.structure.auxil.τ_lw_layer[i] ^ 2 * CANOPY.structure.auxil.ρ_lw[i+1];    # ir + it-jr-it
     end;
 
