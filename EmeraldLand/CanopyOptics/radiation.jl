@@ -49,76 +49,8 @@ Updates canopy radiation profiles for shortwave radiation, given
 
 """
 shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, leaves::Vector{Leaf{FT}}, rad::ShortwaveRadiation{FT}, sbulk::SoilBulk{FT}) where {FT} = (
-    (; DIM_LAYER, SPECTRA) = config;
+    (; DIM_LAYER) = config;
     (; OPTICS, RADIATION) = can;
-
-    if can.structure.state.lai == 0
-        for i in 1:(DIM_LAYER+1)
-            RADIATION.e_direct[:,i] .= rad.e_direct;
-            RADIATION.e_diffuse_down[:,i] .= rad.e_diffuse;
-            RADIATION.e_diffuse_up[:,i] .= 0;
-            RADIATION.e_v[:,i] .= 0;
-        end;
-        RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
-        RADIATION.e_v[:,end] .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
-        RADIATION.e_o .= view(RADIATION.e_diffuse_up,:,DIM_LAYER+1) ./ FT(pi);
-        RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
-
-        RADIATION._par_shaded .= photon.(SPECTRA.Λ_PAR, view(rad.e_diffuse,SPECTRA.IΛ_PAR)) .* 1000;
-        RADIATION._par_sunlit .= photon.(SPECTRA.Λ_PAR, view(rad.e_direct ,SPECTRA.IΛ_PAR)) .* 1000;
-        RADIATION.par_in_diffuse = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
-        RADIATION.par_in_direct = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR;
-        RADIATION.par_in = RADIATION.par_in_diffuse + RADIATION.par_in_direct;
-
-        return nothing
-    end;
-
-    # 1. update upward and downward direct and diffuse radiation profiles
-    RADIATION.e_direct[:,1] .= rad.e_direct;
-    RADIATION.e_diffuse_down[:,1] .= rad.e_diffuse;
-
-    for i in 1:DIM_LAYER
-        _e_d_i = view(RADIATION.e_diffuse_down,:,i  );     # downward diffuse radiation at upper boundary
-        _e_d_j = view(RADIATION.e_diffuse_down,:,i+1);     # downward diffuse radiation at lower boundary
-        _e_s_i = view(RADIATION.e_direct      ,:,i  );     # direct radiation at upper boundary
-        _e_s_j = view(RADIATION.e_direct      ,:,i+1);     # direct radiation at lower boundary
-        _e_u_i = view(RADIATION.e_diffuse_up  ,:,i  );     # upward diffuse radiation at upper boundary
-
-        _r_dd_i = view(OPTICS.ρ_dd ,:,i);  # reflectance of the upper boundary (i)
-        _r_sd_i = view(OPTICS.ρ_sd ,:,i);  # reflectance of the upper boundary (i)
-        _t_dd_i = view(OPTICS.τ_dd ,:,i);  # transmittance of the layer (i)
-        _t_sd_i = view(OPTICS.τ_sd ,:,i);  # transmittance of the layer (i)
-        _t_ss__ = view(OPTICS._τ_ss,i);    # transmittance for directional->directional
-
-        _e_s_j .= _t_ss__ .* _e_s_i;
-        _e_d_j .= _t_sd_i .* _e_s_i .+ _t_dd_i .* _e_d_i;
-        _e_u_i .= _r_sd_i .* _e_s_i .+ _r_dd_i .* _e_d_i;
-    end;
-
-    RADIATION.e_diffuse_up[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(RADIATION.e_direct,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(RADIATION.e_diffuse_down,:,DIM_LAYER+1);
-
-    # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
-    for i in 1:DIM_LAYER
-        _a_s_i = view(RADIATION.e_net_direct  ,:,i  );     # net absorbed direct radiation
-        _a_d_i = view(RADIATION.e_net_diffuse ,:,i  );     # net absorbed diffuse radiation
-        _e_d_i = view(RADIATION.e_diffuse_down,:,i  );     # downward diffuse radiation at upper boundary
-        _e_s_i = view(RADIATION.e_direct      ,:,i  );     # direct radiation at upper boundary
-        _e_u_j = view(RADIATION.e_diffuse_up  ,:,i+1);     # upward diffuse radiation at lower boundary
-        _p_s_i = view(RADIATION.e_sum_direct  ,:,i  );     # sum direct radiation
-        _p_d_i = view(RADIATION.e_sum_diffuse ,:,i  );     # sum diffuse radiation
-
-        _r_dd__ = view(OPTICS._ρ_dd,:,i);  # reflectance of the upper boundary (i)
-        _r_sd__ = view(OPTICS._ρ_sd,:,i);  # reflectance of the upper boundary (i)
-        _t_dd__ = view(OPTICS._τ_dd,:,i);  # transmittance of the layer (i)
-        _t_sd__ = view(OPTICS._τ_sd,:,i);  # transmittance of the layer (i)
-        _t_ss__ = view(OPTICS._τ_ss,i);    # transmittance for directional->directional
-
-        _p_s_i .= _e_s_i;
-        _p_d_i .= _e_d_i .+ _e_u_j;
-
-        _a_s_i .= _p_s_i .* (1 .- _t_ss__ .- _t_sd__ .- _r_sd__);
-        _a_d_i .= _p_d_i .* (1 .- _t_dd__ .- _r_dd__);
-    end;
 
     # 3. compute the spectra at the observer direction
     for i in 1:DIM_LAYER
@@ -132,7 +64,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
 
         _e_v_i  .= can.sensor_geometry.auxil.po[i] .* _dob_i .* _e_d_i;
         _e_v_i .+= can.sensor_geometry.auxil.po[i] .* _dof_i .* _e_u_i;
-        _e_v_i .+= can.sensor_geometry.auxil.pso[i] .* _so__i .* rad.e_direct;
+        _e_v_i .+= can.sensor_geometry.auxil.pso[i] .* _so__i .* rad.e_dir;
         _e_v_i .*= can.structure.state.δlai[i] * can.structure.auxil.ci;
     end;
     RADIATION.e_v[:,end] .= can.sensor_geometry.auxil.po[end] .* view(RADIATION.e_diffuse_up,:,DIM_LAYER+1);
@@ -141,62 +73,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         RADIATION.e_o[i] = sum(view(RADIATION.e_v,i,:)) / FT(pi);
     end;
 
-    RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_direct .+ rad.e_diffuse);
-
-    # 4. compute net absorption for leaves and soil
-    for i in 1:DIM_LAYER
-        _Σ_shaded = view(RADIATION.e_net_diffuse,:,i)' * SPECTRA.ΔΛ / 1000 / can.structure.state.δlai[i];
-        _Σ_sunlit = view(RADIATION.e_net_direct ,:,i)' * SPECTRA.ΔΛ / 1000 / can.structure.state.δlai[i];
-        RADIATION.r_net_sw_shaded[i] = _Σ_shaded;
-        RADIATION.r_net_sw_sunlit[i] = _Σ_sunlit / can.sun_geometry.auxil.p_sunlit[i] + _Σ_shaded;
-        RADIATION.r_net_sw[i] = _Σ_shaded * (1 - can.sun_geometry.auxil.p_sunlit[i]) + _Σ_sunlit * can.sun_geometry.auxil.p_sunlit[i];
-    end;
-
-    sbulk.auxil.e_net_direct .= view(RADIATION.e_direct,:,DIM_LAYER+1) .* (1 .- sbulk.auxil.ρ_sw);
-    sbulk.auxil.e_net_diffuse .= view(RADIATION.e_diffuse_down,:,DIM_LAYER+1) .* (1 .- sbulk.auxil.ρ_sw);
-    sbulk.auxil.r_net_sw = (sbulk.auxil.e_net_direct' * SPECTRA.ΔΛ + sbulk.auxil.e_net_diffuse' * SPECTRA.ΔΛ) / 1000;
-
-    # 5. compute top-of-canopy and leaf level PAR, APAR, and PPAR per ground area
-    RADIATION._par_shaded .= photon.(SPECTRA.Λ_PAR, view(rad.e_diffuse,SPECTRA.IΛ_PAR)) .* 1000;
-    RADIATION._par_sunlit .= photon.(SPECTRA.Λ_PAR, view(rad.e_direct ,SPECTRA.IΛ_PAR)) .* 1000;
-    RADIATION.par_in_diffuse = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
-    RADIATION.par_in_direct = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR;
-    RADIATION.par_in = RADIATION.par_in_diffuse + RADIATION.par_in_direct;
-
-    mul!(OPTICS._tmp_vec_azi, can.sun_geometry.auxil.fs_abs', can.structure.state.p_incl);
-    _normi = 1 / mean(OPTICS._tmp_vec_azi);
-
-    for i in 1:DIM_LAYER
-        _α_apar = view(leaves[i].bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
-
-        # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
-        RADIATION._par_shaded  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_diffuse,SPECTRA.IΛ_PAR,i)) .* 1000;
-        RADIATION._par_sunlit  .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_sum_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.sun_geometry.auxil.p_sunlit[i];
-        RADIATION._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_diffuse,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.structure.state.δlai[i];
-        RADIATION._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(RADIATION.e_net_direct ,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can.structure.state.δlai[i] ./ can.sun_geometry.auxil.p_sunlit[i];
-        RADIATION._ppar_shaded .= RADIATION._apar_shaded .* _α_apar;
-        RADIATION._ppar_sunlit .= RADIATION._apar_sunlit .* _α_apar;
-
-        # PAR for leaves
-        _Σ_par_dif = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
-        _Σ_par_dir = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
-        RADIATION.par_shaded[i] = _Σ_par_dif;
-        RADIATION.par_sunlit[:,:,i] .= can.sensor_geometry.auxil.fo_fs_abs .* _Σ_par_dir;
-        RADIATION.par_sunlit[:,:,i] .+= _Σ_par_dif;
-
-        # APAR for leaves
-        _Σ_apar_dif = RADIATION._apar_shaded' * SPECTRA.ΔΛ_PAR;
-        _Σ_apar_dir = RADIATION._apar_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
-        RADIATION.apar_shaded[i] = _Σ_apar_dif;
-        RADIATION.apar_sunlit[:,:,i] .= can.sensor_geometry.auxil.fo_fs_abs .* _Σ_apar_dir;
-        RADIATION.apar_sunlit[:,:,i] .+= _Σ_apar_dif;
-
-        # PPAR for leaves
-        _Σ_ppar_dif = RADIATION._ppar_shaded' * SPECTRA.ΔΛ_PAR;
-        _Σ_ppar_dir = RADIATION._ppar_sunlit' * SPECTRA.ΔΛ_PAR * _normi;
-        leaves[DIM_LAYER+1-i].flux.auxil.ppar_shaded  = _Σ_ppar_dif;
-        leaves[DIM_LAYER+1-i].flux.auxil.ppar_sunlit .= can.sensor_geometry.auxil.fo_fs_abs .* _Σ_ppar_dir .+ _Σ_ppar_dif;
-    end;
+    RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_dir .+ rad.e_dif);
 
     return nothing
 );

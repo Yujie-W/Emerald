@@ -18,12 +18,13 @@ using ..Namespace: MultiLayerSPAC, SPACConfiguration
 include("geometry/extinction.jl");
 include("geometry/inclination.jl");
 include("geometry/sensor.jl");
+include("geometry/soil_albedo.jl");
 include("geometry/sun.jl");
 include("geometry/structure.jl");
 
 
 # function related to canopy radiation
-include("radiation/soil_albedo.jl");
+include("radiation/shortwave.jl");
 
 
 include("fluorescence.jl");

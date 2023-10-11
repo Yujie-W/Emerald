@@ -64,8 +64,8 @@ for i in 1:10
     #@info "Total water is" tswc [soil.θ for soil in spac.SOIL.LAYERS];
 end;
 
-spac.METEO.rad_sw.e_direct .= 0;
-spac.METEO.rad_sw.e_diffuse .= 0;
+spac.METEO.rad_sw.e_dir .= 0;
+spac.METEO.rad_sw.e_dif .= 0;
 spac.METEO.rain = 0.01;
 for i in 1:10
     EmeraldLand.SPAC.spac!(config, spac, FT(360));
@@ -137,8 +137,8 @@ show_spac_info(spac);
 
 @info "RAD = 0 and LAI = 0";
 EmeraldLand.SPAC.update!(config, spac; lai = 0);
-spac.METEO.rad_sw.e_direct .= 0;
-spac.METEO.rad_sw.e_diffuse .= 0;
+spac.METEO.rad_sw.e_dir .= 0;
+spac.METEO.rad_sw.e_dif .= 0;
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 

@@ -98,8 +98,8 @@ function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr
     # update downward shortwave and longwave radiation
     _in_dir = view(config.SPECTRA.SOLAR_RAD,:,1)' * config.SPECTRA.ΔΛ / 1000;
     _in_dif = view(config.SPECTRA.SOLAR_RAD,:,2)' * config.SPECTRA.ΔΛ / 1000;
-    spac.METEO.rad_sw.e_direct  .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,_df_dir) ./ _in_dir;
-    spac.METEO.rad_sw.e_diffuse .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,_df_dif) ./ _in_dif;
+    spac.METEO.rad_sw.e_dir .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,_df_dir) ./ _in_dir;
+    spac.METEO.rad_sw.e_dif .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,_df_dif) ./ _in_dif;
     spac.METEO.rad_lw = _df_lwr;
 
     # update solar zenith angle based on the time

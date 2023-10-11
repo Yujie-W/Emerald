@@ -44,6 +44,7 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) 
     end;
     CANOPY.sun_geometry.auxil.fs ./= cosd(CANOPY.sun_geometry.state.sza);
     CANOPY.sun_geometry.auxil.fs_abs .= abs.(CANOPY.sun_geometry.auxil.fs);
+    mul!(CANOPY.sun_geometry.auxil.fs_abs_mean, CANOPY.sun_geometry.auxil.fs_abs', CANOPY.structure.state.p_incl);
     for i in eachindex(Θ_INCL)
         view(CANOPY.sun_geometry.auxil.fs_cos²_incl,i,:) .= view(CANOPY.sun_geometry.auxil.fs,i,:) * cosd(Θ_INCL[i]) ^ 2;
     end;

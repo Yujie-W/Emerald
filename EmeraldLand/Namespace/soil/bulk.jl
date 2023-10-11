@@ -48,9 +48,9 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct SoilBulkAuxil{FT}
     # soil energy budget
     "Net diffuse radiation at top soil `[mW m⁻² nm⁻¹]`"
-    e_net_diffuse::Vector{FT}
+    e_net_dif::Vector{FT}
     "Net direct radiation at top soil `[mW m⁻² nm⁻¹]`"
-    e_net_direct::Vector{FT}
+    e_net_dir::Vector{FT}
     "Net longwave energy absorption `[W m⁻²]`"
     r_net_lw::FT = 0
     "Net shortwave energy absorption `[W m⁻²]`"
@@ -86,16 +86,16 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
 end;
 
 SoilBulkAuxil(config::SPACConfiguration{FT}) where {FT} = SoilBulkAuxil{FT}(
-            e_net_diffuse = zeros(FT, config.DIM_WL),
-            e_net_direct  = zeros(FT, config.DIM_WL),
-            ρ_sw          = zeros(FT, config.DIM_WL),
-            dndt          = zeros(FT, config.DIM_SOIL, 5),
-            k             = zeros(FT, config.DIM_SOIL-1),
-            q             = zeros(FT, config.DIM_SOIL-1),
-            q_layers      = zeros(FT, config.DIM_SOIL-1),
-            δt            = zeros(FT, config.DIM_SOIL-1),
-            δψ            = zeros(FT, config.DIM_SOIL-1),
-            λ_layers      = zeros(FT, config.DIM_SOIL-1)
+            e_net_dif = zeros(FT, config.DIM_WL),
+            e_net_dir = zeros(FT, config.DIM_WL),
+            ρ_sw      = zeros(FT, config.DIM_WL),
+            dndt      = zeros(FT, config.DIM_SOIL, 5),
+            k         = zeros(FT, config.DIM_SOIL - 1),
+            q         = zeros(FT, config.DIM_SOIL - 1),
+            q_layers  = zeros(FT, config.DIM_SOIL - 1),
+            δt        = zeros(FT, config.DIM_SOIL - 1),
+            δψ        = zeros(FT, config.DIM_SOIL - 1),
+            λ_layers  = zeros(FT, config.DIM_SOIL - 1)
 );
 
 

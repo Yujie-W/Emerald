@@ -129,8 +129,8 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     # update shortwave and longwave radiation
     _in_dir = view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,1)'  * CACHE_CONFIG.SPECTRA.ΔΛ / 1000;
     _in_dif = view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,2)' * CACHE_CONFIG.SPECTRA.ΔΛ / 1000;
-    CACHE_SPAC.METEO.rad_sw.e_direct  .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,1) .* max(0,wd_params["RAD_DIR"]) ./ _in_dir;
-    CACHE_SPAC.METEO.rad_sw.e_diffuse .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,2) .* max(0,wd_params["RAD_DIF"]) ./ _in_dif;
+    CACHE_SPAC.METEO.rad_sw.e_dir .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,1) .* max(0,wd_params["RAD_DIR"]) ./ _in_dir;
+    CACHE_SPAC.METEO.rad_sw.e_dif .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,2) .* max(0,wd_params["RAD_DIF"]) ./ _in_dif;
     CACHE_SPAC.METEO.rad_lw = wd_params["RAD_LW"];
 
     # update solar zenith angle based on the time

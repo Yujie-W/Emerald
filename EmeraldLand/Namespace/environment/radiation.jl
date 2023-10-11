@@ -23,9 +23,9 @@ $(TYPEDFIELDS)
 mutable struct ShortwaveRadiation{FT<:AbstractFloat}
     # Prognostic variables
     "Diffuse radiation `[mW m⁻² nm⁻¹]`"
-    e_diffuse::Vector{FT}
+    e_dif::Vector{FT}
     "Direct radiation `[mW m⁻² nm⁻¹]`"
-    e_direct::Vector{FT}
+    e_dir::Vector{FT}
 end;
 
 ShortwaveRadiation(config::SPACConfiguration{FT}) where {FT} = ShortwaveRadiation{FT}(read_nc(config.DATASET, "E_DIFF"), read_nc(config.DATASET, "E_DIR"));

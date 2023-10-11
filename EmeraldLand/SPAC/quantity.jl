@@ -100,6 +100,34 @@ GPP(spac::MultiLayerSPAC{FT}) where {FT} = (
 #
 # Changes to this function
 # General
+#     2023-Oct-11: add function to compute PAR above canopy
+#
+#######################################################################################################################################################################################################
+"""
+
+    PAR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+
+Return the PAR above canopy per ground area, given
+- `config` `SPACConfiguration` SPAC configuration
+- `spac` `MultiLayerSPAC` SPAC
+
+"""
+function PAR end;
+
+PAR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
+    (; SPECTRA) = config;
+    (; METEO) = spac;
+
+    ppfd = photon.(SPECTRA.Λ_PAR, (METEO.rad_sw.e_dif + METEO.rad_sw.e_dir)[SPECTRA.IΛ_PAR]) .* 1000;
+
+    return ppfd' * SPECTRA.ΔΛ_PAR
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2022-Oct-19: add function to compute canopy integrated PPAR
 #     2023-May-19: use δlai per canopy layer
 #

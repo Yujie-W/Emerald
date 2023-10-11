@@ -24,19 +24,19 @@ import Emerald.EmeraldLand.SPAC
         spac.SOIL_BULK.auxil._θ = -1;
         config.α_CLM = true;
         config.α_FITTING = false;
-        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        CO.soil_albedo!(config, spac);
         @test all(0 .< spac.SOIL_BULK.auxil.ρ_sw .< 1);
 
         spac.SOIL_BULK.auxil._θ = -1;
         config.α_CLM = false;
         config.α_FITTING = false;
-        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        CO.soil_albedo!(config, spac);
         @test all(0 .< spac.SOIL_BULK.auxil.ρ_sw .< 1);
 
         spac.SOIL_BULK.auxil._θ = -1;
         config.α_CLM = false;
         config.α_FITTING = true;
-        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        CO.soil_albedo!(config, spac);
         @test all(0 .< spac.SOIL_BULK.auxil.ρ_sw .< 1);
     end;
 
@@ -60,7 +60,7 @@ import Emerald.EmeraldLand.SPAC
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
         SPAC.initialize!(config, spac);
-        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.sun_geometry!(config, spac);
 
@@ -85,7 +85,7 @@ import Emerald.EmeraldLand.SPAC
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
         SPAC.initialize!(config, spac);
-        CO.soil_albedo!(config, spac.SOIL_BULK, spac.SOILS[1]);
+        CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.sun_geometry!(config, spac);
         CO.sensor_geometry!(config, spac);
@@ -97,6 +97,32 @@ import Emerald.EmeraldLand.SPAC
         @test spac.CANOPY.sensor_geometry.auxil.sof >= 0;
         @test all(0 .< spac.CANOPY.sensor_geometry.auxil.po .<= 1);
         @test all(0 .< spac.CANOPY.sensor_geometry.auxil.pso .< 1);
+    end;
+
+    @testset "Shortwave radiation" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
+        CO.soil_albedo!(config, spac);
+        CO.canopy_structure!(config, spac);
+        CO.sun_geometry!(config, spac);
+        CO.shortwave_radiation!(config, spac);
+
+        @test all(spac.CANOPY.sun_geometry.auxil.e_dirꜜ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜜ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜛ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dir .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dif .> 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dir .> 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dif .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.r_net_sw .> 0);
+        @test all(spac.SOIL_BULK.auxil.r_net_sw .> 0);
+        for leaf in spac.LEAVES
+            @test all(leaf.flux.auxil.apar_shaded .> 0);
+            @test all(leaf.flux.auxil.apar_sunlit .> 0);
+            @test all(leaf.flux.auxil.ppar_shaded .> 0);
+            @test all(leaf.flux.auxil.ppar_sunlit .> 0);
+        end;
     end;
 
 end;

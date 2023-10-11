@@ -69,8 +69,8 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         _k_chl = view(leaves[i].bio.auxil.f_sife, SPECTRA.IΛ_SIFE);
 
         # integrate the energy absorbed by chl (and car) in each wave length bins
-        OPTICS._tmp_vec_sife_1 .= view(RADIATION.e_net_diffuse,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE .* _k_chl;
-        OPTICS._tmp_vec_sife_2 .= view(RADIATION.e_net_direct ,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE .* _k_chl;
+        OPTICS._tmp_vec_sife_1 .= view(can.sun_geometry.auxil.e_net_dif,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE .* _k_chl;
+        OPTICS._tmp_vec_sife_2 .= view(can.sun_geometry.auxil.e_net_dir,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE .* _k_chl;
 
         # determine which ones to use depending on ϕ_photon
         if Φ_PHOTON
@@ -117,9 +117,9 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
         OPTICS._mat⁻ .= (leaves[i].bio.auxil.mat_b .- leaves[i].bio.auxil.mat_f) ./ 2;
 
         # integrate the energy in each wave length bins
-        OPTICS._tmp_vec_sife_1 .= view(RADIATION.e_direct      ,SPECTRA.IΛ_SIFE,1 ) .* SPECTRA.ΔΛ_SIFE;
-        OPTICS._tmp_vec_sife_2 .= view(RADIATION.e_diffuse_down,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE;
-        OPTICS._tmp_vec_sife_3 .= view(RADIATION.e_diffuse_up  ,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE;
+        OPTICS._tmp_vec_sife_1 .= view(can.sun_geometry.auxil.e_dirꜜ,SPECTRA.IΛ_SIFE,1 ) .* SPECTRA.ΔΛ_SIFE;
+        OPTICS._tmp_vec_sife_2 .= view(can.sun_geometry.auxil.e_difꜜ,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE;
+        OPTICS._tmp_vec_sife_3 .= view(can.sun_geometry.auxil.e_difꜛ,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE;
 
         # determine which ones to use depending on ϕ_photon
         if Φ_PHOTON

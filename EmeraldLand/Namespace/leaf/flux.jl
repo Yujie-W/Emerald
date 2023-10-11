@@ -110,8 +110,12 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     ∫∂w∂t_out = 0
 
     # ppar from canopy radiation
+    "Absorbed photosynthetically active radiation for shaded leaves `[μmol m⁻² s⁻¹]`"
+    apar_shaded::FT = 0
+    "Absorbed photosynthetically active radiation for sunlit leaves `[μmol m⁻² s⁻¹]`"
+    apar_sunlit::Matrix{FT}
     "Absorbed photosynthetically active radiation used for photosynthesis for shaded leaves `[μmol m⁻² s⁻¹]`"
-    ppar_shaded::FT = 200
+    ppar_shaded::FT = 0
     "Absorbed photosynthetically active radiation used for photosynthesis for sunlit leaves `[μmol m⁻² s⁻¹]`"
     ppar_sunlit::Matrix{FT}
 
@@ -138,7 +142,8 @@ LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
             ϕ_f_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ϕ_n_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ϕ_p_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            ppar_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI)
+            apar_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ppar_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
 );
 
 

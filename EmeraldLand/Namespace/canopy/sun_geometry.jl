@@ -74,6 +74,8 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     fs::Matrix{FT}
     "Absolute value of fs"
     fs_abs::Matrix{FT}
+    "Mean fs_abs at different azimuth angles"
+    fs_abs_mean::Vector{FT}
     "fs * cos Θ_INCL"
     fs_cos²_incl::Matrix{FT}
 
@@ -108,6 +110,34 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     τ_dd::Matrix{FT}
     "Effective tranmittance for solar directional->diffuse"
     τ_sd::Matrix{FT}
+
+    # Canopy radiation profiles
+    "Downwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
+    e_difꜜ::Matrix{FT}
+    "Upwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
+    e_difꜛ::Matrix{FT}
+    "Solar directly radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
+    e_dirꜜ::Matrix{FT}
+
+    # Radiation at each canopy layer used for PAR, APAR, PPAR calculations
+    "Net diffuse radiation at each canopy layer for APAR `[mW m⁻² nm⁻¹]`"
+    e_net_dif::Matrix{FT}
+    "Net direct radiation at each canopy layer for APAR `[mW m⁻² nm⁻¹]`"
+    e_net_dir::Matrix{FT}
+
+    # Net radiation used for energy budget
+    "Net shortwave energy absorption for all leaves per leaf area `[W m⁻²]`"
+    r_net_sw::Vector{FT}
+
+    # PAR, APAR, PPAR flux density in each layer
+    "Mean APAR for shaded leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
+    _apar_shaded::Vector{FT}
+    "APAR for sunlit leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
+    _apar_sunlit::Vector{FT}
+    "Mean APAR for shaded leaves for photosynthesis per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
+    _ppar_shaded::Vector{FT}
+    "APAR for sunlit leaves for photosynthesis per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
+    _ppar_sunlit::Vector{FT}
 end;
 
 SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT}(
@@ -119,6 +149,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT
             βs_incl      = zeros(FT, config.DIM_INCL),
             fs           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             fs_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_abs_mean  = zeros(FT, config.DIM_AZI),
             fs_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ddb_leaf     = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ddf_leaf     = zeros(FT, config.DIM_WL, config.DIM_LAYER),
@@ -133,6 +164,16 @@ SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT
             ρ_sd         = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             τ_dd         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_sd         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            e_difꜜ       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
+            e_difꜛ       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
+            e_dirꜜ       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
+            e_net_dif    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            e_net_dir    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            r_net_sw     = zeros(FT, config.DIM_LAYER),
+            _apar_shaded = zeros(FT, config.DIM_PAR),
+            _apar_sunlit = zeros(FT, config.DIM_PAR),
+            _ppar_shaded = zeros(FT, config.DIM_PAR),
+            _ppar_sunlit = zeros(FT, config.DIM_PAR),
 );
 
 

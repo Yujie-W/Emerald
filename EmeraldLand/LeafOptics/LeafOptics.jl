@@ -115,8 +115,8 @@ function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectr
     _α_ppar = (apar_car ? view(bio.α_cabcar, IΛ_PAR) : view(bio.α_cab, IΛ_PAR));
 
     # PAR, APAR, and PPAR energy from direct and diffuse light
-    _e_par_dir   = view(rad.e_direct , IΛ_PAR);
-    _e_par_diff  = view(rad.e_diffuse, IΛ_PAR);
+    _e_par_dir   = view(rad.e_dir, IΛ_PAR);
+    _e_par_diff  = view(rad.e_dif, IΛ_PAR);
     _e_apar_dir  = view(bio.α_sw, IΛ_PAR) .* _e_par_dir;
     _e_apar_diff = view(bio.α_sw, IΛ_PAR) .* _e_par_diff;
     _e_ppar_dir  = _α_ppar .* _e_apar_dir;
@@ -178,7 +178,7 @@ function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectr
     (; IΛ_SIFE, ΔΛ_SIFE, Λ_SIF, Λ_SIFE) = spectra;
 
     # calculate the excitation energy and photons
-    _e_excitation = (view(rad.e_direct, IΛ_SIFE) .+ view(rad.e_diffuse, IΛ_SIFE)) .* ΔΛ_SIFE;
+    _e_excitation = (view(rad.e_dir, IΛ_SIFE) .+ view(rad.e_dif, IΛ_SIFE)) .* ΔΛ_SIFE;
 
     # convert energy to energy using the matrices
     if !ϕ_photon

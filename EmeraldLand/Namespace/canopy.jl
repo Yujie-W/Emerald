@@ -6,7 +6,7 @@
 #     2022-Jun-07: add more fields: fo, fs, po, ps, pso
 #     2022-Jun-08: add more fields: ρ_dd, ρ_sd, σ_dob, σ_dof, σ_so, τ_dd, τ_sd, _ρ_dd, _ρ_sd, _τ_dd, _τ_sd
 #     2022-Jun-09: rename variables to be more descriptive
-#     2022-Jun-10: add more fields: p_sunlit, ϵ, ρ_lw, τ_lw, _mat_down, _mat_down, _tmp_vec_azi, _ρ_lw, _τ_lw
+#     2022-Jun-10: add more fields: p_sunlit, ϵ, ρ_lw, τ_lw, _mat_down, _mat_down, _ρ_lw, _τ_lw
 #     2022-Jun-10: add more fields for sif calculations
 #     2022-Jun-13: add more fields for sif calculations
 #     2022-Jun-13: remove unnecessary cache variables
@@ -36,8 +36,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopyOpticalProperty{FT<:AbstractFloa
     _mat⁻::Matrix{FT}
     "Temporary cache used for matrix adding up purpose (DIM_INCL * DIM_AZI)"
     _tmp_mat_incl_azi_1::Matrix{FT}
-    "Temporary cache used for vector operations (DIM_AZI)"
-    _tmp_vec_azi::Vector{FT}
     "Temporary cache used for vector operations (DIM_LAYER)"
     _tmp_vec_layer::Vector{FT}
     "Cache variable to store the SIF information"
@@ -67,7 +65,6 @@ HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} =
                 _mat⁺               = zeros(FT, DIM_SIF, DIM_SIFE),
                 _mat⁻               = zeros(FT, DIM_SIF, DIM_SIFE),
                 _tmp_mat_incl_azi_1 = zeros(FT, DIM_INCL, DIM_AZI),
-                _tmp_vec_azi        = zeros(FT, DIM_AZI),
                 _tmp_vec_layer      = zeros(FT, DIM_LAYER),
                 _tmp_vec_sif_1      = zeros(FT, DIM_SIF),
                 _tmp_vec_sif_2      = zeros(FT, DIM_SIF),
@@ -89,8 +86,7 @@ HyperspectralMLCanopyOpticalProperty(config::SPACConfiguration{FT}) where {FT} =
 # Changes to this structure
 # General
 #     2022-Jun-09: migrate CanopyRads as HyperspectralMLCanopyRadiationProfile
-#     2022-Jun-09: add fields: albedo, apar_shaded, apar_sunlit, e_net_diffuse, e_net_direct, e_o, e_v, par_shaded, par_sunlit, r_net
-#     2022-Jun-10: add fields: e_sum_diffuse, e_sum_direct, par_in, par_in_diffuse, par_in_direct, par_shaded, par_sunlit, _par_shaded, _par_sunlit
+#     2022-Jun-09: add fields: albedo, apar_shaded, apar_sunlit, e_o, e_v, r_net
 #     2022-Jun-10: add fields: r_net_sw, r_net_sw_shaded, r_net_sw_sunlit, r_lw, r_lw_down, r_lw_up, _r_emit_down, _r_emit_up
 #     2022-Jun-10: add more fields for SIF
 #     2022-Jun-13: add more fields for sif calculations
@@ -117,38 +113,10 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
     # Diagnostic variables
     "Albedo towards the viewing direction"
     albedo::Vector{FT}
-    "Mean APAR for shaded leaves `[μmol m⁻² s⁻¹]`"
-    apar_shaded::Vector{FT}
-    "APAR for sunlit leaves `[μmol m⁻² s⁻¹]`"
-    apar_sunlit::Array{FT,3}
-    "Downwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
-    e_diffuse_down::Matrix{FT}
-    "Upwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
-    e_diffuse_up::Matrix{FT}
-    "Solar directly radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
-    e_direct::Matrix{FT}
-    "Net diffuse radiation at each canopy layer for APAR `[mW m⁻² nm⁻¹]`"
-    e_net_diffuse::Matrix{FT}
-    "Net direct radiation at each canopy layer for APAR `[mW m⁻² nm⁻¹]`"
-    e_net_direct::Matrix{FT}
     "Total radiation towards the viewing direction `[mW m⁻² nm⁻¹]`"
     e_o::Vector{FT}
-    "Sum diffuse radiation at each canopy layer for PAR `[mW m⁻² nm⁻¹]`"
-    e_sum_diffuse::Matrix{FT}
-    "Sum direct radiation at each canopy layer for PAR `[mW m⁻² nm⁻¹]`"
-    e_sum_direct::Matrix{FT}
     "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
     e_v::Matrix{FT}
-    "Total incoming radiation PAR `[μmol m⁻² s⁻¹]`"
-    par_in::FT = 0
-    "Diffuse incoming radiation PAR `[μmol m⁻² s⁻¹]`"
-    par_in_diffuse::FT = 0
-    "Direct incoming radiation PAR `[μmol m⁻² s⁻¹]`"
-    par_in_direct::FT = 0
-    "Mean PAR for shaded leaves (before absorption) `[μmol m⁻² s⁻¹]`"
-    par_shaded::Vector{FT}
-    "PAR for sunlit leaves (before absorption) `[μmol m⁻² s⁻¹]`"
-    par_sunlit::Array{FT,3}
     "Longwave energy flux from leaves per leaf area (one side) `[W m⁻²]`"
     r_lw::Vector{FT}
     "Downwelling longwave energy flux `[W m⁻²]`"
@@ -157,12 +125,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
     r_lw_up::Vector{FT}
     "Net longwave energy absorption for all leaves `[W m⁻²]`"
     r_net_lw::Vector{FT}
-    "Net shortwave energy absorption for all leaves `[W m⁻²]`"
-    r_net_sw::Vector{FT}
-    "Net shortwave energy absorption for shaded leaves `[W m⁻²]`"
-    r_net_sw_shaded::Vector{FT}
-    "Net shortwave energy absorption for sunlit leaves `[W m⁻²]`"
-    r_net_sw_sunlit::Vector{FT}
     "Downwelling SIF for sunlit leaves at each wavelength for a layer"
     s_layer_down::Matrix{FT}
     "Downwelling SIF for sunlit leaves at each wavelength for a layer at chloroplast level"
@@ -187,18 +149,6 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
     sif_up::Matrix{FT}
 
     # Cache variables
-    "Mean APAR for shaded leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
-    _apar_shaded::Vector{FT}
-    "APAR for sunlit leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
-    _apar_sunlit::Vector{FT}
-    "Mean PAR for shaded leaves per wavelength (before absorption) `[μmol m⁻² s⁻¹ nm⁻¹]`"
-    _par_shaded::Vector{FT}
-    "PAR for sunlit leaves per wavelength (before absorption) `[μmol m⁻² s⁻¹ nm⁻¹]`"
-    _par_sunlit::Vector{FT}
-    "Mean APAR for shaded leaves for photosynthesis per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
-    _ppar_shaded::Vector{FT}
-    "APAR for sunlit leaves for photosynthesis per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
-    _ppar_sunlit::Vector{FT}
     "Downwelling longwave energy flux cache `[W m⁻²]`"
     _r_emit_down::Vector{FT}
     "Upwelling longwave energy flux cache `[W m⁻²]`"
@@ -228,26 +178,12 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
 
     return HyperspectralMLCanopyRadiationProfile{FT}(
                 albedo           = zeros(FT, DIM_WL),
-                apar_shaded      = zeros(FT, DIM_LAYER),
-                apar_sunlit      = zeros(FT, DIM_INCL, DIM_AZI, DIM_LAYER),
-                e_diffuse_down   = zeros(FT, DIM_WL, DIM_LAYER+1),
-                e_diffuse_up     = zeros(FT, DIM_WL, DIM_LAYER+1),
-                e_direct         = zeros(FT, DIM_WL, DIM_LAYER+1),
-                e_net_diffuse    = zeros(FT, DIM_WL, DIM_LAYER),
-                e_net_direct     = zeros(FT, DIM_WL, DIM_LAYER),
                 e_o              = zeros(FT, DIM_WL),
-                e_sum_diffuse    = zeros(FT, DIM_WL, DIM_LAYER),
-                e_sum_direct     = zeros(FT, DIM_WL, DIM_LAYER),
                 e_v              = zeros(FT, DIM_WL, DIM_LAYER+1),
-                par_shaded       = zeros(FT, DIM_LAYER),
-                par_sunlit       = zeros(FT, DIM_INCL, DIM_AZI, DIM_LAYER),
                 r_lw             = zeros(FT, DIM_LAYER),
                 r_lw_down        = zeros(FT, DIM_LAYER+1),
                 r_lw_up          = zeros(FT, DIM_LAYER+1),
                 r_net_lw         = zeros(FT, DIM_LAYER),
-                r_net_sw         = zeros(FT, DIM_LAYER),
-                r_net_sw_shaded  = zeros(FT, DIM_LAYER),
-                r_net_sw_sunlit  = zeros(FT, DIM_LAYER),
                 s_layer_down     = zeros(FT, DIM_SIF, DIM_LAYER),
                 s_layer_down_chl = zeros(FT, DIM_SIF, DIM_LAYER),
                 s_layer_up       = zeros(FT, DIM_SIF, DIM_LAYER),
@@ -259,12 +195,6 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
                 sif_obs_soil     = zeros(FT, DIM_SIF),
                 sif_obs_sunlit   = zeros(FT, DIM_SIF),
                 sif_up           = zeros(FT, DIM_SIF, DIM_LAYER+1),
-                _apar_shaded     = zeros(FT, DIM_PAR),
-                _apar_sunlit     = zeros(FT, DIM_PAR),
-                _par_shaded      = zeros(FT, DIM_PAR),
-                _par_sunlit      = zeros(FT, DIM_PAR),
-                _ppar_shaded     = zeros(FT, DIM_PAR),
-                _ppar_sunlit     = zeros(FT, DIM_PAR),
                 _r_emit_down     = zeros(FT, DIM_LAYER),
                 _r_emit_up       = zeros(FT, DIM_LAYER+1),
                 _s_emit_down     = zeros(FT, DIM_SIF, DIM_LAYER),

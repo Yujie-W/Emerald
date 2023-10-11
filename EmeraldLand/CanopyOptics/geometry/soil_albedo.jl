@@ -35,38 +35,39 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT}
+    soil_albedo!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `config` Configurations of spac model
-- `sbulk` `SoilBulk` type struct
-- `soil` `SoilLayer` type struct
+- `spac` SPAC
 
 """
-function soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, soil::SoilLayer{FT}) where {FT}
+function soil_albedo!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; SPECTRA, α_CLM, α_FITTING) = config;
-    @assert 1 <= sbulk.state.color <=20;
+    (; CANOPY, SOIL_BULK, SOILS) = spac;
+
+    @assert 1 <= SOIL_BULK.state.color <=20;
 
     # if the change of swc is lower than 0.001, do nothing
-    if abs(soil.state.θ - sbulk.auxil._θ) < 0.001
+    if abs(SOILS[1].state.θ - SOIL_BULK.auxil._θ) < 0.001
         return nothing
     end;
 
     # use linear interpolation method or CLM method (with upper limit)
-    rwc = soil.state.θ / soil.state.vc.Θ_SAT;
-    par::FT = SOIL_ALBEDOS[sbulk.state.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.state.color,3];
-    nir::FT = SOIL_ALBEDOS[sbulk.state.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.state.color,4];
+    rwc = SOILS[1].state.θ / SOILS[1].state.vc.Θ_SAT;
+    par::FT = SOIL_ALBEDOS[SOIL_BULK.state.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[SOIL_BULK.state.color,3];
+    nir::FT = SOIL_ALBEDOS[SOIL_BULK.state.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[SOIL_BULK.state.color,4];
 
     if α_CLM
-        delta = max(0, FT(0.11) - FT(0.4) * soil.state.θ);
-        par = max(SOIL_ALBEDOS[sbulk.state.color,1], SOIL_ALBEDOS[sbulk.state.color,3] + delta);
-        nir = max(SOIL_ALBEDOS[sbulk.state.color,2], SOIL_ALBEDOS[sbulk.state.color,4] + delta);
+        delta = max(0, FT(0.11) - FT(0.4) * SOILS[1].state.θ);
+        par = max(SOIL_ALBEDOS[SOIL_BULK.state.color,1], SOIL_ALBEDOS[SOIL_BULK.state.color,3] + delta);
+        nir = max(SOIL_ALBEDOS[SOIL_BULK.state.color,2], SOIL_ALBEDOS[SOIL_BULK.state.color,4] + delta);
     end;
 
     # if fitting is disabled, use broadband directly
     if !α_FITTING
-        sbulk.auxil.ρ_sw[SPECTRA.IΛ_PAR] .= par;
-        sbulk.auxil.ρ_sw[SPECTRA.IΛ_NIR] .= nir;
+        SOIL_BULK.auxil.ρ_sw[SPECTRA.IΛ_PAR] .= par;
+        SOIL_BULK.auxil.ρ_sw[SPECTRA.IΛ_NIR] .= nir;
 
         return nothing
     end;
@@ -75,10 +76,10 @@ function soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, soil::
     # TODO: use a new soil moddel for this, do not GSV which is not process-based
     #
     # make an initial guess of the weights
-    ρ_sw = similar(sbulk.auxil.ρ_sw);
+    ρ_sw = similar(SOIL_BULK.auxil.ρ_sw);
     ρ_sw[SPECTRA.IΛ_PAR] .= par;
     ρ_sw[SPECTRA.IΛ_NIR] .= nir;
-    sbulk.auxil.weight .= pinv(SPECTRA.MAT_SOIL) * ρ_sw;
+    SOIL_BULK.auxil.weight .= pinv(SPECTRA.MAT_SOIL) * ρ_sw;
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT} = (
@@ -90,16 +91,16 @@ function soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, soil::
     );
 
     # solve for weights
-    ms = ReduceStepMethodND{FT}(x_mins = FT[-2,-2,-2,-2], x_maxs = FT[2,2,2,2], x_inis = sbulk.auxil.weight, Δ_inis = FT[0.1,0.1,0.1,0.1]);
+    ms = ReduceStepMethodND{FT}(x_mins = FT[-2,-2,-2,-2], x_maxs = FT[2,2,2,2], x_inis = SOIL_BULK.auxil.weight, Δ_inis = FT[0.1,0.1,0.1,0.1]);
     tol = SolutionToleranceND{FT}(FT[0.001,0.001,0.001,0.001], 50);
     sol = find_peak(_fit, ms, tol);
-    sbulk.auxil.weight .= sol;
+    SOIL_BULK.auxil.weight .= sol;
 
     # update vectors in soil
-    mul!(sbulk.auxil.ρ_sw, SPECTRA.MAT_SOIL, sbulk.auxil.weight);
+    mul!(SOIL_BULK.auxil.ρ_sw, SPECTRA.MAT_SOIL, SOIL_BULK.auxil.weight);
 
     # update the albedo._θ to avoid calling this function too many times
-    sbulk.auxil._θ = soil.state.θ;
+    SOIL_BULK.auxil._θ = SOILS[1].state.θ;
 
     return nothing
 end;
