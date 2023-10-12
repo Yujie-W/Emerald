@@ -182,8 +182,8 @@ function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectr
 
     # convert energy to energy using the matrices
     if !ϕ_photon
-        _sif_b = bio.mat_b * _e_excitation * ϕ / FT(pi);
-        _sif_f = bio.mat_f * _e_excitation * ϕ / FT(pi);
+        _sif_b = bio.mat_b * _e_excitation * ϕ / FT(π);
+        _sif_f = bio.mat_f * _e_excitation * ϕ / FT(π);
 
         return _sif_b, _sif_f
     end;
@@ -192,8 +192,8 @@ function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectr
     _phot_excitation = photon.(Λ_SIFE, _e_excitation);
 
     # convert photon to photon using the matrices
-    _phot_b = bio.mat_b * _phot_excitation * ϕ / FT(pi);
-    _phot_f = bio.mat_f * _phot_excitation * ϕ / FT(pi);
+    _phot_b = bio.mat_b * _phot_excitation * ϕ / FT(π);
+    _phot_f = bio.mat_f * _phot_excitation * ϕ / FT(π);
 
     # convert photon to back to energy
     _sif_b = energy.(Λ_SIF, _phot_b);

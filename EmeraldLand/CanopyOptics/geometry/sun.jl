@@ -61,11 +61,12 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) 
     end;
 
     # compute the scattering coefficients for the solar radiation per leaf area
-    for i in eachindex(LEAVES)
-        CANOPY.sun_geometry.auxil.ddb_leaf[:,i] .= CANOPY.structure.auxil.ddb * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.structure.auxil.ddf * LEAVES[i].bio.auxil.τ_leaf;
-        CANOPY.sun_geometry.auxil.ddf_leaf[:,i] .= CANOPY.structure.auxil.ddf * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.structure.auxil.ddb * LEAVES[i].bio.auxil.τ_leaf;
-        CANOPY.sun_geometry.auxil.sdb_leaf[:,i] .= CANOPY.sun_geometry.auxil.sdb * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sun_geometry.auxil.sdf * LEAVES[i].bio.auxil.τ_leaf;
-        CANOPY.sun_geometry.auxil.sdf_leaf[:,i] .= CANOPY.sun_geometry.auxil.sdf * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sun_geometry.auxil.sdb * LEAVES[i].bio.auxil.τ_leaf;
+    for i in 1:DIM_LAYER
+        j = DIM_LAYER + 1 - i;
+        CANOPY.sun_geometry.auxil.ddb_leaf[:,i] .= CANOPY.structure.auxil.ddb * LEAVES[j].bio.auxil.ρ_leaf .+ CANOPY.structure.auxil.ddf * LEAVES[j].bio.auxil.τ_leaf;
+        CANOPY.sun_geometry.auxil.ddf_leaf[:,i] .= CANOPY.structure.auxil.ddf * LEAVES[j].bio.auxil.ρ_leaf .+ CANOPY.structure.auxil.ddb * LEAVES[j].bio.auxil.τ_leaf;
+        CANOPY.sun_geometry.auxil.sdb_leaf[:,i] .= CANOPY.sun_geometry.auxil.sdb * LEAVES[j].bio.auxil.ρ_leaf .+ CANOPY.sun_geometry.auxil.sdf * LEAVES[j].bio.auxil.τ_leaf;
+        CANOPY.sun_geometry.auxil.sdf_leaf[:,i] .= CANOPY.sun_geometry.auxil.sdf * LEAVES[j].bio.auxil.ρ_leaf .+ CANOPY.sun_geometry.auxil.sdb * LEAVES[j].bio.auxil.τ_leaf;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)

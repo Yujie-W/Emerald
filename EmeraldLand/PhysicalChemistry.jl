@@ -82,7 +82,7 @@ diffusive_coefficient(T::FT, mol::Union{TraceGasCO₂{FT}, TraceGasN₂{FT}}, me
     (; a_298, a_a) = mol;
     _a = a_298 * (1 + a_a *  (T-298));
 
-    return K_BOLTZMANN(FT) * T / (4 * FT(pi) * viscosity(T, med) * _a)
+    return K_BOLTZMANN(FT) * T / (4 * FT(π) * viscosity(T, med) * _a)
 );
 
 

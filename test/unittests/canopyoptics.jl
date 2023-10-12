@@ -141,4 +141,20 @@ import Emerald.EmeraldLand.SPAC
         @test all(!isnan, spac.SOIL_BULK.auxil.r_net_lw);
     end;
 
+    @testset "Canopy reflection spectrum" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
+        CO.soil_albedo!(config, spac);
+        CO.canopy_structure!(config, spac);
+        CO.sun_geometry!(config, spac);
+        CO.shortwave_radiation!(config, spac);
+        CO.sensor_geometry!(config, spac);
+        CO.reflection_spectrum!(config, spac);
+
+        @test all(spac.CANOPY.sensor_geometry.auxil.e_sensor_layer .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.e_sensor .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.albedo .> 0);
+    end;
+
 end;

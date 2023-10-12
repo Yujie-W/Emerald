@@ -31,9 +31,10 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{F
 
     # compute longwave effective emissivity, reflectance, and transmittance per layer without correction (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
     for i in 1:DIM_LAYER
+        j = DIM_LAYER + 1 - i;
         ilai = CANOPY.structure.state.δlai[i] * CANOPY.structure.auxil.ci;
-        σ_lw_b = CANOPY.structure.auxil.ddb * LEAVES[i].bio.auxil.ρ_lw + CANOPY.structure.auxil.ddf * LEAVES[i].bio.auxil.τ_lw;
-        σ_lw_f = CANOPY.structure.auxil.ddf * LEAVES[i].bio.auxil.ρ_lw + CANOPY.structure.auxil.ddb * LEAVES[i].bio.auxil.τ_lw;
+        σ_lw_b = CANOPY.structure.auxil.ddb * LEAVES[j].bio.auxil.ρ_lw + CANOPY.structure.auxil.ddf * LEAVES[j].bio.auxil.τ_lw;
+        σ_lw_f = CANOPY.structure.auxil.ddf * LEAVES[j].bio.auxil.ρ_lw + CANOPY.structure.auxil.ddb * LEAVES[j].bio.auxil.τ_lw;
         CANOPY.structure.auxil.τ_lw_layer[i] = exp(-1 * (1 - σ_lw_f) * ilai);
         CANOPY.structure.auxil.ρ_lw_layer[i] = 1 - exp(-1 * σ_lw_b * ilai);
         CANOPY.structure.auxil.ϵ_lw_layer[i] = 1 - CANOPY.structure.auxil.τ_lw_layer[i] - CANOPY.structure.auxil.ρ_lw_layer[i];

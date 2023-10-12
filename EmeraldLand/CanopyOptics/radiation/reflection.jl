@@ -1,0 +1,50 @@
+# This file contains functions to compute the canopy optical properties at the sensor direction
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Oct-12: add function sensor_spectrum! to compute the spectra at the sensor
+#
+#######################################################################################################################################################################################################
+"""
+
+    reflection_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+
+Computes the spectra at the sensor direction, given
+- `config` Configurations of spac model
+- `spac` `MultiLayerSPAC` type SPAC
+
+"""
+function reflection_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    (; DIM_LAYER, DIM_WL) = config;
+    (; CANOPY, METEO) = spac;
+
+    # compute the spectra at the observer direction
+    for i in 1:DIM_LAYER
+        e_d_i = view(CANOPY.sun_geometry.auxil.e_difꜜ,:,i);             # downward diffuse radiation at upper boundary
+        e_u_i = view(CANOPY.sun_geometry.auxil.e_difꜛ,:,i);             # upward diffuse radiation at upper boundary
+        sen_i = view(CANOPY.sensor_geometry.auxil.e_sensor_layer,:,i);  # radiation towards the viewing direction per layer (including soil)
+
+        dob_i = view(CANOPY.sensor_geometry.auxil.dob_leaf,:,i);        # scattering coefficient backward for diffuse->observer
+        dof_i = view(CANOPY.sensor_geometry.auxil.dof_leaf,:,i);        # scattering coefficient forward for diffuse->observer
+        so_i  = view(CANOPY.sensor_geometry.auxil.so_leaf ,:,i);        # bidirectional from solar to observer
+
+        sen_i  .= CANOPY.sensor_geometry.auxil.po[i]  .* dob_i .* e_d_i .+
+                  CANOPY.sensor_geometry.auxil.po[i]  .* dof_i .* e_u_i .+
+                  CANOPY.sensor_geometry.auxil.pso[i] .* so_i  .* METEO.rad_sw.e_dir;
+        sen_i .*= CANOPY.structure.state.δlai[i] * CANOPY.structure.auxil.ci;
+    end;
+    CANOPY.sensor_geometry.auxil.e_sensor_layer[:,end] .= CANOPY.sensor_geometry.auxil.po[end] .* view(CANOPY.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1);
+
+    # compute the spectra at the sensor
+    for i in 1:DIM_WL
+        CANOPY.sensor_geometry.auxil.e_sensor[i] = sum(view(CANOPY.sensor_geometry.auxil.e_sensor_layer,i,:)) / FT(π);
+    end;
+
+    # Note, this albedo calculation is not correct because the sun-sensor geometry is not taken into account (reflectance is not isotropic)
+    #     SCOPE does this a bit differently (controlling numerical issues), but still not correct
+    CANOPY.sensor_geometry.auxil.albedo .= CANOPY.sensor_geometry.auxil.e_sensor .* FT(π) ./ (METEO.rad_sw.e_dir .+ METEO.rad_sw.e_dif);
+
+    return nothing
+end;

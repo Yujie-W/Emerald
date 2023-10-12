@@ -76,7 +76,8 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
     # 4. compute leaf level PAR, APAR, and PPAR per ground area
     normi = 1 / mean(CANOPY.sun_geometry.auxil.fs_abs_mean);
     for i in 1:DIM_LAYER
-        α_apar = view(LEAVES[i].bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
+        j = DIM_LAYER + 1 - i;
+        α_apar = view(LEAVES[j].bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
         CANOPY.sun_geometry.auxil._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(CANOPY.sun_geometry.auxil.e_net_dif,SPECTRA.IΛ_PAR,i)) .* 1000 ./ CANOPY.structure.state.δlai[i];
@@ -88,14 +89,14 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
         # APAR for leaves
         Σ_apar_dif = CANOPY.sun_geometry.auxil._apar_shaded' * SPECTRA.ΔΛ_PAR;
         Σ_apar_dir = CANOPY.sun_geometry.auxil._apar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
-        LEAVES[DIM_LAYER+1-i].flux.auxil.apar_shaded = Σ_apar_dif;
-        LEAVES[DIM_LAYER+1-i].flux.auxil.apar_sunlit .= CANOPY.sun_geometry.auxil.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
+        LEAVES[j].flux.auxil.apar_shaded = Σ_apar_dif;
+        LEAVES[j].flux.auxil.apar_sunlit .= CANOPY.sun_geometry.auxil.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
 
         # PPAR for leaves
         Σ_ppar_dif = CANOPY.sun_geometry.auxil._ppar_shaded' * SPECTRA.ΔΛ_PAR;
         Σ_ppar_dir = CANOPY.sun_geometry.auxil._ppar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
-        LEAVES[DIM_LAYER+1-i].flux.auxil.ppar_shaded = Σ_ppar_dif;
-        LEAVES[DIM_LAYER+1-i].flux.auxil.ppar_sunlit .= CANOPY.sun_geometry.auxil.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
+        LEAVES[j].flux.auxil.ppar_shaded = Σ_ppar_dif;
+        LEAVES[j].flux.auxil.ppar_sunlit .= CANOPY.sun_geometry.auxil.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
     end;
 
     return nothing

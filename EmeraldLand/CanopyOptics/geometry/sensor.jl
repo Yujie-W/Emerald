@@ -110,10 +110,11 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     end;
 
     # compute the scattering coefficients per leaf area
-    for i in eachindex(LEAVES)
-        CANOPY.sensor_geometry.auxil.dob_leaf .= CANOPY.sensor_geometry.auxil.dob * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.dof * LEAVES[i].bio.auxil.τ_leaf;
-        CANOPY.sensor_geometry.auxil.dof_leaf .= CANOPY.sensor_geometry.auxil.dof * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.dob * LEAVES[i].bio.auxil.τ_leaf;
-        CANOPY.sensor_geometry.auxil.so_leaf  .= CANOPY.sensor_geometry.auxil.sob * LEAVES[i].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.sof * LEAVES[i].bio.auxil.τ_leaf;
+    for i in 1:DIM_LAYER
+        j = DIM_LAYER + 1 - i;
+        CANOPY.sensor_geometry.auxil.dob_leaf[:,i] .= CANOPY.sensor_geometry.auxil.dob * LEAVES[j].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.dof * LEAVES[j].bio.auxil.τ_leaf;
+        CANOPY.sensor_geometry.auxil.dof_leaf[:,i] .= CANOPY.sensor_geometry.auxil.dof * LEAVES[j].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.dob * LEAVES[j].bio.auxil.τ_leaf;
+        CANOPY.sensor_geometry.auxil.so_leaf[:,i]  .= CANOPY.sensor_geometry.auxil.sob * LEAVES[j].bio.auxil.ρ_leaf .+ CANOPY.sensor_geometry.auxil.sof * LEAVES[j].bio.auxil.τ_leaf;
     end;
 
     return nothing

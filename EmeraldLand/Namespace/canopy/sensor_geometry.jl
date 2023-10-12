@@ -96,25 +96,36 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     dof_leaf::Matrix{FT}
     "Bidirectional from solar to observer scattering coefficient at different layers and wavelength bins"
     so_leaf::Matrix{FT}
+
+    # Canopy reflection
+    "Albedo of the soil-canopy"
+    albedo::Vector{FT}
+    "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
+    e_sensor_layer::Matrix{FT}
+    "Total radiation towards the viewing direction `[mW m⁻² nm⁻¹]`"
+    e_sensor::Vector{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
-            po           = zeros(FT, config.DIM_LAYER + 1),
-            pso          = zeros(FT, config.DIM_LAYER + 1),
-            Co_incl      = zeros(FT, config.DIM_INCL),
-            So_incl      = zeros(FT, config.DIM_INCL),
-            ko_incl      = zeros(FT, config.DIM_INCL),
-            sb_incl      = zeros(FT, config.DIM_INCL),
-            sf_incl      = zeros(FT, config.DIM_INCL),
-            βo_incl      = zeros(FT, config.DIM_INCL),
-            fo           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs        = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs_abs    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            dob_leaf     = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dof_leaf     = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            so_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            po             = zeros(FT, config.DIM_LAYER + 1),
+            pso            = zeros(FT, config.DIM_LAYER + 1),
+            Co_incl        = zeros(FT, config.DIM_INCL),
+            So_incl        = zeros(FT, config.DIM_INCL),
+            ko_incl        = zeros(FT, config.DIM_INCL),
+            sb_incl        = zeros(FT, config.DIM_INCL),
+            sf_incl        = zeros(FT, config.DIM_INCL),
+            βo_incl        = zeros(FT, config.DIM_INCL),
+            fo             = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_abs         = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_cos²_incl   = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs          = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs_abs      = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            dob_leaf       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            dof_leaf       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            so_leaf        = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            albedo         = zeros(FT, config.DIM_WL),
+            e_sensor_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
+            e_sensor       = zeros(FT, config.DIM_WL),
 );
 
 

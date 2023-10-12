@@ -21,8 +21,9 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC
     (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
 
     # 1. compute longwave radiation out from the leaves and soil
-    for i in eachindex(LEAVES)
-        CANOPY.structure.auxil.lw_layer[i] = K_STEFAN(FT) * CANOPY.structure.auxil.ϵ_lw_layer[i] * LEAVES[DIM_LAYER+1-i].energy.auxil.t ^ 4;
+    for i in 1:DIM_LAYER
+        j = DIM_LAYER + 1 - i;
+        CANOPY.structure.auxil.lw_layer[i] = K_STEFAN(FT) * CANOPY.structure.auxil.ϵ_lw_layer[i] * LEAVES[j].energy.auxil.t ^ 4;
     end;
     r_lw_soil = K_STEFAN(FT) * (1 - SOIL_BULK.auxil.ρ_lw) * SOILS[1].auxil.t ^ 4;
 

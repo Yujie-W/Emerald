@@ -25,6 +25,7 @@ include("geometry/structure.jl");
 
 # function related to canopy radiation
 include("radiation/longwave.jl");
+include("radiation/reflection.jl");
 include("radiation/shortwave.jl");
 
 

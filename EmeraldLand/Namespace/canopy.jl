@@ -111,13 +111,6 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFloat}
     # Diagnostic variables
-    "Albedo towards the viewing direction"
-    albedo::Vector{FT}
-    "Total radiation towards the viewing direction `[mW m⁻² nm⁻¹]`"
-    e_o::Vector{FT}
-    "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
-    e_v::Matrix{FT}
-
     "Downwelling SIF for sunlit leaves at each wavelength for a layer"
     s_layer_down::Matrix{FT}
     "Downwelling SIF for sunlit leaves at each wavelength for a layer at chloroplast level"
@@ -166,9 +159,6 @@ HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} 
     (; DIM_AZI, DIM_INCL, DIM_LAYER, DIM_PAR, DIM_SIF, DIM_WL) = config;
 
     return HyperspectralMLCanopyRadiationProfile{FT}(
-                albedo           = zeros(FT, DIM_WL),
-                e_o              = zeros(FT, DIM_WL),
-                e_v              = zeros(FT, DIM_WL, DIM_LAYER+1),
                 s_layer_down     = zeros(FT, DIM_SIF, DIM_LAYER),
                 s_layer_down_chl = zeros(FT, DIM_SIF, DIM_LAYER),
                 s_layer_up       = zeros(FT, DIM_SIF, DIM_LAYER),

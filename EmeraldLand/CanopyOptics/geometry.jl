@@ -34,14 +34,26 @@ shortwave radiation
         end;
         can.sun_geometry.auxil.e_difꜛ[:,end] .= view(OPTICS.ρ_sd,:,DIM_LAYER+1) .* view(can.sun_geometry.auxil.e_dirꜜ,:,DIM_LAYER+1) .+ view(OPTICS.ρ_dd,:,DIM_LAYER+1) .* view(can.sun_geometry.auxil.e_difꜜ,:,DIM_LAYER+1);
         RADIATION.e_v[:,end] .= view(can.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1);
-        RADIATION.e_o .= view(can.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1) ./ FT(pi);
-        RADIATION.albedo .= RADIATION.e_o * FT(pi) ./ (rad.e_dir .+ rad.e_dif);
+        RADIATION.e_o .= view(can.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1) ./ FT(π);
+        RADIATION.albedo .= RADIATION.e_o * FT(π) ./ (rad.e_dir .+ rad.e_dif);
 
         RADIATION._par_shaded .= photon.(SPECTRA.Λ_PAR, view(rad.e_dif,SPECTRA.IΛ_PAR)) .* 1000;
         RADIATION._par_sunlit .= photon.(SPECTRA.Λ_PAR, view(rad.e_dir,SPECTRA.IΛ_PAR)) .* 1000;
         RADIATION.par_in_diffuse = RADIATION._par_shaded' * SPECTRA.ΔΛ_PAR;
         RADIATION.par_in_direct = RADIATION._par_sunlit' * SPECTRA.ΔΛ_PAR;
         RADIATION.par_in = RADIATION.par_in_diffuse + RADIATION.par_in_direct;
+
+        return nothing
+    end;
+
+longwave radiation
+
+    if can.structure.state.lai == 0
+        _r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * soil.auxil.t ^ 4;
+        RADIATION.r_lw .= 0;
+        RADIATION.r_net_lw .= 0;
+        RADIATION.r_lw_up .= rad * sbulk.auxil.ρ_lw + _r_lw_soil;
+        sbulk.auxil.r_net_lw = rad * (1 - sbulk.auxil.ρ_lw) - _r_lw_soil;
 
         return nothing
     end;
