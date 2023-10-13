@@ -233,21 +233,17 @@ canopy_fluorescence!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, l
     RADIATION.sif_up[:,end] .= view(RADIATION.sif_down,:,DIM_LAYER+1) .* view(OPTICS.ρ_dd,SPECTRA.IΛ_SIF,DIM_LAYER+1) .+ view(RADIATION._s_emit_up,:,DIM_LAYER+1);
 
     # 4. compute SIF from the observer direction
-    OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.pso,1:DIM_LAYER  ) .+
-                              view(can.sensor_geometry.auxil.pso,2:DIM_LAYER+1)) ./ 2 .* can.structure.state.δlai .* can.structure.auxil.ci ./ FT(π);
+    OPTICS._tmp_vec_layer .= can.sensor_geometry.auxil.p_sun_sensor .* can.structure.state.δlai .* can.structure.auxil.ci ./ FT(π);
     mul!(RADIATION.sif_obs_sunlit, RADIATION._sif_obs_sunlit, OPTICS._tmp_vec_layer);
 
-    OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.po ,1:DIM_LAYER  ) .+
-                              view(can.sensor_geometry.auxil.po ,2:DIM_LAYER+1) .-
-                              view(can.sensor_geometry.auxil.pso,1:DIM_LAYER  ) .-
-                              view(can.sensor_geometry.auxil.pso,2:DIM_LAYER+1)) ./ 2 .* can.structure.state.δlai .* can.structure.auxil.ci ./ FT(π);
+    OPTICS._tmp_vec_layer .= (can.sensor_geometry.auxil.p_sensor .- can.sensor_geometry.auxil.p_sun_sensor) .* can.structure.state.δlai .* can.structure.auxil.ci ./ FT(π);
     mul!(RADIATION.sif_obs_shaded, RADIATION._sif_obs_shaded, OPTICS._tmp_vec_layer);
 
     RADIATION._sif_obs_scatter .= view(OPTICS.σ_dob,SPECTRA.IΛ_SIF,:) .* view(RADIATION.sif_down,:,1:DIM_LAYER) .+ view(OPTICS.σ_dof,SPECTRA.IΛ_SIF,:) .* view(RADIATION.sif_up,:,1:DIM_LAYER);
-    OPTICS._tmp_vec_layer .= (view(can.sensor_geometry.auxil.po,1:DIM_LAYER) .+ view(can.sensor_geometry.auxil.po,2:DIM_LAYER+1)) ./ 2 .* can.structure.state.δlai .* can.structure.auxil.ci ./ FT(π);
+    OPTICS._tmp_vec_layer .= can.sensor_geometry.auxil.p_sensor .* can.structure.state.δlai .* can.structure.auxil.ci ./ FT(π);
     mul!(RADIATION.sif_obs_scatter, RADIATION._sif_obs_scatter, OPTICS._tmp_vec_layer);
 
-    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* can.sensor_geometry.auxil.po[end] ./ FT(π);
+    RADIATION.sif_obs_soil .= view(RADIATION.sif_up,:,DIM_LAYER+1) .* can.sensor_geometry.auxil.p_sensor_soil ./ FT(π);
 
     RADIATION.sif_obs .= RADIATION.sif_obs_sunlit .+ RADIATION.sif_obs_shaded .+ RADIATION.sif_obs_scatter .+ RADIATION.sif_obs_soil;
 

@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-11: add function to compute shortwave radiation
 #     2023-Oct-11: fix a typo when using fs_abs (was using fs_fo_abs)
+#     2023-Oct-13: compute the canopy albedo using the integrated radiation of the entire hemisphere
 #
 #######################################################################################################################################################################################################
 """
@@ -62,6 +63,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
         a_s_i .= e_s_i .* (1 .- t_ss .- t_sd .- r_sd);
         a_d_i .= (e_d_i .+ e_u_j) .* (1 .- t_dd .- r_dd);
     end;
+    CANOPY.sun_geometry.auxil.albedo = view(CANOPY.sun_geometry.auxil.e_difꜛ,:,1) ./ (METEO.rad_sw.e_dir .+ METEO.rad_sw.e_dif);
 
     # 3. compute net absorption for leaves and soil
     for i in 1:DIM_LAYER

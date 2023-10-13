@@ -68,7 +68,6 @@ import Emerald.EmeraldLand.SPAC
         @test spac.CANOPY.sun_geometry.auxil.sdb >= 0;
         @test spac.CANOPY.sun_geometry.auxil.sdf >= 0;
         @test 0 < spac.CANOPY.structure.auxil.ci <= 1;
-        @test all(0 .< spac.CANOPY.sun_geometry.auxil.ps .<= 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.p_sunlit .< 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.ρ_sd_layer .< 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.ρ_dd_layer .< 1);
@@ -95,8 +94,9 @@ import Emerald.EmeraldLand.SPAC
         @test spac.CANOPY.sensor_geometry.auxil.dof >= 0;
         @test spac.CANOPY.sensor_geometry.auxil.sob >= 0;
         @test spac.CANOPY.sensor_geometry.auxil.sof >= 0;
-        @test all(0 .< spac.CANOPY.sensor_geometry.auxil.po .<= 1);
-        @test all(0 .< spac.CANOPY.sensor_geometry.auxil.pso .< 1);
+        @test all(0 .< spac.CANOPY.sensor_geometry.auxil.p_sensor .< 1);
+        @test 0 < spac.CANOPY.sensor_geometry.auxil.p_sensor_soil < 1
+        @test all(0 .< spac.CANOPY.sensor_geometry.auxil.p_sun_sensor .< 1);
     end;
 
     @testset "Shortwave radiation" begin
@@ -154,7 +154,7 @@ import Emerald.EmeraldLand.SPAC
 
         @test all(spac.CANOPY.sensor_geometry.auxil.e_sensor_layer .> 0);
         @test all(spac.CANOPY.sensor_geometry.auxil.e_sensor .> 0);
-        @test all(spac.CANOPY.sensor_geometry.auxil.albedo .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.reflectance .> 0);
     end;
 
 end;

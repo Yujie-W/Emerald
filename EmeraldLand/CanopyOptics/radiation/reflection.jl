@@ -30,21 +30,23 @@ function reflection_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
         dof_i = view(CANOPY.sensor_geometry.auxil.dof_leaf,:,i);        # scattering coefficient forward for diffuse->observer
         so_i  = view(CANOPY.sensor_geometry.auxil.so_leaf ,:,i);        # bidirectional from solar to observer
 
-        sen_i  .= CANOPY.sensor_geometry.auxil.po[i]  .* dob_i .* e_d_i .+
-                  CANOPY.sensor_geometry.auxil.po[i]  .* dof_i .* e_u_i .+
-                  CANOPY.sensor_geometry.auxil.pso[i] .* so_i  .* METEO.rad_sw.e_dir;
+        sen_i  .= CANOPY.sensor_geometry.auxil.p_sensor[i]     .* dob_i .* e_d_i .+
+                  CANOPY.sensor_geometry.auxil.p_sensor[i]     .* dof_i .* e_u_i .+
+                  CANOPY.sensor_geometry.auxil.p_sun_sensor[i] .* so_i  .* METEO.rad_sw.e_dir;
         sen_i .*= CANOPY.structure.state.δlai[i] * CANOPY.structure.auxil.ci;
     end;
-    CANOPY.sensor_geometry.auxil.e_sensor_layer[:,end] .= CANOPY.sensor_geometry.auxil.po[end] .* view(CANOPY.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1);
+    CANOPY.sensor_geometry.auxil.e_sensor_layer[:,end] .= CANOPY.sensor_geometry.auxil.p_sensor_soil .* view(CANOPY.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1);
 
     # compute the spectra at the sensor
     for i in 1:DIM_WL
         CANOPY.sensor_geometry.auxil.e_sensor[i] = sum(view(CANOPY.sensor_geometry.auxil.e_sensor_layer,i,:)) / FT(π);
     end;
 
-    # Note, this albedo calculation is not correct because the sun-sensor geometry is not taken into account (reflectance is not isotropic)
+    # Note, this reflectance calculation is not correct because the sun-sensor geometry is not taken into account (reflectance is not isotropic)
+    #     This is to compare with remote sensing data, which use the same calculation (* π)
     #     SCOPE does this a bit differently (controlling numerical issues), but still not correct
-    CANOPY.sensor_geometry.auxil.albedo .= CANOPY.sensor_geometry.auxil.e_sensor .* FT(π) ./ (METEO.rad_sw.e_dir .+ METEO.rad_sw.e_dif);
+    # For real albedo, which is the surface reflectance, it needs to be the ratio between upward diffuse light and total downward light
+    CANOPY.sensor_geometry.auxil.reflectance .= CANOPY.sensor_geometry.auxil.e_sensor .* FT(π) ./ (METEO.rad_sw.e_dir .+ METEO.rad_sw.e_dif);
 
     return nothing
 end;

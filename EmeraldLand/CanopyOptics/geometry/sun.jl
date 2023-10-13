@@ -53,11 +53,11 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) 
     CANOPY.structure.auxil.ci = CANOPY.structure.state.Ω_A + CANOPY.structure.state.Ω_B * (1 - cosd(CANOPY.sun_geometry.state.sza));
 
     # compute the sunlit leaf fraction
-    CANOPY.sun_geometry.auxil.ps = exp.(CANOPY.sun_geometry.auxil.ks .* CANOPY.structure.auxil.ci * CANOPY.structure.state.lai .* CANOPY.structure.auxil.x_bnds);
+    # CANOPY.sun_geometry.auxil.ps = exp.(CANOPY.sun_geometry.auxil.ks .* CANOPY.structure.auxil.ci * CANOPY.structure.state.lai .* CANOPY.structure.auxil.x_bnds);
     for i in 1:DIM_LAYER
-        ilai = CANOPY.structure.auxil.ci * CANOPY.structure.state.δlai[i];
+        ksilai = CANOPY.sun_geometry.auxil.ks * CANOPY.structure.auxil.ci * CANOPY.structure.state.δlai[i];
         kscilai = CANOPY.sun_geometry.auxil.ks * CANOPY.structure.auxil.ci * CANOPY.structure.state.lai;
-        CANOPY.sun_geometry.auxil.p_sunlit[i] = 1 / (CANOPY.sun_geometry.auxil.ks * ilai) * (exp(kscilai * CANOPY.structure.auxil.x_bnds[i]) - exp(kscilai * CANOPY.structure.auxil.x_bnds[i+1]));
+        CANOPY.sun_geometry.auxil.p_sunlit[i] = 1 / ksilai * (exp(kscilai * CANOPY.structure.auxil.x_bnds[i]) - exp(kscilai * CANOPY.structure.auxil.x_bnds[i+1]));
     end;
 
     # compute the scattering coefficients for the solar radiation per leaf area

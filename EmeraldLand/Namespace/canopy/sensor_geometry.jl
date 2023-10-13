@@ -59,9 +59,11 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     "Observer direction beam extinction coefficient weight (diffuse)"
     ko::FT = 0
     "Probability of directly viewing a leaf in observer direction at different layer boundaries"
-    po::Vector{FT}
+    p_sensor::Vector{FT}
+    "Probability of directly viewing soil in observer direction at different layer boundaries"
+    p_sensor_soil::FT = 0
     "Bi-directional probability of directly viewing a leaf at different layer boundaries (solar->canopy->observer)"
-    pso::Vector{FT}
+    p_sun_sensor::Vector{FT}
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(vza) at different inclination angles"
@@ -98,17 +100,17 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     so_leaf::Matrix{FT}
 
     # Canopy reflection
-    "Albedo of the soil-canopy"
-    albedo::Vector{FT}
     "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
     e_sensor_layer::Matrix{FT}
     "Total radiation towards the viewing direction `[mW m⁻² nm⁻¹]`"
     e_sensor::Vector{FT}
+    "Reflectance of the soil-canopy at the sensor direction"
+    reflectance::Vector{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
-            po             = zeros(FT, config.DIM_LAYER + 1),
-            pso            = zeros(FT, config.DIM_LAYER + 1),
+            p_sensor       = zeros(FT, config.DIM_LAYER),
+            p_sun_sensor   = zeros(FT, config.DIM_LAYER),
             Co_incl        = zeros(FT, config.DIM_INCL),
             So_incl        = zeros(FT, config.DIM_INCL),
             ko_incl        = zeros(FT, config.DIM_INCL),
@@ -123,9 +125,9 @@ SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAu
             dob_leaf       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             dof_leaf       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             so_leaf        = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            albedo         = zeros(FT, config.DIM_WL),
             e_sensor_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             e_sensor       = zeros(FT, config.DIM_WL),
+            reflectance    = zeros(FT, config.DIM_WL),
 );
 
 

@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-10: add function sensor_geometry! (run per viewing zenith angle)
 #     2023-Oct-11: compute canopy layer scattering
+#     2023-Oct-13: improve p_sun_sensor calculation accuracy
 #
 #######################################################################################################################################################################################################
 """
@@ -86,27 +87,28 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     CANOPY.sensor_geometry.auxil.fo_fs .= CANOPY.sun_geometry.auxil.fs .* CANOPY.sensor_geometry.auxil.fo;
     CANOPY.sensor_geometry.auxil.fo_fs_abs .= abs.(CANOPY.sensor_geometry.auxil.fo_fs);
 
-    # compute po and pso for sensor geometry
-    CANOPY.sensor_geometry.auxil.po = exp.(CANOPY.sensor_geometry.auxil.ko .* CANOPY.structure.auxil.ci * CANOPY.structure.state.lai .* CANOPY.structure.auxil.x_bnds);
+    # compute fractions of leaves/soil that can be viewed from the sensor direction
+    #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
+    kocilai = CANOPY.sensor_geometry.auxil.ko * CANOPY.structure.auxil.ci * CANOPY.structure.state.lai;
+    for i in 1:DIM_LAYER
+        koilai = CANOPY.sensor_geometry.auxil.ko * CANOPY.structure.auxil.ci * CANOPY.structure.state.δlai[i];
+        CANOPY.sensor_geometry.auxil.p_sensor[i] = 1 / koilai * (exp(kocilai * CANOPY.structure.auxil.x_bnds[i]) - exp(kocilai * CANOPY.structure.auxil.x_bnds[i+1]));
+    end;
+    CANOPY.sensor_geometry.auxil.p_sensor_soil = exp(-kocilai);
 
+    # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
     dso = sqrt( tand(CANOPY.sun_geometry.state.sza) ^ 2 +
-                 tand(CANOPY.sensor_geometry.state.vza) ^ 2 -
-                 2 * tand(CANOPY.sun_geometry.state.sza) * tand(CANOPY.sensor_geometry.state.vza) * cosd(CANOPY.sensor_geometry.state.vaa - CANOPY.sun_geometry.state.saa) );
-    @inline _pdf(x::FT) where {FT} = (
-        Σk = CANOPY.sensor_geometry.auxil.ko + CANOPY.sun_geometry.auxil.ks;
-        Πk = CANOPY.sensor_geometry.auxil.ko * CANOPY.sun_geometry.auxil.ks;
-        cl = CANOPY.structure.auxil.ci * CANOPY.structure.state.lai;
-        α  = dso / CANOPY.structure.state.hot_spot * 2 / Σk;
+                tand(CANOPY.sensor_geometry.state.vza) ^ 2 -
+                2 * tand(CANOPY.sun_geometry.state.sza) * tand(CANOPY.sensor_geometry.state.vza) * cosd(CANOPY.sensor_geometry.state.vaa - CANOPY.sun_geometry.state.saa) );
+    Σk = CANOPY.sensor_geometry.auxil.ko + CANOPY.sun_geometry.auxil.ks;
+    Πk = CANOPY.sensor_geometry.auxil.ko * CANOPY.sun_geometry.auxil.ks;
+    cl = CANOPY.structure.auxil.ci * CANOPY.structure.state.lai;
+    α  = dso / CANOPY.structure.state.hot_spot * 2 / Σk;
+    pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
 
-        if dso == 0
-            return exp( (Σk - sqrt(Πk)) * cl * x )
-        end;
-
-        return exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) )
-    );
-
-    for i in eachindex(CANOPY.structure.auxil.x_bnds)
-        CANOPY.sensor_geometry.auxil.pso[i] = quadgk(_pdf, CANOPY.structure.auxil.x_bnds[i] - FT(1)/DIM_LAYER, CANOPY.structure.auxil.x_bnds[i]; rtol = 1e-2)[1] * DIM_LAYER;
+    for i in 1:DIM_LAYER
+        CANOPY.sensor_geometry.auxil.p_sun_sensor[i] = quadgk(pso, CANOPY.structure.auxil.x_bnds[i+1], CANOPY.structure.auxil.x_bnds[i]; rtol = 1e-2)[1] /
+                                                       (CANOPY.structure.auxil.x_bnds[i] - CANOPY.structure.auxil.x_bnds[i+1]);
     end;
 
     # compute the scattering coefficients per leaf area

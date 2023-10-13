@@ -3,7 +3,7 @@
 # Changes to this structure
 # General
 #     2022-Jun-07: add CanopyOptics struct (will be a field for canopy structure)
-#     2022-Jun-07: add more fields: fo, fs, po, ps, pso
+#     2022-Jun-07: add more fields: fo, fs, ps
 #     2022-Jun-08: add more fields: ρ_dd, ρ_sd, σ_dob, σ_dof, σ_so, τ_dd, τ_sd, _ρ_dd, _ρ_sd, _τ_dd, _τ_sd
 #     2022-Jun-09: rename variables to be more descriptive
 #     2022-Jun-10: add more fields: p_sunlit, ϵ, ρ_lw, τ_lw, _mat_down, _mat_down, _ρ_lw, _τ_lw
@@ -156,7 +156,7 @@ Base.@kwdef mutable struct HyperspectralMLCanopyRadiationProfile{FT<:AbstractFlo
 end;
 
 HyperspectralMLCanopyRadiationProfile(config::SPACConfiguration{FT}) where {FT} = (
-    (; DIM_AZI, DIM_INCL, DIM_LAYER, DIM_PAR, DIM_SIF, DIM_WL) = config;
+    (; DIM_LAYER, DIM_SIF) = config;
 
     return HyperspectralMLCanopyRadiationProfile{FT}(
                 s_layer_down     = zeros(FT, DIM_SIF, DIM_LAYER),

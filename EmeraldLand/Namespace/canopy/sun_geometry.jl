@@ -31,6 +31,7 @@ end;
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SunGeometryAuxil
+#     2023-Oct-13: add field albedo
 #
 #######################################################################################################################################################################################################
 """
@@ -56,8 +57,6 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     ks::FT = 0
     "Probability of directly viewing a leaf in solar direction at different layers"
     p_sunlit::Vector{FT}
-    "Probability of directly viewing a leaf in solar direction at different layer boundaries"
-    ps::Vector{FT}
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(sza) at different inclination angles"
@@ -112,6 +111,8 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     τ_sd::Matrix{FT}
 
     # Canopy radiation profiles
+    "Albedo of the soil-canopy of the entire hemisphere"
+    albedo::Vector{FT}
     "Downwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
     e_difꜜ::Matrix{FT}
     "Upwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
@@ -142,7 +143,6 @@ end;
 
 SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT}(
             p_sunlit     = zeros(FT, config.DIM_LAYER),
-            ps           = zeros(FT, config.DIM_LAYER + 1),
             Cs_incl      = zeros(FT, config.DIM_INCL),
             Ss_incl      = zeros(FT, config.DIM_INCL),
             ks_incl      = zeros(FT, config.DIM_INCL),
@@ -164,6 +164,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT
             ρ_sd         = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             τ_dd         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_sd         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            albedo       = zeros(FT, config.DIM_WL),
             e_difꜜ       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             e_difꜛ       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             e_dirꜜ       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
