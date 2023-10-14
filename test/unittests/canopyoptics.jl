@@ -157,4 +157,38 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.CANOPY.sensor_geometry.auxil.reflectance .> 0);
     end;
 
+    @testset "Canopy fluorescence spectrum" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
+        for leaf in spac.LEAVES
+            leaf.flux.auxil.ϕ_f_shaded = 0.01;
+            leaf.flux.auxil.ϕ_f_sunlit .= 0.01;
+        end;
+        CO.soil_albedo!(config, spac);
+        CO.canopy_structure!(config, spac);
+        CO.sun_geometry!(config, spac);
+        CO.shortwave_radiation!(config, spac);
+        CO.sensor_geometry!(config, spac);
+        CO.fluorescence_spectrum!(config, spac);
+
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sif_chl .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_sunlit .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_shaded .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_scattered .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜜ_layer .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜛ_layer .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜜ_emit .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜛ_emit[:,1:end-1] .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜛ_emit[:,end] .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜜ[:,1] .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜜ[:,2:end] .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_sifꜛ .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs_sunlit .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs_shaded .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs_scattered .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs_soil .> 0);
+        @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs .> 0);
+    end;
+
 end;

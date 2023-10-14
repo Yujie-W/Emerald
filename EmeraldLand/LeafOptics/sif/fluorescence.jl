@@ -261,6 +261,7 @@ end;
 #     2023-Sep-18: partition the SIF emission from PSI and PSII if Φ_SIF_WL is true
 #     2023-Sep-19: add option to cut off SIF emission to make sure its wavelength is within the range of the SIF excitation wavelengths
 #     2023-Sep-19: add option to rescale the SIF emission PDF because of the cut off
+#     2023-Oct-14: compute mat_mean and mat_diff
 #
 #######################################################################################################################################################################################################
 """
@@ -353,6 +354,10 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         vec_b .= leaf_sif_b.(vec_b_1_out, vec_f_1_out, vec_b_2_out, ρ_1_sif, τ_1_sif, ρ_2_sif);
         vec_f .= leaf_sif_f.(vec_f_1_out, vec_b_2_out, vec_f_2_out, ρ_1_sif, ρ_2_sif, τ_2_sif);
     end;
+
+    # compute the mean and mean diff of mat_b and mat_f
+    bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
+    bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
 
     return nothing
 end;

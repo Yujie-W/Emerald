@@ -24,7 +24,6 @@ canopy_optical_properties!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{
 );
 
 shortwave radiation
-
     if can.structure.state.lai == 0
         for i in 1:(DIM_LAYER+1)
             can.sun_geometry.auxil.e_dirꜜ[:,i] .= rad.e_dir;
@@ -47,7 +46,6 @@ shortwave radiation
     end;
 
 longwave radiation
-
     if can.structure.state.lai == 0
         _r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * soil.auxil.t ^ 4;
         RADIATION.r_lw .= 0;
@@ -56,6 +54,23 @@ longwave radiation
         sbulk.auxil.r_net_lw = rad * (1 - sbulk.auxil.ρ_lw) - _r_lw_soil;
 
         return nothing
+    end;
+
+fluorescence
+    if can.structure.state.lai == 0
+        RADIATION.sif_obs .= 0;
+    end;
+
+    if !ENABLE_SIF
+        CANOPY.RADIATION.sif_obs .= 0;
+
+        return nothing
+    end;
+
+    if (CANOPY.sun_geometry.state.sza < 89)
+        canopy_fluorescence!(config, CANOPY, LEAVES);
+    else
+        CANOPY.RADIATION.sif_obs .= 0;
     end;
 
 =#

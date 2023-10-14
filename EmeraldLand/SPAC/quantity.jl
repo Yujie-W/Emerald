@@ -320,7 +320,7 @@ function ΣSIF_CHL end;
     # compute SIF in energy unit before reabsorption within leaves (W m⁻²)
     Σsif::FT = 0;
     for i in eachindex(LEAVES)
-        Σsif += (CANOPY.RADIATION.s_layer_down_chl[:,i] .+ CANOPY.RADIATION.s_layer_up_chl[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
+        Σsif += (CANOPY.sun_geometry.e_sif_chl)' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return Σsif
@@ -353,7 +353,7 @@ function ΣSIF_LEAF end;
     # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
     Σsif::FT = 0;
     for i in eachindex(LEAVES)
-        Σsif += (CANOPY.RADIATION.s_layer_down[:,i] .+ CANOPY.RADIATION.s_layer_up[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
+        Σsif += (CANOPY.sun_geometry.auxil.e_sifꜜ_layer[:,i] .+ CANOPY.sun_geometry.auxil.e_sifꜛ_layer[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return Σsif

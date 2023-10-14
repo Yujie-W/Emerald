@@ -58,6 +58,7 @@ end;
 #     2023-Sep-18: add fields τ_all_i, mat_x_i_out, and _ϕ_sif
 #     2023-Sep-19: add field f_ppar
 #     2023-Sep-22: add field f_psii
+#     2023-Oct-14: add field mat_mean, and mat_diff
 #
 #######################################################################################################################################################################################################
 """
@@ -152,6 +153,10 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     mat_b::Matrix{FT}
     "SIF matrix forwards `[-]`"
     mat_f::Matrix{FT}
+    "Mean SIF matrix of the backward and forward SIF matrices `[-]`"
+    mat_mean::Matrix{FT}
+    "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
+    mat_diff::Matrix{FT}
 
     # longwave radiation
     "Broadband thermal reflectance, related to blackbody emittance `[-]`"
@@ -202,6 +207,8 @@ LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 mat_f_2_out      = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_b            = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_f            = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_mean         = zeros(FT, DIM_SIF, DIM_SIFE),
+                mat_diff         = zeros(FT, DIM_SIF, DIM_SIFE),
                 _ϕ_sif           = zeros(FT, DIM_SIF)
     )
 );

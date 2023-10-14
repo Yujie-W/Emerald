@@ -92,7 +92,7 @@ using Emerald;
 
 function show_spac_info(node)
     beta = EmeraldLand.SPAC.BETA(spac);
-    par = spac.CANOPY.RADIATION.par_in;
+    par = EmeraldLand.SPAC.PAR(config, spac);
     ppar = EmeraldLand.SPAC.PPAR(spac);
     csif = EmeraldLand.SPAC.ΣSIF(spac);
     etr = EmeraldLand.SPAC.ΣETR(spac);

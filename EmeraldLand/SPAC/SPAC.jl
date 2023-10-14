@@ -6,7 +6,7 @@ using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, M_Hâ
 using ..EmeraldPhysics.Optics: photon
 
 using ..CanopyOptics: MODIS_EVI, MODIS_NDVI, MODIS_NIRv, OCO2_SIF759, OCO2_SIF770, TROPOMI_SIF683, TROPOMI_SIF740
-using ..CanopyOptics: canopy_fluorescence!, canopy_radiation!, longwave_radiation!, soil_albedo!
+using ..CanopyOptics: canopy_radiation!, longwave_radiation!, soil_albedo!
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
 using ..Namespace: XylemHydraulicsAuxilNSS

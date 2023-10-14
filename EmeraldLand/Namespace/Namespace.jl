@@ -82,6 +82,8 @@ include("canopy/sensor_geometry.jl");
 include("canopy/structure.jl");
 include("canopy/sun_geometry.jl");
 
+include("canopy/canopy.jl");
+
 
 # Environment
 include("environment/air.jl");
@@ -95,7 +97,6 @@ include("environment/meteorology.jl");
 
 
 
-include("canopy.jl");
 
 include("spac.jl");
 

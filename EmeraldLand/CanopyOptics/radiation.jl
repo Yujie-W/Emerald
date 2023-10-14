@@ -55,16 +55,14 @@ canopy_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where
         CANOPY.RADIATION.par_in_diffuse = 0;
         CANOPY.RADIATION.par_in_direct = 0;
         CANOPY.RADIATION.par_in = 0;
-        CANOPY.RADIATION.par_shaded .= 0;
-        CANOPY.RADIATION.par_sunlit .= 0;
-        CANOPY.RADIATION.apar_shaded .= 0;
-        CANOPY.RADIATION.apar_sunlit .= 0;
         CANOPY.RADIATION.e_v .= 0;
         CANOPY.RADIATION.e_o .= 0;
         CANOPY.RADIATION.albedo .= NaN;
 
         for i in 1:DIM_LAYER
-            # PPAR for leaves
+            # APAR and PPAR for leaves
+            LEAVES[i].flux.auxil.apar_shaded = 0;
+            LEAVES[i].flux.auxil.apar_sunlit .= 0;
             LEAVES[i].flux.auxil.ppar_shaded = 0;
             LEAVES[i].flux.auxil.ppar_sunlit .= 0;
         end;

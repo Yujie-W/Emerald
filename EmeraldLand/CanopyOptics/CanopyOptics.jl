@@ -24,12 +24,12 @@ include("geometry/structure.jl");
 
 
 # function related to canopy radiation
+include("radiation/fluorescence.jl");
 include("radiation/longwave.jl");
 include("radiation/reflection.jl");
 include("radiation/shortwave.jl");
 
 
-include("fluorescence.jl");
 include("geometry.jl");
 include("radiation.jl");
 include("remote_sensing.jl");

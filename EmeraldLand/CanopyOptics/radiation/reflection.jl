@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Oct-12: add function sensor_spectrum! to compute the spectra at the sensor
+#     2023-Oct-14: do nothing if REF is not enabled
 #
 #######################################################################################################################################################################################################
 """
@@ -17,6 +18,11 @@ Computes the spectra at the sensor direction, given
 
 """
 function reflection_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    if !config.ENABLE_REF
+        return nothing
+    end;
+
+    # Run the canopy optical properties simulations only if canopy reflectance feature is enabled
     (; DIM_LAYER, DIM_WL) = config;
     (; CANOPY, METEO) = spac;
 

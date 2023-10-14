@@ -106,28 +106,54 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     e_sensor::Vector{FT}
     "Reflectance of the soil-canopy at the sensor direction"
     reflectance::Vector{FT}
+
+    # Canopy fluorescence
+    "SIF that can be observed from scattered SIF"
+    sif_scattered::Matrix{FT}
+    "SIF that can be observed from the shaded part of the canopy"
+    sif_shaded::Matrix{FT}
+    "SIF that can be observed from the sunlit part of the canopy"
+    sif_sunlit::Matrix{FT}
+    "SIF at sensor direction contributed by shaded leaves fo (not hotspot)"
+    sif_obs_shaded::Vector{FT}
+    "SIF at sensor direction contributed from soil"
+    sif_obs_soil::Vector{FT}
+    "SIF at sensor direction contributed by sunlit leaves fo_fs (hotspot)"
+    sif_obs_sunlit::Vector{FT}
+    "SIF at sensor direction contributed by scattered SIF"
+    sif_obs_scattered::Vector{FT}
+    "Total SIF at sensor direction"
+    sif_obs::Vector{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
-            p_sensor       = zeros(FT, config.DIM_LAYER),
-            p_sun_sensor   = zeros(FT, config.DIM_LAYER),
-            Co_incl        = zeros(FT, config.DIM_INCL),
-            So_incl        = zeros(FT, config.DIM_INCL),
-            ko_incl        = zeros(FT, config.DIM_INCL),
-            sb_incl        = zeros(FT, config.DIM_INCL),
-            sf_incl        = zeros(FT, config.DIM_INCL),
-            βo_incl        = zeros(FT, config.DIM_INCL),
-            fo             = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_abs         = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_cos²_incl   = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs          = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs_abs      = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            dob_leaf       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dof_leaf       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            so_leaf        = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            e_sensor_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            e_sensor       = zeros(FT, config.DIM_WL),
-            reflectance    = zeros(FT, config.DIM_WL),
+            p_sensor          = zeros(FT, config.DIM_LAYER),
+            p_sun_sensor      = zeros(FT, config.DIM_LAYER),
+            Co_incl           = zeros(FT, config.DIM_INCL),
+            So_incl           = zeros(FT, config.DIM_INCL),
+            ko_incl           = zeros(FT, config.DIM_INCL),
+            sb_incl           = zeros(FT, config.DIM_INCL),
+            sf_incl           = zeros(FT, config.DIM_INCL),
+            βo_incl           = zeros(FT, config.DIM_INCL),
+            fo                = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_abs            = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_cos²_incl      = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs             = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs_abs         = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            dob_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            dof_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            so_leaf           = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            e_sensor_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
+            e_sensor          = zeros(FT, config.DIM_WL),
+            reflectance       = zeros(FT, config.DIM_WL),
+            sif_scattered     = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
+            sif_shaded        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
+            sif_sunlit        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
+            sif_obs_scattered = zeros(FT, config.DIM_SIF),
+            sif_obs_shaded    = zeros(FT, config.DIM_SIF),
+            sif_obs_sunlit    = zeros(FT, config.DIM_SIF),
+            sif_obs_soil      = zeros(FT, config.DIM_SIF),
+            sif_obs           = zeros(FT, config.DIM_SIF),
 );
 
 

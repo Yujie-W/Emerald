@@ -7,6 +7,7 @@
 #     2023-Oct-10: add function sensor_geometry! (run per viewing zenith angle)
 #     2023-Oct-11: compute canopy layer scattering
 #     2023-Oct-13: improve p_sun_sensor calculation accuracy
+#     2023-Oct-14: if none of REF or SIF is enabled, skip the sensor geometry calculation
 #
 #######################################################################################################################################################################################################
 """
@@ -19,6 +20,11 @@ Update sensor geometry related auxiliary variables, given
 
 """
 function sensor_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    if !config.ENABLE_REF && !config.ENABLE_SIF
+        return nothing
+    end;
+
+    # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled
     (; DIM_LAYER, Θ_AZI, Θ_INCL) = config;
     (; CANOPY, LEAVES) = spac;
 

@@ -38,7 +38,7 @@ spac_state!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, state::Mult
     state.modis_nirv = MODIS_NIRv(config, spac);
     state.oco_sif₇₅₉ = OCO2_SIF759(config, spac);
     state.oco_sif₇₇₀ = OCO2_SIF770(config, spac);
-    state.par = spac.CANOPY.RADIATION.par_in;
+    state.par = PAR(config, spac);
     state.ppar = PPAR(spac);
     state.transpiration = T_VEG(spac);
     state.tropomi_sif₆₈₃ = TROPOMI_SIF683(config, spac);
