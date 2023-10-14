@@ -25,6 +25,10 @@ include("empirical/gentine.jl");
 include("empirical/leuning.jl");
 include("empirical/medlyn.jl");
 
+
+# optimality models
+include("optimality/dade.jl");
+
 include("conductance.jl");
 include("limits.jl");
 include("optimality.jl");
