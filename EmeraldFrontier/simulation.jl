@@ -258,7 +258,7 @@ simulation!(config::SPACConfiguration{FT},
         dfr.NIR       = MODIS_NIR(config, spac);
         dfr.NIRvI     = MODIS_NIRv(config, spac);
         dfr.NIRvR     = MODIS_NIRvR(config, spac);
-        dfr.PAR       = spac.CANOPY.RADIATION.par_in;
+        dfr.PAR       = PAR(config, spac);
         dfr.PPAR      = PPAR(spac);
         dfr.RED       = MODIS_RED(config, spac);
         dfr.SIF683    = TROPOMI_SIF683(config, spac);

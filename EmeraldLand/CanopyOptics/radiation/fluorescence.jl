@@ -37,7 +37,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerS
         CANOPY.sensor_geometry.auxil.sif_obs_sunlit .= 0;
         CANOPY.sensor_geometry.auxil.sif_obs_shaded .= 0;
         CANOPY.sensor_geometry.auxil.sif_obs_scattered .= 0;
-        CANOPY.sensor_geometry.auxil.sif_obs_ssoil .= 0;
+        CANOPY.sensor_geometry.auxil.sif_obs_soil .= 0;
         CANOPY.sensor_geometry.auxil.sif_obs .= 0;
 
         return nothing

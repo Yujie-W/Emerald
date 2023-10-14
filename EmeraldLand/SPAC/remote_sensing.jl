@@ -121,9 +121,7 @@ function MODIS_BLUE end;
 MODIS_BLUE(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_BLUE(spac.CANOPY, config.SPECTRA);
 
 MODIS_BLUE(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ, RADIATION.albedo, FT(MODIS_BAND_3[1]), FT(MODIS_BAND_3[2]); steps=4)
+    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_3[1]), FT(MODIS_BAND_3[2]); steps=4)
 );
 
 
@@ -184,10 +182,8 @@ function MODIS_LSWI end;
 MODIS_LSWI(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_LSWI(spac.CANOPY, config.SPECTRA);
 
 MODIS_LSWI(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
     _nir  = MODIS_NIR(can, spectra);
-    _swir = read_spectrum(spectra.Λ, RADIATION.albedo, FT(MODIS_BAND_7[1]), FT(MODIS_BAND_7[2]); steps=5);
+    _swir = read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_7[1]), FT(MODIS_BAND_7[2]); steps=5);
 
     return (_nir - _swir) / (_nir + _swir)
 );
@@ -228,9 +224,7 @@ function MODIS_NIR end;
 MODIS_NIR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_NIR(spac.CANOPY, config.SPECTRA);
 
 MODIS_NIR(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ, RADIATION.albedo, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6)
+    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6)
 );
 
 
@@ -269,9 +263,7 @@ function MODIS_NIRvR end;
 MODIS_NIRvR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_NIRvR(spac.CANOPY, config.SPECTRA);
 
 MODIS_NIRvR(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    _nir_rad = read_spectrum(spectra.Λ, RADIATION.e_o, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6);
+    _nir_rad = read_spectrum(spectra.Λ, can.sensor_geometry.auxil.e_sensor, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6);
 
     return MODIS_NDVI(can, spectra) * _nir_rad
 );
@@ -291,9 +283,7 @@ function MODIS_RED end;
 MODIS_RED(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = MODIS_RED(spac.CANOPY, config.SPECTRA);
 
 MODIS_RED(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ, RADIATION.albedo, FT(MODIS_BAND_1[1]), FT(MODIS_BAND_1[2]); steps=6)
+    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_1[1]), FT(MODIS_BAND_1[2]); steps=6)
 );
 
 
@@ -311,9 +301,7 @@ function OCO2_SIF759 end;
 OCO2_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO2_SIF759(spac.CANOPY, config.SPECTRA);
 
 OCO2_SIF759(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO2_SIF_759[1]), FT(OCO2_SIF_759[2]); steps=4)
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(OCO2_SIF_759[1]), FT(OCO2_SIF_759[2]); steps=4)
 );
 
 
@@ -331,9 +319,7 @@ function OCO2_SIF770 end;
 OCO2_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO2_SIF770(spac.CANOPY, config.SPECTRA);
 
 OCO2_SIF770(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO2_SIF_770[1]), FT(OCO2_SIF_770[2]); steps=4)
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(OCO2_SIF_770[1]), FT(OCO2_SIF_770[2]); steps=4)
 );
 
 
@@ -351,9 +337,7 @@ function OCO3_SIF759 end;
 OCO3_SIF759(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO3_SIF759(spac.CANOPY, config.SPECTRA);
 
 OCO3_SIF759(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO3_SIF_759[1]), FT(OCO3_SIF_759[2]); steps=4)
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(OCO3_SIF_759[1]), FT(OCO3_SIF_759[2]); steps=4)
 );
 
 
@@ -371,9 +355,7 @@ function OCO3_SIF770 end;
 OCO3_SIF770(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = OCO3_SIF770(spac.CANOPY, config.SPECTRA);
 
 OCO3_SIF770(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(OCO3_SIF_770[1]), FT(OCO3_SIF_770[2]); steps=4)
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(OCO3_SIF_770[1]), FT(OCO3_SIF_770[2]); steps=4)
 );
 
 
@@ -391,9 +373,7 @@ function TROPOMI_SIF683 end;
 TROPOMI_SIF683(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF683(spac.CANOPY, config.SPECTRA);
 
 TROPOMI_SIF683(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(TROPOMI_SIF_683[1]), FT(TROPOMI_SIF_683[2]); steps=5)
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(TROPOMI_SIF_683[1]), FT(TROPOMI_SIF_683[2]); steps=5)
 );
 
 
@@ -411,9 +391,7 @@ function TROPOMI_SIF740 end;
 TROPOMI_SIF740(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF740(spac.CANOPY, config.SPECTRA);
 
 TROPOMI_SIF740(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(740))
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(740))
 );
 
 
@@ -431,9 +409,7 @@ function TROPOMI_SIF747 end;
 TROPOMI_SIF747(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF747(spac.CANOPY, config.SPECTRA);
 
 TROPOMI_SIF747(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(TROPOMI_SIF_747[1]), FT(TROPOMI_SIF_747[2]); steps=8)
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(TROPOMI_SIF_747[1]), FT(TROPOMI_SIF_747[2]); steps=8)
 );
 
 
@@ -451,7 +427,5 @@ function TROPOMI_SIF751 end;
 TROPOMI_SIF751(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = TROPOMI_SIF751(spac.CANOPY, config.SPECTRA);
 
 TROPOMI_SIF751(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    (; RADIATION) = can;
-
-    return read_spectrum(spectra.Λ_SIF, RADIATION.sif_obs, FT(TROPOMI_SIF_751[1]), FT(TROPOMI_SIF_751[2]); steps=5)
+    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(TROPOMI_SIF_751[1]), FT(TROPOMI_SIF_751[2]); steps=5)
 );

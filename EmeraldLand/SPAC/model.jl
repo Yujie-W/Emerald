@@ -65,9 +65,6 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     stomatal_conductance_profile!(spac);
     plant_photosynthesis!(spac, GCO₂Mode());
 
-    # 4. run canopy fluorescence
-    canopy_fluorescence!(config, spac);
-
     # save the result at this stage for the results at the beginning of this time step
 
     # 5. run soil energy water budget
@@ -81,6 +78,11 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
 
     # 8. update the prognostic variables
     time_stepper!(config, spac, δt);
+
+    # 4. run canopy reflectance and fluorescence
+    sensor_geometry!(config, spac);
+    reflection_spectrum!(config, spac);
+    fluorescence_spectrum!(config, spac);
 
     return nothing
 );

@@ -36,7 +36,4 @@ include("radiation/reflection.jl");
 include("radiation/pipeline.jl");
 
 
-include("remote_sensing.jl");
-
-
 end; # module

@@ -193,7 +193,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         # if _t_res > 0 rerun the budget functions (shortwave radiation not included) and etc., else break
         if _t_res > 0
             update_substep_auxils!(spac);
-            longwave_radiation!(CANOPY, LEAVES, METEO.rad_lw, SOIL_BULK, SOILS[1]);
+            longwave_radiation!(config, spac);
             if spac._root_connection
                 plant_flow_profile!(config, spac);
                 plant_pressure_profile!(config, spac);
