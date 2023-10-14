@@ -17,21 +17,25 @@ using ..Namespace: MultiLayerSPAC, SPACConfiguration
 # functions related to canopy geometry
 include("geometry/extinction.jl");
 include("geometry/inclination.jl");
-include("geometry/sensor.jl");
 include("geometry/soil_albedo.jl");
-include("geometry/sun.jl");
+
 include("geometry/structure.jl");
+
+include("geometry/sun.jl");
+
+include("geometry/sensor.jl");
 
 
 # function related to canopy radiation
-include("radiation/fluorescence.jl");
 include("radiation/longwave.jl");
-include("radiation/reflection.jl");
 include("radiation/shortwave.jl");
 
+include("radiation/fluorescence.jl");
+include("radiation/reflection.jl");
 
-include("geometry.jl");
-include("radiation.jl");
+include("radiation/pipeline.jl");
+
+
 include("remote_sensing.jl");
 
 

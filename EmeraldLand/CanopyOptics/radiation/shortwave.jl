@@ -7,6 +7,8 @@
 #     2023-Oct-11: add function to compute shortwave radiation
 #     2023-Oct-11: fix a typo when using fs_abs (was using fs_fo_abs)
 #     2023-Oct-13: compute the canopy albedo using the integrated radiation of the entire hemisphere
+#     2023-Oct-14: if LAI <= 0, run soil shortwave radiation only
+#     2023-Oct-14: if SZA > 89, set all shortwave fluxes to 0
 #
 #######################################################################################################################################################################################################
 """
@@ -19,9 +21,64 @@ Update shortwave radiation related auxiliary variables, given
 
 """
 function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
-    (; DIM_LAYER, SPECTRA) = config;
     (; CANOPY, LEAVES, METEO, SOIL_BULK) = spac;
 
+    # if sza > 89, set all the radiation variables to 0
+    if spac.CANOPY.sun_geometry.state.sza > 89
+        CANOPY.sun_geometry.auxil.e_difꜜ .= 0;
+        CANOPY.sun_geometry.auxil.e_difꜛ .= 0;
+        CANOPY.sun_geometry.auxil.e_dirꜜ .= 0;
+        CANOPY.sun_geometry.auxil.e_net_dif .= 0;
+        CANOPY.sun_geometry.auxil.e_net_dir .= 0;
+        CANOPY.sun_geometry.auxil.albedo .= NaN;
+        CANOPY.sun_geometry.auxil.e_net_dif .= 0;
+        CANOPY.sun_geometry.auxil.e_net_dir .= 0;
+        CANOPY.sun_geometry.auxil.r_net_sw .= 0;
+        SOIL_BULK.auxil.e_net_dir .= 0;
+        SOIL_BULK.auxil.e_net_dif .= 0;
+        SOIL_BULK.auxil.r_net_sw = 0;
+        for leaf in LEAVES
+            leaf.flux.auxil.apar_shaded = 0;
+            leaf.flux.auxil.apar_sunlit .= 0;
+            leaf.flux.auxil.ppar_shaded = 0;
+            leaf.flux.auxil.ppar_sunlit .= 0;
+        end;
+
+        return nothing
+    end;
+
+    # if LAI <= 0, run soil albedo only
+    (; DIM_LAYER, SPECTRA) = config;
+    if spac.CANOPY.sun_geometry.state.sza <= 89 && spac.CANOPY.structure.state.lai <= 0
+        # 1. update upward and downward direct and diffuse radiation profiles
+        CANOPY.sun_geometry.auxil.e_dirꜜ .= METEO.rad_sw.e_dir;
+        CANOPY.sun_geometry.auxil.e_difꜜ .= METEO.rad_sw.e_dif;
+        CANOPY.sun_geometry.auxil.e_difꜛ .= 0;
+        CANOPY.sun_geometry.auxil.e_difꜛ[:,end] .= (METEO.rad_sw.e_dir .+ METEO.rad_sw.e_dif) .* SOIL_BULK.auxil.ρ_sw;
+        CANOPY.sun_geometry.auxil.albedo .= SOIL_BULK.auxil.ρ_sw;
+
+        # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
+        CANOPY.sun_geometry.auxil.e_net_dif .= 0;
+        CANOPY.sun_geometry.auxil.e_net_dir .= 0;
+        CANOPY.sun_geometry.auxil.r_net_sw .= 0;
+
+        # 3. compute net absorption for leaves and soil
+        SOIL_BULK.auxil.e_net_dir .= METEO.rad_sw.e_dir .* (1 .- SOIL_BULK.auxil.ρ_sw);
+        SOIL_BULK.auxil.e_net_dif .= METEO.rad_sw.e_dif .* (1 .- SOIL_BULK.auxil.ρ_sw);
+        SOIL_BULK.auxil.r_net_sw = (SOIL_BULK.auxil.e_net_dir' * SPECTRA.ΔΛ + SOIL_BULK.auxil.e_net_dif' * SPECTRA.ΔΛ) / 1000;
+
+        # 4. compute leaf level PAR, APAR, and PPAR per ground area
+        for leaf in LEAVES
+            leaf.flux.auxil.apar_shaded = 0;
+            leaf.flux.auxil.apar_sunlit .= 0;
+            leaf.flux.auxil.ppar_shaded = 0;
+            leaf.flux.auxil.ppar_sunlit .= 0;
+        end;
+
+        return nothing
+    end;
+
+    # run the shortwave radiation simulations only if LAI > 0 and when sza <= 89
     # 1. update upward and downward direct and diffuse radiation profiles
     CANOPY.sun_geometry.auxil.e_dirꜜ[:,1] .= METEO.rad_sw.e_dir;
     CANOPY.sun_geometry.auxil.e_difꜜ[:,1] .= METEO.rad_sw.e_dif;
@@ -32,9 +89,9 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
         e_s_j = view(CANOPY.sun_geometry.auxil.e_dirꜜ,:,i+1);       # direct radiation at lower boundary
         e_u_i = view(CANOPY.sun_geometry.auxil.e_difꜛ,:,i  );       # upward diffuse radiation at upper boundary
 
-        r_dd_i = view(CANOPY.sun_geometry.auxil.ρ_dd      ,:,i);    # reflectance of the upper boundary (i)
+        r_dd_i = view(CANOPY.structure.auxil.ρ_dd         ,:,i);    # reflectance of the upper boundary (i)
         r_sd_i = view(CANOPY.sun_geometry.auxil.ρ_sd      ,:,i);    # reflectance of the upper boundary (i)
-        t_dd_i = view(CANOPY.sun_geometry.auxil.τ_dd      ,:,i);    # transmittance of the layer (i)
+        t_dd_i = view(CANOPY.structure.auxil.τ_dd         ,:,i);    # transmittance of the layer (i)
         t_sd_i = view(CANOPY.sun_geometry.auxil.τ_sd      ,:,i);    # transmittance of the layer (i)
         t_ss_i = view(CANOPY.sun_geometry.auxil.τ_ss_layer,  i);    # transmittance for directional->directional
 
@@ -42,8 +99,9 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
         e_d_j .= t_sd_i .* e_s_i .+ t_dd_i .* e_d_i;
         e_u_i .= r_sd_i .* e_s_i .+ r_dd_i .* e_d_i;
     end;
-    CANOPY.sun_geometry.auxil.e_difꜛ[:,end] .= view(CANOPY.sun_geometry.auxil.ρ_sd,:,DIM_LAYER+1) .* view(CANOPY.sun_geometry.auxil.e_dirꜜ,:,DIM_LAYER+1) .+
-                                               view(CANOPY.sun_geometry.auxil.ρ_dd,:,DIM_LAYER+1) .* view(CANOPY.sun_geometry.auxil.e_difꜜ,:,DIM_LAYER+1);
+    CANOPY.sun_geometry.auxil.e_difꜛ[:,end] .= view(CANOPY.sun_geometry.auxil.e_dirꜜ,:,DIM_LAYER+1) .* view(CANOPY.sun_geometry.auxil.ρ_sd,:,DIM_LAYER+1) .+
+                                               view(CANOPY.sun_geometry.auxil.e_difꜜ,:,DIM_LAYER+1) .* view(CANOPY.structure.auxil.ρ_dd,:,DIM_LAYER+1);
+    CANOPY.sun_geometry.auxil.albedo .= view(CANOPY.sun_geometry.auxil.e_difꜛ,:,1) ./ (METEO.rad_sw.e_dir .+ METEO.rad_sw.e_dif);
 
     # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
     for i in 1:DIM_LAYER
@@ -54,16 +112,15 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
         a_s_i = view(CANOPY.sun_geometry.auxil.e_net_dir,:,i);      # net absorbed direct radiation
         a_d_i = view(CANOPY.sun_geometry.auxil.e_net_dif,:,i);      # net absorbed diffuse radiation
 
-        r_dd = view(CANOPY.sun_geometry.auxil.ρ_dd_layer,:,i);      # reflectance of the upper boundary (i)
+        r_dd = view(CANOPY.structure.auxil.ρ_dd_layer   ,:,i);      # reflectance of the upper boundary (i)
         r_sd = view(CANOPY.sun_geometry.auxil.ρ_sd_layer,:,i);      # reflectance of the upper boundary (i)
-        t_dd = view(CANOPY.sun_geometry.auxil.τ_dd_layer,:,i);      # transmittance of the layer (i)
+        t_dd = view(CANOPY.structure.auxil.τ_dd_layer   ,:,i);      # transmittance of the layer (i)
         t_sd = view(CANOPY.sun_geometry.auxil.τ_sd_layer,:,i);      # transmittance of the layer (i)
         t_ss = view(CANOPY.sun_geometry.auxil.τ_ss_layer,  i);      # transmittance for directional->directional
 
         a_s_i .= e_s_i .* (1 .- t_ss .- t_sd .- r_sd);
         a_d_i .= (e_d_i .+ e_u_j) .* (1 .- t_dd .- r_dd);
     end;
-    CANOPY.sun_geometry.auxil.albedo = view(CANOPY.sun_geometry.auxil.e_difꜛ,:,1) ./ (METEO.rad_sw.e_dir .+ METEO.rad_sw.e_dif);
 
     # 3. compute net absorption for leaves and soil
     for i in 1:DIM_LAYER

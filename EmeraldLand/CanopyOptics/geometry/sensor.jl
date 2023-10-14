@@ -20,11 +20,11 @@ Update sensor geometry related auxiliary variables, given
 
 """
 function sensor_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
-    if !config.ENABLE_REF && !config.ENABLE_SIF
+    if (!config.ENABLE_REF && !config.ENABLE_SIF) || spac.CANOPY.structure.state.lai <= 0
         return nothing
     end;
 
-    # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled
+    # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI > 0
     (; DIM_LAYER, Θ_AZI, Θ_INCL) = config;
     (; CANOPY, LEAVES) = spac;
 

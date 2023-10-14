@@ -79,34 +79,22 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     fs_cos²_incl::Matrix{FT}
 
     # Scattering coefficients per leaf area
-    "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
-    ddb_leaf::Matrix{FT}
-    "Forward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
-    ddf_leaf::Matrix{FT}
     "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins"
     sdb_leaf::Matrix{FT}
     "Forward scattering coefficient for solar directional->diffuse at different layers and wavelength bins"
     sdf_leaf::Matrix{FT}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
-    "Reflectance for diffuse->diffuse at each canopy layer"
-    ρ_dd_layer::Matrix{FT}
     "Reflectance for solar directional->diffuse at each canopy layer"
     ρ_sd_layer::Matrix{FT}
-    "Tranmittance for diffuse->diffuse at each canopy layer"
-    τ_dd_layer::Matrix{FT}
     "Tranmittance for solar directional->diffuse at each canopy layer"
     τ_sd_layer::Matrix{FT}
     "Tranmittance for solar directional->directional at each canopy layer (wavelength independent)"
     τ_ss_layer::Vector{FT}
 
     # Effective reflectance and tranmittance per canopy layer (including the denominator correction)
-    "Effective reflectance for diffuse->diffuse"
-    ρ_dd::Matrix{FT}
     "Effective reflectance for directional->diffuse"
     ρ_sd::Matrix{FT}
-    "Effective tranmittance for diffuse->diffuse"
-    τ_dd::Matrix{FT}
     "Effective tranmittance for solar directional->diffuse"
     τ_sd::Matrix{FT}
 
@@ -217,18 +205,12 @@ SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT
             fs_abs           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             fs_abs_mean      = zeros(FT, config.DIM_AZI),
             fs_cos²_incl     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            ddb_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddf_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             sdb_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             sdf_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_dd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ρ_sd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            τ_dd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_sd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_ss_layer       = zeros(FT, config.DIM_LAYER),
-            ρ_dd             = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             ρ_sd             = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            τ_dd             = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_sd             = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             albedo           = zeros(FT, config.DIM_WL),
             e_difꜜ           = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),

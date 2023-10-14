@@ -6,6 +6,8 @@
 # General
 #     2023-Oct-12: add function sensor_spectrum! to compute the spectra at the sensor
 #     2023-Oct-14: do nothing if REF is not enabled
+#     2023-Oct-14: if SZA > 89, set all shortwave fluxes to 0 and reflectance to NaN
+#     2023-Oct-14: if LAI <= 0, use soil reflectance only
 #
 #######################################################################################################################################################################################################
 """
@@ -22,9 +24,27 @@ function reflection_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPA
         return nothing
     end;
 
-    # Run the canopy optical properties simulations only if canopy reflectance feature is enabled
     (; DIM_LAYER, DIM_WL) = config;
-    (; CANOPY, METEO) = spac;
+    (; CANOPY, METEO, SOIL_BULK) = spac;
+
+    if spac.CANOPY.sun_geometry.state.sza > 89
+        CANOPY.sensor_geometry.auxil.e_sensor_layer .= 0;
+        CANOPY.sensor_geometry.auxil.e_sensor .= 0;
+        CANOPY.sensor_geometry.auxil.reflectance .= NaN;
+
+        return nothing
+    end;
+
+    if spac.CANOPY.structure.state.lai <= 0
+        CANOPY.sensor_geometry.auxil.e_sensor_layer .= 0;
+        CANOPY.sensor_geometry.auxil.e_sensor_layer[:,end] .= view(CANOPY.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1);
+        CANOPY.sensor_geometry.auxil.e_sensor .= view(CANOPY.sun_geometry.auxil.e_difꜛ,:,DIM_LAYER+1) ./ FT(π);
+        CANOPY.sensor_geometry.auxil.reflectance .= SOIL_BULK.auxil.ρ_sw;
+
+        return nothing
+    end;
+
+    # Run the canopy optical properties simulations only if canopy reflectance feature is enabled
 
     # compute the spectra at the observer direction
     for i in 1:DIM_LAYER

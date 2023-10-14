@@ -73,6 +73,24 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     "Forward diffuse->diffuse scatter weight"
     ddf::FT = 0
 
+    # Scattering coefficients per leaf area
+    "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
+    ddb_leaf::Matrix{FT}
+    "Forward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
+    ddf_leaf::Matrix{FT}
+
+    # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
+    "Reflectance for diffuse->diffuse at each canopy layer"
+    ρ_dd_layer::Matrix{FT}
+    "Tranmittance for diffuse->diffuse at each canopy layer"
+    τ_dd_layer::Matrix{FT}
+
+    # Effective reflectance and tranmittance per canopy layer (including the denominator correction)
+    "Effective reflectance for diffuse->diffuse"
+    ρ_dd::Matrix{FT}
+    "Effective tranmittance for diffuse->diffuse"
+    τ_dd::Matrix{FT}
+
     # Longwave radiation coefficients (sun and sensor independent)
     "Effective emissivity for different layers"
     ϵ_lw_layer::Vector{FT}
@@ -104,6 +122,12 @@ end;
 
 CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructureAuxil{FT}(
             x_bnds     = zeros(FT, config.DIM_LAYER + 1),
+            ddb_leaf   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ddf_leaf   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ρ_dd_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            τ_dd_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ρ_dd       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
+            τ_dd       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ϵ_lw_layer = zeros(FT, config.DIM_LAYER),
             ρ_lw_layer = zeros(FT, config.DIM_LAYER),
             τ_lw_layer = zeros(FT, config.DIM_LAYER),

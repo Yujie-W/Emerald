@@ -44,11 +44,16 @@ import Emerald.EmeraldLand.SPAC
         config = NS.SPACConfiguration{Float64}();
         spac = NS.MultiLayerSPAC(config);
         SPAC.initialize!(config, spac);
+        CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
 
         @test 0 <= spac.CANOPY.structure.auxil.bf <= 1;
         @test spac.CANOPY.structure.auxil.ddb >= 0;
         @test spac.CANOPY.structure.auxil.ddf >= 0;
+        @test all(0 .< spac.CANOPY.structure.auxil.ρ_dd_layer .< 1);
+        @test all(0 .< spac.CANOPY.structure.auxil.τ_dd_layer .< 1);
+        @test all(0 .< spac.CANOPY.structure.auxil.ρ_dd .< 1);
+        @test all(0 .< spac.CANOPY.structure.auxil.τ_dd .< 1);
         @test all(0 .< spac.CANOPY.structure.auxil.ρ_lw_layer .< 1);
         @test all(0 .< spac.CANOPY.structure.auxil.τ_lw_layer .< 1);
         @test all(0 .< spac.CANOPY.structure.auxil.ϵ_lw_layer .< 1);
@@ -70,14 +75,10 @@ import Emerald.EmeraldLand.SPAC
         @test 0 < spac.CANOPY.structure.auxil.ci <= 1;
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.p_sunlit .< 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.ρ_sd_layer .< 1);
-        @test all(0 .< spac.CANOPY.sun_geometry.auxil.ρ_dd_layer .< 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.τ_ss_layer .< 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.τ_sd_layer .< 1);
-        @test all(0 .< spac.CANOPY.sun_geometry.auxil.τ_dd_layer .< 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.ρ_sd .< 1);
-        @test all(0 .< spac.CANOPY.sun_geometry.auxil.ρ_dd .< 1);
         @test all(0 .< spac.CANOPY.sun_geometry.auxil.τ_sd .< 1);
-        @test all(0 .< spac.CANOPY.sun_geometry.auxil.τ_dd .< 1);
     end;
 
     @testset "Canopy sensor geometry" begin
@@ -189,6 +190,92 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs_scattered .> 0);
         @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs_soil .> 0);
         @test all(spac.CANOPY.sensor_geometry.auxil.sif_obs .> 0);
+    end;
+
+    @testset "Canopy radiation" begin
+        config = NS.SPACConfiguration{Float64}();
+        spac = NS.MultiLayerSPAC(config);
+        SPAC.initialize!(config, spac);
+
+        # SZA < 90
+        spac.CANOPY.sun_geometry.state.sza = 30;
+        CO.canopy_radiation!(config, spac);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_dirꜜ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜜ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜛ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dir .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dif .> 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dir .> 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dif .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.r_net_sw .> 0);
+        @test all(spac.SOIL_BULK.auxil.r_net_sw .> 0);
+        for leaf in spac.LEAVES
+            @test all(leaf.flux.auxil.apar_shaded .> 0);
+            @test all(leaf.flux.auxil.apar_sunlit .> 0);
+            @test all(leaf.flux.auxil.ppar_shaded .> 0);
+            @test all(leaf.flux.auxil.ppar_sunlit .> 0);
+        end;
+        @test all(spac.CANOPY.structure.auxil.lw_layer .> 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜜ .> 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜛ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜜ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜛ .> 0);
+        @test all(!isnan, spac.CANOPY.structure.auxil.r_net_lw);
+        @test all(!isnan, spac.SOIL_BULK.auxil.r_net_lw);
+
+        # SZA > = 90
+        spac.CANOPY.sun_geometry.state.sza = 90;
+        CO.canopy_radiation!(config, spac);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_dirꜜ .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜜ .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜛ .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dir .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dif .== 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dir .== 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dif .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.r_net_sw .== 0);
+        @test all(spac.SOIL_BULK.auxil.r_net_sw .== 0);
+        for leaf in spac.LEAVES
+            @test all(leaf.flux.auxil.apar_shaded .== 0);
+            @test all(leaf.flux.auxil.apar_sunlit .== 0);
+            @test all(leaf.flux.auxil.ppar_shaded .== 0);
+            @test all(leaf.flux.auxil.ppar_sunlit .== 0);
+        end;
+        @test all(spac.CANOPY.structure.auxil.lw_layer .> 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜜ .> 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜛ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜜ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜛ .>= 0);
+        @test all(!isnan, spac.CANOPY.structure.auxil.r_net_lw);
+        @test all(!isnan, spac.SOIL_BULK.auxil.r_net_lw);
+
+        # LAI <= 0
+        spac.CANOPY.sun_geometry.state.sza = 30;
+        spac.CANOPY.structure.state.lai = 0;
+        CO.canopy_radiation!(config, spac);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_dirꜜ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜜ .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜛ[:,1:end-1] .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_difꜛ[:,end] .> 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dir .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.e_net_dif .== 0);
+        @test all(spac.CANOPY.sun_geometry.auxil.r_net_sw .== 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dir .> 0);
+        @test all(spac.SOIL_BULK.auxil.e_net_dif .> 0);
+        @test all(spac.SOIL_BULK.auxil.r_net_sw .> 0);
+        for leaf in spac.LEAVES
+            @test all(leaf.flux.auxil.apar_shaded .== 0);
+            @test all(leaf.flux.auxil.apar_sunlit .== 0);
+            @test all(leaf.flux.auxil.ppar_shaded .== 0);
+            @test all(leaf.flux.auxil.ppar_sunlit .== 0);
+        end;
+        @test all(spac.CANOPY.structure.auxil.lw_layer .== 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜜ .== 0);
+        @test all(spac.CANOPY.structure.auxil.emitꜛ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜜ .> 0);
+        @test all(spac.CANOPY.structure.auxil.lwꜛ .> 0);
+        @test all(spac.CANOPY.structure.auxil.r_net_lw .== 0);
+        @test all(!isnan, spac.SOIL_BULK.auxil.r_net_lw);
     end;
 
 end;

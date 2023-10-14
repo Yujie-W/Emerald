@@ -57,30 +57,30 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT} = (
 # General
 #     2022-Jun-02: generalize the function from CanopyLayers.dladgen to inclination_angles!
 #     2022-Jun-02: add method for VerhoefLIDF algorithm
-#     2023-May-22: add sypport to BetaLIDF
-#     2023-Jun-20: add config to parameter list
+#     2023-May-22: add support to BetaLIDF
+#     2023-Oct-14: if LAI <= 0, do nothing
 #
 #######################################################################################################################################################################################################
 """
 
-    inclination_angles!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT}
+    inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
 
 Update the frequency of leaf inclination angles, given
 - `config` SPAC configurations
-- `can` `MultiLayerCanopy` type multiple layer canopy
-- `lidf` `BetaLIDF` or `VerhoefLIDF` type algorithm
+- `spac` `MultiLayerSPAC` type multiple layer SPAC
 
 """
-function inclination_angles! end;
+function inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    if spac.CANOPY.structure.state.lai <= 0
+        return nothing
+    end;
 
-inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = inclination_angles!(config, spac.CANOPY, spac.CANOPY.structure.state.lidf);
-
-inclination_angles!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}}) where {FT} = (
     (; Θ_INCL_BNDS) = config;
+    (; CANOPY) = spac;
 
-    for i in eachindex(can.structure.state.p_incl)
-        can.structure.state.p_incl[i] = lidf_cdf(lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(lidf, Θ_INCL_BNDS[i,1]);
+    for i in eachindex(CANOPY.structure.state.p_incl)
+        CANOPY.structure.state.p_incl[i] = lidf_cdf(CANOPY.structure.state.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(CANOPY.structure.state.lidf, Θ_INCL_BNDS[i,1]);
     end;
 
     return nothing
-);
+end;

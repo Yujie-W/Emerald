@@ -44,7 +44,7 @@ Updates lower soil boundary reflectance, given
 """
 function soil_albedo!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; SPECTRA, α_CLM, α_FITTING) = config;
-    (; CANOPY, SOIL_BULK, SOILS) = spac;
+    (; SOIL_BULK, SOILS) = spac;
 
     @assert 1 <= SOIL_BULK.state.color <=20;
 

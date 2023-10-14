@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Oct-14: add function fluorescence_spectrum! (run per sensor geometry)
+#     2023-Oct-14: if LAI < = 0 or SZA > 89, set all fluxes to 0
 #
 #######################################################################################################################################################################################################
 """
@@ -21,9 +22,29 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerS
         return nothing
     end;
 
-    # run the fluorescence simulations only if fluorescence feature is enabled
-    (; DIM_AZI, DIM_LAYER, DIM_SIF, SPECTRA, Φ_PHOTON) = config;
     (; CANOPY, LEAVES) = spac;
+    if spac.CANOPY.sun_geometry.state.sza > 89 || spac.CANOPY.structure.state.lai <= 0
+        CANOPY.sun_geometry.auxil.e_sif_chl .= 0;
+        CANOPY.sun_geometry.auxil.e_sifꜜ_layer .= 0;
+        CANOPY.sun_geometry.auxil.e_sifꜛ_layer .= 0;
+        CANOPY.sun_geometry.auxil.e_sifꜜ_emit .= 0;
+        CANOPY.sun_geometry.auxil.e_sifꜛ_emit .= 0;
+        CANOPY.sun_geometry.auxil.e_sifꜜ .= 0;
+        CANOPY.sun_geometry.auxil.e_sifꜛ .= 0;
+        CANOPY.sensor_geometry.auxil.sif_sunlit .= 0;
+        CANOPY.sensor_geometry.auxil.sif_shaded .= 0;
+        CANOPY.sensor_geometry.auxil.sif_scattered .= 0;
+        CANOPY.sensor_geometry.auxil.sif_obs_sunlit .= 0;
+        CANOPY.sensor_geometry.auxil.sif_obs_shaded .= 0;
+        CANOPY.sensor_geometry.auxil.sif_obs_scattered .= 0;
+        CANOPY.sensor_geometry.auxil.sif_obs_ssoil .= 0;
+        CANOPY.sensor_geometry.auxil.sif_obs .= 0;
+
+        return nothing
+    end;
+
+    # run the fluorescence simulations only if fluorescence feature is enabled
+    (; DIM_AZI, DIM_LAYER, SPECTRA, Φ_PHOTON) = config;
 
     # 0. compute chloroplast SIF emissions for different layers
     for i in 1:DIM_LAYER
@@ -167,15 +188,15 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerS
     # 2. account for the SIF emission from bottom to up
     CANOPY.sun_geometry.auxil.e_sifꜛ_emit[:,end] .= 0;
     for i in DIM_LAYER:-1:1
-        r__ = view(CANOPY.sun_geometry.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );    # reflectance without correction
-        r_j = view(CANOPY.sun_geometry.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);    # reflectance of the upper boundary (i) for SIF
-        t_i = view(CANOPY.sun_geometry.auxil.τ_dd      ,SPECTRA.IΛ_SIF,i  );    # transmittance of the layer (i) for SIF
+        r__ = view(CANOPY.structure.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );   # reflectance without correction
+        r_j = view(CANOPY.structure.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);   # reflectance of the upper boundary (i) for SIF
+        t_i = view(CANOPY.structure.auxil.τ_dd      ,SPECTRA.IΛ_SIF,i  );   # transmittance of the layer (i) for SIF
 
-        f_d_i = view(CANOPY.sun_geometry.auxil.e_sifꜜ_layer,:,i  );             # downward emitted SIF from layer i
-        f_u_i = view(CANOPY.sun_geometry.auxil.e_sifꜛ_layer,:,i  );             # downward emitted SIF from layer i
-        s_u_j = view(CANOPY.sun_geometry.auxil.e_sifꜛ_emit ,:,i+1);             # upward SIF from the lower layer
-        s_d_i = view(CANOPY.sun_geometry.auxil.e_sifꜜ_emit ,:,i  );             # downward SIF from the layer
-        s_u_i = view(CANOPY.sun_geometry.auxil.e_sifꜛ_emit ,:,i  );             # upward SIF from the layer
+        f_d_i = view(CANOPY.sun_geometry.auxil.e_sifꜜ_layer,:,i  );         # downward emitted SIF from layer i
+        f_u_i = view(CANOPY.sun_geometry.auxil.e_sifꜛ_layer,:,i  );         # downward emitted SIF from layer i
+        s_u_j = view(CANOPY.sun_geometry.auxil.e_sifꜛ_emit ,:,i+1);         # upward SIF from the lower layer
+        s_d_i = view(CANOPY.sun_geometry.auxil.e_sifꜜ_emit ,:,i  );         # downward SIF from the layer
+        s_u_i = view(CANOPY.sun_geometry.auxil.e_sifꜛ_emit ,:,i  );         # upward SIF from the layer
 
         s_d_i .= (f_d_i .+ s_u_j .* r__) ./ (1 .- r__ .* r_j);
         s_u_i .= f_u_i .+ s_u_j .* t_i .+ s_d_i .* r_j .* t_i;
@@ -184,11 +205,11 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerS
     # 3. account for the SIF emission from up to bottom
     CANOPY.sun_geometry.auxil.e_sifꜜ[:,1] .= 0;
     for i in 1:DIM_LAYER
-        r_i = view(CANOPY.sun_geometry.auxil.ρ_dd,SPECTRA.IΛ_SIF,i);    # reflectance of the layer (i) for SIF
-        t_i = view(CANOPY.sun_geometry.auxil.τ_dd,SPECTRA.IΛ_SIF,i);    # transmittance of the layer (i) for SIF
+        r_i = view(CANOPY.structure.auxil.ρ_dd,SPECTRA.IΛ_SIF,i);   # reflectance of the layer (i) for SIF
+        t_i = view(CANOPY.structure.auxil.τ_dd,SPECTRA.IΛ_SIF,i);   # transmittance of the layer (i) for SIF
 
-        s_d_i = view(CANOPY.sun_geometry.auxil.e_sifꜜ_emit,:,i  );      # downward SIF from the layer
-        s_u_i = view(CANOPY.sun_geometry.auxil.e_sifꜛ_emit,:,i  );      # upward SIF from the layer
+        s_d_i = view(CANOPY.sun_geometry.auxil.e_sifꜜ_emit,:,i  );  # downward SIF from the layer
+        s_u_i = view(CANOPY.sun_geometry.auxil.e_sifꜛ_emit,:,i  );  # upward SIF from the layer
         a_d_i = view(CANOPY.sun_geometry.auxil.e_sifꜜ     ,:,i  );
         a_d_j = view(CANOPY.sun_geometry.auxil.e_sifꜜ     ,:,i+1);
         a_u_i = view(CANOPY.sun_geometry.auxil.e_sifꜛ     ,:,i  );
@@ -196,7 +217,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerS
         a_d_j .= a_d_i .* t_i .+ s_d_i;
         a_u_i .= a_d_i .* r_i .+ s_u_i;
     end;
-    CANOPY.sun_geometry.auxil.e_sifꜛ[:,end] .= view(CANOPY.sun_geometry.auxil.e_sifꜜ,:,DIM_LAYER+1) .* view(CANOPY.sun_geometry.auxil.ρ_dd,SPECTRA.IΛ_SIF,DIM_LAYER+1);
+    CANOPY.sun_geometry.auxil.e_sifꜛ[:,end] .= view(CANOPY.sun_geometry.auxil.e_sifꜜ,:,DIM_LAYER+1) .* view(CANOPY.structure.auxil.ρ_dd,SPECTRA.IΛ_SIF,DIM_LAYER+1);
     CANOPY.sensor_geometry.auxil.sif_scattered .= view(CANOPY.sensor_geometry.auxil.dob_leaf,SPECTRA.IΛ_SIF,:) .* view(CANOPY.sun_geometry.auxil.e_sifꜜ,:,1:DIM_LAYER) .+
                                                   view(CANOPY.sensor_geometry.auxil.dof_leaf,SPECTRA.IΛ_SIF,:) .* view(CANOPY.sun_geometry.auxil.e_sifꜛ,:,1:DIM_LAYER);
 

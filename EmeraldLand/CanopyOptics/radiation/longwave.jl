@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Oct-11: add function longwave_radiation!
+#     2023-Oct-14: if LAI <= 0, run soil longwave radiation only
 #
 #######################################################################################################################################################################################################
 """
@@ -19,6 +20,26 @@ Run longwave radiation simulations, given
 function longwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
     (; DIM_LAYER) = config;
     (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
+
+    if spac.CANOPY.structure.state.lai <= 0
+        # 1. compute longwave radiation out from the leaves and soil
+        CANOPY.structure.auxil.lw_layer .= 0;
+        r_lw_soil = K_STEFAN(FT) * (1 - SOIL_BULK.auxil.ρ_lw) * SOILS[1].auxil.t ^ 4;
+
+        # 2. account for the longwave emission from bottom to up
+        CANOPY.structure.auxil.emitꜜ .= 0;
+        CANOPY.structure.auxil.emitꜛ .= r_lw_soil;
+
+        # 3. account for the longwave emission from up to bottom
+        CANOPY.structure.auxil.lwꜜ .= METEO.rad_lw;
+        CANOPY.structure.auxil.lwꜛ .= METEO.rad_lw * SOIL_BULK.auxil.ρ_lw + r_lw_soil;
+
+        # 4. compute the net longwave radiation per canopy layer and soil
+        CANOPY.structure.auxil.r_net_lw .= 0;
+        SOIL_BULK.auxil.r_net_lw = METEO.rad_lw * (1 - SOIL_BULK.auxil.ρ_lw) - r_lw_soil;
+
+        return nothing
+    end;
 
     # 1. compute longwave radiation out from the leaves and soil
     for i in 1:DIM_LAYER
