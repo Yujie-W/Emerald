@@ -4,7 +4,7 @@ import Emerald.EmeraldLand.Photosynthesis as PS
 import Emerald.EmeraldLand.SPAC
 
 
-@testset verbose = true "Photosynthesis Model" begin
+@testset verbose = true "Photosynthesis.jl" begin
     @testset "Temperature dependencies" begin
         air = NS.AirLayer{Float64}();
         for ps in [NS.C3VJP{Float64}(), NS.C4VJP{Float64}(), NS.C3Cyto{Float64}()]

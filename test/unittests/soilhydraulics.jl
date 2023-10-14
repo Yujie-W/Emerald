@@ -5,7 +5,7 @@ import Emerald.EmeraldLand.PhysicalChemistry as PC
 import Emerald.EmeraldLand.SoilHydraulics as SH
 import Emerald.EmeraldLand.SPAC
 
-@testset verbose = true "Soil Hydraulics Model" begin
+@testset verbose = true "SoilHydraulics.jl" begin
     @testset "Vulnerability curves (k, ψ, θ)" begin
         for vc in [NS.BrooksCorey{Float64}(1), NS.VanGenuchten{Float64}("Loam")]
             θs = collect(Float64, vc.Θ_RES+eps():0.01:vc.Θ_SAT+0.02);

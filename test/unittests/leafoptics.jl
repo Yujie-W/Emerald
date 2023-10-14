@@ -3,7 +3,7 @@ import Emerald.EmeraldLand.LeafOptics as LO
 import Emerald.EmeraldLand.Namespace as NS
 
 
-@testset verbose = true "Leaf Optics Model" begin
+@testset verbose = true "LeafOptics.jl" begin
     @testset "Interface ρ and τ for direct radiation" begin
         n₁ = 1.0;
         n₂ = 1.33;

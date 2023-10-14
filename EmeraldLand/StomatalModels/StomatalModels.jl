@@ -12,8 +12,13 @@ using ..PlantHydraulics: ∂E∂P
 using ..SoilHydraulics: relative_soil_k
 
 
+# empirical models
+include("empirical/ballberry.jl");
+include("empirical/gentine.jl");
+include("empirical/leuning.jl");
+include("empirical/medlyn.jl");
+
 include("conductance.jl");
-include("empirical.jl");
 include("limits.jl");
 include("optimality.jl");
 

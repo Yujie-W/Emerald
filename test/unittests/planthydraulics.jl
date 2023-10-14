@@ -4,7 +4,7 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
 import Emerald.EmeraldLand.SPAC
 
 
-@testset verbose = true "Plant Hydraulics Model" begin
+@testset verbose = true "PlantHydraulics.jl" begin
     @testset "Vulnerability curves K(P)" begin
         for vc in [NS.ComplexVC{Float64}(), NS.LogisticVC{Float64}(), NS.PowerVC{Float64}(), NS.WeibullVC{Float64}()]
             ps = collect(Float64, 0:-0.1:-10);

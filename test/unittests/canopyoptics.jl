@@ -4,7 +4,7 @@ import Emerald.EmeraldLand.Namespace as NS
 import Emerald.EmeraldLand.SPAC
 
 
-@testset verbose = true "Canopy Optics Model" begin
+@testset verbose = true "CanopyOptics.jl" begin
     @testset "Canopy extinction coefficient" begin
         sza = 40.0;
         lias = collect(Float64, 0:5:90);

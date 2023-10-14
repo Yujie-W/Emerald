@@ -52,7 +52,7 @@ Base.@kwdef mutable struct AirLayerAuxil{FT}
     "CO₂ concentration `[ppm]`"
     f_CO₂::FT = 400
     "Partial pressures of CH₄, CO₂, H₂O, N₂, and O₂ `[Pa]`"
-    ps::Vector{FT} = FT[0, 0, 1500, 0, 0]
+    ps::Vector{FT} = FT[0, 40, 1500, 0, 0]
     "Temperature `[K]`"
     t::FT = T₂₅(FT)
     "Wind speed `[m s⁻¹]`"
