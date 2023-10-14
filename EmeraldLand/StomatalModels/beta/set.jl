@@ -1,3 +1,5 @@
+# This file contains function to set beta factor for the stomatal models
+
 #######################################################################################################################################################################################################
 #
 # Changes to this function
@@ -14,14 +16,6 @@
 #
 #######################################################################################################################################################################################################
 """
-This function updates the beta factor for SPAC if empirical models are used. The method is meant to support all SPAC defined in EmeraldNamespace.jl:
-- `MultiLayerSPAC`
-
-"""
-function β_factor! end;
-
-
-"""
 
     β_factor!(spac::MultiLayerSPAC{FT}) where {FT}
 
@@ -32,6 +26,8 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     root.
 
 """
+function β_factor! end;
+
 β_factor!(spac::MultiLayerSPAC{FT}) where {FT} = (
     (; LEAVES, ROOTS, SOILS) = spac;
 
@@ -50,9 +46,9 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
-    f_st = relative_surface_tension(leaf.t);
+    f_st = relative_surface_tension(leaf.energy.auxil.t);
 
-    β.β = β_factor(β.FUNC, leaf.HS.VC, leaf.HS._p_element[end] / f_st);
+    leaf.flux.auxil.β = β_factor(β.FUNC, leaf.xylem.state.vc, leaf.xylem.auxil.pressure[end] / f_st);
 
     return nothing
 );
@@ -63,10 +59,10 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].auxil.t);
-        beta = β_factor(β.FUNC, soils[i].state.vc, roots[i].HS.p_ups / f_st);
+        f_st = relative_surface_tension(roots[i].energy.auxil.t);
+        beta = β_factor(β.FUNC, soils[i].state.vc, soils[i].auxil.ψ / f_st);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
+        kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
@@ -75,20 +71,20 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
 
     if denom > 0
-        β.β = norm / denom;
+        leaf.flux.auxil.β = norm / denom;
     elseif sumf < 0
-        β.β = 1
+        leaf.flux.auxil.β = 1
     else
-        β.β = eps(FT);
+        leaf.flux.auxil.β = eps(FT);
     end;
 
     return nothing
 );
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
-    f_st = relative_surface_tension(leaf.t);
+    f_st = relative_surface_tension(leaf.energy.auxil.t);
 
-    β.β = β_factor(β.FUNC, leaf.HS._p_element[end] / f_st);
+    leaf.flux.auxil.β = β_factor(β.FUNC, leaf.xylem.auxil.pressure[end] / f_st);
 
     return nothing
 );
@@ -99,10 +95,10 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].auxil.t);
-        beta = β_factor(β.FUNC, roots[i].HS.p_ups / f_st);
+        f_st = relative_surface_tension(roots[i].energy.auxil.t);
+        beta = β_factor(β.FUNC, soils[i].auxil.ψ / f_st);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
+        kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
@@ -111,11 +107,11 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
 
     if denom > 0
-        β.β = norm / denom;
+        leaf.flux.auxil.β = norm / denom;
     elseif sumf < 0
-        β.β = 1
+        leaf.flux.auxil.β = 1
     else
-        β.β = eps(FT);
+        leaf.flux.auxil.β = eps(FT);
     end;
 
     return nothing
@@ -127,10 +123,10 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].auxil.t);
-        beta = β_factor(β.FUNC, soil_θ(soils[i].state.vc, roots[i].HS.p_ups / f_st));
+        f_st = relative_surface_tension(roots[i].energy.auxil.t);
+        beta = β_factor(β.FUNC, soil_θ(soils[i].state.vc, soils[i].state.θ / f_st));
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].HS.AREA * roots[i].HS.K_X / roots[i].HS.L : 0;
+        kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
@@ -139,11 +135,11 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
     @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
 
     if denom > 0
-        β.β = norm / denom;
+        leaf.flux.auxil.β = norm / denom;
     elseif sumf < 0
-        β.β = 1
+        leaf.flux.auxil.β = 1
     else
-        β.β = eps(FT);
+        leaf.flux.auxil.β = eps(FT);
     end;
 
     return nothing

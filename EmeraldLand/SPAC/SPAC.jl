@@ -13,9 +13,9 @@ using ..Namespace: JunctionCapacitor, Leaf, Root, SoilBulk, SoilLayer, Stem, Ref
 using ..Namespace: AirLayer, GCO₂Mode, MultiLayerCanopy, MultiLayerSPAC, SPACConfiguration, MultiLayerSPACState
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, read_β
+using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!
 using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25
-using ..StomatalModels: stomatal_conductance!, stomatal_conductance_profile!
+using ..StomatalModels: stomatal_conductance!, stomatal_conductance_profile!, read_β
 
 
 include("instructions/initialize.jl");

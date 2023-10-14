@@ -7,4 +7,5 @@ using Test
     include("unittests/photosynthesis.jl");
     include("unittests/planthydraulics.jl");
     include("unittests/soilhydraulics.jl");
+    include("unittests/stomatalmodels.jl");
 end;

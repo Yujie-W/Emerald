@@ -7,7 +7,6 @@ using ..EmeraldPhysics.Constant: GAS_R, ρg_MPa
 using ..Namespace: AbstractSoilVC
 using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, MedlynSM
 using ..Namespace: AbstractXylemVC, ComplexVC, LogisticVC, PowerVC, WeibullVC
-using ..Namespace: BetaFunction, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterΘ
 using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve
 
 using ..Namespace: ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState
@@ -54,11 +53,6 @@ include("plant/water_budget.jl");
 
 
 
-
-# include functions related to beta factor
-include("beta/model.jl");
-include("beta/read.jl");
-include("beta/set.jl");
 
 # include functions related to drought effects
 include("drought/disconnection.jl");
