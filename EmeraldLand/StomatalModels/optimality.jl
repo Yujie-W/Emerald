@@ -56,84 +56,8 @@ function ∂T∂E end;
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jul-07: migrate function from older version
-#     2022-Jul-11: add docs
-#
-#######################################################################################################################################################################################################
-"""
-This function returns the marginal risk for stomatal opening. This function supports a variety of optimality models for
-- Leaf
-- Leaf (ind=NA for shaded leaf, ind>1 for sunlit leaf)
-
-"""
-function ∂Θ∂E end;
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
-#     2022-Jul-11: add method for AndereggSM model on Leaf for shaded leaf
-#     2022-Jul-11: add method for EllerSM model on Leaf for shaded leaf
-#     2022-Jul-11: add method for SperrySM model on Leaf for shaded leaf
-#     2022-Jul-11: add method for WangSM model on Leaf for shaded leaf
-#     2022-Jul-11: add method for Wang2SM model on Leaf for shaded leaf
-#     2023-Jun-16: compute saturated vapor pressure based on water water potential
-#
-#######################################################################################################################################################################################################
-"""
-
-    ∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
-
-Return the marginal risk for stomatal opening, given
-- `sm` `AndereggSM`, `EllerSM`, `SperrySM`, `WangSM`, or `Wang2SM` type optimality model
-- `leaf` `Leaf` type struct
-- `air` `AirLayer` for environmental conditions
-- `δe` Incremental flow rate to compute ∂E∂P
-
-"""
-∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; A, B) = sm;
-    (; HS) = leaf;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_shaded;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
-
-    return (-2 * A * HS._p_element[end] + B) / _∂E∂P
-);
-
-∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaf;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_shaded;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
-    _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
-    _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
-
-    return _∂K∂E * leaf.flux.auxil.a_n_shaded / _∂E∂P_1
-);
 
 ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     (; HS) = leaf;
@@ -191,68 +115,7 @@ Return the marginal risk for stomatal opening, given
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
-#     2022-Jul-11: add method for AndereggSM model on Leaf for sunlit leaf
-#     2022-Jul-11: add method for EllerSM model on Leaf for sunlit leaf
-#     2022-Jul-11: add method for SperrySM model on Leaf for sunlit leaf
-#     2022-Jul-11: add method for WangSM model on Leaf for sunlit leaf
-#     2022-Jul-11: add method for Wang2SM model on Leaf for sunlit leaf
-#     2023-Mar-02: add a eps(FT) controller to (e_crit - e)
-#     2023-Jun-16: compute saturated vapor pressure based on water water potential
-#
-#######################################################################################################################################################################################################
-"""
 
-    ∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-    ∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT}
-
-Return the marginal risk for stomatal opening, given
-- `sm` `AndereggSM`, `EllerSM`, `SperrySM`, `WangSM`, or `Wang2SM` type optimality model
-- `leaf` `Leaf` type struct
-- `air` `AirLayer` for environmental conditions
-- `δe` Incremental flow rate to compute ∂E∂P
-
-"""
-∂Θ∂E(sm::AndereggSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    (; A, B) = sm;
-    (; HS) = leaf;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
-
-    return (-2 * A * HS._p_element[end] + B) / _∂E∂P
-);
-
-∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaf;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
-    _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
-    _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
-
-    return _∂K∂E * leaf.flux.auxil.a_n_sunlit[ind] / _∂E∂P_1
-);
 
 ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
     (; HS) = leaf;

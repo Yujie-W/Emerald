@@ -58,8 +58,5 @@ include("plant/water_budget.jl");
 include("drought/disconnection.jl");
 include("drought/legacy.jl");
 
-# include function related to stomtal optimality
-include("optimality/derivative.jl");
-
 
 end; # module

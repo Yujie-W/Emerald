@@ -123,4 +123,21 @@ import Emerald.EmeraldLand.SPAC
         @test SM.∂A∂E(leaf, air, 1) > 0;
     end;
 
+    @testset "∂Θ∂E" begin
+        config = NS.SPACConfiguration{Float64}();
+        leaf = NS.Leaf(config);
+        air = NS.AirLayer{Float64}();
+        leaf.flux.auxil.ppar_sunlit .= 100.0;
+        leaf.flux.auxil.ppar_shaded = 100.0;
+        leaf.flux.state.g_H₂O_s_shaded = 0.02;
+        leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
+        SM.stomatal_conductance_profile!(leaf);
+        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+
+        @test SM.∂Θ∂E(NS.AndereggSM{Float64}(), leaf, air) > 0;
+        @test SM.∂Θ∂E(NS.AndereggSM{Float64}(), leaf, air, 1) > 0;
+        @test SM.∂Θ∂E(NS.EllerSM{Float64}(), leaf, air) > 0;
+        @test SM.∂Θ∂E(NS.EllerSM{Float64}(), leaf, air, 1) > 0;
+    end;
+
 end;
