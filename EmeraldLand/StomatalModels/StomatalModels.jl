@@ -32,6 +32,9 @@ include("optimality/dedp.jl");
 
 include("optimality/anderegg.jl");
 include("optimality/eller.jl");
+include("optimality/sperry.jl");
+include("optimality/wang.jl");
+include("optimality/wang2.jl");
 
 
 

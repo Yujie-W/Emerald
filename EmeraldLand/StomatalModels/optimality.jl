@@ -59,118 +59,13 @@ function ∂T∂E end;
 
 
 
-∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaf;
-
-    _p_s = saturation_vapor_pressure(leaf.t, leaf.HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_shaded;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
-    _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
-    _∂E∂P_m = ∂E∂P(leaf, FT(0); δe = δe);
-    _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
-
-    # compute maximum A
-    _ghm = HS._e_crit / _d * air.state.p_air;
-    _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _gcm = 1 / (FT(1.6) / _gsm + 1 / leaf.flux.auxil.g_CO₂_b);
-    photosynthesis_only!(leaf.photosystem, air, _gcm, leaf.flux.auxil.ppar_shaded, leaf.t);
-    _am = leaf.photosystem.auxil.a_n;
-
-    return _∂K∂E * _am / _∂E∂P_m
-);
-
-∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    _p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the A and E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_shaded;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    return leaf.flux.auxil.a_n_shaded / max(eps(FT), (leaf.xylem.auxil.e_crit - _e))
-);
-
-∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    (; A) = sm;
-    (; HS) = leaf;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_shaded;
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
-
-    return (-1 * A * HS._p_element[end] * leaf.flux.auxil.a_n_shaded) / _∂E∂P
-);
 
 
 
 
-∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    (; HS) = leaf;
 
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
 
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
 
-    _∂E∂P_1 = ∂E∂P(leaf, _e; δe = δe);
-    _∂E∂P_2 = ∂E∂P(leaf, _e; δe = -δe);
-    _∂E∂P_m = ∂E∂P(leaf, FT(0); δe = δe);
-    _∂K∂E   = (_∂E∂P_2 - _∂E∂P_1) / δe;
-
-    # compute maximum A
-    _ghm = HS._e_crit / _d * air.state.p_air;
-    _gsm = 1 / (1 / _ghm - 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _gcm = 1 / (FT(1.6) / _gsm + 1 / leaf.flux.auxil.g_CO₂_b);
-    photosynthesis_only!(leaf.photosystem, air, _gcm, leaf.flux.auxil.ppar_sunlit[ind], leaf.t);
-    _am = leaf.photosystem.auxil.a_n;
-
-    return _∂K∂E * _am / _∂E∂P_m
-);
-
-∂Θ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    _p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the A and E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    return leaf.flux.auxil.a_n_sunlit[ind] / max(eps(FT), (leaf.xylem.auxil.e_crit - _e))
-);
-
-∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    (; A) = sm;
-    (; HS) = leaf;
-
-    _p_s = saturation_vapor_pressure(leaf.t, HS.p_leaf * 1000000);
-    _d = max(1, _p_s - air.auxil.ps[3]);
-
-    # compute the E at the current setting
-    _gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
-    _gh = 1 / (1 / _gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    _e  = _gh * _d / air.state.p_air;
-
-    _∂E∂P = ∂E∂P(leaf, _e; δe = δe);
-
-    return (-1 * A * HS._p_element[end] * leaf.flux.auxil.a_n_sunlit[ind]) / _∂E∂P
-);
 
 
 #######################################################################################################################################################################################################

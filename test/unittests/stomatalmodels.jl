@@ -1,6 +1,7 @@
 using Test
 import Emerald.EmeraldLand.Namespace as NS
 import Emerald.EmeraldLand.Photosynthesis as PS
+import Emerald.EmeraldLand.PlantHydraulics as PH
 import Emerald.EmeraldLand.StomatalModels as SM
 import Emerald.EmeraldLand.SPAC
 
@@ -133,11 +134,18 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
         SM.stomatal_conductance_profile!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PH.leaf_pressure_profile!(config, leaf, 0.0);
 
         @test SM.∂Θ∂E(NS.AndereggSM{Float64}(), leaf, air) > 0;
         @test SM.∂Θ∂E(NS.AndereggSM{Float64}(), leaf, air, 1) > 0;
         @test SM.∂Θ∂E(NS.EllerSM{Float64}(), leaf, air) > 0;
         @test SM.∂Θ∂E(NS.EllerSM{Float64}(), leaf, air, 1) > 0;
+        @test SM.∂Θ∂E(NS.SperrySM{Float64}(), leaf, air) > 0;
+        @test SM.∂Θ∂E(NS.SperrySM{Float64}(), leaf, air, 1) > 0;
+        @test SM.∂Θ∂E(NS.WangSM{Float64}(), leaf, air) > 0;
+        @test SM.∂Θ∂E(NS.WangSM{Float64}(), leaf, air, 1) > 0;
+        @test SM.∂Θ∂E(NS.Wang2SM{Float64}(), leaf, air) > 0;
+        @test SM.∂Θ∂E(NS.Wang2SM{Float64}(), leaf, air, 1) > 0;
     end;
 
 end;
