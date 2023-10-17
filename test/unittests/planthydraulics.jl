@@ -115,8 +115,8 @@ import Emerald.EmeraldLand.SPAC
         config2 = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
         leaf1 = NS.Leaf(config1);
         leaf2 = NS.Leaf(config2);
-        leaf1.xylem.state.k_max = 0.05;
-        leaf2.xylem.state.k_max = 0.05;
+        SPAC.initialize_struct!(leaf1);
+        SPAC.initialize_struct!(leaf2);
         PH.leaf_pressure_profile!(config1, leaf1, -0.1);
         PH.leaf_pressure_profile!(config2, leaf2, -0.1);
 

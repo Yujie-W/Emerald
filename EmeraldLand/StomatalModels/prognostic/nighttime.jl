@@ -27,7 +27,5 @@ function ∂gₙ∂t end;
     drde = ∂R∂E(leaf, air, eff_ϵ);
     dθde = ∂Θₙ∂E(leaf, air);
 
-    @show drde dθde;
-
     return max(-0.001, min(0.001, sm.K * (drde - dθde)))
 );

@@ -10,6 +10,7 @@
 #     2023-Sep-30: add buffer pressure and flow calculations
 #     2023-Oct-06: add soil auxiliary variable calculations
 #     2023-Oct-07: add soil bulk auxiliary variable calculations
+#     2023-Oct-16: add leaf stomatal conductance variables calculations
 #
 #######################################################################################################################################################################################################
 """
@@ -163,8 +164,17 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
         c_aux.flow = 0;
     end;
 
+    # update the stomatal conductance
+    leaf.flux.auxil.g_CO₂_shaded = 1 / (1 / leaf.flux.auxil.g_CO₂_b + FT(1.6) / leaf.flux.state.g_H₂O_s_shaded);
+    for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
+        leaf.flux.auxil.g_CO₂_sunlit[i] = 1 / (1 / leaf.flux.auxil.g_CO₂_b + FT(1.6) / leaf.flux.state.g_H₂O_s_sunlit[i]);
+    end;
+    limit_stomatal_conductance!(leaf);
+
     # clear the partial derivatives
     leaf.energy.auxil.∂e∂t = 0;
+    leaf.flux.auxil.∂g∂t_shaded = 0;
+    leaf.flux.auxil.∂g∂t_sunlit .= 0;
 
     return nothing
 );

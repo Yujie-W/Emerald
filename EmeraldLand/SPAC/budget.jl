@@ -200,7 +200,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
             end;
             plant_photosynthesis!(spac, GCO₂Mode());
             soil_profiles!(config, spac);
-            stomatal_conductance!(spac);
+            stomatal_conductance_profile!(spac);
             spac_energy_flow!(spac);
         else
             break;

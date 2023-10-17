@@ -62,7 +62,6 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     canopy_radiation!(config, spac);
 
     # 3. run photosynthesis model
-    stomatal_conductance_profile!(spac);
     plant_photosynthesis!(spac, GCO₂Mode());
 
     # save the result at this stage for the results at the beginning of this time step
@@ -71,7 +70,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT
     soil_profiles!(config, spac);
 
     # 6. run leaf stomatal conductance budget
-    stomatal_conductance!(spac);
+    stomatal_conductance_profile!(spac);
 
     # 7. run plant energy budget
     spac_energy_flow!(spac);
