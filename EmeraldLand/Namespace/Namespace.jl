@@ -92,6 +92,15 @@ include("environment/radiation.jl");
 include("environment/meteorology.jl");
 
 
+# SPAC
+include("spac/info.jl");
+include("spac/memory.jl");
+
+include("spac/plant.jl");
+
+include("spac/bulk.jl");
+
+
 
 
 
