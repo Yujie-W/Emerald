@@ -43,9 +43,11 @@ include("nighttime/dtde.jl");
 include("nighttime/wang.jl");
 
 
+# prognostic models
+include("prognostic/daytime.jl");
+include("prognostic/limits.jl");
 
 include("conductance.jl");
-include("limits.jl");
 
 
 end; # module

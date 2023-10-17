@@ -59,53 +59,15 @@ import Emerald.EmeraldLand.SPAC
         end;
 
         # BetaParameterKleaf
-        for leaf in spac.LEAVES
-            leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-            leaf.flux.state.stomatal_model.β.PARAM_X = NS.BetaParameterKleaf();
-        end;
-        SM.β_factor!(spac);
-        for leaf in spac.LEAVES
-            @test 0 < SM.read_β(leaf) <= 1;
-        end;
-
-        # BetaParameterKsoil
-        for leaf in spac.LEAVES
-            leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-            leaf.flux.state.stomatal_model.β.PARAM_X = NS.BetaParameterKsoil();
-        end;
-        SM.β_factor!(spac);
-        for leaf in spac.LEAVES
-            @test 0 < SM.read_β(leaf) <= 1;
-        end;
-
-        # BetaParameterPleaf
-        for leaf in spac.LEAVES
-            leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-            leaf.flux.state.stomatal_model.β.PARAM_X = NS.BetaParameterPleaf();
-        end;
-        SM.β_factor!(spac);
-        for leaf in spac.LEAVES
-            @test 0 < SM.read_β(leaf) <= 1;
-        end;
-
-        # BetaParameterPsoil
-        for leaf in spac.LEAVES
-            leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-            leaf.flux.state.stomatal_model.β.PARAM_X = NS.BetaParameterPsoil();
-        end;
-        SM.β_factor!(spac);
-        for leaf in spac.LEAVES
-            @test 0 < SM.read_β(leaf) <= 1;
-        end;
-
-        # BetaParameterΘ
-        for leaf in spac.LEAVES
-            leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-            leaf.flux.state.stomatal_model.β.PARAM_X = NS.BetaParameterΘ();
-        end;
-        SM.β_factor!(spac);
-        for leaf in spac.LEAVES
-            @test 0 < SM.read_β(leaf) <= 1;
+        for param_x in [NS.BetaParameterKleaf(), NS.BetaParameterKsoil(), NS.BetaParameterPleaf(), NS.BetaParameterPsoil(), NS.BetaParameterΘ()]
+            for leaf in spac.LEAVES
+                leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
+                leaf.flux.state.stomatal_model.β.PARAM_X = param_x;
+            end;
+            SM.β_factor!(spac);
+            for leaf in spac.LEAVES
+                @test 0 < SM.read_β(leaf) <= 1;
+            end;
         end;
     end;
 
@@ -136,16 +98,10 @@ import Emerald.EmeraldLand.SPAC
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, 0.0);
 
-        @test SM.∂Θ∂E(NS.AndereggSM{Float64}(), leaf, air) > 0;
-        @test SM.∂Θ∂E(NS.AndereggSM{Float64}(), leaf, air, 1) > 0;
-        @test SM.∂Θ∂E(NS.EllerSM{Float64}(), leaf, air) > 0;
-        @test SM.∂Θ∂E(NS.EllerSM{Float64}(), leaf, air, 1) > 0;
-        @test SM.∂Θ∂E(NS.SperrySM{Float64}(), leaf, air) > 0;
-        @test SM.∂Θ∂E(NS.SperrySM{Float64}(), leaf, air, 1) > 0;
-        @test SM.∂Θ∂E(NS.WangSM{Float64}(), leaf, air) > 0;
-        @test SM.∂Θ∂E(NS.WangSM{Float64}(), leaf, air, 1) > 0;
-        @test SM.∂Θ∂E(NS.Wang2SM{Float64}(), leaf, air) > 0;
-        @test SM.∂Θ∂E(NS.Wang2SM{Float64}(), leaf, air, 1) > 0;
+        for sm in [NS.AndereggSM{Float64}(), NS.EllerSM{Float64}(), NS.SperrySM{Float64}(), NS.WangSM{Float64}(), NS.Wang2SM{Float64}(), NS.BallBerrySM{Float64}()]
+            @test SM.∂Θ∂E(sm, leaf, air) > 0;
+            @test SM.∂Θ∂E(sm, leaf, air, 1) > 0;
+        end;
     end;
 
     @testset "Nighttime model" begin
@@ -162,6 +118,51 @@ import Emerald.EmeraldLand.SPAC
 
         @test SM.∂R∂E(leaf, air, 1.0) > 0;
         @test SM.∂Θₙ∂E(leaf, air) > 0;
+    end;
+
+    @testset "∂g∂t" begin
+        config = NS.SPACConfiguration{Float64}();
+        leaf = NS.Leaf(config);
+        air = NS.AirLayer{Float64}();
+        leaf.flux.state.g_H₂O_s_shaded = 0.001;
+        leaf.flux.state.g_H₂O_s_sunlit .= 0.001;
+        leaf.flux.auxil.ppar_sunlit .= 100;
+        leaf.flux.auxil.ppar_shaded = 100;
+        SM.stomatal_conductance_profile!(leaf);
+        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PH.leaf_pressure_profile!(config, leaf, 0.0);
+
+        for sm in [NS.AndereggSM{Float64}(), NS.EllerSM{Float64}(), NS.SperrySM{Float64}(), NS.WangSM{Float64}(), NS.Wang2SM{Float64}(), NS.BallBerrySM{Float64}()]
+            @test SM.∂g∂t(sm, leaf, air) > 0;
+            @test SM.∂g∂t(sm, leaf, air, 1) > 0;
+        end;
+
+        for sm in [NS.BallBerrySM{Float64}(), NS.GentineSM{Float64}(), NS.LeuningSM{Float64}(), NS.MedlynSM{Float64}()]
+            sm.β.PARAM_Y = NS.BetaParameterG1();
+            @test SM.∂g∂t(sm, leaf, air) > 0;
+            @test SM.∂g∂t(sm, leaf, air, 1) > 0;
+
+            sm.β.PARAM_Y = NS.BetaParameterVcmax();
+            @test SM.∂g∂t(sm, leaf, air) > 0;
+            @test SM.∂g∂t(sm, leaf, air, 1) > 0;
+        end;
+    end;
+
+    @testset "Stomatal limits" begin
+        config = NS.SPACConfiguration{Float64}();
+        leaf = NS.Leaf(config);
+
+        leaf.flux.state.g_H₂O_s_shaded = 0;
+        leaf.flux.state.g_H₂O_s_sunlit .= 0;
+        SM.limit_stomatal_conductance!(leaf);
+        @test leaf.flux.state.g_H₂O_s_shaded > 0;
+        @test all(leaf.flux.state.g_H₂O_s_sunlit .> 0);
+
+        leaf.flux.state.g_H₂O_s_shaded = 1;
+        leaf.flux.state.g_H₂O_s_sunlit .= 1;
+        SM.limit_stomatal_conductance!(leaf);
+        @test leaf.flux.state.g_H₂O_s_shaded < 1;
+        @test all(leaf.flux.state.g_H₂O_s_sunlit .< 1);
     end;
 
 end;
