@@ -12,7 +12,7 @@ using Test;
     # There are two ways to change leaf biophysical parameters.
     # The first method is to do it manually.
     # However, users need to run function leaf_spectra! to force the model update leaf level spectra.
-    for leaf in spac.LEAVES
+    for leaf in spac.plant.leaves
         leaf.bio.state.cab = 40;        # chlorophyll a and b content
         leaf.bio.state.car = 10;        # carotenoid content
         leaf.bio.state.cbc = 0.011;     # strutural carbon content

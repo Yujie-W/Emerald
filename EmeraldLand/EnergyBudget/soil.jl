@@ -19,44 +19,47 @@ Note that energy associated with water movement between soil and root is account
 
 """
 function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
-    (; AIRS, METEO, SOIL_BULK, SOILS) = spac;
+    air = spac.airs[1];
+    meteo = spac.meteo;
+    sbulk = spac.soil_bulk;
+    soils = spac.soils;
 
     # add rain and radiation energy into the first layer
-    SOILS[1].auxil.∂e∂t += METEO.rain * CP_L_MOL(FT) * METEO.t_precip;
-    SOILS[1].auxil.∂e∂t += SOIL_BULK.auxil.r_net_lw + SOIL_BULK.auxil.r_net_sw;
+    soils[1].auxil.∂e∂t += meteo.rain * CP_L_MOL(FT) * meteo.t_precip;
+    soils[1].auxil.∂e∂t += sbulk.auxil.r_net_lw + sbulk.auxil.r_net_sw;
 
     # water and energy exchange among layers
-    N = length(SOIL_BULK.auxil.q);
+    N = length(sbulk.auxil.q);
     for i in 1:N
-        SOILS[i  ].auxil.∂e∂t -= SOIL_BULK.auxil.q_layers[i];
-        SOILS[i+1].auxil.∂e∂t += SOIL_BULK.auxil.q_layers[i];
+        soils[i  ].auxil.∂e∂t -= sbulk.auxil.q_layers[i];
+        soils[i+1].auxil.∂e∂t += sbulk.auxil.q_layers[i];
 
         # if flow from upper to lower is positive, use temperature from upper layer; otherwise, use temperature from lower layer
-        t = SOIL_BULK.auxil.q[i] >= 0 ? SOILS[i].auxil.t : SOILS[i+1].auxil.t;
-        SOILS[i  ].auxil.∂e∂t -= SOIL_BULK.auxil.q[i] * CP_L_MOL(FT) * t;
-        SOILS[i+1].auxil.∂e∂t += SOIL_BULK.auxil.q[i] * CP_L_MOL(FT) * t;
+        t = sbulk.auxil.q[i] >= 0 ? soils[i].auxil.t : soils[i+1].auxil.t;
+        soils[i  ].auxil.∂e∂t -= sbulk.auxil.q[i] * CP_L_MOL(FT) * t;
+        soils[i+1].auxil.∂e∂t += sbulk.auxil.q[i] * CP_L_MOL(FT) * t;
     end;
 
     # energy transfer related to gas diffusion (CH₄, CO₂, H₂O, N₂, O₂)
     # update the energy for diffusion from top soil to the first air layer
-    δn1 = SOIL_BULK.auxil.dndt[1,3];
-    δn4 = SOIL_BULK.auxil.dndt[1,1] + SOIL_BULK.auxil.dndt[1,2] + SOIL_BULK.auxil.dndt[1,4] + SOIL_BULK.auxil.dndt[1,5];
-    t = δn1 > 0 ? SOILS[1].auxil.t : AIRS[1].auxil.t;
-    SOILS[1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * t;
-    t = δn4 > 0 ? SOILS[1].auxil.t : AIRS[1].auxil.t;
-    SOILS[1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * t;
+    δn1 = sbulk.auxil.dndt[1,3];
+    δn4 = sbulk.auxil.dndt[1,1] + sbulk.auxil.dndt[1,2] + sbulk.auxil.dndt[1,4] + sbulk.auxil.dndt[1,5];
+    t = δn1 > 0 ? soils[1].auxil.t : air.auxil.t;
+    soils[1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * t;
+    t = δn4 > 0 ? soils[1].auxil.t : air.auxil.t;
+    soils[1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * t;
 
     # update the diffusion among soil layers
-    N = length(SOIL_BULK.auxil.q);
+    N = length(sbulk.auxil.q);
     for i in 1:N
-        δn1 = SOIL_BULK.auxil.dndt[i+1,3];
-        δn4 = SOIL_BULK.auxil.dndt[i+1,1] + SOIL_BULK.auxil.dndt[i+1,2] + SOIL_BULK.auxil.dndt[i+1,4] + SOIL_BULK.auxil.dndt[i+1,5];
-        t = δn1 > 0 ? SOILS[i+1].auxil.t : SOILS[i].auxil.t;
-        SOILS[i  ].auxil.∂e∂t += δn1 * CP_V_MOL(FT) * t;
-        SOILS[i+1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * t;
-        t = δn4 > 0 ? SOILS[i+1].auxil.t : SOILS[i].auxil.t;
-        SOILS[i  ].auxil.∂e∂t += δn4 * CP_D_MOL(FT) * t;
-        SOILS[i+1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * t;
+        δn1 = sbulk.auxil.dndt[i+1,3];
+        δn4 = sbulk.auxil.dndt[i+1,1] + sbulk.auxil.dndt[i+1,2] + sbulk.auxil.dndt[i+1,4] + sbulk.auxil.dndt[i+1,5];
+        t = δn1 > 0 ? soils[i+1].auxil.t : soils[i].auxil.t;
+        soils[i  ].auxil.∂e∂t += δn1 * CP_V_MOL(FT) * t;
+        soils[i+1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * t;
+        t = δn4 > 0 ? soils[i+1].auxil.t : soils[i].auxil.t;
+        soils[i  ].auxil.∂e∂t += δn4 * CP_D_MOL(FT) * t;
+        soils[i+1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * t;
     end;
 
     return nothing

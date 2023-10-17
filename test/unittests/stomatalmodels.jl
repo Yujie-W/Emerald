@@ -47,23 +47,23 @@ import Emerald.EmeraldLand.SPAC
 
         # the function does not for optimality models
         SM.β_factor!(spac);
-        for leaf in spac.LEAVES
+        for leaf in spac.plant.leaves
             @test isnan(SM.read_β(leaf));
         end;
 
         # the function will set up the beta factor for empirical models
-        for root in spac.ROOTS
+        for root in spac.plant.roots
             root.xylem.auxil.flow = 1.0;
         end;
 
         # BetaParameterKleaf
         for param_x in [NS.BetaParameterKleaf(), NS.BetaParameterKsoil(), NS.BetaParameterPleaf(), NS.BetaParameterPsoil(), NS.BetaParameterΘ()]
-            for leaf in spac.LEAVES
+            for leaf in spac.plant.leaves
                 leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
                 leaf.flux.state.stomatal_model.β.PARAM_X = param_x;
             end;
             SM.β_factor!(spac);
-            for leaf in spac.LEAVES
+            for leaf in spac.plant.leaves
                 @test 0 < SM.read_β(leaf) <= 1;
             end;
         end;
@@ -184,7 +184,7 @@ import Emerald.EmeraldLand.SPAC
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
-        for leaf in spac.LEAVES
+        for leaf in spac.plant.leaves
             leaf.flux.auxil.ppar_shaded = 100.0;
             leaf.flux.auxil.ppar_sunlit .= 200.0;
             leaf.flux.state.g_H₂O_s_shaded = 0;
@@ -193,7 +193,7 @@ import Emerald.EmeraldLand.SPAC
         end;
         SM.stomatal_conductance_profile!(spac);
 
-        for leaf in spac.LEAVES
+        for leaf in spac.plant.leaves
             @test leaf.flux.auxil.∂g∂t_shaded > 0;
             @test all(leaf.flux.auxil.∂g∂t_sunlit .> 0);
         end;
@@ -205,7 +205,7 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize!(config, spac);
         g_shaded = [];
         g_sunlit = [];
-        for leaf in spac.LEAVES
+        for leaf in spac.plant.leaves
             leaf.flux.auxil.ppar_shaded = 100.0;
             leaf.flux.auxil.ppar_sunlit .= 200.0;
             leaf.flux.state.g_H₂O_s_shaded = 0;
@@ -217,8 +217,8 @@ import Emerald.EmeraldLand.SPAC
         SM.stomatal_conductance_profile!(spac);
         SM.stomatal_conductance!(spac, 1.0);
 
-        for i in eachindex(spac.LEAVES)
-            leaf = spac.LEAVES[i];
+        for i in eachindex(spac.plant.leaves)
+            leaf = spac.plant.leaves[i];
             @test leaf.flux.auxil.∂g∂t_shaded > 0;
             @test all(leaf.flux.auxil.∂g∂t_sunlit .> 0);
 

@@ -137,16 +137,23 @@ update!(config::SPACConfiguration{FT},
         vcmax_expo::Union{Number,Nothing} = nothing
 ) where {FT} = (
     (; DIM_LAYER, T_CLM) = config;
-    (; AIRS, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL_BULK, SOILS, TRUNK) = spac;
+    airs = spac.airs;
+    branches = spac.plant.branches;
+    can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
+    roots = spac.plant.roots;
+    sbulk = spac.soil_bulk;
+    soils = spac.soils;
+    trunk = spac.plant.trunk;
 
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
-        for leaf in LEAVES
+        for leaf in leaves
             leaf.bio.state.cab = cab;
         end;
     end;
     if !isnothing(car)
-        for leaf in LEAVES
+        for leaf in leaves
             leaf.bio.state.car = car;
         end;
     end;
@@ -156,42 +163,42 @@ update!(config::SPACConfiguration{FT},
 
     # update LAI and Vcmax (with scaling factor)
     if !isnothing(lai)
-        CANOPY.structure.state.lai = lai;
-        CANOPY.structure.state.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
-        CANOPY.structure.auxil.x_bnds = (lai == 0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(CANOPY.structure.state.δlai[1:i]) for i in 1:DIM_LAYER]] ./ -lai));
+        can_str.state.lai = lai;
+        can_str.state.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
+        can_str.auxil.x_bnds = (lai == 0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(can_str.state.δlai[1:i]) for i in 1:DIM_LAYER]] ./ -lai));
         for i in 1:DIM_LAYER
-            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.structure.state.δlai[i];
+            leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
         end;
 
         # make sure leaf area index setup and energy are correct
-        for i in eachindex(LEAVES)
-            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.structure.state.δlai[i];
-            initialize_struct!(LEAVES[i]);
+        for i in eachindex(leaves)
+            leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
+            initialize_struct!(leaves[i]);
         end;
     end;
     if !isnothing(vcmax)
-        LEAVES[1].photosystem.state.v_cmax25 = vcmax;
+        leaves[1].photosystem.state.v_cmax25 = vcmax;
     end;
     if !isnothing(vcmax) || !isnothing(lai)
         for i in 2:DIM_LAYER
-            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(CANOPY.structure.state.δlai[1:i-1]));
-            LEAVES[i].photosystem.state.v_cmax25 = LEAVES[1].photosystem.state.v_cmax25 * _scaling;
-            LEAVES[i].photosystem.state.j_max25 = LEAVES[1].photosystem.state.v_cmax25 * 1.67 * _scaling;
-            LEAVES[i].photosystem.state.r_d25 = LEAVES[1].photosystem.state.v_cmax25 * 0.015 * _scaling;
-            LEAVES[i].photosystem.auxil._t = 0;
+            _scaling = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.state.δlai[1:i-1]));
+            leaves[i].photosystem.state.v_cmax25 = leaves[1].photosystem.state.v_cmax25 * _scaling;
+            leaves[i].photosystem.state.j_max25 = leaves[1].photosystem.state.v_cmax25 * 1.67 * _scaling;
+            leaves[i].photosystem.state.r_d25 = leaves[1].photosystem.state.v_cmax25 * 0.015 * _scaling;
+            leaves[i].photosystem.auxil._t = 0;
         end;
     end;
 
     # update CI
     if !isnothing(ci)
-        CANOPY.structure.auxil.ci = ci;
-        CANOPY.structure.state.Ω_A = ci;
-        CANOPY.structure.state.Ω_B = 0;
+        can_str.auxil.ci = ci;
+        can_str.state.Ω_A = ci;
+        can_str.state.Ω_B = 0;
     end;
 
     # update Vcmax and Jmax TD
     if !isnothing(t_clm)
-        for leaf in LEAVES
+        for leaf in leaves
             if T_CLM
                 leaf.photosystem.state.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
                 leaf.photosystem.state.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
@@ -203,7 +210,7 @@ update!(config::SPACConfiguration{FT},
     if !isnothing(kmax)
         # set up the kmax assuming 50% resistance in root, 25% in stem, and 25% in leaves
         _ks = if kmax isa Number
-            _trunk_percent = TRUNK.HS.ΔH / (TRUNK.HS.ΔH + BRANCHES[end].HS.ΔH);
+            _trunk_percent = trunk.HS.ΔH / (trunk.HS.ΔH + branches[end].HS.ΔH);
             (2 * kmax, 4 * kmax / _trunk_percent, 4 * kmax / (1 - _trunk_percent), 4 * kmax)
         else
             @assert length(kmax) == 4 "kmax must be a number or a tuple of length 4";
@@ -211,46 +218,46 @@ update!(config::SPACConfiguration{FT},
         end;
 
         # partition kmax into the roots based on xylem area
-        for _ilayer in ROOTS
-            _ilayer.HS.K_X = _ilayer.HS.AREA / TRUNK.HS.AREA * _ks[1] * _ilayer.HS.L / _ilayer.HS.AREA;
+        for _ilayer in roots
+            _ilayer.HS.K_X = _ilayer.HS.AREA / trunk.HS.AREA * _ks[1] * _ilayer.HS.L / _ilayer.HS.AREA;
         end;
-        TRUNK.HS.K_X = _ks[2] * TRUNK.HS.L / TRUNK.HS.AREA;
-        for _ilayer in BRANCHES
-            _ilayer.HS.K_X = _ilayer.HS.AREA / TRUNK.HS.AREA * _ks[3] * _ilayer.HS.L / _ilayer.HS.AREA;
+        trunk.HS.K_X = _ks[2] * trunk.HS.L / trunk.HS.AREA;
+        for _ilayer in branches
+            _ilayer.HS.K_X = _ilayer.HS.AREA / trunk.HS.AREA * _ks[3] * _ilayer.HS.L / _ilayer.HS.AREA;
         end;
-        for _ilayer in LEAVES
-            _ilayer.HS.K_SLA = _ks[4] / (CANOPY.structure.state.lai * SOIL_BULK.state.area);
+        for _ilayer in leaves
+            _ilayer.HS.K_SLA = _ks[4] / (can_str.state.lai * sbulk.state.area);
         end;
     end;
 
     # prescribe soil water content (within [Θ_RES,Θ_SAT])
     if !isnothing(swcs)
         for i in eachindex(swcs)
-            SOILS[i].state.θ = max(SOILS[i].state.vc.Θ_RES + eps(FT), min(SOILS[i].state.vc.Θ_SAT - eps(FT), swcs[i]));
-            initialize_struct!(SOILS[i], AIRS[1]);
+            soils[i].state.θ = max(soils[i].state.vc.Θ_RES + eps(FT), min(soils[i].state.vc.Θ_SAT - eps(FT), swcs[i]));
+            initialize_struct!(soils[i], airs[1]);
         end;
     end;
 
     # prescribe soil temperature
     if !isnothing(t_soils)
         for i in eachindex(t_soils)
-            SOILS[i].auxil.t = t_soils[i];
-            initialize_struct!(SOILS[i], AIRS[1]);
+            soils[i].auxil.t = t_soils[i];
+            initialize_struct!(soils[i], airs[1]);
         end;
     end;
 
     # prescribe leaf temperature
     if !isnothing(t_leaf)
-        for leaf in LEAVES
+        for leaf in leaves
             leaf.energy.auxil.t = t_leaf;
             leaf.energy.auxil.cp = heat_capacitance(leaf);
             leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
         end;
 
         # make sure leaf area index setup and energy are correct
-        for i in eachindex(LEAVES)
-            LEAVES[i].xylem.state.area = SOIL_BULK.state.area * CANOPY.structure.state.δlai[i];
-            initialize_struct!(LEAVES[i]);
+        for i in eachindex(leaves)
+            leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
+            initialize_struct!(leaves[i]);
         end;
     end;
 

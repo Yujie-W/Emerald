@@ -22,7 +22,28 @@ Clear the legacy for hydraulic organ or system, given
 """
 function clear_legacy! end;
 
-clear_legacy!(spac::BulkSPAC{FT}) where {FT} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
+clear_legacy!(spac::BulkSPAC{FT}) where {FT} = (
+    roots = spac.plant.roots;
+    trunk = spac.plant.trunk;
+    branches = spac.plant.branches;
+    leaves = spac.plant.leaves;
+
+    for root in roots
+        clear_legacy!(root);
+    end;
+
+    clear_legacy!(trunk);
+
+    for stem in branches
+        clear_legacy!(stem);
+    end;
+
+    for leaf in leaves
+        clear_legacy!(leaf);
+    end;
+
+    return nothing
+);
 
 clear_legacy!(organ::Union{Leaf{FT}, Root{FT}, Stem{FT}}) where {FT} = clear_legacy!(organ.xylem);
 

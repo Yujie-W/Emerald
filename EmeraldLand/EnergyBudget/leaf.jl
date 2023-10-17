@@ -16,18 +16,22 @@ Calculate the energy flows of the leaf, given
 
 """
 function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
-    (; AIRS, BRANCHES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
+    branches = spac.plant.branches;
+    airs = spac.airs;
+    leaves = spac.plant.leaves;
+    lindex = spac.plant.leaves_index;
+    canopy = spac.canopy;
     # the total energy change of the leaf is the sum of
     #     the energy of the flow from the stem
     #     the energy of the flow from the air
     #     the sensible heat from the air
     #     the net radiation energy from shortwave and longwave radiation
 
-    N = length(BRANCHES)
-    for i in eachindex(BRANCHES)
-        stem = BRANCHES[i];
-        leaf = LEAVES[i];
-        air = AIRS[LEAVES_INDEX[i]];
+    N = length(branches)
+    for i in eachindex(branches)
+        stem = branches[i];
+        leaf = leaves[i];
+        air = airs[lindex[i]];
 
         # if flow in is positive, then energy flow is positive for leaf
         f_i = flow_in(leaf);
@@ -50,11 +54,11 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         end;
 
         # add the sensible heat flux from the leaf to air (to total leaf area)
-        g_be = FT(1.4) * FT(0.135) * sqrt(AIRS[LEAVES_INDEX[i]].auxil.wind / (FT(0.72) * LEAVES[i].bio.state.width));
+        g_be = FT(1.4) * FT(0.135) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.state.width));
         leaf.energy.auxil.∂e∂t -= 2 * g_be * CP_D_MOL(FT) * (leaf.energy.auxil.t - air.auxil.t) * leaf.xylem.state.area;
 
         # add the net radiation energy to the leaf (to total leaf area)
-        leaf.energy.auxil.∂e∂t += (CANOPY.sun_geometry.auxil.r_net_sw[N+1-i] + CANOPY.structure.auxil.r_net_lw[N+1-i]) / CANOPY.structure.state.δlai[N+1-i] * leaf.xylem.state.area;
+        leaf.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw[N+1-i] + canopy.structure.auxil.r_net_lw[N+1-i]) / canopy.structure.state.δlai[N+1-i] * leaf.xylem.state.area;
     end;
 
     return nothing

@@ -50,10 +50,13 @@ Set up root pressure profile for each root, given
 
 """
 function root_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
-    (; JUNCTION, ROOTS, ROOTS_INDEX, SOILS) = spac;
+    soils = spac.soils;
+    roots = spac.plant.roots;
+    rindx = spac.plant.roots_index;
+    junction = spac.plant.junction;
 
-    for i in eachindex(ROOTS)
-        root_pressure_profile!(SOILS[ROOTS_INDEX[i]], ROOTS[i], JUNCTION);
+    for i in eachindex(roots)
+        root_pressure_profile!(soils[rindx[i]], roots[i], junction);
     end;
 
     return nothing

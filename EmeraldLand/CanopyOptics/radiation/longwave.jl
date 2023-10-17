@@ -19,65 +19,69 @@ Run longwave radiation simulations, given
 """
 function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; DIM_LAYER) = config;
-    (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
+    can_struct = spac.canopy.structure;
+    leaves = spac.plant.leaves;
+    meteo = spac.meteo;
+    soil_bulk = spac.soil_bulk;
+    top_soil = spac.soils[1];
 
-    if spac.CANOPY.structure.state.lai <= 0
+    if can_struct.state.lai <= 0
         # 1. compute longwave radiation out from the leaves and soil
-        CANOPY.structure.auxil.lw_layer .= 0;
-        r_lw_soil = K_STEFAN(FT) * (1 - SOIL_BULK.auxil.ρ_lw) * SOILS[1].auxil.t ^ 4;
+        can_struct.auxil.lw_layer .= 0;
+        r_lw_soil = K_STEFAN(FT) * (1 - soil_bulk.auxil.ρ_lw) * top_soil.auxil.t ^ 4;
 
         # 2. account for the longwave emission from bottom to up
-        CANOPY.structure.auxil.emitꜜ .= 0;
-        CANOPY.structure.auxil.emitꜛ .= r_lw_soil;
+        can_struct.auxil.emitꜜ .= 0;
+        can_struct.auxil.emitꜛ .= r_lw_soil;
 
         # 3. account for the longwave emission from up to bottom
-        CANOPY.structure.auxil.lwꜜ .= METEO.rad_lw;
-        CANOPY.structure.auxil.lwꜛ .= METEO.rad_lw * SOIL_BULK.auxil.ρ_lw + r_lw_soil;
+        can_struct.auxil.lwꜜ .= meteo.rad_lw;
+        can_struct.auxil.lwꜛ .= meteo.rad_lw * soil_bulk.auxil.ρ_lw + r_lw_soil;
 
         # 4. compute the net longwave radiation per canopy layer and soil
-        CANOPY.structure.auxil.r_net_lw .= 0;
-        SOIL_BULK.auxil.r_net_lw = METEO.rad_lw * (1 - SOIL_BULK.auxil.ρ_lw) - r_lw_soil;
+        can_struct.auxil.r_net_lw .= 0;
+        soil_bulk.auxil.r_net_lw = meteo.rad_lw * (1 - soil_bulk.auxil.ρ_lw) - r_lw_soil;
 
         return nothing
     end;
 
     # 1. compute longwave radiation out from the leaves and soil
     for i in 1:DIM_LAYER
-        j = DIM_LAYER + 1 - i;
-        CANOPY.structure.auxil.lw_layer[i] = K_STEFAN(FT) * CANOPY.structure.auxil.ϵ_lw_layer[i] * LEAVES[j].energy.auxil.t ^ 4;
+        leaf = leaves[DIM_LAYER + 1 - i];
+        can_struct.auxil.lw_layer[i] = K_STEFAN(FT) * can_struct.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
     end;
-    r_lw_soil = K_STEFAN(FT) * (1 - SOIL_BULK.auxil.ρ_lw) * SOILS[1].auxil.t ^ 4;
+    r_lw_soil = K_STEFAN(FT) * (1 - soil_bulk.auxil.ρ_lw) * top_soil.auxil.t ^ 4;
 
     # 2. account for the longwave emission from bottom to up
-    CANOPY.structure.auxil.emitꜛ[end] = r_lw_soil;
+    can_struct.auxil.emitꜛ[end] = r_lw_soil;
     for i in DIM_LAYER:-1:1
-        r = CANOPY.structure.auxil.ρ_lw_layer[i];
-        t = CANOPY.structure.auxil.τ_lw_layer[i];
-        r_j = CANOPY.structure.auxil.ρ_lw[i+1];
+        r = can_struct.auxil.ρ_lw_layer[i];
+        t = can_struct.auxil.τ_lw_layer[i];
+        r_j = can_struct.auxil.ρ_lw[i+1];
 
         denom = 1 - r * r_j;
-        CANOPY.structure.auxil.emitꜜ[i] = (CANOPY.structure.auxil.emitꜛ[i+1] * r + CANOPY.structure.auxil.lw_layer[i]) / denom;
-        CANOPY.structure.auxil.emitꜛ[i] = (CANOPY.structure.auxil.emitꜜ[i] * r_j * t + CANOPY.structure.auxil.emitꜛ[i+1] * t) / denom + CANOPY.structure.auxil.lw_layer[i];
+        can_struct.auxil.emitꜜ[i] = (can_struct.auxil.emitꜛ[i+1] * r + can_struct.auxil.lw_layer[i]) / denom;
+        can_struct.auxil.emitꜛ[i] = (can_struct.auxil.emitꜜ[i] * r_j * t + can_struct.auxil.emitꜛ[i+1] * t) / denom + can_struct.auxil.lw_layer[i];
     end;
 
     # 3. account for the longwave emission from up to bottom
-    CANOPY.structure.auxil.lwꜜ[1] = METEO.rad_lw;
+    can_struct.auxil.lwꜜ[1] = meteo.rad_lw;
     for i in 1:DIM_LAYER
-        r_i = CANOPY.structure.auxil.ρ_lw[i];
-        t_i = CANOPY.structure.auxil.τ_lw[i];
+        r_i = can_struct.auxil.ρ_lw[i];
+        t_i = can_struct.auxil.τ_lw[i];
 
-        CANOPY.structure.auxil.lwꜛ[i] = CANOPY.structure.auxil.lwꜜ[i] * r_i + CANOPY.structure.auxil.emitꜛ[i];
-        CANOPY.structure.auxil.lwꜜ[i+1] = CANOPY.structure.auxil.lwꜜ[i] * t_i + CANOPY.structure.auxil.emitꜜ[i];
+        can_struct.auxil.lwꜛ[i] = can_struct.auxil.lwꜜ[i] * r_i + can_struct.auxil.emitꜛ[i];
+        can_struct.auxil.lwꜜ[i+1] = can_struct.auxil.lwꜜ[i] * t_i + can_struct.auxil.emitꜜ[i];
     end;
-    CANOPY.structure.auxil.lwꜛ[end] = CANOPY.structure.auxil.lwꜜ[end] * SOIL_BULK.auxil.ρ_lw + r_lw_soil;
+    can_struct.auxil.lwꜛ[end] = can_struct.auxil.lwꜜ[end] * soil_bulk.auxil.ρ_lw + r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
     for i in 1:DIM_LAYER
-        CANOPY.structure.auxil.r_net_lw[i] = (CANOPY.structure.auxil.lwꜜ[i] + CANOPY.structure.auxil.lwꜛ[i+1]) * CANOPY.structure.auxil.ϵ_lw_layer[i] - 2 * CANOPY.structure.auxil.lw_layer[i];
-        CANOPY.structure.auxil.r_net_lw[i] /= CANOPY.structure.state.δlai[i];
+        can_struct.auxil.r_net_lw[i] = (can_struct.auxil.lwꜜ[i] + can_struct.auxil.lwꜛ[i+1]) * can_struct.auxil.ϵ_lw_layer[i] - 2 * can_struct.auxil.lw_layer[i];
+        can_struct.auxil.r_net_lw[i] /= can_struct.state.δlai[i];
     end;
 
-    SOIL_BULK.auxil.r_net_lw = CANOPY.structure.auxil.lwꜜ[end] * (1 - SOIL_BULK.auxil.ρ_lw) - r_lw_soil;
+    soil_bulk.auxil.r_net_lw = can_struct.auxil.lwꜜ[end] * (1 - soil_bulk.auxil.ρ_lw) - r_lw_soil;
 
     return nothing
 end;

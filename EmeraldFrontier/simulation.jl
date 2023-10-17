@@ -41,10 +41,10 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     _df_wnd::FT = dfr.WIND;
 
     # adjust optimum t based on 10 day moving average skin temperature
-    _tleaf = nanmean([_layer.energy.auxil.t for _layer in spac.LEAVES]);
-    push!(spac.MEMORY.tem, _tleaf);
-    if length(spac.MEMORY.tem) > 240 deleteat!(spac.MEMORY.tem,1) end;
-    update!(config, spac; t_clm = nanmean(spac.MEMORY.tem));
+    _tleaf = nanmean([_layer.energy.auxil.t for _layer in spac.plant.leaves]);
+    push!(spac.plant.memory.state.t_history, _tleaf);
+    if length(spac.plant.memory.state.t_history) > 240 deleteat!(spac.plant.memory.state.t_history,1) end;
+    update!(config, spac; t_clm = nanmean(spac.plant.memory.state.t_history));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
     if !t_on
@@ -64,33 +64,33 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     end;
 
     # prescribe the precipitation related parameters
-    spac.METEO.rain = _df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
-    spac.METEO.t_precip = _df_tar;
+    spac.meteo.rain = _df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
+    spac.meteo.t_precip = _df_tar;
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
-    _trigger_lai::Bool = !isnan(_df_lai) && (_df_lai != spac.MEMORY.lai);
-    _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.MEMORY.vcm);
-    _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.MEMORY.chl);
+    _trigger_lai::Bool = !isnan(_df_lai) && (_df_lai != spac.plant.memory.auxil.lai);
+    _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.plant.memory.auxil.vcmax25);
+    _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.plant.memory.auxil.chl);
     if _trigger_lai
         update!(config, spac; lai = _df_lai, vcmax_expo = 0.3);
-        spac.MEMORY.lai = _df_lai;
+        spac.plant.memory.auxil.lai = _df_lai;
     end;
 
     if _trigger_vcm
         update!(config, spac; vcmax = _df_vcm, vcmax_expo = 0.3);
-        spac.MEMORY.vcm = _df_vcm;
+        spac.plant.memory.auxil.vcmax25 = _df_vcm;
     end;
 
     if _trigger_chl
         update!(config, spac; cab = _df_chl, car = _df_chl / 7);
-        spac.MEMORY.chl = _df_chl;
+        spac.plant.memory.auxil.chl = _df_chl;
     end;
 
     # update clumping index
     update!(config, spac; ci = _df_cli);
 
     # update environmental conditions
-    for air in spac.AIRS
+    for air in spac.airs
         air.state.p_air = _df_atm;
         update!(air; f_CO₂ = _df_co2, t = _df_tar, vpd = _df_vpd, wind = _df_wnd);
     end;
@@ -98,13 +98,13 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     # update downward shortwave and longwave radiation
     _in_dir = view(config.SPECTRA.SOLAR_RAD,:,1)' * config.SPECTRA.ΔΛ / 1000;
     _in_dif = view(config.SPECTRA.SOLAR_RAD,:,2)' * config.SPECTRA.ΔΛ / 1000;
-    spac.METEO.rad_sw.e_dir .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,_df_dir) ./ _in_dir;
-    spac.METEO.rad_sw.e_dif .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,_df_dif) ./ _in_dif;
-    spac.METEO.rad_lw = _df_lwr;
+    spac.meteo.rad_sw.e_dir .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,_df_dir) ./ _in_dir;
+    spac.meteo.rad_sw.e_dif .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,_df_dif) ./ _in_dif;
+    spac.meteo.rad_lw = _df_lwr;
 
     # update solar zenith angle based on the time
-    _sza = solar_zenith_angle(spac.LATITUDE, FT(_df_doy));
-    spac.CANOPY.sun_geometry.state.sza = (_df_dir + _df_dif > 10) ? min(_sza, 88.999) : _sza;
+    _sza = solar_zenith_angle(spac.info.lat, FT(_df_doy));
+    spac.canopy.sun_geometry.state.sza = (_df_dir + _df_dif > 10) ? min(_sza, 88.999) : _sza;
 
     return nothing
 end;
@@ -245,8 +245,8 @@ simulation!(config::SPACConfiguration{FT},
     # test if the integrated water flow is conserved
     #=
     if DEBUG
-        _sum_leaf_out = [_clayer.∫∂w∂t_out for _clayer in spac.LEAVES]' * spac.CANOPY.structure.state.δlai;
-        @info "Debugging" _sum_leaf_out spac.METEO.rain;
+        _sum_leaf_out = [_clayer.∫∂w∂t_out for _clayer in spac.plant.leaves]' * spac.canopy.structure.state.δlai;
+        @info "Debugging" _sum_leaf_out spac.meteo.rain;
     end;
     =#
 
@@ -293,10 +293,10 @@ simulation!(config::SPACConfiguration{FT},
 
     # save water contents and temperatures based on t_on and θ_on
     if ENABLE_SOIL_WATER_BUDGET
-        dfr.MOD_SWC_1 = spac.SOILS[1].state.θ;
-        dfr.MOD_SWC_2 = spac.SOILS[2].state.θ;
-        dfr.MOD_SWC_3 = spac.SOILS[3].state.θ;
-        dfr.MOD_SWC_4 = spac.SOILS[4].state.θ;
+        dfr.MOD_SWC_1 = spac.soils[1].state.θ;
+        dfr.MOD_SWC_2 = spac.soils[2].state.θ;
+        dfr.MOD_SWC_3 = spac.soils[3].state.θ;
+        dfr.MOD_SWC_4 = spac.soils[4].state.θ;
 
         if DEBUG
             if any(isnan, (dfr.MOD_SWC_1, dfr.MOD_SWC_2, dfr.MOD_SWC_3, dfr.MOD_SWC_4))
@@ -306,14 +306,14 @@ simulation!(config::SPACConfiguration{FT},
         end;
     end;
     if ENABLE_ENERGY_BUDGET
-        _tleaf = [leaf.energy.auxil.t for leaf in spac.LEAVES];
+        _tleaf = [leaf.energy.auxil.t for leaf in spac.plant.leaves];
         dfr.MOD_T_L_MAX  = nanmax(_tleaf);
         dfr.MOD_T_L_MEAN = nanmean(_tleaf);
         dfr.MOD_T_L_MIN  = nanmin(_tleaf);
-        dfr.MOD_T_S_1    = spac.SOILS[1].auxil.t;
-        dfr.MOD_T_S_2    = spac.SOILS[2].auxil.t;
-        dfr.MOD_T_S_3    = spac.SOILS[3].auxil.t;
-        dfr.MOD_T_S_4    = spac.SOILS[4].auxil.t;
+        dfr.MOD_T_S_1    = spac.soils[1].auxil.t;
+        dfr.MOD_T_S_2    = spac.soils[2].auxil.t;
+        dfr.MOD_T_S_3    = spac.soils[3].auxil.t;
+        dfr.MOD_T_S_4    = spac.soils[4].auxil.t;
 
         if DEBUG
             if any(isnan, (dfr.MOD_T_L_MAX, dfr.MOD_T_L_MEAN, dfr.MOD_T_L_MIN, dfr.MOD_T_S_1, dfr.MOD_T_S_2, dfr.MOD_T_S_3, dfr.MOD_T_S_4))

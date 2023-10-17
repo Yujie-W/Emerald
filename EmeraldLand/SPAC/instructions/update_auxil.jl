@@ -24,32 +24,39 @@ Update the auxiliary variables at sub time step within a big time step, given
 function update_substep_auxils! end;
 
 update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
-    (; SOILS, SOIL_BULK, ROOTS, JUNCTION, TRUNK, BRANCHES, LEAVES) = spac;
+    soils = spac.soils;
+    soil_bulk = spac.soil_bulk;
+
+    roots = spac.plant.roots;
+    junction = spac.plant.junction;
+    trunk = spac.plant.trunk;
+    branches = spac.plant.branches;
+    leaves = spac.plant.leaves;
 
     # update the soil layer auxiliary variables
-    for soil in SOILS
+    for soil in soils
         update_substep_auxils!(soil);
     end;
 
     # update soil bulk auxiliary variables
-    update_substep_auxils!(SOIL_BULK);
+    update_substep_auxils!(soil_bulk);
 
     # update the root auxiliary variables
-    for root in ROOTS
+    for root in roots
         update_substep_auxils!(root);
     end;
 
     # update the junction auxiliary variables
-    update_substep_auxils!(JUNCTION);
+    update_substep_auxils!(junction);
 
     # update the stem auxiliary variables
-    update_substep_auxils!(TRUNK);
-    for stem in BRANCHES
+    update_substep_auxils!(trunk);
+    for stem in branches
         update_substep_auxils!(stem);
     end;
 
     # update the leaf auxiliary variables
-    for leaf in LEAVES
+    for leaf in leaves
         update_substep_auxils!(leaf);
     end;
 
@@ -198,9 +205,7 @@ Update the auxiliary variables at big time step, given
 function update_step_auxils! end;
 
 update_step_auxils!(spac::BulkSPAC{FT}) where {FT} = (
-    (; LEAVES) = spac;
-
-    for leaf in LEAVES
+    for leaf in spac.plant.leaves
         update_substep_auxils!(leaf);
     end;
 

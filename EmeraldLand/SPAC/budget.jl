@@ -29,14 +29,19 @@ Return adjusted time that soil does not over saturate or drain, given
 """
 function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
     (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
-    (; BRANCHES, JUNCTION, LEAVES, SOILS, TRUNK) = spac;
+    soils = spac.soils;
+    junction = spac.plant.junction;
+    trunk = spac.plant.trunk;
+    branches = spac.plant.branches;
+    leaves = spac.plant.leaves;
+    lai = spac.canopy.structure.state.lai;
 
     _δt_1 = δt;
 
     # make sure each layer does not drain (allow for oversaturation), and θ change is less than 0.01
     _δt_2 = _δt_1;
     if ENABLE_SOIL_WATER_BUDGET
-        for soil in SOILS
+        for soil in soils
             _δt_2 = min(FT(0.01) / abs(soil.auxil.∂θ∂t), _δt_2);
             if soil.auxil.∂θ∂t < 0
                 _δt_dra = (soil.state.vc.Θ_RES - soil.state.θ) / soil.auxil.∂θ∂t;
@@ -48,7 +53,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
     # make sure soil temperatures do not change more than 1 K per time step
     _δt_3 = _δt_2;
     if ENABLE_ENERGY_BUDGET
-        for soil in SOILS
+        for soil in soils
             _∂T∂t = soil.auxil.∂e∂t / soil.auxil.cp;
             _δt_3 = min(1 / abs(_∂T∂t), _δt_3);
         end;
@@ -57,7 +62,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
     # make sure trunk temperatures do not change more than 1 K per time step
     _δt_4 = _δt_3;
     if ENABLE_ENERGY_BUDGET
-        _∂T∂t = TRUNK.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(TRUNK.xylem.state.v_storage));
+        _∂T∂t = trunk.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(trunk.xylem.state.v_storage));
         _δt_4 = min(1 / abs(_∂T∂t), _δt_4);
 
         if DEBUG
@@ -70,12 +75,12 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
 
     # make sure the junction water does not change more than 10 mol per time step
     _δt_5 = _δt_4;
-    if JUNCTION.auxil.∂w∂t != 0
-        _δt_5 = min(10 / abs(JUNCTION.auxil.∂w∂t), _δt_5);
+    if junction.auxil.∂w∂t != 0
+        _δt_5 = min(10 / abs(junction.auxil.∂w∂t), _δt_5);
 
         if DEBUG
-            if any(isnan, (_δt_5, JUNCTION.auxil.∂w∂t))
-                @info "Debugging" _δt_5 JUNCTION.auxil.∂w∂t;
+            if any(isnan, (_δt_5, junction.auxil.∂w∂t))
+                @info "Debugging" _δt_5 junction.auxil.∂w∂t;
                 error("NaN in adjusted_time at junction");
             end;
         end;
@@ -84,7 +89,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
     # make sure branch stem temperatures do not change more than 1 K per time step
     _δt_6 = _δt_5;
     if ENABLE_ENERGY_BUDGET
-        for _branch in BRANCHES
+        for _branch in branches
             _∂T∂t = _branch.energy.auxil.∂e∂t / (CP_L_MOL(FT) * sum(_branch.xylem.state.v_storage));
             _δt_6 = min(1 / abs(_∂T∂t), _δt_6);
 
@@ -99,8 +104,8 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
 
     # make sure leaf temperatures do not change more than 1 K per time step
     _δt_7 = _δt_6;
-    if ENABLE_ENERGY_BUDGET && spac.CANOPY.structure.state.lai > 0
-        for leaf in LEAVES
+    if ENABLE_ENERGY_BUDGET && lai > 0
+        for leaf in leaves
             _∂T∂t = leaf.energy.auxil.∂e∂t / heat_capacitance(leaf);
             _δt_7 = min(1 / abs(_∂T∂t), _δt_7);
 
@@ -115,8 +120,8 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
 
     # make sure leaf stomatal conductances do not change more than 0.06 mol m⁻² s⁻¹
     _δt_8 = _δt_7;
-    if spac.CANOPY.structure.state.lai > 0
-        for leaf in LEAVES
+    if lai > 0
+        for leaf in leaves
             for _∂g∂t in leaf.flux.auxil.∂g∂t_sunlit
                 _δt_8 = min(FT(0.06) / abs(_∂g∂t), _δt_8);
             end;
@@ -149,7 +154,6 @@ end;
 #     2022-Oct-22: add option t_on to enable/disable soil and leaf energy budgets
 #     2022-Nov-18: add option p_on to enable/disable plant flow and pressure profiles
 #     2023-Apr-13: add config to function call to steady state function
-#     2023-Apr-13: sw and lw radiation moved to METEO
 #     2023-Jun-13: add config to parameter list
 #     2023-Jun-15: add judge for root connection
 #     2023-Sep-11: move the optional p_on, t_on and θ_on to the config struct
@@ -170,8 +174,6 @@ Move forward in time for SPAC with time stepper controller, given
 function time_stepper! end;
 
 time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT} = (
-    (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
-
     # run the update function until time elapses
     _count = 0;
     _t_res = FT(δt);
@@ -184,7 +186,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) wh
         soil_budgets!(config, spac, _δt);
         stomatal_conductance!(spac, _δt);
         spac_energy_budget!(spac, _δt);
-        if spac._root_connection
+        if spac.plant._root_connection
             plant_water_budget!(spac, _δt);
         end;
 
@@ -194,7 +196,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) wh
         if _t_res > 0
             update_substep_auxils!(spac);
             longwave_radiation!(config, spac);
-            if spac._root_connection
+            if spac.plant._root_connection
                 plant_flow_profile!(config, spac);
                 plant_pressure_profile!(config, spac);
             end;
@@ -208,7 +210,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) wh
 
         # if total count exceeds 100
         if (_count > 1000) && (_δt < 0.01) && (_t_res > 10)
-            @info "Number of steppers exceeds 1000, breaking..." spac.LATITUDE spac.LONGITUDE spac.CANOPY.structure.state.lai _t_res _δts;
+            @info "Number of steppers exceeds 1000, breaking..." spac.info.lat spac.info.lon spac.canopy.structure.state.lai _t_res _δts;
             break;
         end;
     end;

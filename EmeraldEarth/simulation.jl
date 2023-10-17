@@ -49,7 +49,7 @@ simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
 #           isnan(CACHE_STATE.transpiration)
 #            @warn "An error occurred 1!"; break;
 #        end;
-#        if CACHE_SPAC.CANOPY.sun_geometry.state.sza < 89
+#        if CACHE_SPAC.canopy.sun_geometry.state.sza < 89
 #            if isnan(CACHE_STATE.modis_evi) ||
 #               isnan(CACHE_STATE.modis_ndvi) ||
 #               isnan(CACHE_STATE.modis_nirv)

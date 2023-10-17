@@ -178,7 +178,7 @@ import Emerald.EmeraldLand.SPAC
 
         spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
-        spac.CANOPY.structure.state.lai = 0.0;
+        spac.canopy.structure.state.lai = 0.0;
         PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         @test true;
         PS.plant_photosynthesis!(spac, NS.PCO₂Mode());
@@ -186,7 +186,7 @@ import Emerald.EmeraldLand.SPAC
 
         spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
-        spac.CANOPY.sun_geometry.state.sza = 90;
+        spac.canopy.sun_geometry.state.sza = 90;
         PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         @test true;
         PS.plant_photosynthesis!(spac, NS.PCO₂Mode());

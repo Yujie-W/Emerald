@@ -19,7 +19,7 @@
 
     β_factor!(spac::BulkSPAC{FT}) where {FT}
 
-Update the β factor for the LEAVES component in SPAC, given
+Update the β factor for the leaves in SPAC, given
 - `spac` `BulkSPAC` type SPAC
 
 Note that if the β function is based on Kleaf or Pleaf, β factor is taken as that of leaf; if the β function is based on Ksoil, Psoil, or Θ, β is taken as the average weighted by flow rate in each
@@ -29,10 +29,12 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 function β_factor! end;
 
 β_factor!(spac::BulkSPAC{FT}) where {FT} = (
-    (; LEAVES, ROOTS, SOILS) = spac;
+    leaves = spac.plant.leaves;
+    roots = spac.plant.roots;
+    soils = spac.soils;
 
-    for i in eachindex(LEAVES)
-        β_factor!(ROOTS, SOILS, LEAVES[i], LEAVES[i].flux.state.stomatal_model);
+    for i in eachindex(leaves)
+        β_factor!(roots, soils, leaves[i], leaves[i].flux.state.stomatal_model);
     end;
 
     return nothing

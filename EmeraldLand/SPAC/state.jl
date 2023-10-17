@@ -19,14 +19,15 @@ Synchronize state variables from 1st to 2nd struct, given
 function spac_state! end;
 
 spac_state!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, state::MultiLayerSPACState{FT}) where {FT} = (
-    (; LEAVES, MEMORY) = spac;
+    leaves = spac.plant.leaves;
+    memory = spac.plant.memory;
 
-    for i in eachindex(LEAVES)
-        state.gs_shaded[i] = LEAVES[i].g_H₂O_s_shaded;
-        state.gs_sunlit[:,:,i] .= LEAVES[i].g_H₂O_s_sunlit;
+    for i in eachindex(leaves)
+        state.gs_shaded[i] = leaves[i].g_H₂O_s_shaded;
+        state.gs_sunlit[:,:,i] .= leaves[i].g_H₂O_s_sunlit;
     end;
 
-    state.t_clm .= MEMORY.tem;
+    state.t_clm .= memory.state.t_history;
 
     # save the variables used for publications
     state.beta = BETA(spac);
@@ -48,14 +49,15 @@ spac_state!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, state::MultiLayer
 );
 
 spac_state!(state::MultiLayerSPACState{FT}, spac::BulkSPAC{FT}) where {FT} = (
-    (; LEAVES, MEMORY) = spac;
+    leaves = spac.plant.leaves;
+    memory = spac.plant.memory;
 
-    for i in eachindex(LEAVES)
-        LEAVES[i].g_H₂O_s_shaded = state.gs_shaded[i];
-        LEAVES[i].g_H₂O_s_sunlit .= state.gs_sunlit[:,:,i];
+    for i in eachindex(leaves)
+        leaves[i].g_H₂O_s_shaded = state.gs_shaded[i];
+        leaves[i].g_H₂O_s_sunlit .= state.gs_sunlit[:,:,i];
     end;
 
-    MEMORY.tem .= state.t_clm;
+    memory.state.t_history .= state.t_clm;
 
     return nothing
 );

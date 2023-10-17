@@ -16,27 +16,29 @@ Calculate the energy flows of the junction, given
 
 """
 function junction_energy_flows!(spac::BulkSPAC{FT}) where {FT}
-    (; JUNCTION, ROOTS, TRUNK) = spac;
+    roots = spac.plant.roots;
+    junction = spac.plant.junction;
+    trunk = spac.plant.trunk;
 
     # The total energy change of the junction is difference between
     #     the energy of the flow from the roots
     #     the energy of the flow to the trunk
     # if the flow out of root is positive, then the energy flow is positive
-    for root in ROOTS
+    for root in roots
         f_o = flow_out(root);
         if f_o >= 0
-            JUNCTION.auxil.∂e∂t += f_o * CP_L_MOL(FT) * root.energy.auxil.t;
+            junction.auxil.∂e∂t += f_o * CP_L_MOL(FT) * root.energy.auxil.t;
         else
-            JUNCTION.auxil.∂e∂t += f_o * CP_L_MOL(FT) * JUNCTION.auxil.t;
+            junction.auxil.∂e∂t += f_o * CP_L_MOL(FT) * junction.auxil.t;
         end;
     end;
 
     # if the flow into the trunk is positive, then the energy flow is negative
-    f_i = flow_in(TRUNK);
+    f_i = flow_in(trunk);
     if f_i >= 0
-        JUNCTION.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * JUNCTION.auxil.t;
+        junction.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * junction.auxil.t;
     else
-        JUNCTION.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * TRUNK.energy.auxil.t;
+        junction.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * trunk.energy.auxil.t;
     end;
 
     return nothing

@@ -16,16 +16,14 @@ Update the water budget of the root-trunk junction, given
 
 """
 function junction_water_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
-    (; JUNCTION, ROOTS, TRUNK) = spac;
-
     # compute the total flow into the junction as the sum of root flow out minus the trunk flow in
     sum_q::FT = 0;
-    for root in ROOTS
+    for root in spac.plant.roots
         sum_q += flow_out(root) * δt;
     end;
-    sum_q -= flow_in(TRUNK) * δt;
+    sum_q -= flow_in(spac.plant.trunk) * δt;
 
-    JUNCTION.state.v_storage += sum_q;
+    spac.plant.junction.state.v_storage += sum_q;
 
     return nothing
 end;

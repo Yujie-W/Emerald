@@ -69,7 +69,7 @@ Update leaf reflectance and transmittance for SPAC, given
 
 """
 function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    for leaf in spac.LEAVES
+    for leaf in spac.plant.leaves
         leaf_spectra!(config, leaf.bio, leaf.capacitor.state.v_storage);
     end;
 

@@ -27,27 +27,27 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
                 latitude = gmdict["LATITUDE"],
                 longitude = gmdict["LONGITUDE"],
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
-                zs = [-2, _z_canopy/2, _z_canopy]);
-    _spac.SOIL_BULK.state.color = gmdict["SOIL_COLOR"];
+                plant_zs = [-2, _z_canopy/2, _z_canopy]);
+    _spac.soil_bulk.state.color = gmdict["SOIL_COLOR"];
 
     # update soil type information per layer
-    for i in eachindex(_spac.SOILS)
+    for i in eachindex(_spac.soils)
         # TODO: add a line to parameterize K_MAX
-        _spac.SOILS[i].state.vc.α = gmdict["SOIL_α"][i];
-        _spac.SOILS[i].state.vc.N = gmdict["SOIL_N"][i];
-        _spac.SOILS[i].state.vc.M = 1 - 1 / _spac.SOILS[i].state.vc.N;
-        _spac.SOILS[i].state.vc.Θ_RES = gmdict["SOIL_ΘR"][i];
-        _spac.SOILS[i].state.vc.Θ_SAT = gmdict["SOIL_ΘS"][i];
+        _spac.soils[i].state.vc.α = gmdict["SOIL_α"][i];
+        _spac.soils[i].state.vc.N = gmdict["SOIL_N"][i];
+        _spac.soils[i].state.vc.M = 1 - 1 / _spac.soils[i].state.vc.N;
+        _spac.soils[i].state.vc.Θ_RES = gmdict["SOIL_ΘR"][i];
+        _spac.soils[i].state.vc.Θ_SAT = gmdict["SOIL_ΘS"][i];
     end;
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
-    # for _organ in [_spac.LEAVES; _spac.BRANCHES; _spac.TRUNK; _spac.ROOTS]
+    # for _organ in [_spac.plant.leaves; _spac.plant.branches; _spac.plant.trunk; _spac.plant.roots]
     #     _organ.xylem.state.vc.B = 10;
     #     _organ.xylem.state.vc.C = 1;
     # end;
 
     # update leaf mass per area and stomtal model
-    for leaf in _spac.LEAVES
+    for leaf in _spac.plant.leaves
         leaf.bio.state.lma = gmdict["LMA"];
     end;
 

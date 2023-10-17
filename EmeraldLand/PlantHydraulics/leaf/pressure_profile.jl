@@ -47,10 +47,11 @@ Set up leaf pressure profile for each leaf, given
 
 """
 function leaf_pressure_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    (; BRANCHES, LEAVES) = spac;
+    branches = spac.plant.branches;
+    leaves = spac.plant.leaves;
 
-    for i in eachindex(BRANCHES)
-        leaf_pressure_profile!(config, LEAVES[i], BRANCHES[i].xylem.auxil.pressure[end]);
+    for i in eachindex(branches)
+        leaf_pressure_profile!(config, leaves[i], branches[i].xylem.auxil.pressure[end]);
     end;
 
     return nothing

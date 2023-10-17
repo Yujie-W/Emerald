@@ -19,14 +19,16 @@ function stomatal_conductance_profile! end;
 
 stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
     # if lai = 0 or roots are not connected, do nothing
-    if spac.CANOPY.structure.state.lai == 0 || !spac._root_connection
+    if spac.canopy.structure.state.lai == 0 || !spac.plant._root_connection
         return nothing
     end;
 
-    (; AIRS, LEAVES, LEAVES_INDEX) = spac;
+    airs = spac.airs;
+    leaves = spac.plant.leaves;
+    lindex = spac.plant.leaves_index;
 
-    for i in eachindex(LEAVES_INDEX)
-        stomatal_conductance_profile!(LEAVES[i], AIRS[LEAVES_INDEX[i]]);
+    for i in eachindex(leaves)
+        stomatal_conductance_profile!(leaves[i], airs[lindex[i]]);
     end;
 
     return nothing

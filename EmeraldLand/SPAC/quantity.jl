@@ -16,15 +16,15 @@ Return the average beta factor for
 function BETA end;
 
 BETA(spac::BulkSPAC{FT}) where {FT} = (
-    (; LEAVES) = spac;
+    leaves = spac.plant.leaves;
 
     # compute the mean beta
     βs = 0;
-    for leaf in LEAVES
+    for leaf in leaves
         βs += read_β(leaf);
     end;
 
-    return βs / length(LEAVES)
+    return βs / length(leaves)
 );
 
 
@@ -47,15 +47,16 @@ Return the canopy net primary productivity per ground area, given
 function CNPP end;
 
 CNPP(spac::BulkSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute GPP
     cnpp::FT = 0;
-    N = length(LEAVES);
-    for i in eachindex(LEAVES)
+    N = length(leaves);
+    for i in eachindex(leaves)
         j = N - i + 1;
-        cnpp += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_n_sunlit) +
-                 (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.a_n_shaded) * CANOPY.structure.state.δlai[j];
+        cnpp += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_n_sunlit) +
+                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_n_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return cnpp
@@ -81,15 +82,16 @@ Return the gross primary productivity per ground area, given
 function GPP end;
 
 GPP(spac::BulkSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute GPP
     gpp::FT = 0;
-    N = length(LEAVES);
-    for i in eachindex(LEAVES)
+    N = length(leaves);
+    for i in eachindex(leaves)
         j = N - i + 1;
-        gpp += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit) +
-                (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded) * CANOPY.structure.state.δlai[j];
+        gpp += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit) +
+                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return gpp
@@ -116,9 +118,9 @@ function PAR end;
 
 PAR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;
-    (; METEO) = spac;
+    rad_sw = spac.meteo.rad_sw;
 
-    ppfd = photon.(SPECTRA.Λ_PAR, (METEO.rad_sw.e_dif + METEO.rad_sw.e_dir)[SPECTRA.IΛ_PAR]) .* 1000;
+    ppfd = photon.(SPECTRA.Λ_PAR, (rad_sw.e_dif + rad_sw.e_dir)[SPECTRA.IΛ_PAR]) .* 1000;
 
     return ppfd' * SPECTRA.ΔΛ_PAR
 );
@@ -143,15 +145,16 @@ Return the canopy integrated PPAR per ground area, given
 function PPAR end;
 
 PPAR(spac::BulkSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute GPP
     ppar::FT = 0;
-    N = length(LEAVES);
-    for i in eachindex(LEAVES)
+    N = length(leaves);
+    for i in eachindex(leaves)
         j = N - i + 1;
-        ppar += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.ppar_sunlit) +
-                 (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.ppar_shaded) * CANOPY.structure.state.δlai[i];
+        ppar += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.ppar_sunlit) +
+                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded) * canopy.structure.state.δlai[i];
     end;
 
     return ppar
@@ -177,14 +180,15 @@ Return the transpiration rate per ground area, given
 function T_VEG end;
 
 T_VEG(spac::BulkSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute transpiration rate
     tran::FT = 0;
-    N = length(LEAVES);
-    for i in eachindex(LEAVES)
+    N = length(leaves);
+    for i in eachindex(leaves)
         j = N - i + 1;
-        tran += flow_out(LEAVES[i]) * CANOPY.structure.state.δlai[j];
+        tran += flow_out(leaves[i]) * canopy.structure.state.δlai[j];
     end;
 
     return tran
@@ -202,26 +206,27 @@ T_VEG(spac::BulkSPAC{FT}) where {FT} = (
 function ΦDFNP end;
 
 ΦDFNP(spac::BulkSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     sum_ϕda::FT = 0;
     sum_ϕfa::FT = 0;
     sum_ϕna::FT = 0;
     sum_ϕpa::FT = 0;
     sum_a::FT = 0;
-    N = length(LEAVES);
-    for i in eachindex(LEAVES)
+    N = length(leaves);
+    for i in eachindex(leaves)
         j = N - i + 1;
-        sum_ϕda += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_d_sunlit) +
-                   (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_d_shaded) * CANOPY.structure.state.δlai[j];
-        sum_ϕfa += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_f_sunlit) +
-                   (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_f_shaded) * CANOPY.structure.state.δlai[j];
-        sum_ϕna += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_n_sunlit) +
-                   (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_n_shaded) * CANOPY.structure.state.δlai[j];
-        sum_ϕpa += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit .* LEAVES[i].flux.auxil.ϕ_p_sunlit) +
-                   (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded * LEAVES[i].flux.auxil.ϕ_p_shaded) * CANOPY.structure.state.δlai[j];
-        sum_a   += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.a_g_sunlit) +
-                    (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.a_g_shaded) * CANOPY.structure.state.δlai[j];
+        sum_ϕda += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit .* leaves[i].flux.auxil.ϕ_d_sunlit) +
+                   (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded * leaves[i].flux.auxil.ϕ_d_shaded) * canopy.structure.state.δlai[j];
+        sum_ϕfa += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit .* leaves[i].flux.auxil.ϕ_f_sunlit) +
+                   (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded * leaves[i].flux.auxil.ϕ_f_shaded) * canopy.structure.state.δlai[j];
+        sum_ϕna += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit .* leaves[i].flux.auxil.ϕ_n_sunlit) +
+                   (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded * leaves[i].flux.auxil.ϕ_n_shaded) * canopy.structure.state.δlai[j];
+        sum_ϕpa += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit .* leaves[i].flux.auxil.ϕ_p_sunlit) +
+                   (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded * leaves[i].flux.auxil.ϕ_p_shaded) * canopy.structure.state.δlai[j];
+        sum_a   += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit) +
+                    (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return (sum_ϕda, sum_ϕfa, sum_ϕna, sum_ϕpa) ./ sum_a
@@ -246,15 +251,16 @@ Return the total ETR per ground area, given
 function ΣETR end;
 
 ΣETR(spac::BulkSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute GPP
     Σetr::FT = 0;
-    N = length(LEAVES);
-    for i in eachindex(LEAVES)
+    N = length(leaves);
+    for i in eachindex(leaves)
         j = N - i + 1;
-        Σetr += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.etr_sunlit) +
-                 (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.etr_shaded) * CANOPY.structure.state.δlai[j];
+        Σetr += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.etr_sunlit) +
+                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.etr_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return Σetr
@@ -279,15 +285,16 @@ Return the total SIF at chloroplast level (without any reabsorption) per ground 
 function ΣSIF end;
 
 ΣSIF(spac::BulkSPAC{FT}) where {FT} = (
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute SIF in photons unit
     Σsif::FT = 0;
-    N = length(LEAVES);
-    for i in eachindex(LEAVES)
+    N = length(leaves);
+    for i in eachindex(leaves)
         j = N - i + 1;
-        Σsif += (CANOPY.sun_geometry.auxil.p_sunlit[j] * mean(LEAVES[i].flux.auxil.ppar_sunlit .* LEAVES[i].flux.auxil.ϕ_f_sunlit) +
-                 (1 - CANOPY.sun_geometry.auxil.p_sunlit[j]) * LEAVES[i].flux.auxil.ppar_shaded * LEAVES[i].flux.auxil.ϕ_f_shaded) * CANOPY.structure.state.δlai[j];
+        Σsif += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.ppar_sunlit .* leaves[i].flux.auxil.ϕ_f_sunlit) +
+                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded * leaves[i].flux.auxil.ϕ_f_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return Σsif
@@ -315,12 +322,13 @@ function ΣSIF_CHL end;
 
 ΣSIF_CHL(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute SIF in energy unit before reabsorption within leaves (W m⁻²)
     Σsif::FT = 0;
-    for i in eachindex(LEAVES)
-        Σsif += view(CANOPY.sun_geometry.auxil.e_sif_chl,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
+    for i in eachindex(leaves)
+        Σsif += view(canopy.sun_geometry.auxil.e_sif_chl,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return Σsif
@@ -348,12 +356,13 @@ function ΣSIF_LEAF end;
 
 ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;
-    (; CANOPY, LEAVES) = spac;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
 
     # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
     Σsif::FT = 0;
-    for i in eachindex(LEAVES)
-        Σsif += (CANOPY.sun_geometry.auxil.e_sifꜜ_layer[:,i] .+ CANOPY.sun_geometry.auxil.e_sifꜛ_layer[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
+    for i in eachindex(leaves)
+        Σsif += (canopy.sun_geometry.auxil.e_sifꜜ_layer[:,i] .+ canopy.sun_geometry.auxil.e_sifꜛ_layer[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return Σsif

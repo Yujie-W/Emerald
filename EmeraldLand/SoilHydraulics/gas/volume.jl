@@ -22,14 +22,14 @@ Balance the air volume in the soil so that pressure is in equilibrium, given
 """
 function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; PRESCRIBE_AIR) = config;
-    (; AIRS, SOILS) = spac;
+    soils = spac.soils;
 
     # balance the air volume among soil layers from lower to upper layers
-    air = AIRS[1];
-    for i in length(SOILS)-1:-1:1
+    air = spac.airs[1];
+    for i in length(soils)-1:-1:1
         # upper layer is soil_i and lower is soil_j
-        soil_i = SOILS[i];
-        soil_j = SOILS[i+1];
+        soil_i = soils[i];
+        soil_j = soils[i+1];
 
         # compute the air moles in the lower layer
         ndry_i = soil_i.state.ns[1] + soil_i.state.ns[2] + soil_i.state.ns[4] + soil_i.state.ns[5];
@@ -81,7 +81,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wher
     end;
 
     # balance the air volume between top soil and atmosphere
-    soil = SOILS[1];
+    soil = soils[1];
     s_dry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
     a_dry = air.state.ns[1] + air.state.ns[2] + air.state.ns[4] + air.state.ns[5];
     s_max = (air.state.p_air - saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (GAS_R(FT) * soil.auxil.t);

@@ -11,7 +11,7 @@ flow_out(stem::Stem{FT}) where {FT} = flow_out(stem.xylem);
 # General
 #     2023-Sep-05: add function stem_flow_profiles!
 #     2023-Sep-28: update the branch and trunk flow profile at the same time
-#     2023-Sep-30: subtract the flow into TRUNK from the JUNCTION.auxil.∂w∂t
+#     2023-Sep-30: subtract the flow into trunk from the junction.auxil.∂w∂t
 #
 #######################################################################################################################################################################################################
 """
@@ -23,16 +23,19 @@ Set up stem flow profile, given
 
 """
 function stem_flow_profiles!(spac::BulkSPAC{FT}) where {FT}
-    (; BRANCHES, JUNCTION, LEAVES, TRUNK) = spac;
+    junction = spac.plant.junction;
+    trunk = spac.plant.trunk;
+    branches = spac.plant.branches;
+    leaves = spac.plant.leaves;
 
     sum_f::FT = 0;
-    for i in eachindex(BRANCHES)
-        set_flow_profile!(BRANCHES[i].xylem, flow_in(LEAVES[i]));
-        sum_f += flow_out(BRANCHES[i]);
+    for i in eachindex(branches)
+        set_flow_profile!(branches[i].xylem, flow_in(leaves[i]));
+        sum_f += flow_out(branches[i]);
     end;
 
-    set_flow_profile!(TRUNK.xylem, sum_f);
-    JUNCTION.auxil.∂w∂t -= flow_in(TRUNK);
+    set_flow_profile!((trunk).xylem, sum_f);
+    junction.auxil.∂w∂t -= flow_in(trunk);
 
     return nothing
 end;

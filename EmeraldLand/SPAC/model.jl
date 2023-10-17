@@ -50,13 +50,13 @@ function soil_plant_air_continuum! end;
 # TODO: add top soil evaporation
 soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT} = (
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
-    spac.SOIL_BULK.auxil.runoff = 0;
+    spac.soil_bulk.auxil.runoff = 0;
     update_substep_auxils!(spac);
 
     # 1. run plant hydraulic model (must be run before plant_photosynthesis! as the latter may need β for empirical models)
     plant_flow_profile!(config, spac);
     plant_pressure_profile!(config, spac);
-    (!spac._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(config, spac; lai = 0) : nothing;
+    (!spac.plant._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(config, spac; lai = 0) : nothing;
 
     # 2. run canopy RT
     canopy_radiation!(config, spac);

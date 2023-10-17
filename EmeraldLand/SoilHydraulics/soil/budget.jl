@@ -48,20 +48,20 @@ Run the soil budgets for water and gas, given
 
 """
 function soil_budgets!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
-    (; SOILS) = spac;
+    soils = spac.soils;
 
     # per soil layer, run the gas diffusion, mass flow, and condensation or evaporation budgets
-    for i in eachindex(SOILS)
+    for soil in soils
         # run the soil gas budget
         for j in 1:5
-            SOILS[i].state.ns[j] += SOILS[i].auxil.∂n∂t[j] * δt;
+            (soil).state.ns[j] += (soil).auxil.∂n∂t[j] * δt;
         end;
 
         # run the water transport (mass flow)
-        SOILS[i].state.θ += SOILS[i].auxil.∂θ∂t * δt;
+        (soil).state.θ += (soil).auxil.∂θ∂t * δt;
 
         # run the soil water condensation or evaporation
-        soil_water_condensation!(SOILS[i]);
+        soil_water_condensation!(soil);
     end;
 
     # compute surface runoff and volume balance for the air

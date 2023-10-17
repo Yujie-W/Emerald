@@ -45,10 +45,14 @@ Calculate the energy budgets of the spac, given
 
 """
 function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
-    (; BRANCHES, LEAVES, ROOTS, SOILS, TRUNK) = spac;
+    soils = spac.soils;
+    roots = spac.plant.roots;
+    trunk = spac.plant.trunk;
+    branches = spac.plant.branches;
+    leaves = spac.plant.leaves;
 
     # update the temperature for soil
-    for soil in SOILS
+    for soil in soils
         # water mass and energy flow
         soil.state.Σe += soil.auxil.∂e∂t * δt / soil.auxil.δz;
 
@@ -57,27 +61,28 @@ function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     end;
 
     # update the energy loss related to surface runoff
-    if SOILS[1].state.θ > SOILS[1].state.vc.Θ_SAT
-        cp = heat_capacitance(SOILS[1]; runoff = SOILS[1].auxil.runoff);
-        t  = SOILS[1].state.Σe / cp;
-        SOILS[1].state.Σe -= SOILS[1].auxil.runoff / SOILS[1].auxil.δz * CP_L_MOL(FT) * t;
+    top_soil = soils[1];
+    if top_soil.state.θ > top_soil.state.vc.Θ_SAT
+        cp = heat_capacitance(top_soil; runoff = top_soil.auxil.runoff);
+        t  = top_soil.state.Σe / cp;
+        top_soil.state.Σe -= top_soil.auxil.runoff / top_soil.auxil.δz * CP_L_MOL(FT) * t;
     end;
 
     # update the temperature for roots
-    for root in ROOTS
+    for root in roots
         root.energy.state.Σe += root.energy.auxil.∂e∂t * δt;
     end;
 
     # update the temperature for trunk
-    TRUNK.energy.state.Σe += TRUNK.energy.auxil.∂e∂t * δt;
+    trunk.energy.state.Σe += trunk.energy.auxil.∂e∂t * δt;
 
     # update the temperature for branches
-    for stem in BRANCHES
+    for stem in branches
         stem.energy.state.Σe += stem.energy.auxil.∂e∂t * δt;
     end;
 
     # update the temperature for leaves
-    for leaf in LEAVES
+    for leaf in leaves
         leaf.energy.state.Σe += leaf.energy.auxil.∂e∂t * δt;
     end;
 

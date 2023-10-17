@@ -33,7 +33,7 @@ function initialize_cache!(FT)
                 zs = [-2, _z_canopy/2, _z_canopy]);
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
-    # for _organ in [CACHE_SPAC.LEAVES; CACHE_SPAC.BRANCHES; CACHE_SPAC.TRUNK; CACHE_SPAC.ROOTS]
+    # for _organ in [CACHE_SPAC.plant.leaves; CACHE_SPAC.plant.branches; CACHE_SPAC.plant.trunk; CACHE_SPAC.plant.roots]
     #     _organ.xylem.state.vc.B = 3;
     #     _organ.xylem.state.vc.C = 1;
     # end;
@@ -41,12 +41,12 @@ function initialize_cache!(FT)
     # update leaf mass per area and stomtal model
     @inline linear_p_soil(x) = min(1, max(eps(FT), 1 + x / 5));
     _bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
-    for leaf in CACHE_SPAC.LEAVES
+    for leaf in CACHE_SPAC.plant.leaves
         leaf.flux.state.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = _bt);
     end;
 
     # initialize the spac with non-saturated soil
-    update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(max(soil.VC.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.SOILS));
+    update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(max(soil.VC.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.soils));
     initialize!(CACHE_SPAC, CACHE_CONFIG);
 
     # create a state struct based on the spac
@@ -87,41 +87,41 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
 
     # update the values in the CACHE_SPAC, use .= for arrays
     global CACHE_SPAC;
-    CACHE_SPAC.LATITUDE = gm_params["LATITUDE"];
-    CACHE_SPAC.LONGITUDE = gm_params["LONGITUDE"];
-    CACHE_SPAC.ELEVATION = gm_params["ELEVATION"];
+    CACHE_SPAC.info.lat = gm_params["LATITUDE"];
+    CACHE_SPAC.info.lon = gm_params["LONGITUDE"];
+    CACHE_SPAC.info.elev = gm_params["ELEVATION"];
     CACHE_SPAC.Z .= [-2, _z_canopy/2, _z_canopy];
     CACHE_SPAC.Z_AIR .= collect(0:21) * _z_canopy / 20;
-    CACHE_SPAC.SOIL_BULK.state.color = gm_params["SOIL_COLOR"];
+    CACHE_SPAC.soil_bulk.state.color = gm_params["SOIL_COLOR"];
 
     # update soil type information per layer
-    for i in eachindex(CACHE_SPAC.SOILS)
+    for i in eachindex(CACHE_SPAC.soils)
         # TODO: add a line to parameterize K_MAX
         # TODO: fix these later with better data source
         if !isnan(gm_params["SOIL_α"][i]) && !isnan(gm_params["SOIL_N"][i]) && !isnan(gm_params["SOIL_ΘR"][i]) && !isnan(gm_params["SOIL_ΘS"][i])
-            CACHE_SPAC.SOILS[i].state.vc.α = gm_params["SOIL_α"][i];
-            CACHE_SPAC.SOILS[i].state.vc.N = gm_params["SOIL_N"][i];
-            CACHE_SPAC.SOILS[i].state.vc.M = 1 - 1 / CACHE_SPAC.SOILS[i].state.vc.N;
-            CACHE_SPAC.SOILS[i].state.vc.Θ_RES = gm_params["SOIL_ΘR"][i];
-            CACHE_SPAC.SOILS[i].state.vc.Θ_SAT = gm_params["SOIL_ΘS"][i];
+            CACHE_SPAC.soils[i].state.vc.α = gm_params["SOIL_α"][i];
+            CACHE_SPAC.soils[i].state.vc.N = gm_params["SOIL_N"][i];
+            CACHE_SPAC.soils[i].state.vc.M = 1 - 1 / CACHE_SPAC.soils[i].state.vc.N;
+            CACHE_SPAC.soils[i].state.vc.Θ_RES = gm_params["SOIL_ΘR"][i];
+            CACHE_SPAC.soils[i].state.vc.Θ_SAT = gm_params["SOIL_ΘS"][i];
         end;
     end;
 
     # update leaf mass per area and stomtal model
-    for leaf in CACHE_SPAC.LEAVES
+    for leaf in CACHE_SPAC.plant.leaves
         leaf.BIO.state.lma = gm_params["LMA"];
         leaf.flux.state.stomatal_model.G1 = gm_params["MEDLYN_G1"];
     end;
 
     # update environmental conditions
-    for air in CACHE_SPAC.AIRS
+    for air in CACHE_SPAC.airs
         air.state.p_air = wd_params["P_ATM"];
         update!(air; t = wd_params["T_AIR"], vpd = wd_params["VPD"], wind = wd_params["WIND"]);
     end;
 
     # sync the environmental conditions per layer for CO₂ concentration
     if !isnothing(gm_params["CO2"])
-        for air in CACHE_SPAC.AIRS
+        for air in CACHE_SPAC.airs
             update!(air; f_CO₂ = gm_params["CO2"]);
         end;
     end;
@@ -129,34 +129,33 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     # update shortwave and longwave radiation
     _in_dir = view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,1)'  * CACHE_CONFIG.SPECTRA.ΔΛ / 1000;
     _in_dif = view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,2)' * CACHE_CONFIG.SPECTRA.ΔΛ / 1000;
-    CACHE_SPAC.METEO.rad_sw.e_dir .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,1) .* max(0,wd_params["RAD_DIR"]) ./ _in_dir;
-    CACHE_SPAC.METEO.rad_sw.e_dif .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,2) .* max(0,wd_params["RAD_DIF"]) ./ _in_dif;
-    CACHE_SPAC.METEO.rad_lw = wd_params["RAD_LW"];
+    CACHE_SPAC.meteo.rad_sw.e_dir .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,1) .* max(0,wd_params["RAD_DIR"]) ./ _in_dir;
+    CACHE_SPAC.meteo.rad_sw.e_dif .= view(CACHE_CONFIG.SPECTRA.SOLAR_RAD,:,2) .* max(0,wd_params["RAD_DIF"]) ./ _in_dif;
+    CACHE_SPAC.meteo.rad_lw = wd_params["RAD_LW"];
 
     # update solar zenith angle based on the time
-    _sza = solar_zenith_angle(CACHE_SPAC.LATITUDE, FT(wd_params["FDOY"]));
-    CACHE_SPAC.CANOPY.sun_geometry.state.sza = (wd_params["RAD_DIR"] + wd_params["RAD_DIF"] > 10) ? min(_sza, 88.999) : _sza;
+    _sza = solar_zenith_angle(CACHE_SPAC.info.lat, FT(wd_params["FDOY"]));
+    CACHE_SPAC.canopy.sun_geometry.state.sza = (wd_params["RAD_DIR"] + wd_params["RAD_DIF"] > 10) ? min(_sza, 88.999) : _sza;
 
     # prescribe soil water content
     if "SWC" in keys(wd_params)
         update!(CACHE_SPAC, CACHE_CONFIG; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
         # TODO: remove this when soil diffusion problem is fixed
-        update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(min(soil.state.vc.Θ_SAT - 0.001, soil.state.θ) for soil in CACHE_SPAC.SOILS));
+        update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(min(soil.state.vc.Θ_SAT - 0.001, soil.state.θ) for soil in CACHE_SPAC.soils));
     end;
 
     # synchronize the state if state is not nothing, otherwise set all values to NaN (do thing before prescribing T_SKIN)
     if !isnothing(state)
         spac_state!(state, CACHE_SPAC);
     else
-        CACHE_SPAC.MEMORY.tem .= NaN;
+        CACHE_SPAC.plant.memory.state.t_history .= NaN;
     end;
 
     # prescribe leaf temperature from skin temperature
-    # TODO: add CACHE_SPAC.MEMORY.tem as prognostic variable
     if "T_SKIN" in keys(wd_params)
-        push!(CACHE_SPAC.MEMORY.tem, wd_params["T_SKIN"]);
-        if length(CACHE_SPAC.MEMORY.tem) > 240 deleteat!(CACHE_SPAC.MEMORY.tem,1) end;
-        update!(CACHE_SPAC, CACHE_CONFIG; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.MEMORY.tem));
+        push!(CACHE_SPAC.plant.memory.state.t_history, wd_params["T_SKIN"]);
+        if length(CACHE_SPAC.plant.memory.state.t_history) > 240 deleteat!(CACHE_SPAC.plant.memory.state.t_history,1) end;
+        update!(CACHE_SPAC, CACHE_CONFIG; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.plant.memory.state.t_history));
     end;
 
     # synchronize LAI, CHL, and CI

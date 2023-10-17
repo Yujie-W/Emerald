@@ -62,9 +62,9 @@ Set the flow profile of each leaf, given
 
 """
 function leaf_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
-    if spac.CANOPY.structure.state.lai > 0
+    if spac.canopy.structure.state.lai > 0
         # do this way to avoid memory allocation of a [nothing...] vector
-        for leaf in spac.LEAVES
+        for leaf in spac.plant.leaves
             leaf_water_budget!(leaf, (leaf).xylem.auxil, δt);
         end;
     end;

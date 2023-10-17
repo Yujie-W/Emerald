@@ -58,16 +58,16 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
 end;
 
 MultiLayerSPACState{FT}(spac::BulkSPAC{FT}) where {FT} = (
-    (; LEAVES) = spac;
+    leaves = spac.plant.leaves;
 
-    _gs_sunlit = zeros(FT, size(LEAVES[1].g_H₂O_s_sunlit,1), size(LEAVES[1].g_H₂O_s_sunlit,2), length(LEAVES));
-    for i in eachindex(LEAVES)
-        _gs_sunlit[:,:,i] .= LEAVES[i].g_H₂O_s_sunlit;
+    _gs_sunlit = zeros(FT, size(leaves[1].g_H₂O_s_sunlit,1), size(leaves[1].g_H₂O_s_sunlit,2), length(leaves));
+    for i in eachindex(leaves)
+        _gs_sunlit[:,:,i] .= leaves[i].g_H₂O_s_sunlit;
     end;
 
     return MultiLayerSPACState{FT}(
-                gs_shaded = [leaf.g_H₂O_s_shaded for leaf in LEAVES],
+                gs_shaded = [leaf.g_H₂O_s_shaded for leaf in leaves],
                 gs_sunlit = _gs_sunlit,
-                t_clm = deepcopy(spac.MEMORY.tem),
+                t_clm = deepcopy(spac.plant.memory.state.t_history),
     )
 );

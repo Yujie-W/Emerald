@@ -52,15 +52,16 @@ BulkSPAC(config::SPACConfiguration{FT};
     spac_info = SPACInfo{FT}(
                 z_air  = air_bounds,
                 z_soil = soil_bounds,
+                elev   = elevation,
                 lat    = latitude,
                 lon    = longitude);
 
     # set up soil bulk parameters
+    config.DIM_SOIL = length(soil_bounds) - 1;
     spac_sbulk = SoilBulk(config);
     spac_sbulk.state.area = ground_area;
 
     # set up the soil layers (energy updated in initialize! function)
-    config.DIM_SOIL = length(soil_bounds) - 1;
     soil_layers = SoilLayer{FT}[SoilLayer{FT}() for _ in 1:config.DIM_SOIL];
     for i in eachindex(soil_layers)
         soil_layers[i].state.zs = soil_bounds[i:i+1];

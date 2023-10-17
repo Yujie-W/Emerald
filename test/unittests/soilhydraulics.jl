@@ -40,41 +40,41 @@ import Emerald.EmeraldLand.SPAC
 
         # set the soil to be not saturated
         SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
-        spac.SOILS[5].state.ns[4] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
-        spac.SOILS[5].state.ns[5] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
+        spac.soils[5].state.ns[4] = spac.airs[1].state.p_air * (spac.soils[5].state.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].auxil.δz / (CS.GAS_R() * spac.soils[5].auxil.t);
+        spac.soils[5].state.ns[5] = spac.airs[1].state.p_air * (spac.soils[5].state.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].auxil.δz / (CS.GAS_R() * spac.soils[5].auxil.t);
         SH.volume_balance!(config, spac);
         SPAC.update_substep_auxils!(spac);
         SH.trace_gas_diffusion!(config, spac);
 
         # total mole into the layer should be the same as the derivative of the total mole of all layers
         for j in 1:5
-            @test -spac.SOIL_BULK.auxil.dndt[1,j] ≈ sum([soil.auxil.∂n∂t[j] for soil in spac.SOILS]);
+            @test -spac.soil_bulk.auxil.dndt[1,j] ≈ sum([soil.auxil.∂n∂t[j] for soil in spac.soils]);
         end;
 
         # set one soil layer to be oversaturated
-        spac.SOILS[3].state.θ = spac.SOILS[3].state.vc.Θ_SAT;
+        spac.soils[3].state.θ = spac.soils[3].state.vc.Θ_SAT;
         SPAC.update_substep_auxils!(spac);
         SH.trace_gas_diffusion!(config, spac);
 
         # total mole into the layer should be the same as the derivative of the total mole of all layers
         for j in 1:5
-            @test -spac.SOIL_BULK.auxil.dndt[1,j] ≈ sum([soil.auxil.∂n∂t[j] for soil in spac.SOILS]);
+            @test -spac.soil_bulk.auxil.dndt[1,j] ≈ sum([soil.auxil.∂n∂t[j] for soil in spac.soils]);
         end;
 
         # there is no dry air diffusion up to and from the third layer
-        @test all(spac.SOIL_BULK.auxil.dndt[3,[1,2,4,5]] .== 0);
-        @test all(spac.SOIL_BULK.auxil.dndt[4,[1,2,4,5]] .== 0);
+        @test all(spac.soil_bulk.auxil.dndt[3,[1,2,4,5]] .== 0);
+        @test all(spac.soil_bulk.auxil.dndt[4,[1,2,4,5]] .== 0);
 
         # set all soil layer to be oversaturated
         for j in 1:5
-            spac.SOILS[j].state.θ = spac.SOILS[j].state.vc.Θ_SAT;
+            spac.soils[j].state.θ = spac.soils[j].state.vc.Θ_SAT;
         end;
         SPAC.update_substep_auxils!(spac);
         SH.trace_gas_diffusion!(config, spac);
 
         # there is no dry air diffusion up to and from each layer
         for j in 1:5
-            @test all(spac.SOIL_BULK.auxil.dndt[j,[1,2,4,5]] .== 0);
+            @test all(spac.soil_bulk.auxil.dndt[j,[1,2,4,5]] .== 0);
         end;
     end;
 
@@ -89,7 +89,7 @@ import Emerald.EmeraldLand.SPAC
         SH.soil_water_infiltration!(spac);
 
         # total water mole change by infiltration should be 0 (no water is lost or gained)
-        @test sum([soil.auxil.∂θ∂t * soil.auxil.δz for soil in spac.SOILS]) ≈ 0 atol = 1e-10;
+        @test sum([soil.auxil.∂θ∂t * soil.auxil.δz for soil in spac.soils]) ≈ 0 atol = 1e-10;
 
         # set the soil to be almost saturated (controlled by the soil water content)
         SPAC.update!(config, spac; swcs = (0.5, 0.5, 0.5, 0.5, 0.5));
@@ -97,7 +97,7 @@ import Emerald.EmeraldLand.SPAC
         SH.soil_water_infiltration!(spac);
 
         # total water mole change by infiltration should be 0 (no water is lost or gained)
-        @test sum([soil.auxil.∂θ∂t * soil.auxil.δz for soil in spac.SOILS]) ≈ 0 atol = 1e-10;
+        @test sum([soil.auxil.∂θ∂t * soil.auxil.δz for soil in spac.soils]) ≈ 0 atol = 1e-10;
     end;
 
     @testset "Soil gas and water volume" begin
@@ -110,30 +110,30 @@ import Emerald.EmeraldLand.SPAC
         # now the lowest layer to be short of dry air
         SH.trace_gas_diffusion!(config, spac);
         SH.volume_balance!(config, spac);
-        for i in eachindex(spac.SOILS)
-            soil = spac.SOILS[i];
-            nmax = (spac.AIRS[1].state.p_air - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
+        for i in eachindex(spac.soils)
+            soil = spac.soils[i];
+            nmax = (spac.airs[1].state.p_air - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
             ndry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
             @test ndry <= nmax || ndry ≈ nmax;
         end;
 
         # set first layer to be saturated, and let the second layer to suck some water from the first layer
-        spac.SOILS[1].state.θ = spac.SOILS[1].state.vc.Θ_SAT;
-        spac.SOILS[1].state.ns .= 0;
-        spac.SOILS[2].state.ns[5] = 0;
-        θ_1 = spac.SOILS[1].state.θ;
-        θ_2 = spac.SOILS[2].state.θ;
+        spac.soils[1].state.θ = spac.soils[1].state.vc.Θ_SAT;
+        spac.soils[1].state.ns .= 0;
+        spac.soils[2].state.ns[5] = 0;
+        θ_1 = spac.soils[1].state.θ;
+        θ_2 = spac.soils[2].state.θ;
         SH.volume_balance!(config, spac);
-        @test spac.SOILS[1].state.θ < θ_1;
-        @test spac.SOILS[2].state.θ > θ_2;
+        @test spac.soils[1].state.θ < θ_1;
+        @test spac.soils[2].state.θ > θ_2;
 
         # set the last layer to be oversaturated in terms of dry air, and then air should move towards upper layers
-        spac.SOILS[5].state.ns[4] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
-        spac.SOILS[5].state.ns[5] = spac.AIRS[1].state.p_air * (spac.SOILS[5].state.vc.Θ_SAT - spac.SOILS[5].state.θ) * spac.SOILS[5].auxil.δz / (CS.GAS_R() * spac.SOILS[5].auxil.t);
+        spac.soils[5].state.ns[4] = spac.airs[1].state.p_air * (spac.soils[5].state.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].auxil.δz / (CS.GAS_R() * spac.soils[5].auxil.t);
+        spac.soils[5].state.ns[5] = spac.airs[1].state.p_air * (spac.soils[5].state.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].auxil.δz / (CS.GAS_R() * spac.soils[5].auxil.t);
         SH.volume_balance!(config, spac);
-        for i in eachindex(spac.SOILS)
-            soil = spac.SOILS[i];
-            nmax = (spac.AIRS[1].state.p_air - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
+        for i in eachindex(spac.soils)
+            soil = spac.soils[i];
+            nmax = (spac.airs[1].state.p_air - PC.saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (CS.GAS_R() * soil.auxil.t);
             ndry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
             @test ndry <= nmax || ndry ≈ nmax;
         end;
@@ -148,34 +148,34 @@ import Emerald.EmeraldLand.SPAC
         SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_runoff!(spac);
-        @test spac.SOIL_BULK.auxil.runoff == 0;
+        @test spac.soil_bulk.auxil.runoff == 0;
 
         # set the second layer to be oversaturated (but not enough to cause runoff)
-        SPAC.update!(config, spac; swcs = (0.3, spac.SOILS[2].state.vc.Θ_SAT + 0.01, 0.3, 0.3, 0.3));
-        spac.SOILS[2].state.θ = spac.SOILS[2].state.vc.Θ_SAT + 0.01;
+        SPAC.update!(config, spac; swcs = (0.3, spac.soils[2].state.vc.Θ_SAT + 0.01, 0.3, 0.3, 0.3));
+        spac.soils[2].state.θ = spac.soils[2].state.vc.Θ_SAT + 0.01;
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_runoff!(spac);
-        @test spac.SOIL_BULK.auxil.runoff == 0;
+        @test spac.soil_bulk.auxil.runoff == 0;
 
         # set the second layer to be oversaturated (enough to cause runoff)
         SPAC.update!(config, spac; swcs = (0.3, 0.7, 0.3, 0.3, 0.3));
-        spac.SOILS[2].state.θ = 0.7;
+        spac.soils[2].state.θ = 0.7;
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_runoff!(spac);
-        runoffs = ((0.7 - spac.SOILS[2].state.vc.Θ_SAT) * spac.SOILS[2].auxil.δz + (0.3 - spac.SOILS[1].state.vc.Θ_SAT) * spac.SOILS[1].auxil.δz) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64);
-        @test spac.SOIL_BULK.auxil.runoff ≈ runoffs > 0;
+        runoffs = ((0.7 - spac.soils[2].state.vc.Θ_SAT) * spac.soils[2].auxil.δz + (0.3 - spac.soils[1].state.vc.Θ_SAT) * spac.soils[1].auxil.δz) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64);
+        @test spac.soil_bulk.auxil.runoff ≈ runoffs > 0;
 
         # set every layer to the oversaturated
         SPAC.update!(config, spac; swcs = (0.7, 0.7, 0.7, 0.7, 0.7));
-        spac.SOILS[1].state.θ = 0.7;
-        spac.SOILS[2].state.θ = 0.7;
-        spac.SOILS[3].state.θ = 0.7;
-        spac.SOILS[4].state.θ = 0.7;
-        spac.SOILS[5].state.θ = 0.7;
+        spac.soils[1].state.θ = 0.7;
+        spac.soils[2].state.θ = 0.7;
+        spac.soils[3].state.θ = 0.7;
+        spac.soils[4].state.θ = 0.7;
+        spac.soils[5].state.θ = 0.7;
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_runoff!(spac);
-        runoffs = sum([(0.7 - spac.SOILS[i].state.vc.Θ_SAT) * spac.SOILS[i].auxil.δz for i in 1:5]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64);
-        @test spac.SOIL_BULK.auxil.runoff ≈ runoffs > 0;
+        runoffs = sum([(0.7 - spac.soils[i].state.vc.Θ_SAT) * spac.soils[i].auxil.δz for i in 1:5]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64);
+        @test spac.soil_bulk.auxil.runoff ≈ runoffs > 0;
     end;
 
     @testset "Water conservation" begin
@@ -186,8 +186,8 @@ import Emerald.EmeraldLand.SPAC
 
         # the case of no root water uptake
         SPAC.update_substep_auxils!(spac);
-        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
-        for root in spac.ROOTS
+        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
+        for root in spac.plant.roots
             if typeof(root.xylem.auxil.flow) <: AbstractFloat
                 root.xylem.auxil.flow = 0;
             else
@@ -196,13 +196,13 @@ import Emerald.EmeraldLand.SPAC
         end;
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
-        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
-        @test water_end + spac.SOIL_BULK.auxil.dndt[1,3] * 10 ≈ water_ini;
+        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
+        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 ≈ water_ini;
 
         # the case with root water uptake
         SPAC.update_substep_auxils!(spac);
-        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
-        for root in spac.ROOTS
+        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
+        for root in spac.plant.roots
             if typeof(root.xylem.auxil.flow) <: AbstractFloat
                 root.xylem.auxil.flow = 1;
             else
@@ -211,25 +211,25 @@ import Emerald.EmeraldLand.SPAC
         end;
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
-        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
-        @test water_end + spac.SOIL_BULK.auxil.dndt[1,3] * 10 + length(spac.ROOTS) * 1 * 10 / spac.SOIL_BULK.state.area ≈ water_ini;
+        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
+        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.state.area ≈ water_ini;
 
         # the case with root water uptake and surface runoff (water flow already defined above)
-        spac.SOILS[1].state.θ = 0.7;
+        spac.soils[1].state.θ = 0.7;
         SPAC.update_substep_auxils!(spac);
-        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
+        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
-        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
-        @test water_end + spac.SOIL_BULK.auxil.dndt[1,3] * 10 + length(spac.ROOTS) * 1 * 10 / spac.SOIL_BULK.state.area + spac.SOIL_BULK.auxil.runoff ≈ water_ini;
+        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
+        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.state.area + spac.soil_bulk.auxil.runoff ≈ water_ini;
 
         # the case with precipitation (water flow already defined above)
         SPAC.update_substep_auxils!(spac);
-        spac.METEO.rain = 1;
-        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
+        spac.meteo.rain = 1;
+        water_ini = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
-        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.SOILS]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.SOILS]);
-        @test water_end + spac.SOIL_BULK.auxil.dndt[1,3] * 10 + length(spac.ROOTS) * 1 * 10 / spac.SOIL_BULK.state.area + spac.SOIL_BULK.auxil.runoff ≈ water_ini + spac.METEO.rain * 10;
+        water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
+        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.state.area + spac.soil_bulk.auxil.runoff ≈ water_ini + spac.meteo.rain * 10;
     end;
 end;

@@ -72,7 +72,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-28: add function root_flow_profiles!
-#     2023-Sep-30: add root flow out into JUNCTION.auxil.∂w∂t
+#     2023-Sep-30: add root flow out into junction.auxil.∂w∂t
 #
 #######################################################################################################################################################################################################
 """
@@ -85,11 +85,14 @@ Set up root flow profile for each root, given
 
 """
 function root_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    (; JUNCTION, ROOTS, ROOTS_INDEX, SOILS) = spac;
+    soils = spac.soils;
+    roots = spac.plant.roots;
+    rindex = spac.plant.roots_index;
+    junction = spac.plant.junction;
 
-    for i in eachindex(ROOTS)
-        root_flow_profile!(config, ROOTS[i], SOILS[ROOTS_INDEX[i]], JUNCTION);
-        JUNCTION.auxil.∂w∂t += flow_out(ROOTS[i]);
+    for i in eachindex(roots)
+        root_flow_profile!(config, roots[i], soils[rindex[i]], junction);
+        junction.auxil.∂w∂t += flow_out(roots[i]);
     end;
 
     return nothing

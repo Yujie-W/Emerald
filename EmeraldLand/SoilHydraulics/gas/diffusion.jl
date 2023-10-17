@@ -17,8 +17,9 @@ Compute the diffusion of trace gasses in the soil, given
 
 """
 function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    (; AIRS, SOIL_BULK, SOILS) = spac;
     (; DIM_SOIL, TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
+    soil_bulk = spac.soil_bulk;
+    soils = spac.soils;
 
     #
     # diffusion from top soil to the first air layer
@@ -28,19 +29,19 @@ function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     # TODO:
     #     - the impact from wind speed on the boundary layer thickness need to be accounted for
     #
-    air = AIRS[1];
+    air = spac.airs[1];
     rt_air = GAS_R(FT) * air.auxil.t;
-    rel_kd = 2 * SOILS[1].auxil.kd;
-    rel_kv = 2 * SOILS[1].auxil.kv;
-    v_gas = max(0, SOILS[1].state.vc.Θ_SAT - SOILS[1].state.θ) * SOILS[1].auxil.δz;
+    rel_kd = 2 * soils[1].auxil.kd;
+    rel_kv = 2 * soils[1].auxil.kv;
+    v_gas = max(0, soils[1].state.vc.Θ_SAT - soils[1].state.θ) * soils[1].auxil.δz;
     if v_gas > 0
-        SOIL_BULK.auxil.dndt[1,1] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_CH₄, TRACE_AIR) * (SOILS[1].state.ns[1] / v_gas - air.auxil.ps[1] / rt_air);
-        SOIL_BULK.auxil.dndt[1,2] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_CO₂, TRACE_AIR) * (SOILS[1].state.ns[2] / v_gas - air.auxil.ps[2] / rt_air);
-        SOIL_BULK.auxil.dndt[1,4] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_N₂ , TRACE_AIR) * (SOILS[1].state.ns[4] / v_gas - air.auxil.ps[4] / rt_air);
-        SOIL_BULK.auxil.dndt[1,5] = rel_kd * diffusive_coefficient(SOILS[1].auxil.t, TRACE_O₂ , TRACE_AIR) * (SOILS[1].state.ns[5] / v_gas - air.auxil.ps[5] / rt_air);
+        soil_bulk.auxil.dndt[1,1] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_CH₄, TRACE_AIR) * (soils[1].state.ns[1] / v_gas - air.auxil.ps[1] / rt_air);
+        soil_bulk.auxil.dndt[1,2] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_CO₂, TRACE_AIR) * (soils[1].state.ns[2] / v_gas - air.auxil.ps[2] / rt_air);
+        soil_bulk.auxil.dndt[1,4] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_N₂ , TRACE_AIR) * (soils[1].state.ns[4] / v_gas - air.auxil.ps[4] / rt_air);
+        soil_bulk.auxil.dndt[1,5] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_O₂ , TRACE_AIR) * (soils[1].state.ns[5] / v_gas - air.auxil.ps[5] / rt_air);
     end;
     v_vap = v_gas + FT(0.01);
-    SOIL_BULK.auxil.dndt[1,3] = rel_kv * diffusive_coefficient(SOILS[1].auxil.t, TRACE_H₂O, TRACE_AIR) * (SOILS[1].state.ns[3] / v_vap - air.auxil.ps[3] / rt_air);
+    soil_bulk.auxil.dndt[1,3] = rel_kv * diffusive_coefficient(soils[1].auxil.t, TRACE_H₂O, TRACE_AIR) * (soils[1].state.ns[3] / v_vap - air.auxil.ps[3] / rt_air);
 
     #
     # Diffusion among soi layers
@@ -49,54 +50,54 @@ function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     #
     for i in 1:DIM_SOIL-1
         # for gas 1,2,4,5
-        v_gas_i = max(0, SOILS[i  ].state.vc.Θ_SAT - SOILS[i  ].state.θ) * SOILS[i  ].auxil.δz;
-        v_gas_j = max(0, SOILS[i+1].state.vc.Θ_SAT - SOILS[i+1].state.θ) * SOILS[i+1].auxil.δz;
+        v_gas_i = max(0, soils[i  ].state.vc.Θ_SAT - soils[i  ].state.θ) * soils[i  ].auxil.δz;
+        v_gas_j = max(0, soils[i+1].state.vc.Θ_SAT - soils[i+1].state.θ) * soils[i+1].auxil.δz;
         if v_gas_i > 0 && v_gas_j > 0
-            kdi = diffusive_coefficient(SOILS[i  ].auxil.t, TRACE_CH₄, TRACE_AIR) * SOILS[i  ].auxil.kd;
-            kdj = diffusive_coefficient(SOILS[i+1].auxil.t, TRACE_CH₄, TRACE_AIR) * SOILS[i+1].auxil.kd;
+            kdi = diffusive_coefficient(soils[i  ].auxil.t, TRACE_CH₄, TRACE_AIR) * soils[i  ].auxil.kd;
+            kdj = diffusive_coefficient(soils[i+1].auxil.t, TRACE_CH₄, TRACE_AIR) * soils[i+1].auxil.kd;
             rel_kd = 2 * kdi * kdj / (kdi + kdj);
-            drate = rel_kd * (SOILS[i].state.ns[1] / v_gas_i - SOILS[i+1].state.ns[1] / v_gas_j);
-            SOIL_BULK.auxil.dndt[i+1,1] = -drate;
+            drate = rel_kd * (soils[i].state.ns[1] / v_gas_i - soils[i+1].state.ns[1] / v_gas_j);
+            soil_bulk.auxil.dndt[i+1,1] = -drate;
 
-            kdi = diffusive_coefficient(SOILS[i  ].auxil.t, TRACE_CO₂, TRACE_AIR) * SOILS[i  ].auxil.kd;
-            kdj = diffusive_coefficient(SOILS[i+1].auxil.t, TRACE_CO₂, TRACE_AIR) * SOILS[i+1].auxil.kd;
+            kdi = diffusive_coefficient(soils[i  ].auxil.t, TRACE_CO₂, TRACE_AIR) * soils[i  ].auxil.kd;
+            kdj = diffusive_coefficient(soils[i+1].auxil.t, TRACE_CO₂, TRACE_AIR) * soils[i+1].auxil.kd;
             rel_kd = 2 * kdi * kdj / (kdi + kdj);
-            drate = rel_kd * (SOILS[i].state.ns[2] / v_gas_i - SOILS[i+1].state.ns[2] / v_gas_j);
-            SOIL_BULK.auxil.dndt[i+1,2] = -drate;
+            drate = rel_kd * (soils[i].state.ns[2] / v_gas_i - soils[i+1].state.ns[2] / v_gas_j);
+            soil_bulk.auxil.dndt[i+1,2] = -drate;
 
-            kdi = diffusive_coefficient(SOILS[i  ].auxil.t, TRACE_N₂, TRACE_AIR) * SOILS[i  ].auxil.kd;
-            kdj = diffusive_coefficient(SOILS[i+1].auxil.t, TRACE_N₂, TRACE_AIR) * SOILS[i+1].auxil.kd;
+            kdi = diffusive_coefficient(soils[i  ].auxil.t, TRACE_N₂, TRACE_AIR) * soils[i  ].auxil.kd;
+            kdj = diffusive_coefficient(soils[i+1].auxil.t, TRACE_N₂, TRACE_AIR) * soils[i+1].auxil.kd;
             rel_kd = 2 * kdi * kdj / (kdi + kdj);
-            drate = rel_kd * (SOILS[i].state.ns[4] / v_gas_i - SOILS[i+1].state.ns[4] / v_gas_j);
-            SOIL_BULK.auxil.dndt[i+1,4] = -drate;
+            drate = rel_kd * (soils[i].state.ns[4] / v_gas_i - soils[i+1].state.ns[4] / v_gas_j);
+            soil_bulk.auxil.dndt[i+1,4] = -drate;
 
-            kdi = diffusive_coefficient(SOILS[i  ].auxil.t, TRACE_O₂, TRACE_AIR) * SOILS[i  ].auxil.kd;
-            kdj = diffusive_coefficient(SOILS[i+1].auxil.t, TRACE_O₂, TRACE_AIR) * SOILS[i+1].auxil.kd;
+            kdi = diffusive_coefficient(soils[i  ].auxil.t, TRACE_O₂, TRACE_AIR) * soils[i  ].auxil.kd;
+            kdj = diffusive_coefficient(soils[i+1].auxil.t, TRACE_O₂, TRACE_AIR) * soils[i+1].auxil.kd;
             rel_kd = 2 * kdi * kdj / (kdi + kdj);
-            drate = rel_kd * (SOILS[i].state.ns[5] / v_gas_i - SOILS[i+1].state.ns[5] / v_gas_j);
-            SOIL_BULK.auxil.dndt[i+1,5] = -drate;
+            drate = rel_kd * (soils[i].state.ns[5] / v_gas_i - soils[i+1].state.ns[5] / v_gas_j);
+            soil_bulk.auxil.dndt[i+1,5] = -drate;
         end;
 
         # for water vapor
         v_vap_i = v_gas_i + FT(0.01);
         v_vap_j = v_gas_j + FT(0.01);
-        kdi = diffusive_coefficient(SOILS[i  ].auxil.t, TRACE_H₂O, TRACE_AIR) * SOILS[i  ].auxil.kv;
-        kdj = diffusive_coefficient(SOILS[i+1].auxil.t, TRACE_H₂O, TRACE_AIR) * SOILS[i+1].auxil.kv;
+        kdi = diffusive_coefficient(soils[i  ].auxil.t, TRACE_H₂O, TRACE_AIR) * soils[i  ].auxil.kv;
+        kdj = diffusive_coefficient(soils[i+1].auxil.t, TRACE_H₂O, TRACE_AIR) * soils[i+1].auxil.kv;
         rel_kv = 2 * kdi * kdj / (kdi + kdj);
-        drate = rel_kv * (SOILS[i].state.ns[3] / v_vap_i - SOILS[i+1].state.ns[3] / v_vap_j);
-        SOIL_BULK.auxil.dndt[i+1,3] = -drate;
+        drate = rel_kv * (soils[i].state.ns[3] / v_vap_i - soils[i+1].state.ns[3] / v_vap_j);
+        soil_bulk.auxil.dndt[i+1,3] = -drate;
     end;
 
     # update the diffusion from top soil to the first air layer
     for j in 1:5
-        SOILS[1].auxil.∂n∂t[j] -= SOIL_BULK.auxil.dndt[1,j];
+        soils[1].auxil.∂n∂t[j] -= soil_bulk.auxil.dndt[1,j];
     end;
 
     # update the diffusion among soil layers
     for i in 1:DIM_SOIL-1
         for j in 1:5
-            SOILS[i  ].auxil.∂n∂t[j] += SOIL_BULK.auxil.dndt[i+1,j];
-            SOILS[i+1].auxil.∂n∂t[j] -= SOIL_BULK.auxil.dndt[i+1,j];
+            soils[i  ].auxil.∂n∂t[j] += soil_bulk.auxil.dndt[i+1,j];
+            soils[i+1].auxil.∂n∂t[j] -= soil_bulk.auxil.dndt[i+1,j];
         end;
     end;
 

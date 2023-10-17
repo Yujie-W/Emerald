@@ -16,13 +16,14 @@ Compute the runoff of the soil from the lowest layer to the top layer, given
 
 """
 function soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
-    (; SOIL_BULK, SOILS) = spac;
+    sbulk = spac.soil_bulk;
+    soils = spac.soils;
 
     # iterate from the lowest soil layer to the top
-    N = length(SOILS);
+    N = length(soils);
     for i in N-1:-1:1
-        soili = SOILS[i];
-        soilj = SOILS[i+1];
+        soili = soils[i];
+        soilj = soils[i+1];
 
         # if the lower layer is oversaturated, the oversaturated water will flow to the upper layer (as well as energy)
         if soilj.state.θ > soilj.state.vc.Θ_SAT
@@ -39,9 +40,10 @@ function soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
     end;
 
     # run the soil water runoffn from the top layer (energy will be updated in EnergyBudgets.jl because of the need to call heat_capacitance function)
-    if SOILS[1].state.θ > SOILS[1].state.vc.Θ_SAT
-        SOIL_BULK.auxil.runoff = (SOILS[1].state.θ - SOILS[1].state.vc.Θ_SAT) * SOILS[1].auxil.δz * ρ_H₂O(FT) / M_H₂O(FT);
-        SOILS[1].state.θ = SOILS[1].state.vc.Θ_SAT;
+    top_soil = soils[1];
+    if top_soil.state.θ > top_soil.state.vc.Θ_SAT
+        sbulk.auxil.runoff = (top_soil.state.θ - top_soil.state.vc.Θ_SAT) * top_soil.auxil.δz * ρ_H₂O(FT) / M_H₂O(FT);
+        top_soil.state.θ = top_soil.state.vc.Θ_SAT;
     end;
 
     return nothing

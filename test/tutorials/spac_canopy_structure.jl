@@ -17,7 +17,7 @@ using Test;
     EmeraldLand.SPAC.update!(config, spac; lai = 3, ci = 0.8);
     @test true;
 
-    # Leaf inclination angle distribution is stored as a vector p_incl in field CANOPY.
+    # Leaf inclination angle distribution is stored as a vector p_incl in field canopy.
     # By default, p_incl is a uniform distribution from 0° to 90° per 10°.
     # To change p_incl, we use the VerhoefLIDF model to update the distribution function.
     # For example, (A,B) =
@@ -27,8 +27,8 @@ using Test;
     #     (1,0) gives planophile distribution,
     #     (0,-1) gives plagiophile distribution, and
     #     (0,1) gives extremophile distribution.
-    spac.CANOPY.structure.state.lidf.A = -0.35;
-    spac.CANOPY.structure.state.lidf.B = -0.15;
+    spac.canopy.structure.state.lidf.A = -0.35;
+    spac.canopy.structure.state.lidf.B = -0.15;
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
@@ -40,16 +40,16 @@ using Test;
     #     (1.172,2.770) gives planophile distribution,
     #     (3.326,3.326) gives plagiophile distribution, and
     #     (0.433,0.433) gives extremophile distribution.
-    spac.CANOPY.structure.state.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
-    spac.CANOPY.structure.state.lidf.A = 1;
-    spac.CANOPY.structure.state.lidf.B = 1;
+    spac.canopy.structure.state.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
+    spac.canopy.structure.state.lidf.A = 1;
+    spac.canopy.structure.state.lidf.B = 1;
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
     # By default, we use VerhoefLIDF method to compute LIDF, but we also support the use of Beta function.
     # To use the BetaLIDF, you need to change the parameter to BetaLIDF first.
-    spac.CANOPY.structure.state.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
+    spac.canopy.structure.state.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
     EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;

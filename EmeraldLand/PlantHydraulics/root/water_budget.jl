@@ -17,7 +17,7 @@ Set the flow profile of each root, given
 
 """
 function root_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
-    for root in spac.ROOTS
+    for root in spac.plant.roots
         xylem_water_budget!(root.xylem, root.xylem.auxil, δt);
     end;
 
