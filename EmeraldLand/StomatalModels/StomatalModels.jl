@@ -37,10 +37,15 @@ include("optimality/wang.jl");
 include("optimality/wang2.jl");
 
 
+# nighttime stomatal conductance
+include("nighttime/drde.jl");
+include("nighttime/dtde.jl");
+include("nighttime/wang.jl");
+
+
 
 include("conductance.jl");
 include("limits.jl");
-include("optimality.jl");
 
 
 end; # module

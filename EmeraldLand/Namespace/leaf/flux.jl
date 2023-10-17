@@ -120,8 +120,6 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     ppar_sunlit::Matrix{FT}
 
     # used for nocturnal stomatal conductance
-    "Ratio that leaf area is exposed to external sources/sinks (not other leaves, e.g., 2/LAI for canopy on average, used for nocturnal transpiration)"
-    f_view::FT = 2
     "Memory PPAR `[μmol m⁻² s⁻¹]`"
     ppar_mem::FT = 100
 

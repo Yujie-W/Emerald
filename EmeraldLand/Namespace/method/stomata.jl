@@ -259,7 +259,7 @@ end;
 # Changes to this struct
 # General
 #     2022-Jun-30: add struct for Wang model
-#     2022-Jul-11: add fields: F_FITNESS, f_view, and ppar_mem
+#     2022-Jul-11: add fields: F_FITNESS, and ppar_mem
 #
 #######################################################################################################################################################################################################
 """

@@ -148,4 +148,20 @@ import Emerald.EmeraldLand.SPAC
         @test SM.∂Θ∂E(NS.Wang2SM{Float64}(), leaf, air, 1) > 0;
     end;
 
+    @testset "Nighttime model" begin
+        config = NS.SPACConfiguration{Float64}();
+        leaf = NS.Leaf(config);
+        air = NS.AirLayer{Float64}();
+        leaf.flux.state.g_H₂O_s_shaded = 0.02;
+        leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
+        leaf.flux.auxil.ppar_sunlit .= 0;
+        leaf.flux.auxil.ppar_shaded = 0;
+        SM.stomatal_conductance_profile!(leaf);
+        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PH.leaf_pressure_profile!(config, leaf, 0.0);
+
+        @test SM.∂R∂E(leaf, air, 1.0) > 0;
+        @test SM.∂Θₙ∂E(leaf, air) > 0;
+    end;
+
 end;

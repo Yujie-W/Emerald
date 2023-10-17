@@ -15,7 +15,7 @@
 
 Return the marginal hydraulic conductance, given
 - `leaf` `Leaf` type struct
-- `flow` Flow rate through the leaf xylem `[mol m⁻² s⁻¹]`
+- `flow` Flow rate through the leaf xylem `[mol s⁻¹]`
 - `δe` Incremental flow rate, default is 1e-7
 
 """

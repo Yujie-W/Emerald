@@ -36,9 +36,9 @@ Return the marginal risk for stomatal opening, given
     # compute the E at the current setting
     gs = leaf.flux.state.g_H₂O_s_shaded;
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air;
+    e  = gh * d / air.state.p_air * leaf.xylem.state.area;
 
-    dedp = ∂E∂P(leaf, e; δe = δe);
+    dedp = ∂E∂P(leaf, e; δe = δe) / leaf.xylem.state.area;
 
     return (-2 * A * leaf.capacitor.auxil.p_leaf + B) / dedp
 );
@@ -52,9 +52,9 @@ Return the marginal risk for stomatal opening, given
     # compute the E at the current setting
     gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air;
+    e  = gh * d / air.state.p_air * leaf.xylem.state.area;
 
-    dedp = ∂E∂P(leaf, e; δe = δe);
+    dedp = ∂E∂P(leaf, e; δe = δe) / leaf.xylem.state.area;
 
     return (-2 * A * leaf.capacitor.auxil.p_leaf + B) / dedp
 );
