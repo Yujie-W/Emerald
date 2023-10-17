@@ -15,15 +15,15 @@ flow_out(leaf::Leaf{FT}) where {FT} = flow_out(leaf.xylem) + leaf.capacitor.auxi
 #######################################################################################################################################################################################################
 """
 
-    leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Set the flow out from each leaf, given
 - `config` `SPACConfiguration` type struct
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
-    # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a MultiLayerSPAC
+function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a BulkSPAC
     #     LEAVES index is from lower to upper, and thus the sunlit leaves fraction is DIM_LAYER + 1 - i
     #     AIRS index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX
 

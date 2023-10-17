@@ -33,13 +33,13 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    stem_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    stem_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
 
 Set up stem pressure profile for trunk and branches, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function stem_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+function stem_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
     (; BRANCHES, JUNCTION, TRUNK) = spac;
 
     stem_pressure_profile!(TRUNK, JUNCTION.auxil.pressure);

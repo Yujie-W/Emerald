@@ -35,14 +35,14 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #######################################################################################################################################################################################################
 """
 
-    soil_albedo!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Updates lower soil boundary reflectance, given
 - `config` Configurations of spac model
 - `spac` SPAC
 
 """
-function soil_albedo!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; SPECTRA, α_CLM, α_FITTING) = config;
     (; SOIL_BULK, SOILS) = spac;
 

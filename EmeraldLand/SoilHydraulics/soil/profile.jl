@@ -9,14 +9,14 @@
 #######################################################################################################################################################################################################
 """
 
-    soil_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    soil_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update the flow, diffusion, and energy flow profiles in the soil, given
 - `config` `SPACConfiguration` type configuration
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function soil_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function soil_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     soil_water_infiltration!(spac);
     root_source_sink!(spac);
     trace_gas_diffusion!(config, spac);

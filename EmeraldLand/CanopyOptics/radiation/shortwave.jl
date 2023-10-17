@@ -13,14 +13,14 @@
 #######################################################################################################################################################################################################
 """
 
-    shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update shortwave radiation related auxiliary variables, given
 - `config` SPAC configuration
 - `spac` SPAC
 
 """
-function shortwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; CANOPY, LEAVES, METEO, SOIL_BULK) = spac;
 
     # if sza > 89, set all the radiation variables to 0

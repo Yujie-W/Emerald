@@ -11,14 +11,14 @@
 #######################################################################################################################################################################################################
 """
 
-    sun_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update sun geometry related auxiliary variables, given
 - `config` SPAC configuration
 - `spac` SPAC
 
 """
-function sun_geometry!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     if spac.CANOPY.sun_geometry.state.sza > 89 || spac.CANOPY.structure.state.lai <= 0
         return nothing
     end;

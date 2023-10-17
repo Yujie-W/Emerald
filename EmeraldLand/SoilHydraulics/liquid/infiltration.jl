@@ -9,13 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    soil_water_infiltration!(spac::MultiLayerSPAC{FT}) where {FT}
+    soil_water_infiltration!(spac::BulkSPAC{FT}) where {FT}
 
 Update the marginal increase of soil water content per layer, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
-function soil_water_infiltration!(spac::MultiLayerSPAC{FT}) where {FT}
+function soil_water_infiltration!(spac::BulkSPAC{FT}) where {FT}
     (; METEO, SOIL_BULK, SOILS) = spac;
 
     # update the soil bulk auxiliary variables related to soil water and enrgy transfer between adjacent layers

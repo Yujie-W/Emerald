@@ -17,10 +17,10 @@
 #######################################################################################################################################################################################################
 """
 
-    β_factor!(spac::MultiLayerSPAC{FT}) where {FT}
+    β_factor!(spac::BulkSPAC{FT}) where {FT}
 
 Update the β factor for the LEAVES component in SPAC, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 Note that if the β function is based on Kleaf or Pleaf, β factor is taken as that of leaf; if the β function is based on Ksoil, Psoil, or Θ, β is taken as the average weighted by flow rate in each
     root.
@@ -28,7 +28,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 """
 function β_factor! end;
 
-β_factor!(spac::MultiLayerSPAC{FT}) where {FT} = (
+β_factor!(spac::BulkSPAC{FT}) where {FT} = (
     (; LEAVES, ROOTS, SOILS) = spac;
 
     for i in eachindex(LEAVES)

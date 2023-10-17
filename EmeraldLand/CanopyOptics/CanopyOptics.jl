@@ -10,7 +10,7 @@ using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BetaLIDF, VerhoefLIDF
-using ..Namespace: MultiLayerSPAC, SPACConfiguration
+using ..Namespace: BulkSPAC, SPACConfiguration
 
 
 # functions related to canopy geometry

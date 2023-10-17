@@ -39,14 +39,14 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_pressure_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    leaf_pressure_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Set up leaf pressure profile for each leaf, given
 - `config` `SPACConfiguration` type struct
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function leaf_pressure_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function leaf_pressure_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; BRANCHES, LEAVES) = spac;
 
     for i in eachindex(BRANCHES)

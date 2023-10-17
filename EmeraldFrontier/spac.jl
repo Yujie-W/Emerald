@@ -21,7 +21,7 @@ function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     _air_bounds = _Δz .* collect(0:21);
 
     # create a SPAC to work on
-    _spac = MultiLayerSPAC(
+    _spac = BulkSPAC(
                 config;
                 air_bounds = _air_bounds,
                 latitude = gmdict["LATITUDE"],

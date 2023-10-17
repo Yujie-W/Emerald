@@ -15,15 +15,15 @@
 #######################################################################################################################################################################################################
 """
 
-    update_substep_auxils!(spac::MultiLayerSPAC{FT}) where {FT}
+    update_substep_auxils!(spac::BulkSPAC{FT}) where {FT}
 
 Update the auxiliary variables at sub time step within a big time step, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function update_substep_auxils! end;
 
-update_substep_auxils!(spac::MultiLayerSPAC{FT}) where {FT} = (
+update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
     (; SOILS, SOIL_BULK, ROOTS, JUNCTION, TRUNK, BRANCHES, LEAVES) = spac;
 
     # update the soil layer auxiliary variables
@@ -189,15 +189,15 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    update_step_auxils!(spac::MultiLayerSPAC{FT}) where {FT}
+    update_step_auxils!(spac::BulkSPAC{FT}) where {FT}
 
 Update the auxiliary variables at big time step, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function update_step_auxils! end;
 
-update_step_auxils!(spac::MultiLayerSPAC{FT}) where {FT} = (
+update_step_auxils!(spac::BulkSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;
 
     for leaf in LEAVES

@@ -9,13 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    junction_water_budget!(spac::MultiLayerSPAC{FT}) where {FT}
+    junction_water_budget!(spac::BulkSPAC{FT}) where {FT}
 
 Update the water budget of the root-trunk junction, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function junction_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function junction_water_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     (; JUNCTION, ROOTS, TRUNK) = spac;
 
     # compute the total flow into the junction as the sum of root flow out minus the trunk flow in

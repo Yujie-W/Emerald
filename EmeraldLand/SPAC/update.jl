@@ -92,7 +92,7 @@ update!(air::AirLayer{FT};
 """
 
     update!(config::SPACConfiguration{FT},
-            spac::MultiLayerSPAC{FT},;
+            spac::BulkSPAC{FT},;
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
             ci::Union{Number,Nothing} = nothing,
@@ -108,7 +108,7 @@ update!(air::AirLayer{FT};
 
 Update the physiological parameters of the SPAC, given
 - `spac` Soil plant air continuum
-- `config` Configuration for `MultiLayerSPAC`
+- `config` Configuration for `BulkSPAC`
 - `cab` Chlorophyll content. Optional, default is nothing
 - `car` Carotenoid content. Optional, default is nothing
 - `ci` Clumping index. Optional, default is nothing
@@ -123,7 +123,7 @@ Update the physiological parameters of the SPAC, given
 
 """
 update!(config::SPACConfiguration{FT},
-        spac::MultiLayerSPAC{FT};
+        spac::BulkSPAC{FT};
         cab::Union{Number,Nothing} = nothing,
         car::Union{Number,Nothing} = nothing,
         ci::Union{Number,Nothing} = nothing,

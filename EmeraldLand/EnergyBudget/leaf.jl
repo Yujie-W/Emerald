@@ -9,13 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+    leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the leaf, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function leaf_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     (; AIRS, BRANCHES, CANOPY, LEAVES, LEAVES_INDEX) = spac;
     # the total energy change of the leaf is the sum of
     #     the energy of the flow from the stem

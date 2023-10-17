@@ -36,13 +36,13 @@ root_sink(x_aux::XylemHydraulicsAuxilSS{FT}) where {FT} = x_aux.flow;
 #######################################################################################################################################################################################################
 """
 
-    root_source_sink!(spac::MultiLayerSPAC{FT}) where {FT}
+    root_source_sink!(spac::BulkSPAC{FT}) where {FT}
 
 Update the source/sink terms for the soil layers, given
 - `spac` the SPAC model
 
 """
-function root_source_sink!(spac::MultiLayerSPAC{FT}) where {FT}
+function root_source_sink!(spac::BulkSPAC{FT}) where {FT}
     (; ROOTS, ROOTS_INDEX, SOIL_BULK, SOILS) = spac;
 
     # loop through the roots and compute the source/sink terms

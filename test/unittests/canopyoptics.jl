@@ -18,7 +18,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Soil albedo" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
 
         spac.SOIL_BULK.auxil._θ = -1;
@@ -42,7 +42,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Canopy structure" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
@@ -63,7 +63,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Canopy sun geometry" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
@@ -83,7 +83,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Canopy sensor geometry" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
@@ -102,7 +102,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Shortwave radiation" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
@@ -128,7 +128,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Longwave radiation" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.longwave_radiation!(config, spac);
@@ -144,7 +144,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Canopy reflection spectrum" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
@@ -160,7 +160,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Canopy fluorescence spectrum" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         for leaf in spac.LEAVES
             leaf.flux.auxil.ϕ_f_shaded = 0.01;
@@ -194,7 +194,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Canopy radiation" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
 
         # SZA < 90

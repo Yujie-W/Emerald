@@ -13,16 +13,16 @@
 #######################################################################################################################################################################################################
 """
 
-    clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT}
+    clear_legacy!(spac::BulkSPAC{FT}) where {FT}
     clear_legacy!(organ::Union{Leaf{FT}, Root{FT}, Stem{FT}}) where {FT}
 
 Clear the legacy for hydraulic organ or system, given
-- `spac` `MultiLayerSPAC` type structure
+- `spac` `BulkSPAC` type structure
 - `organ` `Leaf`, `Root`, or `Stem` type structure
 """
 function clear_legacy! end;
 
-clear_legacy!(spac::MultiLayerSPAC{FT}) where {FT} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
+clear_legacy!(spac::BulkSPAC{FT}) where {FT} = (clear_legacy!.(spac.ROOTS); clear_legacy!(spac.TRUNK); clear_legacy!.(spac.BRANCHES); clear_legacy!.(spac.LEAVES););
 
 clear_legacy!(organ::Union{Leaf{FT}, Root{FT}, Stem{FT}}) where {FT} = clear_legacy!(organ.xylem);
 

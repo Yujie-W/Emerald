@@ -10,15 +10,15 @@
 #######################################################################################################################################################################################################
 """
 
-    soil_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
+    soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
 
 Update the marginal increase of soil energy per layer, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 Note that energy associated with water movement between soil and root is accounted for in the root energy budget function.
 
 """
-function soil_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
+function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
     (; AIRS, METEO, SOIL_BULK, SOILS) = spac;
 
     # add rain and radiation energy into the first layer

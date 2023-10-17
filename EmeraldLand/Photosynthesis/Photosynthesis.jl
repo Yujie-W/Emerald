@@ -11,7 +11,7 @@ using ..Namespace: GCO₂Mode, PCO₂Mode
 using ..Namespace: C3Cyto, C3VJP, C4VJP
 using ..Namespace: Leaf
 using ..Namespace: AirLayer
-using ..Namespace: MultiLayerSPAC
+using ..Namespace: BulkSPAC
 
 
 # photosystem level model (order by the step in photosynthesis model)

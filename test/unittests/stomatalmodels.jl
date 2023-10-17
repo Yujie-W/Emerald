@@ -42,7 +42,7 @@ import Emerald.EmeraldLand.SPAC
 
         # set the beta factor based on stomatal models
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
 
         # the function does not for optimality models
@@ -182,7 +182,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Stomatal profiles" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         for leaf in spac.LEAVES
             leaf.flux.auxil.ppar_shaded = 100.0;
@@ -201,7 +201,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Stomatal budgets" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         g_shaded = [];
         g_sunlit = [];

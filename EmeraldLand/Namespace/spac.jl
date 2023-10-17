@@ -34,7 +34,7 @@ end;
 #     2022-May-25: SPAC system for monospecies tree
 #     2022-May-25: use Root and Stem structures with temperatures
 #     2022-May-31: rename _qs to _fs
-#     2022-Jun-29: rename struct to MultiLayerSPAC, and use Leaf
+#     2022-Jun-29: rename struct to BulkSPAC, and use Leaf
 #     2022-Jun-29: add CANOPY, Z, AIRS, WLSET, LHA, SOIL, RAD_LW, RAD_SW, Φ_PHOTON to SPAC
 #     2022-Jul-14: add Meteorology to SPAC
 #     2022-Aug-30: remove LHA and WLSET
@@ -60,7 +60,7 @@ Struct for monospecies tree SPAC system (with trunk and branches)
 $(TYPEDFIELDS)
 
 """
-mutable struct MultiLayerSPAC{FT}
+mutable struct BulkSPAC{FT}
     # Geometry information
     "Corresponding air layer per canopy layer"
     LEAVES_INDEX::Vector{Int}
@@ -108,7 +108,7 @@ mutable struct MultiLayerSPAC{FT}
     _root_connection::Bool
 end;
 
-MultiLayerSPAC(
+BulkSPAC(
             config::SPACConfiguration{FT};
             air_bounds::Vector{<:Number} = collect(0:0.5:13),
             basal_area::Number = 1,
@@ -163,7 +163,7 @@ MultiLayerSPAC(
         air_layers[i].auxil.δz = (air_bounds[i+1] - air_bounds[i]);
     end;
 
-    return MultiLayerSPAC{FT}(
+    return BulkSPAC{FT}(
                 ind_layer,                                              # LEAVES_INDEX
                 ind_root,                                               # ROOTS_INDEX
                 zs,                                                     # Z
@@ -245,7 +245,7 @@ Base.@kwdef mutable struct MultiLayerSPACState{FT}
     tropomi_sif₇₄₀::FT = 0
 end;
 
-MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
+MultiLayerSPACState{FT}(spac::BulkSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;
 
     _gs_sunlit = zeros(FT, size(LEAVES[1].g_H₂O_s_sunlit,1), size(LEAVES[1].g_H₂O_s_sunlit,2), length(LEAVES));

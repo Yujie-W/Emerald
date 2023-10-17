@@ -11,14 +11,14 @@
 #######################################################################################################################################################################################################
 """
 
-    canopy_structure!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update canopy structure related auxiliary variables, given
 - `config` SPAC configuration
 - `spac` SPAC
 
 """
-function canopy_structure!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     if spac.CANOPY.structure.state.lai <= 0
         return nothing
     end;

@@ -13,14 +13,14 @@
 #######################################################################################################################################################################################################
 """
 
-    volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Balance the air volume in the soil so that pressure is in equilibrium, given
-- `config` Configuration for `MultiLayerSPAC`
-- `spac` `MultiLayerSPAC` SPAC
+- `config` Configuration for `BulkSPAC`
+- `spac` `BulkSPAC` SPAC
 
 """
-function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; PRESCRIBE_AIR) = config;
     (; AIRS, SOILS) = spac;
 

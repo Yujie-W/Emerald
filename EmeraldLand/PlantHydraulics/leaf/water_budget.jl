@@ -54,14 +54,14 @@ leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) w
 #######################################################################################################################################################################################################
 """
 
-    leaf_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    leaf_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Set the flow profile of each leaf, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 - `δt` time step
 
 """
-function leaf_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function leaf_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     if spac.CANOPY.structure.state.lai > 0
         # do this way to avoid memory allocation of a [nothing...] vector
         for leaf in spac.LEAVES

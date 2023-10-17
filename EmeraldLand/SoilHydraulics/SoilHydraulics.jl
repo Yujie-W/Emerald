@@ -6,7 +6,7 @@ using ..Namespace: BrooksCorey, VanGenuchten
 using ..Namespace: XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS
 using ..Namespace: Root
 using ..Namespace: SoilLayer
-using ..Namespace: MultiLayerSPAC, SPACConfiguration
+using ..Namespace: BulkSPAC, SPACConfiguration
 using ..PhysicalChemistry: diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure
 
 

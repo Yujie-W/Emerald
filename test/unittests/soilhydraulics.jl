@@ -35,7 +35,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Trace gas diffusion" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
 
         # set the soil to be not saturated
@@ -80,7 +80,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Soil infiltration" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
 
         # set the soil to be not saturated
@@ -102,7 +102,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Soil gas and water volume" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
         SPAC.update_substep_auxils!(spac);
@@ -141,7 +141,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Surface runoff" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
 
         # set every layer to be unsaturated
@@ -180,7 +180,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Water conservation" begin
         config = NS.SPACConfiguration{Float64}();
-        spac = NS.MultiLayerSPAC(config);
+        spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
 

@@ -12,14 +12,14 @@
 #######################################################################################################################################################################################################
 """
 
-    reflection_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    reflection_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Computes the spectra at the sensor direction, given
 - `config` Configurations of spac model
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function reflection_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function reflection_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     if !config.ENABLE_REF
         return nothing
     end;

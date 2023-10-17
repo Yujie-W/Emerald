@@ -4,7 +4,7 @@ import Emerald.EmeraldLand.PlantHydraulics as PH
 
 # steady state
 config = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = true);
-spac = NS.MultiLayerSPAC(config);
+spac = NS.BulkSPAC(config);
 for leaf in spac.LEAVES
     leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
     leaf.g_H₂O_s_shaded = 0.1;
@@ -25,7 +25,7 @@ end;
 
 # non-steady state
 config = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
-spac = NS.MultiLayerSPAC(config);
+spac = NS.BulkSPAC(config);
 for leaf in spac.LEAVES
     leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
     leaf.g_H₂O_s_shaded = 0.1;

@@ -17,7 +17,7 @@ using Emerald;
 
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
-spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
+spac = EmeraldLand.Namespace.BulkSPAC(config);
 spac.METEO.rad_lw = 300;
 EmeraldLand.SPAC.initialize!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
@@ -30,7 +30,7 @@ using Emerald;
 
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
-spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
+spac = EmeraldLand.Namespace.BulkSPAC(config);
 #EmeraldLand.SPAC.update!(config, spac; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
 EmeraldLand.SPAC.initialize!(config, spac);
 spac.METEO.rad_lw = 300;
@@ -110,7 +110,7 @@ end;
 
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}();
-spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
+spac = EmeraldLand.Namespace.BulkSPAC(config);
 EmeraldLand.SPAC.update!(config, spac; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
 EmeraldLand.SPAC.initialize!(config, spac);
 spac.METEO.rad_lw = 300;

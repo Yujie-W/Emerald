@@ -10,14 +10,14 @@
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Run longwave radiation simulations, given
 - `config` SPAC configuration
 - `spac` SPAC
 
 """
-function longwave_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; DIM_LAYER) = config;
     (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
 

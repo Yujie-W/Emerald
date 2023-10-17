@@ -9,13 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    junction_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+    junction_energy_flows!(spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the junction, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function junction_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+function junction_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     (; JUNCTION, ROOTS, TRUNK) = spac;
 
     # The total energy change of the junction is difference between

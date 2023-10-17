@@ -39,15 +39,15 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    soil_budgets!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    soil_budgets!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Run the soil budgets for water and gas, given
 - `config` `SPACConfiguration` type configuration
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 - `δt` time step
 
 """
-function soil_budgets!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function soil_budgets!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
     (; SOILS) = spac;
 
     # per soil layer, run the gas diffusion, mass flow, and condensation or evaporation budgets

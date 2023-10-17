@@ -16,13 +16,13 @@ flow_out(stem::Stem{FT}) where {FT} = flow_out(stem.xylem);
 #######################################################################################################################################################################################################
 """
 
-    stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    stem_flow_profiles!(spac::BulkSPAC{FT}) where {FT}
 
 Set up stem flow profile, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function stem_flow_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+function stem_flow_profiles!(spac::BulkSPAC{FT}) where {FT}
     (; BRANCHES, JUNCTION, LEAVES, TRUNK) = spac;
 
     sum_f::FT = 0;

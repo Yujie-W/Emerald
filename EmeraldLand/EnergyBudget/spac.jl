@@ -10,13 +10,13 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
+    spac_energy_flow!(spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the plant, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function spac_energy_flow!(spac::MultiLayerSPAC{FT}) where {FT}
+function spac_energy_flow!(spac::BulkSPAC{FT}) where {FT}
     soil_energy_flow!(spac);
     root_energy_flows!(spac);
     junction_energy_flows!(spac);
@@ -37,14 +37,14 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    spac_energy_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Calculate the energy budgets of the spac, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 - `δt` time step
 
 """
-function spac_energy_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     (; BRANCHES, LEAVES, ROOTS, SOILS, TRUNK) = spac;
 
     # update the temperature for soil

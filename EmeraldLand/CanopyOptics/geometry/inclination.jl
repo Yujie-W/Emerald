@@ -63,14 +63,14 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    inclination_angles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update the frequency of leaf inclination angles, given
 - `config` SPAC configurations
-- `spac` `MultiLayerSPAC` type multiple layer SPAC
+- `spac` `BulkSPAC` type multiple layer SPAC
 
 """
-function inclination_angles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function inclination_angles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     if spac.CANOPY.structure.state.lai <= 0
         return nothing
     end;

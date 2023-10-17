@@ -19,16 +19,16 @@
 #######################################################################################################################################################################################################
 """
 
-    initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    initialize!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Initialize the SPAC, given
 - `config` Configurations of spac model
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function initialize! end;
 
-initialize!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
+initialize!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     (; AIRS, BRANCHES, CANOPY, LEAVES, ROOTS, SOIL_BULK, SOILS, TRUNK) = spac;
 
     # make sure soil energy is correctly scaled with temperature and soil water content

@@ -12,14 +12,14 @@
 #######################################################################################################################################################################################################
 """
 
-    stomatal_conductance!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    stomatal_conductance!(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Update stomatal conductance for H₂O based on computed ∂g∂t, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 - `δt` Time step length `[s]`
 
 """
-stomatal_conductance!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT} = (
+stomatal_conductance!(spac::BulkSPAC{FT}, δt::FT) where {FT} = (
     # if lai = 0 or roots are not connected, do nothing
     if spac.CANOPY.structure.state.lai == 0 || !spac._root_connection
         return nothing

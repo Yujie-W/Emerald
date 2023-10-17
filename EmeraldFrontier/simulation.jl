@@ -13,17 +13,17 @@
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT}
+    prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT}
 
 Prescribe traits and environmental conditions, given
 - `config` `SPACConfiguration` type SPAC configuration
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 - `dfr` `DataFrameRow` type weather driver
 - `t_on` If true, plant energy budget is on, do not prescribe the temperatures
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
-function prescribe!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT}
+function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT}
     # read the data out of dataframe row to reduce memory allocation
     _df_atm::FT = dfr.P_ATM;
     _df_chl::FT = dfr.CHLOROPHYLL;
@@ -139,7 +139,7 @@ end;
                 saving::Union{Nothing,String} = nothing,
                 selection = :)
     simulation!(config::SPACConfiguration{FT},
-                spac::MultiLayerSPAC{FT},
+                spac::BulkSPAC{FT},
                 wdf::DataFrame;
                 initialial_state::Union{Nothing,Bool} = true,
                 saving::Union{Nothing,String} = nothing,
@@ -179,7 +179,7 @@ simulation!(wd_tag::String,
 );
 
 simulation!(config::SPACConfiguration{FT},
-            spac::MultiLayerSPAC{FT},
+            spac::BulkSPAC{FT},
             wdf::DataFrame;
             initialial_state::Union{Nothing,Bool} = true,
             saving::Union{Nothing,String} = nothing,
@@ -220,7 +220,7 @@ simulation!(config::SPACConfiguration{FT},
 );
 
 simulation!(config::SPACConfiguration{FT},
-            spac::MultiLayerSPAC{FT},
+            spac::BulkSPAC{FT},
             dfr::DataFrameRow;
             n_step::Int = 10,
             δt::Number = 3600

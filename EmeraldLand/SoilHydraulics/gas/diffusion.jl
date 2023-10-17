@@ -9,14 +9,14 @@
 #######################################################################################################################################################################################################
 """
 
-    trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Compute the diffusion of trace gasses in the soil, given
 - `config` `SPACConfiguration` type configuration
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; AIRS, SOIL_BULK, SOILS) = spac;
     (; DIM_SOIL, TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
 

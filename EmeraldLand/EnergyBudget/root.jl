@@ -10,13 +10,13 @@
 #######################################################################################################################################################################################################
 """
 
-    root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+    root_energy_flows!(spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the root, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function root_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+function root_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     (; JUNCTION, ROOTS, ROOTS_INDEX, SOIL_BULK, SOILS) = spac;
 
     # compute the energy flow per layer

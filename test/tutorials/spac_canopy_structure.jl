@@ -5,7 +5,7 @@ using Test;
 @testset "Modify Canopy Structural Parameters" begin
     FT = Float64;
     config = EmeraldLand.Namespace.SPACConfiguration{FT}();
-    spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
+    spac = EmeraldLand.Namespace.BulkSPAC(config);
     EmeraldLand.SPAC.initialize!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     EmeraldLand.SPAC.spac!(config, spac, FT(1));

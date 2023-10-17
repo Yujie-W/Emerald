@@ -9,14 +9,14 @@
 #######################################################################################################################################################################################################
 """
 
-    canopy_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    canopy_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update the canopy radiation related auxiliary variables, given
 - `config` SPAC configuration
 - `spac` SPAC
 
 """
-function canopy_radiation!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function canopy_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     # update the canopy structure
     inclination_angles!(config, spac);
     canopy_structure!(config, spac);

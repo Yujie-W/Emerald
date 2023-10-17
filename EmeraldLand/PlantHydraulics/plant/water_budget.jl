@@ -15,14 +15,14 @@
 #######################################################################################################################################################################################################
 """
 
-    plant_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    plant_water_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Set up the water budget of the plant, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 - `δt` time step
 
 """
-function plant_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function plant_water_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     leaf_water_budgets!(spac, δt);
     stem_water_budgets!(spac, δt);
     root_water_budgets!(spac, δt);

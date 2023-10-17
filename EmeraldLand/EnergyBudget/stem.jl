@@ -9,13 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    stem_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+    stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the trunk and branches, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function stem_energy_flows!(spac::MultiLayerSPAC{FT}) where {FT}
+function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     (; BRANCHES, JUNCTION, LEAVES, TRUNK) = spac;
 
     # for the trunk, the total energy is the differentce of

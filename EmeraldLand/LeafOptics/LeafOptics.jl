@@ -5,7 +5,7 @@ using SpecialFunctions: expint
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
 
 using ..Namespace: LeafBio, LeafBioState
-using ..Namespace: MultiLayerSPAC, SPACConfiguration
+using ..Namespace: BulkSPAC, SPACConfiguration
 
 
 include("prospect/interface.jl");
@@ -56,19 +56,19 @@ end;
 #
 # Changes made to this method
 # General
-#     2022-Jun-29: add method for MultiLayerSPAC
+#     2022-Jun-29: add method for BulkSPAC
 #
 #######################################################################################################################################################################################################
 """
 
-    plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update leaf reflectance and transmittance for SPAC, given
 - `config` Configurations of spac model
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     for leaf in spac.LEAVES
         leaf_spectra!(config, leaf.bio, leaf.capacitor.state.v_storage);
     end;

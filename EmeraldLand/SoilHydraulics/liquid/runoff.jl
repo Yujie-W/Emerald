@@ -9,13 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    soil_water_runoff!(spac::MultiLayerSPAC{FT}) where {FT}
+    soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
 
 Compute the runoff of the soil from the lowest layer to the top layer, given
-- `spac` `MultiLayerSPAC` type SPAC
+- `spac` `BulkSPAC` type SPAC
 
 """
-function soil_water_runoff!(spac::MultiLayerSPAC{FT}) where {FT}
+function soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
     (; SOIL_BULK, SOILS) = spac;
 
     # iterate from the lowest soil layer to the top

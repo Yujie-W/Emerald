@@ -9,15 +9,15 @@
 #######################################################################################################################################################################################################
 """
 
-    stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT}
+    stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT}
 
 Compute marginal stomatal conductance change for H₂O, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
 function stomatal_conductance_profile! end;
 
-stomatal_conductance_profile!(spac::MultiLayerSPAC{FT}) where {FT} = (
+stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
     # if lai = 0 or roots are not connected, do nothing
     if spac.CANOPY.structure.state.lai == 0 || !spac._root_connection
         return nothing

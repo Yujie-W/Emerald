@@ -9,14 +9,14 @@
 #######################################################################################################################################################################################################
 """
 
-    root_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    root_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Set the flow profile of each root, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 - `δt` time step
 
 """
-function root_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function root_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     for root in spac.ROOTS
         xylem_water_budget!(root.xylem, root.xylem.auxil, δt);
     end;

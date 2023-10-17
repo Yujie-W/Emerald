@@ -88,14 +88,14 @@ disconnect!(hs::Union{LeafHydraulics{FT}, RootHydraulics{FT}, StemHydraulics{FT}
 #######################################################################################################################################################################################################
 """
 
-    disconnect_roots!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    disconnect_roots!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Disconnect roots from soil if soil water content is very low, given
 - `config` SPAC configuration
 - `spac` SPAC model
 
 """
-function disconnect_roots!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function disconnect_roots!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; KR_THRESHOLD) = config;
     (; ROOTS, ROOTS_INDEX, SOIL) = spac;
 
@@ -125,13 +125,13 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    disconnect_spac!(spac::MultiLayerSPAC{FT}) where {FT}
+    disconnect_spac!(spac::BulkSPAC{FT}) where {FT}
 
 Disconnect spac if no root is connected to soil any more, given
 - `spac` SPAC model
 
 """
-function disconnect_spac!(spac::MultiLayerSPAC{FT}) where {FT}
+function disconnect_spac!(spac::BulkSPAC{FT}) where {FT}
     (; BRANCHES, LEAVES, ROOTS, TRUNK) = spac;
 
     # very first step here: if soil is too dry, disconnect root from soil

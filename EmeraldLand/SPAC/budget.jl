@@ -19,15 +19,15 @@
 #######################################################################################################################################################################################################
 """
 
-        adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+        adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Return adjusted time that soil does not over saturate or drain, given
-- `config` Configuration for `MultiLayerSPAC`
-- `spac` `MultiLayerSPAC` SPAC
+- `config` Configuration for `BulkSPAC`
+- `spac` `BulkSPAC` SPAC
 - `δt` Time step
 
 """
-function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
     (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
     (; BRANCHES, JUNCTION, LEAVES, SOILS, TRUNK) = spac;
 
@@ -158,18 +158,18 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT}
-    time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
+    time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Move forward in time for SPAC with time stepper controller, given
-- `config` Configuration for `MultiLayerSPAC`
-- `spac` `MultiLayerSPAC` SPAC
+- `config` Configuration for `BulkSPAC`
+- `spac` `BulkSPAC` SPAC
 - `δt` Time step (if not given, solve for steady state solution)
 
 """
 function time_stepper! end;
 
-time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Number) where {FT} = (
+time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT} = (
     (; CANOPY, LEAVES, METEO, SOIL_BULK, SOILS) = spac;
 
     # run the update function until time elapses

@@ -10,7 +10,7 @@ using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
 using ..Namespace: XylemHydraulicsAuxilNSS
 using ..Namespace: JunctionCapacitor, Leaf, Root, SoilBulk, SoilLayer, Stem, ReferenceSpectra
-using ..Namespace: AirLayer, GCO₂Mode, MultiLayerCanopy, MultiLayerSPAC, SPACConfiguration, MultiLayerSPACState
+using ..Namespace: AirLayer, GCO₂Mode, MultiLayerCanopy, BulkSPAC, SPACConfiguration, MultiLayerSPACState
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!

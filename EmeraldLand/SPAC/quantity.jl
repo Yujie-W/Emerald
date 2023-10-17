@@ -7,15 +7,15 @@
 #######################################################################################################################################################################################################
 """
 
-    BETA(spac::MultiLayerSPAC{FT}) where {FT}
+    BETA(spac::BulkSPAC{FT}) where {FT}
 
 Return the average beta factor for
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function BETA end;
 
-BETA(spac::MultiLayerSPAC{FT}) where {FT} = (
+BETA(spac::BulkSPAC{FT}) where {FT} = (
     (; LEAVES) = spac;
 
     # compute the mean beta
@@ -38,15 +38,15 @@ BETA(spac::MultiLayerSPAC{FT}) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    CNPP(spac::MultiLayerSPAC{FT}) where {FT}
+    CNPP(spac::BulkSPAC{FT}) where {FT}
 
 Return the canopy net primary productivity per ground area, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function CNPP end;
 
-CNPP(spac::MultiLayerSPAC{FT}) where {FT} = (
+CNPP(spac::BulkSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
@@ -72,15 +72,15 @@ CNPP(spac::MultiLayerSPAC{FT}) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    GPP(spac::MultiLayerSPAC{FT}) where {FT}
+    GPP(spac::BulkSPAC{FT}) where {FT}
 
 Return the gross primary productivity per ground area, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function GPP end;
 
-GPP(spac::MultiLayerSPAC{FT}) where {FT} = (
+GPP(spac::BulkSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
@@ -105,16 +105,16 @@ GPP(spac::MultiLayerSPAC{FT}) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    PAR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    PAR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Return the PAR above canopy per ground area, given
 - `config` `SPACConfiguration` SPAC configuration
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function PAR end;
 
-PAR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
+PAR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;
     (; METEO) = spac;
 
@@ -134,15 +134,15 @@ PAR(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    PPAR(spac::MultiLayerSPAC{FT}) where {FT}
+    PPAR(spac::BulkSPAC{FT}) where {FT}
 
 Return the canopy integrated PPAR per ground area, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function PPAR end;
 
-PPAR(spac::MultiLayerSPAC{FT}) where {FT} = (
+PPAR(spac::BulkSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
@@ -168,15 +168,15 @@ PPAR(spac::MultiLayerSPAC{FT}) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    T_VEG(spac::MultiLayerSPAC{FT}) where {FT}
+    T_VEG(spac::BulkSPAC{FT}) where {FT}
 
 Return the transpiration rate per ground area, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function T_VEG end;
 
-T_VEG(spac::MultiLayerSPAC{FT}) where {FT} = (
+T_VEG(spac::BulkSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute transpiration rate
@@ -201,7 +201,7 @@ T_VEG(spac::MultiLayerSPAC{FT}) where {FT} = (
 
 function ΦDFNP end;
 
-ΦDFNP(spac::MultiLayerSPAC{FT}) where {FT} = (
+ΦDFNP(spac::BulkSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     sum_ϕda::FT = 0;
@@ -237,15 +237,15 @@ function ΦDFNP end;
 #######################################################################################################################################################################################################
 """
 
-    ΣETR(spac::MultiLayerSPAC{FT}) where {FT}
+    ΣETR(spac::BulkSPAC{FT}) where {FT}
 
 Return the total ETR per ground area, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function ΣETR end;
 
-ΣETR(spac::MultiLayerSPAC{FT}) where {FT} = (
+ΣETR(spac::BulkSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute GPP
@@ -270,15 +270,15 @@ function ΣETR end;
 #######################################################################################################################################################################################################
 """
 
-ΣSIF(spac::MultiLayerSPAC{FT}) where {FT}
+ΣSIF(spac::BulkSPAC{FT}) where {FT}
 
 Return the total SIF at chloroplast level (without any reabsorption) per ground area, given
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function ΣSIF end;
 
-ΣSIF(spac::MultiLayerSPAC{FT}) where {FT} = (
+ΣSIF(spac::BulkSPAC{FT}) where {FT} = (
     (; CANOPY, LEAVES) = spac;
 
     # compute SIF in photons unit
@@ -304,16 +304,16 @@ function ΣSIF end;
 #######################################################################################################################################################################################################
 """
 
-    ΣSIF_CHL(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    ΣSIF_CHL(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Return the total SIF at chloroplast level (without any reabsorption) in W m⁻² per ground area, given
 - `config` `SPACConfiguration` SPAC configuration
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function ΣSIF_CHL end;
 
-ΣSIF_CHL(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
+ΣSIF_CHL(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;
     (; CANOPY, LEAVES) = spac;
 
@@ -337,16 +337,16 @@ function ΣSIF_CHL end;
 #######################################################################################################################################################################################################
 """
 
-    ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Return the total SIF at leaf level after reabsorption in W m⁻² per ground area, given
 - `config` `SPACConfiguration` SPAC configuration
-- `spac` `MultiLayerSPAC` SPAC
+- `spac` `BulkSPAC` SPAC
 
 """
 function ΣSIF_LEAF end;
 
-ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT} = (
+ΣSIF_LEAF(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     (; SPECTRA) = config;
     (; CANOPY, LEAVES) = spac;
 

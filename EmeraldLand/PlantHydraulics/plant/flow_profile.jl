@@ -16,14 +16,14 @@
 #######################################################################################################################################################################################################
 """
 
-    plant_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    plant_flow_profile!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Set up the flow profile along the rhizosphere-root-stem-leaf continuum, given
 - `config` `SPACConfiguration` type struct
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function plant_flow_profile!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function plant_flow_profile!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     leaf_flow_profiles!(config, spac);
     stem_flow_profiles!(spac);
     root_flow_profiles!(config, spac);

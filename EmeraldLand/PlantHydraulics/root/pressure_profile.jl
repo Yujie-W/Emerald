@@ -43,13 +43,13 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    root_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+    root_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
 
 Set up root pressure profile for each root, given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function root_pressure_profiles!(spac::MultiLayerSPAC{FT}) where {FT}
+function root_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
     (; JUNCTION, ROOTS, ROOTS_INDEX, SOILS) = spac;
 
     for i in eachindex(ROOTS)

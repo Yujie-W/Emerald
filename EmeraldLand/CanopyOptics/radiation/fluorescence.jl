@@ -10,14 +10,14 @@
 #######################################################################################################################################################################################################
 """
 
-    fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Compute the fluorescence spectrum of the canopy at the sensor direction, given
 - `config` SPAC configuration
 - `spac` SPAC
 
 """
-function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     if !config.ENABLE_SIF
         return nothing
     end;

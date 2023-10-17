@@ -9,14 +9,14 @@
 #######################################################################################################################################################################################################
 """
 
-    stem_water_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    stem_water_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Set the flow profile of each stem (trunk and branches), given
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 - `δt` time step
 
 """
-function stem_water_budgets!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function stem_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     xylem_water_budget!(spac.TRUNK.xylem, spac.TRUNK.xylem.auxil, δt);
 
     for stem in spac.BRANCHES

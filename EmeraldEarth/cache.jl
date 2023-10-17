@@ -24,7 +24,7 @@ function initialize_cache!(FT)
     # create a SPAC to work on
     _z_canopy = FT(10);
     CACHE_CONFIG = SPACConfiguration{FT}();
-    CACHE_SPAC = MultiLayerSPAC(
+    CACHE_SPAC = BulkSPAC(
                 CACHE_CONFIG;
                 air_bounds = collect(0:21) * _z_canopy / 20,
                 latitude = 0,

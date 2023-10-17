@@ -77,14 +77,14 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    root_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+    root_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Set up root flow profile for each root, given
 - `config` `SPACConfiguration` type struct
-- `spac` `MultiLayerSPAC` type struct
+- `spac` `BulkSPAC` type struct
 
 """
-function root_flow_profiles!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}) where {FT}
+function root_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; JUNCTION, ROOTS, ROOTS_INDEX, SOILS) = spac;
 
     for i in eachindex(ROOTS)
