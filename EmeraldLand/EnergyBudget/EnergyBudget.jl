@@ -4,9 +4,13 @@ module EnergyBudget
 
 using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, M_H₂O, ρ_H₂O
 
-using ..Namespace: AirLayer, JunctionCapacitor, Leaf, Root, SoilLayer, Stem, XylemHydraulics
-using ..Namespace: MultiLayerSPAC, SPACConfiguration
+using ..Namespace: XylemHydraulics
+using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
+using ..Namespace: AirLayer, SoilLayer
+using ..Namespace: MultiLayerSPAC
+
 using ..PhysicalChemistry: latent_heat_vapor
+
 using ..PlantHydraulics: flow_in, flow_out
 
 

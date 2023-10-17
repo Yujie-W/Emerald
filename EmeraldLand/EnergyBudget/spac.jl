@@ -37,15 +37,14 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+    spac_energy_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
 
 Calculate the energy budgets of the spac, given
-- `config` `SPACConfiguration` type configuration
 - `spac` `MultiLayerSPAC` type SPAC
 - `δt` time step
 
 """
-function spac_energy_budget!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
+function spac_energy_budget!(spac::MultiLayerSPAC{FT}, δt::FT) where {FT}
     (; BRANCHES, LEAVES, ROOTS, SOILS, TRUNK) = spac;
 
     # update the temperature for soil

@@ -254,7 +254,7 @@ MultiLayerSPACState{FT}(spac::MultiLayerSPAC{FT}) where {FT} = (
     end;
 
     return MultiLayerSPACState{FT}(
-                gs_shaded = [_leaves.g_H₂O_s_shaded for _leaves in LEAVES],
+                gs_shaded = [leaf.g_H₂O_s_shaded for leaf in LEAVES],
                 gs_sunlit = _gs_sunlit,
                 t_clm = deepcopy(spac.MEMORY.tem),
     )

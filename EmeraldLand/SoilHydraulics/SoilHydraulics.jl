@@ -1,15 +1,13 @@
 module SoilHydraulics
 
-using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
-using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, Λ_THERMAL_H₂O, ρ_H₂O, ρg_MPa
+using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, GAS_R, M_H₂O, ρ_H₂O, ρg_MPa
 
-using ..Namespace: VanGenuchten
+using ..Namespace: BrooksCorey, VanGenuchten
 using ..Namespace: XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS
-using ..Namespace: Root, SoilLayer
+using ..Namespace: Root
+using ..Namespace: SoilLayer
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
-using ..PhysicalChemistry: diffusive_coefficient, latent_heat_vapor, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-
-import ..Namespace: BrooksCorey
+using ..PhysicalChemistry: diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure
 
 
 # vc

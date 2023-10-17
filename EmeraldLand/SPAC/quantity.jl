@@ -20,8 +20,8 @@ BETA(spac::MultiLayerSPAC{FT}) where {FT} = (
 
     # compute the mean beta
     βs = 0;
-    for _leaves in LEAVES
-        βs += read_β(_leaves.flux.state.stomatal_model);
+    for leaf in LEAVES
+        βs += read_β(leaf);
     end;
 
     return βs / length(LEAVES)

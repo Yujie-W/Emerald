@@ -30,10 +30,6 @@ import Emerald.EmeraldLand.SPAC
     @testset "Beta function" begin
         # compute the beta factor
         f(x) = x;
-        @test SM.β_factor(f, NS.WeibullVC{Float64}(2, 5), 0.0) == 1.0;
-        @test SM.β_factor(f, NS.WeibullVC{Float64}(2, 5), -1.0) < 1.0;
-        @test SM.β_factor(f, NS.VanGenuchten{Float64}("Loam"), 0.0) == 1.0;
-        @test SM.β_factor(f, NS.VanGenuchten{Float64}("Clay"), -1.0) < 1.0;
         @test SM.β_factor(f, 1.0) == 1.0;
         @test SM.β_factor(f, 0.5) < 1.0;
 

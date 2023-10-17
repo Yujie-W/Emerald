@@ -56,7 +56,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}
         # if nmax_j > ndry_j but upper layer is saturated, the lower layer will need to suck some water from upper layer to balance the air volume
         # compute the equilibrate mole of air from upper layer when it reaches its field capacity
         if (nmax_j > ndry_j) && (soil_i.state.θ >= soil_i.state.vc.Θ_SAT)
-            θ_fc_up = soil_θ(soil_i.state.vc, -1 * ρ_H₂O(FT) * GRAVITY(FT) * soil_i.auxil.δz / relative_surface_tension(soil_i.auxil.t));
+            θ_fc_up = soil_θ(soil_i.state.vc, -1 * ρg_MPa(FT) * soil_i.auxil.δz / relative_surface_tension(soil_i.auxil.t));
             v_mass = min((nmax_j - ndry_j) * GAS_R(FT) * soil_j.auxil.t / air.state.p_air, (soil_i.state.vc.Θ_SAT - θ_fc_up) * soil_i.auxil.δz);
             soil_j.state.θ += v_mass / soil_j.auxil.δz;
             soil_i.state.θ -= v_mass / soil_i.auxil.δz;

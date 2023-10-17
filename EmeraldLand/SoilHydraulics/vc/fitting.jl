@@ -1,5 +1,5 @@
 # This file contains functions to construct soil hydraulic properties from other soil hydraulic properties or data
-
+#=
 #######################################################################################################################################################################################################
 #
 # Changes made to this constructor
@@ -43,3 +43,4 @@ BrooksCorey{FT}(vg::VanGenuchten{FT}) where {FT} = (
 
     return bc
 );
+=#

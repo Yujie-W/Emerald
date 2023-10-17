@@ -4,18 +4,16 @@ using ..EmeraldMath.Math: upper_quadratic
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
 using ..EmeraldPhysics.Constant: GAS_R, ρg_MPa
 
-using ..Namespace: AbstractSoilVC
-using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, MedlynSM
-using ..Namespace: AbstractXylemVC, ComplexVC, LogisticVC, PowerVC, WeibullVC
+using ..Namespace: ComplexVC, LogisticVC, PowerVC, WeibullVC
 using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve
-
 using ..Namespace: ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState
 using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
-using ..Namespace: JunctionCapacitor, Leaf, Root, SoilLayer, Stem
+using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
+using ..Namespace: SoilLayer
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using ..SoilHydraulics: relative_soil_k, soil_θ
+using ..SoilHydraulics: relative_soil_k
 
 
 # xylem

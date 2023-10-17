@@ -9,8 +9,7 @@ using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
-using ..Namespace: MultiLayerCanopy, ReferenceSpectra, ShortwaveRadiation
-using ..Namespace: BetaLIDF, Leaf, SoilBulk, SoilLayer, VerhoefLIDF
+using ..Namespace: BetaLIDF, VerhoefLIDF
 using ..Namespace: MultiLayerSPAC, SPACConfiguration
 
 

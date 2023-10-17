@@ -48,7 +48,7 @@ function β_factor! end;
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
     f_st = relative_surface_tension(leaf.energy.auxil.t);
 
-    leaf.flux.auxil.β = β_factor(β.FUNC, leaf.xylem.state.vc, leaf.xylem.auxil.pressure[end] / f_st);
+    leaf.flux.auxil.β = β_factor(β.FUNC, relative_xylem_k(leaf.xylem.state.vc, leaf.xylem.auxil.pressure[end] / f_st));
 
     return nothing
 );
@@ -59,8 +59,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].energy.auxil.t);
-        beta = β_factor(β.FUNC, soils[i].state.vc, soils[i].auxil.ψ / f_st);
+        beta = β_factor(β.FUNC, soils[i].auxil.k);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;
@@ -82,9 +81,7 @@ function β_factor! end;
 );
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
-    f_st = relative_surface_tension(leaf.energy.auxil.t);
-
-    leaf.flux.auxil.β = β_factor(β.FUNC, leaf.xylem.auxil.pressure[end] / f_st);
+    leaf.flux.auxil.β = β_factor(β.FUNC, leaf.xylem.auxil.pressure[end]);
 
     return nothing
 );
@@ -95,8 +92,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].energy.auxil.t);
-        beta = β_factor(β.FUNC, soils[i].auxil.ψ / f_st);
+        beta = β_factor(β.FUNC, soils[i].auxil.ψ);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;
@@ -123,8 +119,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        f_st = relative_surface_tension(roots[i].energy.auxil.t);
-        beta = β_factor(β.FUNC, soil_θ(soils[i].state.vc, soils[i].state.θ / f_st));
+        beta = β_factor(β.FUNC, soils[i].state.θ);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;

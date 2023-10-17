@@ -45,7 +45,7 @@ initialize_struct!(stem::Stem{FT}) where {FT} = (
 initialize_struct!(leaf::Leaf{FT}) where {FT} = (
     leaf.xylem.state.cp = 1780;
     leaf.xylem.state.k_max = 0.04;
-    leaf.capacitor.state.v_storage = leaf.capacitor.state.v_max * leaf.xylem.state.area;
+    leaf.capacitor.state.v_storage = leaf.capacitor.state.v_max;
     leaf.energy.auxil.cp = heat_capacitance(leaf);
     leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
 

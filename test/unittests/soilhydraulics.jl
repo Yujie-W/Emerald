@@ -24,12 +24,14 @@ import Emerald.EmeraldLand.SPAC
         end;
     end;
 
+    #=
     @testset "Vulnerability curve (fitting)" begin
         for vg in [NS.VanGenuchten{Float64}("Loam"), NS.VanGenuchten{Float64}("Sand")]
             bc = NS.BrooksCorey{Float64}(vg);
             @test true;
         end;
     end;
+    =#
 
     @testset "Trace gas diffusion" begin
         config = NS.SPACConfiguration{Float64}();

@@ -101,7 +101,7 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, 
     _δt_7 = _δt_6;
     if ENABLE_ENERGY_BUDGET && spac.CANOPY.structure.state.lai > 0
         for leaf in LEAVES
-            _∂T∂t = leaf.energy.auxil.∂e∂t / (leaf.xylem.state.cp * leaf.bio.state.lma * 10 + CP_L_MOL(FT) * leaf.capacitor.state.v_storage);
+            _∂T∂t = leaf.energy.auxil.∂e∂t / heat_capacitance(leaf);
             _δt_7 = min(1 / abs(_∂T∂t), _δt_7);
 
             if DEBUG
@@ -183,7 +183,7 @@ time_stepper!(config::SPACConfiguration{FT}, spac::MultiLayerSPAC{FT}, δt::Numb
         # run the budgets for all ∂x∂t
         soil_budgets!(config, spac, _δt);
         stomatal_conductance!(spac, _δt);
-        spac_energy_budget!(config, spac, _δt);
+        spac_energy_budget!(spac, _δt);
         if spac._root_connection
             plant_water_budget!(spac, _δt);
         end;
