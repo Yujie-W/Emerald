@@ -121,7 +121,7 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
 
     # used for nocturnal stomatal conductance
     "Memory PPAR `[μmol m⁻² s⁻¹]`"
-    ppar_mem::FT = 100
+    ppar_mem::FT = 1000
 
     # used for empirical model
     "Beta of the empirical models (NaN for optimality models)"

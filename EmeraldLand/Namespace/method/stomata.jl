@@ -274,7 +274,7 @@ Empty struct for Wang stomatal model. The equation used for Wang type model is
 Base.@kwdef mutable struct WangSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
     # General model information
     "Fitness factor"
-    F_FITNESS::FT = 0.1
+    F_FITNESS::FT = 0.2
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
 end;
