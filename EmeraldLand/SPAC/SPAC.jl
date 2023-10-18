@@ -2,7 +2,7 @@ module SPAC
 
 using Statistics: mean
 
-using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, M_H₂O, P_ATM, T₀, Λ_THERMAL_H₂O, ρ_H₂O, ρg_MPa
+using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, F_N₂, F_O₂, GAS_R, M_H₂O, P_ATM, T₀, Λ_THERMAL_H₂O, ρ_H₂O, ρg_MPa
 using ..EmeraldPhysics.Optics: photon
 
 using ..CanopyOptics: canopy_radiation!, fluorescence_spectrum!, longwave_radiation!, reflection_spectrum!, sensor_geometry!, soil_albedo!
@@ -20,6 +20,7 @@ using ..StomatalModels: limit_stomatal_conductance!, stomatal_conductance!, stom
 
 # general instructions to run SPAC
 include("instructions/initialize.jl");
+include("instructions/prescribe.jl");
 include("instructions/update_auxil.jl");
 
 

@@ -37,6 +37,8 @@ Base.@kwdef mutable struct UniversalConstants
     "Isobaric specific heat of water vapor `[J kg⁻¹ K⁻¹]`"
     CP_V::Float64 = 1859
     "O₂ fraction in air `[-]`"
+    F_N₂::Float64 = 0.79
+    "O₂ fraction in air `[-]`"
     F_O₂::Float64 = 0.2095
     "Universal gas constant `[J mol⁻¹ K⁻¹]`"
     GAS_R::Float64 = 8.3144598
@@ -111,6 +113,9 @@ CP_V(FT=Float64) = FT(UNIVERSAL_CONSTANTS.CP_V);
 
 """ Isobaric specific heat of water vapor per mole `[J mol⁻¹ K⁻¹]` """
 CP_V_MOL(FT=Float64) = CP_V(FT) * M_H₂O(FT);
+
+""" N₂ fraction in air `[-]` """
+F_N₂(FT=Float64) = FT(UNIVERSAL_CONSTANTS.F_N₂);
 
 """ O₂ fraction in air `[-]` """
 F_O₂(FT=Float64) = FT(UNIVERSAL_CONSTANTS.F_O₂);

@@ -18,8 +18,8 @@ initialize_struct!(soil::SoilLayer{FT}, air::AirLayer{FT}) where {FT} = (
     δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
     rt = GAS_R(FT) * soil.auxil.t;
     soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
-    soil.state.ns[4] = air.state.p_air * 0.79 * soil.auxil.δz * δθ / rt;
-    soil.state.ns[5] = air.state.p_air * 0.209 * soil.auxil.δz * δθ / rt;
+    soil.state.ns[4] = air.state.p_air * F_N₂(FT) * soil.auxil.δz * δθ / rt;
+    soil.state.ns[5] = air.state.p_air * F_O₂(FT) * soil.auxil.δz * δθ / rt;
     soil.auxil.cp = heat_capacitance(soil);
     soil.state.Σe = soil.auxil.cp * soil.auxil.t;
 
@@ -54,13 +54,12 @@ initialize_struct!(leaf::Leaf{FT}) where {FT} = (
 
 initialize_struct!(air::AirLayer{FT}) where {FT} = (
     air.auxil.ps[2] = air.auxil.f_CO₂ * air.state.p_air * 1e-6;
-    air.auxil.ps[4] = 0.79 * air.state.p_air;
-    air.auxil.ps[5] = 0.209 * air.state.p_air;
+    air.auxil.ps[4] = F_N₂(FT) * air.state.p_air;
+    air.auxil.ps[5] = F_O₂(FT) * air.state.p_air;
 
-    air.state.ns[2] = air.auxil.f_CO₂ * air.state.p_air * 1e-6 * air.auxil.δz / (GAS_R(FT) * air.auxil.t);
-    air.state.ns[3] = air.auxil.ps[3] * air.auxil.δz / (GAS_R(FT) * air.auxil.t);
-    air.state.ns[4] = 0.79 * air.state.p_air * air.auxil.δz / (GAS_R(FT) * air.auxil.t);
-    air.state.ns[5] = 0.209 * air.state.p_air * air.auxil.δz / (GAS_R(FT) * air.auxil.t);
+    for i in 1:5
+        air.state.ns[i] = air.auxil.ps[i] * air.auxil.δz / (GAS_R(FT) * air.auxil.t);
+    end;
 
     air.state.Σe = heat_capacitance(air) * air.auxil.t;
 

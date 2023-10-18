@@ -92,7 +92,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     # update environmental conditions
     for air in spac.airs
         air.state.p_air = _df_atm;
-        update!(air; f_CO₂ = _df_co2, t = _df_tar, vpd = _df_vpd, wind = _df_wnd);
+        prescribe_air!(air; f_CO₂ = _df_co2, t = _df_tar, vpd = _df_vpd, wind = _df_wnd);
     end;
 
     # update downward shortwave and longwave radiation
