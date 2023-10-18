@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-11: add function longwave_radiation!
 #     2023-Oct-14: if LAI <= 0, run soil longwave radiation only
+#     2023-Oct-18: partition the energy between leaf and stem
 #
 #######################################################################################################################################################################################################
 """
@@ -49,9 +50,15 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
 
     # 1. compute longwave radiation out from the leaves and soil
     for i in 1:DIM_LAYER
+        # leaf = leaves[DIM_LAYER + 1 - i];
+        # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
         leaf = leaves[DIM_LAYER + 1 - i];
         stem = branches[DIM_LAYER + 1 - i];
-        can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
+        f_leaf = can_str.state.δlai[i] / (can_str.state.δlai[i] + can_str.state.δsai[i]);
+        f_stem = 1 - f_leaf;
+        can_str.auxil.lw_layer_leaf[i] = leaf.energy.auxil.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i];
+        can_str.auxil.lw_layer_stem[i] = stem.energy.auxil.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i];
+        can_str.auxil.lw_layer[i] = can_str.auxil.lw_layer_leaf[i] + can_str.auxil.lw_layer_stem[i];
     end;
     r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * top_soil.auxil.t ^ 4;
 
@@ -79,10 +86,13 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     can_str.auxil.lwꜛ[end] = can_str.auxil.lwꜜ[end] * sbulk.auxil.ρ_lw + r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
-    # TODO: stem energy balance
     for i in 1:DIM_LAYER
-        can_str.auxil.r_net_lw[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] - 2 * can_str.auxil.lw_layer[i];
-        can_str.auxil.r_net_lw[i] /= can_str.state.δlai[i];
+        # can_str.auxil.r_net_lw[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] - 2 * can_str.auxil.lw_layer[i];
+        # can_str.auxil.r_net_lw[i] /= can_str.state.δlai[i];
+        f_leaf = can_str.state.δlai[i] / (can_str.state.δlai[i] + can_str.state.δsai[i]);
+        f_stem = 1 - f_leaf;
+        can_str.auxil.r_net_lw_leaf[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] * f_leaf - 2 * can_str.auxil.lw_layer_leaf[i];
+        can_str.auxil.r_net_lw_stem[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] * f_stem - 2 * can_str.auxil.lw_layer_stem[i];
     end;
 
     sbulk.auxil.r_net_lw = can_str.auxil.lwꜜ[end] * (1 - sbulk.auxil.ρ_lw) - r_lw_soil;

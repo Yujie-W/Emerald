@@ -116,7 +116,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.e_net_dif .> 0);
         @test all(spac.soil_bulk.auxil.e_net_dir .> 0);
         @test all(spac.soil_bulk.auxil.e_net_dif .> 0);
-        @test all(spac.canopy.sun_geometry.auxil.r_net_sw .> 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_leaf .> 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
             @test all(leaf.flux.auxil.apar_shaded .> 0);
@@ -208,7 +209,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.e_net_dif .> 0);
         @test all(spac.soil_bulk.auxil.e_net_dir .> 0);
         @test all(spac.soil_bulk.auxil.e_net_dif .> 0);
-        @test all(spac.canopy.sun_geometry.auxil.r_net_sw .> 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_leaf .> 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
             @test all(leaf.flux.auxil.apar_shaded .> 0);
@@ -235,7 +237,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.e_net_dif .== 0);
         @test all(spac.soil_bulk.auxil.e_net_dir .== 0);
         @test all(spac.soil_bulk.auxil.e_net_dif .== 0);
-        @test all(spac.canopy.sun_geometry.auxil.r_net_sw .== 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_leaf .== 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .== 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .== 0);
         for leaf in spac.plant.leaves
             @test all(leaf.flux.auxil.apar_shaded .== 0);
@@ -263,7 +266,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.e_difꜛ[:,end] .> 0);
         @test all(spac.canopy.sun_geometry.auxil.e_net_dir .== 0);
         @test all(spac.canopy.sun_geometry.auxil.e_net_dif .== 0);
-        @test all(spac.canopy.sun_geometry.auxil.r_net_sw .== 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_leaf .== 0);
+        @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .== 0);
         @test all(spac.soil_bulk.auxil.e_net_dir .> 0);
         @test all(spac.soil_bulk.auxil.e_net_dif .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);

@@ -53,7 +53,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-09: add struct CanopyStructureAuxil
-#     2023-Oct-18: add fields ddb_stem and ddf_stem
+#     2023-Oct-18: add fields ddb_stem, ddf_stem, lw_layer_leaf, lw_layer_stem, r_net_lw_leaf, r_net_lw_stem
 #
 #######################################################################################################################################################################################################
 """
@@ -116,8 +116,12 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     τ_lw::Vector{FT}
 
     # Longwave radiation flux
-    "Longwave energy flux from leaves (one side) `[W m⁻²]`"
+    "Longwave energy flux from leaves and stem (one side) `[W m⁻²]`"
     lw_layer::Vector{FT}
+    "Longwave energy flux from leaves (one side) `[W m⁻²]`"
+    lw_layer_leaf::Vector{FT}
+    "Longwave energy flux from stem (one side) `[W m⁻²]`"
+    lw_layer_stem::Vector{FT}
     "Downwelling longwave energy flux `[W m⁻²]`"
     lwꜜ::Vector{FT}
     "Upwelling longwave energy flux `[W m⁻²]`"
@@ -150,6 +154,8 @@ CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructure
             ρ_lw          = zeros(FT, config.DIM_LAYER + 1),
             τ_lw          = zeros(FT, config.DIM_LAYER),
             lw_layer      = zeros(FT, config.DIM_LAYER),
+            lw_layer_leaf = zeros(FT, config.DIM_LAYER),
+            lw_layer_stem = zeros(FT, config.DIM_LAYER),
             lwꜜ           = zeros(FT, config.DIM_LAYER + 1),
             lwꜛ           = zeros(FT, config.DIM_LAYER + 1),
             emitꜜ         = zeros(FT, config.DIM_LAYER),

@@ -32,7 +32,7 @@ end;
 # General
 #     2023-Oct-09: add struct SunGeometryAuxil
 #     2023-Oct-13: add field albedo
-#     2023-Oct-18: add fields sdb_stem and sdf_stem
+#     2023-Oct-18: add fields sdb_stem, sdf_stem, r_net_lw_leaf, r_net_lw_stem
 #
 #######################################################################################################################################################################################################
 """
@@ -120,8 +120,10 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     e_net_dir::Matrix{FT}
 
     # Net radiation used for energy budget
-    "Net shortwave energy absorption for all leaves per leaf area `[W m⁻²]`"
-    r_net_sw::Vector{FT}
+    "Net shortwave energy absorption for all leaves per ground area `[W m⁻²]`"
+    r_net_sw_leaf::Vector{FT}
+    "Net shortwave energy absorption for all stems per ground area `[W m⁻²]`"
+    r_net_sw_stem::Vector{FT}
 
     # Fluorescence related fluxes (not computing the fluorescence spectrum at sensor direction)
     "SIF emission per layer at chloroplast level"
@@ -225,7 +227,8 @@ SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT
             e_dirꜜ           = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             e_net_dif        = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             e_net_dir        = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            r_net_sw         = zeros(FT, config.DIM_LAYER),
+            r_net_sw_leaf    = zeros(FT, config.DIM_LAYER),
+            r_net_sw_stem    = zeros(FT, config.DIM_LAYER),
             e_sif_chl        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
             e_sifꜜ_layer     = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
             e_sifꜛ_layer     = zeros(FT, config.DIM_SIF, config.DIM_LAYER),

@@ -5,6 +5,7 @@
 # Changes to the function
 # General
 #     2023-Sep-30: add function to calculate the energy flow of the stem (trunk and branches)
+#     2023-Oct-18: add net radiation to branch energy budget
 #
 #######################################################################################################################################################################################################
 """
@@ -16,6 +17,8 @@ Calculate the energy flows of the trunk and branches, given
 
 """
 function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
+    canopy = spac.canopy;
+    sbulk = spac.soil_bulk;
     junction = spac.plant.junction;
     trunk = spac.plant.trunk;
     branches = spac.plant.branches;
@@ -35,9 +38,11 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     # for the branches, the total energy is the difference of
     #     energy from the trunk
     #     energy to the leaves
-    for i in eachindex(branches)
-        stem = branches[i];
-        leaf = leaves[i];
+    N = length(branches)
+    for i in 1:N
+        j = N + 1 - i;
+        stem = branches[j];
+        leaf = leaves[j];
 
         # if flow in is positive, then energy flow is positive for branches but negative for trunk
         f_i = flow_in(stem);
@@ -56,6 +61,9 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         else
             stem.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * leaf.energy.auxil.t;
         end;
+
+        # add the net radiation energy to the leaf (to total leaf area)
+        stem.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_stem[i] + canopy.structure.auxil.r_net_lw_stem[i]) * sbulk.state.area;
     end;
 
     return nothing
