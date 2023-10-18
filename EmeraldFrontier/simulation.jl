@@ -223,7 +223,6 @@ simulation!(config::SPACConfiguration{FT},
 simulation!(config::SPACConfiguration{FT},
             spac::BulkSPAC{FT},
             dfr::DataFrameRow;
-            n_step::Int = 10,
             δt::Number = 3600
 ) where {FT} = (
     (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
@@ -232,16 +231,11 @@ simulation!(config::SPACConfiguration{FT},
     _df_dif::FT = dfr.RAD_DIF;
     _df_dir::FT = dfr.RAD_DIR;
 
-    # initialize the integrators
-    update_step_auxils!(spac);
-
     # prescribe parameters
     prescribe!(config, spac, dfr);
 
     # run the model
-    for _ in 1:n_step
-        soil_plant_air_continuum!(config, spac, δt / n_step);
-    end;
+    soil_plant_air_continuum!(config, spac, δt);
 
     # test if the integrated water flow is conserved
     #=

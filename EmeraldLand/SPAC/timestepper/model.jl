@@ -1,3 +1,5 @@
+# This file contains functions to run the SPAC model in a large time step (update_step_auxils! will be called)
+
 #######################################################################################################################################################################################################
 #
 # Changes to this function
@@ -18,7 +20,9 @@
 #     2023-Sep-07: add ALLOW_LEAF_SHEDDING check
 #     2023-Sep-11: move the optional t_on and θ_on to the config struct
 #     2023-Sep-14: remove some if else control from root disconnection
-#
+# To do
+#     TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
+#     TODO: add top soil evaporation
 #######################################################################################################################################################################################################
 """
 This function runs the model using the following steps:
@@ -34,21 +38,14 @@ This function runs the model using the following steps:
 This function is supposed to have the highest hierarchy, and should support all SPAC types defined in EmeraldNamespace.jl. Note to update the water flow profile when initializing the SPAC.
 
     soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
-    soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) where {FT}
-    soil_plant_air_continuum!(config::Nothing, spac::Nothing) where {FT}
 
 Run SPAC model and move forward in time with time stepper controller, given
-- `spac` `BulkSPAC` SPAC, or nothing
 - `config` Configuration for `BulkSPAC`
-- `δt` Time step (if not given, solve for steady state solution)
+- `spac` `BulkSPAC` SPAC,
+- `δt` Time step
 
 """
-function soil_plant_air_continuum! end;
-
-# TODO: add lite mode later to update energy balance (only longwave radiation and soil+leaf energy budgets)? Or use shorter time steps (will be time consuming, but more accurate)
-# TODO: add top soil evaporation
-soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT} = (
+function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
     # 0. set total runoff to 0 so as to accumulate with sub-timestep
     spac.soil_bulk.auxil.runoff = 0;
     update_substep_auxils!(spac);
@@ -84,10 +81,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt
     fluorescence_spectrum!(config, spac);
 
     return nothing
-);
-
-soil_plant_air_continuum!(config::Nothing, spac::Nothing, δt::Number) = nothing;
-
+end;
 
 # add an alias for soil_plant_air_continuum!
 spac! = soil_plant_air_continuum!;

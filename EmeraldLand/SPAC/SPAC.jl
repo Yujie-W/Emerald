@@ -29,6 +29,8 @@ include("timestepper/timer.jl");
 
 include("timestepper/stepper.jl");
 
+include("timestepper/model.jl");
+
 
 # quantities of SPAC
 include("quantity/beta.jl");
@@ -47,7 +49,6 @@ include("quantity/oco.jl");
 include("quantity/tropomi.jl");
 
 
-include("model.jl");
 include("state.jl");
 
 
