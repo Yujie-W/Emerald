@@ -116,3 +116,171 @@ function prescribe_soil!(spac::BulkSPAC{FT}; swcs::Union{Tuple,Nothing} = nothin
 
     return nothing
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this method
+# General
+#     2022-Oct-19: add method to update or prescribe cab, car, lai, Vcmax and Jmax TD, t_leaf, vcmax profile
+#     2022-Nov-21: fix a bug related to Vcmax profile (no global simulations are impacted)
+#     2023-May-11: add ci to the option list
+#     2023-May-19: use δlai per canopy layer
+#     2023-Aug-25: add option to set up hydraulic conductance profiles for root, trunk, branches, and leaves
+#     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
+#     2023-Sep-07: add ALLOW_LEAF_CONDENSATION and T_CLM checks
+#     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
+#
+#######################################################################################################################################################################################################
+"""
+
+    prescribe_traits!(
+                config::SPACConfiguration{FT},
+                spac::BulkSPAC{FT};
+                cab::Union{Number,Nothing} = nothing,
+                car::Union{Number,Nothing} = nothing,
+                ci::Union{Number,Nothing} = nothing,
+                kmax::Union{Number,Tuple,Nothing} = nothing,
+                lai::Union{Number,Nothing} = nothing,
+                swcs::Union{Tuple,Nothing} = nothing,
+                t_clm::Union{Number,Nothing} = nothing,
+                t_leaf::Union{Number,Nothing} = nothing,
+                t_soils::Union{Tuple,Nothing} = nothing,
+                vcmax::Union{Number,Nothing} = nothing,
+                vcmax_expo::Union{Number,Nothing} = nothing) where {FT}
+
+Update the physiological parameters of the SPAC, given
+- `spac` Soil plant air continuum
+- `config` Configuration for `BulkSPAC`
+- `cab` Chlorophyll content. Optional, default is nothing
+- `car` Carotenoid content. Optional, default is nothing
+- `ci` Clumping index. Optional, default is nothing
+- `kmax` Maximum hydraulic conductance. Optional, default is nothing
+- `lai` Leaf area index. Optional, default is nothing
+- `t_clm` Moving average temperature to update Vcmax and Jmax temperature dependencies. Optional, default is nothing
+- `t_leaf` Leaf temperature. Optional, default is nothing
+- `vcmax` Vcmax25 at the top of canopy. Optional, default is nothing
+- `vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
+
+"""
+function prescribe_traits!(
+            config::SPACConfiguration{FT},
+            spac::BulkSPAC{FT};
+            cab::Union{Number,Nothing} = nothing,
+            car::Union{Number,Nothing} = nothing,
+            ci::Union{Number,Nothing} = nothing,
+            kmax::Union{Number,Tuple,Nothing} = nothing,
+            lai::Union{Number,Nothing} = nothing,
+            t_clm::Union{Number,Nothing} = nothing,
+            t_leaf::Union{Number,Nothing} = nothing,
+            vcmax::Union{Number,Nothing} = nothing,
+            vcmax_expo::Union{Number,Nothing} = nothing
+) where {FT}
+    (; DIM_LAYER, T_CLM) = config;
+    branches = spac.plant.branches;
+    can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
+    roots = spac.plant.roots;
+    sbulk = spac.soil_bulk;
+    trunk = spac.plant.trunk;
+
+    # update chlorophyll and carotenoid contents (and spectra)
+    if !isnothing(cab)
+        for leaf in leaves
+            leaf.bio.state.cab = cab;
+        end;
+    end;
+
+    if !isnothing(car)
+        for leaf in leaves
+            leaf.bio.state.car = car;
+        end;
+    end;
+
+    if !isnothing(cab) || !isnothing(car)
+        plant_leaf_spectra!(config, spac);
+    end;
+
+    # update LAI and Vcmax (with scaling factor)
+    if !isnothing(lai)
+        can_str.state.lai = lai;
+        can_str.state.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
+        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:DIM_LAYER]] ./ -(lai + can_str.state.sai));
+        for i in 1:DIM_LAYER
+            leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
+        end;
+    end;
+
+    if !isnothing(vcmax)
+        leaves[1].photosystem.state.v_cmax25 = vcmax;
+    end;
+
+    if !isnothing(vcmax) || !isnothing(lai)
+        for i in 2:DIM_LAYER
+            ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.state.δlai[1:i-1]));
+            leaves[i].photosystem.state.v_cmax25 = leaves[1].photosystem.state.v_cmax25 * ratio;
+            leaves[i].photosystem.state.j_max25 = leaves[1].photosystem.state.v_cmax25 * 1.67 * ratio;
+            leaves[i].photosystem.state.r_d25 = leaves[1].photosystem.state.v_cmax25 * 0.015 * ratio;
+            leaves[i].photosystem.auxil._t = 0;
+        end;
+    end;
+
+    # update CI
+    if !isnothing(ci)
+        can_str.auxil.ci = ci;
+        can_str.state.Ω_A = ci;
+        can_str.state.Ω_B = 0;
+    end;
+
+    # update Vcmax and Jmax TD
+    if !isnothing(t_clm)
+        for leaf in leaves
+            if T_CLM
+                leaf.photosystem.state.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+                leaf.photosystem.state.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+            end;
+        end;
+    end;
+
+    # update kmax
+    if !isnothing(kmax)
+        # set up the kmax assuming 50% resistance in root, 25% in stem, and 25% in leaves
+        ks = if kmax isa Number
+            trunk_percent = trunk.xylem.state.Δh / (trunk.xylem.state.Δh + branches[end].xylem.state.Δh);
+            (2 * kmax, 4 * kmax / trunk_percent, 4 * kmax / (1 - trunk_percent), 4 * kmax)
+        else
+            @assert length(kmax) == 4 "kmax must be a number or a tuple of length 4";
+            kmax
+        end;
+
+        # partition kmax into the roots based on xylem area
+        for root in roots
+            # root.xylem.state.k_max = root.xylem.state.area / trunk.xylem.state.area * ks[1] * root.xylem.state.l / root.xylem.state.area;
+            root.xylem.state.k_max = ks[1] * root.xylem.state.l / trunk.xylem.state.area;
+        end;
+        trunk.xylem.state.k_max = ks[2] * trunk.xylem.state.l / trunk.xylem.state.area;
+        for stem in branches
+            #stem.xylem.state.kmax = stem.xylem.state.area / trunk.xylem.state.area * ks[3] * stem.xylem.state.l / stem.xylem.state.area;
+            stem.xylem.state.kmax = ks[3] * stem.xylem.state.l / trunk.xylem.state.area;
+        end;
+        for leaf in leaves
+            leaf.xylem.state.k_max = ks[4] / (can_str.state.lai * sbulk.state.area);
+        end;
+    end;
+
+    # prescribe leaf temperature
+    if !isnothing(t_leaf)
+        for leaf in leaves
+            leaf.energy.auxil.t = t_leaf;
+        end;
+    end;
+
+    # re-initialize leaf energy if LAI or t_leaf is updated
+    if !isnothing(lai) || !isnothing(t_leaf)
+        for leaf in leaves
+            initialize_struct!(leaf; k_sla = leaf.xylem.state.k_max);
+        end;
+    end;
+
+    return nothing
+end;

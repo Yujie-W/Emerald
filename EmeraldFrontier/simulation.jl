@@ -44,7 +44,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     _tleaf = nanmean([_layer.energy.auxil.t for _layer in spac.plant.leaves]);
     push!(spac.plant.memory.state.t_history, _tleaf);
     if length(spac.plant.memory.state.t_history) > 240 deleteat!(spac.plant.memory.state.t_history,1) end;
-    update!(config, spac; t_clm = nanmean(spac.plant.memory.state.t_history));
+    prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.state.t_history));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
     if !t_on
@@ -53,7 +53,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
         _df_ts2::FT = dfr.T_SOIL_2;
         _df_ts3::FT = dfr.T_SOIL_3;
         _df_ts4::FT = dfr.T_SOIL_4;
-        update!(config, spac; t_leaf = max(_df_tar, _df_tlf));
+        prescribe_traits!(config, spac; t_leaf = max(_df_tar, _df_tlf));
         prescribe_soil!(spac; t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
     end;
     if !θ_on
@@ -73,22 +73,22 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.plant.memory.auxil.vcmax25);
     _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.plant.memory.auxil.chl);
     if _trigger_lai
-        update!(config, spac; lai = _df_lai, vcmax_expo = 0.3);
+        prescribe_traits!(config, spac; lai = _df_lai, vcmax_expo = 0.3);
         spac.plant.memory.auxil.lai = _df_lai;
     end;
 
     if _trigger_vcm
-        update!(config, spac; vcmax = _df_vcm, vcmax_expo = 0.3);
+        prescribe_traits!(config, spac; vcmax = _df_vcm, vcmax_expo = 0.3);
         spac.plant.memory.auxil.vcmax25 = _df_vcm;
     end;
 
     if _trigger_chl
-        update!(config, spac; cab = _df_chl, car = _df_chl / 7);
+        prescribe_traits!(config, spac; cab = _df_chl, car = _df_chl / 7);
         spac.plant.memory.auxil.chl = _df_chl;
     end;
 
     # update clumping index
-    update!(config, spac; ci = _df_cli);
+    prescribe_traits!(config, spac; ci = _df_cli);
 
     # update environmental conditions
     for air in spac.airs

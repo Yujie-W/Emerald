@@ -56,7 +56,7 @@ soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt
     # 1. run plant hydraulic model (must be run before plant_photosynthesis! as the latter may need β for empirical models)
     plant_flow_profile!(config, spac);
     plant_pressure_profile!(config, spac);
-    (!spac.plant._root_connection && config.ALLOW_LEAF_SHEDDING) ? update!(config, spac; lai = 0) : nothing;
+    (!spac.plant._root_connection && config.ALLOW_LEAF_SHEDDING) ? prescribe_traits!(config, spac; lai = 0) : nothing;
 
     # 2. run canopy RT
     canopy_radiation!(config, spac);

@@ -155,7 +155,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     if "T_SKIN" in keys(wd_params)
         push!(CACHE_SPAC.plant.memory.state.t_history, wd_params["T_SKIN"]);
         if length(CACHE_SPAC.plant.memory.state.t_history) > 240 deleteat!(CACHE_SPAC.plant.memory.state.t_history,1) end;
-        update!(CACHE_CONFIG, CACHE_SPAC; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.plant.memory.state.t_history));
+        prescribe_traits!(CACHE_CONFIG, CACHE_SPAC; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.plant.memory.state.t_history));
     end;
 
     # synchronize LAI, CHL, and CI
@@ -166,7 +166,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     _vcm = griddingmachine_data(gm_params["VCMAX25"], gm_params["YEAR"], _iday);
 
     # update clumping index, LAI, Vcmax, and Chl
-    update!(CACHE_CONFIG, CACHE_SPAC; cab = _chl, car = _chl / 7, ci = _cli, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
+    prescribe_traits!(CACHE_CONFIG, CACHE_SPAC; cab = _chl, car = _chl / 7, ci = _cli, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
 
     return nothing
 end;

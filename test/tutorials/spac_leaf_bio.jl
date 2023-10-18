@@ -22,10 +22,10 @@ using Test;
     EmeraldLand.LeafOptics.plant_leaf_spectra!(config, spac);
     @test true;
 
-    # The second method is to use the embedded function update! from submodule SPAC.
+    # The second method is to use the embedded function prescribe_traits! from submodule SPAC.
     # In this case, function leaf_spectra! runs automatically.
     # Note that it is recommended to change both at the same time, otherwise leaf_spectra! will run twice.
-    # As to the supported options of the function update!, please check out the documentation.
-    EmeraldLand.SPAC.update!(config, spac; cab = 40, car = 10);
+    # As to the supported options of the function prescribe_traits!, please check out the documentation.
+    EmeraldLand.SPAC.prescribe_traits!(config, spac; cab = 40, car = 10);
     @test true;
 end;

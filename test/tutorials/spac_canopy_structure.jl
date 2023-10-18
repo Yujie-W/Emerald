@@ -12,9 +12,9 @@ using Test;
 
     # Changing canopy structure may result in changes in other parameters, such as Vcmax profile.
     # Thus, it is not recommended to modify those parametes manually unless otherwise told to by developers.
-    # It is highly recommended to use our embedded function update! to modify canopy structure.
-    # Currently, function update! supports the modification of leaf area index and clumping index.
-    EmeraldLand.SPAC.update!(config, spac; lai = 3, ci = 0.8);
+    # It is highly recommended to use our embedded function prescribe_traits! to modify canopy structure.
+    # Currently, function prescribe_traits! supports the modification of leaf area index and clumping index.
+    EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3, ci = 0.8);
     @test true;
 
     # Leaf inclination angle distribution is stored as a vector p_incl in field canopy.

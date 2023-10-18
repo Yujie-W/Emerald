@@ -31,7 +31,7 @@ using Emerald;
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
-#EmeraldLand.SPAC.update!(config, spac; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
+#EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
 EmeraldLand.SPAC.initialize!(config, spac);
 spac.meteo.rad_lw = 300;
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
@@ -100,10 +100,7 @@ function show_spac_info(node)
     ndvi = EmeraldLand.CanopyOptics.MODIS_NDVI(node);
     evi = EmeraldLand.CanopyOptics.MODIS_EVI(node);
     nirv = EmeraldLand.CanopyOptics.MODIS_NIRv(node);
-    sifs = (EmeraldLand.CanopyOptics.TROPOMI_SIF683(node),
-            EmeraldLand.CanopyOptics.TROPOMI_SIF740(node),
-            EmeraldLand.CanopyOptics.OCO2_SIF759(node),
-            EmeraldLand.CanopyOptics.OCO2_SIF770(node));
+    sifs = (EmeraldLand.CanopyOptics.TROPOMI_SIF683(node), EmeraldLand.CanopyOptics.TROPOMI_SIF740(node), EmeraldLand.CanopyOptics.OCO2_SIF759(node), EmeraldLand.CanopyOptics.OCO2_SIF770(node));
     tran = EmeraldLand.SPAC.T_VEG(spac);
     @info "SPAC Details" beta par ppar csif etr gpp tran ndvi evi nirv sifs;
 end;
@@ -116,34 +113,34 @@ EmeraldLand.SPAC.initialize!(config, spac);
 spac.meteo.rad_lw = 300;
 
 @info "RAD > 0 and LAI = 0";
-EmeraldLand.SPAC.update!(config, spac; lai = 0);
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD > 0 and LAI > 0";
-EmeraldLand.SPAC.update!(config, spac; lai = 1);
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD > 0 and LAI = 0";
-EmeraldLand.SPAC.update!(config, spac; lai = 0);
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD > 0 and LAI > 0";
-EmeraldLand.SPAC.update!(config, spac; lai = 1);
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI = 0";
-EmeraldLand.SPAC.update!(config, spac; lai = 0);
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
 spac.meteo.rad_sw.e_dir .= 0;
 spac.meteo.rad_sw.e_dif .= 0;
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI > 0";
-EmeraldLand.SPAC.update!(config, spac; lai = 1);
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
@@ -153,6 +150,6 @@ EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI = 0 (SZA > 90)";
-EmeraldLand.SPAC.update!(config, spac; lai = 0);
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);

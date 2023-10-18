@@ -16,7 +16,7 @@ using ..EmeraldData.ERA5: ERA5_FOLDER, ERA5SingleLevelsDriver
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, SPACConfiguration, MultiLayerSPACState
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
-using ..EmeraldLand.SPAC: GPP, PPAR, initialize!, prescribe_air!, prescribe_soil!, soil_plant_air_continuum!, spac_state!, update!
+using ..EmeraldLand.SPAC: GPP, PPAR, initialize!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!, spac_state!
 using ..EmeraldMath.Data: interpolate_data!
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldPhysics.EarthGeometry: solar_zenith_angle

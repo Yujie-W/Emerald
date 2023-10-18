@@ -49,7 +49,7 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
         ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
         f = g * d / airs[lindex[i]].state.p_air;
 
-        # set_flow_out!(leaf.HS.FLOW, f);
+        # set_flow_out!
         set_flow_profile!(leaf.xylem, f - leaf.capacitor.auxil.flow);
     end;
 
