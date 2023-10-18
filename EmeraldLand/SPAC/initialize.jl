@@ -31,7 +31,7 @@ function initialize! end;
 initialize!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     airs = spac.airs;
     soils = spac.soils;
-    soil_bulk = spac.soil_bulk;
+    sbulk = spac.soil_bulk;
     canopy = spac.canopy;
 
     roots = spac.plant.roots;
@@ -57,7 +57,7 @@ initialize!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     # make sure leaf area index setup and energy are correct
     for i in eachindex(leaves)
-        leaves[i].xylem.state.area = soil_bulk.state.area * canopy.structure.state.δlai[i];
+        leaves[i].xylem.state.area = sbulk.state.area * canopy.structure.state.δlai[i];
         initialize_struct!(leaves[i]);
     end;
 

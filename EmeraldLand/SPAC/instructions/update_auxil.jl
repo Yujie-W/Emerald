@@ -25,7 +25,7 @@ function update_substep_auxils! end;
 
 update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
     soils = spac.soils;
-    soil_bulk = spac.soil_bulk;
+    sbulk = spac.soil_bulk;
 
     roots = spac.plant.roots;
     junction = spac.plant.junction;
@@ -39,7 +39,7 @@ update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
     end;
 
     # update soil bulk auxiliary variables
-    update_substep_auxils!(soil_bulk);
+    update_substep_auxils!(sbulk);
 
     # update the root auxiliary variables
     for root in roots

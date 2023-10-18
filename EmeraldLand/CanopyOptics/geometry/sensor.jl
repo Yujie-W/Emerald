@@ -27,7 +27,7 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
 
     # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI+SAI > 0
     (; DIM_LAYER, SPECTRA, Θ_AZI, Θ_INCL) = config;
-    can_struct = spac.canopy.structure;
+    can_str = spac.canopy.structure;
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
     leaves = spac.plant.leaves;
@@ -76,13 +76,13 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
         sen_geo.auxil.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
         sen_geo.auxil.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
     end;
-    sen_geo.auxil.ko = can_struct.state.p_incl' * sen_geo.auxil.ko_incl;
+    sen_geo.auxil.ko = can_str.state.p_incl' * sen_geo.auxil.ko_incl;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    sen_geo.auxil.dob = (sen_geo.auxil.ko + can_struct.auxil.bf) / 2;
-    sen_geo.auxil.dof = (sen_geo.auxil.ko - can_struct.auxil.bf) / 2;
-    sen_geo.auxil.sob = can_struct.state.p_incl' * sen_geo.auxil.sb_incl;
-    sen_geo.auxil.sof = can_struct.state.p_incl' * sen_geo.auxil.sf_incl;
+    sen_geo.auxil.dob = (sen_geo.auxil.ko + can_str.auxil.bf) / 2;
+    sen_geo.auxil.dof = (sen_geo.auxil.ko - can_str.auxil.bf) / 2;
+    sen_geo.auxil.sob = can_str.state.p_incl' * sen_geo.auxil.sb_incl;
+    sen_geo.auxil.sof = can_str.state.p_incl' * sen_geo.auxil.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -99,10 +99,10 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
-    kocipai = sen_geo.auxil.ko * can_struct.auxil.ci * (can_struct.state.lai + can_struct.state.sai);
+    kocipai = sen_geo.auxil.ko * can_str.auxil.ci * (can_str.state.lai + can_str.state.sai);
     for i in 1:DIM_LAYER
-        kociipai = sen_geo.auxil.ko * can_struct.auxil.ci * (can_struct.state.δlai[i] + can_struct.state.δsai[i]);
-        sen_geo.auxil.p_sensor[i] = 1 / kociipai * (exp(kocipai * can_struct.auxil.x_bnds[i]) - exp(kocipai * can_struct.auxil.x_bnds[i+1]));
+        kociipai = sen_geo.auxil.ko * can_str.auxil.ci * (can_str.state.δlai[i] + can_str.state.δsai[i]);
+        sen_geo.auxil.p_sensor[i] = 1 / kociipai * (exp(kocipai * can_str.auxil.x_bnds[i]) - exp(kocipai * can_str.auxil.x_bnds[i+1]));
     end;
     sen_geo.auxil.p_sensor_soil = exp(-kocipai);
 
@@ -112,12 +112,12 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
                 2 * tand(sun_geo.state.sza) * tand(sen_geo.state.vza) * cosd(sen_geo.state.vaa - sun_geo.state.saa) );
     Σk = sen_geo.auxil.ko + sun_geo.auxil.ks;
     Πk = sen_geo.auxil.ko * sun_geo.auxil.ks;
-    cl = can_struct.auxil.ci * (can_struct.state.lai + can_struct.state.sai);
-    α  = dso / can_struct.state.hot_spot * 2 / Σk;
+    cl = can_str.auxil.ci * (can_str.state.lai + can_str.state.sai);
+    α  = dso / can_str.state.hot_spot * 2 / Σk;
     pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
 
     for i in 1:DIM_LAYER
-        sen_geo.auxil.p_sun_sensor[i] = quadgk(pso, can_struct.auxil.x_bnds[i+1], can_struct.auxil.x_bnds[i]; rtol = 1e-2)[1] / (can_struct.auxil.x_bnds[i] - can_struct.auxil.x_bnds[i+1]);
+        sen_geo.auxil.p_sun_sensor[i] = quadgk(pso, can_str.auxil.x_bnds[i+1], can_str.auxil.x_bnds[i]; rtol = 1e-2)[1] / (can_str.auxil.x_bnds[i] - can_str.auxil.x_bnds[i+1]);
     end;
 
     # compute the scattering coefficients per leaf area

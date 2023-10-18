@@ -129,30 +129,33 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
 
     # Net longwave radiation flux
     "Net longwave energy absorption per leaf area `[W m⁻²]`"
-    r_net_lw::Vector{FT}
+    r_net_lw_leaf::Vector{FT}
+    "Net longwave energy absorption per stem area `[W m⁻²]`"
+    r_net_lw_stem::Vector{FT}
 end;
 
 CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructureAuxil{FT}(
-            x_bnds     = zeros(FT, config.DIM_LAYER + 1),
-            ddb_leaf   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddf_leaf   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddb_stem   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddf_stem   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_dd_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            τ_dd_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_dd       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            τ_dd       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ϵ_lw_layer = zeros(FT, config.DIM_LAYER),
-            ρ_lw_layer = zeros(FT, config.DIM_LAYER),
-            τ_lw_layer = zeros(FT, config.DIM_LAYER),
-            ρ_lw       = zeros(FT, config.DIM_LAYER + 1),
-            τ_lw       = zeros(FT, config.DIM_LAYER),
-            lw_layer   = zeros(FT, config.DIM_LAYER),
-            lwꜜ        = zeros(FT, config.DIM_LAYER + 1),
-            lwꜛ        = zeros(FT, config.DIM_LAYER + 1),
-            emitꜜ      = zeros(FT, config.DIM_LAYER),
-            emitꜛ      = zeros(FT, config.DIM_LAYER + 1),
-            r_net_lw   = zeros(FT, config.DIM_LAYER),
+            x_bnds        = zeros(FT, config.DIM_LAYER + 1),
+            ddb_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ddf_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ddb_stem      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ddf_stem      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ρ_dd_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            τ_dd_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ρ_dd          = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
+            τ_dd          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ϵ_lw_layer    = zeros(FT, config.DIM_LAYER),
+            ρ_lw_layer    = zeros(FT, config.DIM_LAYER),
+            τ_lw_layer    = zeros(FT, config.DIM_LAYER),
+            ρ_lw          = zeros(FT, config.DIM_LAYER + 1),
+            τ_lw          = zeros(FT, config.DIM_LAYER),
+            lw_layer      = zeros(FT, config.DIM_LAYER),
+            lwꜜ           = zeros(FT, config.DIM_LAYER + 1),
+            lwꜛ           = zeros(FT, config.DIM_LAYER + 1),
+            emitꜜ         = zeros(FT, config.DIM_LAYER),
+            emitꜛ         = zeros(FT, config.DIM_LAYER + 1),
+            r_net_lw_leaf = zeros(FT, config.DIM_LAYER),
+            r_net_lw_stem = zeros(FT, config.DIM_LAYER),
 );
 
 

@@ -44,31 +44,31 @@ Updates lower soil boundary reflectance, given
 """
 function soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; SPECTRA, α_CLM, α_FITTING) = config;
-    soil_bulk = spac.soil_bulk;
+    sbulk = spac.soil_bulk;
     top_soil = spac.soils[1];
 
-    @assert 1 <= soil_bulk.state.color <=20;
+    @assert 1 <= sbulk.state.color <=20;
 
     # if the change of swc is lower than 0.001, do nothing
-    if abs(top_soil.state.θ - soil_bulk.auxil._θ) < 0.001
+    if abs(top_soil.state.θ - sbulk.auxil._θ) < 0.001
         return nothing
     end;
 
     # use linear interpolation method or CLM method (with upper limit)
     rwc = top_soil.state.θ / top_soil.state.vc.Θ_SAT;
-    par::FT = SOIL_ALBEDOS[soil_bulk.state.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[soil_bulk.state.color,3];
-    nir::FT = SOIL_ALBEDOS[soil_bulk.state.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[soil_bulk.state.color,4];
+    par::FT = SOIL_ALBEDOS[sbulk.state.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.state.color,3];
+    nir::FT = SOIL_ALBEDOS[sbulk.state.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.state.color,4];
 
     if α_CLM
         delta = max(0, FT(0.11) - FT(0.4) * top_soil.state.θ);
-        par = max(SOIL_ALBEDOS[soil_bulk.state.color,1], SOIL_ALBEDOS[soil_bulk.state.color,3] + delta);
-        nir = max(SOIL_ALBEDOS[soil_bulk.state.color,2], SOIL_ALBEDOS[soil_bulk.state.color,4] + delta);
+        par = max(SOIL_ALBEDOS[sbulk.state.color,1], SOIL_ALBEDOS[sbulk.state.color,3] + delta);
+        nir = max(SOIL_ALBEDOS[sbulk.state.color,2], SOIL_ALBEDOS[sbulk.state.color,4] + delta);
     end;
 
     # if fitting is disabled, use broadband directly
     if !α_FITTING
-        soil_bulk.auxil.ρ_sw[SPECTRA.IΛ_PAR] .= par;
-        soil_bulk.auxil.ρ_sw[SPECTRA.IΛ_NIR] .= nir;
+        sbulk.auxil.ρ_sw[SPECTRA.IΛ_PAR] .= par;
+        sbulk.auxil.ρ_sw[SPECTRA.IΛ_NIR] .= nir;
 
         return nothing
     end;
@@ -77,10 +77,10 @@ function soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {
     # TODO: use a new soil moddel for this, do not GSV which is not process-based
     #
     # make an initial guess of the weights
-    ρ_sw = similar(soil_bulk.auxil.ρ_sw);
+    ρ_sw = similar(sbulk.auxil.ρ_sw);
     ρ_sw[SPECTRA.IΛ_PAR] .= par;
     ρ_sw[SPECTRA.IΛ_NIR] .= nir;
-    soil_bulk.auxil.weight .= pinv(SPECTRA.MAT_SOIL) * ρ_sw;
+    sbulk.auxil.weight .= pinv(SPECTRA.MAT_SOIL) * ρ_sw;
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT} = (
@@ -92,16 +92,16 @@ function soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {
     );
 
     # solve for weights
-    ms = ReduceStepMethodND{FT}(x_mins = FT[-2,-2,-2,-2], x_maxs = FT[2,2,2,2], x_inis = soil_bulk.auxil.weight, Δ_inis = FT[0.1,0.1,0.1,0.1]);
+    ms = ReduceStepMethodND{FT}(x_mins = FT[-2,-2,-2,-2], x_maxs = FT[2,2,2,2], x_inis = sbulk.auxil.weight, Δ_inis = FT[0.1,0.1,0.1,0.1]);
     tol = SolutionToleranceND{FT}(FT[0.001,0.001,0.001,0.001], 50);
     sol = find_peak(_fit, ms, tol);
-    soil_bulk.auxil.weight .= sol;
+    sbulk.auxil.weight .= sol;
 
     # update vectors in soil
-    mul!(soil_bulk.auxil.ρ_sw, SPECTRA.MAT_SOIL, soil_bulk.auxil.weight);
+    mul!(sbulk.auxil.ρ_sw, SPECTRA.MAT_SOIL, sbulk.auxil.weight);
 
     # update the albedo._θ to avoid calling this function too many times
-    soil_bulk.auxil._θ = top_soil.state.θ;
+    sbulk.auxil._θ = top_soil.state.θ;
 
     return nothing
 end;

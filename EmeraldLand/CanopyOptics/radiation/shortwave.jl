@@ -22,9 +22,9 @@ Update shortwave radiation related auxiliary variables, given
 
 """
 function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    can_struct = spac.canopy.structure;
+    can_str = spac.canopy.structure;
     sun_geo = spac.canopy.sun_geometry;
-    soil_bulk = spac.soil_bulk;
+    sbulk = spac.soil_bulk;
     leaves = spac.plant.leaves;
 
     # if sza > 89, set all the radiation variables to 0
@@ -38,9 +38,9 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         sun_geo.auxil.e_net_dif .= 0;
         sun_geo.auxil.e_net_dir .= 0;
         sun_geo.auxil.r_net_sw .= 0;
-        soil_bulk.auxil.e_net_dir .= 0;
-        soil_bulk.auxil.e_net_dif .= 0;
-        soil_bulk.auxil.r_net_sw = 0;
+        sbulk.auxil.e_net_dir .= 0;
+        sbulk.auxil.e_net_dif .= 0;
+        sbulk.auxil.r_net_sw = 0;
         for leaf in leaves
             leaf.flux.auxil.apar_shaded = 0;
             leaf.flux.auxil.apar_sunlit .= 0;
@@ -54,13 +54,13 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     # if LAI <= 0, run soil albedo only
     rad_sw = spac.meteo.rad_sw;
     (; DIM_LAYER, SPECTRA) = config;
-    if sun_geo.state.sza <= 89 && can_struct.state.lai <= 0 && can_struct.state.sai <= 0
+    if sun_geo.state.sza <= 89 && can_str.state.lai <= 0 && can_str.state.sai <= 0
         # 1. update upward and downward direct and diffuse radiation profiles
         sun_geo.auxil.e_dirꜜ .= rad_sw.e_dir;
         sun_geo.auxil.e_difꜜ .= rad_sw.e_dif;
         sun_geo.auxil.e_difꜛ .= 0;
-        sun_geo.auxil.e_difꜛ[:,end] .= (rad_sw.e_dir .+ rad_sw.e_dif) .* soil_bulk.auxil.ρ_sw;
-        sun_geo.auxil.albedo .= soil_bulk.auxil.ρ_sw;
+        sun_geo.auxil.e_difꜛ[:,end] .= (rad_sw.e_dir .+ rad_sw.e_dif) .* sbulk.auxil.ρ_sw;
+        sun_geo.auxil.albedo .= sbulk.auxil.ρ_sw;
 
         # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
         sun_geo.auxil.e_net_dif .= 0;
@@ -68,9 +68,9 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         sun_geo.auxil.r_net_sw .= 0;
 
         # 3. compute net absorption for leaves and soil
-        soil_bulk.auxil.e_net_dir .= rad_sw.e_dir .* (1 .- soil_bulk.auxil.ρ_sw);
-        soil_bulk.auxil.e_net_dif .= rad_sw.e_dif .* (1 .- soil_bulk.auxil.ρ_sw);
-        soil_bulk.auxil.r_net_sw = (soil_bulk.auxil.e_net_dir' * SPECTRA.ΔΛ + soil_bulk.auxil.e_net_dif' * SPECTRA.ΔΛ) / 1000;
+        sbulk.auxil.e_net_dir .= rad_sw.e_dir .* (1 .- sbulk.auxil.ρ_sw);
+        sbulk.auxil.e_net_dif .= rad_sw.e_dif .* (1 .- sbulk.auxil.ρ_sw);
+        sbulk.auxil.r_net_sw = (sbulk.auxil.e_net_dir' * SPECTRA.ΔΛ + sbulk.auxil.e_net_dif' * SPECTRA.ΔΛ) / 1000;
 
         # 4. compute leaf level PAR, APAR, and PPAR per ground area
         for leaf in leaves
@@ -94,9 +94,9 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         e_s_j = view(sun_geo.auxil.e_dirꜜ,:,i+1);       # direct radiation at lower boundary
         e_u_i = view(sun_geo.auxil.e_difꜛ,:,i  );       # upward diffuse radiation at upper boundary
 
-        r_dd_i = view(can_struct.auxil.ρ_dd         ,:,i);    # reflectance of the upper boundary (i)
+        r_dd_i = view(can_str.auxil.ρ_dd         ,:,i);    # reflectance of the upper boundary (i)
         r_sd_i = view(sun_geo.auxil.ρ_sd      ,:,i);    # reflectance of the upper boundary (i)
-        t_dd_i = view(can_struct.auxil.τ_dd         ,:,i);    # transmittance of the layer (i)
+        t_dd_i = view(can_str.auxil.τ_dd         ,:,i);    # transmittance of the layer (i)
         t_sd_i = view(sun_geo.auxil.τ_sd      ,:,i);    # transmittance of the layer (i)
         t_ss_i = view(sun_geo.auxil.τ_ss_layer,  i);    # transmittance for directional->directional
 
@@ -105,7 +105,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         e_u_i .= r_sd_i .* e_s_i .+ r_dd_i .* e_d_i;
     end;
     sun_geo.auxil.e_difꜛ[:,end] .= view(sun_geo.auxil.e_dirꜜ,:,DIM_LAYER+1) .* view(sun_geo.auxil.ρ_sd,:,DIM_LAYER+1) .+
-                                               view(sun_geo.auxil.e_difꜜ,:,DIM_LAYER+1) .* view(can_struct.auxil.ρ_dd,:,DIM_LAYER+1);
+                                               view(sun_geo.auxil.e_difꜜ,:,DIM_LAYER+1) .* view(can_str.auxil.ρ_dd,:,DIM_LAYER+1);
     sun_geo.auxil.albedo .= view(sun_geo.auxil.e_difꜛ,:,1) ./ (rad_sw.e_dir .+ rad_sw.e_dif);
 
     # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
@@ -117,9 +117,9 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         a_s_i = view(sun_geo.auxil.e_net_dir,:,i);      # net absorbed direct radiation
         a_d_i = view(sun_geo.auxil.e_net_dif,:,i);      # net absorbed diffuse radiation
 
-        r_dd = view(can_struct.auxil.ρ_dd_layer   ,:,i);      # reflectance of the upper boundary (i)
+        r_dd = view(can_str.auxil.ρ_dd_layer   ,:,i);      # reflectance of the upper boundary (i)
         r_sd = view(sun_geo.auxil.ρ_sd_layer,:,i);      # reflectance of the upper boundary (i)
-        t_dd = view(can_struct.auxil.τ_dd_layer   ,:,i);      # transmittance of the layer (i)
+        t_dd = view(can_str.auxil.τ_dd_layer   ,:,i);      # transmittance of the layer (i)
         t_sd = view(sun_geo.auxil.τ_sd_layer,:,i);      # transmittance of the layer (i)
         t_ss = view(sun_geo.auxil.τ_ss_layer,  i);      # transmittance for directional->directional
 
@@ -132,24 +132,24 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     for i in 1:DIM_LAYER
         Σ_shaded = view(sun_geo.auxil.e_net_dif,:,i)' * SPECTRA.ΔΛ / 1000;
         Σ_sunlit = view(sun_geo.auxil.e_net_dir,:,i)' * SPECTRA.ΔΛ / 1000;
-        sun_geo.auxil.r_net_sw[i] = (Σ_shaded + Σ_sunlit) / can_struct.state.δlai[i];
+        sun_geo.auxil.r_net_sw[i] = (Σ_shaded + Σ_sunlit) / can_str.state.δlai[i];
     end;
-    soil_bulk.auxil.e_net_dir .= view(sun_geo.auxil.e_dirꜜ,:,DIM_LAYER+1) .* (1 .- soil_bulk.auxil.ρ_sw);
-    soil_bulk.auxil.e_net_dif .= view(sun_geo.auxil.e_difꜜ,:,DIM_LAYER+1) .* (1 .- soil_bulk.auxil.ρ_sw);
-    soil_bulk.auxil.r_net_sw = (soil_bulk.auxil.e_net_dir' * SPECTRA.ΔΛ + soil_bulk.auxil.e_net_dif' * SPECTRA.ΔΛ) / 1000;
+    sbulk.auxil.e_net_dir .= view(sun_geo.auxil.e_dirꜜ,:,DIM_LAYER+1) .* (1 .- sbulk.auxil.ρ_sw);
+    sbulk.auxil.e_net_dif .= view(sun_geo.auxil.e_difꜜ,:,DIM_LAYER+1) .* (1 .- sbulk.auxil.ρ_sw);
+    sbulk.auxil.r_net_sw = (sbulk.auxil.e_net_dir' * SPECTRA.ΔΛ + sbulk.auxil.e_net_dif' * SPECTRA.ΔΛ) / 1000;
 
     # 4. compute leaf level PAR, APAR, and PPAR per ground area
     normi = 1 / mean(sun_geo.auxil.fs_abs_mean);
     for i in 1:DIM_LAYER
         j = DIM_LAYER + 1 - i;
         α_apar = view(leaves[j].bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
-        a_leaf = view(leaves[j].bio.auxil.α_leaf, SPECTRA.IΛ_PAR) .* can_struct.state.δlai[i];
-        a_stem = (1 .- view(SPECTRA.ρ_STEM, SPECTRA.IΛ_PAR)) .* can_struct.state.δsai[i];
+        a_leaf = view(leaves[j].bio.auxil.α_leaf, SPECTRA.IΛ_PAR) .* can_str.state.δlai[i];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM, SPECTRA.IΛ_PAR)) .* can_str.state.δsai[i];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
-        sun_geo.auxil._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,i)) .* f_leaf .* 1000 ./ can_struct.state.δlai[i];
-        sun_geo.auxil._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,i)) .* f_leaf .* 1000 ./ can_struct.state.δlai[i] ./ sun_geo.auxil.p_sunlit[i];
+        sun_geo.auxil._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,i)) .* f_leaf .* 1000 ./ can_str.state.δlai[i];
+        sun_geo.auxil._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,i)) .* f_leaf .* 1000 ./ can_str.state.δlai[i] ./ sun_geo.auxil.p_sunlit[i];
         sun_geo.auxil._ppar_shaded .= sun_geo.auxil._apar_shaded .* α_apar;
         sun_geo.auxil._ppar_sunlit .= sun_geo.auxil._apar_sunlit .* α_apar;
 

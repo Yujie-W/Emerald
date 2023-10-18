@@ -138,7 +138,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.structure.auxil.emitꜛ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜜ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜛ .>= 0);
-        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw);
+        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw_leaf);
+        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw_stem);
         @test all(!isnan, spac.soil_bulk.auxil.r_net_lw);
     end;
 
@@ -220,7 +221,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.structure.auxil.emitꜛ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜜ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜛ .> 0);
-        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw);
+        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw_leaf);
+        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw_stem);
         @test all(!isnan, spac.soil_bulk.auxil.r_net_lw);
 
         # SZA > = 90
@@ -246,7 +248,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.structure.auxil.emitꜛ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜜ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜛ .>= 0);
-        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw);
+        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw_leaf);
+        @test all(!isnan, spac.canopy.structure.auxil.r_net_lw_stem);
         @test all(!isnan, spac.soil_bulk.auxil.r_net_lw);
 
         # LAI <= 0 and SAI <= 0
@@ -275,7 +278,8 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.structure.auxil.emitꜛ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜜ .> 0);
         @test all(spac.canopy.structure.auxil.lwꜛ .> 0);
-        @test all(spac.canopy.structure.auxil.r_net_lw .== 0);
+        @test all(spac.canopy.structure.auxil.r_net_lw_leaf .== 0);
+        @test all(spac.canopy.structure.auxil.r_net_lw_stem .== 0);
         @test all(!isnan, spac.soil_bulk.auxil.r_net_lw);
     end;
 end;
