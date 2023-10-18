@@ -11,8 +11,6 @@
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2023-Aug-23: add nan check for some methods (not all, to do later)
 #     2023-Aug-27: make sure D >= 1 when compute dAdE
-# To do
-#     TODO: figure out why the ratios are 1.35 and 1.6, and make them more accurate
 #
 #######################################################################################################################################################################################################
 """
