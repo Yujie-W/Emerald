@@ -80,9 +80,8 @@ function inclination_angles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
 
     (; Θ_INCL_BNDS) = config;
 
-    # TODO: make p_incl an auxiliary variable
-    for i in eachindex(can_str.state.p_incl)
-        can_str.state.p_incl[i] = lidf_cdf(can_str.state.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(can_str.state.lidf, Θ_INCL_BNDS[i,1]);
+    for i in eachindex(can_str.auxil.p_incl)
+        can_str.auxil.p_incl[i] = lidf_cdf(can_str.state.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(can_str.state.lidf, Θ_INCL_BNDS[i,1]);
     end;
 
     return nothing

@@ -25,8 +25,6 @@ Base.@kwdef mutable struct CanopyStructureState{FT}
     hot_spot::FT = 0.05
     "Leaf inclination angle distribution function algorithm"
     lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
-    "Inclination angle distribution"
-    p_incl::Vector{FT}
 
     # Leaf area index
     "Leaf area index"
@@ -70,6 +68,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     "Clumping index"
     ci::FT = 1
+    "Inclination angle distribution"
+    p_incl::Vector{FT}
     "Canopy level boundary locations"
     x_bnds::Vector{FT}
 
@@ -139,6 +139,7 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
 end;
 
 CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructureAuxil{FT}(
+            p_incl        = zeros(FT, config.DIM_INCL),
             x_bnds        = zeros(FT, config.DIM_LAYER + 1),
             ddb_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ddf_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
@@ -195,13 +196,13 @@ CanopyStructure(config::SPACConfiguration{FT}) where {FT} = (
     δlai = 3 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
     sai = 0.5;
     δsai = 0.5 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
-    p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
     cs_auxil = CanopyStructureAuxil(config);
     cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:config.DIM_LAYER]] ./ -(lai + sai));
+    cs_auxil.p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
     return CanopyStructure{FT}(
-                state = CanopyStructureState{FT}(p_incl = p_incl, lai = lai, δlai = δlai, sai = sai, δsai = δsai),
+                state = CanopyStructureState{FT}(lai = lai, δlai = δlai, sai = sai, δsai = δsai),
                 auxil = cs_auxil,
     )
 );

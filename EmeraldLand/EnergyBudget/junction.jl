@@ -16,8 +16,8 @@ Calculate the energy flows of the junction, given
 
 """
 function junction_energy_flows!(spac::BulkSPAC{FT}) where {FT}
-    roots = spac.plant.roots;
     junction = spac.plant.junction;
+    roots = spac.plant.roots;
     trunk = spac.plant.trunk;
 
     # The total energy change of the junction is difference between

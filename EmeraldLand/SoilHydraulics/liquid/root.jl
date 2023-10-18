@@ -43,10 +43,10 @@ Update the source/sink terms for the soil layers, given
 
 """
 function root_source_sink!(spac::BulkSPAC{FT}) where {FT}
+    rindx = spac.plant.roots_index;
+    roots = spac.plant.roots;
     sbulk = spac.soil_bulk;
     soils = spac.soils;
-    roots = spac.plant.roots;
-    rindx = spac.plant.roots_index;
 
     # loop through the roots and compute the source/sink terms
     for i in eachindex(roots)

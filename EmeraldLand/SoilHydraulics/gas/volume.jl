@@ -22,10 +22,11 @@ Balance the air volume in the soil so that pressure is in equilibrium, given
 """
 function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; PRESCRIBE_AIR) = config;
+    air = spac.airs[1];
     soils = spac.soils;
+    top_soil = soils[1];
 
     # balance the air volume among soil layers from lower to upper layers
-    air = spac.airs[1];
     for i in length(soils)-1:-1:1
         # upper layer is soil_i and lower is soil_j
         soil_i = soils[i];
@@ -81,19 +82,19 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wher
     end;
 
     # balance the air volume between top soil and atmosphere
-    soil = soils[1];
-    s_dry = soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5];
+    s_dry = top_soil.state.ns[1] + top_soil.state.ns[2] + top_soil.state.ns[4] + top_soil.state.ns[5];
     a_dry = air.state.ns[1] + air.state.ns[2] + air.state.ns[4] + air.state.ns[5];
-    s_max = (air.state.p_air - saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000)) * soil.auxil.δz * (soil.state.vc.Θ_SAT - soil.state.θ) / (GAS_R(FT) * soil.auxil.t);
+    s_max = (air.state.p_air - saturation_vapor_pressure(top_soil.auxil.t, top_soil.auxil.ψ * 1000000)) * top_soil.auxil.δz *
+            (top_soil.state.vc.Θ_SAT - top_soil.state.θ) / (GAS_R(FT) * top_soil.auxil.t);
 
     # if soil air is not saturated, it can absorb more air from the atmosphere
     if s_max > s_dry
         n_mass = min(s_max - s_dry, a_dry / 2);
-        soil.state.ns[1] += n_mass * air.state.ns[1] / a_dry;
-        soil.state.ns[2] += n_mass * air.state.ns[2] / a_dry;
-        soil.state.ns[4] += n_mass * air.state.ns[4] / a_dry;
-        soil.state.ns[5] += n_mass * air.state.ns[5] / a_dry;
-        soil.state.Σe += n_mass * CP_D_MOL(FT) * air.auxil.t / soil.auxil.δz;
+        top_soil.state.ns[1] += n_mass * air.state.ns[1] / a_dry;
+        top_soil.state.ns[2] += n_mass * air.state.ns[2] / a_dry;
+        top_soil.state.ns[4] += n_mass * air.state.ns[4] / a_dry;
+        top_soil.state.ns[5] += n_mass * air.state.ns[5] / a_dry;
+        top_soil.state.Σe += n_mass * CP_D_MOL(FT) * air.auxil.t / top_soil.auxil.δz;
         if !PRESCRIBE_AIR
             air.state.ns[1] -= n_mass * air.state.ns[1] / a_dry;
             air.state.ns[2] -= n_mass * air.state.ns[2] / a_dry;
@@ -103,17 +104,17 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wher
         end;
     elseif s_max < s_dry
         n_mass = s_dry - s_max;
-        soil.state.ns[1] -= n_mass * soil.state.ns[1] / s_dry;
-        soil.state.ns[2] -= n_mass * soil.state.ns[2] / s_dry;
-        soil.state.ns[4] -= n_mass * soil.state.ns[4] / s_dry;
-        soil.state.ns[5] -= n_mass * soil.state.ns[5] / s_dry;
-        soil.state.Σe -= n_mass * CP_D_MOL(FT) * soil.auxil.t / soil.auxil.δz;
+        top_soil.state.ns[1] -= n_mass * top_soil.state.ns[1] / s_dry;
+        top_soil.state.ns[2] -= n_mass * top_soil.state.ns[2] / s_dry;
+        top_soil.state.ns[4] -= n_mass * top_soil.state.ns[4] / s_dry;
+        top_soil.state.ns[5] -= n_mass * top_soil.state.ns[5] / s_dry;
+        top_soil.state.Σe -= n_mass * CP_D_MOL(FT) * top_soil.auxil.t / top_soil.auxil.δz;
         if !PRESCRIBE_AIR
-            air.state.ns[1] += n_mass * soil.state.ns[1] / s_dry;
-            air.state.ns[2] += n_mass * soil.state.ns[2] / s_dry;
-            air.state.ns[4] += n_mass * soil.state.ns[4] / s_dry;
-            air.state.ns[5] += n_mass * soil.state.ns[5] / s_dry;
-            air.state.Σe += n_mass * CP_D_MOL(FT) * soil.auxil.t;
+            air.state.ns[1] += n_mass * top_soil.state.ns[1] / s_dry;
+            air.state.ns[2] += n_mass * top_soil.state.ns[2] / s_dry;
+            air.state.ns[4] += n_mass * top_soil.state.ns[4] / s_dry;
+            air.state.ns[5] += n_mass * top_soil.state.ns[5] / s_dry;
+            air.state.Σe += n_mass * CP_D_MOL(FT) * top_soil.auxil.t;
         end;
     end;
 

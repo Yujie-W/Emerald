@@ -21,16 +21,17 @@ Update sensor geometry related auxiliary variables, given
 
 """
 function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    if (!config.ENABLE_REF && !config.ENABLE_SIF) || (spac.canopy.structure.state.lai <= 0 && spac.canopy.structure.state.sai <= 0)
+    can_str = spac.canopy.structure;
+
+    if (!config.ENABLE_REF && !config.ENABLE_SIF) || (can_str.state.lai <= 0 && can_str.state.sai <= 0)
         return nothing
     end;
 
     # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI+SAI > 0
     (; DIM_LAYER, SPECTRA, Θ_AZI, Θ_INCL) = config;
-    can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
-    leaves = spac.plant.leaves;
 
     # extinction coefficients for the solar radiation
     vza = sen_geo.state.vza;
@@ -76,13 +77,13 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
         sen_geo.auxil.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
         sen_geo.auxil.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
     end;
-    sen_geo.auxil.ko = can_str.state.p_incl' * sen_geo.auxil.ko_incl;
+    sen_geo.auxil.ko = can_str.auxil.p_incl' * sen_geo.auxil.ko_incl;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
     sen_geo.auxil.dob = (sen_geo.auxil.ko + can_str.auxil.bf) / 2;
     sen_geo.auxil.dof = (sen_geo.auxil.ko - can_str.auxil.bf) / 2;
-    sen_geo.auxil.sob = can_str.state.p_incl' * sen_geo.auxil.sb_incl;
-    sen_geo.auxil.sof = can_str.state.p_incl' * sen_geo.auxil.sf_incl;
+    sen_geo.auxil.sob = can_str.auxil.p_incl' * sen_geo.auxil.sb_incl;
+    sen_geo.auxil.sof = can_str.auxil.p_incl' * sen_geo.auxil.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -107,9 +108,7 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     sen_geo.auxil.p_sensor_soil = exp(-kocipai);
 
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
-    dso = sqrt( tand(sun_geo.state.sza) ^ 2 +
-                tand(sen_geo.state.vza) ^ 2 -
-                2 * tand(sun_geo.state.sza) * tand(sen_geo.state.vza) * cosd(sen_geo.state.vaa - sun_geo.state.saa) );
+    dso = sqrt( tand(sun_geo.state.sza) ^ 2 + tand(sen_geo.state.vza) ^ 2 - 2 * tand(sun_geo.state.sza) * tand(sen_geo.state.vza) * cosd(sen_geo.state.vaa - sun_geo.state.saa) );
     Σk = sen_geo.auxil.ko + sun_geo.auxil.ks;
     Πk = sen_geo.auxil.ko * sun_geo.auxil.ks;
     cl = can_str.auxil.ci * (can_str.state.lai + can_str.state.sai);

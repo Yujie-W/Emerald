@@ -16,12 +16,13 @@ Calculate the energy flows of the leaf, given
 
 """
 function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
-    branches = spac.plant.branches;
     airs = spac.airs;
+    branches = spac.plant.branches;
+    canopy = spac.canopy;
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;
-    canopy = spac.canopy;
     sbulk = spac.soil_bulk;
+
     # the total energy change of the leaf is the sum of
     #     the energy of the flow from the stem
     #     the energy of the flow from the air

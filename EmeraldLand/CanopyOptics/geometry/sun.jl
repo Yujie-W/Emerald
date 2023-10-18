@@ -20,8 +20,8 @@ Update sun geometry related auxiliary variables, given
 
 """
 function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    sun_geo = spac.canopy.sun_geometry;
     can_str = spac.canopy.structure;
+    sun_geo = spac.canopy.sun_geometry;
 
     if sun_geo.state.sza > 89 || (can_str.state.lai <= 0 && can_str.state.sai <= 0)
         return nothing
@@ -42,7 +42,7 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
         sun_geo.auxil.βs_incl[i] = βs;
         sun_geo.auxil.ks_incl[i] = 2 / FT(π) / cosd(sun_geo.state.sza) * (Cs * (βs - FT(π)/2) + Ss * sin(βs));
     end;
-    sun_geo.auxil.ks = can_str.state.p_incl' * sun_geo.auxil.ks_incl;
+    sun_geo.auxil.ks = can_str.auxil.p_incl' * sun_geo.auxil.ks_incl;
 
     # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
     sun_geo.auxil.sdb = (sun_geo.auxil.ks + can_str.auxil.bf) / 2;
@@ -54,7 +54,7 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     end;
     sun_geo.auxil.fs ./= cosd(sun_geo.state.sza);
     sun_geo.auxil.fs_abs .= abs.(sun_geo.auxil.fs);
-    mul!(sun_geo.auxil.fs_abs_mean, sun_geo.auxil.fs_abs', can_str.state.p_incl);
+    mul!(sun_geo.auxil.fs_abs_mean, sun_geo.auxil.fs_abs', can_str.auxil.p_incl);
     for i in eachindex(Θ_INCL)
         view(sun_geo.auxil.fs_cos²_incl,i,:) .= view(sun_geo.auxil.fs,i,:) * cosd(Θ_INCL[i]) ^ 2;
     end;
@@ -94,13 +94,13 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     for i in DIM_LAYER:-1:1
         ρ_dd_layer = view(can_str.auxil.ρ_dd_layer,:,i  );
         ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,i+1);
-        ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer   ,:,i  );
-        ρ_sd_i     = view(sun_geo.auxil.ρ_sd         ,:,i  );
-        ρ_sd_j     = view(sun_geo.auxil.ρ_sd         ,:,i+1);
+        ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer,:,i  );
+        ρ_sd_i     = view(sun_geo.auxil.ρ_sd      ,:,i  );
+        ρ_sd_j     = view(sun_geo.auxil.ρ_sd      ,:,i+1);
         τ_dd_layer = view(can_str.auxil.τ_dd_layer,:,i  );
-        τ_sd_layer = view(sun_geo.auxil.τ_sd_layer   ,:,i  );
-        τ_sd_i     = view(sun_geo.auxil.τ_sd         ,:,i  );
-        τ_ss_layer = view(sun_geo.auxil.τ_ss_layer   ,  i  );
+        τ_sd_layer = view(sun_geo.auxil.τ_sd_layer,:,i  );
+        τ_sd_i     = view(sun_geo.auxil.τ_sd      ,:,i  );
+        τ_ss_layer = view(sun_geo.auxil.τ_ss_layer,  i  );
 
         τ_sd_i .= (τ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* ρ_dd_layer) ./ (1 .- ρ_dd_layer .* ρ_dd_j);    # sdit + ssit-sdjr-ddit; rescale
         ρ_sd_i .= ρ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* τ_dd_layer .+ τ_sd_i .* ρ_dd_j .* τ_dd_layer;   # sdir + ssit-sdjr-ddit + sdit-ddjr-ddit

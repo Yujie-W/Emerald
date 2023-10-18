@@ -17,11 +17,11 @@ Calculate the energy flows of the root, given
 
 """
 function root_energy_flows!(spac::BulkSPAC{FT}) where {FT}
+    junction = spac.plant.junction;
+    rindx = spac.plant.roots_index;
+    roots = spac.plant.roots;
     sbulk = spac.soil_bulk;
     soils = spac.soils;
-    roots = spac.plant.roots;
-    rindx = spac.plant.roots_index;
-    junction = spac.plant.junction;
 
     # compute the energy flow per layer
     # the energy flow is computed as the difference between

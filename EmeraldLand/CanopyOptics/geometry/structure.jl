@@ -33,7 +33,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     # compute the weighed average of the leaf inclination angle distribution
     can_str.auxil.bf = 0;
     for i in eachindex(Θ_INCL)
-        can_str.auxil.bf += can_str.state.p_incl[i] * cosd(Θ_INCL[i]) ^ 2;;
+        can_str.auxil.bf += can_str.auxil.p_incl[i] * cosd(Θ_INCL[i]) ^ 2;;
     end;
     can_str.auxil.ddb = (1 + can_str.auxil.bf) / 2;
     can_str.auxil.ddf = (1 - can_str.auxil.bf) / 2;
@@ -72,8 +72,8 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
         τ_dd_layer = view(can_str.auxil.τ_dd_layer,:,i  );
         τ_dd_i     = view(can_str.auxil.τ_dd      ,:,i  );
 
-        τ_dd_i .= τ_dd_layer ./ (1 .- ρ_dd_layer .* ρ_dd_j);            # ddit; rescale
-        ρ_dd_i .= ρ_dd_layer .+ τ_dd_layer .* ρ_dd_j .* τ_dd_i;         # ddir + ddit-ddjr-ddit
+        τ_dd_i .= τ_dd_layer ./ (1 .- ρ_dd_layer .* ρ_dd_j);        # ddit; rescale
+        ρ_dd_i .= ρ_dd_layer .+ τ_dd_layer .* ρ_dd_j .* τ_dd_i;     # ddir + ddit-ddjr-ddit
     end;
 
     # compute longwave effective emissivity, reflectance, and transmittance per layer without correction (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -91,7 +91,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     can_str.auxil.ρ_lw[end] = sbulk.auxil.ρ_lw;
     for i in DIM_LAYER:-1:1
         denom = 1 - can_str.auxil.ρ_lw_layer[i] * can_str.auxil.ρ_lw[i+1];
-        can_str.auxil.τ_lw[i] = can_str.auxil.τ_lw_layer[i] / denom;                                                              # it, rescale
+        can_str.auxil.τ_lw[i] = can_str.auxil.τ_lw_layer[i] / denom;                                                        # it, rescale
         can_str.auxil.ρ_lw[i] = can_str.auxil.ρ_lw_layer[i] + can_str.auxil.τ_lw_layer[i] ^ 2 * can_str.auxil.ρ_lw[i+1];    # ir + it-jr-it
     end;
 

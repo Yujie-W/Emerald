@@ -218,15 +218,15 @@ update!(config::SPACConfiguration{FT},
         end;
 
         # partition kmax into the roots based on xylem area
-        for _ilayer in roots
-            _ilayer.HS.K_X = _ilayer.HS.AREA / trunk.HS.AREA * _ks[1] * _ilayer.HS.L / _ilayer.HS.AREA;
+        for root in roots
+            root.HS.K_X = root.HS.AREA / trunk.HS.AREA * _ks[1] * root.HS.L / root.HS.AREA;
         end;
         trunk.HS.K_X = _ks[2] * trunk.HS.L / trunk.HS.AREA;
-        for _ilayer in branches
-            _ilayer.HS.K_X = _ilayer.HS.AREA / trunk.HS.AREA * _ks[3] * _ilayer.HS.L / _ilayer.HS.AREA;
+        for stem in branches
+            stem.HS.K_X = stem.HS.AREA / trunk.HS.AREA * _ks[3] * stem.HS.L / stem.HS.AREA;
         end;
-        for _ilayer in leaves
-            _ilayer.HS.K_SLA = _ks[4] / (can_str.state.lai * sbulk.state.area);
+        for leaf in leaves
+            leaf.HS.K_SLA = _ks[4] / (can_str.state.lai * sbulk.state.area);
         end;
     end;
 

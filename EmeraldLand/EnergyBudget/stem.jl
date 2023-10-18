@@ -17,12 +17,12 @@ Calculate the energy flows of the trunk and branches, given
 
 """
 function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
-    canopy = spac.canopy;
-    sbulk = spac.soil_bulk;
-    junction = spac.plant.junction;
-    trunk = spac.plant.trunk;
     branches = spac.plant.branches;
+    canopy = spac.canopy;
+    junction = spac.plant.junction;
     leaves = spac.plant.leaves;
+    sbulk = spac.soil_bulk;
+    trunk = spac.plant.trunk;
 
     # for the trunk, the total energy is the differentce of
     #     energy from the junction

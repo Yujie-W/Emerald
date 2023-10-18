@@ -85,10 +85,10 @@ Set up root flow profile for each root, given
 
 """
 function root_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    soils = spac.soils;
-    roots = spac.plant.roots;
-    rindex = spac.plant.roots_index;
     junction = spac.plant.junction;
+    rindex = spac.plant.roots_index;
+    roots = spac.plant.roots;
+    soils = spac.soils;
 
     for i in eachindex(roots)
         root_flow_profile!(config, roots[i], soils[rindex[i]], junction);

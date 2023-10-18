@@ -56,7 +56,7 @@ CNPP(spac::BulkSPAC{FT}) where {FT} = (
     for i in eachindex(leaves)
         j = N - i + 1;
         cnpp += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_n_sunlit) +
-                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_n_shaded) * canopy.structure.state.δlai[j];
+                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_n_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return cnpp
@@ -91,7 +91,7 @@ GPP(spac::BulkSPAC{FT}) where {FT} = (
     for i in eachindex(leaves)
         j = N - i + 1;
         gpp += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit) +
-                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded) * canopy.structure.state.δlai[j];
+               (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return gpp
@@ -154,7 +154,7 @@ PPAR(spac::BulkSPAC{FT}) where {FT} = (
     for i in eachindex(leaves)
         j = N - i + 1;
         ppar += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.ppar_sunlit) +
-                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded) * canopy.structure.state.δlai[i];
+                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded) * canopy.structure.state.δlai[i];
     end;
 
     return ppar
@@ -226,7 +226,7 @@ function ΦDFNP end;
         sum_ϕpa += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit .* leaves[i].flux.auxil.ϕ_p_sunlit) +
                    (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded * leaves[i].flux.auxil.ϕ_p_shaded) * canopy.structure.state.δlai[j];
         sum_a   += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit) +
-                    (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded) * canopy.structure.state.δlai[j];
+                   (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return (sum_ϕda, sum_ϕfa, sum_ϕna, sum_ϕpa) ./ sum_a
@@ -260,7 +260,7 @@ function ΣETR end;
     for i in eachindex(leaves)
         j = N - i + 1;
         Σetr += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.etr_sunlit) +
-                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.etr_shaded) * canopy.structure.state.δlai[j];
+                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.etr_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return Σetr
@@ -294,7 +294,7 @@ function ΣSIF end;
     for i in eachindex(leaves)
         j = N - i + 1;
         Σsif += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.ppar_sunlit .* leaves[i].flux.auxil.ϕ_f_sunlit) +
-                 (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded * leaves[i].flux.auxil.ϕ_f_shaded) * canopy.structure.state.δlai[j];
+                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded * leaves[i].flux.auxil.ϕ_f_shaded) * canopy.structure.state.δlai[j];
     end;
 
     return Σsif

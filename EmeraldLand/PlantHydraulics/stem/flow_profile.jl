@@ -23,10 +23,10 @@ Set up stem flow profile, given
 
 """
 function stem_flow_profiles!(spac::BulkSPAC{FT}) where {FT}
-    junction = spac.plant.junction;
-    trunk = spac.plant.trunk;
     branches = spac.plant.branches;
+    junction = spac.plant.junction;
     leaves = spac.plant.leaves;
+    trunk = spac.plant.trunk;
 
     sum_f::FT = 0;
     for i in eachindex(branches)

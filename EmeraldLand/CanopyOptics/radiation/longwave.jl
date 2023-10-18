@@ -20,8 +20,8 @@ Run longwave radiation simulations, given
 """
 function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     (; DIM_LAYER) = config;
-    can_str = spac.canopy.structure;
     branches = spac.plant.branches;
+    can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     meteo = spac.meteo;
     sbulk = spac.soil_bulk;

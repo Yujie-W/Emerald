@@ -45,11 +45,11 @@ Calculate the energy budgets of the spac, given
 
 """
 function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
-    soils = spac.soils;
-    roots = spac.plant.roots;
-    trunk = spac.plant.trunk;
     branches = spac.plant.branches;
     leaves = spac.plant.leaves;
+    roots = spac.plant.roots;
+    soils = spac.soils;
+    trunk = spac.plant.trunk;
 
     # update the temperature for soil
     for soil in soils
