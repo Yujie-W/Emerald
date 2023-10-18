@@ -59,6 +59,7 @@ lidf_cdf(lidf::VerhoefLIDF{FT}, θ::FT) where {FT} = (
 #     2022-Jun-02: add method for VerhoefLIDF algorithm
 #     2023-May-22: add support to BetaLIDF
 #     2023-Oct-14: if LAI <= 0, do nothing
+#     2023-Oct-18: if LAI <= 0 && SAI <= 0, do nothing
 #
 #######################################################################################################################################################################################################
 """
@@ -73,7 +74,7 @@ Update the frequency of leaf inclination angles, given
 function inclination_angles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     can_struct = spac.canopy.structure;
 
-    if can_struct.state.lai <= 0
+    if can_struct.state.lai <= 0 && can_struct.state.sai <= 0
         return nothing
     end;
 

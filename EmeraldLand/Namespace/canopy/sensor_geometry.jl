@@ -31,6 +31,7 @@ end;
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SensorGeometryAuxil
+#     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
 #
 #######################################################################################################################################################################################################
 """
@@ -91,13 +92,19 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     "Absolute value of fo * fs"
     fo_fs_abs::Matrix{FT}
 
-    # Scattering coefficients per leaf area
-    "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins"
+    # Scattering coefficients per leaf area or stem area
+    "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins of leaf"
     dob_leaf::Matrix{FT}
-    "Forward scattering coefficient for diffuse->observer at different layers and wavelength bins"
+    "Forward scattering coefficient for diffuse->observer at different layers and wavelength bins of leaf"
     dof_leaf::Matrix{FT}
-    "Bidirectional from solar to observer scattering coefficient at different layers and wavelength bins"
+    "Bidirectional from solar to observer scattering coefficient at different layers and wavelength bins of leaf"
     so_leaf::Matrix{FT}
+    "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins of stem"
+    dob_stem::Matrix{FT}
+    "Forward scattering coefficient for diffuse->observer at different layers and wavelength bins of stem"
+    dof_stem::Matrix{FT}
+    "Bidirectional from solar to observer scattering coefficient at different layers and wavelength bins of stem"
+    so_stem::Matrix{FT}
 
     # Canopy reflection
     "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
@@ -143,6 +150,9 @@ SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAu
             dob_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             dof_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             so_leaf           = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            dob_stem          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            dof_stem          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            so_stem           = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             e_sensor_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
             e_sensor          = zeros(FT, config.DIM_WL),
             reflectance       = zeros(FT, config.DIM_WL),

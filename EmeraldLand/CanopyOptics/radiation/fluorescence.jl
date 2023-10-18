@@ -183,10 +183,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         # total emitted SIF for upward and downward direction
         ilai = can_str.state.δlai[i] * can_str.auxil.ci;
-        sun_geo.auxil.e_sifꜜ_layer[:,i] .= sun_geo.auxil._sif_sunlitꜜ .* ilai .* sun_geo.auxil.p_sunlit[i] .+
-                                           sun_geo.auxil._sif_shadedꜜ .* ilai .* (1 - sun_geo.auxil.p_sunlit[i]);
-        sun_geo.auxil.e_sifꜛ_layer[:,i] .= sun_geo.auxil._sif_sunlitꜛ .* ilai .* sun_geo.auxil.p_sunlit[i] .+
-                                           sun_geo.auxil._sif_shadedꜛ .* ilai .* (1 - sun_geo.auxil.p_sunlit[i]);
+        sun_geo.auxil.e_sifꜜ_layer[:,i] .= sun_geo.auxil._sif_sunlitꜜ .* ilai .* sun_geo.auxil.p_sunlit[i] .+ sun_geo.auxil._sif_shadedꜜ .* ilai .* (1 - sun_geo.auxil.p_sunlit[i]);
+        sun_geo.auxil.e_sifꜛ_layer[:,i] .= sun_geo.auxil._sif_sunlitꜛ .* ilai .* sun_geo.auxil.p_sunlit[i] .+ sun_geo.auxil._sif_shadedꜛ .* ilai .* (1 - sun_geo.auxil.p_sunlit[i]);
     end;
 
     # 2. account for the SIF emission from bottom to up

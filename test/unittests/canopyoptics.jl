@@ -249,9 +249,10 @@ import Emerald.EmeraldLand.SPAC
         @test all(!isnan, spac.canopy.structure.auxil.r_net_lw);
         @test all(!isnan, spac.soil_bulk.auxil.r_net_lw);
 
-        # LAI <= 0
+        # LAI <= 0 and SAI <= 0
         spac.canopy.sun_geometry.state.sza = 30;
         spac.canopy.structure.state.lai = 0;
+        spac.canopy.structure.state.sai = 0;
         CO.canopy_radiation!(config, spac);
         @test all(spac.canopy.sun_geometry.auxil.e_dirꜜ .> 0);
         @test all(spac.canopy.sun_geometry.auxil.e_difꜜ .> 0);

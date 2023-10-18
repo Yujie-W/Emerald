@@ -9,6 +9,7 @@
 #     2023-Oct-13: compute the canopy albedo using the integrated radiation of the entire hemisphere
 #     2023-Oct-14: if LAI <= 0, run soil shortwave radiation only
 #     2023-Oct-14: if SZA > 89, set all shortwave fluxes to 0
+#     2023-Oct-18: account for SAI in the shortwave radiation calculation
 #
 #######################################################################################################################################################################################################
 """
@@ -53,7 +54,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     # if LAI <= 0, run soil albedo only
     rad_sw = spac.meteo.rad_sw;
     (; DIM_LAYER, SPECTRA) = config;
-    if sun_geo.state.sza <= 89 && can_struct.state.lai <= 0
+    if sun_geo.state.sza <= 89 && can_struct.state.lai <= 0 && can_struct.state.sai <= 0
         # 1. update upward and downward direct and diffuse radiation profiles
         sun_geo.auxil.e_dirꜜ .= rad_sw.e_dir;
         sun_geo.auxil.e_difꜜ .= rad_sw.e_dif;
@@ -127,6 +128,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     end;
 
     # 3. compute net absorption for leaves and soil
+    # TODO: partition the energy from leaf and stem for the total radiation
     for i in 1:DIM_LAYER
         Σ_shaded = view(sun_geo.auxil.e_net_dif,:,i)' * SPECTRA.ΔΛ / 1000;
         Σ_sunlit = view(sun_geo.auxil.e_net_dir,:,i)' * SPECTRA.ΔΛ / 1000;
@@ -141,10 +143,13 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     for i in 1:DIM_LAYER
         j = DIM_LAYER + 1 - i;
         α_apar = view(leaves[j].bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
+        a_leaf = view(leaves[j].bio.auxil.α_leaf, SPECTRA.IΛ_PAR) .* can_struct.state.δlai[i];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM, SPECTRA.IΛ_PAR)) .* can_struct.state.δsai[i];
+        f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
-        sun_geo.auxil._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can_struct.state.δlai[i];
-        sun_geo.auxil._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,i)) .* 1000 ./ can_struct.state.δlai[i] ./ sun_geo.auxil.p_sunlit[i];
+        sun_geo.auxil._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,i)) .* f_leaf .* 1000 ./ can_struct.state.δlai[i];
+        sun_geo.auxil._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,i)) .* f_leaf .* 1000 ./ can_struct.state.δlai[i] ./ sun_geo.auxil.p_sunlit[i];
         sun_geo.auxil._ppar_shaded .= sun_geo.auxil._apar_shaded .* α_apar;
         sun_geo.auxil._ppar_sunlit .= sun_geo.auxil._apar_sunlit .* α_apar;
 

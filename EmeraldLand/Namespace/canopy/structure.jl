@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2023-Oct-09: add struct CanopyStructureState
+#     2023-Oct-18: add fields sai and δsai
 #
 #######################################################################################################################################################################################################
 """
@@ -33,6 +34,12 @@ Base.@kwdef mutable struct CanopyStructureState{FT}
     "Leaf area index distribution"
     δlai::Vector{FT}
 
+    # Stem area index
+    "Stem area index"
+    sai::FT
+    "Stem area index distribution"
+    δsai::Vector{FT}
+
     # Clumping index
     "Clumping structure a"
     Ω_A::FT = 1
@@ -46,6 +53,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-09: add struct CanopyStructureAuxil
+#     2023-Oct-18: add fields ddb_stem and ddf_stem
 #
 #######################################################################################################################################################################################################
 """
@@ -74,10 +82,14 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     ddf::FT = 0
 
     # Scattering coefficients per leaf area
-    "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
+    "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of leaf"
     ddb_leaf::Matrix{FT}
-    "Forward scattering coefficient for diffuse->diffuse at different layers and wavelength bins"
+    "Forward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of leaf"
     ddf_leaf::Matrix{FT}
+    "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of stem"
+    ddb_stem::Matrix{FT}
+    "Forward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of stem"
+    ddf_stem::Matrix{FT}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
     "Reflectance for diffuse->diffuse at each canopy layer"
@@ -124,6 +136,8 @@ CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructure
             x_bnds     = zeros(FT, config.DIM_LAYER + 1),
             ddb_leaf   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ddf_leaf   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ddb_stem   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            ddf_stem   = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ρ_dd_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_dd_layer = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ρ_dd       = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
@@ -170,13 +184,15 @@ end;
 CanopyStructure(config::SPACConfiguration{FT}) where {FT} = (
     lai = 3;
     δlai = 3 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
+    sai = 0.5;
+    δsai = 0.5 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
     p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
     cs_auxil = CanopyStructureAuxil(config);
-    cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) for i in 1:config.DIM_LAYER]] ./ -lai);
+    cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:config.DIM_LAYER]] ./ -(lai + sai));
 
     return CanopyStructure{FT}(
-                state = CanopyStructureState{FT}(p_incl = p_incl, lai = lai, δlai = δlai),
+                state = CanopyStructureState{FT}(p_incl = p_incl, lai = lai, δlai = δlai, sai = sai, δsai = δsai),
                 auxil = cs_auxil,
     )
 );

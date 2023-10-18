@@ -25,7 +25,7 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     soil_bulk = spac.soil_bulk;
     top_soil = spac.soils[1];
 
-    if can_struct.state.lai <= 0
+    if can_struct.state.lai <= 0 && can_struct.state.sai <= 0
         # 1. compute longwave radiation out from the leaves and soil
         can_struct.auxil.lw_layer .= 0;
         r_lw_soil = K_STEFAN(FT) * (1 - soil_bulk.auxil.ρ_lw) * top_soil.auxil.t ^ 4;
@@ -76,6 +76,7 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     can_struct.auxil.lwꜛ[end] = can_struct.auxil.lwꜜ[end] * soil_bulk.auxil.ρ_lw + r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
+    # TODO: stem energy balance
     for i in 1:DIM_LAYER
         can_struct.auxil.r_net_lw[i] = (can_struct.auxil.lwꜜ[i] + can_struct.auxil.lwꜛ[i+1]) * can_struct.auxil.ϵ_lw_layer[i] - 2 * can_struct.auxil.lw_layer[i];
         can_struct.auxil.r_net_lw[i] /= can_struct.state.δlai[i];

@@ -8,6 +8,7 @@
 #     2023-Oct-11: compute canopy layer scattering
 #     2023-Oct-13: improve p_sun_sensor calculation accuracy
 #     2023-Oct-14: if none of REF or SIF is enabled, skip the sensor geometry calculation
+#     2023-Oct-18: account for SAI in the sensor geometry calculation
 #
 #######################################################################################################################################################################################################
 """
@@ -20,12 +21,12 @@ Update sensor geometry related auxiliary variables, given
 
 """
 function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    if (!config.ENABLE_REF && !config.ENABLE_SIF) || spac.canopy.structure.state.lai <= 0
+    if (!config.ENABLE_REF && !config.ENABLE_SIF) || (spac.canopy.structure.state.lai <= 0 && spac.canopy.structure.state.sai <= 0)
         return nothing
     end;
 
-    # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI > 0
-    (; DIM_LAYER, Θ_AZI, Θ_INCL) = config;
+    # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI+SAI > 0
+    (; DIM_LAYER, SPECTRA, Θ_AZI, Θ_INCL) = config;
     can_struct = spac.canopy.structure;
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
@@ -98,12 +99,12 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
-    kocilai = sen_geo.auxil.ko * can_struct.auxil.ci * can_struct.state.lai;
+    kocipai = sen_geo.auxil.ko * can_struct.auxil.ci * (can_struct.state.lai + can_struct.state.sai);
     for i in 1:DIM_LAYER
-        koilai = sen_geo.auxil.ko * can_struct.auxil.ci * can_struct.state.δlai[i];
-        sen_geo.auxil.p_sensor[i] = 1 / koilai * (exp(kocilai * can_struct.auxil.x_bnds[i]) - exp(kocilai * can_struct.auxil.x_bnds[i+1]));
+        kociipai = sen_geo.auxil.ko * can_struct.auxil.ci * (can_struct.state.δlai[i] + can_struct.state.δsai[i]);
+        sen_geo.auxil.p_sensor[i] = 1 / kociipai * (exp(kocipai * can_struct.auxil.x_bnds[i]) - exp(kocipai * can_struct.auxil.x_bnds[i+1]));
     end;
-    sen_geo.auxil.p_sensor_soil = exp(-kocilai);
+    sen_geo.auxil.p_sensor_soil = exp(-kocipai);
 
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
     dso = sqrt( tand(sun_geo.state.sza) ^ 2 +
@@ -111,13 +112,12 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
                 2 * tand(sun_geo.state.sza) * tand(sen_geo.state.vza) * cosd(sen_geo.state.vaa - sun_geo.state.saa) );
     Σk = sen_geo.auxil.ko + sun_geo.auxil.ks;
     Πk = sen_geo.auxil.ko * sun_geo.auxil.ks;
-    cl = can_struct.auxil.ci * can_struct.state.lai;
+    cl = can_struct.auxil.ci * (can_struct.state.lai + can_struct.state.sai);
     α  = dso / can_struct.state.hot_spot * 2 / Σk;
     pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
 
     for i in 1:DIM_LAYER
-        sen_geo.auxil.p_sun_sensor[i] = quadgk(pso, can_struct.auxil.x_bnds[i+1], can_struct.auxil.x_bnds[i]; rtol = 1e-2)[1] /
-                                                       (can_struct.auxil.x_bnds[i] - can_struct.auxil.x_bnds[i+1]);
+        sen_geo.auxil.p_sun_sensor[i] = quadgk(pso, can_struct.auxil.x_bnds[i+1], can_struct.auxil.x_bnds[i]; rtol = 1e-2)[1] / (can_struct.auxil.x_bnds[i] - can_struct.auxil.x_bnds[i+1]);
     end;
 
     # compute the scattering coefficients per leaf area
@@ -126,6 +126,9 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
         sen_geo.auxil.dob_leaf[:,i] .= sen_geo.auxil.dob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dof * leaf.bio.auxil.τ_leaf;
         sen_geo.auxil.dof_leaf[:,i] .= sen_geo.auxil.dof * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dob * leaf.bio.auxil.τ_leaf;
         sen_geo.auxil.so_leaf[:,i]  .= sen_geo.auxil.sob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.sof * leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dob_stem[:,i] .= sen_geo.auxil.dob * SPECTRA.ρ_STEM;
+        sen_geo.auxil.dof_stem[:,i] .= sen_geo.auxil.dof * SPECTRA.ρ_STEM;
+        sen_geo.auxil.so_stem[:,i]  .= sen_geo.auxil.sob * SPECTRA.ρ_STEM;
     end;
 
     return nothing

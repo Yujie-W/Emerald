@@ -165,7 +165,7 @@ update!(config::SPACConfiguration{FT},
     if !isnothing(lai)
         can_str.state.lai = lai;
         can_str.state.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
-        can_str.auxil.x_bnds = (lai == 0 ? (collect(0:DIM_LAYER) ./ -DIM_LAYER) : ([0; [sum(can_str.state.δlai[1:i]) for i in 1:DIM_LAYER]] ./ -lai));
+        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:DIM_LAYER]] ./ -(lai + can_str.state.sai));
         for i in 1:DIM_LAYER
             leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
         end;

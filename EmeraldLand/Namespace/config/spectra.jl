@@ -9,12 +9,11 @@
 #     2021-Aug-04: refactor the structure with constants, variables, and temporary cache
 #     2021-Aug-04: add concentrations and characteristic curves altogether
 #     2021-Aug-10: add CBC and PRO supoort
-#     2021-Nov-24: tease apart the characteristic absorption curves to HyperspectralAbsorption
 #     2022-Jul-20: add field DATASET to struct
-#     2023-Jun-16: remove fields of DIM_*
 #     2023-Sep-11: add field ΔΛ_SIF
 #     2023-Sep-13: add fields Φ_PSI and Φ_PSII
 #     2023-Sep-19: add fields MAT_SOIL and SOLAR_RAD
+#     2023-Oct-17: add field ρ_STEM
 #
 #######################################################################################################################################################################################################
 """
@@ -70,6 +69,10 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     Φ_PSI::Vector{FT} = read_nc(DATASET, "K_PS1")
     "Fluorescence yield of PS II probability function `[nm⁻¹]`"
     Φ_PSII::Vector{FT} = read_nc(DATASET, "K_PS2")
+
+    # Stem reflectance
+    "Stem reflectance `[-]`"
+    ρ_STEM::Vector{FT} = zeros(FT, length(Λ)) .+ 0.2
 
     # Variable features for the soil
     "A matrix of characteristic curves"
@@ -142,6 +145,7 @@ broadband_spectra(FT) = ReferenceSpectra{FT}(
             Φ_PS      = [0, 0],                             # will not be used
             Φ_PSI     = [0, 0],                             # will not be used
             Φ_PSII    = [0, 0],                             # will not be used
+            ρ_STEM    = [0.16, 0.39],
             MAT_SOIL  = [0 0; 0 0],                         # will not be used
             SOLAR_RAD = [191.544 119.923; 277.752 55.076],
             WL_NIR    = [700, 2500],

@@ -7,6 +7,7 @@
 #     2023-Oct-10: add function canopy_structure! (run only once per inclination angle distribution)
 #     2023-Oct-11: compute longwave reflectance, transmittance, and emissivity
 #     2023-Oct-14: if LAI <= 0, do nothing
+#     2023-Oct-18: account for SAI in the canopy structure calculation
 #
 #######################################################################################################################################################################################################
 """
@@ -21,12 +22,12 @@ Update canopy structure related auxiliary variables, given
 function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     can_struct = spac.canopy.structure;
 
-    if can_struct.state.lai <= 0
+    if can_struct.state.lai <= 0 && can_struct.state.sai <= 0
         return nothing
     end;
 
-    # run the canopy structure function only when LAI > 0
-    (; DIM_LAYER, Θ_INCL) = config;
+    # run the canopy structure function only when LAI+SAI > 0
+    (; DIM_LAYER, SPECTRA, Θ_INCL) = config;
     soil_bulk = spac.soil_bulk;
 
     # compute the weighed average of the leaf inclination angle distribution
@@ -48,11 +49,19 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
         leaf = spac.plant.leaves[DIM_LAYER + 1 - i];
         can_struct.auxil.ddb_leaf[:,i] .= can_struct.auxil.ddb * leaf.bio.auxil.ρ_leaf .+ can_struct.auxil.ddf * leaf.bio.auxil.τ_leaf;
         can_struct.auxil.ddf_leaf[:,i] .= can_struct.auxil.ddf * leaf.bio.auxil.ρ_leaf .+ can_struct.auxil.ddb * leaf.bio.auxil.τ_leaf;
+        can_struct.auxil.ddb_stem[:,i] .= can_struct.auxil.ddb * SPECTRA.ρ_STEM;
+        can_struct.auxil.ddf_stem[:,i] .= can_struct.auxil.ddf * SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    can_struct.auxil.τ_dd_layer .= exp.(-1 .* (1 .- can_struct.auxil.ddf_leaf) .* can_struct.state.δlai' .* can_struct.auxil.ci);
-    can_struct.auxil.ρ_dd_layer .= 1 .- exp.(-1 .* can_struct.auxil.ddb_leaf .* can_struct.state.δlai' .* can_struct.auxil.ci);
+    # can_struct.auxil.τ_dd_layer .= exp.(-1 .* (1 .- can_struct.auxil.ddf_leaf) .* can_struct.state.δlai' .* can_struct.auxil.ci);
+    # can_struct.auxil.ρ_dd_layer .= 1 .- exp.(-1 .* can_struct.auxil.ddb_leaf .* can_struct.state.δlai' .* can_struct.auxil.ci);
+    for i in 1:DIM_LAYER
+        k_τ_x = (can_struct.state.δlai[i] .* (1 .- can_struct.auxil.ddf_leaf[:,i]) .+ can_struct.state.δsai[i] .* (1 .- can_struct.auxil.ddf_stem[:,i])) .* can_struct.auxil.ci;
+        k_ρ_x = (can_struct.state.δlai[i] .* can_struct.auxil.ddb_leaf[:,i] .+ can_struct.state.δsai[i] .* can_struct.auxil.ddb_stem[:,i]) .* can_struct.auxil.ci;
+        can_struct.auxil.τ_dd_layer[:,i] .= exp.(-1 .* k_τ_x);
+        can_struct.auxil.ρ_dd_layer[:,i] .= 1 .- exp.(-1 .* k_ρ_x);
+    end;
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)
     can_struct.auxil.ρ_dd[:,end] .= soil_bulk.auxil.ρ_sw;
@@ -70,11 +79,11 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     # compute longwave effective emissivity, reflectance, and transmittance per layer without correction (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
     for i in 1:DIM_LAYER
         leaf = spac.plant.leaves[DIM_LAYER + 1 - i];
-        ilai = can_struct.state.δlai[i] * can_struct.auxil.ci;
+        ipai = (can_struct.state.δlai[i] + can_struct.state.δsai[i]) * can_struct.auxil.ci;
         σ_lw_b = can_struct.auxil.ddb * leaf.bio.auxil.ρ_lw + can_struct.auxil.ddf * leaf.bio.auxil.τ_lw;
         σ_lw_f = can_struct.auxil.ddf * leaf.bio.auxil.ρ_lw + can_struct.auxil.ddb * leaf.bio.auxil.τ_lw;
-        can_struct.auxil.τ_lw_layer[i] = exp(-1 * (1 - σ_lw_f) * ilai);
-        can_struct.auxil.ρ_lw_layer[i] = 1 - exp(-1 * σ_lw_b * ilai);
+        can_struct.auxil.τ_lw_layer[i] = exp(-1 * (1 - σ_lw_f) * ipai);
+        can_struct.auxil.ρ_lw_layer[i] = 1 - exp(-1 * σ_lw_b * ipai);
         can_struct.auxil.ϵ_lw_layer[i] = 1 - can_struct.auxil.τ_lw_layer[i] - can_struct.auxil.ρ_lw_layer[i];
     end;
 

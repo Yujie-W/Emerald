@@ -32,6 +32,7 @@ end;
 # General
 #     2023-Oct-09: add struct SunGeometryAuxil
 #     2023-Oct-13: add field albedo
+#     2023-Oct-18: add fields sdb_stem and sdf_stem
 #
 #######################################################################################################################################################################################################
 """
@@ -79,10 +80,14 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     fs_cos²_incl::Matrix{FT}
 
     # Scattering coefficients per leaf area
-    "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins"
+    "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
     sdb_leaf::Matrix{FT}
-    "Forward scattering coefficient for solar directional->diffuse at different layers and wavelength bins"
+    "Forward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
     sdf_leaf::Matrix{FT}
+    "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of stem"
+    sdb_stem::Matrix{FT}
+    "Forward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of stem"
+    sdf_stem::Matrix{FT}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
     "Reflectance for solar directional->diffuse at each canopy layer"
@@ -207,6 +212,8 @@ SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT
             fs_cos²_incl     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             sdb_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             sdf_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            sdb_stem         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
+            sdf_stem         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             ρ_sd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_sd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
             τ_ss_layer       = zeros(FT, config.DIM_LAYER),
