@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-14: add function fluorescence_spectrum! (run per sensor geometry)
 #     2023-Oct-14: if LAI < = 0 or SZA > 89, set all fluxes to 0
+#     2023-Oct-18: SIF excitation is rescaled to leaf partitioning (accounting stem)
 #
 #######################################################################################################################################################################################################
 """
@@ -23,9 +24,9 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     end;
 
     can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
-    leaves = spac.plant.leaves;
 
     if sun_geo.state.sza > 89 || can_str.state.lai <= 0
         sun_geo.auxil.e_sif_chl .= 0;
@@ -53,11 +54,14 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # 0. compute chloroplast SIF emissions for different layers
     for i in 1:DIM_LAYER
         leaf = leaves[DIM_LAYER + 1 - i];
+        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[i];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[i];
+        f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # integrate the energy absorbed by chl (and car) in each wave length bins
         f_sife = view(leaf.bio.auxil.f_sife, SPECTRA.IΛ_SIFE);
-        sun_geo.auxil._e_dif_sife .= view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE .* f_sife;
-        sun_geo.auxil._e_dir_sife .= view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE .* f_sife;
+        sun_geo.auxil._e_dif_sife .= view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE .* f_sife;
+        sun_geo.auxil._e_dir_sife .= view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE .* f_sife;
 
         # convert the excitation radiation to fluorescence components
         if Φ_PHOTON
@@ -82,17 +86,9 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         end;
 
         # add up the SIF from sunlit and shaded leaves for each layer through accounting for the SIF quantum yield
-        ϕ_sunlit_dif = lidf_weight(leaf.flux.auxil.ϕ_f_sunlit,
-                                   can_str.state.p_incl,
-                                   sun_geo.auxil._vec_azi);
-        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi,
-                                   leaf.flux.auxil.ϕ_f_sunlit,
-                                   sun_geo.auxil.fs_abs,
-                                   sun_geo.auxil._vec_azi,
-                                   can_str.state.p_incl);
-        sun_geo.auxil.e_sif_chl[:,i] .= sun_geo.auxil._e_dif_shaded .* leaf.flux.auxil.ϕ_f_shaded .+
-                                                    sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+
-                                                    sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
+        ϕ_sunlit_dif = lidf_weight(leaf.flux.auxil.ϕ_f_sunlit, can_str.auxil.p_incl, sun_geo.auxil._vec_azi);
+        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, leaf.flux.auxil.ϕ_f_sunlit, sun_geo.auxil.fs_abs, sun_geo.auxil._vec_azi, can_str.auxil.p_incl);
+        sun_geo.auxil.e_sif_chl[:,i] .= sun_geo.auxil._e_dif_shaded .* leaf.flux.auxil.ϕ_f_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
     end;
 
     # 1. compute SIF emissions for different layers
@@ -100,7 +96,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # function to weight matrices by inclination angles
     @inline local_lidf_weight(mat_0, mat_1) = (
         sun_geo.auxil._mat_incl_azi .= mat_0 .* mat_1;
-        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.state.p_incl);
+        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.auxil.p_incl);
 
         return mean(sun_geo.auxil._vec_azi)
     );
@@ -108,11 +104,14 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
     for i in 1:DIM_LAYER
         leaf = leaves[DIM_LAYER + 1 - i];
+        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[i];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[i];
+        f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # compute the energy used for SIF excitation
-        sun_geo.auxil._e_dirꜜ_sife .= view(sun_geo.auxil.e_dirꜜ,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE;
-        sun_geo.auxil._e_difꜜ_sife .= view(sun_geo.auxil.e_difꜜ,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE;
-        sun_geo.auxil._e_difꜛ_sife .= view(sun_geo.auxil.e_difꜛ,SPECTRA.IΛ_SIFE,i) .* SPECTRA.ΔΛ_SIFE;
+        sun_geo.auxil._e_dirꜜ_sife .= view(sun_geo.auxil.e_dirꜜ,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
+        sun_geo.auxil._e_difꜜ_sife .= view(sun_geo.auxil.e_difꜜ,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
+        sun_geo.auxil._e_difꜛ_sife .= view(sun_geo.auxil.e_difꜛ,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
 
         # convert the excitation radiation to photons if ϕ_photon is true
         if Φ_PHOTON
@@ -190,15 +189,15 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # 2. account for the SIF emission from bottom to up
     sun_geo.auxil.e_sifꜛ_emit[:,end] .= 0;
     for i in DIM_LAYER:-1:1
-        r__ = view(can_str.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );   # reflectance without correction
-        r_j = view(can_str.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);   # reflectance of the upper boundary (i) for SIF
-        t_i = view(can_str.auxil.τ_dd      ,SPECTRA.IΛ_SIF,i  );   # transmittance of the layer (i) for SIF
+        r__ = view(can_str.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );    # reflectance without correction
+        r_j = view(can_str.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);    # reflectance of the upper boundary (i) for SIF
+        t_i = view(can_str.auxil.τ_dd      ,SPECTRA.IΛ_SIF,i  );    # transmittance of the layer (i) for SIF
 
-        f_d_i = view(sun_geo.auxil.e_sifꜜ_layer,:,i  );         # downward emitted SIF from layer i
-        f_u_i = view(sun_geo.auxil.e_sifꜛ_layer,:,i  );         # downward emitted SIF from layer i
-        s_u_j = view(sun_geo.auxil.e_sifꜛ_emit ,:,i+1);         # upward SIF from the lower layer
-        s_d_i = view(sun_geo.auxil.e_sifꜜ_emit ,:,i  );         # downward SIF from the layer
-        s_u_i = view(sun_geo.auxil.e_sifꜛ_emit ,:,i  );         # upward SIF from the layer
+        f_d_i = view(sun_geo.auxil.e_sifꜜ_layer,:,i  );            # downward emitted SIF from layer i
+        f_u_i = view(sun_geo.auxil.e_sifꜛ_layer,:,i  );            # downward emitted SIF from layer i
+        s_u_j = view(sun_geo.auxil.e_sifꜛ_emit ,:,i+1);            # upward SIF from the lower layer
+        s_d_i = view(sun_geo.auxil.e_sifꜜ_emit ,:,i  );            # downward SIF from the layer
+        s_u_i = view(sun_geo.auxil.e_sifꜛ_emit ,:,i  );            # upward SIF from the layer
 
         s_d_i .= (f_d_i .+ s_u_j .* r__) ./ (1 .- r__ .* r_j);
         s_u_i .= f_u_i .+ s_u_j .* t_i .+ s_d_i .* r_j .* t_i;
@@ -207,11 +206,11 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # 3. account for the SIF emission from up to bottom
     sun_geo.auxil.e_sifꜜ[:,1] .= 0;
     for i in 1:DIM_LAYER
-        r_i = view(can_str.auxil.ρ_dd,SPECTRA.IΛ_SIF,i);   # reflectance of the layer (i) for SIF
-        t_i = view(can_str.auxil.τ_dd,SPECTRA.IΛ_SIF,i);   # transmittance of the layer (i) for SIF
+        r_i = view(can_str.auxil.ρ_dd,SPECTRA.IΛ_SIF,i);    # reflectance of the layer (i) for SIF
+        t_i = view(can_str.auxil.τ_dd,SPECTRA.IΛ_SIF,i);    # transmittance of the layer (i) for SIF
 
-        s_d_i = view(sun_geo.auxil.e_sifꜜ_emit,:,i  );  # downward SIF from the layer
-        s_u_i = view(sun_geo.auxil.e_sifꜛ_emit,:,i  );  # upward SIF from the layer
+        s_d_i = view(sun_geo.auxil.e_sifꜜ_emit,:,i  );      # downward SIF from the layer
+        s_u_i = view(sun_geo.auxil.e_sifꜛ_emit,:,i  );      # upward SIF from the layer
         a_d_i = view(sun_geo.auxil.e_sifꜜ     ,:,i  );
         a_d_j = view(sun_geo.auxil.e_sifꜜ     ,:,i+1);
         a_u_i = view(sun_geo.auxil.e_sifꜛ     ,:,i  );
