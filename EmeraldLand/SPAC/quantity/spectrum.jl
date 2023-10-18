@@ -43,8 +43,8 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) 
     ys = 0;
     δx = (x₂ - x₁) / steps;
     for i in 1:(steps+1)
-        x = x₁ + (i - 1) * δx;
-        ys += read_spectrum(x, y, x);
+        xi = x₁ + (i - 1) * δx;
+        ys += read_spectrum(x, y, xi);
     end;
 
     return ys / (steps + 1)
