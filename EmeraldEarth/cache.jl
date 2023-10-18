@@ -46,7 +46,7 @@ function initialize_cache!(FT)
     end;
 
     # initialize the spac with non-saturated soil
-    update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(max(soil.VC.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.soils));
+    prescribe_soil!(CACHE_SPAC; swcs = Tuple(max(soil.VC.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.soils));
     initialize!(CACHE_SPAC, CACHE_CONFIG);
 
     # create a state struct based on the spac
@@ -139,9 +139,9 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
 
     # prescribe soil water content
     if "SWC" in keys(wd_params)
-        update!(CACHE_SPAC, CACHE_CONFIG; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
+        prescribe_soil!(CACHE_SPAC; swcs = wd_params["SWC"], t_soils = wd_params["T_SOIL"]);
         # TODO: remove this when soil diffusion problem is fixed
-        update!(CACHE_SPAC, CACHE_CONFIG; swcs = Tuple(min(soil.state.vc.Θ_SAT - 0.001, soil.state.θ) for soil in CACHE_SPAC.soils));
+        prescribe_soil!(CACHE_SPAC; swcs = Tuple(min(soil.state.vc.Θ_SAT - 0.001, soil.state.θ) for soil in CACHE_SPAC.soils));
     end;
 
     # synchronize the state if state is not nothing, otherwise set all values to NaN (do thing before prescribing T_SKIN)
@@ -155,7 +155,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     if "T_SKIN" in keys(wd_params)
         push!(CACHE_SPAC.plant.memory.state.t_history, wd_params["T_SKIN"]);
         if length(CACHE_SPAC.plant.memory.state.t_history) > 240 deleteat!(CACHE_SPAC.plant.memory.state.t_history,1) end;
-        update!(CACHE_SPAC, CACHE_CONFIG; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.plant.memory.state.t_history));
+        update!(CACHE_CONFIG, CACHE_SPAC; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.plant.memory.state.t_history));
     end;
 
     # synchronize LAI, CHL, and CI
@@ -166,7 +166,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     _vcm = griddingmachine_data(gm_params["VCMAX25"], gm_params["YEAR"], _iday);
 
     # update clumping index, LAI, Vcmax, and Chl
-    update!(CACHE_SPAC, CACHE_CONFIG; cab = _chl, car = _chl / 7, ci = _cli, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
+    update!(CACHE_CONFIG, CACHE_SPAC; cab = _chl, car = _chl / 7, ci = _cli, lai =_lai, vcmax = _vcm, vcmax_expo = 0.3);
 
     return nothing
 end;

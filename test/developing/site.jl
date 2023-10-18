@@ -111,7 +111,7 @@ end;
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}();
 spac = EmeraldLand.Namespace.BulkSPAC(config);
-EmeraldLand.SPAC.update!(config, spac; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
+EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
 EmeraldLand.SPAC.initialize!(config, spac);
 spac.meteo.rad_lw = 300;
 

@@ -53,14 +53,15 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
         _df_ts2::FT = dfr.T_SOIL_2;
         _df_ts3::FT = dfr.T_SOIL_3;
         _df_ts4::FT = dfr.T_SOIL_4;
-        update!(config, spac; t_leaf = max(_df_tar, _df_tlf), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
+        update!(config, spac; t_leaf = max(_df_tar, _df_tlf));
+        prescribe_soil!(spac; t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
     end;
     if !θ_on
         _df_sw1::FT = dfr.SWC_1;
         _df_sw2::FT = dfr.SWC_2;
         _df_sw3::FT = dfr.SWC_3;
         _df_sw4::FT = dfr.SWC_4;
-        update!(config, spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
+        prescribe_soil!(spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4));
     end;
 
     # prescribe the precipitation related parameters

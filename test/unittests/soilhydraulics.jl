@@ -39,7 +39,7 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize!(config, spac);
 
         # set the soil to be not saturated
-        SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
+        SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
         spac.soils[5].state.ns[4] = spac.airs[1].state.p_air * (spac.soils[5].state.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].auxil.δz / (CS.GAS_R() * spac.soils[5].auxil.t);
         spac.soils[5].state.ns[5] = spac.airs[1].state.p_air * (spac.soils[5].state.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].auxil.δz / (CS.GAS_R() * spac.soils[5].auxil.t);
         SH.volume_balance!(config, spac);
@@ -84,7 +84,7 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize!(config, spac);
 
         # set the soil to be not saturated
-        SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
+        SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_infiltration!(spac);
 
@@ -92,7 +92,7 @@ import Emerald.EmeraldLand.SPAC
         @test sum([soil.auxil.∂θ∂t * soil.auxil.δz for soil in spac.soils]) ≈ 0 atol = 1e-10;
 
         # set the soil to be almost saturated (controlled by the soil water content)
-        SPAC.update!(config, spac; swcs = (0.5, 0.5, 0.5, 0.5, 0.5));
+        SPAC.prescribe_soil!(spac; swcs = (0.5, 0.5, 0.5, 0.5, 0.5));
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_infiltration!(spac);
 
@@ -104,7 +104,7 @@ import Emerald.EmeraldLand.SPAC
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
-        SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
+        SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
         SPAC.update_substep_auxils!(spac);
 
         # now the lowest layer to be short of dry air
@@ -145,20 +145,20 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize!(config, spac);
 
         # set every layer to be unsaturated
-        SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
+        SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_runoff!(spac);
         @test spac.soil_bulk.auxil.runoff == 0;
 
         # set the second layer to be oversaturated (but not enough to cause runoff)
-        SPAC.update!(config, spac; swcs = (0.3, spac.soils[2].state.vc.Θ_SAT + 0.01, 0.3, 0.3, 0.3));
+        SPAC.prescribe_soil!(spac; swcs = (0.3, spac.soils[2].state.vc.Θ_SAT + 0.01, 0.3, 0.3, 0.3));
         spac.soils[2].state.θ = spac.soils[2].state.vc.Θ_SAT + 0.01;
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_runoff!(spac);
         @test spac.soil_bulk.auxil.runoff == 0;
 
         # set the second layer to be oversaturated (enough to cause runoff)
-        SPAC.update!(config, spac; swcs = (0.3, 0.7, 0.3, 0.3, 0.3));
+        SPAC.prescribe_soil!(spac; swcs = (0.3, 0.7, 0.3, 0.3, 0.3));
         spac.soils[2].state.θ = 0.7;
         SPAC.update_substep_auxils!(spac);
         SH.soil_water_runoff!(spac);
@@ -166,7 +166,7 @@ import Emerald.EmeraldLand.SPAC
         @test spac.soil_bulk.auxil.runoff ≈ runoffs > 0;
 
         # set every layer to the oversaturated
-        SPAC.update!(config, spac; swcs = (0.7, 0.7, 0.7, 0.7, 0.7));
+        SPAC.prescribe_soil!(spac; swcs = (0.7, 0.7, 0.7, 0.7, 0.7));
         spac.soils[1].state.θ = 0.7;
         spac.soils[2].state.θ = 0.7;
         spac.soils[3].state.θ = 0.7;
@@ -182,7 +182,7 @@ import Emerald.EmeraldLand.SPAC
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
-        SPAC.update!(config, spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
+        SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
 
         # the case of no root water uptake
         SPAC.update_substep_auxils!(spac);
