@@ -6,8 +6,21 @@ using Emerald;
 wd_tag = "wd1";
 gm_dict = EmeraldFrontier.gm_dict(EmeraldFrontier.GriddingMachineLabels(year=2019), 35.1, 115.2);
 wd_data = EmeraldFrontier.weather_driver(wd_tag, gm_dict);
-df_pres = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240, p_on = false, t_on = false, θ_on = false);
-df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240, p_on = true, t_on = true, θ_on = true);
+df_pres = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240);
+df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection = 1:240);
+
+
+#
+# Debugging the root disconnection and reconnection issues
+#
+using Emerald;
+
+FT = Float64;
+config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
+spac = EmeraldLand.Namespace.BulkSPAC(config);
+spac.meteo.rad_lw = 300;
+EmeraldLand.SPAC.initialize!(config, spac);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 
 
 #
@@ -16,52 +29,53 @@ df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection
 using Emerald;
 
 FT = Float64;
-config = EmeraldLand.Namespace.SPACConfiguration{FT}();
-spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
-EmeraldLand.SPAC.update!(spac, config; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
-EmeraldLand.SPAC.initialize!(spac, config);
-spac.METEO.rad_lw = 300;
+config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
+spac = EmeraldLand.Namespace.BulkSPAC(config);
+#EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
+EmeraldLand.SPAC.initialize!(config, spac);
+spac.meteo.rad_lw = 300;
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 
-spac.METEO.rain = 0;
+spac.meteo.rain = 0;
 for i in 1:100
-    EmeraldLand.SPAC.spac!(spac, config, FT(360));
-    tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_fout = spac.METEO.rain * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) - soil_water_flow;
-    root_water_flow = sum([EmeraldLand.SoilHydraulics.root_sink(rlayer) for rlayer in spac.ROOTS]) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
+    EmeraldLand.SPAC.spac!(config, spac, FT(360));
+    tswc = sum([soil.θ * soil.auxil.δz for soil in spac.SOIL.LAYERS]);
+    soil_water_flow = sum([soil.∂θ∂t * soil.auxil.δz for soil in spac.SOIL.LAYERS]);
+    soil_water_fout = spac.meteo.rain * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) - soil_water_flow;
+    root_water_flow = sum([EmeraldLand.SoilHydraulics.root_sink(rlayer) for rlayer in spac.plant.roots]) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
     leaf_water_flow = EmeraldLand.SPAC.T_VEG(spac) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT);
     #@info "Debugging" soil_water_flow soil_water_fout root_water_flow leaf_water_flow spac.SOIL.runoff;
-    #@info "Total water is" tswc [slayer.θ for slayer in spac.SOIL.LAYERS];
-    pns = [slayer.TRACES.n_N₂ / (slayer.ΔZ * max(0, slayer.VC.Θ_SAT - slayer.θ)) / 1000 * slayer.t * EmeraldLand.Constant.GAS_R() for slayer in spac.SOIL.LAYERS];
+    #@info "Total water is" tswc [soil.θ for soil in spac.SOIL.LAYERS];
+    pns = [soil.state.ns[4] / (soil.auxil.δz * max(0, soil.VC.Θ_SAT - soil.θ)) / 1000 * soil.t * EmeraldLand.Constant.GAS_R() for soil in spac.SOIL.LAYERS];
     @info "N₂ partial pressure in kPa" pns;
-    tss = [slayer.t for slayer in spac.SOIL.LAYERS];
+    tss = [soil.t for soil in spac.SOIL.LAYERS];
     @info "Soil temperature in K" tss;
 end;
 
-spac.METEO.rain = 0.01;
+spac.meteo.rain = 0.01;
 for i in 1:10
-    EmeraldLand.SPAC.spac!(spac, config, FT(360));
-    tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_fout = spac.METEO.rain * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) - soil_water_flow;
-    root_water_flow = sum([EmeraldLand.SoilHydraulics.root_sink(rlayer) for rlayer in spac.ROOTS]) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
+    EmeraldLand.SPAC.spac!(config, spac, FT(360));
+    tswc = sum([soil.θ * soil.auxil.δz for soil in spac.SOIL.LAYERS]);
+    soil_water_flow = sum([soil.∂θ∂t * soil.auxil.δz for soil in spac.SOIL.LAYERS]);
+    soil_water_fout = spac.meteo.rain * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) - soil_water_flow;
+    root_water_flow = sum([EmeraldLand.SoilHydraulics.root_sink(rlayer) for rlayer in spac.plant.roots]) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
     leaf_water_flow = EmeraldLand.SPAC.T_VEG(spac) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT);
     @info "Debugging" soil_water_flow soil_water_fout root_water_flow leaf_water_flow spac.SOIL.runoff;
-    #@info "Total water is" tswc [slayer.θ for slayer in spac.SOIL.LAYERS];
+    #@info "Total water is" tswc [soil.θ for soil in spac.SOIL.LAYERS];
 end;
 
-spac.METEO.rad_sw.e_direct .= 0;
-spac.METEO.rad_sw.e_diffuse .= 0;
-spac.METEO.rain = 0.01;
+spac.meteo.rad_sw.e_dir .= 0;
+spac.meteo.rad_sw.e_dif .= 0;
+spac.meteo.rain = 0.01;
 for i in 1:10
-    EmeraldLand.SPAC.spac!(spac, config, FT(360));
-    tswc = sum([slayer.θ * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_flow = sum([slayer.∂θ∂t * slayer.ΔZ for slayer in spac.SOIL.LAYERS]);
-    soil_water_fout = spac.METEO.rain * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) - soil_water_flow;
-    root_water_flow = sum([EmeraldLand.SoilHydraulics.root_sink(rlayer) for rlayer in spac.ROOTS]) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
+    EmeraldLand.SPAC.spac!(config, spac, FT(360));
+    tswc = sum([soil.θ * soil.auxil.δz for soil in spac.SOIL.LAYERS]);
+    soil_water_flow = sum([soil.∂θ∂t * soil.auxil.δz for soil in spac.SOIL.LAYERS]);
+    soil_water_fout = spac.meteo.rain * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) - soil_water_flow;
+    root_water_flow = sum([EmeraldLand.SoilHydraulics.root_sink(rlayer) for rlayer in spac.plant.roots]) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT) / spac.SOIL.AREA;
     leaf_water_flow = EmeraldLand.SPAC.T_VEG(spac) * EmeraldLand.Constant.M_H₂O(FT) / EmeraldLand.Constant.ρ_H₂O(FT);
     @info "Debugging" soil_water_flow soil_water_fout root_water_flow leaf_water_flow spac.SOIL.runoff;
-    @info "SWC per layer" [slayer.θ for slayer in spac.SOIL.LAYERS];
+    @info "SWC per layer" [soil.θ for soil in spac.SOIL.LAYERS];
 end;
 
 
@@ -78,7 +92,7 @@ using Emerald;
 
 function show_spac_info(node)
     beta = EmeraldLand.SPAC.BETA(spac);
-    par = spac.CANOPY.RADIATION.par_in;
+    par = EmeraldLand.SPAC.PAR(config, spac);
     ppar = EmeraldLand.SPAC.PPAR(spac);
     csif = EmeraldLand.SPAC.ΣSIF(spac);
     etr = EmeraldLand.SPAC.ΣETR(spac);
@@ -86,59 +100,56 @@ function show_spac_info(node)
     ndvi = EmeraldLand.CanopyOptics.MODIS_NDVI(node);
     evi = EmeraldLand.CanopyOptics.MODIS_EVI(node);
     nirv = EmeraldLand.CanopyOptics.MODIS_NIRv(node);
-    sifs = (EmeraldLand.CanopyOptics.TROPOMI_SIF683(node),
-            EmeraldLand.CanopyOptics.TROPOMI_SIF740(node),
-            EmeraldLand.CanopyOptics.OCO2_SIF759(node),
-            EmeraldLand.CanopyOptics.OCO2_SIF770(node));
+    sifs = (EmeraldLand.CanopyOptics.TROPOMI_SIF683(node), EmeraldLand.CanopyOptics.TROPOMI_SIF740(node), EmeraldLand.CanopyOptics.OCO2_SIF759(node), EmeraldLand.CanopyOptics.OCO2_SIF770(node));
     tran = EmeraldLand.SPAC.T_VEG(spac);
     @info "SPAC Details" beta par ppar csif etr gpp tran ndvi evi nirv sifs;
-end
+end;
 
 FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}();
-spac = EmeraldLand.Namespace.MultiLayerSPAC(config);
-EmeraldLand.SPAC.update!(spac, config; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
-EmeraldLand.SPAC.initialize!(spac, config);
-spac.METEO.rad_lw = 300;
+spac = EmeraldLand.Namespace.BulkSPAC(config);
+EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
+EmeraldLand.SPAC.initialize!(config, spac);
+spac.meteo.rad_lw = 300;
 
 @info "RAD > 0 and LAI = 0";
-EmeraldLand.SPAC.update!(spac, config; lai = 0);
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD > 0 and LAI > 0";
-EmeraldLand.SPAC.update!(spac, config; lai = 1);
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD > 0 and LAI = 0";
-EmeraldLand.SPAC.update!(spac, config; lai = 0);
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD > 0 and LAI > 0";
-EmeraldLand.SPAC.update!(spac, config; lai = 1);
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI = 0";
-EmeraldLand.SPAC.update!(spac, config; lai = 0);
-spac.METEO.rad_sw.e_direct .= 0;
-spac.METEO.rad_sw.e_diffuse .= 0;
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
+spac.meteo.rad_sw.e_dir .= 0;
+spac.meteo.rad_sw.e_dif .= 0;
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI > 0";
-EmeraldLand.SPAC.update!(spac, config; lai = 1);
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI > 0 (SZA > 90)";
-spac.ANGLES.sza = 90;
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+spac.canopy.sun_geometry.state.sza = 90;
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);
 
 @info "RAD = 0 and LAI = 0 (SZA > 90)";
-EmeraldLand.SPAC.update!(spac, config; lai = 0);
-EmeraldLand.SPAC.spac!(spac, config, FT(360));
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
+EmeraldLand.SPAC.spac!(config, spac, FT(360));
 show_spac_info(spac);

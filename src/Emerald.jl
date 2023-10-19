@@ -8,24 +8,25 @@ export EmeraldFrontier
 export EmeraldIO
 export EmeraldLand
 export EmeraldMath
+export EmeraldPhysics
 export EmeraldTest
 export EmeraldUtility
-export EmeraldVisualization
 
 
 # include the submodules
-include("../EmeraldIO.jl/EmeraldIO.jl");
-include("../EmeraldMath.jl/EmeraldMath.jl");
-include("../EmeraldTest.jl/EmeraldTest.jl");
-include("../EmeraldUtility.jl/EmeraldUtility.jl");
+include("../EmeraldIO/EmeraldIO.jl");
+include("../EmeraldPhysics/EmeraldPhysics.jl");
+include("../EmeraldTest/EmeraldTest.jl");
+include("../EmeraldUtility/EmeraldUtility.jl");
 
-include("../EmeraldLand.jl/EmeraldLand.jl");
-include("../EmeraldVisualization.jl/EmeraldVisualization.jl");
+include("../EmeraldMath/EmeraldMath.jl");
 
-include("../EmeraldData.jl/EmeraldData.jl");
+include("../EmeraldLand/EmeraldLand.jl");
 
-include("../EmeraldEarth.jl/EmeraldEarth.jl");
-include("../EmeraldFrontier.jl/EmeraldFrontier.jl");
+include("../EmeraldData/EmeraldData.jl");
+
+include("../EmeraldEarth/EmeraldEarth.jl");
+include("../EmeraldFrontier/EmeraldFrontier.jl");
 
 
-end # module
+end; # module

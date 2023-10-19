@@ -1,0 +1,48 @@
+{
+    "GRIDDINGMACHINE": {
+        "LABEL": "SOIL_TEXTURE",
+        "VERSION": 1,
+        "EXTRA_LABEL": null,
+        "LAT_LON_RESO": null,
+        "YEARS": null,
+        "TEMPORAL_RESO": "1Y"
+    },
+    "OUTPUT_VAR_ATTR": {
+        "about": "soil texture from GLDAS model",
+        "long_name": "soil texture catergory",
+        "unit": "-"
+    },
+    "INPUT_VAR_SETS": [
+        {
+            "INDEX_AXIS_INDEX": 3,
+            "LATITUDE_AXIS_INDEX": 2,
+            "MASKING_FUNCTION": "",
+            "LONGITUDE_AXIS_INDEX": 1,
+            "SCALING_FUNCTION": "",
+            "DATA_NAME": "GLDAS_soiltex"
+        }
+    ],
+    "OUTPUT_REF_ATTR": {
+        "year": "2004",
+        "journal": "Bulletin of the American Meteorological Society",
+        "doi": "10.1175/BAMS-85-3-381",
+        "title": "The Global Land Data Assimilation System",
+        "authors": "Rodell M. et al."
+    },
+    "INPUT_MAP_SETS": {
+        "FORMAT": "NETCDF",
+        "PROJECTION": "CYLINDRICAL",
+        "VALUE_AT": true,
+        "FLIP_LAT": false,
+        "FILE_NAME_PATTERN": null,
+        "FOLDER": "/home/wyujie/GriddingMachine/original",
+        "FILE_NAME_FUNCTION": "",
+        "COVERAGE": [
+            -60.0,
+            90.0,
+            -180.0,
+            180.0
+        ],
+        "FLIP_LON": false
+    }
+}
