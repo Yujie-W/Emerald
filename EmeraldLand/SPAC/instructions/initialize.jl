@@ -81,6 +81,7 @@ initialize_struct!(air::AirLayer{FT}) where {FT} = (
 #     2023-Oct-07: add 0.01 to the water vapor volume per soil layer
 #     2023-Oct-09: add root and stem initialization in the initialization of SPAC
 #     2023-Oct-17: update step and subtep auxils during initialization
+#     2023-Oct-18: initialize leaf inclination angles and canopy structure during initialization
 #
 #######################################################################################################################################################################################################
 """
@@ -137,6 +138,10 @@ initialize!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     # initialize leaf level spectra
     plant_leaf_spectra!(config, spac);
+
+    # initialize canopy structure
+    inclination_angles!(config, spac);
+    canopy_structure!(config, spac);
 
     # initialize stomatal conductance
     stomatal_conductance!(spac, FT(0));

@@ -130,6 +130,7 @@ end;
 #     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
 #     2023-Sep-07: add ALLOW_LEAF_CONDENSATION and T_CLM checks
 #     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
+#     2023-Oct-18: recalculate canopy structural parameters when LAI, cab, car, ci is updated
 #
 #######################################################################################################################################################################################################
 """
@@ -227,9 +228,9 @@ function prescribe_traits!(
 
     # update CI
     if !isnothing(ci)
-        can_str.auxil.ci = ci;
         can_str.state.Ω_A = ci;
         can_str.state.Ω_B = 0;
+        can_str.auxil.ci = ci;
     end;
 
     # update Vcmax and Jmax TD
@@ -280,6 +281,11 @@ function prescribe_traits!(
         for leaf in leaves
             initialize_struct!(leaf; k_sla = leaf.xylem.state.k_max);
         end;
+    end;
+
+    # recalibrate the canopy structure parameters if any of LAI, Cab, Car, etc. is updated
+    if !isnothing(lai) || !isnothing(cab) || !isnothing(car) || !isnothing(ci)
+        canopy_structure!(config, spac);
     end;
 
     return nothing
