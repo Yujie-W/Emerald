@@ -4,6 +4,7 @@
 # General
 #     2023-Sep-16: add function to update the SIF conversion matrix of the first layer
 #     2023-Sep-16: clear vec_b and vec_f before the calculation (for the case of recalculating the SIF conversion matrix)
+#     2023-Oct-24: remove Φ_PS from the calculation so as to use with separate PSI and PSII SIF spectra
 #
 #######################################################################################################################################################################################################
 """
@@ -22,11 +23,10 @@ Update the SIF conversion matrix of the first layer, given
 - `τ_sub_sif` transmittance within a sublayer for SIF
 - `vec_b` SIF vector backwards (SubArray of a Matrix)
 - `vec_f` SIF vector forwards (SubArray of a Matrix)
-- `ϕ` SIF emission PDF (SubArray of a Vector)
 - `N` number of sublayers of each layer
 
 """
-function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::Vector, N::Int) where {FT}
+function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, N::Int) where {FT}
     # parameters required for the calculation that can be derived from the input parameters
     ρ_i_21 = 1 - τ_i_21;
     α_sub = 1 - τ_sub;
@@ -46,16 +46,16 @@ function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_
     #    now the radiation goes from up to down
     rad_i = τ_i_θ * f_sife;
     for i in 1:N
-        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
     # 2. then the radiation goes from down to up after hitting the water-air interface
     rad_i *= ρ_i_21;
     for i in N:-1:1
-        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
@@ -69,16 +69,16 @@ function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_
     #    now the radiation goes from down to up
     rad_i = τ_θ * ρ_2 / (1 - ρ_1 * ρ_2) * τ_i_12 * f_sife;
     for i in N:-1:1
-        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
     # 4. then the radiation goes from up to down
     rad_i *= ρ_i_21;
     for i in 1:N
-        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
@@ -96,11 +96,12 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-16: add function to update the SIF conversion matrix of the n-1 layer
+#     2023-Oct-24: remove Φ_PS from the calculation so as to use with separate PSI and PSII SIF spectra
 #
 #######################################################################################################################################################################################################
 """
 
-    layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::Vector, N::Int) where {FT}
+    layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, N::Int) where {FT}
 
 Update the SIF conversion matrix of the n-1 layer, given
 - `τ_sub` transmittance within a sublayer
@@ -112,11 +113,10 @@ Update the SIF conversion matrix of the n-1 layer, given
 - `τ_sub_sif` transmittance within a sublayer for SIF
 - `vec_b` SIF vector backwards (SubArray of a Matrix)
 - `vec_f` SIF vector forwards (SubArray of a Matrix)
-- `ϕ` SIF emission PDF (SubArray of a Vector)
 - `N` number of sublayers of each layer
 
 """
-function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, ϕ::Vector, N::Int) where {FT}
+function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, N::Int) where {FT}
     # parameters required for the calculation
     α_sub = 1 - τ_sub;
     τ_all = τ_sub ^ N;
@@ -142,16 +142,16 @@ function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f
     #    now the radiation goes from up to down
     rad_i = τ_θ / (1 - ρ_1 * ρ_2) * τ_i_12 * f_sife;
     for i in 1:N
-        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
     # 3. then the radiation goes from down to up
     rad_i *= ρ_i_21;
     for i in N:-1:1
-        vec_b .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (i - FT(0.5));
-        vec_f .+= rad_i / 2 * α_sub .* ϕ .* τ_sub_sif .^ (N - i + FT(0.5));
+        vec_b .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (i - FT(0.5));
+        vec_f .+= rad_i / 2 * α_sub .* τ_sub_sif .^ (N - i + FT(0.5));
         rad_i *= τ_sub;
     end;
 
@@ -262,6 +262,7 @@ end;
 #     2023-Sep-19: add option to cut off SIF emission to make sure its wavelength is within the range of the SIF excitation wavelengths
 #     2023-Sep-19: add option to rescale the SIF emission PDF because of the cut off
 #     2023-Oct-14: compute mat_mean and mat_diff
+#     2023-Oct-24: save the matrices for PSI and PSII as well as PS combined
 #
 #######################################################################################################################################################################################################
 """
@@ -276,7 +277,7 @@ Update the SIF conversion matrix of the leaf, given
 """
 function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::Int) where {FT}
     (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
-    (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE, Φ_PS, Φ_PSI, Φ_PSII) = SPECTRA;
+    (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS, Φ_PSI, Φ_PSII) = SPECTRA;
 
     # update the SIF emission vector per excitation wavelength
     ρ_21_sif    = view(bio.auxil.ρ_interface_21, IΛ_SIF);
@@ -289,13 +290,17 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
     τ_all_sif_1 = view(bio.auxil.τ_all_1, IΛ_SIF);
     τ_all_sif_2 = view(bio.auxil.τ_all_2, IΛ_SIF);
     ϕ           = bio.auxil._ϕ_sif;
+    ϕ1          = bio.auxil._ϕ1_sif;
+    ϕ2          = bio.auxil._ϕ2_sif;
     for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
 
         # compute ϕ if Φ_SIF_WL is true, otherwise use the default Φ_PS
+        f_psii = bio.auxil.f_psii[ii];
         if Φ_SIF_WL
-            f_psii = bio.auxil.f_psii[ii];
             ϕ .= view(Φ_PSII, IΛ_SIF) .* f_psii .+ view(Φ_PSI, IΛ_SIF) .* (1 - f_psii);
+            ϕ1 .= view(Φ_PSI, IΛ_SIF);
+            ϕ2 .= view(Φ_PSII, IΛ_SIF);
         else
             ϕ .= view(Φ_PS, IΛ_SIF);
         end;
@@ -308,15 +313,24 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         if Φ_SIF_CUTOFF == 1
             if ii > IΛ_SIF[1]
                 ϕ[1:ii-IΛ_SIF[1]] .= 0;
+                ϕ1[1:ii-IΛ_SIF[1]] .= 0;
+                ϕ2[1:ii-IΛ_SIF[1]] .= 0;
             end;
         elseif Φ_SIF_CUTOFF == 2
-            ϕ .*= 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp(Λ_SIFE[ii] / 10));
+            factor = 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp(Λ_SIFE[ii] / 10));
+            ϕ .*= factor;
+            ϕ1 .*= factor;
+            ϕ2 .*= factor;
         end;
 
         # rescale ϕ if Φ_SIF_RESCALE is true
         if Φ_SIF_RESCALE && Φ_SIF_CUTOFF > 0
-            ϕ ./= sum(ϕ);
+            ϕ ./= ΔΛ_SIF' * ϕ;
+            ϕ1 ./= ΔΛ_SIF' * ϕ1;
+            ϕ2 ./= ΔΛ_SIF' * ϕ2;
         end;
+        ϕ1 .*= 1 - f_psii;
+        ϕ2 .*= f_psii;
 
         # read in the values from the auxilary variables
         vec_b_1     = view(bio.auxil.mat_b_1, :, i);
@@ -327,8 +341,14 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         vec_f_1_out = view(bio.auxil.mat_f_1_out, :, i);
         vec_b_2_out = view(bio.auxil.mat_b_2_out, :, i);
         vec_f_2_out = view(bio.auxil.mat_f_2_out, :, i);
+
         vec_b       = view(bio.auxil.mat_b, :, i);
         vec_f       = view(bio.auxil.mat_f, :, i);
+        vec_b1      = view(bio.auxil.psi_mat_b, :, i);
+        vec_f1      = view(bio.auxil.psi_mat_f, :, i);
+        vec_b2      = view(bio.auxil.psii_mat_b, :, i);
+        vec_f2      = view(bio.auxil.psii_mat_f, :, i);
+
         τ_i_θ       = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
         τ_i_12      = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
         τ_i_21      = bio.auxil.τ_interface_21[ii];     # the transmittance of the isotropic radiation at the water-air interface
@@ -341,8 +361,8 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         f_sife      = bio.auxil.f_sife[ii];
 
         # update the SIF conversion matrix of the two layers (SIF that reachs the internal the water-air interface)
-        layer_1_sif_vec!(τ_i_θ, τ_i_12, τ_i_21, τ_sub_1, τ_l_θ, ρ_l_1, ρ_l_2, f_sife, τ_sub_sif_1, vec_b_1, vec_f_1, ϕ, N);
-        layer_2_sif_vec!(τ_sub_2, τ_l_θ, ρ_l_1, ρ_l_2, τ_l_2, f_sife, τ_sub_sif_2, vec_b_2, vec_f_2, ϕ, N);
+        layer_1_sif_vec!(τ_i_θ, τ_i_12, τ_i_21, τ_sub_1, τ_l_θ, ρ_l_1, ρ_l_2, f_sife, τ_sub_sif_1, vec_b_1, vec_f_1, N);
+        layer_2_sif_vec!(τ_sub_2, τ_l_θ, ρ_l_1, ρ_l_2, τ_l_2, f_sife, τ_sub_sif_2, vec_b_2, vec_f_2, N);
 
         # update the SIF conversion matrix of the two layers (SIF that reachs the external the water-air interface)
         vec_b_1_out .= layer_sif_out.(vec_b_1, vec_f_1, ρ_21_sif, τ_all_sif_1);
@@ -353,11 +373,23 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         # compute the SIF emission vector backward and forward
         vec_b .= leaf_sif_b.(vec_b_1_out, vec_f_1_out, vec_b_2_out, ρ_1_sif, τ_1_sif, ρ_2_sif);
         vec_f .= leaf_sif_f.(vec_f_1_out, vec_b_2_out, vec_f_2_out, ρ_1_sif, ρ_2_sif, τ_2_sif);
+
+        # scale the matrices based on the Φ_PS*
+        vec_b1 .= vec_b .* ϕ1;
+        vec_f1 .= vec_f .* ϕ1;
+        vec_b2 .= vec_b .* ϕ2;
+        vec_f2 .= vec_f .* ϕ2;
+        vec_b .*= ϕ;
+        vec_f .*= ϕ;
     end;
 
     # compute the mean and mean diff of mat_b and mat_f
     bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
     bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
+    bio.auxil.psi_mat_mean .= (bio.auxil.psi_mat_b .+ bio.auxil.psi_mat_f) ./ 2;
+    bio.auxil.psi_mat_diff .= (bio.auxil.psi_mat_b .- bio.auxil.psi_mat_f) ./ 2;
+    bio.auxil.psii_mat_mean .= (bio.auxil.psii_mat_b .+ bio.auxil.psii_mat_f) ./ 2;
+    bio.auxil.psii_mat_diff .= (bio.auxil.psii_mat_b .- bio.auxil.psii_mat_f) ./ 2;
 
     return nothing
 end;

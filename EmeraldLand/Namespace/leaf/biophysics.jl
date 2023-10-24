@@ -58,7 +58,8 @@ end;
 #     2023-Sep-18: add fields τ_all_i, mat_x_i_out, and _ϕ_sif
 #     2023-Sep-19: add field f_ppar
 #     2023-Sep-22: add field f_psii
-#     2023-Oct-14: add field mat_mean, and mat_diff
+#     2023-Oct-14: add fields mat_mean, and mat_diff
+#     2023-Oct-24: add fields psi_mat_* and psii_mat_*
 #
 #######################################################################################################################################################################################################
 """
@@ -132,7 +133,7 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     "Absorption of the leaf `[-]`"
     α_leaf::Vector{FT}
 
-    # SIF excitation to emittance matrix
+    # SIF excitation to emittance matrix (before scaling with Φ_PS*)
     "First layer SIF matrix backwards (emission only) `[-]`"
     mat_b_1::Matrix{FT}
     "First layer SIF matrix forwards (emission only) `[-]`"
@@ -149,6 +150,8 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     mat_b_2_out::Matrix{FT}
     "Second layer SIF matrix forwards (after reabsorption, reflection, and transmission) `[-]`"
     mat_f_2_out::Matrix{FT}
+
+    # SIF excitation to emittance matrix
     "SIF matrix backwards `[-]`"
     mat_b::Matrix{FT}
     "SIF matrix forwards `[-]`"
@@ -157,6 +160,26 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     mat_mean::Matrix{FT}
     "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
     mat_diff::Matrix{FT}
+
+    # SIF excitation to emittance matrix for PSI
+    "SIF matrix backwards `[-]`"
+    psi_mat_b::Matrix{FT}
+    "SIF matrix forwards `[-]`"
+    psi_mat_f::Matrix{FT}
+    "Mean SIF matrix of the backward and forward SIF matrices `[-]`"
+    psi_mat_mean::Matrix{FT}
+    "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
+    psi_mat_diff::Matrix{FT}
+
+    # SIF excitation to emittance matrix for PSII
+    "SIF matrix backwards `[-]`"
+    psii_mat_b::Matrix{FT}
+    "SIF matrix forwards `[-]`"
+    psii_mat_f::Matrix{FT}
+    "Mean SIF matrix of the backward and forward SIF matrices `[-]`"
+    psii_mat_mean::Matrix{FT}
+    "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
+    psii_mat_diff::Matrix{FT}
 
     # longwave radiation
     "Broadband thermal reflectance, related to blackbody emittance `[-]`"
@@ -167,6 +190,10 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     # cache variables
     "SIF PDF based on the wavelength of excitation `[-]`"
     _ϕ_sif::Vector{FT}
+    "SIF PDF based on the wavelength of excitation `[-]`"
+    _ϕ1_sif::Vector{FT}
+    "SIF PDF based on the wavelength of excitation `[-]`"
+    _ϕ2_sif::Vector{FT}
 end;
 
 LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
@@ -209,7 +236,17 @@ LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 mat_f            = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_mean         = zeros(FT, DIM_SIF, DIM_SIFE),
                 mat_diff         = zeros(FT, DIM_SIF, DIM_SIFE),
-                _ϕ_sif           = zeros(FT, DIM_SIF)
+                psi_mat_b        = zeros(FT, DIM_SIF, DIM_SIFE),
+                psi_mat_f        = zeros(FT, DIM_SIF, DIM_SIFE),
+                psi_mat_mean     = zeros(FT, DIM_SIF, DIM_SIFE),
+                psi_mat_diff     = zeros(FT, DIM_SIF, DIM_SIFE),
+                psii_mat_b       = zeros(FT, DIM_SIF, DIM_SIFE),
+                psii_mat_f       = zeros(FT, DIM_SIF, DIM_SIFE),
+                psii_mat_mean    = zeros(FT, DIM_SIF, DIM_SIFE),
+                psii_mat_diff    = zeros(FT, DIM_SIF, DIM_SIFE),
+                _ϕ_sif           = zeros(FT, DIM_SIF),
+                _ϕ1_sif          = zeros(FT, DIM_SIF),
+                _ϕ2_sif          = zeros(FT, DIM_SIF),
     )
 );
 
