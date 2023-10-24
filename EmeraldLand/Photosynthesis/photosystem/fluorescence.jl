@@ -66,9 +66,9 @@ photosystem_coefficients!(psm::C3Cyto{FT}, ppar::FT; β::FT = FT(1)) where {FT} 
     ϕ_F1_a  = psm.state.K_F / k_sum_3 * q1 + psm.state.K_F / k_sum_4 * (1 - q1);
 
     # save the weighted fluorescence and photosynthesis yields in reaction center
-    psm.auxil.ϕ_f1 = ϕ_F1_a * psm.state.F_PSI;
-    psm.auxil.ϕ_f2 = ϕ_F2_a * (1 - psm.state.F_PSI);
-    psm.auxil.ϕ_f  = psm.auxil.ϕ_f1 + psm.auxil.ϕ_f2;
+    psm.auxil.ϕ_f1 = ϕ_F1_a;
+    psm.auxil.ϕ_f2 = ϕ_F2_a;
+    psm.auxil.ϕ_f  = ϕ_F1_a * psm.state.F_PSI + ϕ_F2_a * (1 - psm.state.F_PSI);
     psm.auxil.ϕ_p  = ϕ_P1_a * psm.state.F_PSI + ϕ_P2_a * (1 - psm.state.F_PSI);
 
     return nothing
@@ -129,6 +129,8 @@ photosystem_coefficients!(psm::Union{C3VJP{FT}, C4VJP{FT}}, ppar::FT; β::FT = F
     psm.auxil.ϕ_f  = psm.auxil.f_m′ * (1 - psm.auxil.ϕ_p);
     psm.auxil.ϕ_d  = psm.auxil.k_d / psm.state.K_F * psm.auxil.ϕ_f;
     psm.auxil.ϕ_n  = (psm.auxil.k_npq_rev + psm.state.k_npq_sus) / psm.state.K_F * psm.auxil.ϕ_f;
+    psm.auxil.ϕ_f1 = psm.auxil.ϕ_f;
+    psm.auxil.ϕ_f2 = psm.auxil.ϕ_f;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
