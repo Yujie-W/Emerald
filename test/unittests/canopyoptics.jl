@@ -167,6 +167,8 @@ import Emerald.EmeraldLand.SPAC
         for leaf in spac.plant.leaves
             leaf.flux.auxil.ϕ_f_shaded = 0.01;
             leaf.flux.auxil.ϕ_f_sunlit .= 0.01;
+            leaf.flux.auxil.ϕ_f1_sunlit .= 0.01;
+            leaf.flux.auxil.ϕ_f2_sunlit .= 0.01;
         end;
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);

@@ -18,6 +18,7 @@
 #     2023-Mar-11: add option to compute respiration rate only
 #     2023-Jun-13: save actual etr as well
 #     2023-Sep-09: save ϕ_d, ϕ_n, and ϕ_p to Leaf
+#     2023-Oct-24: save ϕ_f1 and ϕ_f2
 #
 #######################################################################################################################################################################################################
 """
@@ -76,15 +77,19 @@ leaf_photosynthesis!(
 # This method computes and save the photosynthetic rates into leaf flux struct for GCO₂Mode
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
     if rd_only
-        leaf.photosystem.auxil.r_d  = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.auxil.t);
-        leaf.flux.auxil.a_n_sunlit .= -leaf.photosystem.auxil.r_d;
-        leaf.flux.auxil.a_g_sunlit .= 0;
-        leaf.flux.auxil.etr_sunlit .= 0;
-        leaf.flux.auxil.ϕ_f_sunlit .= 0;
-        leaf.flux.auxil.a_n_shaded  = -leaf.photosystem.auxil.r_d;
-        leaf.flux.auxil.a_g_shaded  = 0;
-        leaf.flux.auxil.etr_shaded  = 0;
-        leaf.flux.auxil.ϕ_f_shaded  = 0;
+        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.auxil.t);
+        leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
+        leaf.flux.auxil.a_g_sunlit  .= 0;
+        leaf.flux.auxil.etr_sunlit  .= 0;
+        leaf.flux.auxil.ϕ_f_sunlit  .= 0;
+        leaf.flux.auxil.ϕ_f1_sunlit .= 0;
+        leaf.flux.auxil.ϕ_f2_sunlit .= 0;
+        leaf.flux.auxil.a_n_shaded   = -leaf.photosystem.auxil.r_d;
+        leaf.flux.auxil.a_g_shaded   = 0;
+        leaf.flux.auxil.etr_shaded   = 0;
+        leaf.flux.auxil.ϕ_f_shaded   = 0;
+        leaf.flux.auxil.ϕ_f1_shaded  = 0;
+        leaf.flux.auxil.ϕ_f2_shaded  = 0;
 
         return nothing
     end;
@@ -111,13 +116,15 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
         photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i]; β = β);
 
         # save the rates and to leaf
-        leaf.flux.auxil.a_n_sunlit[i] = leaf.photosystem.auxil.a_n;
-        leaf.flux.auxil.a_g_sunlit[i] = leaf.photosystem.auxil.a_g;
-        leaf.flux.auxil.etr_sunlit[i] = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-        leaf.flux.auxil.ϕ_d_sunlit[i] = leaf.photosystem.auxil.ϕ_d;
-        leaf.flux.auxil.ϕ_f_sunlit[i] = leaf.photosystem.auxil.ϕ_f;
-        leaf.flux.auxil.ϕ_n_sunlit[i] = leaf.photosystem.auxil.ϕ_n;
-        leaf.flux.auxil.ϕ_p_sunlit[i] = leaf.photosystem.auxil.ϕ_p;
+        leaf.flux.auxil.a_n_sunlit[i]  = leaf.photosystem.auxil.a_n;
+        leaf.flux.auxil.a_g_sunlit[i]  = leaf.photosystem.auxil.a_g;
+        leaf.flux.auxil.etr_sunlit[i]  = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
+        leaf.flux.auxil.ϕ_d_sunlit[i]  = leaf.photosystem.auxil.ϕ_d;
+        leaf.flux.auxil.ϕ_f_sunlit[i]  = leaf.photosystem.auxil.ϕ_f;
+        leaf.flux.auxil.ϕ_n_sunlit[i]  = leaf.photosystem.auxil.ϕ_n;
+        leaf.flux.auxil.ϕ_p_sunlit[i]  = leaf.photosystem.auxil.ϕ_p;
+        leaf.flux.auxil.ϕ_f1_sunlit[i] = leaf.photosystem.auxil.ϕ_f1;
+        leaf.flux.auxil.ϕ_f2_sunlit[i] = leaf.photosystem.auxil.ϕ_f2;
     end;
 
     # run the model for shaded leaf
@@ -152,15 +159,19 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
 # This method computes and save the photosynthetic rates into leaf flux struct for PCO₂Mode
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
     if rd_only
-        leaf.photosystem.auxil.r_d  = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.auxil.t);
-        leaf.flux.auxil.a_n_sunlit .= -leaf.photosystem.auxil.r_d;
-        leaf.flux.auxil.a_g_sunlit .= 0;
-        leaf.flux.auxil.etr_sunlit .= 0;
-        leaf.flux.auxil.ϕ_f_sunlit .= 0;
-        leaf.flux.auxil.a_n_shaded  = -leaf.photosystem.auxil.r_d;
-        leaf.flux.auxil.a_g_shaded  = 0;
-        leaf.flux.auxil.etr_shaded  = 0;
-        leaf.flux.auxil.ϕ_f_shaded  = 0;
+        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.auxil.t);
+        leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
+        leaf.flux.auxil.a_g_sunlit  .= 0;
+        leaf.flux.auxil.etr_sunlit  .= 0;
+        leaf.flux.auxil.ϕ_f_sunlit  .= 0;
+        leaf.flux.auxil.ϕ_f1_sunlit .= 0;
+        leaf.flux.auxil.ϕ_f2_sunlit .= 0;
+        leaf.flux.auxil.a_n_shaded   = -leaf.photosystem.auxil.r_d;
+        leaf.flux.auxil.a_g_shaded   = 0;
+        leaf.flux.auxil.etr_shaded   = 0;
+        leaf.flux.auxil.ϕ_f_shaded   = 0;
+        leaf.flux.auxil.ϕ_f1_shaded  = 0;
+        leaf.flux.auxil.ϕ_f2_shaded  = 0;
 
         return nothing
     end;
@@ -180,13 +191,15 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT
         photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i]; β = β);
 
         # save the rates and to leaf
-        leaf.flux.auxil.a_n_sunlit[i] = leaf.photosystem.auxil.a_n;
-        leaf.flux.auxil.a_g_sunlit[i] = leaf.photosystem.auxil.a_g;
-        leaf.flux.auxil.etr_sunlit[i] = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-        leaf.flux.auxil.ϕ_d_sunlit[i] = leaf.photosystem.auxil.ϕ_d;
-        leaf.flux.auxil.ϕ_f_sunlit[i] = leaf.photosystem.auxil.ϕ_f;
-        leaf.flux.auxil.ϕ_n_sunlit[i] = leaf.photosystem.auxil.ϕ_n;
-        leaf.flux.auxil.ϕ_p_sunlit[i] = leaf.photosystem.auxil.ϕ_p;
+        leaf.flux.auxil.a_n_sunlit[i]  = leaf.photosystem.auxil.a_n;
+        leaf.flux.auxil.a_g_sunlit[i]  = leaf.photosystem.auxil.a_g;
+        leaf.flux.auxil.etr_sunlit[i]  = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
+        leaf.flux.auxil.ϕ_d_sunlit[i]  = leaf.photosystem.auxil.ϕ_d;
+        leaf.flux.auxil.ϕ_f_sunlit[i]  = leaf.photosystem.auxil.ϕ_f;
+        leaf.flux.auxil.ϕ_n_sunlit[i]  = leaf.photosystem.auxil.ϕ_n;
+        leaf.flux.auxil.ϕ_p_sunlit[i]  = leaf.photosystem.auxil.ϕ_p;
+        leaf.flux.auxil.ϕ_f1_sunlit[i] = leaf.photosystem.auxil.ϕ_f1;
+        leaf.flux.auxil.ϕ_f2_sunlit[i] = leaf.photosystem.auxil.ϕ_f2;
     end;
 
     # run the model for shaded leaf

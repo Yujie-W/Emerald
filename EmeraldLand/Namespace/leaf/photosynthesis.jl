@@ -214,6 +214,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-03: add PSMAuxil struct
+#     2023-Oct-24: add fields ϕ_f1 and ϕ_f2; remove fields ϵ_1 and ϵ_2 (computed in the LeafOptics module)
 #
 #######################################################################################################################################################################################################
 """
@@ -294,6 +295,12 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     "Photochemical yield"
     ϕ_p::FT = 0
 
+    # fluorescence yeolds of two photosystems
+    "Fluorescence yield of PSI"
+    ϕ_f1::FT = 0
+    "Fluorescence yield of PSII"
+    ϕ_f2::FT = 0
+
     # fluorescence variables
     "Dark adapted yield (`Kp=0`)"
     f_m::FT = 0
@@ -319,12 +326,6 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     k_p::FT = 0
     "max PSII yield (_k_npq_rev = 0, all RC open)"
     ϕ_psii_max::FT = 0
-
-    # Cytochrome reaction center vars
-    "Weight factor that PSI fluorescence reaches sensor (after reabsorption)"
-    ϵ_1::FT = 0
-    "Weight factor that PSII fluorescence reaches sensor (after reabsorption)"
-    ϵ_2::FT = 1
 
     # cache variables
     "Last leaf temperature. If different from leaf t, then make temperature correction"

@@ -39,6 +39,7 @@ LeafFluxState(config::SPACConfiguration{FT}) where {FT} = LeafFluxState{FT}(g_H�
 # Changes to this struct
 # General
 #     2023-Oct-03: add sturct LeafFluxAuxil
+#     2023-Oct-24: add fields ϕ_f1_* and ϕ_f2_*
 #
 #######################################################################################################################################################################################################
 """
@@ -105,6 +106,16 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     "Photochemical quantum yield for sunlit leaves `[-]`"
     ϕ_p_sunlit::Matrix{FT}
 
+    # Fluorescence yeilds of two photosystems
+    "PSI fluorescence quantum yield for shaded leaves `[-]`"
+    ϕ_f1_shaded::FT = 0
+    "PSI fluorescence quantum yield for sunlit leaves `[-]`"
+    ϕ_f1_sunlit::Matrix{FT}
+    "PSII fluorescence quantum yield for shaded leaves `[-]`"
+    ϕ_f2_shaded::FT = 0
+    "PSII fluorescence quantum yield for sunlit leaves `[-]`"
+    ϕ_f2_sunlit::Matrix{FT}
+
     # Integrators
     "Integrator for transpiration out"
     ∫∂w∂t_out = 0
@@ -140,6 +151,8 @@ LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
             ϕ_f_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ϕ_n_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ϕ_p_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ϕ_f1_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ϕ_f2_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             apar_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ppar_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
 );

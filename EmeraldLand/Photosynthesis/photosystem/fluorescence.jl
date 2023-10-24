@@ -14,6 +14,7 @@
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2023-Jun-15: set ϕ_f and ϕ_p to 0 when ppar is 0
 #     2023-Sep-09: compute ϕ_d and ϕ_n in the VJPReactionCenter
+#     2023-Oct-24: save PSI and PSII ϕ_f in the C3Cyto model
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
@@ -65,8 +66,10 @@ photosystem_coefficients!(psm::C3Cyto{FT}, ppar::FT; β::FT = FT(1)) where {FT} 
     ϕ_F1_a  = psm.state.K_F / k_sum_3 * q1 + psm.state.K_F / k_sum_4 * (1 - q1);
 
     # save the weighted fluorescence and photosynthesis yields in reaction center
-    psm.auxil.ϕ_f = ϕ_F1_a * psm.auxil.ϵ_1 * psm.state.F_PSI + ϕ_F2_a * psm.auxil.ϵ_2 * (1 - psm.state.F_PSI);
-    psm.auxil.ϕ_p = ϕ_P1_a * psm.state.F_PSI + ϕ_P2_a * (1 - psm.state.F_PSI);
+    psm.auxil.ϕ_f1 = ϕ_F1_a * psm.state.F_PSI;
+    psm.auxil.ϕ_f2 = ϕ_F2_a * (1 - psm.state.F_PSI);
+    psm.auxil.ϕ_f  = psm.auxil.ϕ_f1 + psm.auxil.ϕ_f2;
+    psm.auxil.ϕ_p  = ϕ_P1_a * psm.state.F_PSI + ϕ_P2_a * (1 - psm.state.F_PSI);
 
     return nothing
 

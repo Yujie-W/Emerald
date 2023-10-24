@@ -97,9 +97,9 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         e_s_j = view(sun_geo.auxil.e_dirꜜ,:,i+1);       # direct radiation at lower boundary
         e_u_i = view(sun_geo.auxil.e_difꜛ,:,i  );       # upward diffuse radiation at upper boundary
 
-        r_dd_i = view(can_str.auxil.ρ_dd         ,:,i);    # reflectance of the upper boundary (i)
+        r_dd_i = view(can_str.auxil.ρ_dd      ,:,i);    # reflectance of the upper boundary (i)
         r_sd_i = view(sun_geo.auxil.ρ_sd      ,:,i);    # reflectance of the upper boundary (i)
-        t_dd_i = view(can_str.auxil.τ_dd         ,:,i);    # transmittance of the layer (i)
+        t_dd_i = view(can_str.auxil.τ_dd      ,:,i);    # transmittance of the layer (i)
         t_sd_i = view(sun_geo.auxil.τ_sd      ,:,i);    # transmittance of the layer (i)
         t_ss_i = view(sun_geo.auxil.τ_ss_layer,  i);    # transmittance for directional->directional
 
