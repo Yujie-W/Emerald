@@ -9,17 +9,16 @@
 #######################################################################################################################################################################################################
 """
 
-    weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
+    weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false)
 
 Prepare weather driver dataframe to feed SPAC, given
 - `wd_tag` Weather driver version tag
 - `gmdict` Dictionary that store grid information
 - `appending` If true, always check whether there are new fields to add
-- `displaying` If true, display information about the NetCDF file
 
 """
-function weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
-    _nc_wd = weather_driver_file(wd_tag, gmdict; appending = appending, displaying = displaying)[1];
+function weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false)
+    _nc_wd = weather_driver_file(wd_tag, gmdict; appending = appending)[1];
     _df_wd = read_nc(_nc_wd);
 
     # interpolate the data to a new resolution

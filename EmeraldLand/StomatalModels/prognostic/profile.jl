@@ -5,6 +5,7 @@
 # Changes to this method
 # General
 #     2023-Mar-13: add function to update stomatal conductance profile based on gs and gb
+#     2023-Oct-25: run nighttime stomatal conductance model if PPAR <= 1
 #
 #######################################################################################################################################################################################################
 """
@@ -18,8 +19,10 @@ Compute marginal stomatal conductance change for H₂O, given
 function stomatal_conductance_profile! end;
 
 stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
+    can_str = spac.canopy.structure;
+
     # if lai = 0 or roots are not connected, do nothing
-    if spac.canopy.structure.state.lai == 0 || !spac.plant._root_connection
+    if can_str.state.lai == 0 || !spac.plant._root_connection
         return nothing
     end;
 
@@ -27,17 +30,25 @@ stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;
 
+    N = length(leaves);
     for i in eachindex(leaves)
-        stomatal_conductance_profile!(leaves[i], airs[lindex[i]]);
+        j = N + 1 - i;
+        stomatal_conductance_profile!(leaves[j], airs[lindex[j]], can_str.auxil.ϵ_lw_layer[i]);
     end;
 
     return nothing
 );
 
-stomatal_conductance_profile!(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
-    leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air);
-    for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
-        leaf.flux.auxil.∂g∂t_sunlit[i] = ∂g∂t(leaf, air, i);
+stomatal_conductance_profile!(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
+    if leaf.flux.auxil.ppar_shaded > 1
+        leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air);
+        for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
+            leaf.flux.auxil.∂g∂t_sunlit[i] = ∂g∂t(leaf, air, i);
+        end;
+    else
+        dgndt = ∂gₙ∂t(leaf, air, eff_ϵ);
+        leaf.flux.auxil.∂g∂t_shaded = dgndt;
+        leaf.flux.auxil.∂g∂t_sunlit .= dgndt;
     end;
 
     return nothing

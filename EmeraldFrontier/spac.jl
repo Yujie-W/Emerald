@@ -7,14 +7,14 @@
 #######################################################################################################################################################################################################
 """
 
-    spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
+    spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
 
 Create a SPAC, given
 - `gmdict` Dictionary of GriddingMachine data in a grid
 - `config` Configurations for SPAC
 
 """
-function spac(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
+function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     # read in canopy height
     _z_canopy   = max(FT(0.1), gmdict["CANOPY_HEIGHT"]);
     _Δz         = _z_canopy / 20;

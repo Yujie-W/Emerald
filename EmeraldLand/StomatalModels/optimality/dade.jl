@@ -65,5 +65,5 @@ function ∂A∂E end;
     e2 = gh2 * d / air.state.p_air;
     a2 = leaf.photosystem.auxil.a_n;
 
-    return (a2 - a1) / (e2 - e1);
+    return (a2 - a1) / (e2 - e1)
 );
