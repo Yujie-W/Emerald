@@ -116,6 +116,7 @@ function gm_dict(dts::GriddingMachineLabels, lat::Number, lon::Number)
                         "LON_INDEX"     => lon_ind(lon; res = 1),
                         "LONGITUDE"     => lon,
                         "MEDLYN_G1"     => _g1,
+                        "MESSAGE_LEVEL" => 0,
                         "RESO_SPACE"    => "1X",
                         "SOIL_COLOR"    => min(20, max(1, Int(floor(read_LUT(query_collection(dts.tag_s_cc), lat, lon)[1])))),
                         "SOIL_N"        => read_LUT(query_collection(dts.tag_s_n), lat, lon)[1],

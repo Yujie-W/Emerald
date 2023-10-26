@@ -268,22 +268,22 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 #######################################################################################################################################################################################################
 """
 
-    weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
+    weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::Bool = false)
 
 Return the input weather driver file path and name, given
 - `wd_tag` Weather driver version tag
 - `dict` Dictionary that store grid information
 - `appending` If true, always check whether there are new fields to add
-- `displaying` If true, display information about the NetCDF file
 
 """
-function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::Bool = false, displaying::Bool = true)
+function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::Bool = false)
     # which index of data to read
     _gz      = dict["RESO_SPACE"]
     _lat_ind = dict["LAT_INDEX"];
     _lon     = dict["LONGITUDE"];
     _lon_ind = dict["LON_INDEX"];
     _year    = dict["YEAR"];
+    msg_lvl  = dict["MESSAGE_LEVEL"];
 
     # folders that stores the input data
     @assert isdir(DRIVER_FOLDER) "Weather driver folder $(DRIVER_FOLDER) does not exist...";
@@ -292,7 +292,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
 
     # if file exists and appending is false
     if isfile(_nc_path) && !appending
-        if displaying
+        if msg_lvl == 2
             @info "$(_nc_path) exists, doing nothing...";
         end;
 
@@ -301,7 +301,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
 
     # if file exists and appending is true
     if isfile(_nc_path) && appending
-        if displaying
+        if msg_lvl == 2
             @info "$(_nc_path) exists, adding new fields...";
         end;
 
@@ -318,7 +318,7 @@ function weather_driver_file(wd_tag::String, dict::Dict{String,Any}; appending::
     end;
 
     # if file does not exist
-    if displaying
+    if msg_lvl == 2
         @info "$(_nc_path) does not exist, generating file now...";
     end;
 

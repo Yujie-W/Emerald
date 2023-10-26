@@ -62,25 +62,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to partition the SIF PDF based the wavelength"
     Φ_SIF_WL::Bool = true
 
-    # features related to plant hydraulics
-    "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
-    DIM_XYLEM::Int = 5
-    "Threshold of the critical pressure or flow that trigger a remainder of conductance"
-    KR_THRESHOLD::FT = 0.001
-    "Whether to run the model at steady state mode"
-    STEADY_STATE_FLOW::Bool = true
-
-    # features related to canopy photosynthesis
-    # Note
-    #     1. to use the hyperspectral mode, set both to true
-    #     2. to use the broadband mode with sunlit/shaded fractions, set SUNLIT_FRACTION to true and SUNLIT_ANGLES to false
-    #     3. to use the broadband mode with one leaf model, set both to false (ppar_sunlit and ppar_shaded will be set to be the same)
-    #     4. to use big leaf model, TODO item
-    "Whether to partition the sunlit fraction into different inclination and azimuth angles (if false, use float for sunlit fraction)"
-    SUNLIT_ANGLES::Bool = true
-    "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
-    SUNLIT_FRACTION::Bool = true
-
     # Settings related to the canopy geometry angles (inclination and azimuth settings)
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
@@ -93,28 +74,25 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Mean inclination angles `[°]`"
     Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
 
-
-
-
-
-
-    # Turn on/off features
-    "Allow leaf condensation"
-    ALLOW_LEAF_CONDENSATION::Bool = false
-    "Allow leaf shedding"
-    ALLOW_LEAF_SHEDDING::Bool = false
-    "Enable drought legacy effect"
-    ENABLE_DROUGHT_LEGACY::Bool = false
-    "Whether to acclimate leaf Vcmax and Jmax TD"
-    T_CLM::Bool = true
+    # Settings related to soil albedo
     "Whether to use CLM soil albedo scheme"
     α_CLM::Bool = false
     "Whether to fit the data from broadband to hyperspectral"
     α_FITTING::Bool = true
 
-    # Prescribe parameters
-    "Prescribe air layer information such as partial pressures"
-    PRESCRIBE_AIR::Bool = true
+    # features related to plant hydraulics
+    "Allow leaf condensation"
+    ALLOW_LEAF_CONDENSATION::Bool = false
+    "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
+    DIM_XYLEM::Int = 5
+    "Threshold of the critical pressure or flow that trigger a remainder of conductance"
+    KR_THRESHOLD::FT = 0.001
+    "Whether to run the model at steady state mode"
+    STEADY_STATE_FLOW::Bool = true
+
+    # Settings related to photosynthesis
+    "Whether to acclimate leaf Vcmax and Jmax TD"
+    T_CLM::Bool = true
 
     # Trace gas information
     "Trace gas air"
@@ -129,4 +107,31 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     TRACE_N₂::TraceGasN₂{FT} = TraceGasN₂{FT}()
     "Trace gas O₂"
     TRACE_O₂::TraceGasO₂{FT} = TraceGasO₂{FT}()
+
+    # Prescribe parameters
+    "Prescribe air layer information such as partial pressures"
+    PRESCRIBE_AIR::Bool = true
+
+
+
+
+    # features related to canopy sunlit/shaded fractions
+    # Note
+    #     1. to use the hyperspectral mode, set both to true
+    #     2. to use the broadband mode with sunlit/shaded fractions, set SUNLIT_FRACTION to true and SUNLIT_ANGLES to false
+    #     3. to use the broadband mode with one leaf model, set both to false (ppar_sunlit and ppar_shaded will be set to be the same)
+    #     4. to use big leaf model, TODO item
+    "Whether to partition the sunlit fraction into different inclination and azimuth angles (if false, use float for sunlit fraction)"
+    SUNLIT_ANGLES::Bool = true
+    "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
+    SUNLIT_FRACTION::Bool = true
+
+
+
+
+    # Features to add
+    "Allow leaf shedding"
+    ALLOW_LEAF_SHEDDING::Bool = false
+    "Enable drought legacy effect"
+    ENABLE_DROUGHT_LEGACY::Bool = false
 end;
