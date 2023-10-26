@@ -47,14 +47,14 @@ colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT} = a_1 * a_
 #######################################################################################################################################################################################################
 """
 
-    colimit_photosynthesis!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}; β::FT = FT(1)) where {FT}
+    colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT}
 
 Colimit the photosynthesis by rubisco-, light-, and product-limited photosynthetic rates, given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis model
+- `psm` `LeafPhotosystem` type photosynthesis model
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd (default is 1)
 
 """
-function colimit_photosynthesis!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}; β::FT = FT(1)) where {FT}
+function colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT}
     a_i = colimited_rate(psm.auxil.a_c, psm.auxil.a_j, psm.state.COLIMIT_CJ);
     psm.auxil.a_g = colimited_rate(psm.auxil.a_p, a_i, psm.state.COLIMIT_IP);
     psm.auxil.a_n = psm.auxil.a_g - β * psm.auxil.r_d;

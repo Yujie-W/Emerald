@@ -15,11 +15,11 @@
 #######################################################################################################################################################################################################
 """
 
-    light_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}) where {FT}
-    light_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
+    light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT}
+    light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
 
 Update the electron transport limited photosynthetic rate (none for PCO₂Mode and g_lc for GCO₂Mode), given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` struct
+- `psm` `LeafPhotosystem` struct
 - `air` `AirLayer` struct for environmental conditions like O₂ partial pressure
 - `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
@@ -27,29 +27,33 @@ Update the electron transport limited photosynthetic rate (none for PCO₂Mode a
 """
 function light_limited_rate! end;
 
-light_limited_rate!(psm::Union{C3Cyto{FT}, C4VJP{FT}}) where {FT} = (psm.auxil.a_j = psm.auxil.j_pot * psm.auxil.e2c; return nothing);
+light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT} = light_limited_rate!(psm.state, psm.auxil);
 
-light_limited_rate!(psm::C3VJP{FT}) where {FT} = (psm.auxil.a_j = psm.auxil.j * psm.auxil.e2c; return nothing);
+light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = light_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
 
-light_limited_rate!(psm::C3Cyto{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
-    if psm.auxil.j_psi == 0
-        psm.auxil.a_j = 0;
+light_limited_rate!(pss::Union{C3CytoState{FT}, C4VJPState{FT}}, psa::PSMAuxil{FT}) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);
+
+light_limited_rate!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);
+
+light_limited_rate!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+    if psa.j_psi == 0
+        psa.a_j = 0;
 
         return nothing
     end;
 
-    eff_a = 1 - psm.auxil.η_l / psm.auxil.η_c;
-    eff_b = 1 / psm.auxil.η_c;
-    eff_1 = eff_a * psm.state.EFF_1 + 3 * eff_b;
-    eff_2 = eff_a * psm.state.EFF_2 + 7 * eff_b;
+    eff_a = 1 - psa.η_l / psa.η_c;
+    eff_b = 1 / psa.η_c;
+    eff_1 = eff_a * pss.EFF_1 + 3 * eff_b;
+    eff_2 = eff_a * pss.EFF_2 + 7 * eff_b;
 
-    a = psm.auxil.j_psi;
-    b = psm.auxil.j_psi * psm.auxil.γ_star;
+    a = psa.j_psi;
+    b = psa.j_psi * psa.γ_star;
     c = eff_1;
-    d = eff_2 * psm.auxil.γ_star;
+    d = eff_2 * psa.γ_star;
     f = air.state.p_air / g_lc * FT(1e-6);
     p = air.auxil.ps[2];
-    r = β * psm.auxil.r_d;
+    r = β * psa.r_d;
 
     qa = c * f;
     qb = c * f * r - c * p - d - a * f;
@@ -57,28 +61,28 @@ light_limited_rate!(psm::C3Cyto{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)
     an = lower_quadratic(qa, qb, qc);
 
     if g_lc == 0
-        psm.auxil.a_j = r;
+        psa.a_j = r;
     else
-        psm.auxil.a_j = an + r;
+        psa.a_j = an + r;
     end;
 
     return nothing
 );
 
-light_limited_rate!(psm::C3VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
-    if psm.auxil.j == 0
-        psm.auxil.a_j = 0;
+light_limited_rate!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+    if psa.j == 0
+        psa.a_j = 0;
 
         return nothing
     end;
 
-    a = psm.auxil.j;
-    b = psm.auxil.j * psm.auxil.γ_star;
-    c = psm.state.EFF_1;
-    d = psm.state.EFF_2 * psm.auxil.γ_star;
+    a = psa.j;
+    b = psa.j * psa.γ_star;
+    c = pss.EFF_1;
+    d = pss.EFF_2 * psa.γ_star;
     f = air.state.p_air / g_lc * FT(1e-6);
     p = air.auxil.ps[2];
-    r = β * psm.auxil.r_d;
+    r = β * psa.r_d;
 
     qa = c * f;
     qb = c * f * r - c * p - d - a * f;
@@ -86,12 +90,12 @@ light_limited_rate!(psm::C3VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1))
     an = lower_quadratic(qa, qb, qc);
 
     if g_lc == 0
-        psm.auxil.a_j = r;
+        psa.a_j = r;
     else
-        psm.auxil.a_j = an + r;
+        psa.a_j = an + r;
     end;
 
     return nothing
 );
 
-light_limited_rate!(psm::C4VJP, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm.auxil.a_j = psm.auxil.j_pot * psm.auxil.e2c; return nothing);
+light_limited_rate!(psm::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);

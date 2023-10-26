@@ -14,11 +14,11 @@
 #######################################################################################################################################################################################################
 """
 
-    product_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT}
-    product_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
+    product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT}
+    product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
 
 Update the product limited photosynthetic rate (p_i for PCO₂Mode, g_lc for GCO₂Mode), given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` struct
+- `psm` `LeafPhotosystem` struct
 - `p_i` Internal CO₂ partial pressure in `Pa`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 - `air` `AirLayer` struct
@@ -27,18 +27,22 @@ Update the product limited photosynthetic rate (p_i for PCO₂Mode, g_lc for GCO
 """
 function product_limited_rate! end;
 
-product_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (psm.auxil.a_p = β * psm.auxil.v_cmax / 2; return nothing);
+product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.state, psm.auxil, p_i; β = β);
 
-product_limited_rate!(psm::C4VJP{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psm.auxil.a_p = β * psm.auxil.v_pmax * p_i / (p_i + psm.auxil.k_pep); return nothing);
+product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
 
-product_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm.auxil.a_p = β * psm.auxil.v_cmax / 2; return nothing);
+product_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psa.a_p = β * psa.v_cmax / 2; return nothing);
 
-product_limited_rate!(psm::C4VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
-    a = β * psm.auxil.v_pmax;
-    d = psm.auxil.k_pep;
+product_limited_rate!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psa.a_p = β * psa.v_pmax * p_i / (p_i + psa.k_pep); return nothing);
+
+product_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_p = β * psa.v_cmax / 2; return nothing);
+
+product_limited_rate!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+    a = β * psa.v_pmax;
+    d = psa.k_pep;
     f = air.state.p_air / g_lc * FT(1e-6);
     p = air.auxil.ps[2];
-    r = β * psm.auxil.r_d;
+    r = β * psa.r_d;
 
     qa = f;
     qb = f * r - p - d - a * f;
@@ -46,9 +50,9 @@ product_limited_rate!(psm::C4VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1
     an = lower_quadratic(qa, qb, qc);
 
     if g_lc == 0
-        psm.auxil.a_p = r;
+        psa.a_p = r;
     else
-        psm.auxil.a_p = an + r;
+        psa.a_p = an + r;
     end;
 
     return nothing

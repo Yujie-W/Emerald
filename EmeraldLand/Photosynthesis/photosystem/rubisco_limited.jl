@@ -29,21 +29,25 @@ Update the RubisCO limited photosynthetic rate (p_i for PCO₂Mode and g_lc for 
 """
 function rubisco_limited_rate! end;
 
-rubisco_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psm.auxil.a_c = β * psm.auxil.v_cmax * (p_i - psm.auxil.γ_star) / (p_i + psm.auxil.k_m);
+rubisco_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, p_i; β = β);
+
+rubisco_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
+
+rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+    psa.a_c = β * psa.v_cmax * (p_i - psa.γ_star) / (p_i + psa.k_m);
 
     return nothing
 );
 
-rubisco_limited_rate!(psm::C4VJP{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psm.auxil.a_c = β * psm.auxil.v_cmax; return nothing);
+rubisco_limited_rate!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
 
-rubisco_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
-    a = β * psm.auxil.v_cmax;
-    b = β * psm.auxil.v_cmax * psm.auxil.γ_star;
-    d = psm.auxil.k_m;
+rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+    a = β * psa.v_cmax;
+    b = β * psa.v_cmax * psa.γ_star;
+    d = psa.k_m;
     f = air.state.p_air / g_lc * FT(1e-6);
     p = air.auxil.ps[2];
-    r = β * psm.auxil.r_d;
+    r = β * psa.r_d;
 
     qa = f;
     qb = f*r - p - d - a*f;
@@ -51,12 +55,12 @@ rubisco_limited_rate!(psm::Union{C3Cyto{FT}, C3VJP{FT}}, air::AirLayer{FT}, g_lc
     an = lower_quadratic(qa, qb, qc);
 
     if g_lc == 0
-        psm.auxil.a_c = r;
+        psa.a_c = r;
     else
-        psm.auxil.a_c = an + r;
+        psa.a_c = an + r;
     end;
 
     return nothing
 );
 
-rubisco_limited_rate!(psm::C4VJP{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psm.auxil.a_c = β * psm.auxil.v_cmax; return nothing);
+rubisco_limited_rate!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);

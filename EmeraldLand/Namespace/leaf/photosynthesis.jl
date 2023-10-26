@@ -337,9 +337,8 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add C3VJP struct
-#     2023-Oct-03: add C3Cyto struct
-#     2023-Oct-03: add C4VJP struct
+#     2023-Oct-03: add C3VJP, C3Cyto, and C4VJP structs
+#     2023-Oct-36: combine C3Cyto, C3VJP, and C4VJP into LeafPhotosystem
 #
 #######################################################################################################################################################################################################
 """
@@ -353,47 +352,9 @@ Struct that contains the fields for C3 photosynthesis (VJP model)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3VJP{FT}
+Base.@kwdef mutable struct LeafPhotosystem{FT}
     "State variables"
-    state::C3VJPState{FT} = C3VJPState{FT}()
-    "Auxilary variables"
-    auxil::PSMAuxil{FT} = PSMAuxil{FT}()
-end;
-
-
-"""
-
-$(TYPEDEF)
-
-Struct that contains the fields for C3 photosynthesis (Cytochrome model)
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct C3Cyto{FT}
-    "State variables"
-    state::C3CytoState{FT} = C3CytoState{FT}()
-    "Auxilary variables"
-    auxil::PSMAuxil{FT} = PSMAuxil{FT}()
-end;
-
-
-"""
-
-$(TYPEDEF)
-
-Struct that contains the fields for C4 photosynthesis (VJP model)
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct C4VJP{FT}
-    "State variables"
-    state::C4VJPState{FT} = C4VJPState{FT}()
+    state::Union{C3CytoState{FT}, C3VJPState{FT}, C4VJPState{FT}} = C3VJPState{FT}()
     "Auxilary variables"
     auxil::PSMAuxil{FT} = PSMAuxil{FT}()
 end;

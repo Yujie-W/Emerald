@@ -12,12 +12,10 @@
 #######################################################################################################################################################################################################
 """
 
-    photosystem_electron_transport!(psm::C3Cyto{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
-    photosystem_electron_transport!(psm::C3VJP{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
-    photosystem_electron_transport!(psm::C4VJP{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
+    photosystem_electron_transport!(psm::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
 
 Update the electron transport rates, given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` type struct
+- `psm` `LeafPhotosystem` type struct
 - `ppar` Absorbed photosynthetically active radiation in `μmol m⁻² s⁻¹`
 - `p_i` Internal CO₂ partial pressure in `Pa`, used to compute e_to_c
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
@@ -25,26 +23,28 @@ Update the electron transport rates, given
 """
 function photosystem_electron_transport! end;
 
-photosystem_electron_transport!(psm::C3Cyto{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psm.auxil.e2c   = (p_i - psm.auxil.γ_star) / (psm.state.EFF_1 * p_i + psm.state.EFF_2 * psm.auxil.γ_star);
-    psm.auxil.j_psi = colimited_rate(β * psm.auxil.v_qmax, ppar * psm.state.F_PSI * psm.state.Φ_PSI_MAX, psm.state.COLIMIT_J);
-    psm.auxil.η     = 1 - psm.auxil.η_l / psm.auxil.η_c + (3 * p_i + 7 * psm.auxil.γ_star) / (psm.state.EFF_1 * p_i + psm.state.EFF_2 * psm.auxil.γ_star) / psm.auxil.η_c;
-    psm.auxil.j_pot = psm.auxil.j_psi / psm.auxil.η;
+photosystem_electron_transport!(psm::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = photosystem_electron_transport!(psm.state, psm.auxil, ppar, p_i; β = β);
+
+photosystem_electron_transport!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
+    psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
+    psa.j_psi = colimited_rate(β * psa.v_qmax, ppar * pss.F_PSI * pss.Φ_PSI_MAX, pss.COLIMIT_J);
+    psa.η     = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
+    psa.j_pot = psa.j_psi / psa.η;
 
     return nothing
 );
 
-photosystem_electron_transport!(psm::C3VJP{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psm.auxil.e2c   = (p_i - psm.auxil.γ_star) / (psm.state.EFF_1 * p_i + psm.state.EFF_2 * psm.auxil.γ_star);
-    psm.auxil.j_pot = psm.state.F_PSII * psm.auxil.ϕ_psii_max * ppar;
-    psm.auxil.j     = colimited_rate(psm.auxil.j_pot, β * psm.auxil.j_max, psm.state.COLIMIT_J);
+photosystem_electron_transport!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
+    psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
+    psa.j_pot = pss.F_PSII * psa.ϕ_psii_max * ppar;
+    psa.j     = colimited_rate(psa.j_pot, β * psa.j_max, pss.COLIMIT_J);
 
     return nothing
 );
 
-photosystem_electron_transport!(psm::C4VJP{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psm.auxil.e2c   = 1 / 6;
-    psm.auxil.j_pot = psm.state.F_PSII * psm.auxil.ϕ_psii_max * ppar;
+photosystem_electron_transport!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
+    psa.e2c   = 1 / 6;
+    psa.j_pot = pss.F_PSII * psa.ϕ_psii_max * ppar;
 
     return nothing
 );

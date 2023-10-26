@@ -19,7 +19,7 @@ Updates leaf photosynthetic rates based on leaf diffusive conductance (for Stoma
 - `t` Leaf temperature in `[K]`
 
 """
-function photosynthesis_only!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT}
+function photosynthesis_only!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT}
     photosystem_temperature_dependence!(psm, air, t);
     photosystem_electron_transport!(psm, ppar, FT(20); β = FT(1));
     rubisco_limited_rate!(psm, air, g_lc; β = FT(1));
