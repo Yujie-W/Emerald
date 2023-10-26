@@ -7,6 +7,7 @@ using Test
         include("tutorials/frontier.jl");
     end;
 
+    include("tutorials/leaf_quantum_yields.jl");
     include("tutorials/leaf_spectra.jl");
     include("tutorials/leaf_sif_spectra.jl");
 

@@ -2,7 +2,7 @@ using Emerald;
 using Test;
 
 
-@testset "Run Leaf Level Spectra" begin
+@testset "Leaf Level Spectra" begin
     FT = Float64;
 
     # LeafOptics package can be used in stand-alone mode without loading unnecessary modules.
