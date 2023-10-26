@@ -28,10 +28,11 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     end;
 
     # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI+SAI > 0
-    (; DIM_LAYER, SPECTRA, Θ_AZI, Θ_INCL) = config;
+    (; SPECTRA, Θ_AZI, Θ_INCL) = config;
     leaves = spac.plant.leaves;
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
+    n_layer = length(leaves);
 
     # extinction coefficients for the solar radiation
     vza = sen_geo.state.vza;
@@ -101,7 +102,7 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
     kocipai = sen_geo.auxil.ko * can_str.auxil.ci * (can_str.state.lai + can_str.state.sai);
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         kociipai = sen_geo.auxil.ko * can_str.auxil.ci * (can_str.state.δlai[i] + can_str.state.δsai[i]);
         sen_geo.auxil.p_sensor[i] = 1 / kociipai * (exp(kocipai * can_str.auxil.x_bnds[i]) - exp(kocipai * can_str.auxil.x_bnds[i+1]));
     end;
@@ -115,13 +116,13 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     α  = dso / can_str.state.hot_spot * 2 / Σk;
     pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
 
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         sen_geo.auxil.p_sun_sensor[i] = quadgk(pso, can_str.auxil.x_bnds[i+1], can_str.auxil.x_bnds[i]; rtol = 1e-2)[1] / (can_str.auxil.x_bnds[i] - can_str.auxil.x_bnds[i+1]);
     end;
 
     # compute the scattering coefficients per leaf area
-    for i in 1:DIM_LAYER
-        leaf = leaves[DIM_LAYER + 1 - i];
+    for i in 1:n_layer
+        leaf = leaves[n_layer + 1 - i];
         sen_geo.auxil.dob_leaf[:,i] .= sen_geo.auxil.dob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dof * leaf.bio.auxil.τ_leaf;
         sen_geo.auxil.dof_leaf[:,i] .= sen_geo.auxil.dof * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dob * leaf.bio.auxil.τ_leaf;
         sen_geo.auxil.so_leaf[:,i]  .= sen_geo.auxil.sob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.sof * leaf.bio.auxil.τ_leaf;

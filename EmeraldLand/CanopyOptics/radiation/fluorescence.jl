@@ -27,6 +27,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     leaves = spac.plant.leaves;
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
+    n_layer = length(leaves);
 
     if sun_geo.state.sza > 89 || can_str.state.lai <= 0
         sun_geo.auxil.e_sif_chl .= 0;
@@ -49,11 +50,11 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     end;
 
     # run the fluorescence simulations only if fluorescence feature is enabled
-    (; DIM_AZI, DIM_LAYER, SPECTRA, Φ_PHOTON) = config;
+    (; DIM_AZI, SPECTRA, Φ_PHOTON) = config;
 
     # 0. compute chloroplast SIF emissions for different layers
-    for i in 1:DIM_LAYER
-        leaf = leaves[DIM_LAYER + 1 - i];
+    for i in 1:n_layer
+        leaf = leaves[n_layer + 1 - i];
         a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[i];
         a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[i];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
@@ -102,8 +103,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     );
     _COS²_Θ_INCL_AZI = (cosd.(config.Θ_INCL) .^ 2) * ones(FT, 1, DIM_AZI);
 
-    for i in 1:DIM_LAYER
-        leaf = leaves[DIM_LAYER + 1 - i];
+    for i in 1:n_layer
+        leaf = leaves[n_layer + 1 - i];
         a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[i];
         a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[i];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
@@ -188,7 +189,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
     # 2. account for the SIF emission from bottom to up
     sun_geo.auxil.e_sifꜛ_emit[:,end] .= 0;
-    for i in DIM_LAYER:-1:1
+    for i in n_layer:-1:1
         r__ = view(can_str.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );    # reflectance without correction
         r_j = view(can_str.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);    # reflectance of the upper boundary (i) for SIF
         t_i = view(can_str.auxil.τ_dd      ,SPECTRA.IΛ_SIF,i  );    # transmittance of the layer (i) for SIF
@@ -205,7 +206,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
     # 3. account for the SIF emission from up to bottom
     sun_geo.auxil.e_sifꜜ[:,1] .= 0;
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         r_i = view(can_str.auxil.ρ_dd,SPECTRA.IΛ_SIF,i);    # reflectance of the layer (i) for SIF
         t_i = view(can_str.auxil.τ_dd,SPECTRA.IΛ_SIF,i);    # transmittance of the layer (i) for SIF
 
@@ -218,12 +219,12 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         a_d_j .= a_d_i .* t_i .+ s_d_i;
         a_u_i .= a_d_i .* r_i .+ s_u_i;
     end;
-    sun_geo.auxil.e_sifꜛ[:,end] .= view(sun_geo.auxil.e_sifꜜ,:,DIM_LAYER+1) .* view(can_str.auxil.ρ_dd,SPECTRA.IΛ_SIF,DIM_LAYER+1);
-    sen_geo.auxil.sif_scattered .= view(sen_geo.auxil.dob_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜜ,:,1:DIM_LAYER) .+
-                                   view(sen_geo.auxil.dof_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜛ,:,1:DIM_LAYER);
+    sun_geo.auxil.e_sifꜛ[:,end] .= view(sun_geo.auxil.e_sifꜜ,:,n_layer+1) .* view(can_str.auxil.ρ_dd,SPECTRA.IΛ_SIF,n_layer+1);
+    sen_geo.auxil.sif_scattered .= view(sen_geo.auxil.dob_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜜ,:,1:n_layer) .+
+                                   view(sen_geo.auxil.dof_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜛ,:,1:n_layer);
 
     # 4. compute SIF from the observer direction
-    vec_layer = ones(FT, DIM_LAYER);
+    vec_layer = ones(FT, n_layer);
     vec_layer .= sen_geo.auxil.p_sun_sensor .* can_str.state.δlai .* can_str.auxil.ci ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_sunlit, sen_geo.auxil.sif_sunlit, vec_layer);
 
@@ -233,7 +234,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     vec_layer .= sen_geo.auxil.p_sensor .* can_str.state.δlai .* can_str.auxil.ci ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_scattered, sen_geo.auxil.sif_scattered, vec_layer);
 
-    sen_geo.auxil.sif_obs_soil .= view(sun_geo.auxil.e_sifꜛ,:,DIM_LAYER+1) .* sen_geo.auxil.p_sensor_soil ./ FT(π);
+    sen_geo.auxil.sif_obs_soil .= view(sun_geo.auxil.e_sifꜛ,:,n_layer+1) .* sen_geo.auxil.p_sensor_soil ./ FT(π);
 
     sen_geo.auxil.sif_obs .= sen_geo.auxil.sif_obs_sunlit .+ sen_geo.auxil.sif_obs_shaded .+ sen_geo.auxil.sif_obs_scattered .+ sen_geo.auxil.sif_obs_soil;
 

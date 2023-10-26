@@ -138,31 +138,31 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     r_net_lw_stem::Vector{FT}
 end;
 
-CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructureAuxil{FT}(
+CanopyStructureAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureAuxil{FT}(
             p_incl        = zeros(FT, config.DIM_INCL),
-            x_bnds        = zeros(FT, config.DIM_LAYER + 1),
-            ddb_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddf_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddb_stem      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddf_stem      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_dd_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            τ_dd_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_dd          = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            τ_dd          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ϵ_lw_layer    = zeros(FT, config.DIM_LAYER),
-            ρ_lw_layer    = zeros(FT, config.DIM_LAYER),
-            τ_lw_layer    = zeros(FT, config.DIM_LAYER),
-            ρ_lw          = zeros(FT, config.DIM_LAYER + 1),
-            τ_lw          = zeros(FT, config.DIM_LAYER),
-            lw_layer      = zeros(FT, config.DIM_LAYER),
-            lw_layer_leaf = zeros(FT, config.DIM_LAYER),
-            lw_layer_stem = zeros(FT, config.DIM_LAYER),
-            lwꜜ           = zeros(FT, config.DIM_LAYER + 1),
-            lwꜛ           = zeros(FT, config.DIM_LAYER + 1),
-            emitꜜ         = zeros(FT, config.DIM_LAYER),
-            emitꜛ         = zeros(FT, config.DIM_LAYER + 1),
-            r_net_lw_leaf = zeros(FT, config.DIM_LAYER),
-            r_net_lw_stem = zeros(FT, config.DIM_LAYER),
+            x_bnds        = zeros(FT, n_layer + 1),
+            ddb_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddf_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddb_stem      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddf_stem      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ρ_dd_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            τ_dd_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ρ_dd          = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+            τ_dd          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ϵ_lw_layer    = zeros(FT, n_layer),
+            ρ_lw_layer    = zeros(FT, n_layer),
+            τ_lw_layer    = zeros(FT, n_layer),
+            ρ_lw          = zeros(FT, n_layer + 1),
+            τ_lw          = zeros(FT, n_layer),
+            lw_layer      = zeros(FT, n_layer),
+            lw_layer_leaf = zeros(FT, n_layer),
+            lw_layer_stem = zeros(FT, n_layer),
+            lwꜜ           = zeros(FT, n_layer + 1),
+            lwꜛ           = zeros(FT, n_layer + 1),
+            emitꜜ         = zeros(FT, n_layer),
+            emitꜛ         = zeros(FT, n_layer + 1),
+            r_net_lw_leaf = zeros(FT, n_layer),
+            r_net_lw_stem = zeros(FT, n_layer),
 );
 
 
@@ -191,14 +191,14 @@ Base.@kwdef mutable struct CanopyStructure{FT}
     auxil::CanopyStructureAuxil{FT}
 end;
 
-CanopyStructure(config::SPACConfiguration{FT}) where {FT} = (
+CanopyStructure(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
     lai = 3;
-    δlai = 3 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
+    δlai = 3 .* ones(FT, n_layer) ./ n_layer;
     sai = 0.5;
-    δsai = 0.5 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
+    δsai = 0.5 .* ones(FT, n_layer) ./ n_layer;
 
-    cs_auxil = CanopyStructureAuxil(config);
-    cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:config.DIM_LAYER]] ./ -(lai + sai));
+    cs_auxil = CanopyStructureAuxil(config, n_layer);
+    cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
     cs_auxil.p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
     return CanopyStructure{FT}(

@@ -17,7 +17,7 @@
 #######################################################################################################################################################################################################
 """
 
-        adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
+        adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
 Return adjusted time that soil does not over saturate or drain, given
 - `config` Configuration for `BulkSPAC`
@@ -25,8 +25,7 @@ Return adjusted time that soil does not over saturate or drain, given
 - `δt` Time step
 
 """
-function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
-    (; ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
+function adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
     branches = spac.plant.branches;
     junction = spac.plant.junction;
     lai = spac.canopy.structure.state.lai;
@@ -36,40 +35,36 @@ function adjusted_time(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
 
     # make sure each layer does not drain (allow for oversaturation), and θ change is less than 0.01
     δt_1 = δt;
-    if ENABLE_SOIL_WATER_BUDGET
-        for soil in soils
-            δt_1 = min(FT(0.01) / abs(soil.auxil.∂θ∂t), δt_1);
-            if soil.auxil.∂θ∂t < 0
-                δt_drain = (soil.state.vc.Θ_RES - soil.state.θ) / soil.auxil.∂θ∂t;
-                δt_1 = min(δt_drain, δt_1);
-            end;
+    for soil in soils
+        δt_1 = min(FT(0.01) / abs(soil.auxil.∂θ∂t), δt_1);
+        if soil.auxil.∂θ∂t < 0
+            δt_drain = (soil.state.vc.Θ_RES - soil.state.θ) / soil.auxil.∂θ∂t;
+            δt_1 = min(δt_drain, δt_1);
         end;
     end;
 
     # make sure temperatures do not change more than 1 K per time step
     δt_2 = δt_1;
-    if ENABLE_ENERGY_BUDGET
-        for soil in soils
-            ∂T∂t = soil.auxil.∂e∂t / soil.auxil.cp;
-            δt_2 = min(1 / abs(∂T∂t), δt_2);
-        end;
-
-        ∂T∂t = junction.auxil.∂e∂t / junction.auxil.cp;
+    for soil in soils
+        ∂T∂t = soil.auxil.∂e∂t / soil.auxil.cp;
         δt_2 = min(1 / abs(∂T∂t), δt_2);
+    end;
 
-        ∂T∂t = trunk.energy.auxil.∂e∂t / trunk.energy.auxil.cp;
+    ∂T∂t = junction.auxil.∂e∂t / junction.auxil.cp;
+    δt_2 = min(1 / abs(∂T∂t), δt_2);
+
+    ∂T∂t = trunk.energy.auxil.∂e∂t / trunk.energy.auxil.cp;
+    δt_2 = min(1 / abs(∂T∂t), δt_2);
+
+    for stem in branches
+        ∂T∂t = stem.energy.auxil.∂e∂t / stem.energy.auxil.cp;
         δt_2 = min(1 / abs(∂T∂t), δt_2);
+    end;
 
-        for stem in branches
-            ∂T∂t = stem.energy.auxil.∂e∂t / stem.energy.auxil.cp;
+    if lai > 0
+        for leaf in leaves
+            ∂T∂t = leaf.energy.auxil.∂e∂t / leaf.energy.auxil.cp;
             δt_2 = min(1 / abs(∂T∂t), δt_2);
-        end;
-
-        if lai > 0
-            for leaf in leaves
-                ∂T∂t = leaf.energy.auxil.∂e∂t / leaf.energy.auxil.cp;
-                δt_2 = min(1 / abs(∂T∂t), δt_2);
-            end;
         end;
     end;
 

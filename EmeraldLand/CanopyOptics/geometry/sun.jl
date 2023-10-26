@@ -28,9 +28,10 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     end;
 
     # if sza <= 89 and LAI+SAI > 0, run the sun geometry function
-    (; DIM_LAYER, SPECTRA, Θ_AZI, Θ_INCL) = config;
+    (; SPECTRA, Θ_AZI, Θ_INCL) = config;
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
+    n_layer = length(leaves);
 
     # extinction coefficients for the solar radiation
     for i in eachindex(Θ_INCL)
@@ -62,14 +63,14 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     # compute the sunlit leaf fraction
     # sun_geo.auxil.ps = exp.(sun_geo.auxil.ks .* can_str.auxil.ci * can_str.state.lai .* can_str.auxil.x_bnds);
     kscipai = sun_geo.auxil.ks * can_str.auxil.ci * (can_str.state.lai + can_str.state.sai);
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         ksciipai = sun_geo.auxil.ks * can_str.auxil.ci * (can_str.state.δlai[i] + can_str.state.δsai[i]);
         sun_geo.auxil.p_sunlit[i] = 1 / ksciipai * (exp(kscipai * can_str.auxil.x_bnds[i]) - exp(kscipai * can_str.auxil.x_bnds[i+1]));
     end;
 
     # compute the scattering coefficients for the solar radiation per leaf area
-    for i in 1:DIM_LAYER
-        leaf = leaves[DIM_LAYER + 1 - i];
+    for i in 1:n_layer
+        leaf = leaves[n_layer + 1 - i];
         sun_geo.auxil.sdb_leaf[:,i] .= sun_geo.auxil.sdb * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdf * leaf.bio.auxil.τ_leaf;
         sun_geo.auxil.sdf_leaf[:,i] .= sun_geo.auxil.sdf * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdb * leaf.bio.auxil.τ_leaf;
         sun_geo.auxil.sdb_stem[:,i] .= sun_geo.auxil.sdb * SPECTRA.ρ_STEM;
@@ -80,7 +81,7 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     # sun_geo.auxil.τ_ss_layer .= exp.(-1 .* sun_geo.auxil.ks .* can_str.state.δlai .* can_str.auxil.ci);
     # sun_geo.auxil.τ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdf_leaf .* can_str.state.δlai' .* can_str.auxil.ci);
     # sun_geo.auxil.ρ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdb_leaf .* can_str.state.δlai' .* can_str.auxil.ci);
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         kt_ss_x = sun_geo.auxil.ks .* (can_str.state.δlai[i] + can_str.state.δsai[i]) .* can_str.auxil.ci;
         kt_sd_x = (sun_geo.auxil.sdf_leaf[:,i] .* can_str.state.δlai[i] .+ sun_geo.auxil.sdf_stem[:,i] .* can_str.state.δsai[i]) .* can_str.auxil.ci;
         kr_sd_x = (sun_geo.auxil.sdb_leaf[:,i] .* can_str.state.δlai[i] .+ sun_geo.auxil.sdb_stem[:,i] .* can_str.state.δsai[i]) .* can_str.auxil.ci;
@@ -91,7 +92,7 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)
     sun_geo.auxil.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
-    for i in DIM_LAYER:-1:1
+    for i in n_layer:-1:1
         ρ_dd_layer = view(can_str.auxil.ρ_dd_layer,:,i  );
         ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,i+1);
         ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer,:,i  );

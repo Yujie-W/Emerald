@@ -132,7 +132,7 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
         CO.canopy_structure!(config, spac);
-        CO.longwave_radiation!(config, spac);
+        CO.longwave_radiation!(spac);
 
         @test all(spac.canopy.structure.auxil.lw_layer .> 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .> 0);

@@ -133,9 +133,9 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     sif_obs::Vector{FT}
 end;
 
-SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
-            p_sensor          = zeros(FT, config.DIM_LAYER),
-            p_sun_sensor      = zeros(FT, config.DIM_LAYER),
+SensorGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometryAuxil{FT}(
+            p_sensor          = zeros(FT, n_layer),
+            p_sun_sensor      = zeros(FT, n_layer),
             Co_incl           = zeros(FT, config.DIM_INCL),
             So_incl           = zeros(FT, config.DIM_INCL),
             ko_incl           = zeros(FT, config.DIM_INCL),
@@ -147,23 +147,23 @@ SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAu
             fo_cos²_incl      = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             fo_fs             = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             fo_fs_abs         = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            dob_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dof_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            so_leaf           = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dob_stem          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dof_stem          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            so_stem           = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            e_sensor_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            e_sensor          = zeros(FT, config.DIM_WL),
-            reflectance       = zeros(FT, config.DIM_WL),
-            sif_scattered     = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            sif_shaded        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            sif_sunlit        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            sif_obs_scattered = zeros(FT, config.DIM_SIF),
-            sif_obs_shaded    = zeros(FT, config.DIM_SIF),
-            sif_obs_sunlit    = zeros(FT, config.DIM_SIF),
-            sif_obs_soil      = zeros(FT, config.DIM_SIF),
-            sif_obs           = zeros(FT, config.DIM_SIF),
+            dob_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            dof_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            so_leaf           = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            dob_stem          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            dof_stem          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            so_stem           = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            e_sensor_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+            e_sensor          = zeros(FT, length(config.SPECTRA.Λ)),
+            reflectance       = zeros(FT, length(config.SPECTRA.Λ)),
+            sif_scattered     = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+            sif_shaded        = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+            sif_sunlit        = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+            sif_obs_scattered = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs_shaded    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs_sunlit    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs_soil      = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs           = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
 );
 
 
@@ -192,4 +192,4 @@ Base.@kwdef mutable struct SensorGeometry{FT}
     auxil::SensorGeometryAuxil{FT}
 end;
 
-SensorGeometry(config::SPACConfiguration{FT}) where {FT} = SensorGeometry{FT}(auxil = SensorGeometryAuxil(config));
+SensorGeometry(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometry{FT}(auxil = SensorGeometryAuxil(config, n_layer));

@@ -130,18 +130,8 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    simulation!(wd_tag::String,
-                gmdict::Dict{String,Any};
-                appending::Bool = false,
-                initialial_state::Union{Nothing,Bool} = true,
-                saving::Union{Nothing,String} = nothing,
-                selection = :)
-    simulation!(config::SPACConfiguration{FT},
-                spac::BulkSPAC{FT},
-                wdf::DataFrame;
-                initialial_state::Union{Nothing,Bool} = true,
-                saving::Union{Nothing,String} = nothing,
-                selection = :) where {FT}
+    simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :)
+    simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT}
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
@@ -159,12 +149,7 @@ The second method can be used to run externally prepared config, spac, and weath
 """
 function simulation! end;
 
-simulation!(wd_tag::String,
-            gmdict::Dict{String,Any};
-            appending::Bool = false,
-            initialial_state::Union{Nothing,Bool} = true,
-            saving::Union{Nothing,String} = nothing,
-            selection = :) = (
+simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
     config = spac_config(gmdict);
     spac = spac_struct(gmdict, config);
     wdf = weather_driver(wd_tag, gmdict; appending = appending);
@@ -174,12 +159,7 @@ simulation!(wd_tag::String,
     return isnothing(saving) ? wdf : nothing
 );
 
-simulation!(config::SPACConfiguration{FT},
-            spac::BulkSPAC{FT},
-            wdf::DataFrame;
-            initialial_state::Union{Nothing,Bool} = true,
-            saving::Union{Nothing,String} = nothing,
-            selection = :) where {FT} = (
+simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT} = (
     (; MESSAGE_LEVEL) = config;
 
     _wdfr = eachrow(wdf);
@@ -213,13 +193,7 @@ simulation!(config::SPACConfiguration{FT},
     return nothing
 );
 
-simulation!(config::SPACConfiguration{FT},
-            spac::BulkSPAC{FT},
-            dfr::DataFrameRow;
-            δt::Number = 3600
-) where {FT} = (
-    (; DEBUG, ENABLE_ENERGY_BUDGET, ENABLE_SOIL_WATER_BUDGET) = config;
-
+simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; δt::Number = 3600) where {FT} = (
     # read the data out of dataframe row to reduce memory allocation
     _df_dif::FT = dfr.RAD_DIF;
     _df_dir::FT = dfr.RAD_DIR;
@@ -229,13 +203,6 @@ simulation!(config::SPACConfiguration{FT},
 
     # run the model
     soil_plant_air_continuum!(config, spac, δt);
-
-    #=
-    if DEBUG
-        _sum_leaf_out = [_clayer.∫∂w∂t_out for _clayer in spac.plant.leaves]' * spac.canopy.structure.state.δlai;
-        @info "Debugging" _sum_leaf_out spac.meteo.rain;
-    end;
-    =#
 
     # save the SIF and reflectance if there is sunlight
     if _df_dir + _df_dif >= 10
@@ -256,14 +223,6 @@ simulation!(config::SPACConfiguration{FT},
         dfr.ΣSIF_CHL  = ΣSIF_CHL(config, spac);
         dfr.ΣSIF_LEAF = ΣSIF_LEAF(config, spac);
         dfr.ΦD, dfr.ΦF, dfr.ΦN, dfr.ΦP = ΦDFNP(spac);
-
-        # display the debug information
-        if DEBUG
-            if any(isnan, (dfr.BLUE, dfr.EVI, dfr.NDVI, dfr.NIR, dfr.NIRvI, dfr.NIRvR, dfr.PAR, dfr.PPAR, dfr.RED, dfr.SIF683, dfr.SIF740, dfr.SIF757, dfr.SIF771, dfr.ΦD, dfr.ΦF, dfr.ΦN, dfr.ΦP))
-                @info "Debugging" dfr.BLUE dfr.EVI dfr.NDVI dfr.NIR dfr.NIRvI dfr.NIRvR dfr.PAR dfr.PPAR dfr.RED dfr.SIF683 dfr.SIF740 dfr.SIF757 dfr.SIF771 dfr.ΦD dfr.ΦF dfr.ΦN dfr.ΦP;
-                error("NaN detected when computing remote sensing variables");
-            end;
-        end;
     else
         dfr.BLUE   = NaN;
         dfr.EVI    = NaN;
@@ -279,49 +238,25 @@ simulation!(config::SPACConfiguration{FT},
     end;
 
     # save water contents and temperatures based on t_on and θ_on
-    if ENABLE_SOIL_WATER_BUDGET
-        dfr.MOD_SWC_1 = spac.soils[1].state.θ;
-        dfr.MOD_SWC_2 = spac.soils[2].state.θ;
-        dfr.MOD_SWC_3 = spac.soils[3].state.θ;
-        dfr.MOD_SWC_4 = spac.soils[4].state.θ;
+    dfr.MOD_SWC_1 = spac.soils[1].state.θ;
+    dfr.MOD_SWC_2 = spac.soils[2].state.θ;
+    dfr.MOD_SWC_3 = spac.soils[3].state.θ;
+    dfr.MOD_SWC_4 = spac.soils[4].state.θ;
 
-        if DEBUG
-            if any(isnan, (dfr.MOD_SWC_1, dfr.MOD_SWC_2, dfr.MOD_SWC_3, dfr.MOD_SWC_4))
-                @info "Debugging" dfr.MOD_SWC_1 dfr.MOD_SWC_2 dfr.MOD_SWC_3 dfr.MOD_SWC_4;
-                error("NaN detected when computing soil water contents");
-            end;
-        end;
-    end;
-    if ENABLE_ENERGY_BUDGET
-        _tleaf = [leaf.energy.auxil.t for leaf in spac.plant.leaves];
-        dfr.MOD_T_L_MAX  = nanmax(_tleaf);
-        dfr.MOD_T_L_MEAN = nanmean(_tleaf);
-        dfr.MOD_T_L_MIN  = nanmin(_tleaf);
-        dfr.MOD_T_S_1    = spac.soils[1].auxil.t;
-        dfr.MOD_T_S_2    = spac.soils[2].auxil.t;
-        dfr.MOD_T_S_3    = spac.soils[3].auxil.t;
-        dfr.MOD_T_S_4    = spac.soils[4].auxil.t;
-
-        if DEBUG
-            if any(isnan, (dfr.MOD_T_L_MAX, dfr.MOD_T_L_MEAN, dfr.MOD_T_L_MIN, dfr.MOD_T_S_1, dfr.MOD_T_S_2, dfr.MOD_T_S_3, dfr.MOD_T_S_4))
-                @info "Debugging" dfr.MOD_T_L_MAX dfr.MOD_T_L_MEAN dfr.MOD_T_L_MIN dfr.MOD_T_S_1 dfr.MOD_T_S_2 dfr.MOD_T_S_3 dfr.MOD_T_S_4;
-                error("NaN detected when computing soil and leaf temperatures");
-            end;
-        end;
-    end;
+    _tleaf = [leaf.energy.auxil.t for leaf in spac.plant.leaves];
+    dfr.MOD_T_L_MAX  = nanmax(_tleaf);
+    dfr.MOD_T_L_MEAN = nanmean(_tleaf);
+    dfr.MOD_T_L_MIN  = nanmin(_tleaf);
+    dfr.MOD_T_S_1    = spac.soils[1].auxil.t;
+    dfr.MOD_T_S_2    = spac.soils[2].auxil.t;
+    dfr.MOD_T_S_3    = spac.soils[3].auxil.t;
+    dfr.MOD_T_S_4    = spac.soils[4].auxil.t;
 
     # save the total flux into the DataFrame
     dfr.BETA  = BETA(spac);
     dfr.F_CO2 = CNPP(spac);
     dfr.F_GPP = GPP(spac);
     dfr.F_H2O = T_VEG(spac);
-
-    if DEBUG
-        if any(isnan, (dfr.F_CO2, dfr.F_GPP, dfr.F_H2O))
-            @info "Debugging" dfr.BETA dfr.F_CO2 dfr.F_GPP dfr.F_H2O;
-            error("NaN detected when computing fluxes");
-        end;
-    end;
 
     return nothing
 );

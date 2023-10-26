@@ -25,8 +25,8 @@ using Test;
 
     # Now the SIF spectra can be computed using the stored matrices mat_b and mat_f for any given incoming radiation spectrum
     # Here we define a blue light and red light (only in the SIF excitation spectrum)
-    rad_b = zeros(FT, config.DIM_SIFE);
-    rad_r = zeros(FT, config.DIM_SIFE);
+    rad_b = zeros(FT, length(config.SPECTRA.IΛ_SIFE));
+    rad_r = zeros(FT, length(config.SPECTRA.IΛ_SIFE));
     rad_b[450 .<= config.SPECTRA.Λ_SIFE .<= 480] .= 1;
     rad_r[620 .<= config.SPECTRA.Λ_SIFE .<= 650] .= 1;
     sif_b_b = bio.auxil.mat_b * rad_b;

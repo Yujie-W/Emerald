@@ -17,9 +17,10 @@ Compute the diffusion of trace gasses in the soil, given
 
 """
 function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    (; DIM_SOIL, TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
+    (; TRACE_AIR, TRACE_CH₄, TRACE_CO₂, TRACE_H₂O, TRACE_N₂, TRACE_O₂) = config;
     sbulk = spac.soil_bulk;
     soils = spac.soils;
+    n_soil = length(soils);
 
     #
     # diffusion from top soil to the first air layer
@@ -48,7 +49,7 @@ function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     #     - diffusion path length is the sum of the half thickness of the two layers
     #     - mean diffusion rate is the mean of the two layers 1/k = 1/k1 + 1/k2
     #
-    for i in 1:DIM_SOIL-1
+    for i in 1:n_soil-1
         # for gas 1,2,4,5
         v_gas_i = max(0, soils[i  ].state.vc.Θ_SAT - soils[i  ].state.θ) * soils[i  ].auxil.δz;
         v_gas_j = max(0, soils[i+1].state.vc.Θ_SAT - soils[i+1].state.θ) * soils[i+1].auxil.δz;
@@ -94,7 +95,7 @@ function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     end;
 
     # update the diffusion among soil layers
-    for i in 1:DIM_SOIL-1
+    for i in 1:n_soil-1
         for j in 1:5
             soils[i  ].auxil.∂n∂t[j] += sbulk.auxil.dndt[i+1,j];
             soils[i+1].auxil.∂n∂t[j] -= sbulk.auxil.dndt[i+1,j];

@@ -28,10 +28,10 @@ Base.@kwdef mutable struct MultiLayerCanopy{FT<:AbstractFloat}
     structure::CanopyStructure{FT}
 end;
 
-MultiLayerCanopy(config::SPACConfiguration{FT}) where {FT} = (
+MultiLayerCanopy(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
     return MultiLayerCanopy{FT}(
-                sensor_geometry = SensorGeometry(config),
-                sun_geometry    = SunGeometry(config),
-                structure       = CanopyStructure(config),
+                sensor_geometry = SensorGeometry(config, n_layer),
+                sun_geometry    = SunGeometry(config, n_layer),
+                structure       = CanopyStructure(config, n_layer),
     )
 );

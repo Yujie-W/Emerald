@@ -24,7 +24,7 @@ function canopy_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     sun_geometry!(config, spac);
 
     # run longwave and shortwave radiation
-    longwave_radiation!(config, spac);
+    longwave_radiation!(spac);
     shortwave_radiation!(config, spac);
 
     return nothing

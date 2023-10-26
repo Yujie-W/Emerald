@@ -85,17 +85,17 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     _θ::FT = -1
 end;
 
-SoilBulkAuxil(config::SPACConfiguration{FT}) where {FT} = SoilBulkAuxil{FT}(
-            e_net_dif = zeros(FT, config.DIM_WL),
-            e_net_dir = zeros(FT, config.DIM_WL),
-            ρ_sw      = zeros(FT, config.DIM_WL),
-            dndt      = zeros(FT, config.DIM_SOIL, 5),
-            k         = zeros(FT, config.DIM_SOIL - 1),
-            q         = zeros(FT, config.DIM_SOIL - 1),
-            q_layers  = zeros(FT, config.DIM_SOIL - 1),
-            δt        = zeros(FT, config.DIM_SOIL - 1),
-            δψ        = zeros(FT, config.DIM_SOIL - 1),
-            λ_layers  = zeros(FT, config.DIM_SOIL - 1)
+SoilBulkAuxil(config::SPACConfiguration{FT}, n_soil::Int) where {FT} = SoilBulkAuxil{FT}(
+            e_net_dif = zeros(FT, length(config.SPECTRA.Λ)),
+            e_net_dir = zeros(FT, length(config.SPECTRA.Λ)),
+            ρ_sw      = zeros(FT, length(config.SPECTRA.Λ)),
+            dndt      = zeros(FT, n_soil, 5),
+            k         = zeros(FT, n_soil - 1),
+            q         = zeros(FT, n_soil - 1),
+            q_layers  = zeros(FT, n_soil - 1),
+            δt        = zeros(FT, n_soil - 1),
+            δψ        = zeros(FT, n_soil - 1),
+            λ_layers  = zeros(FT, n_soil - 1)
 );
 
 
@@ -124,4 +124,4 @@ Base.@kwdef mutable struct SoilBulk{FT}
     auxil::SoilBulkAuxil{FT}
 end;
 
-SoilBulk(config::SPACConfiguration{FT}) where {FT} = SoilBulk{FT}(auxil = SoilBulkAuxil(config));
+SoilBulk(config::SPACConfiguration{FT}, n_soil::Int) where {FT} = SoilBulk{FT}(auxil = SoilBulkAuxil(config, n_soil));

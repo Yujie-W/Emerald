@@ -13,7 +13,7 @@
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, and T_CLM
-#     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD, ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
+#     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD
 #     2023-Sep-18: add field Φ_SIF_WL
 #     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
@@ -63,6 +63,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     Φ_SIF_WL::Bool = true
 
     # features related to plant hydraulics
+    "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
+    DIM_XYLEM::Int = 5
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"
     KR_THRESHOLD::FT = 0.001
     "Whether to run the model at steady state mode"
@@ -103,12 +105,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     ALLOW_LEAF_SHEDDING::Bool = false
     "Enable drought legacy effect"
     ENABLE_DROUGHT_LEGACY::Bool = false
-    "Enable energy balance (t_on)"
-    ENABLE_ENERGY_BUDGET::Bool = true
-    "Enable plant hydraulics (p_on)"
-    ENABLE_PLANT_HYDRAULICS::Bool = true
-    "Enable soil water budget (θ_on)"
-    ENABLE_SOIL_WATER_BUDGET::Bool = true
     "Whether to acclimate leaf Vcmax and Jmax TD"
     T_CLM::Bool = true
     "Whether to use CLM soil albedo scheme"
@@ -119,28 +115,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # Prescribe parameters
     "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
-
-    # Dimensions of the spac system
-    "Dimension of air layers"
-    DIM_AIR::Int = 20
-    "Dimension of canopy layers"
-    DIM_LAYER::Int = 12
-    "Number of wavelength bins for NIR"
-    DIM_NIR::Int = length(SPECTRA.IΛ_NIR)
-    "Dimension of root layers"
-    DIM_ROOT::Int = 5
-    "Number of wavelength bins for PAR"
-    DIM_PAR::Int = length(SPECTRA.IΛ_PAR)
-    "Dimension of SIF wave length bins"
-    DIM_SIF::Int = length(SPECTRA.IΛ_SIF)
-    "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int = length(SPECTRA.IΛ_SIFE)
-    "Dimension of soil layers"
-    DIM_SOIL::Int = 4
-    "Dimension of short wave length bins"
-    DIM_WL::Int = length(SPECTRA.Λ)
-    "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
-    DIM_XYLEM::Int = 5
 
     # Trace gas information
     "Trace gas air"

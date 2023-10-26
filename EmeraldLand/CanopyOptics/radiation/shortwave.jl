@@ -27,6 +27,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
     sun_geo = spac.canopy.sun_geometry;
+    n_layer = length(leaves);
 
     # if sza > 89, set all the radiation variables to 0
     if sun_geo.state.sza > 89
@@ -54,7 +55,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     end;
 
     # if LAI <= 0, run soil albedo only
-    (; DIM_LAYER, SPECTRA) = config;
+    (; SPECTRA) = config;
     rad_sw = spac.meteo.rad_sw;
     if sun_geo.state.sza <= 89 && can_str.state.lai <= 0 && can_str.state.sai <= 0
         # 1. update upward and downward direct and diffuse radiation profiles
@@ -90,7 +91,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     # 1. update upward and downward direct and diffuse radiation profiles
     sun_geo.auxil.e_dirꜜ[:,1] .= rad_sw.e_dir;
     sun_geo.auxil.e_difꜜ[:,1] .= rad_sw.e_dif;
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         e_d_i = view(sun_geo.auxil.e_difꜜ,:,i  );       # downward diffuse radiation at upper boundary
         e_d_j = view(sun_geo.auxil.e_difꜜ,:,i+1);       # downward diffuse radiation at lower boundary
         e_s_i = view(sun_geo.auxil.e_dirꜜ,:,i  );       # direct radiation at upper boundary
@@ -107,12 +108,12 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         e_d_j .= t_sd_i .* e_s_i .+ t_dd_i .* e_d_i;
         e_u_i .= r_sd_i .* e_s_i .+ r_dd_i .* e_d_i;
     end;
-    sun_geo.auxil.e_difꜛ[:,end] .= view(sun_geo.auxil.e_dirꜜ,:,DIM_LAYER+1) .* view(sun_geo.auxil.ρ_sd,:,DIM_LAYER+1) .+
-                                   view(sun_geo.auxil.e_difꜜ,:,DIM_LAYER+1) .* view(can_str.auxil.ρ_dd,:,DIM_LAYER+1);
+    sun_geo.auxil.e_difꜛ[:,end] .= view(sun_geo.auxil.e_dirꜜ,:,n_layer+1) .* view(sun_geo.auxil.ρ_sd,:,n_layer+1) .+
+                                   view(sun_geo.auxil.e_difꜜ,:,n_layer+1) .* view(can_str.auxil.ρ_dd,:,n_layer+1);
     sun_geo.auxil.albedo .= view(sun_geo.auxil.e_difꜛ,:,1) ./ (rad_sw.e_dir .+ rad_sw.e_dif);
 
     # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         e_d_i = view(sun_geo.auxil.e_difꜜ,:,i  );       # downward diffuse radiation at upper boundary
         e_s_i = view(sun_geo.auxil.e_dirꜜ,:,i  );       # direct radiation at upper boundary
         e_u_j = view(sun_geo.auxil.e_difꜛ,:,i+1);       # upward diffuse radiation at upper boundary
@@ -133,8 +134,8 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     # 3. compute net absorption for leaves and soil
     # 4. compute leaf level PAR, APAR, and PPAR per ground area
     normi = 1 / mean(sun_geo.auxil.fs_abs_mean);
-    for i in 1:DIM_LAYER
-        j = DIM_LAYER + 1 - i;
+    for i in 1:n_layer
+        j = n_layer + 1 - i;
         a_leaf = leaves[j].bio.auxil.α_leaf .* can_str.state.δlai[i];
         a_stem = (1 .- SPECTRA.ρ_STEM) .* can_str.state.δsai[i];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
@@ -177,8 +178,8 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
             leaves[j].flux.auxil.ppar_sunlit .= 0;
         end;
     end;
-    sbulk.auxil.e_net_dir .= view(sun_geo.auxil.e_dirꜜ,:,DIM_LAYER+1) .* (1 .- sbulk.auxil.ρ_sw);
-    sbulk.auxil.e_net_dif .= view(sun_geo.auxil.e_difꜜ,:,DIM_LAYER+1) .* (1 .- sbulk.auxil.ρ_sw);
+    sbulk.auxil.e_net_dir .= view(sun_geo.auxil.e_dirꜜ,:,n_layer+1) .* (1 .- sbulk.auxil.ρ_sw);
+    sbulk.auxil.e_net_dif .= view(sun_geo.auxil.e_difꜜ,:,n_layer+1) .* (1 .- sbulk.auxil.ρ_sw);
     sbulk.auxil.r_net_sw = (sbulk.auxil.e_net_dir' * SPECTRA.ΔΛ + sbulk.auxil.e_net_dif' * SPECTRA.ΔΛ) / 1000;
 
     return nothing

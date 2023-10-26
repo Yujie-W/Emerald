@@ -128,7 +128,6 @@ end;
 #     2023-May-19: use δlai per canopy layer
 #     2023-Aug-25: add option to set up hydraulic conductance profiles for root, trunk, branches, and leaves
 #     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
-#     2023-Sep-07: add ALLOW_LEAF_CONDENSATION and T_CLM checks
 #     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
 #     2023-Oct-18: recalculate canopy structural parameters when LAI, cab, car, ci is updated
 #
@@ -177,13 +176,14 @@ function prescribe_traits!(
             vcmax::Union{Number,Nothing} = nothing,
             vcmax_expo::Union{Number,Nothing} = nothing
 ) where {FT}
-    (; DIM_LAYER, T_CLM) = config;
+    (; T_CLM) = config;
     branches = spac.plant.branches;
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     roots = spac.plant.roots;
     sbulk = spac.soil_bulk;
     trunk = spac.plant.trunk;
+    n_layer = length(leaves);
 
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
@@ -205,9 +205,9 @@ function prescribe_traits!(
     # update LAI and Vcmax (with scaling factor)
     if !isnothing(lai)
         can_str.state.lai = lai;
-        can_str.state.δlai = lai .* ones(FT, DIM_LAYER) ./ DIM_LAYER;
-        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:DIM_LAYER]] ./ -(lai + can_str.state.sai));
-        for i in 1:DIM_LAYER
+        can_str.state.δlai = lai .* ones(FT, n_layer) ./ n_layer;
+        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:n_layer]] ./ -(lai + can_str.state.sai));
+        for i in 1:n_layer
             leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
         end;
     end;
@@ -217,7 +217,7 @@ function prescribe_traits!(
     end;
 
     if !isnothing(vcmax) || !isnothing(lai)
-        for i in 2:DIM_LAYER
+        for i in 2:n_layer
             ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.state.δlai[1:i-1]));
             leaves[i].photosystem.state.v_cmax25 = leaves[1].photosystem.state.v_cmax25 * ratio;
             leaves[i].photosystem.state.j_max25 = leaves[1].photosystem.state.v_cmax25 * 1.67 * ratio;

@@ -31,7 +31,7 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
         update_substep_auxils!(spac);
         plant_flow_profile!(config, spac);
         plant_pressure_profile!(config, spac);
-        longwave_radiation!(config, spac);
+        longwave_radiation!(spac);
         plant_photosynthesis!(spac, GCO₂Mode());
         soil_profiles!(config, spac);
         stomatal_conductance_profile!(spac);
@@ -40,7 +40,7 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
 
         # determine the real time step without violating the stability condition
         count += 1;
-        t_step = adjusted_time(config, spac, t_res);
+        t_step = adjusted_time(spac, t_res);
 
         # if total count exceeds 100
         if (count > 1000) && (t_step < 0.01) && (t_res > 10)

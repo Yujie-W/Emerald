@@ -11,21 +11,20 @@
 #######################################################################################################################################################################################################
 """
 
-    longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
 
 Run longwave radiation simulations, given
-- `config` SPAC configuration
 - `spac` SPAC
 
 """
-function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    (; DIM_LAYER) = config;
+function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
     branches = spac.plant.branches;
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     meteo = spac.meteo;
     sbulk = spac.soil_bulk;
     top_soil = spac.soils[1];
+    n_layer = length(leaves);
 
     if can_str.state.lai <= 0 && can_str.state.sai <= 0
         # 1. compute longwave radiation out from the leaves and soil
@@ -49,11 +48,11 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     end;
 
     # 1. compute longwave radiation out from the leaves and soil
-    for i in 1:DIM_LAYER
-        # leaf = leaves[DIM_LAYER + 1 - i];
+    for i in 1:n_layer
+        # leaf = leaves[n_layer + 1 - i];
         # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
-        leaf = leaves[DIM_LAYER + 1 - i];
-        stem = branches[DIM_LAYER + 1 - i];
+        leaf = leaves[n_layer + 1 - i];
+        stem = branches[n_layer + 1 - i];
         f_leaf = can_str.state.δlai[i] / (can_str.state.δlai[i] + can_str.state.δsai[i]);
         f_stem = 1 - f_leaf;
         can_str.auxil.lw_layer_leaf[i] = leaf.energy.auxil.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i];
@@ -64,7 +63,7 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
 
     # 2. account for the longwave emission from bottom to up
     can_str.auxil.emitꜛ[end] = r_lw_soil;
-    for i in DIM_LAYER:-1:1
+    for i in n_layer:-1:1
         r = can_str.auxil.ρ_lw_layer[i];
         t = can_str.auxil.τ_lw_layer[i];
         r_j = can_str.auxil.ρ_lw[i+1];
@@ -76,7 +75,7 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
 
     # 3. account for the longwave emission from up to bottom
     can_str.auxil.lwꜜ[1] = meteo.rad_lw;
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         r_i = can_str.auxil.ρ_lw[i];
         t_i = can_str.auxil.τ_lw[i];
 
@@ -86,7 +85,7 @@ function longwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     can_str.auxil.lwꜛ[end] = can_str.auxil.lwꜜ[end] * sbulk.auxil.ρ_lw + r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
-    for i in 1:DIM_LAYER
+    for i in 1:n_layer
         # can_str.auxil.r_net_lw[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] - 2 * can_str.auxil.lw_layer[i];
         # can_str.auxil.r_net_lw[i] /= can_str.state.δlai[i];
         f_leaf = can_str.state.δlai[i] / (can_str.state.δlai[i] + can_str.state.δsai[i]);
