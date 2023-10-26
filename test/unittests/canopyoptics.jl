@@ -18,24 +18,32 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Soil albedo" begin
         config = NS.SPACConfiguration{Float64}();
+
+        config.α_CLM = true;
+        config.α_FITTING = true;
         spac = NS.BulkSPAC(config);
         SPAC.initialize!(config, spac);
+        CO.soil_albedo!(config, spac);
+        @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
-        spac.soil_bulk.auxil._θ = -1;
         config.α_CLM = true;
         config.α_FITTING = false;
+        spac = NS.BulkSPAC(config);
+        SPAC.initialize!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
-        spac.soil_bulk.auxil._θ = -1;
-        config.α_CLM = false;
-        config.α_FITTING = false;
-        CO.soil_albedo!(config, spac);
-        @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
-
-        spac.soil_bulk.auxil._θ = -1;
         config.α_CLM = false;
         config.α_FITTING = true;
+        spac = NS.BulkSPAC(config);
+        SPAC.initialize!(config, spac);
+        CO.soil_albedo!(config, spac);
+        @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
+
+        config.α_CLM = false;
+        config.α_FITTING = false;
+        spac = NS.BulkSPAC(config);
+        SPAC.initialize!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
     end;

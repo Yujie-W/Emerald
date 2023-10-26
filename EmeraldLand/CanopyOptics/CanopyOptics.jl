@@ -10,6 +10,8 @@ using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BetaLIDF, VerhoefLIDF
+using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoHyperspectralCLIMA, SoilAlbedoHyperspectralCLM
+using ..Namespace: SoilLayer, SoilBulk
 using ..Namespace: BulkSPAC, SPACConfiguration
 
 

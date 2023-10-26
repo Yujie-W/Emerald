@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2023-Oct-17: add struct BulkSPAC
+#     2023-Oct-17: add step to customize soil albedo algorithm from spac settings
 #
 #######################################################################################################################################################################################################
 """
@@ -60,6 +61,17 @@ BulkSPAC(config::SPACConfiguration{FT};
     n_soil = length(soil_bounds) - 1;
     spac_sbulk = SoilBulk(config, n_soil);
     spac_sbulk.state.area = ground_area;
+
+    # set up soil albedo algorithm
+    if config.α_CLM && config.α_FITTING
+        spac_sbulk.state.albedo = SoilAlbedoHyperspectralCLM();
+    elseif config.α_CLM
+        spac_sbulk.state.albedo = SoilAlbedoBroadbandCLM();
+    elseif !config.α_CLM && config.α_FITTING
+        spac_sbulk.state.albedo = SoilAlbedoHyperspectralCLIMA();
+    else
+        spac_sbulk.state.albedo = SoilAlbedoBroadbandCLIMA();
+    end;
 
     # set up the soil layers (energy updated in initialize! function)
     soil_layers = SoilLayer{FT}[SoilLayer{FT}() for _ in 1:n_soil];

@@ -39,6 +39,7 @@ include("method/lidf.jl");
 include("method/mode.jl");
 include("method/pv.jl");
 include("method/soil.jl");
+include("method/soil_albedo.jl");
 include("method/stomata.jl");
 include("method/xylem.jl");
 

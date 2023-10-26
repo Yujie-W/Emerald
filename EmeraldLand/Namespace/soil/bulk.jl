@@ -4,7 +4,8 @@
 #
 # Changes to this struct
 # General
-#     2023-Oct-05: add struct SoilBulkAuxil
+#     2023-Oct-05: add struct SoilBulkState
+#     2023-Oct-26: add field albedo for soil albedo algorithm
 #
 #######################################################################################################################################################################################################
 """
@@ -19,6 +20,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SoilBulkState{FT}
+    "Soil albedo method"
+    albedo::Union{SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
     "Total area of the soil `[m²]`"
     area::FT = 500
     "Color class as in CLM"
