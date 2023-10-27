@@ -137,7 +137,7 @@ photosystem_temperature_dependence!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}, air:
 
     # TODO: add a TD_KD in the model in the future like psd.TD_KC
     psa.k_d        = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);
-    psa.ϕ_psii_max = pss.K_P_MAX / (psa.k_d + pss.K_F + pss.K_P_MAX);
+    psa.ϕ_psii_max = pss.K_PSII / (psa.k_d + pss.K_F + pss.K_PSII);
 
     psa._t = t;
 
@@ -156,7 +156,7 @@ photosystem_temperature_dependence!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, air:
 
     # TODO: add a TD_KD in the model in the future like psd.TD_KC
     psa.k_d        = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);
-    psa.ϕ_psii_max = pss.K_P_MAX / (psa.k_d + pss.K_F + pss.K_P_MAX);
+    psa.ϕ_psii_max = pss.K_PSII / (psa.k_d + pss.K_F + pss.K_PSII);
 
     psa._t = t;
 

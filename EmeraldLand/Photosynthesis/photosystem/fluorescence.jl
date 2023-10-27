@@ -118,14 +118,14 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAu
     psa.k_p       = max(0, psa.ϕ_p * (pss.K_F + psa.k_d + psa.k_npq_rev + pss.k_npq_sus) / (1 - psa.ϕ_p) );
 
     # TODO: whether to consider sustained K_N in the calculations of f_o and f_m
-    # rc._f_o  = K_F / (K_F + K_P_MAX + rc._k_d + rc.k_npq_sus);
-    # rc._f_o′ = K_F / (K_F + K_P_MAX + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
+    # rc._f_o  = K_F / (K_F + K_PSII + rc._k_d + rc.k_npq_sus);
+    # rc._f_o′ = K_F / (K_F + K_PSII + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
     # rc._f_m  = K_F / (K_F + rc._k_d + rc.k_npq_sus);
     # rc._f_m′ = K_F / (K_F + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
 
     # calculate fluorescence quantum yield
-    psa.f_o  = pss.K_F / (pss.K_F + pss.K_P_MAX + psa.k_d);
-    psa.f_o′ = pss.K_F / (pss.K_F + pss.K_P_MAX + psa.k_d + psa.k_npq_rev + pss.k_npq_sus);
+    psa.f_o  = pss.K_F / (pss.K_F + pss.K_PSII + psa.k_d);
+    psa.f_o′ = pss.K_F / (pss.K_F + pss.K_PSII + psa.k_d + psa.k_npq_rev + pss.k_npq_sus);
     psa.f_m  = pss.K_F / (pss.K_F + psa.k_d);
     psa.f_m′ = pss.K_F / (pss.K_F + psa.k_d + psa.k_npq_rev + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);

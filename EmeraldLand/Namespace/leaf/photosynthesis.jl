@@ -129,8 +129,8 @@ Base.@kwdef mutable struct C3VJPState{FT}
     F_PSII::FT = 0.5
     "Rate constant for fluorescence"
     K_F::FT = 0.05
-    "Maximal rate constant for photochemistry"
-    K_P_MAX::FT = 4
+    "Maximal rate constant for PSII photochemistry"
+    K_PSII::FT = 4
 
     # Embedded structures
     "Fluorescence model"
@@ -188,8 +188,8 @@ Base.@kwdef mutable struct C4VJPState{FT}
     F_PSII::FT = 0.5
     "Rate constant for fluorescence"
     K_F::FT = 0.05
-    "Maximal rate constant for photochemistry"
-    K_P_MAX::FT = 4
+    "Maximal rate constant for PSII photochemistry"
+    K_PSII::FT = 4
 
     # Embedded structures
     "Fluorescence model"
