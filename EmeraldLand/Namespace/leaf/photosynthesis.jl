@@ -52,8 +52,6 @@ Base.@kwdef mutable struct C3CytoState{FT}
     TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)
 
     # Constant coefficients
-    "Fraction of absorbed light used by PSII ETR"
-    F_PSII::FT = 0.44 / (0.41 + 0.44)
     "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
     K_D::FT = 0.55
     "Rate constant of fluorescence `[ns⁻¹]`"
@@ -125,8 +123,6 @@ Base.@kwdef mutable struct C3VJPState{FT}
     TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
 
     # Constant coefficients
-    "Fraction of absorbed light used by PSII ETR"
-    F_PSII::FT = 0.5
     "Rate constant for fluorescence"
     K_F::FT = 0.05
     "Maximal rate constant for PSII photochemistry"
@@ -184,8 +180,6 @@ Base.@kwdef mutable struct C4VJPState{FT}
     TD_VPMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VpmaxTDBoyd(FT)
 
     # Constant coefficients
-    "Fraction of absorbed light used by PSII ETR"
-    F_PSII::FT = 0.5
     "Rate constant for fluorescence"
     K_F::FT = 0.05
     "Maximal rate constant for PSII photochemistry"
@@ -242,6 +236,8 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     # electron transport rates
     "Electron to CO₂ coefficient"
     e2c::FT = 0
+    "Fraction of absorbed light used by PSII ETR"
+    f_psii::FT = 0.5
     "Electron transport `[μmol m⁻² s⁻¹]`"
     j::FT = 0
     "Maximal electron transport rate at leaf temperature `[μmol m⁻² s⁻¹]`"
