@@ -115,6 +115,8 @@ photosystem_temperature_dependence!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, air
     psa.k_m    = psa.k_c * (1 + air.state.p_air * F_O₂(FT) / psa.k_o);
     psa.v_qmax = pss.b₆f * psa.k_q;
 
+    psa.ϕ_psi_max = pss.K_PSI / (pss.K_D + pss.K_F + pss.K_PSI);
+
     psa._t = t;
 
     return nothing

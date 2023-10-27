@@ -27,7 +27,7 @@ photosystem_electron_transport!(psm::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β:
 
 photosystem_electron_transport!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
-    psa.j_psi = colimited_rate(β * psa.v_qmax, ppar * pss.F_PSI * pss.Φ_PSI_MAX, pss.COLIMIT_J);
+    psa.j_psi = colimited_rate(β * psa.v_qmax, ppar * (1 - pss.F_PSII) * psa.ϕ_psi_max, pss.COLIMIT_J);
     psa.η     = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
     psa.j_pot = psa.j_psi / psa.η;
 

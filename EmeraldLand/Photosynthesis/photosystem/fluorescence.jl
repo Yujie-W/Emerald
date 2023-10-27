@@ -7,7 +7,7 @@
 #     2022-Feb-07: use ppar in fluorescence model
 #     2022-Feb-07: add support for Johnson and Berry (2021) model
 #     2022-Feb-07: use a_gross and j_pot rather than a series of j_p680 and j_p700
-#     2022-Feb-10: scale fluorescence quantum yield based on F_PSI and reabsorption factor
+#     2022-Feb-10: scale fluorescence quantum yield based on F_PSII and reabsorption factor
 #     2022-Feb-10: q1 needs to be multiply by η
 #     2022-Mar-04: add support to sustained NPQ
 #     2022-Mar-04: use the weighted yield for photosynthesis
@@ -46,9 +46,9 @@ photosystem_coefficients!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT; β:
     end;
 
     # adapted from https://github.com/jenjohnson/johnson-berry-2021-pres/blob/main/scripts/model_fun.m
-    ϕ_P1_a = psa.a_g * psa.η / (psa.e2c * ppar * pss.F_PSI);
-    ϕ_P2_a = psa.a_g / (psa.e2c * ppar * (1 - pss.F_PSI));
-    q1     = ϕ_P1_a / pss.Φ_PSI_MAX;
+    ϕ_P1_a = psa.a_g * psa.η / (psa.e2c * ppar * (1 - pss.F_PSII));
+    ϕ_P2_a = psa.a_g / (psa.e2c * ppar * pss.F_PSII);
+    q1     = ϕ_P1_a / psa.ϕ_psi_max;
     q2     = 1 - psa.j_psi / (β * psa.v_qmax);
 
     # solve PSII K_N
@@ -70,8 +70,8 @@ photosystem_coefficients!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT; β:
     # save the weighted fluorescence and photosynthesis yields in reaction center
     psa.ϕ_f1 = ϕ_F1_a;
     psa.ϕ_f2 = ϕ_F2_a;
-    psa.ϕ_f  = ϕ_F1_a * pss.F_PSI + ϕ_F2_a * (1 - pss.F_PSI);
-    psa.ϕ_p  = ϕ_P1_a * pss.F_PSI + ϕ_P2_a * (1 - pss.F_PSI);
+    psa.ϕ_f  = ϕ_F1_a * (1 - pss.F_PSII) + ϕ_F2_a * pss.F_PSII;
+    psa.ϕ_p  = ϕ_P1_a * (1 - pss.F_PSII) + ϕ_P2_a * pss.F_PSII;
 
     return nothing
 

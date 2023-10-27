@@ -4,6 +4,83 @@
 #
 # Changes to this struct
 # General
+#     2023-Oct-03: add C3CytoState struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the state variables for C3 photosynthesis (Cytochrome model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C3CytoState{FT}
+    # General model information
+    "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
+    EFF_1::FT = 4
+    "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
+    EFF_2::FT = 8
+
+    # Colimitation methods
+    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
+    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
+    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for J"
+    COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = SerialColimit{FT}()
+
+    # Temperature dependency structures
+    "[`AbstractTemperatureDependency`](@ref) type Kc temperature dependency"
+    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KcTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
+    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KoTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Kq temperature dependency"
+    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KqTDJohnson(FT)
+    "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
+    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
+    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDJohnson(FT)
+    "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
+    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)
+
+    # Constant coefficients
+    "Fraction of absorbed light used by PSII ETR"
+    F_PSII::FT = 0.44 / (0.41 + 0.44)
+    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
+    K_D::FT = 0.55
+    "Rate constant of fluorescence `[ns⁻¹]`"
+    K_F::FT = 0.05
+    "Rate constant of photochemistry for PS I `[ns⁻¹]`"
+    K_PSI::FT = 14.5
+    "Rate constant of photochemistry for PS II `[ns⁻¹]`"
+    K_PSII::FT = 4.5
+    "Rate constant of excitation sharing for PS II `[ns⁻¹]`"
+    K_U::FT = 2
+    "Rate constant of regulated heat loss via oxidized PS I center `[s⁻¹]`"
+    K_X::FT = 14.5
+
+    # Prognostic variables
+    "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
+    b₆f::FT = 350 / 300
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Oct-03: add C3VJPState struct
 #
 #######################################################################################################################################################################################################
@@ -64,85 +141,6 @@ Base.@kwdef mutable struct C3VJPState{FT}
     j_max25::FT = 83.5
     "Sustained NPQ rate constant (for seasonal changes, default is zero)"
     k_npq_sus::FT = 0
-    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
-    r_d25::FT = 0.75
-    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
-    v_cmax25::FT = 50
-end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2023-Oct-03: add C3CytoState struct
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Struct that contains the state variables for C3 photosynthesis (Cytochrome model)
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct C3CytoState{FT}
-    # General model information
-    "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
-    EFF_1::FT = 4
-    "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
-    EFF_2::FT = 8
-
-    # Colimitation methods
-    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
-    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
-    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
-    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
-    "[`AbstractColimit`](@ref) type colimitation method for J"
-    COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = SerialColimit{FT}()
-
-    # Temperature dependency structures
-    "[`AbstractTemperatureDependency`](@ref) type Kc temperature dependency"
-    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KcTDCLM(FT)
-    "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
-    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KoTDCLM(FT)
-    "[`AbstractTemperatureDependency`](@ref) type Kq temperature dependency"
-    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KqTDJohnson(FT)
-    "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
-    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
-    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
-    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
-    "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
-    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
-    "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
-    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDJohnson(FT)
-    "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
-    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)
-
-    # Constant coefficients
-    "Fraction of absorbed light used by PSI ETR"
-    F_PSI::FT = 0.41 / (0.41 + 0.44)
-    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
-    K_D::FT = 0.55
-    "Rate constant of fluorescence `[ns⁻¹]`"
-    K_F::FT = 0.05
-    "Rate constant of photochemistry for PS I `[ns⁻¹]`"
-    K_PSI::FT = 14.5
-    "Rate constant of photochemistry for PS II `[ns⁻¹]`"
-    K_PSII::FT = 4.5
-    "Rate constant of excitation sharing for PS II `[ns⁻¹]`"
-    K_U::FT = 2
-    "Rate constant of regulated heat loss via oxidized PS I center `[s⁻¹]`"
-    K_X::FT = 14.5
-    "Maximal PS I photochemical yield"
-    Φ_PSI_MAX::FT = K_PSI / (K_D + K_F + K_PSI)
-
-    # Prognostic variables
-    "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
-    b₆f::FT = 350 / 300
     "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     r_d25::FT = 0.75
     "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
@@ -324,6 +322,8 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     k_npq_rev::FT = 0
     "Rate constant for photochemistry"
     k_p::FT = 0
+    "Maximal PS I photochemical yield"
+    ϕ_psi_max::FT = 0
     "max PSII yield (_k_npq_rev = 0, all RC open)"
     ϕ_psii_max::FT = 0
 
