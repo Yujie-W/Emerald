@@ -15,6 +15,7 @@
 #     2023-Jun-15: set ϕ_f and ϕ_p to 0 when ppar is 0
 #     2023-Sep-09: compute ϕ_d and ϕ_n in the VJPReactionCenter
 #     2023-Oct-24: save PSI and PSII ϕ_f in the C3Cyto model
+#     2023-Oct-28: add method for QLFluoscenceModel
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
@@ -100,7 +101,9 @@ photosystem_coefficients!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT; β:
     =#
 );
 
-photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = photosystem_coefficients!(pss, pss.FLM, psa, ppar; β = β);
+
+photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::KNFluoscenceModel{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
         psa.ϕ_f = 0;
         psa.ϕ_p = 0;
@@ -113,9 +116,9 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAu
 
     # calculate rate constants
     x  = max(0, 1 - psa.ϕ_p / psa.ϕ_psii_max);
-    xᵅ = x ^ pss.FLM.K_A;
-    psa.k_npq_rev = pss.FLM.K_0 * (1 + pss.FLM.K_B) * xᵅ / (pss.FLM.K_B + xᵅ);
-    psa.k_p       = max(0, psa.ϕ_p * (pss.K_F + psa.k_d + psa.k_npq_rev + pss.k_npq_sus) / (1 - psa.ϕ_p) );
+    xᵅ = x ^ flm.K_A;
+    psa.k_n = flm.K_0 * (1 + flm.K_B) * xᵅ / (flm.K_B + xᵅ);
+    psa.k_p = max(0, psa.ϕ_p * (pss.K_F + psa.k_d + psa.k_n + pss.k_npq_sus) / (1 - psa.ϕ_p) );
 
     # TODO: whether to consider sustained K_N in the calculations of f_o and f_m
     # rc._f_o  = K_F / (K_F + K_PSII + rc._k_d + rc.k_npq_sus);
@@ -125,12 +128,12 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAu
 
     # calculate fluorescence quantum yield
     psa.f_o  = pss.K_F / (pss.K_F + pss.K_PSII + psa.k_d);
-    psa.f_o′ = pss.K_F / (pss.K_F + pss.K_PSII + psa.k_d + psa.k_npq_rev + pss.k_npq_sus);
+    psa.f_o′ = pss.K_F / (pss.K_F + pss.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.f_m  = pss.K_F / (pss.K_F + psa.k_d);
-    psa.f_m′ = pss.K_F / (pss.K_F + psa.k_d + psa.k_npq_rev + pss.k_npq_sus);
+    psa.f_m′ = pss.K_F / (pss.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     psa.ϕ_d  = psa.k_d / pss.K_F * psa.ϕ_f;
-    psa.ϕ_n  = (psa.k_npq_rev + pss.k_npq_sus) / pss.K_F * psa.ϕ_f;
+    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pss.K_F * psa.ϕ_f;
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
 
@@ -140,7 +143,45 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAu
     # calculate quenching rates
     psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
     psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    psa.npq = (psa.k_npq_rev + pss.k_npq_sus) / (pss.K_F + psa.k_d);
+    psa.npq = (psa.k_n + pss.k_npq_sus) / (pss.K_F + psa.k_d);
+
+    return nothing
+);
+
+photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::QLFluoscenceModel{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+    if ppar == 0
+        psa.ϕ_f = 0;
+        psa.ϕ_p = 0;
+
+        return nothing
+    end;
+
+    # calculate photochemical yield
+    psa.ϕ_p = psa.a_g / (psa.e2c * psa.f_psii * ppar);
+
+    # calculate the qL
+    q_l = flm.K_A * exp(-flm.K_B * ppar);
+    psa.k_p = pss.K_PSII * q_l;
+    psa.k_n = (psa.k_p - psa.ϕ_p * (pss.K_F + pss.K_D + psa.k_p)) / psa.ϕ_p;
+
+    # calculate fluorescence quantum yield
+    psa.f_o  = pss.K_F / (pss.K_F + pss.K_PSII + pss.K_D);
+    psa.f_o′ = pss.K_F / (pss.K_F + pss.K_PSII + pss.K_D + psa.k_n + pss.k_npq_sus);
+    psa.f_m  = pss.K_F / (pss.K_F + pss.K_D);
+    psa.f_m′ = pss.K_F / (pss.K_F + pss.K_D + psa.k_n + pss.k_npq_sus);
+    psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
+    psa.ϕ_d  = pss.K_D / pss.K_F * psa.ϕ_f;
+    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pss.K_F * psa.ϕ_f;
+    psa.ϕ_f1 = psa.ϕ_f;
+    psa.ϕ_f2 = psa.ϕ_f;
+
+    # TODO: if K_N is used above, do we need to recalculate _npq
+    # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
+
+    # calculate quenching rates
+    psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
+    psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
+    psa.npq = (psa.k_n + pss.k_npq_sus) / (pss.K_F + pss.K_D);
 
     return nothing
 );

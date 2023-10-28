@@ -80,6 +80,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-03: add C3VJPState struct
+#     2023-Oct-28: add support to QLFluoscenceModel
 #
 #######################################################################################################################################################################################################
 """
@@ -123,6 +124,8 @@ Base.@kwdef mutable struct C3VJPState{FT}
     TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
 
     # Constant coefficients
+    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
+    K_D::FT = 0.85
     "Rate constant for fluorescence"
     K_F::FT = 0.05
     "Maximal rate constant for PSII photochemistry"
@@ -130,7 +133,7 @@ Base.@kwdef mutable struct C3VJPState{FT}
 
     # Embedded structures
     "Fluorescence model"
-    FLM::VanDerTolFluorescenceModel{FT} = VanDerTolFluorescenceModel{FT}()
+    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
 
     # Prognostic variables
     "Maximal electron transport rate at 298.15 K `[μmol m⁻² s⁻¹]`"
@@ -149,6 +152,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-03: add C4VJPState struct
+#     2023-Oct-28: add support to QLFluoscenceModel
 #
 #######################################################################################################################################################################################################
 """
@@ -180,6 +184,8 @@ Base.@kwdef mutable struct C4VJPState{FT}
     TD_VPMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VpmaxTDBoyd(FT)
 
     # Constant coefficients
+    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
+    K_D::FT = 0.85
     "Rate constant for fluorescence"
     K_F::FT = 0.05
     "Maximal rate constant for PSII photochemistry"
@@ -187,7 +193,7 @@ Base.@kwdef mutable struct C4VJPState{FT}
 
     # Embedded structures
     "Fluorescence model"
-    FLM::VanDerTolFluorescenceModel{FT} = VanDerTolFluorescenceModel{FT}()
+    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
 
     # Prognostic variables
     "Sustained NPQ rate constant (for seasonal changes, default is zero)"
@@ -315,7 +321,7 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     "Rate constant for thermal dissipation"
     k_d::FT = 0
     "Reversible NPQ rate constant (initially zero)"
-    k_npq_rev::FT = 0
+    k_n::FT = 0
     "Rate constant for photochemistry"
     k_p::FT = 0
     "Maximal PS I photochemical yield"

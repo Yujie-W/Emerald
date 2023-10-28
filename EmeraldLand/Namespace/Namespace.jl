@@ -34,6 +34,7 @@ include("config/config.jl");
 # General methods (for users to choose from)
 include("method/beta.jl");
 include("method/colimit.jl");
+include("method/fluorescence.jl");
 include("method/kinetics.jl");
 include("method/lidf.jl");
 include("method/mode.jl");
@@ -70,7 +71,6 @@ include("stem/stem.jl");
 include("leaf/biophysics.jl");
 include("leaf/energy.jl");
 include("leaf/extraxylem.jl");
-include("leaf/fluorescence.jl");
 include("leaf/flux.jl");
 
 include("leaf/photosynthesis.jl");

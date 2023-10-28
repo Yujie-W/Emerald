@@ -106,6 +106,20 @@ import Emerald.EmeraldLand.SPAC
             PS.photosystem_coefficients!(ps, 100.0);
             @test true;
         end;
+
+        # try out the qL based fluorescence model (CXVJP model only)
+        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}()]
+            ps.state = pss;
+            ps.state.FLM = NS.QLFluoscenceModel{Float64}();
+            PS.photosystem_temperature_dependence!(ps, air, 298.15);
+            PS.photosystem_electron_transport!(ps, 100.0, 20.0);
+            PS.rubisco_limited_rate!(ps, 20.0);
+            PS.light_limited_rate!(ps);
+            PS.product_limited_rate!(ps, 20.0);
+            PS.colimit_photosynthesis!(ps);
+            PS.photosystem_coefficients!(ps, 100.0);
+            @test true;
+        end;
     end;
 
     @testset "Photosynthesis only (for stomatal models)" begin
@@ -152,7 +166,7 @@ import Emerald.EmeraldLand.SPAC
         PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(), 1.0; rd_only = false);
         @test true;
 
-        # optimality stomtal model
+        # optimality stomatal model
         leaf.flux.state.stomatal_model = NS.WangSM{Float64}();
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(); rd_only = false);
         @test true;

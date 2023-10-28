@@ -8,6 +8,7 @@ using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, Medl
 using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
 using ..Namespace: GCO₂Mode, PCO₂Mode
+using ..Namespace: KNFluoscenceModel, QLFluoscenceModel
 using ..Namespace: C3CytoState, C3VJPState, C4VJPState, PSMAuxil
 using ..Namespace: LeafPhotosystem
 using ..Namespace: Leaf
