@@ -16,6 +16,7 @@
 #     2023-Sep-09: compute ϕ_d and ϕ_n in the VJPReactionCenter
 #     2023-Oct-24: save PSI and PSII ϕ_f in the C3Cyto model
 #     2023-Oct-28: add method for QLFluoscenceModel
+#     2023-Oct-30: compute q_l using exp(-flm.K_B * ppar) (omitting K_A)
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
@@ -160,7 +161,7 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::QLFlu
     psa.ϕ_p = psa.a_g / (psa.e2c * psa.f_psii * ppar);
 
     # calculate the qL
-    q_l = flm.K_A * exp(-flm.K_B * ppar);
+    q_l = exp(-flm.K_B * ppar);
     psa.k_p = pss.K_PSII * q_l;
     psa.k_n = (psa.k_p - psa.ϕ_p * (pss.K_F + pss.K_D + psa.k_p)) / psa.ϕ_p;
 

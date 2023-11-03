@@ -40,6 +40,7 @@ KNFluoscenceModelDrought(FT) = KNFluoscenceModel{FT}(K_0 = 5.01, K_A = 1.93, K_B
 # Changes to the struct
 # General
 #     2023-Oct-27: add qL based model
+#     2023-Oct-30: remove K_A from the method (which should be 1)
 # Sources
 #     Han et al. (2022) The physiological basis for estimating photosynthesis from Chla fluorescence
 #
@@ -56,12 +57,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct QLFluoscenceModel{FT<:AbstractFloat}
-    "Fitting parameter α"
-    K_A::FT = 0.8
-    "Fitting parameter β"
+    "Fitting parameter qb"
     K_B::FT = 0.95e-3
 end;
 
-QLFluoscenceModelC3(FT) = QLFluoscenceModel{FT}(K_A = 0.8, K_B = 0.95e-3);
+QLFluoscenceModelC3(FT) = QLFluoscenceModel{FT}(K_B = 0.95e-3);
 
-QLFluoscenceModelC4(FT) = QLFluoscenceModel{FT}(K_A = 0.83, K_B = 0.63e-3);
+QLFluoscenceModelC4(FT) = QLFluoscenceModel{FT}(K_B = 0.63e-3);
