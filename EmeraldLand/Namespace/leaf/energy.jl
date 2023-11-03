@@ -30,6 +30,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Sep-25: add LeafEnergyAuxil
+#     2023-Nov-03: add fields ∂e∂t_le and ∂e∂t_sh
 #
 #######################################################################################################################################################################################################
 """
@@ -53,6 +54,10 @@ Base.@kwdef mutable struct LeafEnergyAuxil{FT}
     t::FT = T₂₅()
     "Partial derivative of the energy per time `[J s⁻¹]`"
     ∂e∂t::FT = 0
+    "Partial derivative of the energy per time for latent heat `[J s⁻¹]`"
+    ∂e∂t_le::FT = 0
+    "Partial derivative of the energy per time for sensible heat `[J s⁻¹]`"
+    ∂e∂t_sh::FT = 0
 end;
 
 

@@ -5,6 +5,7 @@
 # Changes to the function
 # General
 #     2023-Sep-30: add function to calculate the energy flow of the leaf
+#     2023-Nov-03: save latent and sensible heat fluxes in leaf energy auxil
 #
 #######################################################################################################################################################################################################
 """
@@ -50,15 +51,15 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         # so here we only need to calculate the heat mass flow from water vapor in gas phase
         f_o = flow_out(leaf);
         leaf.energy.auxil.∂e∂t -= f_o * M_H₂O(FT) * latent_heat_vapor(leaf.energy.auxil.t);
-        if f_o >= 0
-            leaf.energy.auxil.∂e∂t -= f_o * CP_V_MOL(FT) * leaf.energy.auxil.t;
-        else
-            leaf.energy.auxil.∂e∂t -= f_o * CP_V_MOL(FT) * air.auxil.t;
-        end;
+        le = f_o >= 0 ? f_o * CP_V_MOL(FT) * leaf.energy.auxil.t : f_o * CP_V_MOL(FT) * air.auxil.t;
+        leaf.energy.auxil.∂e∂t -= le;
+        leaf.energy.auxil.∂e∂t_le = le;
 
         # add the sensible heat flux from the leaf to air (to total leaf area)
         g_be = FT(1.4) * FT(0.135) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.state.width));
-        leaf.energy.auxil.∂e∂t -= 2 * g_be * CP_D_MOL(FT) * (leaf.energy.auxil.t - air.auxil.t) * leaf.xylem.state.area;
+        sh = 2 * g_be * CP_D_MOL(FT) * (leaf.energy.auxil.t - air.auxil.t) * leaf.xylem.state.area;
+        leaf.energy.auxil.∂e∂t -= sh;
+        leaf.energy.auxil.∂e∂t_sh = sh;
 
         # add the net radiation energy to the leaf (to total leaf area)
         leaf.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_leaf[i] + canopy.structure.auxil.r_net_lw_leaf[i]) * sbulk.state.area;
