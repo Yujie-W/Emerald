@@ -23,7 +23,7 @@ Prescribe traits and environmental conditions, given
 - `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
-function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialial_state::Bool = false) where {FT}
+function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}
     # read the data out of dataframe row to reduce memory allocation
     _df_atm::FT = dfr.P_ATM;
     _df_chl::FT = dfr.CHLOROPHYLL;
@@ -47,7 +47,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.state.t_history));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
-    if initialial_state
+    if initialize_state
         _df_tlf::FT = dfr.T_LEAF;
         _df_ts1::FT = dfr.T_SOIL_1;
         _df_ts2::FT = dfr.T_SOIL_2;
@@ -130,14 +130,14 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :)
-    simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT}
+    simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :)
+    simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT}
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
 - `gmdict` GriddingMachine dict for site information
 - `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
-- `initialial_state` Initial state of spac: if is a bool, load the first data from the weather driver
+- `initialize_state` Initial state of spac: if is a bool, load the first data from the weather driver
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
 - `selection` Run selection of data, default is : (namely 1:end;)
 
@@ -149,23 +149,23 @@ The second method can be used to run externally prepared config, spac, and weath
 """
 function simulation! end;
 
-simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
+simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
     config = spac_config(gmdict);
     spac = spac_struct(gmdict, config);
     wdf = weather_driver(wd_tag, gmdict; appending = appending);
 
-    simulation!(config, spac, wdf; initialial_state = initialial_state, saving = saving, selection = selection);
+    simulation!(config, spac, wdf; initialize_state = initialize_state, saving = saving, selection = selection);
 
     return isnothing(saving) ? wdf : nothing
 );
 
-simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialial_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT} = (
+simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT} = (
     (; MESSAGE_LEVEL) = config;
 
     _wdfr = eachrow(wdf);
 
-    # initialize spac based on initialial_state
-    prescribe!(config, spac, _wdfr[1]; initialial_state = initialial_state);
+    # initialize spac based on initialize_state
+    prescribe!(config, spac, _wdfr[1]; initialize_state = initialize_state);
 
     # iterate through the time steps
     if MESSAGE_LEVEL == 0
