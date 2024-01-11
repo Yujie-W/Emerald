@@ -64,6 +64,10 @@ Base.@kwdef mutable struct UniversalConstants
     P_ATM::Float64 = 1.01325e5
     "Water vapor pressure at triple temperature `[Pa]`"
     PRESS_TRIPLE::Float64 = 611.657
+    "Earth equatorial radius `[m]`"
+    R_EQUATOR::Float64 = 6378137
+    "Earth polar radius `[m]`"
+    R_POLAR::Float64 = 6356752
     "Freezing temperature of water `[K]`"
     T₀::Float64 = 273.15
     "Triple temperature of water `[K]`"
@@ -155,6 +159,14 @@ P_ATM(FT=Float64) = FT(UNIVERSAL_CONSTANTS.P_ATM);
 
 """ Water vapor pressure at triple temperature `[Pa]` """
 PRESS_TRIPLE(FT=Float64) = FT(UNIVERSAL_CONSTANTS.PRESS_TRIPLE);
+
+""" Earth equatorial radius `[m]` """
+R_EQUATOR(FT=Float64) = FT(UNIVERSAL_CONSTANTS.R_EQUATOR);
+
+""" Earth polar radius `[m]` """
+R_POLAR(FT=Float64) = FT(UNIVERSAL_CONSTANTS.R_POLAR);
+
+""" Gas constant dry air `[J kg⁻¹ K⁻¹]` """
 
 """ Gas constant water vapor `[J kg⁻¹ K⁻¹]` """
 R_V(FT=Float64) = GAS_R(FT) / M_H₂O(FT);
