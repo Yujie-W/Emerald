@@ -29,7 +29,7 @@ function GOES_R_BRFX end;
 GOES_R_BRFX(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, x::Int) where {FT} = GOES_R_BRFX(spac.canopy, config.SPECTRA, x);
 
 GOES_R_BRFX(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}, x::Int) where {FT} = (
-    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(GOES_R_ABI_BANDS[x]), FT(GOES_R_ABI_BANDS[x]); steps=4);
+    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(GOES_R_ABI_BANDS[x][1]), FT(GOES_R_ABI_BANDS[x][2]); steps=4);
 );
 
 GOES_R_BRF1(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = GOES_R_BRFX(config, spac, 1);
