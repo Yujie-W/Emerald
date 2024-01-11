@@ -42,6 +42,7 @@ include("quantity/beta.jl");
 include("quantity/et.jl");
 include("quantity/etr.jl");
 include("quantity/gpp.jl");
+include("quantity/goes.jl");
 include("quantity/npp.jl");
 include("quantity/par.jl");
 include("quantity/sif.jl");
