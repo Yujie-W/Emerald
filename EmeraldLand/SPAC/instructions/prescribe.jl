@@ -130,6 +130,7 @@ end;
 #     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
 #     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
 #     2023-Oct-18: recalculate canopy structural parameters when LAI, cab, car, ci is updated
+#     2024-Jan-11: add option to prescribe sai
 #
 #######################################################################################################################################################################################################
 """
@@ -142,6 +143,7 @@ end;
                 ci::Union{Number,Nothing} = nothing,
                 kmax::Union{Number,Tuple,Nothing} = nothing,
                 lai::Union{Number,Nothing} = nothing,
+                sai::Union{Number,Nothing} = nothing,
                 swcs::Union{Tuple,Nothing} = nothing,
                 t_clm::Union{Number,Nothing} = nothing,
                 t_leaf::Union{Number,Nothing} = nothing,
@@ -157,6 +159,7 @@ Update the physiological parameters of the SPAC, given
 - `ci` Clumping index. Optional, default is nothing
 - `kmax` Maximum hydraulic conductance. Optional, default is nothing
 - `lai` Leaf area index. Optional, default is nothing
+- `sai` Stem area index. Optional, default is nothing
 - `t_clm` Moving average temperature to update Vcmax and Jmax temperature dependencies. Optional, default is nothing
 - `t_leaf` Leaf temperature. Optional, default is nothing
 - `vcmax` Vcmax25 at the top of canopy. Optional, default is nothing
@@ -171,6 +174,7 @@ function prescribe_traits!(
             ci::Union{Number,Nothing} = nothing,
             kmax::Union{Number,Tuple,Nothing} = nothing,
             lai::Union{Number,Nothing} = nothing,
+            sai::Union{Number,Nothing} = nothing,
             t_clm::Union{Number,Nothing} = nothing,
             t_leaf::Union{Number,Nothing} = nothing,
             vcmax::Union{Number,Nothing} = nothing,
@@ -231,6 +235,13 @@ function prescribe_traits!(
         can_str.state.Ω_A = ci;
         can_str.state.Ω_B = 0;
         can_str.auxil.ci = ci;
+    end;
+
+    # update SAI
+    if !isnothing(sai)
+        can_str.state.sai = sai;
+        can_str.state.δsai = sai .* ones(FT, n_layer) ./ n_layer;
+        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:n_layer]] ./ -(can_str.state.lai + sai));
     end;
 
     # update Vcmax and Jmax TD
