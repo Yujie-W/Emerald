@@ -62,7 +62,7 @@ soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 );
 
 soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoBroadbandCLM) where {FT} = (
-    (; SPECTRA, α_CLM, α_FITTING) = config;
+    (; SPECTRA) = config;
 
     # use linear interpolation method or CLM method (with upper limit)
     delta = max(0, FT(0.11) - FT(0.4) * top_soil.state.θ);

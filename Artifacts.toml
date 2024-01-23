@@ -32,3 +32,11 @@ lazy = true
     [[land_model_spectrum_V4.download]]
     sha256 = "5610ba5463f0fece3829809a1b0ac13eb42eafbae10ef067ed4991a1a775ef10"
     url = "https://github.com/Yujie-W/ResearchArtifacts/raw/wyujie/LandModel/land_model_spectrum_V4.tar.gz"
+
+[land_model_spectrum_V5]
+git-tree-sha1 = "2ade9a49cc8cab3824956ab0f82642b313dea34b"
+lazy = true
+
+    [[land_model_spectrum_V5.download]]
+    sha256 = "5ef71ae8d69aeebe0a556dfdceace7a05090f835a8e825087f7f2fef9a7b879c"
+    url = "https://github.com/Yujie-W/ResearchArtifacts/raw/wyujie/LandModel/land_model_spectrum_V5.tar.gz"
