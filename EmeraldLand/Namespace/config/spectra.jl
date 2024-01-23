@@ -14,6 +14,8 @@
 #     2023-Sep-13: add fields Φ_PSI and Φ_PSII
 #     2023-Sep-19: add fields MAT_SOIL and SOLAR_RAD
 #     2023-Oct-17: add field ρ_STEM
+#     2024-Jan-23: change default minimum PAR to 300 nm
+#     2024-Jan-23: add field for PAR using the 300-700 nm definition
 #
 #######################################################################################################################################################################################################
 """
@@ -87,6 +89,8 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     WL_NIR::Vector{FT} = FT[700, 2500]
     "Wavelength limits for PAR `[nm]`"
     WL_PAR::Vector{FT} = FT[300, 750]
+    "Wavelength limits for PAR using the 300-700 nm setup `[nm]`"
+    WL_PAR_700::Vector{FT} = FT[300, 700]
     "Wavelength limits for SIF emission `[nm]`"
     WL_SIF::Vector{FT} = FT[640, 850]
     "Wavelength limits for SIF excitation `[nm]`"
@@ -97,6 +101,8 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     IΛ_NIR::Vector{Int} = findall( WL_NIR[1] .<= Λ .<= WL_NIR[2] )
     "Indicies of Λ_PAR in Λ"
     IΛ_PAR::Vector{Int} = findall( WL_PAR[1] .<= Λ .<= WL_PAR[2] )
+    "Indicies of Λ_PAR in Λ using the 300-700 nm definition"
+    IΛ_PAR_700::Vector{Int} = findall( WL_PAR_700[1] .<= Λ .<= WL_PAR_700[2] )
     "Indicies of Λ_SIF in Λ"
     IΛ_SIF::Vector{Int} = findall( WL_SIF[1] .<= Λ .<= WL_SIF[2] )
     "Indicies of Λ_SIFE in Λ"
@@ -105,12 +111,16 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     # Constants based on the ones above
     "Differential wavelength for PAR `[nm]`"
     ΔΛ_PAR::Vector{FT} = ΔΛ[IΛ_PAR]
+    "Differential wavelength for PAR using 300-700 nm definition `[nm]`"
+    ΔΛ_PAR_700::Vector{FT} = ΔΛ[IΛ_PAR_700]
     "Differential wavelength for SIF `[nm]`"
     ΔΛ_SIF::Vector{FT} = ΔΛ[IΛ_SIF]
     "Differential wavelength for SIF excitation `[nm]`"
     ΔΛ_SIFE::Vector{FT} = ΔΛ[IΛ_SIFE]
     "Wavelength bins for PAR `[nm]`"
     Λ_PAR::Vector{FT} = Λ[IΛ_PAR]
+    "Wavelength bins for PAR using the 300-700 nm definition `[nm]`"
+    Λ_PAR_700::Vector{FT} = Λ[IΛ_PAR_700]
     "Wavelength bins for SIF `[nm]`"
     Λ_SIF::Vector{FT} = Λ[IΛ_SIF]
     "Wavelength bins for SIF excitation `[nm]`"

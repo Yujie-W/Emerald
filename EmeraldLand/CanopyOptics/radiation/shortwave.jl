@@ -11,6 +11,7 @@
 #     2023-Oct-14: if SZA > 89, set all shortwave fluxes to 0
 #     2023-Oct-18: account for SAI in the shortwave radiation calculation
 #     2023-Oct-18: partition the energy between leaf and stem
+#     2024-Jan-23: set PPAR to be the minimum of 2PPAR_700 and PPAR_750
 #
 #######################################################################################################################################################################################################
 """
@@ -166,9 +167,13 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
             leaves[j].flux.auxil.apar_shaded = Σ_apar_dif;
             leaves[j].flux.auxil.apar_sunlit .= sun_geo.auxil.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
 
-            # PPAR for leaves
-            Σ_ppar_dif = sun_geo.auxil._ppar_shaded' * SPECTRA.ΔΛ_PAR;
-            Σ_ppar_dir = sun_geo.auxil._ppar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
+            # PPAR for leaves (set PPAR to be the minimum of 2PPAR_700 and PPAR_750)
+            Σ_ppar_dif_700 = view(sun_geo.auxil._ppar_shaded, SPECTRA.IΛ_PAR_700)' * SPECTRA.ΔΛ_PAR_700;
+            Σ_ppar_dir_700 = view(sun_geo.auxil._ppar_sunlit, SPECTRA.IΛ_PAR_700)' * SPECTRA.ΔΛ_PAR_700 * normi;
+            Σ_ppar_dif_750 = sun_geo.auxil._ppar_shaded' * SPECTRA.ΔΛ_PAR;
+            Σ_ppar_dir_750 = sun_geo.auxil._ppar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
+            Σ_ppar_dif = min(2Σ_ppar_dif_700, Σ_ppar_dif_750);
+            Σ_ppar_dir = min(2Σ_ppar_dir_700, Σ_ppar_dir_750);
             leaves[j].flux.auxil.ppar_shaded = Σ_ppar_dif;
             leaves[j].flux.auxil.ppar_sunlit .= sun_geo.auxil.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
         else
