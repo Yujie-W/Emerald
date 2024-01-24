@@ -226,7 +226,7 @@ update_step_auxils!(spac::BulkSPAC{FT}) where {FT} = (
 );
 
 update_step_auxils!(leaf::Leaf{FT}) where {FT} = (
-    leaf.∫∂w∂t_out = 0;
+    leaf.flux.auxil.∫∂w∂t_out = 0;
 
     return nothing
 );
