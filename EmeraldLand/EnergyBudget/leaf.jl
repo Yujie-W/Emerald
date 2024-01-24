@@ -56,7 +56,7 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         leaf.energy.auxil.∂e∂t_le = le;
 
         # add the sensible heat flux from the leaf to air (to total leaf area)
-        g_be = FT(1.4) * FT(0.135) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.state.width));
+        g_be = FT(1.35) * leaf.flux.auxil.g_CO₂_b;
         sh = 2 * g_be * CP_D_MOL(FT) * (leaf.energy.auxil.t - air.auxil.t) * leaf.xylem.state.area;
         leaf.energy.auxil.∂e∂t -= sh;
         leaf.energy.auxil.∂e∂t_sh = sh;

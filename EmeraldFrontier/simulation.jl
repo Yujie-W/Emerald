@@ -19,8 +19,6 @@ Prescribe traits and environmental conditions, given
 - `config` `SPACConfiguration` type SPAC configuration
 - `spac` `BulkSPAC` type SPAC
 - `dfr` `DataFrameRow` type weather driver
-- `t_on` If true, plant energy budget is on, do not prescribe the temperatures
-- `θ_on` If true, soil water budget is on, do not prescribe soil water contents
 
 """
 function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}

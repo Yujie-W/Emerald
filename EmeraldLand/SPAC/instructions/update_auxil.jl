@@ -192,6 +192,7 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
 # Changes to this function
 # General
 #     2023-Sep-30: add update_step_auxils! function
+#     2024-Jan-24: update leaf boundary layer conductance based on wind speed and leaf width
 #
 #######################################################################################################################################################################################################
 """
@@ -205,8 +206,20 @@ Update the auxiliary variables at big time step, given
 function update_step_auxils! end;
 
 update_step_auxils!(spac::BulkSPAC{FT}) where {FT} = (
-    for leaf in spac.plant.leaves
-        update_substep_auxils!(leaf);
+    airs = spac.airs;
+    leaves = spac.plant.leaves;
+    lindex = spac.plant.leaves_index;
+
+    # clear the integrated values
+    for leaf in leaves
+        update_step_auxils!(leaf);
+    end;
+
+    # update leaf boundary layer conductance
+    for i in eachindex(leaves)
+        leaf = leaves[i];
+        air = airs[lindex[i]];
+        leaf.flux.auxil.g_CO₂_b = FT(0.14) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.state.width));
     end;
 
     return nothing
