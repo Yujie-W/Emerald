@@ -16,6 +16,7 @@
 #     2023-Oct-17: add field ρ_STEM
 #     2024-Jan-23: change default minimum PAR to 300 nm
 #     2024-Jan-23: add field for PAR using the 300-700 nm definition
+#     2024-Jan-23: redefine IΛ_PAR_700 to be the index within IΛ_PAR so that we can simply subset the PPAR even though the definition of PAR is changed
 #
 #######################################################################################################################################################################################################
 """
@@ -101,8 +102,8 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     IΛ_NIR::Vector{Int} = findall( WL_NIR[1] .<= Λ .<= WL_NIR[2] )
     "Indicies of Λ_PAR in Λ"
     IΛ_PAR::Vector{Int} = findall( WL_PAR[1] .<= Λ .<= WL_PAR[2] )
-    "Indicies of Λ_PAR in Λ using the 300-700 nm definition"
-    IΛ_PAR_700::Vector{Int} = findall( WL_PAR_700[1] .<= Λ .<= WL_PAR_700[2] )
+    "Indicies of Λ_PAR_700 in Λ_PAR using the 300-700 nm definition"
+    IΛ_PAR_700::Vector{Int} = findall( WL_PAR_700[1] .<= Λ[IΛ_PAR] .<= WL_PAR_700[2] )
     "Indicies of Λ_SIF in Λ"
     IΛ_SIF::Vector{Int} = findall( WL_SIF[1] .<= Λ .<= WL_SIF[2] )
     "Indicies of Λ_SIFE in Λ"
@@ -112,7 +113,7 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     "Differential wavelength for PAR `[nm]`"
     ΔΛ_PAR::Vector{FT} = ΔΛ[IΛ_PAR]
     "Differential wavelength for PAR using 300-700 nm definition `[nm]`"
-    ΔΛ_PAR_700::Vector{FT} = ΔΛ[IΛ_PAR_700]
+    ΔΛ_PAR_700::Vector{FT} = ΔΛ_PAR[IΛ_PAR_700]
     "Differential wavelength for SIF `[nm]`"
     ΔΛ_SIF::Vector{FT} = ΔΛ[IΛ_SIF]
     "Differential wavelength for SIF excitation `[nm]`"
@@ -120,7 +121,7 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     "Wavelength bins for PAR `[nm]`"
     Λ_PAR::Vector{FT} = Λ[IΛ_PAR]
     "Wavelength bins for PAR using the 300-700 nm definition `[nm]`"
-    Λ_PAR_700::Vector{FT} = Λ[IΛ_PAR_700]
+    Λ_PAR_700::Vector{FT} = Λ_PAR[IΛ_PAR_700]
     "Wavelength bins for SIF `[nm]`"
     Λ_SIF::Vector{FT} = Λ[IΛ_SIF]
     "Wavelength bins for SIF excitation `[nm]`"
