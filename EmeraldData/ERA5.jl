@@ -22,12 +22,13 @@ ERA5_LABELS = [
             "10m_v_component_of_wind",
             "2m_dewpoint_temperature",
             "2m_temperature",
-            "mean_surface_downward_long_wave_radiation_flux",
-            "mean_surface_downward_long_wave_radiation_flux_clear_sky",
             "mean_surface_direct_short_wave_radiation_flux",
             "mean_surface_direct_short_wave_radiation_flux_clear_sky",
+            "mean_surface_downward_long_wave_radiation_flux",
+            "mean_surface_downward_long_wave_radiation_flux_clear_sky",
             "mean_surface_downward_short_wave_radiation_flux",
             "mean_surface_downward_short_wave_radiation_flux_clear_sky",
+            "mean_surface_downward_uv_radiation_flux",
             "skin_temperature",
             "soil_temperature_level_1",
             "soil_temperature_level_2",
@@ -42,11 +43,11 @@ ERA5_LABELS = [
             "volumetric_soil_water_layer_4"];
 ERA5_LAYERS = [
             "u10", "v10", "d2m", "t2m",
-            "msdwlwrf", "msdwlwrfcs", "msdrswrf", "msdrswrfcs", "msdwswrf", "msdwswrfcs",
+            "msdrswrf", "msdrswrfcs", "msdwlwrf", "msdwlwrfcs","msdwswrf", "msdwswrfcs", "msdwuvrf",
             "skt", "stl1", "stl2", "stl3", "stl4", "sp", "tcc", "tp", "swvl1", "swvl2", "swvl3", "swvl4"];
 ERA5_NETCDF = [
             "WIND_X", "WIND_Y", "T_DEW", "T_AIR",
-            "RAD_LW", "RAD_LW_CS", "RAD_DIR", "RAD_DIR_CS", "RAD", "RAD_CS",
+            "RAD_DIR", "RAD_DIR_CS", "RAD_LW", "RAD_LW_CS", "RAD", "RAD_CS", "RAD_UV",
             "T_LEAF", "T_SOIL_1", "T_SOIL_2", "T_SOIL_3", "T_SOIL_4", "P_ATM", "CLOUD", "PRECIP", "SWC_1", "SWC_2", "SWC_3", "SWC_4"];
 
 
@@ -99,52 +100,14 @@ Base.@kwdef struct ERA5SingleLevelsDriver
     T_S_4::Tuple{String,String} = ("stl4", "soil_temperature_level_4")
     "Skin temperature"
     T_SKN::Tuple{String,String} = ("skt", "skin_temperature")
+    "Total UV radiation"
+    UVRAD::Tuple{String,String} = ("msdwuvrf", "mean_surface_downward_uv_radiation_flux")
     "Total precipitation in m"
     W_TOT::Tuple{String,String} = ("tp", "total_precipitation")
     "Wind speed"
     WINDU::Tuple{String,String} = ("u10", "10m_u_component_of_wind")
     "Wind speed"
     WINDV::Tuple{String,String} = ("v10", "10m_v_component_of_wind")
-end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2023-Mar-10: migrate from research repo to Emerald
-#
-#######################################################################################################################################################################################################
-"""
-
-    fetch_ERA5_data!(year::Int; notification::Bool = false)
-
-Fetch all the ERA5 data rquired to run this project, given
-- `year` Which year of data to download
-- `notification` If true, send out emails. Default is `false`
-
-Note that ERA5 single levels data ranges from 1979 to present, and ERA5 land data ranges from 1981 to present. Be aware not to download data out of the range.
-
-"""
-function fetch_ERA5_data!(year::Int; notification::Bool = false)
-    _dts = ERA5SingleLevelsHourly();
-    _dir = "$(ERA5_FOLDER)/original/";
-    if !isdir(_dir)
-        @warn "$(_dir) does not exist, skipping...";
-        return nothing
-    end;
-
-    # An email will be sent out per year, comment it if you do not want
-    fetch_data!(_dts, year; vars=ERA5_LABELS, folder=_dir);
-    @info "Finished downloading all the datasets!";
-    if notification
-        send_email!("[ERA5 DATA STATUS] Downloading data for year $(year)",
-                    "fluo@gps.caltech.edu",
-                    "jesiner@gmail.com",
-                    "ERA5 data downloading is finished for year $(year)!");
-    end;
-
-    return nothing
 end;
 
 

@@ -7,6 +7,7 @@
 #     2023-Sep-14: add struct LeafBioState
 #     2023-Sep-14: add fields ϕ_car and ϕ_car_ppar
 #     2023-Oct-03: add field width
+#     2024-Jan-20: set ϕ_car_ppar to 0 by default
 #
 #######################################################################################################################################################################################################
 """
@@ -44,7 +45,7 @@ Base.@kwdef mutable struct LeafBioState{FT<:AbstractFloat}
     "Fraction of carotenoid aborption into SIF `[-]`"
     ϕ_car::FT = 0
     "Fraction of carotenoid aborption into PPAR `[-]`"
-    ϕ_car_ppar::FT = 1
+    ϕ_car_ppar::FT = 0
 end;
 
 
