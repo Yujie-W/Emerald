@@ -3,7 +3,7 @@ module FluxTower
 using DataFrames: DataFrame
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
-using NetcdfIO: save_nc!
+using NetcdfIO: read_nc, save_nc!
 
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Stats: nanmean
@@ -23,6 +23,7 @@ FLUXNET_REPROCESSED = "$(FLUXNET_FOLDER)/reprocessed";
 include("fluxtower/towers.jl");
 include("fluxtower/fluxtowerdata.jl");
 include("fluxtower/process.jl");
+include("fluxtower/query.jl");
 
 
 end # module
