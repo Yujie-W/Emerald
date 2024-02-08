@@ -60,14 +60,14 @@ end;
 MultiLayerSPACState{FT}(spac::BulkSPAC{FT}) where {FT} = (
     leaves = spac.plant.leaves;
 
-    _gs_sunlit = zeros(FT, size(leaves[1].g_H₂O_s_sunlit,1), size(leaves[1].g_H₂O_s_sunlit,2), length(leaves));
+    gs_sunlit = zeros(FT, size(leaves[1].g_H₂O_s_sunlit,1), size(leaves[1].g_H₂O_s_sunlit,2), length(leaves));
     for i in eachindex(leaves)
-        _gs_sunlit[:,:,i] .= leaves[i].g_H₂O_s_sunlit;
+        gs_sunlit[:,:,i] .= leaves[i].g_H₂O_s_sunlit;
     end;
 
     return MultiLayerSPACState{FT}(
                 gs_shaded = [leaf.g_H₂O_s_shaded for leaf in leaves],
-                gs_sunlit = _gs_sunlit,
+                gs_sunlit = gs_sunlit,
                 t_clm = deepcopy(spac.plant.memory.state.t_history),
     )
 );

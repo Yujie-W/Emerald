@@ -131,6 +131,7 @@ end;
 #     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
 #     2023-Oct-18: recalculate canopy structural parameters when LAI, cab, car, ci is updated
 #     2024-Jan-11: add option to prescribe sai
+#     2024-Feb-08: fix the issue in Vcmax profiles (was opposite)
 #
 #######################################################################################################################################################################################################
 """
@@ -211,22 +212,34 @@ function prescribe_traits!(
         can_str.state.lai = lai;
         can_str.state.δlai = lai .* ones(FT, n_layer) ./ n_layer;
         can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:n_layer]] ./ -(lai + can_str.state.sai));
-        for i in 1:n_layer
-            leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
+        for irt in 1:n_layer
+            ilf = n_layer - irt + 1;
+            leaves[ilf].xylem.state.area = sbulk.state.area * can_str.state.δlai[irt];
         end;
     end;
 
     if !isnothing(vcmax)
-        leaves[1].photosystem.state.v_cmax25 = vcmax;
+        leaves[end].photosystem.state.v_cmax25 = vcmax;
     end;
 
     if !isnothing(vcmax) || !isnothing(lai)
-        for i in 2:n_layer
-            ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.state.δlai[1:i-1]));
-            leaves[i].photosystem.state.v_cmax25 = leaves[1].photosystem.state.v_cmax25 * ratio;
-            leaves[i].photosystem.state.j_max25 = leaves[1].photosystem.state.v_cmax25 * 1.67 * ratio;
-            leaves[i].photosystem.state.r_d25 = leaves[1].photosystem.state.v_cmax25 * 0.015 * ratio;
-            leaves[i].photosystem.auxil._t = 0;
+        for irt in 1:n_layer
+            ilf = n_layer - irt + 1;
+            ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.state.δlai[1:irt-1]));
+            leaf = leaves[ilf];
+            if leaf.photosystem.state isa C3VJPState
+                leaf.photosystem.state.v_cmax25 = leaves[end].photosystem.state.v_cmax25 * ratio;
+                leaf.photosystem.state.j_max25 = leaves[end].photosystem.state.v_cmax25 * 1.67 * ratio;
+                leaf.photosystem.state.r_d25 = leaves[end].photosystem.state.v_cmax25 * 0.015 * ratio;
+                leaf.photosystem.auxil._t = 0;
+            elseif leaf.photosystem.state isa C3CytoState
+                leaf.photosystem.state.v_cmax25 = leaves[end].photosystem.state.v_cmax25 * ratio;
+                leaf.photosystem.state.b₆f = leaves[end].photosystem.state.v_cmax25 * 7 / 300 * ratio;
+                leaf.photosystem.state.r_d25 = leaves[end].photosystem.state.v_cmax25 * 0.015 * ratio;
+                leaf.photosystem.auxil._t = 0;
+            else
+                error("Vcmax profile is only available for C3VJPState and C3CytoState.");
+            end;
         end;
     end;
 

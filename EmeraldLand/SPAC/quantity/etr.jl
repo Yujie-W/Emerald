@@ -18,14 +18,14 @@ function ΣETR end;
 ΣETR(spac::BulkSPAC{FT}) where {FT} = (
     canopy = spac.canopy;
     leaves = spac.plant.leaves;
+    n_layer = length(leaves);
 
     # compute GPP
     Σetr::FT = 0;
-    N = length(leaves);
-    for i in eachindex(leaves)
-        j = N - i + 1;
-        Σetr += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.etr_sunlit) +
-                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.etr_shaded) * canopy.structure.state.δlai[j];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        Σetr += (canopy.sun_geometry.auxil.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.etr_sunlit) +
+                (1 - canopy.sun_geometry.auxil.p_sunlit[irt]) * leaves[ilf].flux.auxil.etr_shaded) * canopy.structure.state.δlai[irt];
     end;
 
     return Σetr

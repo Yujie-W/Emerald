@@ -23,6 +23,7 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;
     sbulk = spac.soil_bulk;
+    n_layer = length(leaves);
 
     # the total energy change of the leaf is the sum of
     #     the energy of the flow from the stem
@@ -30,12 +31,11 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     #     the sensible heat from the air
     #     the net radiation energy from shortwave and longwave radiation
 
-    N = length(branches)
-    for i in 1:N
-        j = N + 1 - i;
-        stem = branches[j];
-        leaf = leaves[j];
-        air = airs[lindex[j]];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        stem = branches[ilf];
+        leaf = leaves[ilf];
+        air = airs[lindex[ilf]];
 
         # if flow in is positive, then energy flow is positive for leaf
         f_i = flow_in(leaf);
@@ -62,7 +62,7 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         leaf.energy.auxil.∂e∂t_sh = sh;
 
         # add the net radiation energy to the leaf (to total leaf area)
-        leaf.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_leaf[i] + canopy.structure.auxil.r_net_lw_leaf[i]) * sbulk.state.area;
+        leaf.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_leaf[irt] + canopy.structure.auxil.r_net_lw_leaf[irt]) * sbulk.state.area;
     end;
 
     return nothing

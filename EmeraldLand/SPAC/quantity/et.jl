@@ -19,13 +19,13 @@ function T_VEG end;
 T_VEG(spac::BulkSPAC{FT}) where {FT} = (
     canopy = spac.canopy;
     leaves = spac.plant.leaves;
+    n_layer = length(leaves);
 
     # compute transpiration rate
     tran::FT = 0;
-    N = length(leaves);
-    for i in eachindex(leaves)
-        j = N - i + 1;
-        tran += flow_out(leaves[i]) * canopy.structure.state.δlai[j];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        tran += flow_out(leaves[ilf]) * canopy.structure.state.δlai[irt];
     end;
 
     return tran

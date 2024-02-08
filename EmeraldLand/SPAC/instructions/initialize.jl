@@ -104,6 +104,7 @@ initialize!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     soils = spac.soils;
     sbulk = spac.soil_bulk;
     trunk = spac.plant.trunk;
+    n_layer = length(leaves);
 
     # make sure soil energy is correctly scaled with temperature and soil water content
     for soil in soils
@@ -122,9 +123,10 @@ initialize!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     end;
 
     # make sure leaf area index setup and energy are correct
-    for i in eachindex(leaves)
-        leaves[i].xylem.state.area = sbulk.state.area * can_str.state.δlai[i];
-        initialize_struct!(leaves[i]);
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaves[ilf].xylem.state.area = sbulk.state.area * can_str.state.δlai[irt];
+        initialize_struct!(leaves[ilf]);
     end;
 
     # make sure air layers are correctly initialized

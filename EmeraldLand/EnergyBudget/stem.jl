@@ -23,6 +23,7 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
     trunk = spac.plant.trunk;
+    n_layer = length(leaves);
 
     # for the trunk, the total energy is the differentce of
     #     energy from the junction
@@ -38,11 +39,10 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     # for the branches, the total energy is the difference of
     #     energy from the trunk
     #     energy to the leaves
-    N = length(branches)
-    for i in 1:N
-        j = N + 1 - i;
-        stem = branches[j];
-        leaf = leaves[j];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        stem = branches[ilf];
+        leaf = leaves[ilf];
 
         # if flow in is positive, then energy flow is positive for branches but negative for trunk
         f_i = flow_in(stem);
@@ -63,7 +63,7 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         end;
 
         # add the net radiation energy to the leaf (to total leaf area)
-        stem.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_stem[i] + canopy.structure.auxil.r_net_lw_stem[i]) * sbulk.state.area;
+        stem.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_stem[irt] + canopy.structure.auxil.r_net_lw_stem[irt]) * sbulk.state.area;
     end;
 
     return nothing

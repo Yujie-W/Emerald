@@ -53,16 +53,17 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     (; DIM_AZI, SPECTRA, Φ_PHOTON) = config;
 
     # 0. compute chloroplast SIF emissions for different layers
-    for i in 1:n_layer
-        leaf = leaves[n_layer + 1 - i];
-        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[i];
-        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[i];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = leaves[ilf];
+        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[irt];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[irt];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # integrate the energy absorbed by chl (and car) in each wave length bins
         f_sife = view(leaf.bio.auxil.f_sife, SPECTRA.IΛ_SIFE);
-        sun_geo.auxil._e_dif_sife .= view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE .* f_sife;
-        sun_geo.auxil._e_dir_sife .= view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE .* f_sife;
+        sun_geo.auxil._e_dif_sife .= view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_SIFE,irt) .* f_leaf .* SPECTRA.ΔΛ_SIFE .* f_sife;
+        sun_geo.auxil._e_dir_sife .= view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_SIFE,irt) .* f_leaf .* SPECTRA.ΔΛ_SIFE .* f_sife;
 
         # convert the excitation radiation to fluorescence components
         if Φ_PHOTON
@@ -75,8 +76,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         sun_geo.auxil._e_dir_sif .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(sun_geo.auxil._e_dir_sife);
 
         # add up the excitation radiation from direct and diffuse radiation for sunlit and shaded leaves
-        sun_geo.auxil._e_dif_shaded .= sun_geo.auxil._e_dif_sif .* (1 - sun_geo.auxil.p_sunlit[i]);
-        sun_geo.auxil._e_dif_sunlit .= sun_geo.auxil._e_dif_sif .* sun_geo.auxil.p_sunlit[i];
+        sun_geo.auxil._e_dif_shaded .= sun_geo.auxil._e_dif_sif .* (1 - sun_geo.auxil.p_sunlit[irt]);
+        sun_geo.auxil._e_dif_sunlit .= sun_geo.auxil._e_dif_sif .* sun_geo.auxil.p_sunlit[irt];
         sun_geo.auxil._e_dir_sunlit .= sun_geo.auxil._e_dir_sif;
 
         # convert the SIF back to energy unit if ϕ_photon is true
@@ -89,7 +90,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         # add up the SIF from sunlit and shaded leaves for each layer through accounting for the SIF quantum yield
         ϕ_sunlit_dif = lidf_weight(leaf.flux.auxil.ϕ_f_sunlit, can_str.auxil.p_incl, sun_geo.auxil._vec_azi);
         ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, leaf.flux.auxil.ϕ_f_sunlit, sun_geo.auxil.fs_abs, sun_geo.auxil._vec_azi, can_str.auxil.p_incl);
-        sun_geo.auxil.e_sif_chl[:,i] .= sun_geo.auxil._e_dif_shaded .* leaf.flux.auxil.ϕ_f_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
+        sun_geo.auxil.e_sif_chl[:,irt] .= sun_geo.auxil._e_dif_shaded .* leaf.flux.auxil.ϕ_f_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
     end;
 
     # 1. compute SIF emissions for different layers
@@ -103,16 +104,17 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     );
     _COS²_Θ_INCL_AZI = (cosd.(config.Θ_INCL) .^ 2) * ones(FT, 1, DIM_AZI);
 
-    for i in 1:n_layer
-        leaf = leaves[n_layer + 1 - i];
-        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[i];
-        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[i];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = leaves[ilf];
+        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[irt];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[irt];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # compute the energy used for SIF excitation
-        sun_geo.auxil._e_dirꜜ_sife .= view(sun_geo.auxil.e_dirꜜ,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
-        sun_geo.auxil._e_difꜜ_sife .= view(sun_geo.auxil.e_difꜜ,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
-        sun_geo.auxil._e_difꜛ_sife .= view(sun_geo.auxil.e_difꜛ,SPECTRA.IΛ_SIFE,i) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
+        sun_geo.auxil._e_dirꜜ_sife .= view(sun_geo.auxil.e_dirꜜ,SPECTRA.IΛ_SIFE,irt) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
+        sun_geo.auxil._e_difꜜ_sife .= view(sun_geo.auxil.e_difꜜ,SPECTRA.IΛ_SIFE,irt) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
+        sun_geo.auxil._e_difꜛ_sife .= view(sun_geo.auxil.e_difꜛ,SPECTRA.IΛ_SIFE,irt) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
 
         # convert the excitation radiation to photons if ϕ_photon is true
         if Φ_PHOTON
@@ -175,16 +177,16 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
                                       sun_geo.auxil._e_difꜛ_sif_mean .* sl_1_ .+ sun_geo.auxil._e_difꜛ_sif_diff .* sl_θ²;
 
         # update the SIF cache for the observer direction (compute it here to save time)
-        sen_geo.auxil.sif_sunlit[:,i] .= sun_geo.auxil._e_dirꜜ_sif_mean .* sl_SO .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sl_so .+
-                                         sun_geo.auxil._e_difꜜ_sif_mean .* sl_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sl_oθ .+
-                                         sun_geo.auxil._e_difꜛ_sif_mean .* sl_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sl_oθ;
-        sen_geo.auxil.sif_shaded[:,i] .= sun_geo.auxil._e_difꜜ_sif_mean .* sh_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sh_oθ .+
-                                         sun_geo.auxil._e_difꜛ_sif_mean .* sh_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_oθ;
+        sen_geo.auxil.sif_sunlit[:,irt] .= sun_geo.auxil._e_dirꜜ_sif_mean .* sl_SO .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sl_so .+
+                                           sun_geo.auxil._e_difꜜ_sif_mean .* sl_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sl_oθ .+
+                                           sun_geo.auxil._e_difꜛ_sif_mean .* sl_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sl_oθ;
+        sen_geo.auxil.sif_shaded[:,irt] .= sun_geo.auxil._e_difꜜ_sif_mean .* sh_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sh_oθ .+
+                                           sun_geo.auxil._e_difꜛ_sif_mean .* sh_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_oθ;
 
         # total emitted SIF for upward and downward direction
-        ilai = can_str.state.δlai[i] * can_str.auxil.ci;
-        sun_geo.auxil.e_sifꜜ_layer[:,i] .= sun_geo.auxil._sif_sunlitꜜ .* ilai .* sun_geo.auxil.p_sunlit[i] .+ sun_geo.auxil._sif_shadedꜜ .* ilai .* (1 - sun_geo.auxil.p_sunlit[i]);
-        sun_geo.auxil.e_sifꜛ_layer[:,i] .= sun_geo.auxil._sif_sunlitꜛ .* ilai .* sun_geo.auxil.p_sunlit[i] .+ sun_geo.auxil._sif_shadedꜛ .* ilai .* (1 - sun_geo.auxil.p_sunlit[i]);
+        ilai = can_str.state.δlai[irt] * can_str.auxil.ci;
+        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ .* ilai .* sun_geo.auxil.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜜ .* ilai .* (1 - sun_geo.auxil.p_sunlit[irt]);
+        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ .* ilai .* sun_geo.auxil.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜛ .* ilai .* (1 - sun_geo.auxil.p_sunlit[irt]);
     end;
 
     # 2. account for the SIF emission from bottom to up

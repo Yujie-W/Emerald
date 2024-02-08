@@ -121,14 +121,15 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     end;
 
     # compute the scattering coefficients per leaf area
-    for i in 1:n_layer
-        leaf = leaves[n_layer + 1 - i];
-        sen_geo.auxil.dob_leaf[:,i] .= sen_geo.auxil.dob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dof * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dof_leaf[:,i] .= sen_geo.auxil.dof * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dob * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.so_leaf[:,i]  .= sen_geo.auxil.sob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.sof * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dob_stem[:,i] .= sen_geo.auxil.dob * SPECTRA.ρ_STEM;
-        sen_geo.auxil.dof_stem[:,i] .= sen_geo.auxil.dof * SPECTRA.ρ_STEM;
-        sen_geo.auxil.so_stem[:,i]  .= sen_geo.auxil.sob * SPECTRA.ρ_STEM;
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = leaves[ilf];
+        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.auxil.dob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dof * leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.auxil.dof * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dob * leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.auxil.sob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.sof * leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.auxil.dob * SPECTRA.ρ_STEM;
+        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.auxil.dof * SPECTRA.ρ_STEM;
+        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.auxil.sob * SPECTRA.ρ_STEM;
     end;
 
     return nothing

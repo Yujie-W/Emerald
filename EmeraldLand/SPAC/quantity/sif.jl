@@ -18,14 +18,15 @@ function ΣSIF end;
 ΣSIF(spac::BulkSPAC{FT}) where {FT} = (
     canopy = spac.canopy;
     leaves = spac.plant.leaves;
+    n_layer = length(leaves);
 
     # compute SIF in photons unit
     Σsif::FT = 0;
     N = length(leaves);
-    for i in eachindex(leaves)
-        j = N - i + 1;
-        Σsif += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.ppar_sunlit .* leaves[i].flux.auxil.ϕ_f_sunlit) +
-                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded * leaves[i].flux.auxil.ϕ_f_shaded) * canopy.structure.state.δlai[j];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        Σsif += (canopy.sun_geometry.auxil.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.ppar_sunlit .* leaves[ilf].flux.auxil.ϕ_f_sunlit) +
+                (1 - canopy.sun_geometry.auxil.p_sunlit[irt]) * leaves[ilf].flux.auxil.ppar_shaded * leaves[ilf].flux.auxil.ϕ_f_shaded) * canopy.structure.state.δlai[irt];
     end;
 
     return Σsif

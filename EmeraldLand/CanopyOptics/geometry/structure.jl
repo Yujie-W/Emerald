@@ -47,12 +47,13 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     can_str.auxil.ci = can_str.state.Ω_A;
 
     # compute the scattering coefficients for the solar radiation per leaf area
-    for i in 1:n_layer
-        leaf = spac.plant.leaves[n_layer + 1 - i];
-        can_str.auxil.ddb_leaf[:,i] .= can_str.auxil.ddb * leaf.bio.auxil.ρ_leaf .+ can_str.auxil.ddf * leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddf_leaf[:,i] .= can_str.auxil.ddf * leaf.bio.auxil.ρ_leaf .+ can_str.auxil.ddb * leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddb_stem[:,i] .= can_str.auxil.ddb * SPECTRA.ρ_STEM;
-        can_str.auxil.ddf_stem[:,i] .= can_str.auxil.ddf * SPECTRA.ρ_STEM;
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = spac.plant.leaves[ilf];
+        can_str.auxil.ddb_leaf[:,irt] .= can_str.auxil.ddb * leaf.bio.auxil.ρ_leaf .+ can_str.auxil.ddf * leaf.bio.auxil.τ_leaf;
+        can_str.auxil.ddf_leaf[:,irt] .= can_str.auxil.ddf * leaf.bio.auxil.ρ_leaf .+ can_str.auxil.ddb * leaf.bio.auxil.τ_leaf;
+        can_str.auxil.ddb_stem[:,irt] .= can_str.auxil.ddb * SPECTRA.ρ_STEM;
+        can_str.auxil.ddf_stem[:,irt] .= can_str.auxil.ddf * SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -79,14 +80,15 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     end;
 
     # compute longwave effective emissivity, reflectance, and transmittance per layer without correction (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    for i in 1:n_layer
-        leaf = spac.plant.leaves[n_layer + 1 - i];
-        ipai = (can_str.state.δlai[i] + can_str.state.δsai[i]) * can_str.auxil.ci;
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = spac.plant.leaves[ilf];
+        ipai = (can_str.state.δlai[irt] + can_str.state.δsai[irt]) * can_str.auxil.ci;
         σ_lw_b = can_str.auxil.ddb * leaf.bio.auxil.ρ_lw + can_str.auxil.ddf * leaf.bio.auxil.τ_lw;
         σ_lw_f = can_str.auxil.ddf * leaf.bio.auxil.ρ_lw + can_str.auxil.ddb * leaf.bio.auxil.τ_lw;
-        can_str.auxil.τ_lw_layer[i] = exp(-1 * (1 - σ_lw_f) * ipai);
-        can_str.auxil.ρ_lw_layer[i] = 1 - exp(-1 * σ_lw_b * ipai);
-        can_str.auxil.ϵ_lw_layer[i] = 1 - can_str.auxil.τ_lw_layer[i] - can_str.auxil.ρ_lw_layer[i];
+        can_str.auxil.τ_lw_layer[irt] = exp(-1 * (1 - σ_lw_f) * ipai);
+        can_str.auxil.ρ_lw_layer[irt] = 1 - exp(-1 * σ_lw_b * ipai);
+        can_str.auxil.ϵ_lw_layer[irt] = 1 - can_str.auxil.τ_lw_layer[irt] - can_str.auxil.ρ_lw_layer[irt];
     end;
 
     # update the effective longwave reflectance and transmittance

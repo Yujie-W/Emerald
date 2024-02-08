@@ -69,12 +69,13 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     end;
 
     # compute the scattering coefficients for the solar radiation per leaf area
-    for i in 1:n_layer
-        leaf = leaves[n_layer + 1 - i];
-        sun_geo.auxil.sdb_leaf[:,i] .= sun_geo.auxil.sdb * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdf * leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdf_leaf[:,i] .= sun_geo.auxil.sdf * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdb * leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdb_stem[:,i] .= sun_geo.auxil.sdb * SPECTRA.ρ_STEM;
-        sun_geo.auxil.sdf_stem[:,i] .= sun_geo.auxil.sdf * SPECTRA.ρ_STEM;
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = leaves[ilf];
+        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.auxil.sdb * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdf * leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.auxil.sdf * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdb * leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.auxil.sdb * SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.auxil.sdf * SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)

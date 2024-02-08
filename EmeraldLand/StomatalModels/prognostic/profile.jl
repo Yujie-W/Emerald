@@ -29,11 +29,11 @@ stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
     airs = spac.airs;
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;
+    n_layer = length(leaves);
 
-    N = length(leaves);
-    for i in eachindex(leaves)
-        j = N + 1 - i;
-        stomatal_conductance_profile!(leaves[j], airs[lindex[j]], can_str.auxil.ϵ_lw_layer[i]);
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        stomatal_conductance_profile!(leaves[ilf], airs[lindex[ilf]], can_str.auxil.ϵ_lw_layer[irt]);
     end;
 
     return nothing

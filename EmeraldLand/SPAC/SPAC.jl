@@ -10,6 +10,7 @@ using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geome
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
 using ..Namespace: ReferenceSpectra
+using ..Namespace: C3CytoState, C3VJPState, C4VJPState
 using ..Namespace: GCO₂Mode
 using ..Namespace: XylemHydraulicsAuxilNSS
 using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
