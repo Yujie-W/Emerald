@@ -132,6 +132,7 @@ end;
 #     2023-Oct-18: recalculate canopy structural parameters when LAI, cab, car, ci is updated
 #     2024-Jan-11: add option to prescribe sai
 #     2024-Feb-08: fix the issue in Vcmax profiles (was opposite)
+#     2024-Feb-08: add support to C3CytoState and C3VJPState
 #
 #######################################################################################################################################################################################################
 """

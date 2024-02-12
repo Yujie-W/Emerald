@@ -176,7 +176,6 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
     for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
         leaf.flux.auxil.g_CO₂_sunlit[i] = 1 / (1 / leaf.flux.auxil.g_CO₂_b + FT(1.6) / leaf.flux.state.g_H₂O_s_sunlit[i]);
     end;
-    limit_stomatal_conductance!(leaf);
 
     # clear the partial derivatives
     leaf.energy.auxil.∂e∂t = 0;

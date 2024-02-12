@@ -8,6 +8,7 @@
 #     2022-Jul-12: add method to update g for SPAC
 #     2023-Mar-11: do nothing if LAI == 0
 #     2023-Sep-14: add root disconnection control
+#     2023-Feb-12: limit stomatal conductance within its structural limits after updating the conductance based on ∂g∂t
 #
 #######################################################################################################################################################################################################
 """
@@ -37,6 +38,7 @@ stomatal_conductance!(leaf::Leaf{FT}, δt::FT) where {FT} = (
     for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
         leaf.flux.state.g_H₂O_s_sunlit[i] += leaf.flux.auxil.∂g∂t_sunlit[i] * δt;
     end;
+    limit_stomatal_conductance!(leaf);
 
     return nothing
 );
