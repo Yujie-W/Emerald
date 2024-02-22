@@ -9,7 +9,7 @@
 #######################################################################################################################################################################################################
 """
 
-    save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT}
+    save_simulations!(filename::String, states::Matrix{Union{Nothing}}, doy::Number; displaying::Bool = true)
 
 Save the simulation results to netcdf file, given
 - `filename` Path of the netcdf file
@@ -18,13 +18,13 @@ Save the simulation results to netcdf file, given
 - `displaying` Whether to display information regarding process
 
 """
-function save_simulations!(filename::String, states::Matrix{Union{Nothing,MultiLayerSPACState{FT}}}, doy::Number; displaying::Bool = true) where {FT}
+function save_simulations!(filename::String, states::Matrix{Union{Nothing}}, doy::Number; displaying::Bool = true)
     if displaying
         @tinfo "Saving the simulation results to netcdf file...";
     end;
 
     # read results from matrix of states
-    @inline get_value(state::Union{Nothing,MultiLayerSPACState}, fn::Symbol) = (
+    @inline get_value(state::Union{Nothing}, fn::Symbol) = (
         return isnothing(state) ? NaN32 : Float32(getfield(state, fn));
     );
     _mat_beta = get_value.(states, :beta);

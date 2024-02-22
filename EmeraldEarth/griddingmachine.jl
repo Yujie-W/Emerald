@@ -103,47 +103,68 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT} = (
 
     @tinfo "Querying data from GriddingMachine...";
     if gm_tag == "gm1"
-        _dts = LandDatasets{FT}(
-                    gz         = 1,
-                    year       = year,
-                    tag_s_cc   = "SC_2X_1Y_V1",
-                    tag_s_α    = "SOIL_VGA_12X_1Y_V1",
-                    tag_s_n    = "SOIL_VGN_12X_1Y_V1",
-                    tag_s_Θr   = "SOIL_SWCR_12X_1Y_V1",
-                    tag_s_Θs   = "SOIL_SWCS_12X_1Y_V1",
-                    tag_p_ch   = "CH_20X_1Y_V1",
-                    tag_p_chl  = "CHL_2X_7D_V1",
-                    tag_p_ci   = "CI_2X_1Y_V1",
-                    tag_p_lai  = "LAI_MODIS_2X_8D_$(year)_V1",
-                    tag_p_sla  = "SLA_2X_1Y_V1",
-                    tag_p_vcm  = "VCMAX_2X_1Y_V2",
-                    tag_t_ele  = "ELEV_4X_1Y_V1",
-                    tag_t_lm   = "LM_4X_1Y_V1",
-                    tag_t_pft  = "PFT_2X_1Y_V1")
-    else # gm_tag == "gm2"
-        _dts = LandDatasets{FT}(
-                    gz         = 1,
-                    year       = year,
-                    tag_s_cc   = "SC_2X_1Y_V1",
-                    tag_s_α    = "SOIL_VGA_12X_1Y_V1",
-                    tag_s_n    = "SOIL_VGN_12X_1Y_V1",
-                    tag_s_Θr   = "SOIL_SWCR_12X_1Y_V1",
-                    tag_s_Θs   = "SOIL_SWCS_12X_1Y_V1",
-                    tag_p_ch   = "CH_20X_1Y_V1",
-                    tag_p_chl  = "CHL_2X_7D_V1",
-                    tag_p_ci   = "CI_2X_1M_V3",
-                    tag_p_lai  = "LAI_MODIS_2X_8D_$(year)_V1",
-                    tag_p_sla  = "SLA_2X_1Y_V1",
-                    tag_p_vcm  = "VCMAX_2X_1Y_V2",
-                    tag_t_ele  = "ELEV_4X_1Y_V1",
-                    tag_t_lm   = "LM_4X_1Y_V1",
-                    tag_t_pft  = "PFT_2X_1Y_V1")
+        dts = LandDatasets{FT}(
+                    gz        = 1,
+                    year      = year,
+                    tag_s_cc  = "SC_2X_1Y_V1",
+                    tag_s_α   = "SOIL_VGA_12X_1Y_V1",
+                    tag_s_n   = "SOIL_VGN_12X_1Y_V1",
+                    tag_s_Θr  = "SOIL_SWCR_12X_1Y_V1",
+                    tag_s_Θs  = "SOIL_SWCS_12X_1Y_V1",
+                    tag_p_ch  = "CH_20X_1Y_V1",
+                    tag_p_chl = "CHL_2X_7D_V1",
+                    tag_p_ci  = "CI_2X_1Y_V1",
+                    tag_p_lai = "LAI_MODIS_2X_8D_$(year)_V1",
+                    tag_p_sla = "SLA_2X_1Y_V1",
+                    tag_p_vcm = "VCMAX_2X_1Y_V2",
+                    tag_t_ele = "ELEV_4X_1Y_V1",
+                    tag_t_lm  = "LM_4X_1Y_V1",
+                    tag_t_pft = "PFT_2X_1Y_V1")
+    elseif gm_tag == "gm2"
+        dts = LandDatasets{FT}(
+                    gz        = 1,
+                    year      = year,
+                    tag_s_cc  = "SC_2X_1Y_V1",
+                    tag_s_α   = "SOIL_VGA_12X_1Y_V1",
+                    tag_s_n   = "SOIL_VGN_12X_1Y_V1",
+                    tag_s_Θr  = "SOIL_SWCR_12X_1Y_V1",
+                    tag_s_Θs  = "SOIL_SWCS_12X_1Y_V1",
+                    tag_p_ch  = "CH_20X_1Y_V1",
+                    tag_p_chl = "CHL_2X_7D_V1",
+                    tag_p_ci  = "CI_2X_1M_V3",
+                    tag_p_lai = "LAI_MODIS_2X_8D_$(year)_V1",
+                    tag_p_sla = "SLA_2X_1Y_V1",
+                    tag_p_vcm = "VCMAX_2X_1Y_V2",
+                    tag_t_ele = "ELEV_4X_1Y_V1",
+                    tag_t_lm  = "LM_4X_1Y_V1",
+                    tag_t_pft = "PFT_2X_1Y_V1")
+    elseif gm_tag == "gm3"
+        dts = LandDatasets{FT}(
+                    gz        = 1,
+                    year      = year,
+                    tag_s_cc  = "SC_2X_1Y_V1",
+                    tag_s_α   = "SOIL_VGA_12X_1Y_V1",
+                    tag_s_n   = "SOIL_VGN_12X_1Y_V1",
+                    tag_s_Θr  = "SOIL_SWCR_12X_1Y_V1",
+                    tag_s_Θs  = "SOIL_SWCS_12X_1Y_V1",
+                    tag_p_ch  = "CH_20X_1Y_V1",
+                    tag_p_chl = "CHL_2X_7D_V1",
+                    tag_p_ci  = "CI_2X_1M_V3",
+                    tag_p_lai = "LAI_MODIS_2X_8D_$(year)_V1",
+                    tag_p_sla = "SLA_2X_1Y_V1",
+                    tag_p_vcm = "VCMAX_2X_1Y_V2_60%",
+                    tag_t_ele = "ELEV_4X_1Y_V1",
+                    tag_t_lm  = "LM_4X_1Y_V1",
+                    tag_t_pft = "PFT_2X_1Y_V1",
+                    p_vcm     = regrid(read_LUT(query_collection("VCMAX_2X_1Y_V2"))[1], 1) .* 0.6)
+    else
+        error("Tag $(gm_tag) is not supported!");
     end;
 
     @tinfo "Gap-filling data from GriddingMachine...";
-    extend_data!(_dts);
+    extend_data!(dts);
 
-    return _dts
+    return dts
 );
 
 
@@ -166,33 +187,33 @@ Gap fill the data linearly, given
 """
 function extend_data!(dts::LandDatasets{FT}) where {FT}
     # determine where to fill based on land mask and lai
-    for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-        if (dts.t_lm[_ilon,_ilat] > 0) && (nanmax(dts.p_lai[_ilon,_ilat,:]) > 0)
-            dts.mask_spac[_ilon,_ilat] = true;
-            _mask_lai = isnan.(dts.p_lai[_ilon,_ilat,:]);
-            dts.p_lai[_ilon,_ilat,_mask_lai] .= 0;
-        elseif (dts.t_lm[_ilon,_ilat] > 0)
-            dts.mask_soil[_ilon,_ilat] = true;
-            _mask_lai = isnan.(dts.p_lai[_ilon,_ilat,:]);
-            dts.p_lai[_ilon,_ilat,_mask_lai] .= 0;
+    for ilon in axes(dts.t_lm,1), ilat in axes(dts.t_lm,2)
+        if (dts.t_lm[ilon,ilat] > 0) && (nanmax(dts.p_lai[ilon,ilat,:]) > 0)
+            dts.mask_spac[ilon,ilat] = true;
+            mask_lai = isnan.(dts.p_lai[ilon,ilat,:]);
+            dts.p_lai[ilon,ilat,mask_lai] .= 0;
+        elseif (dts.t_lm[ilon,ilat] > 0)
+            dts.mask_soil[ilon,ilat] = true;
+            mask_lai = isnan.(dts.p_lai[ilon,ilat,:]);
+            dts.p_lai[ilon,ilat,mask_lai] .= 0;
         end;
     end;
 
     # iterate the fieldnames
-    for _field in fieldnames(typeof(dts))
-        if !(_field in [:p_lai, :t_ele, :t_lm, :t_pft, :mask_soil, :mask_spac])
-            _data = getfield(dts, _field);
-            if _data isa Array
+    for fn in fieldnames(typeof(dts))
+        if !(fn in [:p_lai, :t_ele, :t_lm, :t_pft, :mask_soil, :mask_spac])
+            data = getfield(dts, fn);
+            if data isa Array
                 # extend the data first based on interpolations
-                for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-                    _tmp = _data[_ilon,_ilat,:];
-                    interpolate_data!(_tmp);
-                    _data[_ilon,_ilat,:] .= _tmp;
+                for ilon in axes(dts.t_lm,1), ilat in axes(dts.t_lm,2)
+                    tmp = data[ilon,ilat,:];
+                    interpolate_data!(tmp);
+                    data[ilon,ilat,:] .= tmp;
                 end;
 
                 # fill the NaNs with nanmean of the rest
-                _mask_mean = dts.mask_spac .&& isnan.(_data);
-                _data[_mask_mean] .= nanmean(_data);
+                mask_mean = dts.mask_spac .&& isnan.(data);
+                data[mask_mean] .= nanmean(data);
             end;
         end;
     end;
@@ -248,49 +269,49 @@ function gm_grids(dts::LandDatasets{FT}) where {FT}
     # TODO: add a step to verify the input datasets
     @tinfo "Preparing a matrix of GriddingMachine data to work on...";
     _mat_gm = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
-    for _ilon in axes(dts.t_lm,1), _ilat in axes(dts.t_lm,2)
-        if dts.mask_spac[_ilon,_ilat]
-            _pfts = dts.t_pft[_ilon,_ilat,:];
+    for ilon in axes(dts.t_lm,1), ilat in axes(dts.t_lm,2)
+        if dts.mask_spac[ilon,ilat]
+            _pfts = dts.t_pft[ilon,ilat,:];
             _g = CLM5_PFTG[_ind_c3]' * _pfts[_ind_c3] / sum(_pfts[_ind_c3]);
             _g1 = isnan(_g) ? nanmean(CLM5_PFTG[_ind_c3]) : _g;
-            _mat_gm[_ilon,_ilat] = Dict{String,Any}(
-                        "CANOPY_HEIGHT" => dts.p_ch[_ilon,_ilat],
-                        "CHLOROPHYLL"   => dts.p_chl[_ilon,_ilat,:],
-                        "CLUMPING"      => dts.p_ci[_ilon,_ilat,:],
+            _mat_gm[ilon,ilat] = Dict{String,Any}(
+                        "CANOPY_HEIGHT" => dts.p_ch[ilon,ilat],
+                        "CHLOROPHYLL"   => dts.p_chl[ilon,ilat,:],
+                        "CLUMPING"      => dts.p_ci[ilon,ilat,:],
                         "CO2"           => _co2,
-                        "ELEVATION"     => dts.t_ele[_ilon,_ilat],
+                        "ELEVATION"     => dts.t_ele[ilon,ilat],
                         "FT"            => FT,
-                        "LAI"           => dts.p_lai[_ilon,_ilat,:],
-                        "LATITUDE"      => (_ilat - 0.5) * 180 / size(dts.t_lm,2) - 90,
-                        "LMA"           => 1 / dts.p_sla[_ilon,_ilat] / 10,
-                        "LONGITUDE"     => (_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180,
+                        "LAI"           => dts.p_lai[ilon,ilat,:],
+                        "LATITUDE"      => (ilat - 0.5) * 180 / size(dts.t_lm,2) - 90,
+                        "LMA"           => 1 / dts.p_sla[ilon,ilat] / 10,
+                        "LONGITUDE"     => (ilon - 0.5) * 360 / size(dts.t_lm,1) - 180,
                         "MEDLYN_G1"     => _g1,
-                        "SOIL_COLOR"    => min(20, max(1, Int(floor(dts.s_cc[_ilon,_ilat])))),
-                        "SOIL_N"        => dts.s_n[_ilon,_ilat,:],
-                        "SOIL_α"        => dts.s_α[_ilon,_ilat,:],
-                        "SOIL_ΘR"       => dts.s_Θr[_ilon,_ilat,:],
-                        "SOIL_ΘS"       => dts.s_Θs[_ilon,_ilat,:],
-                        "VCMAX25"       => dts.p_vcm[_ilon,_ilat,:],
+                        "SOIL_COLOR"    => min(20, max(1, Int(floor(dts.s_cc[ilon,ilat])))),
+                        "SOIL_N"        => dts.s_n[ilon,ilat,:],
+                        "SOIL_α"        => dts.s_α[ilon,ilat,:],
+                        "SOIL_ΘR"       => dts.s_Θr[ilon,ilat,:],
+                        "SOIL_ΘS"       => dts.s_Θs[ilon,ilat,:],
+                        "VCMAX25"       => dts.p_vcm[ilon,ilat,:],
                         "YEAR"          => dts.year,
             );
-        elseif dts.mask_soil[_ilon,_ilat]
-            _mat_gm[_ilon,_ilat] = Dict{String,Any}(
+        elseif dts.mask_soil[ilon,ilat]
+            _mat_gm[ilon,ilat] = Dict{String,Any}(
                         "CANOPY_HEIGHT" => eps(FT),
                         "CHLOROPHYLL"   => [10.0],
                         "CLUMPING"      => [1.0],
                         "CO2"           => _co2,
-                        "ELEVATION"     => dts.t_ele[_ilon,_ilat],
+                        "ELEVATION"     => dts.t_ele[ilon,ilat],
                         "FT"            => FT,
                         "LAI"           => [0.0],
-                        "LATITUDE"      => (_ilat - 0.5) * 180 / size(dts.t_lm,2) - 90,
+                        "LATITUDE"      => (ilat - 0.5) * 180 / size(dts.t_lm,2) - 90,
                         "LMA"           => 0.012,
-                        "LONGITUDE"     => (_ilon - 0.5) * 360 / size(dts.t_lm,1) - 180,
+                        "LONGITUDE"     => (ilon - 0.5) * 360 / size(dts.t_lm,1) - 180,
                         "MEDLYN_G1"     => nanmean(CLM5_PFTG[_ind_c3]),
-                        "SOIL_COLOR"    => min(20, max(1, Int(floor(dts.s_cc[_ilon,_ilat])))),
-                        "SOIL_N"        => dts.s_n[_ilon,_ilat,:],  # these are nan for some sites, fix this with a better data source
-                        "SOIL_α"        => dts.s_α[_ilon,_ilat,:],  # these are nan for some sites, fix this with a better data source
-                        "SOIL_ΘR"       => dts.s_Θr[_ilon,_ilat,:], # these are nan for some sites, fix this with a better data source
-                        "SOIL_ΘS"       => dts.s_Θs[_ilon,_ilat,:], # these are nan for some sites, fix this with a better data source
+                        "SOIL_COLOR"    => min(20, max(1, Int(floor(dts.s_cc[ilon,ilat])))),
+                        "SOIL_N"        => dts.s_n[ilon,ilat,:],  # these are nan for some sites, fix this with a better data source
+                        "SOIL_α"        => dts.s_α[ilon,ilat,:],  # these are nan for some sites, fix this with a better data source
+                        "SOIL_ΘR"       => dts.s_Θr[ilon,ilat,:], # these are nan for some sites, fix this with a better data source
+                        "SOIL_ΘS"       => dts.s_Θs[ilon,ilat,:], # these are nan for some sites, fix this with a better data source
                         "VCMAX25"       => [10.0],
                         "YEAR"          => dts.year,
             );

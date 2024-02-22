@@ -51,7 +51,7 @@ function initialize_cache!(FT)
     initialize!(CACHE_SPAC, CACHE_CONFIG);
 
     # create a state struct based on the spac
-    CACHE_STATE = MultiLayerSPACState{FT}(CACHE_SPAC);
+    # CACHE_STATE = MultiLayerSPACState{FT}(CACHE_SPAC);
 
     return nothing
 end;
@@ -78,7 +78,7 @@ Synchronize SPAC parameters from,
 - `state` `MultiLayerSPACState` for all state variables, or nothing
 
 """
-function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState})
+function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing})
     FT = gm_params["FT"];
     _z_canopy = max(FT(0.1), gm_params["CANOPY_HEIGHT"]);
 
@@ -147,7 +147,7 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
 
     # synchronize the state if state is not nothing, otherwise set all values to NaN (do thing before prescribing T_SKIN)
     if !isnothing(state)
-        spac_state!(state, CACHE_SPAC);
+        #spac_state!(state, CACHE_SPAC);
     else
         CACHE_SPAC.plant.memory.t_history .= NaN;
     end;

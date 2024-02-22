@@ -14,9 +14,9 @@ using NetcdfIO: append_nc!, create_nc!, grow_nc!, read_nc
 
 using ..EmeraldData.ERA5: ERA5_FOLDER, ERA5SingleLevelsDriver
 using ..EmeraldIO.Text: read_csv
-using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, SPACConfiguration, MultiLayerSPACState
+using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration, sync_state!
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
-using ..EmeraldLand.SPAC: GPP, PPAR, initialize!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!, spac_state!
+using ..EmeraldLand.SPAC: GPP, PPAR, initialize!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!
 using ..EmeraldMath.Data: interpolate_data!
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldPhysics.EarthGeometry: solar_zenith_angle

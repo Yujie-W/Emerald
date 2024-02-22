@@ -15,9 +15,9 @@
 
     simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
                 wd_mat::Matrix{Union{Nothing,Dict{String,Any}}},
-                state_mat::Matrix{Union{Nothing,MultiLayerSPACState{FT}}};
+                state_mat::Matrix{Union{Nothing}};
                 displaying::Bool = true
-    ) where {FT}
+    )
 
 Run simulations on SPAC, given
 - `gm_mat` Matrix of GriddingMachine inputs
@@ -30,9 +30,9 @@ function simulation! end;
 
 simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
             wd_mat::Matrix{Union{Nothing,Dict{String,Any}}},
-            state_mat::Matrix{Union{Nothing,MultiLayerSPACState{FT}}};
+            state_mat::Matrix{Union{Nothing}};
             displaying::Bool = true
-) where {FT} = (
+) = (
 #    @tinfo "Debugging the code using one core...";
 #    @showprogress for i in eachindex(gm_mat)
 #        simulation!(gm_mat[i], wd_mat[i], state_mat[i]);
@@ -78,10 +78,10 @@ simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
 
 simulation!(gm_params::Nothing, wd_params::Nothing, state::Nothing) = nothing;
 
-simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing,MultiLayerSPACState{FT}}) where {FT} = (
+simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing}) = (
     synchronize_cache!(gm_params, wd_params, state);
     soil_plant_air_continuum!(CACHE_CONFIG, CACHE_SPAC, 3600);
-    spac_state!(CACHE_CONFIG, CACHE_SPAC, CACHE_STATE);
+    #spac_state!(CACHE_CONFIG, CACHE_SPAC, CACHE_STATE);
 
     return CACHE_STATE
 );
