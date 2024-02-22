@@ -113,13 +113,4 @@ include("spac/plant.jl");
 include("spac/bulk.jl");
 
 
-
-
-
-
-
-
-include("spac.jl");
-
-
 end;

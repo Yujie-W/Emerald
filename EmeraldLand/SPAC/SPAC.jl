@@ -56,9 +56,4 @@ include("quantity/oco.jl");
 include("quantity/tropomi.jl");
 
 
-# This file is to be refactored when reaching the EmeraldEarth stage
-using.. Namespace: MultiLayerSPACState
-include("state.jl");
-
-
 end; # module
