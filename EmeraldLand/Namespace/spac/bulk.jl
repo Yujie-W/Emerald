@@ -145,3 +145,79 @@ BulkSPAC(config::SPACConfiguration{FT};
                 canopy    = spac_canopy
     )
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Feb-2: add struct BulkSPACStates
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct to save bulk SPAC states (collections of states)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+mutable struct BulkSPACStates{FT}
+    "General information"
+    info::SPACInfo{FT}
+
+    "Soil bulk variables"
+    soil_bulk::SoilBulkState{FT}
+    "Soil layers"
+    soils::Vector{SoilLayerState{FT}}
+
+    "Air for each layer (more than canopy layer)"
+    airs::Vector{AirLayerState{FT}}
+
+    "Plant information"
+    plant::PlantStates{FT}
+    "Canopy used for radiation calculations"
+    canopy::MultiLayerCanopyStates{FT}
+end;
+
+BulkSPACStates(spac::BulkSPAC{FT}) where {FT} = BulkSPACStates{FT}(
+            spac.info,
+            spac.soil_bulk.state,
+            [soil.state for soil in spac.soils],
+            [air.state for air in spac.airs],
+            PlantStates(spac.plant),
+            MultiLayerCanopyStates(spac.canopy)
+);
+
+sync_state!(spac::BulkSPAC{FT}, states::BulkSPACStates{FT}) where {FT} = (
+    sync_state!(spac.info, states.info);
+    sync_state!(spac.soil_bulk.state, states.soil_bulk);
+    for i in eachindex(spac.soils)
+        sync_state!(spac.soils[i].state, states.soils[i]);
+    end;
+    for i in eachindex(spac.airs)
+        sync_state!(spac.airs[i].state, states.airs[i]);
+    end;
+    sync_state!(spac.plant, states.plant);
+    sync_state!(spac.canopy, states.canopy);
+
+    return nothing
+);
+
+sync_state!(states::BulkSPACStates{FT}, spac::BulkSPAC{FT}) where {FT} = (
+    sync_state!(states.info, spac.info);
+    sync_state!(states.soil_bulk, spac.soil_bulk.state);
+    for i in eachindex(states.soils)
+        sync_state!(states.soils[i], spac.soils[i].state);
+    end;
+    for i in eachindex(states.airs)
+        sync_state!(states.airs[i], spac.airs[i].state);
+    end;
+    sync_state!(states.plant, spac.plant);
+    sync_state!(states.canopy, spac.canopy);
+
+    return nothing
+);

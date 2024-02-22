@@ -35,3 +35,49 @@ MultiLayerCanopy(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
                 structure       = CanopyStructure(config, n_layer),
     )
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this structure
+# General
+#     2024-Feb-22: add struct MultiLayerCanopyStates
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure to save multiple layer hyperspectral canopy states (collections of states)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+mutable struct MultiLayerCanopyStates{FT<:AbstractFloat}
+    "Sensor geometry state"
+    sensor_geometry::SensorGeometryState{FT}
+    "Sun geometry state"
+    sun_geometry::SunGeometryState{FT}
+    "Canopy structure state"
+    structure::CanopyStructureState{FT}
+end;
+
+MultiLayerCanopyStates(canopy::MultiLayerCanopy{FT}) where {FT} = MultiLayerCanopyStates{FT}(canopy.sensor_geometry.state, canopy.sun_geometry.state, canopy.structure.state);
+
+sync_state!(canopy::MultiLayerCanopy{FT}, states::MultiLayerCanopyStates{FT}) where {FT} = (
+    sync_state!(canopy.sensor_geometry.state, states.sensor_geometry);
+    sync_state!(canopy.sun_geometry.state, states.sun_geometry);
+    sync_state!(canopy.structure.state, states.structure);
+
+    return nothing
+);
+
+sync_state!(states::MultiLayerCanopyStates{FT}, canopy::MultiLayerCanopy{FT}) where {FT} = (
+    sync_state!(states.sensor_geometry, canopy.sensor_geometry.state);
+    sync_state!(states.sun_geometry, canopy.sun_geometry.state);
+    sync_state!(states.structure, canopy.structure.state);
+
+    return nothing
+);

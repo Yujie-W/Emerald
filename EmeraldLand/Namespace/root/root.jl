@@ -30,13 +30,50 @@ Base.@kwdef mutable struct Root{FT}
     xylem::XylemHydraulics{FT}
 end;
 
-
-"""
-
-    Root(config::SPACConfiguration{FT}) where {FT}
-
-Return the root struct with initialized energy states, given
-- `config` `SPACConfiguration` type struct
-
-"""
 Root(config::SPACConfiguration{FT}) where {FT} = Root{FT}(xylem = XylemHydraulics(config));
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Feb-22: add struct RootStates
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct to save root states (collections of states)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+mutable struct RootStates{FT<:AbstractFloat}
+    "Root energy state"
+    energy::XylemEnergyState{FT}
+    "Rhizosphere state"
+    rhizosphere::RhizosphereState{FT}
+    "Root xylem state"
+    xylem::XylemHydraulicsState{FT}
+end;
+
+RootStates(root::Root{FT}) where {FT} = RootStates{FT}(root.energy.state, root.rhizosphere.state, root.xylem.state);
+
+sync_state!(root::Root{FT}, states::RootStates{FT}) where {FT} = (
+    sync_state!(root.energy.state, states.energy);
+    sync_state!(root.rhizosphere.state, states.rhizosphere);
+    sync_state!(root.xylem.state, states.xylem);
+
+    return nothing
+);
+
+sync_state!(states::RootStates{FT}, root::Root{FT}) where {FT} = (
+    sync_state!(states.energy, root.energy.state);
+    sync_state!(states.rhizosphere, root.rhizosphere.state);
+    sync_state!(states.xylem, root.xylem.state);
+
+    return nothing
+);
