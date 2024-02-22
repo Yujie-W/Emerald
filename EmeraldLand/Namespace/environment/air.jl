@@ -29,6 +29,15 @@ Base.@kwdef mutable struct AirLayerState{FT}
     Σe::FT = 0
 end;
 
+sync_state!(state_from::AirLayerState{FT}, state_to::AirLayerState{FT}) where {FT} = (
+    state_to.ns .= state_from.ns;
+    state_to.p_air = state_from.p_air;
+    state_to.zs .= state_from.zs;
+    state_to.Σe = state_from.Σe;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

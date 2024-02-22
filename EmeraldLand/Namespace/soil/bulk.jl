@@ -28,6 +28,14 @@ Base.@kwdef mutable struct SoilBulkState{FT}
     color::Int = 1
 end;
 
+sync_state!(state_from::SoilBulkState{FT}, state_to::SoilBulkState{FT}) where {FT} = (
+    sync_state!(state_from.albedo, state_to.albedo);
+    state_to.area = state_from.area;
+    state_to.color = state_from.color;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

@@ -51,6 +51,21 @@ XylemHydraulicsState(config::SPACConfiguration{FT}; area::Number = 1, l::Number 
             v_max     = v_max
 );
 
+sync_state!(state_from::XylemHydraulicsState{FT}, state_to::XylemHydraulicsState{FT}) where {FT} = (
+    state_to.area = state_from.area;
+    state_to.cp = state_from.cp;
+    state_to.k_max = state_from.k_max;
+    state_to.l = state_from.l;
+    state_to.p_history .= state_from.p_history;
+    sync_state!(state_from.pv, state_to.pv);
+    state_to.v_storage .= state_from.v_storage;
+    state_to.v_max = state_from.v_max;
+    sync_state!(state_from.vc, state_to.vc);
+    state_to.Δh = state_from.Δh;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

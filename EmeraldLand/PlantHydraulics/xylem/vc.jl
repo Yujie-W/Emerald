@@ -42,7 +42,7 @@ relative_xylem_k(vc::LogisticVC{FT}, p_25::FT) where {FT} = (
         return FT(1)
     end;
 
-    return min(1, max(0, (1 - 1/(1 + vc.a * exp(vc.b * p_25))) * (vc.a + 1) / vc.a))
+    return min(1, max(0, (1 - 1/(1 + vc.A * exp(vc.B * p_25))) * (vc.A + 1) / vc.A))
 );
 
 relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT} = (
@@ -50,7 +50,7 @@ relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT} = (
         return FT(1)
     end;
 
-    return min(1, max(0, 1 / (1 + vc.a * (-p_25) ^ vc.b)))
+    return min(1, max(0, 1 / (1 + vc.A * (-p_25) ^ vc.B)))
 );
 
 relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT} = (
@@ -58,7 +58,7 @@ relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT} = (
         return FT(1)
     end;
 
-    return min(1, max(0, exp(-1 * (-p_25 / vc.b) ^ vc.c)))
+    return min(1, max(0, exp(-1 * (-p_25 / vc.B) ^ vc.C)))
 );
 
 
@@ -90,11 +90,11 @@ Return the critical xylem water pressure at 25 °C that triggers a given amount 
 """
 function xylem_pressure end;
 
-xylem_pressure(vc::LogisticVC{FT}, kr::FT) where {FT} = log(kr / (vc.a + 1 - kr * vc.a)) / vc.b;
+xylem_pressure(vc::LogisticVC{FT}, kr::FT) where {FT} = log(kr / (vc.A + 1 - kr * vc.A)) / vc.B;
 
-xylem_pressure(vc::PowerVC{FT}, kr::FT) where {FT} = -1 * ((1 - kr) / (kr * vc.a)) ^ (1 / vc.b);
+xylem_pressure(vc::PowerVC{FT}, kr::FT) where {FT} = -1 * ((1 - kr) / (kr * vc.A)) ^ (1 / vc.B);
 
-xylem_pressure(vc::WeibullVC{FT}, kr::FT) where {FT} = -1 * (-1 * log(kr)) ^ (1 / vc.c) * vc.b;
+xylem_pressure(vc::WeibullVC{FT}, kr::FT) where {FT} = -1 * (-1 * log(kr)) ^ (1 / vc.C) * vc.B;
 
 xylem_pressure(vc::ComplexVC{FT}, kr::FT) where {FT} = (
     # use the p from each curve to define the min and max of target pressure

@@ -62,4 +62,14 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
 end;
 
 # add an alias for soil_plant_air_continuum!
+"""
+
+    spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
+
+Run SPAC model and move forward in time with time stepper controller, given
+- `config` Configuration for `BulkSPAC`
+- `spac` `BulkSPAC` SPAC,
+- `δt` Time step
+
+"""
 spac! = soil_plant_air_continuum!;

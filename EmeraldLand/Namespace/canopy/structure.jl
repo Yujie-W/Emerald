@@ -45,6 +45,19 @@ Base.@kwdef mutable struct CanopyStructureState{FT}
     Ω_B::FT = 0
 end;
 
+sync_state!(state_from::CanopyStructureState{FT}, state_to::CanopyStructureState{FT}) where {FT} = (
+    state_to.hot_spot = state_from.hot_spot;
+    sync_state!(state_from.lidf, state_to.lidf);
+    state_to.lai = state_from.lai;
+    state_to.δlai .= state_from.δlai;
+    state_to.sai = state_from.sai;
+    state_to.δsai .= state_from.δsai;
+    state_to.Ω_A = state_from.Ω_A;
+    state_to.Ω_B = state_from.Ω_B;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

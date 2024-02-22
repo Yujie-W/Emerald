@@ -31,6 +31,16 @@ Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
     vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}(5,1)
 end;
 
+sync_state!(state_from::ExtraXylemCapacitorState{FT}, state_to::ExtraXylemCapacitorState{FT}) where {FT} = (
+    state_to.k_max = state_from.k_max;
+    sync_state!(state_from.pv, state_to.pv);
+    state_to.v_storage = state_from.v_storage;
+    state_to.v_max = state_from.v_max;
+    sync_state!(state_from.vc, state_to.vc);
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

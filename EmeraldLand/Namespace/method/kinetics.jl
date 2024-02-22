@@ -52,6 +52,14 @@ Base.@kwdef mutable struct Arrhenius{FT<:AbstractFloat} <: AbstractTemperatureDe
     ΔHA::FT
 end;
 
+sync_state!(state_from::Arrhenius{FT}, state_to::Arrhenius{FT}) where {FT} = (
+    state_to.T_REF = state_from.T_REF;
+    state_to.VAL_REF = state_from.VAL_REF;
+    state_to.ΔHA = state_from.ΔHA;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -91,6 +99,16 @@ Base.@kwdef mutable struct ArrheniusPeak{FT<:AbstractFloat} <: AbstractTemperatu
     ΔSV::FT
 end;
 
+sync_state!(state_from::ArrheniusPeak{FT}, state_to::ArrheniusPeak{FT}) where {FT} = (
+    state_to.T_REF = state_from.T_REF;
+    state_to.VAL_REF = state_from.VAL_REF;
+    state_to.ΔHA = state_from.ΔHA;
+    state_to.ΔHD = state_from.ΔHD;
+    state_to.ΔSV = state_from.ΔSV;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -123,6 +141,14 @@ Base.@kwdef mutable struct Q10{FT<:AbstractFloat} <: AbstractTemperatureDependen
     "Uncorrected vakye at reference temperature"
     VAL_REF::FT
 end;
+
+sync_state!(state_from::Q10{FT}, state_to::Q10{FT}) where {FT} = (
+    state_to.Q_10 = state_from.Q_10;
+    state_to.T_REF = state_from.T_REF;
+    state_to.VAL_REF = state_from.VAL_REF;
+
+    return nothing
+);
 
 
 #######################################################################################################################################################################################################
@@ -161,6 +187,16 @@ Base.@kwdef mutable struct Q10Peak{FT<:AbstractFloat} <: AbstractTemperatureDepe
     "Entropy factor"
     ΔSV::FT
 end;
+
+sync_state!(state_from::Q10Peak{FT}, state_to::Q10Peak{FT}) where {FT} = (
+    state_to.Q_10 = state_from.Q_10;
+    state_to.T_REF = state_from.T_REF;
+    state_to.VAL_REF = state_from.VAL_REF;
+    state_to.ΔHD = state_from.ΔHD;
+    state_to.ΔSV = state_from.ΔSV;
+
+    return nothing
+);
 
 
 #######################################################################################################################################################################################################

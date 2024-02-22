@@ -45,6 +45,13 @@ Base.@kwdef mutable struct BetaLIDF{FT<:AbstractFloat} <: AbstractLIDFAlgorithm{
     B::FT = 1
 end;
 
+sync_state!(state_from::BetaLIDF{FT}, state_to::BetaLIDF{FT}) where {FT} = (
+    state_to.A = state_from.A;
+    state_to.B = state_from.B;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -72,3 +79,10 @@ Base.@kwdef mutable struct VerhoefLIDF{FT<:AbstractFloat} <: AbstractLIDFAlgorit
     "Leaf inclination angle distribution function parameter b"
     B::FT = 0
 end;
+
+sync_state!(state_from::VerhoefLIDF{FT}, state_to::VerhoefLIDF{FT}) where {FT} = (
+    state_to.A = state_from.A;
+    state_to.B = state_from.B;
+
+    return nothing
+);

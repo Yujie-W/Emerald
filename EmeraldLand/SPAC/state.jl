@@ -27,7 +27,7 @@ spac_state!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, state::MultiLayer
         state.gs_sunlit[:,:,i] .= leaves[i].g_H₂O_s_sunlit;
     end;
 
-    state.t_clm .= memory.state.t_history;
+    state.t_clm .= memory.t_history;
 
     # save the variables used for publications
     state.beta = BETA(spac);
@@ -57,7 +57,7 @@ spac_state!(state::MultiLayerSPACState{FT}, spac::BulkSPAC{FT}) where {FT} = (
         leaves[i].g_H₂O_s_sunlit .= state.gs_sunlit[:,:,i];
     end;
 
-    memory.state.t_history .= state.t_clm;
+    memory.t_history .= state.t_clm;
 
     return nothing
 );

@@ -78,6 +78,17 @@ BrooksCorey{FT}(catg::Int) where {FT} = (
     )
 );
 
+sync_state!(state_from::BrooksCorey{FT}, state_to::BrooksCorey{FT}) where {FT} = (
+    state_to.B = state_from.B;
+    state_to.K_MAX = state_from.K_MAX;
+    state_to.TYPE = state_from.TYPE;
+    state_to.Ψ_SAT = state_from.Ψ_SAT;
+    state_to.Θ_SAT = state_from.Θ_SAT;
+    state_to.Θ_RES = state_from.Θ_RES;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -203,4 +214,16 @@ VanGenuchten{FT}(name::String) where {FT} = (
 
     # return a new struct
     return VanGenuchten{FT}(K_MAX = p[5] / GRAVITY(FT) * 1e6 / M_H₂O(FT), N = p[2], TYPE = name, α = p[1], Θ_RES = p[4], Θ_SAT = p[3])
+);
+
+sync_state!(state_from::VanGenuchten{FT}, state_to::VanGenuchten{FT}) where {FT} = (
+    state_to.K_MAX = state_from.K_MAX;
+    state_to.N = state_from.N;
+    state_to.TYPE = state_from.TYPE;
+    state_to.α = state_from.α;
+    state_to.Θ_RES = state_from.Θ_RES;
+    state_to.Θ_SAT = state_from.Θ_SAT;
+    state_to.M = state_from.M;
+
+    return nothing
 );

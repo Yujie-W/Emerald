@@ -24,6 +24,17 @@ const LAND_2021_1NM = artifact"land_model_spectrum_V6" * "/clima_land_spectra_1n
 const SOIL_TEXT     = read_csv("$(@__DIR__)/../../data/SOIL-TEXTURE.csv");
 
 
+# general function to use in the namespace
+"""
+
+    sync_state!(from, to)
+
+Synchonize the state variables from one to another
+
+"""
+function sync_state! end;
+
+
 # The configuration of the SPAC system
 include("config/spectra.jl");
 include("config/trace.jl");

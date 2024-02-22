@@ -7,6 +7,7 @@
 #     2023-Mar-29: prescribe longwave radiation as well
 #     2023-Jun-15: add a controller over rad to make sure it is >= 0
 #     2023-Aug-25: make soil and leaf temperature and soil moisture optional
+#     2024-Feb-22: remove state and auxil from spac struct
 # Bug fixes
 #     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88.999
 #
@@ -40,9 +41,9 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
 
     # adjust optimum t based on 10 day moving average skin temperature
     _tleaf = nanmean([_layer.energy.auxil.t for _layer in spac.plant.leaves]);
-    push!(spac.plant.memory.state.t_history, _tleaf);
-    if length(spac.plant.memory.state.t_history) > 240 deleteat!(spac.plant.memory.state.t_history,1) end;
-    prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.state.t_history));
+    push!(spac.plant.memory.t_history, _tleaf);
+    if length(spac.plant.memory.t_history) > 240 deleteat!(spac.plant.memory.t_history,1) end;
+    prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.t_history));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
     if initialize_state
@@ -65,22 +66,22 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     spac.meteo.t_precip = _df_tar;
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
-    _trigger_lai::Bool = !isnan(_df_lai) && (_df_lai != spac.plant.memory.auxil.lai);
-    _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.plant.memory.auxil.vcmax25);
-    _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.plant.memory.auxil.chl);
+    _trigger_lai::Bool = !isnan(_df_lai) && (_df_lai != spac.plant.memory.lai);
+    _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.plant.memory.vcmax25);
+    _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.plant.memory.chl);
     if _trigger_lai
         prescribe_traits!(config, spac; lai = _df_lai, vcmax_expo = 0.3);
-        spac.plant.memory.auxil.lai = _df_lai;
+        spac.plant.memory.lai = _df_lai;
     end;
 
     if _trigger_vcm
         prescribe_traits!(config, spac; vcmax = _df_vcm, vcmax_expo = 0.3);
-        spac.plant.memory.auxil.vcmax25 = _df_vcm;
+        spac.plant.memory.vcmax25 = _df_vcm;
     end;
 
     if _trigger_chl
         prescribe_traits!(config, spac; cab = _df_chl, car = _df_chl / 7);
-        spac.plant.memory.auxil.chl = _df_chl;
+        spac.plant.memory.chl = _df_chl;
     end;
 
     # update clumping index

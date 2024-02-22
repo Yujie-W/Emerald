@@ -25,6 +25,13 @@ Base.@kwdef mutable struct SensorGeometryState{FT}
     vza::FT = 0
 end;
 
+sync_state!(state_from::SensorGeometryState{FT}, state_to::SensorGeometryState{FT}) where {FT} = (
+    state_to.vaa = state_from.vaa;
+    state_to.vza = state_from.vza;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

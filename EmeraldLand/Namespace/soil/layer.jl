@@ -39,6 +39,19 @@ Base.@kwdef mutable struct SoilLayerState{FT}
     zs::Vector{FT} = FT[0,-1]
 end;
 
+sync_state!(state_from::SoilLayerState{FT}, state_to::SoilLayerState{FT}) where {FT} = (
+    state_to.cp = state_from.cp;
+    state_to.ns .= state_from.ns;
+    sync_state!(state_from.vc, state_to.vc);
+    state_to.λ_soil = state_from.λ_soil;
+    state_to.ρ = state_from.ρ;
+    state_to.θ = state_from.θ;
+    state_to.Σe = state_from.Σe;
+    state_to.zs .= state_from.zs;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

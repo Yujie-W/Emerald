@@ -35,3 +35,5 @@ struct SoilAlbedoHyperspectralCLM <: AbstractSoilAlbedo end;
 
 """ Hyperspectral soil albedo fitted from CLIMA broadband soil albedo """
 struct SoilAlbedoHyperspectralCLIMA <: AbstractSoilAlbedo end;
+
+sync_state!(state_from::AbstractSoilAlbedo, state_to::AbstractSoilAlbedo) = nothing;

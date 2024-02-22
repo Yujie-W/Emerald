@@ -23,6 +23,12 @@ Base.@kwdef mutable struct RhizosphereState{FT}
     k_max::FT = 1e20
 end;
 
+sync_state!(state_from::RhizosphereState{FT}, state_to::RhizosphereState{FT}) where {FT} = (
+    state_to.k_max = state_from.k_max;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

@@ -6,6 +6,7 @@
 #     2023-Mar-13: initialize CACHE_STATE at the same time
 #     2023-Mar-13: initialize CACHE_CONFIG at the same time
 #     2023-Jun-15: make sure prescribed swc does not exceed the limits
+#     2024-Feb-22: remove state and auxil from spac struct
 # Bug fixes
 #     2023-Aug-26: make sure sza < 89 when total radiation is higher than 10 W m⁻²
 #
@@ -148,14 +149,14 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     if !isnothing(state)
         spac_state!(state, CACHE_SPAC);
     else
-        CACHE_SPAC.plant.memory.state.t_history .= NaN;
+        CACHE_SPAC.plant.memory.t_history .= NaN;
     end;
 
     # prescribe leaf temperature from skin temperature
     if "T_SKIN" in keys(wd_params)
-        push!(CACHE_SPAC.plant.memory.state.t_history, wd_params["T_SKIN"]);
-        if length(CACHE_SPAC.plant.memory.state.t_history) > 240 deleteat!(CACHE_SPAC.plant.memory.state.t_history,1) end;
-        prescribe_traits!(CACHE_CONFIG, CACHE_SPAC; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.plant.memory.state.t_history));
+        push!(CACHE_SPAC.plant.memory.t_history, wd_params["T_SKIN"]);
+        if length(CACHE_SPAC.plant.memory.t_history) > 240 deleteat!(CACHE_SPAC.plant.memory.t_history,1) end;
+        prescribe_traits!(CACHE_CONFIG, CACHE_SPAC; t_leaf = wd_params["T_SKIN"], t_clm = nanmean(CACHE_SPAC.plant.memory.t_history));
     end;
 
     # synchronize LAI, CHL, and CI

@@ -58,6 +58,8 @@ struct BetaParameterVcmax <: AbstractBetaParameter end;
 """ Empty struct indicating that the beta function is based on soil water content """
 struct BetaParameterΘ <: AbstractBetaParameter end;
 
+sync_state!(state_from::AbstractBetaParameter, state_to::AbstractBetaParameter) = nothing;
+
 
 #######################################################################################################################################################################################################
 #
@@ -88,3 +90,11 @@ Base.@kwdef mutable struct BetaFunction{FT<:AbstractFloat}
     "Target parameter to tune"
     PARAM_Y::Union{BetaParameterG1, BetaParameterVcmax} = BetaParameterG1()
 end;
+
+sync_state!(state_from::BetaFunction{FT}, state_to::BetaFunction{FT}) where {FT} = (
+    state_to.FUNC = deepcopy(state_from.FUNC);
+    sync_state!(state_from.PARAM_X, state_to.PARAM_X);
+    sync_state!(state_from.PARAM_Y, state_to.PARAM_Y);
+
+    return nothing
+);
