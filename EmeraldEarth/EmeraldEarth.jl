@@ -32,7 +32,6 @@ CACHE_SPAC    = nothing;
 CACHE_STATE   = nothing;
 
 
-include("griddingmachine.jl");
 include("driver.jl");
 include("cache.jl");
 include("save.jl");

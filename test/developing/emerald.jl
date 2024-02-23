@@ -1,23 +1,23 @@
 #
-# Version B4 (default setting; run it on Curry)
+# Version B5 (default setting; run it on Curry)
 #
 using Emerald;
 using ProgressMeter;
 
 FT = Float64;
 
-EMERALD_VER = "b4";
-GMDATA_VER = "gm2";
+EMERALD_VER = "b5";
+GMDATA_VER = "gm3";
 WDRIVER_VER = "wd1";
 
 if gethostname()[1:5] == "curry"
     # use 64 threads on curry
-    EmeraldEarth.add_threads!(64, FT);
+    EmeraldEarth.add_threads!(32, FT);
 
     # define the datasets, grids, states, and weather drivers
-    dts = EmeraldEarth.LandDatasets{FT}(GMDATA_VER, 2020);
-    mat = EmeraldEarth.gm_grids(dts);
-    sts = Matrix{Union{Nothing,EmeraldLand.Namespace.MultiLayerSPACState{FT}}}(nothing, size(dts.t_lm));
+    dts = EmeraldData.GlobalDatasets.LandDatasets{FT}(GMDATA_VER, 2019);
+    mat = EmeraldData.GlobalDatasets.grid_dict_mat(dts);
+    sts = Matrix{Union{Nothing,EmeraldLand.Namespace.BulkSPACStates{FT}}}(nothing, size(dts.t_lm));
     wdr = EmeraldData.ERA5.ERA5SingleLevelsDriver();
 
     # preload the weather driver

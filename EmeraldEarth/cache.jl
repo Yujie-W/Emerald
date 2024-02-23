@@ -31,7 +31,7 @@ function initialize_cache!(FT)
                 latitude = 0,
                 longitude = 0,
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
-                zs = [-2, _z_canopy/2, _z_canopy]);
+                plant_zs = [-2, _z_canopy/2, _z_canopy]);
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
     # for _organ in [CACHE_SPAC.plant.leaves; CACHE_SPAC.plant.branches; CACHE_SPAC.plant.trunk; CACHE_SPAC.plant.roots]
@@ -47,11 +47,11 @@ function initialize_cache!(FT)
     end;
 
     # initialize the spac with non-saturated soil
-    prescribe_soil!(CACHE_SPAC; swcs = Tuple(max(soil.VC.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.soils));
-    initialize!(CACHE_SPAC, CACHE_CONFIG);
+    prescribe_soil!(CACHE_SPAC; swcs = Tuple(max(soil.state.vc.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.soils));
+    initialize!(CACHE_CONFIG, CACHE_SPAC);
 
     # create a state struct based on the spac
-    # CACHE_STATE = MultiLayerSPACState{FT}(CACHE_SPAC);
+    CACHE_STATE = BulkSPACStates(CACHE_SPAC);
 
     return nothing
 end;
