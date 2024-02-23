@@ -8,9 +8,9 @@ using ..EmeraldPhysics
 using ..EmeraldUtility
 
 
-include("FluxTower.jl");
-include("GlobalDatasets.jl");
-include("GriddingMachineData.jl");
+include("fluxtower/FluxTower.jl");
+include("globaldatasets/GlobalDatasets.jl");
+include("griddingmachine/GriddingMachineData.jl");
 include("weatherdriver/WeatherDrivers.jl");
 
 

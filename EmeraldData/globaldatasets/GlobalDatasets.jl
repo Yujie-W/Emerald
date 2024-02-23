@@ -16,11 +16,11 @@ using ..EmeraldUtility.Log: @tinfo
 CCS = read_csv("$(@__DIR__)/../data/CO2-1Y.csv");
 
 
-include("globaldatasets/clm.jl");
-include("globaldatasets/land_datasets.jl");
+include("clm.jl");
+include("land_datasets.jl");
 
-include("globaldatasets/extend_data.jl");
-include("globaldatasets/grid_dict.jl");
+include("extend_data.jl");
+include("grid_dict.jl");
 
 
 end # module

@@ -20,10 +20,10 @@ FLUXNET_REPROCESSED = "$(FLUXNET_FOLDER)/reprocessed";
 
 
 # include the general data struct and constructors
-include("fluxtower/towers.jl");
-include("fluxtower/fluxtowerdata.jl");
-include("fluxtower/process.jl");
-include("fluxtower/query.jl");
+include("towers.jl");
+include("fluxtowerdata.jl");
+include("process.jl");
+include("query.jl");
 
 
 end # module

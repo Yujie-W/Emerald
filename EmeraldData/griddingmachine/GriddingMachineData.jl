@@ -16,15 +16,15 @@ ARTIFACT_FOLDER       = "$(GRIDDING_MACHINE_HOME)/artifacts"
 FTP_URLS              = ["ftp://fluo.gps.caltech.edu/XYZT_GRIDDING_MACHINE/artifacts"];
 
 
-include("griddingmachine/data_read.jl");
-include("griddingmachine/data_reprocess.jl");
-include("griddingmachine/deploy.jl");
-include("griddingmachine/json_attribute.jl");
-include("griddingmachine/json_data.jl");
-include("griddingmachine/json_griddingmachine.jl");
-include("griddingmachine/json_map.jl");
-include("griddingmachine/json_save.jl");
-include("griddingmachine/terminal.jl");
+include("data_read.jl");
+include("data_reprocess.jl");
+include("deploy.jl");
+include("json_attribute.jl");
+include("json_data.jl");
+include("json_griddingmachine.jl");
+include("json_map.jl");
+include("json_save.jl");
+include("terminal.jl");
 
 
 end; # module
