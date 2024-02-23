@@ -32,11 +32,11 @@ CACHE_SPAC    = nothing;
 CACHE_STATE   = nothing;
 
 
-include("initialize.jl");
+include("setup.jl");
 include("threads.jl");
 
 
-include("cache.jl");
+include("sync.jl");
 include("save.jl");
 include("simulation.jl");
 

@@ -7,19 +7,20 @@
 #     2023-Mar-13: initialize CACHE_CONFIG at the same time
 #     2023-Jun-15: make sure prescribed swc does not exceed the limits
 #     2024-Feb-22: remove state and auxil from spac struct
+#     2024-Feb-23: rename to setup_cache!
 # Bug fixes
 #     2023-Aug-26: make sure sza < 89 when total radiation is higher than 10 W m⁻²
 #
 #######################################################################################################################################################################################################
 """
 
-    initialize_cache!(FT::DataType = Float64)
+    setup_cache!(FT::DataType = Float64)
 
 Initialize the global parameter `CACHE_SPAC` (in all threads after loading workers), given
 - `FT` Floating type (default is Float64)
 
 """
-function initialize_cache!(FT::DataType = Float64)
+function setup_cache!(FT::DataType = Float64)
     global CACHE_CONFIG, CACHE_SPAC, CACHE_STATE;
 
     # create a SPAC to work on

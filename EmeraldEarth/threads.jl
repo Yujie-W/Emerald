@@ -20,7 +20,7 @@ function add_threads!(threads::Int, FT::DataType = Float64)
     @everywhere Base.MainInclude.eval(:(using Emerald.EmeraldEarth));
 
     @tinfo "Initializing the SPAC cache in each thread...";
-    @everywhere EmeraldEarth.initialize_cache!($FT);
+    @everywhere EmeraldEarth.setup_cache!($FT);
 
     return nothing
 end;

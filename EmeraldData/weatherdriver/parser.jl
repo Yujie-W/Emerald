@@ -35,14 +35,14 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    global_weather_drivers(wds::Dict{String,Any}, ind::Int)
+    weather_drivers_snapshot(wds::Dict{String,Any}, ind::Int)
 
 Extract a slice of weather data from preloaded drivers, given
 - `wds` Preloaded weather drivers
 - `ind` Index of the data
 
 """
-function global_weather_drivers(wds::Dict{String,Any}, ind::Int)
+function weather_drivers_snapshot(wds::Dict{String,Any}, ind::Int)
     @tinfo "Extract a slice of weather data from preloaded drivers...";
 
     # create a matrix of GriddingMachine data

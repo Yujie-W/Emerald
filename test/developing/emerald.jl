@@ -14,8 +14,11 @@ if gethostname()[1:5] == "curry"
     # define the datasets, grids, states, and weather drivers
     dts = EmeraldData.GlobalDatasets.LandDatasets{FT}(GMDATA_VER, 2019);
     mat = EmeraldData.GlobalDatasets.grid_dict_mat(dts);
-    sts = Matrix{Union{Nothing,EmeraldLand.Namespace.BulkSPACStates{FT}}}(nothing, size(dts.t_lm));
     wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1);
+
+
+    sts = Matrix{Union{Nothing,EmeraldLand.Namespace.BulkSPACStates{FT}}}(nothing, size(dts.t_lm));
+    wdi = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
 
 
     # use multiple threads on curry
