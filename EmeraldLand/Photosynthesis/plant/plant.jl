@@ -28,7 +28,7 @@ function plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCOâ‚‚Mode, PCOâ‚
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;
 
-    rd_only = spac.canopy.sun_geometry.state.sza < 89 ? false : true;
+    rd_only = spac.canopy.sun_geometry.state.sza > 89;
     for i in eachindex(leaves)
         leaf_photosynthesis!(leaves[i], airs[lindex[i]], mode; rd_only = rd_only);
     end;

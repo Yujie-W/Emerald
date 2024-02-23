@@ -58,7 +58,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     # if LAI <= 0, run soil albedo only
     (; SPECTRA) = config;
     rad_sw = spac.meteo.rad_sw;
-    if sun_geo.state.sza <= 89 && can_str.state.lai <= 0 && can_str.state.sai <= 0
+    if can_str.state.lai <= 0 && can_str.state.sai <= 0
         # 1. update upward and downward direct and diffuse radiation profiles
         sun_geo.auxil.e_dirꜜ .= rad_sw.e_dir;
         sun_geo.auxil.e_difꜜ .= rad_sw.e_dif;

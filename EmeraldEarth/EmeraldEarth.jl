@@ -12,7 +12,7 @@ using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using NetcdfIO: append_nc!, create_nc!, grow_nc!, read_nc
 
 using ..EmeraldData.WeatherDrivers: ERA5_FOLDER, ERA5SingleLevelsDriver
-using ..EmeraldData.GlobalDatasets: LandDatasets, grid_dict
+using ..EmeraldData.GlobalDatasets: LandDatasets, grid_dict, query_griddingmachine_data
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration, sync_state!
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
@@ -34,6 +34,7 @@ CACHE_STATE   = nothing;
 
 include("setup.jl");
 include("threads.jl");
+include("initialize.jl");
 
 
 include("sync.jl");

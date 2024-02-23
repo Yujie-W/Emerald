@@ -76,10 +76,10 @@ simulation!(gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
     return _states
 );
 
-simulation!(gm_params::Nothing, wd_params::Nothing, state::Nothing) = nothing;
+simulation!(gm_dict::Nothing, wd_dict::Nothing, state::Nothing) = nothing;
 
-simulation!(gm_params::Dict{String,Any}, wd_params::Dict{String,Any}, state::Union{Nothing}) = (
-    synchronize_cache!(gm_params, wd_params, state);
+simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::Union{Nothing}) = (
+    synchronize_cache!(gm_dict, wd_dict, state);
     soil_plant_air_continuum!(CACHE_CONFIG, CACHE_SPAC, 3600);
     #spac_state!(CACHE_CONFIG, CACHE_SPAC, CACHE_STATE);
 

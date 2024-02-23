@@ -57,6 +57,7 @@ end;
 # Changes made to this method
 # General
 #     2022-Jun-29: add method for BulkSPAC
+#     2024-Feb-22: do nothing if lai is zero
 #
 #######################################################################################################################################################################################################
 """
@@ -69,6 +70,12 @@ Update leaf reflectance and transmittance for SPAC, given
 
 """
 function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    # if LAI is zero, do nothing
+    can_str = spac.canopy.structure;
+    if can_str.state.lai <= 0
+        return nothing
+    end;
+
     for leaf in spac.plant.leaves
         leaf_spectra!(config, leaf.bio, leaf.capacitor.state.v_storage);
     end;

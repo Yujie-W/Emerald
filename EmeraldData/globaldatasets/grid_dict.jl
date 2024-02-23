@@ -6,6 +6,7 @@
 #     2023-Mar-25: add three more fields to use ERA weather driver
 #     2023-Aug-25: interpolate the data after reading from GriddingMachine
 #     2024-Feb-22: separate the grid_dict function from the gm_grids function that prepare all the grids
+#     2024-Feb-23: use 0 for the plant-related fields for non-vegetated land
 #
 #######################################################################################################################################################################################################
 """
@@ -40,22 +41,39 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
     # return the grid dictionary if the grid is masked as soil
     if dts.mask_soil[ilon,ilat]
         return Dict{String,Any}(
+                    "CANOPY_HEIGHT" => 0,
+                    "CHLOROPHYLL"   => [0],
+                    "CLUMPING"      => [1],
                     "CO2"           => co2,
                     "ELEVATION"     => dts.t_ele[ilon,ilat],
                     "FT"            => FT,
+                    "G1_MEDLYN_C3"  => 0,
+                    "G1_MEDLYN_C4"  => 0,
+                    "LAI"           => [0],
                     "LAND_MASK"     => lmsk,
                     "LATITUDE"      => (ilat - 0.5) * reso - 90,
                     "LAT_INDEX"     => ilat,
+                    "LMA"           => 0,
                     "LONGITUDE"     => (ilon - 0.5) * reso - 180,
                     "LON_INDEX"     => ilon,
                     "MESSAGE_LEVEL" => 0,
-                    "RESOLUTION"    => "$(dts.LABELS.nx)X",
+                    "PFT_FRACTIONS" => [0],
+                    "RESO_SPACE"    => dts.LABELS.nx,
                     "SOIL_COLOR"    => scolor,
                     "SOIL_N"        => s_n,
                     "SOIL_α"        => s_α,
                     "SOIL_ΘR"       => s_Θr,
                     "SOIL_ΘS"       => s_Θs,
-                    "YEAR"          => dts.LABELS.year);
+                    "VCMAX25"       => 0,
+                    "YEAR"          => dts.LABELS.year,
+                    "ρ_NIR_C3"      => 0,
+                    "ρ_NIR_C4"      => 0,
+                    "ρ_PAR_C3"      => 0,
+                    "ρ_PAR_C4"      => 0,
+                    "τ_NIR_C3"      => 0,
+                    "τ_NIR_C4"      => 0,
+                    "τ_PAR_C3"      => 0,
+                    "τ_PAR_C4"      => 0);
     end;
 
     # else return the grid dictionary if the grid is masked as plant

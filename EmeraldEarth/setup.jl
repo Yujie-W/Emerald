@@ -34,12 +34,6 @@ function setup_cache!(FT::DataType = Float64)
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
                 plant_zs = [-2, z_canopy/2, z_canopy]);
 
-    # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
-    # for _organ in [CACHE_SPAC.plant.leaves; CACHE_SPAC.plant.branches; CACHE_SPAC.plant.trunk; CACHE_SPAC.plant.roots]
-    #     _organ.xylem.state.vc.B = 3;
-    #     _organ.xylem.state.vc.C = 1;
-    # end;
-
     # update leaf mass per area and stomtal model
     @inline linear_p_soil(x) = min(1, max(eps(FT), 1 + x / 5));
     bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());

@@ -9,6 +9,7 @@
 #     2023-Oct-13: improve p_sun_sensor calculation accuracy
 #     2023-Oct-14: if none of REF or SIF is enabled, skip the sensor geometry calculation
 #     2023-Oct-18: account for SAI in the sensor geometry calculation
+#     2024-Feb-22: add solar zenith angle control
 #
 #######################################################################################################################################################################################################
 """
@@ -22,8 +23,9 @@ Update sensor geometry related auxiliary variables, given
 """
 function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     can_str = spac.canopy.structure;
+    sun_geo = spac.canopy.sun_geometry;
 
-    if (!config.ENABLE_REF && !config.ENABLE_SIF) || (can_str.state.lai <= 0 && can_str.state.sai <= 0)
+    if (!config.ENABLE_REF && !config.ENABLE_SIF) || sun_geo.state.sza > 89 || (can_str.state.lai <= 0 && can_str.state.sai <= 0)
         return nothing
     end;
 
@@ -31,7 +33,6 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     (; SPECTRA, Θ_AZI, Θ_INCL) = config;
     leaves = spac.plant.leaves;
     sen_geo = spac.canopy.sensor_geometry;
-    sun_geo = spac.canopy.sun_geometry;
     n_layer = length(leaves);
 
     # extinction coefficients for the solar radiation

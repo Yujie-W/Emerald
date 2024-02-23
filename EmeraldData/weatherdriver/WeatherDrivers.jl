@@ -20,6 +20,7 @@ include("era5_type.jl");
 include("era5_load.jl");
 
 include("parser.jl");
+include("snapshot.jl");
 
 
 # CliMA Land settings
