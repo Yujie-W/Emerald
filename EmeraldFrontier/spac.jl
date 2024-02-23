@@ -51,10 +51,10 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
         leaf.bio.state.lma = gmdict["LMA"];
     end;
 
-    # add support to C4 photosynthesis
-    if gmdict["C3C4"] == "C4"
-        error("C4 photosynthesis to be setted up");
-    end;
+    # TODO: add support to C4 photosynthesis
+    # if gmdict["C3C4"] == "C4"
+    #     error("C4 photosynthesis to be setted up");
+    # end;
 
     # update the vcmax for C3 model
     prescribe_traits!(config, _spac; vcmax = nanmean(gmdict["VCMAX25"]), vcmax_expo = 0.3);
