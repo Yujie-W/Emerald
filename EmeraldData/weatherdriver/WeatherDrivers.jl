@@ -1,4 +1,4 @@
-module ERA5
+module WeatherDrivers
 
 using DataFrames: DataFrame
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS

@@ -1,5 +1,5 @@
 # This file is meant to automatically download and regrid the ERA5 single levels data
-using Emerald.EmeraldData.ERA5: fetch_ERA5_data!, regrid_ERA5!
+using Emerald.EmeraldData.WeatherDrivers: fetch_ERA5_data!, regrid_ERA5!
 
 # download ERA5 data
 years = 2000:2022;

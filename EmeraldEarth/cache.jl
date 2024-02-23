@@ -23,15 +23,15 @@ function initialize_cache!(FT)
     global CACHE_CONFIG, CACHE_SPAC, CACHE_STATE;
 
     # create a SPAC to work on
-    _z_canopy = FT(10);
+    z_canopy = FT(10);
     CACHE_CONFIG = SPACConfiguration{FT}();
     CACHE_SPAC = BulkSPAC(
                 CACHE_CONFIG;
-                air_bounds = collect(0:21) * _z_canopy / 20,
+                air_bounds = collect(0:21) * z_canopy / 20,
                 latitude = 0,
                 longitude = 0,
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
-                plant_zs = [-2, _z_canopy/2, _z_canopy]);
+                plant_zs = [-2, z_canopy/2, z_canopy]);
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
     # for _organ in [CACHE_SPAC.plant.leaves; CACHE_SPAC.plant.branches; CACHE_SPAC.plant.trunk; CACHE_SPAC.plant.roots]
@@ -41,9 +41,9 @@ function initialize_cache!(FT)
 
     # update leaf mass per area and stomtal model
     @inline linear_p_soil(x) = min(1, max(eps(FT), 1 + x / 5));
-    _bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
+    bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
     for leaf in CACHE_SPAC.plant.leaves
-        leaf.flux.state.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = _bt);
+        leaf.flux.state.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = bt);
     end;
 
     # initialize the spac with non-saturated soil

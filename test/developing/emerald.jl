@@ -18,7 +18,7 @@ if gethostname()[1:5] == "curry"
     dts = EmeraldData.GlobalDatasets.LandDatasets{FT}(GMDATA_VER, 2019);
     mat = EmeraldData.GlobalDatasets.grid_dict_mat(dts);
     sts = Matrix{Union{Nothing,EmeraldLand.Namespace.BulkSPACStates{FT}}}(nothing, size(dts.t_lm));
-    wdr = EmeraldData.ERA5.ERA5SingleLevelsDriver();
+    wdr = EmeraldData.WeatherDrivers.ERA5SingleLevelsDriver();
 
     # preload the weather driver
     wds = EmeraldEarth.weather_drivers(dts, wdr);
