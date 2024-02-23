@@ -13,7 +13,7 @@ using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldUtility.Log: @tinfo
 
 
-CCS = read_csv("$(@__DIR__)/../data/CO2-1Y.csv");
+CCS = read_csv("$(@__DIR__)/../../data/CO2-1Y.csv");
 
 
 include("clm.jl");

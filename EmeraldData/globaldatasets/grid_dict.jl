@@ -11,7 +11,7 @@
 """
 
     grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) where {FT}
-    grid_dict(dtl::LandDatasetLabels, year::Int, gz::Int, lat::Number, lon::Number; ccs::DataFrame = CCS)
+    grid_dict(dtl::LandDatasetLabels, year::Int, nx::Int, lat::Number, lon::Number; ccs::DataFrame = CCS)
 
 Prepare a dictionary of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct
@@ -20,7 +20,7 @@ Prepare a dictionary of GriddingMachine data to feed SPAC, given
 - `ccs` CO2 concentration data (provided by default)
 - `dtl` `LandDatasetLabels` type data struct
 - `year` year of the datasets
-- `gz` grid resolution (1/gz °)
+- `nx` grid resolution (1/nx °)
 - `lat` latitude
 - `lon` longitude
 
@@ -28,7 +28,7 @@ Prepare a dictionary of GriddingMachine data to feed SPAC, given
 function grid_dict end;
 
 grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) where {FT} = (
-    reso   = 1 / dts.LABELS.gz;
+    reso   = 1 / dts.LABELS.nx;
     co2    = ccs.MEAN[findfirst(ccs.YEAR .== dts.LABELS.year)];
     lmsk   = dts.t_lm[ilon,ilat,1];
     scolor = min(20, max(1, Int(floor(dts.s_cc[ilon,ilat,1]))));
@@ -49,7 +49,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                     "LONGITUDE"     => (ilon - 0.5) * reso - 180,
                     "LON_INDEX"     => ilon,
                     "MESSAGE_LEVEL" => 0,
-                    "RESOLUTION"    => "$(dts.LABELS.gz)X",
+                    "RESOLUTION"    => "$(dts.LABELS.nx)X",
                     "SOIL_COLOR"    => scolor,
                     "SOIL_N"        => s_n,
                     "SOIL_α"        => s_α,
@@ -109,7 +109,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                 "LON_INDEX"     => ilon,
                 "MESSAGE_LEVEL" => 0,
                 "PFT_FRACTIONS" => pfts,
-                "RESO_SPACE"    => "$(dts.LABELS.gz)X",
+                "RESO_SPACE"    => dts.LABELS.nx,
                 "SOIL_COLOR"    => scolor,
                 "SOIL_N"        => s_n,
                 "SOIL_α"        => s_α,
@@ -194,12 +194,12 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
                 "LAI"           => lais,
                 "LAND_MASK"     => lmsk,
                 "LATITUDE"      => lat,
-                "LAT_INDEX"     => lat_ind(lat; res = 1/dtl.gz),
+                "LAT_INDEX"     => lat_ind(lat; res = 1/dtl.nx),
                 "LMA"           => lma,
                 "LONGITUDE"     => lon,
-                "LON_INDEX"     => lon_ind(lon; res = 1/dtl.gz),
+                "LON_INDEX"     => lon_ind(lon; res = 1/dtl.nx),
                 "MESSAGE_LEVEL" => 0,
-                "RESO_SPACE"    => "$(dtl.gz)X",
+                "RESO_SPACE"    => dtl.nx,
                 "PFT_FRACTIONS" => pfts,
                 "SOIL_COLOR"    => scolor,
                 "SOIL_N"        => s_n,

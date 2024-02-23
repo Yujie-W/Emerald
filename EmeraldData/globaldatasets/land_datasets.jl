@@ -21,8 +21,8 @@ Base.@kwdef mutable struct LandDatasetLabels
     gm_tag::String
     "Which year do the datasets apply (when applicable)"
     year::Int
-    "Spatial resolution zoom factor, resolution is 1/gz °"
-    gz::Int
+    "Spatial resolution zoom factor, resolution is 1/nx °"
+    nx::Int
     "GriddingMachine.jl tag for soil color class"
     tag_s_cc::String
     "GriddingMachine.jl tag for soil van Genuchten parameters"
@@ -69,7 +69,7 @@ LandDatasetLabels(gm_tag::String, year::Int) = (
         dtl = LandDatasetLabels(
                     gm_tag    = gm_tag,
                     year      = year,
-                    gz        = 1,
+                    nx        = 1,
                     tag_s_cc  = "SC_2X_1Y_V1",
                     tag_s_α   = "SOIL_VGA_12X_1Y_V1",
                     tag_s_n   = "SOIL_VGN_12X_1Y_V1",
@@ -88,7 +88,7 @@ LandDatasetLabels(gm_tag::String, year::Int) = (
         dtl = LandDatasetLabels(
                     gm_tag    = gm_tag,
                     year      = year,
-                    gz        = 1,
+                    nx        = 1,
                     tag_s_cc  = "SC_2X_1Y_V1",
                     tag_s_α   = "SOIL_VGA_12X_1Y_V1",
                     tag_s_n   = "SOIL_VGN_12X_1Y_V1",
@@ -107,7 +107,7 @@ LandDatasetLabels(gm_tag::String, year::Int) = (
         dtl = LandDatasetLabels(
                     gm_tag    = gm_tag,
                     year      = year,
-                    gz        = 1,
+                    nx        = 1,
                     tag_s_cc  = "SC_2X_1Y_V1",
                     tag_s_α   = "SOIL_VGA_12X_1Y_V1",
                     tag_s_n   = "SOIL_VGN_12X_1Y_V1",
@@ -153,37 +153,37 @@ Base.@kwdef mutable struct LandDatasets{FT<:AbstractFloat}
 
     # soil properties
     "Soil color class"
-    s_cc::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_cc))[1], LABELS.gz);
+    s_cc::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_cc))[1], LABELS.nx);
     "Soil van Genuchten α"
-    s_α::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_α))[1], LABELS.gz)
+    s_α::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_α))[1], LABELS.nx)
     "Soil van Genuchten n"
-    s_n::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_n))[1], LABELS.gz)
+    s_n::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_n))[1], LABELS.nx)
     "Soil van Genuchten Θr"
-    s_Θr::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θr))[1], LABELS.gz)
+    s_Θr::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θr))[1], LABELS.nx)
     "Soil van Genuchten Θs"
-    s_Θs::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θs))[1], LABELS.gz)
+    s_Θs::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θs))[1], LABELS.nx)
 
     # plant properties
     "Plant canopy height"
-    p_ch::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_ch))[1], LABELS.gz)
+    p_ch::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_ch))[1], LABELS.nx)
     "Plant chlorophyll content"
-    p_chl::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_chl))[1], LABELS.gz)
+    p_chl::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_chl))[1], LABELS.nx)
     "Stand clumping index"
-    p_ci::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_ci))[1], LABELS.gz)
+    p_ci::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_ci))[1], LABELS.nx)
     "Stand leaf area index"
-    p_lai::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_lai))[1], LABELS.gz)
+    p_lai::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_lai))[1], LABELS.nx)
     "Plant leaf specific area"
-    p_sla::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_sla))[1], LABELS.gz)
+    p_sla::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_sla))[1], LABELS.nx)
     "Plant maximum carboxylation rate"
-    p_vcm::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_vcm))[1], LABELS.gz)
+    p_vcm::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_vcm))[1], LABELS.nx)
 
     # stand properties
     "Stand elevation"
-    t_ele::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_ele))[1], LABELS.gz)
+    t_ele::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_ele))[1], LABELS.nx)
     "Stand land mask"
-    t_lm::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_lm))[1], LABELS.gz)
+    t_lm::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_lm))[1], LABELS.nx)
     "Stand PFT percentages `[%]`"
-    t_pft::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_pft))[1], LABELS.gz)
+    t_pft::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_pft))[1], LABELS.nx)
 
     # masks
     "Mask for bare soil"

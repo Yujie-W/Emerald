@@ -32,11 +32,13 @@ CACHE_SPAC    = nothing;
 CACHE_STATE   = nothing;
 
 
-include("driver.jl");
+include("initialize.jl");
+include("threads.jl");
+
+
 include("cache.jl");
 include("save.jl");
 include("simulation.jl");
-include("threads.jl");
 
 
 end; # module

@@ -1,60 +1,4 @@
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2023-Mar-13: add function to initialize the CACHE_SPAC
-#     2023-Mar-13: initialize CACHE_STATE at the same time
-#     2023-Mar-13: initialize CACHE_CONFIG at the same time
-#     2023-Jun-15: make sure prescribed swc does not exceed the limits
-#     2024-Feb-22: remove state and auxil from spac struct
-# Bug fixes
-#     2023-Aug-26: make sure sza < 89 when total radiation is higher than 10 W m⁻²
-#
-#######################################################################################################################################################################################################
-"""
 
-    initialize_cache!(FT)
-
-Initialize the global parameter `CACHE_SPAC`, given
-- `FT` Floating type
-
-"""
-function initialize_cache!(FT)
-    global CACHE_CONFIG, CACHE_SPAC, CACHE_STATE;
-
-    # create a SPAC to work on
-    z_canopy = FT(10);
-    CACHE_CONFIG = SPACConfiguration{FT}();
-    CACHE_SPAC = BulkSPAC(
-                CACHE_CONFIG;
-                air_bounds = collect(0:21) * z_canopy / 20,
-                latitude = 0,
-                longitude = 0,
-                soil_bounds = [0, -0.1, -0.35, -1, -3],
-                plant_zs = [-2, z_canopy/2, z_canopy]);
-
-    # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
-    # for _organ in [CACHE_SPAC.plant.leaves; CACHE_SPAC.plant.branches; CACHE_SPAC.plant.trunk; CACHE_SPAC.plant.roots]
-    #     _organ.xylem.state.vc.B = 3;
-    #     _organ.xylem.state.vc.C = 1;
-    # end;
-
-    # update leaf mass per area and stomtal model
-    @inline linear_p_soil(x) = min(1, max(eps(FT), 1 + x / 5));
-    bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
-    for leaf in CACHE_SPAC.plant.leaves
-        leaf.flux.state.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = bt);
-    end;
-
-    # initialize the spac with non-saturated soil
-    prescribe_soil!(CACHE_SPAC; swcs = Tuple(max(soil.state.vc.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.soils));
-    initialize!(CACHE_CONFIG, CACHE_SPAC);
-
-    # create a state struct based on the spac
-    CACHE_STATE = BulkSPACStates(CACHE_SPAC);
-
-    return nothing
-end;
 
 
 #######################################################################################################################################################################################################
@@ -135,8 +79,18 @@ function synchronize_cache!(gm_params::Dict{String,Any}, wd_params::Dict{String,
     CACHE_SPAC.meteo.rad_lw = wd_params["RAD_LW"];
 
     # update solar zenith angle based on the time
+
+
+
+
     _sza = solar_zenith_angle(CACHE_SPAC.info.lat, FT(wd_params["FDOY"]));
+
+
+
+
     CACHE_SPAC.canopy.sun_geometry.state.sza = (wd_params["RAD_DIR"] + wd_params["RAD_DIF"] > 10) ? min(_sza, 88.999) : _sza;
+
+
 
     # prescribe soil water content
     if "SWC" in keys(wd_params)
