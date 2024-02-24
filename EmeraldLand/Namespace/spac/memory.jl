@@ -25,7 +25,7 @@ Base.@kwdef mutable struct PlantMemory{FT}
     "LAI used for last time step"
     lai::FT = -1
     "Memory about the historical temperature"
-    t_history::Vector{FT} = ones(FT,10) .* FT(NaN)
+    t_history::Vector{FT} = FT[298]
     "Vcmax25 used for last time step"
     vcmax25::FT = -1
 end;
@@ -33,7 +33,7 @@ end;
 sync_state!(state_from::PlantMemory{FT}, state_to::PlantMemory{FT}) where {FT} = (
     state_to.chl = state_from.chl;
     state_to.lai = state_from.lai;
-    state_to.t_history .= state_from.t_history;
+    state_to.t_history = deepcopy(state_from.t_history);
     state_to.vcmax25 = state_from.vcmax25;
 
     return nothing

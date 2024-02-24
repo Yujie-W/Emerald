@@ -11,25 +11,46 @@ GMDATA_VER = "gm3";
 WDRIVER_VER = "wd1";
 
 if gethostname()[1:5] == "curry"
-    # define the datasets, grids, states, and weather drivers
+    # define the
+    #     dts: land datasets
+    #     gms: griddingmachine dataset matrix
+    #     wds: preloaded weather drivers
+    #     iss: initial soil and skin states
+    #     wdi: weather drivers snapshot matrix
+    #     mss: initial states snapshot matrix
     dts = EmeraldData.GlobalDatasets.LandDatasets{FT}(GMDATA_VER, 2019);
     gms = EmeraldData.GlobalDatasets.grid_dict_mat(dts);
     wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1);
     iss = EmeraldData.WeatherDrivers.initial_soil_skin_states(WDRIVER_VER, 2019, 1, 1);
-
-    # use multiple threads on curry
-    EmeraldEarth.add_threads!(32, FT);
     wdi = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
     mss = EmeraldData.WeatherDrivers.initial_states_snapshot(iss);
 
-    EmeraldEarth.initial_states(gms, wdi, mss)
+    # use multiple threads on curry
+    EmeraldEarth.add_threads!(32, FT);
+
+    # prepare the initial states matrix
+    sts = EmeraldEarth.initial_states(gms, wdi, mss);
 
 
-    EmeraldEarth.initial_state(gms[1], wdi[1], mss[1])
+    gm11 = gms[1,1];
+    wd11 = wdi[1,1];
+    st11 = deepcopy(sts[1,1]);
+
+
+    begin
+        EmeraldLand.Namespace.sync_state!(st11, EmeraldEarth.CACHE_SPAC);
+        EmeraldEarth.prescribe_traits_environment!(gm11, wd11);
+        EmeraldLand.SPAC.spac!(EmeraldEarth.CACHE_CONFIG, EmeraldEarth.CACHE_SPAC, 3600);
+    end;
+
+
+    st11 = EmeraldEarth.grid_simulation!(gm11, wd11, st11);
 
 
 
-    sts = Matrix{Union{Nothing,EmeraldLand.Namespace.BulkSPACStates{FT}}}(nothing, size(dts.t_lm));
+    EmeraldEarth.grid_simulation!(gms[1,1], wdi[1,1], sts[1,1]);
+
+
     wdi = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
 
 

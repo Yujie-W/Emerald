@@ -37,9 +37,10 @@ include("threads.jl");
 include("initialize.jl");
 
 
-include("sync.jl");
-include("save.jl");
 include("simulation.jl");
+
+
+include("save.jl");
 
 
 end; # module

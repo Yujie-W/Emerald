@@ -40,9 +40,6 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     _df_wnd::FT = dfr.WIND;
 
     # adjust optimum t based on 10 day moving average skin temperature
-    _tleaf = nanmean([_layer.energy.auxil.t for _layer in spac.plant.leaves]);
-    push!(spac.plant.memory.t_history, _tleaf);
-    if length(spac.plant.memory.t_history) > 240 deleteat!(spac.plant.memory.t_history,1) end;
     prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.t_history));
 
     # prescribe soil water contents and leaf temperature (for version B1 only)
@@ -202,6 +199,9 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
 
     # run the model
     soil_plant_air_continuum!(config, spac, δt);
+    mean_tleaf = nanmean([l.energy.auxil.t for l in spac.plant.leaves]);
+    push!(spac.plant.memory.t_history, mean_tleaf);
+    if length(spac.plant.memory.t_history) > 240 deleteat!(spac.plant.memory.t_history,1) end;
 
     # save the SIF and reflectance if there is sunlight
     if _df_dir + _df_dif >= 10
