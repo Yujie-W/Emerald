@@ -48,23 +48,6 @@ Base.@kwdef mutable struct LeafBioState{FT<:AbstractFloat}
     ϕ_car_ppar::FT = 0
 end;
 
-sync_state!(state_from::LeafBioState{FT}, state_to::LeafBioState{FT}) where {FT} = (
-    state_to.ant = state_from.ant;
-    state_to.brown = state_from.brown;
-    state_to.cab = state_from.cab;
-    state_to.car = state_from.car;
-    state_to.cbc = state_from.cbc;
-    state_to.f_zeax = state_from.f_zeax;
-    state_to.lma = state_from.lma;
-    state_to.meso_n = state_from.meso_n;
-    state_to.pro = state_from.pro;
-    state_to.width = state_from.width;
-    state_to.ϕ_car = state_from.ϕ_car;
-    state_to.ϕ_car_ppar = state_from.ϕ_car_ppar;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #

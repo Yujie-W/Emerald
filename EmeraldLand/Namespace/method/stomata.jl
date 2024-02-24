@@ -58,14 +58,6 @@ Base.@kwdef mutable struct AndereggSM{FT<:AbstractFloat} <: AbstractStomataModel
     K::FT = 1e-7
 end;
 
-sync_state!(state_from::AndereggSM{FT}, state_to::AndereggSM{FT}) where {FT} = (
-    state_to.A = state_from.A;
-    state_to.B = state_from.B;
-    state_to.K = state_from.K;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -102,15 +94,6 @@ Base.@kwdef mutable struct BallBerrySM{FT<:AbstractFloat} <: AbstractStomataMode
     τ::FT = 600
 end;
 
-sync_state!(state_from::BallBerrySM{FT}, state_to::BallBerrySM{FT}) where {FT} = (
-    state_to.G0 = state_from.G0;
-    state_to.G1 = state_from.G1;
-    sync_state!(state_from.β, state_to.β);
-    state_to.τ = state_from.τ;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -134,12 +117,6 @@ Base.@kwdef mutable struct EllerSM{FT<:AbstractFloat} <: AbstractStomataModel{FT
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
 end;
-
-sync_state!(state_from::EllerSM{FT}, state_to::EllerSM{FT}) where {FT} = (
-    state_to.K = state_from.K;
-
-    return nothing
-);
 
 
 #######################################################################################################################################################################################################
@@ -177,15 +154,6 @@ Base.@kwdef mutable struct GentineSM{FT<:AbstractFloat} <: AbstractStomataModel{
     "Time constant for the prognostic stomatal conductance `[s]`"
     τ::FT = 600
 end;
-
-sync_state!(state_from::GentineSM{FT}, state_to::GentineSM{FT}) where {FT} = (
-    state_to.G0 = state_from.G0;
-    state_to.G1 = state_from.G1;
-    sync_state!(state_from.β, state_to.β);
-    state_to.τ = state_from.τ;
-
-    return nothing
-);
 
 
 #######################################################################################################################################################################################################
@@ -225,16 +193,6 @@ Base.@kwdef mutable struct LeuningSM{FT<:AbstractFloat} <: AbstractStomataModel{
     τ::FT = 600
 end;
 
-sync_state!(state_from::LeuningSM{FT}, state_to::LeuningSM{FT}) where {FT} = (
-    state_to.D0 = state_from.D0;
-    state_to.G0 = state_from.G0;
-    state_to.G1 = state_from.G1;
-    sync_state!(state_from.β, state_to.β);
-    state_to.τ = state_from.τ;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -271,15 +229,6 @@ Base.@kwdef mutable struct MedlynSM{FT<:AbstractFloat} <: AbstractStomataModel{F
     τ::FT = 600
 end;
 
-sync_state!(state_from::MedlynSM{FT}, state_to::MedlynSM{FT}) where {FT} = (
-    state_to.G0 = state_from.G0;
-    state_to.G1 = state_from.G1;
-    sync_state!(state_from.β, state_to.β);
-    state_to.τ = state_from.τ;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -303,12 +252,6 @@ Base.@kwdef mutable struct SperrySM{FT<:AbstractFloat} <: AbstractStomataModel{F
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
 end;
-
-sync_state!(state_from::SperrySM{FT}, state_to::SperrySM{FT}) where {FT} = (
-    state_to.K = state_from.K;
-
-    return nothing
-);
 
 
 #######################################################################################################################################################################################################
@@ -335,13 +278,6 @@ Base.@kwdef mutable struct WangSM{FT<:AbstractFloat} <: AbstractStomataModel{FT}
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
 end;
-
-sync_state!(state_from::WangSM{FT}, state_to::WangSM{FT}) where {FT} = (
-    state_to.F_FITNESS = state_from.F_FITNESS;
-    state_to.K = state_from.K;
-
-    return nothing
-);
 
 
 #######################################################################################################################################################################################################
@@ -373,10 +309,3 @@ Base.@kwdef mutable struct Wang2SM{FT<:AbstractFloat} <: AbstractStomataModel{FT
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
 end;
-
-sync_state!(state_from::Wang2SM{FT}, state_to::Wang2SM{FT}) where {FT} = (
-    state_to.A = state_from.A;
-    state_to.K = state_from.K;
-
-    return nothing
-);

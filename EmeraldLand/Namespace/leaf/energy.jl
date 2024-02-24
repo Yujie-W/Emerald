@@ -24,12 +24,6 @@ Base.@kwdef mutable struct LeafEnergyState{FT}
     Σe::FT = 0
 end;
 
-sync_state!(state_from::LeafEnergyState{FT}, state_to::LeafEnergyState{FT}) where {FT} = (
-    state_to.Σe = state_from.Σe;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #

@@ -25,5 +25,3 @@ struct GCO₂Mode <: AbstractPhotosynthesisMode end;
 
 """ An empty structure to signal the function to calculate photosynthetic rates based on CO₂ partial pressure """
 struct PCO₂Mode <: AbstractPhotosynthesisMode end;
-
-sync_state!(state_from::AbstractPhotosynthesisMode, state_to::AbstractPhotosynthesisMode) = nothing;

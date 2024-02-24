@@ -14,6 +14,7 @@ using NetcdfIO: read_nc
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
+using ..EmeraldUtility.StructEqual: sync_struct!
 
 
 # Please do not use V1/V2/V3 files here as they do not contain the Phi_PSI and Phi_PSII variables
@@ -24,15 +25,7 @@ const LAND_2021_1NM = artifact"land_model_spectrum_V6" * "/clima_land_spectra_1n
 const SOIL_TEXT     = read_csv("$(@__DIR__)/../../data/SOIL-TEXTURE.csv");
 
 
-# general function to use in the namespace
-"""
-
-    sync_state!(from, to)
-
-Synchonize the state variables from one to another
-
-"""
-function sync_state! end;
+include("sync_state.jl");
 
 
 # The configuration of the SPAC system

@@ -48,10 +48,3 @@ ColimitCJCLMC3(FT) = QuadraticColimit{FT}(CURVATURE = 0.98);
 ColimitCJCLMC4(FT) = QuadraticColimit{FT}(CURVATURE = 0.8);
 ColimitIPCLM(FT) = QuadraticColimit{FT}(CURVATURE = 0.95);
 ColimitJCLM(FT)  = QuadraticColimit{FT}(CURVATURE = 0.7);
-
-sync_state!(state_from::AbstractColimit{FT}, state_to::AbstractColimit{FT}) where {FT} = nothing;
-sync_state!(state_from::QuadraticColimit{FT}, state_to::QuadraticColimit{FT}) where {FT} = (
-    state_to.CURVATURE = state_from.CURVATURE;
-
-    return nothing
-);

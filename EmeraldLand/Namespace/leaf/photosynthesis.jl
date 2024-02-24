@@ -74,33 +74,6 @@ Base.@kwdef mutable struct C3CytoState{FT}
     v_cmax25::FT = 50
 end;
 
-sync_state!(state_from::C3CytoState{FT}, state_to::C3CytoState{FT}) where {FT} = (
-    state_to.EFF_1 = state_from.EFF_1;
-    state_to.EFF_2 = state_from.EFF_2;
-    sync_state!(state_from.COLIMIT_CJ, state_to.COLIMIT_CJ);
-    sync_state!(state_from.COLIMIT_IP, state_to.COLIMIT_IP);
-    sync_state!(state_from.COLIMIT_J, state_to.COLIMIT_J);
-    sync_state!(state_from.TD_KC, state_to.TD_KC);
-    sync_state!(state_from.TD_KO, state_to.TD_KO);
-    sync_state!(state_from.TD_KQ, state_to.TD_KQ);
-    sync_state!(state_from.TD_R, state_to.TD_R);
-    sync_state!(state_from.TD_VCMAX, state_to.TD_VCMAX);
-    sync_state!(state_from.TD_Γ, state_to.TD_Γ);
-    sync_state!(state_from.TD_ηC, state_to.TD_ηC);
-    sync_state!(state_from.TD_ηL, state_to.TD_ηL);
-    state_to.K_D = state_from.K_D;
-    state_to.K_F = state_from.K_F;
-    state_to.K_PSI = state_from.K_PSI;
-    state_to.K_PSII = state_from.K_PSII;
-    state_to.K_U = state_from.K_U;
-    state_to.K_X = state_from.K_X;
-    state_to.b₆f = state_from.b₆f;
-    state_to.r_d25 = state_from.r_d25;
-    state_to.v_cmax25 = state_from.v_cmax25;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -173,30 +146,6 @@ Base.@kwdef mutable struct C3VJPState{FT}
     v_cmax25::FT = 50
 end;
 
-sync_state!(state_from::C3VJPState{FT}, state_to::C3VJPState{FT}) where {FT} = (
-    state_to.EFF_1 = state_from.EFF_1;
-    state_to.EFF_2 = state_from.EFF_2;
-    sync_state!(state_from.COLIMIT_CJ, state_to.COLIMIT_CJ);
-    sync_state!(state_from.COLIMIT_IP, state_to.COLIMIT_IP);
-    sync_state!(state_from.COLIMIT_J, state_to.COLIMIT_J);
-    sync_state!(state_from.TD_JMAX, state_to.TD_JMAX);
-    sync_state!(state_from.TD_KC, state_to.TD_KC);
-    sync_state!(state_from.TD_KO, state_to.TD_KO);
-    sync_state!(state_from.TD_R, state_to.TD_R);
-    sync_state!(state_from.TD_VCMAX, state_to.TD_VCMAX);
-    sync_state!(state_from.TD_Γ, state_to.TD_Γ);
-    state_to.K_D = state_from.K_D;
-    state_to.K_F = state_from.K_F;
-    state_to.K_PSII = state_from.K_PSII;
-    sync_state!(state_from.FLM, state_to.FLM);
-    state_to.j_max25 = state_from.j_max25;
-    state_to.k_npq_sus = state_from.k_npq_sus;
-    state_to.r_d25 = state_from.r_d25;
-    state_to.v_cmax25 = state_from.v_cmax25;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -256,25 +205,6 @@ Base.@kwdef mutable struct C4VJPState{FT}
     "Maximal PEP carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     v_pmax25::FT = 50
 end;
-
-sync_state!(state_from::C4VJPState{FT}, state_to::C4VJPState{FT}) where {FT} = (
-    sync_state!(state_from.COLIMIT_CJ, state_to.COLIMIT_CJ);
-    sync_state!(state_from.COLIMIT_IP, state_to.COLIMIT_IP);
-    sync_state!(state_from.TD_KPEP, state_to.TD_KPEP);
-    sync_state!(state_from.TD_R, state_to.TD_R);
-    sync_state!(state_from.TD_VCMAX, state_to.TD_VCMAX);
-    sync_state!(state_from.TD_VPMAX, state_to.TD_VPMAX);
-    state_to.K_D = state_from.K_D;
-    state_to.K_F = state_from.K_F;
-    state_to.K_PSII = state_from.K_PSII;
-    sync_state!(state_from.FLM, state_to.FLM);
-    state_to.k_npq_sus = state_from.k_npq_sus;
-    state_to.r_d25 = state_from.r_d25;
-    state_to.v_cmax25 = state_from.v_cmax25;
-    state_to.v_pmax25 = state_from.v_pmax25;
-
-    return nothing
-);
 
 
 #######################################################################################################################################################################################################

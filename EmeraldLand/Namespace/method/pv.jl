@@ -46,13 +46,6 @@ Base.@kwdef mutable struct ExponentialPVCurve{FT<:AbstractFloat} <: AbstractPVCu
     slope::FT = 0.2
 end;
 
-sync_state!(state_from::ExponentialPVCurve{FT}, state_to::ExponentialPVCurve{FT}) where {FT} = (
-    state_to.k_refill = state_from.k_refill;
-    state_to.slope = state_from.slope;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -79,13 +72,6 @@ Base.@kwdef mutable struct LinearPVCurve{FT<:AbstractFloat} <: AbstractPVCurve{F
     "Slope of the linear PV curve (relative to maximum) `[MPa⁻¹]`"
     slope::FT = 0.2
 end;
-
-sync_state!(state_from::LinearPVCurve{FT}, state_to::LinearPVCurve{FT}) where {FT} = (
-    state_to.k_refill = state_from.k_refill;
-    state_to.slope = state_from.slope;
-
-    return nothing
-);
 
 
 #######################################################################################################################################################################################################
@@ -119,13 +105,3 @@ Base.@kwdef mutable struct SegmentedPVCurve{FT<:AbstractFloat} <: AbstractPVCurv
     "Bulk modulus of elasticity `[MPa]`"
     ϵ_bulk::FT = 20
 end;
-
-sync_state!(state_from::SegmentedPVCurve{FT}, state_to::SegmentedPVCurve{FT}) where {FT} = (
-    state_to.c_all = state_from.c_all;
-    state_to.k_refill = state_from.k_refill;
-    state_to.θ_apo = state_from.θ_apo;
-    state_to.θ_tlp = state_from.θ_tlp;
-    state_to.ϵ_bulk = state_from.ϵ_bulk;
-
-    return nothing
-);

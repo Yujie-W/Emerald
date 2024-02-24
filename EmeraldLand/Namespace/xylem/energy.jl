@@ -24,12 +24,6 @@ Base.@kwdef mutable struct XylemEnergyState{FT}
     Σe::FT = 0
 end;
 
-sync_state!(state_from::XylemEnergyState{FT}, state_to::XylemEnergyState{FT}) where {FT} = (
-    state_to.Σe = state_from.Σe;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #

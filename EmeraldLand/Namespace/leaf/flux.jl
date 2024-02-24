@@ -33,15 +33,6 @@ end;
 
 LeafFluxState(config::SPACConfiguration{FT}) where {FT} = LeafFluxState{FT}(g_H₂O_s_sunlit = 0.01 .* ones(FT, config.DIM_INCL, config.DIM_AZI));
 
-sync_state!(state_from::LeafFluxState{FT}, state_to::LeafFluxState{FT}) where {FT} = (
-    sync_state!(state_from.stomatal_model, state_to.stomatal_model);
-    state_to.g_limits .= state_from.g_limits;
-    state_to.g_H₂O_s_shaded = state_from.g_H₂O_s_shaded;
-    state_to.g_H₂O_s_sunlit .= state_from.g_H₂O_s_sunlit;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #

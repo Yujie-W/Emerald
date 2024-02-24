@@ -34,14 +34,6 @@ KNFluoscenceModelAll(FT) = KNFluoscenceModel{FT}(K_0 = 2.48, K_A = 2.83, K_B = 0
 
 KNFluoscenceModelDrought(FT) = KNFluoscenceModel{FT}(K_0 = 5.01, K_A = 1.93, K_B = 10);
 
-sync_state!(state_from::KNFluoscenceModel{FT}, state_to::KNFluoscenceModel{FT}) where {FT} = (
-    state_to.K_0 = state_from.K_0;
-    state_to.K_A = state_from.K_A;
-    state_to.K_B = state_from.K_B;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -72,9 +64,3 @@ end;
 QLFluoscenceModelC3(FT) = QLFluoscenceModel{FT}(K_B = 0.95e-3);
 
 QLFluoscenceModelC4(FT) = QLFluoscenceModel{FT}(K_B = 0.63e-3);
-
-sync_state!(state_from::QLFluoscenceModel{FT}, state_to::QLFluoscenceModel{FT}) where {FT} = (
-    state_to.K_B = state_from.K_B;
-
-    return nothing
-);

@@ -25,13 +25,6 @@ Base.@kwdef mutable struct SunGeometryState{FT}
     sza::FT = 30
 end;
 
-sync_state!(state_from::SunGeometryState{FT}, state_to::SunGeometryState{FT}) where {FT} = (
-    state_to.saa = state_from.saa;
-    state_to.sza = state_from.sza;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #

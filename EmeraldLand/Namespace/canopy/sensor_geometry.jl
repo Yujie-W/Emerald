@@ -25,13 +25,6 @@ Base.@kwdef mutable struct SensorGeometryState{FT}
     vza::FT = 0
 end;
 
-sync_state!(state_from::SensorGeometryState{FT}, state_to::SensorGeometryState{FT}) where {FT} = (
-    state_to.vaa = state_from.vaa;
-    state_to.vza = state_from.vza;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -193,8 +186,14 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometry{FT}
+    "Trait variables"
+    trait::Nothing = nothing
     "State variables"
     state::SensorGeometryState{FT} = SensorGeometryState{FT}()
+    "Trait-dependent variables"
+    t_aux::Nothing = nothing
+    "State-dependent variables"
+    s_aux::Nothing = nothing
     "Auxiliary variables"
     auxil::SensorGeometryAuxil{FT}
 end;

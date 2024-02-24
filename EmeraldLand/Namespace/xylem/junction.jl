@@ -29,15 +29,6 @@ Base.@kwdef mutable struct JunctionCapacitorState{FT}
     v_max::FT = 5000
 end;
 
-sync_state!(state_from::JunctionCapacitorState{FT}, state_to::JunctionCapacitorState{FT}) where {FT} = (
-    state_to.Σe = state_from.Σe;
-    sync_state!(state_from.pv, state_to.pv);
-    state_to.v_storage = state_from.v_storage;
-    state_to.v_max = state_from.v_max;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
