@@ -27,6 +27,7 @@ end;
 # Changes to this function
 # General
 #     2024-Feb-23: add function to initialize the state based on the gridding machine, weather driver, and initial state
+#     2024-Feb-23: set up SAI as well
 #
 #######################################################################################################################################################################################################
 """
@@ -64,6 +65,9 @@ initial_state(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Dic
         spac.plant.leaves[i].flux.state.stomatal_model = deepcopy(CACHE_SPAC.plant.leaves[i].flux.state.stomatal_model);
         spac.plant.leaves[i].flux.state.stomatal_model.G1 = gm_dict["G1_MEDLYN_C3"];
     end;
+
+    # set up SAI
+    prescribe_traits!(CACHE_CONFIG, spac; sai = gm_dict["SAI"]);
 
     # update soil type information per layer
     for i in eachindex(spac.soils)

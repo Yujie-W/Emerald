@@ -95,7 +95,6 @@ function prescribe_soil!(spac::BulkSPAC{FT}; swcs::Union{Tuple,Nothing} = nothin
     if !isnothing(swcs)
         for i in eachindex(swcs)
             soils[i].state.θ = max(soils[i].state.vc.Θ_RES + eps(FT), min(soils[i].state.vc.Θ_SAT - eps(FT), swcs[i]));
-            initialize_states!(soils[i], airs[1]);
         end;
     end;
 
@@ -103,7 +102,6 @@ function prescribe_soil!(spac::BulkSPAC{FT}; swcs::Union{Tuple,Nothing} = nothin
     if !isnothing(t_soils)
         for i in eachindex(t_soils)
             soils[i].auxil.t = t_soils[i];
-            initialize_states!(soils[i], airs[1]);
         end;
     end;
 
@@ -210,9 +208,10 @@ function prescribe_traits!(
 
     # update LAI and Vcmax (with scaling factor)
     if !isnothing(lai)
-        can_str.state.lai = lai;
-        can_str.state.δlai = lai .* ones(FT, n_layer) ./ n_layer;
-        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:n_layer]] ./ -(lai + can_str.state.sai));
+        epslai = max(eps(FT), lai);
+        can_str.state.lai = epslai;
+        can_str.state.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
+        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:n_layer]] ./ -(epslai + can_str.state.sai));
         for irt in 1:n_layer
             ilf = n_layer - irt + 1;
             leaves[ilf].xylem.state.area = sbulk.state.area * can_str.state.δlai[irt];

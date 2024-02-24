@@ -7,6 +7,7 @@
 #     2023-Aug-25: interpolate the data after reading from GriddingMachine
 #     2024-Feb-22: separate the grid_dict function from the gm_grids function that prepare all the grids
 #     2024-Feb-23: use 0 for the plant-related fields for non-vegetated land
+#     2024-Feb-23: set SAI to be 1/10 of the maximum LAI
 #
 #######################################################################################################################################################################################################
 """
@@ -59,6 +60,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                     "MESSAGE_LEVEL" => 0,
                     "PFT_FRACTIONS" => [0],
                     "RESO_SPACE"    => dts.LABELS.nx,
+                    "SAI"           => 0,
                     "SOIL_COLOR"    => scolor,
                     "SOIL_N"        => s_n,
                     "SOIL_α"        => s_α,
@@ -128,6 +130,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                 "MESSAGE_LEVEL" => 0,
                 "PFT_FRACTIONS" => pfts,
                 "RESO_SPACE"    => dts.LABELS.nx,
+                "SAI"           => nanmax(lais) / 10,
                 "SOIL_COLOR"    => scolor,
                 "SOIL_N"        => s_n,
                 "SOIL_α"        => s_α,
@@ -219,6 +222,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
                 "MESSAGE_LEVEL" => 0,
                 "RESO_SPACE"    => dtl.nx,
                 "PFT_FRACTIONS" => pfts,
+                "SAI"           => nanmax(lais) / 10,
                 "SOIL_COLOR"    => scolor,
                 "SOIL_N"        => s_n,
                 "SOIL_α"        => s_α,

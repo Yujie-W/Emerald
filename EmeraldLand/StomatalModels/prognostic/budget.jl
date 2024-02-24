@@ -22,7 +22,7 @@ Update stomatal conductance for H₂O based on computed ∂g∂t, given
 """
 stomatal_conductance!(spac::BulkSPAC{FT}, δt::FT) where {FT} = (
     # if lai = 0 or roots are not connected, do nothing
-    if spac.canopy.structure.state.lai == 0 || !spac.plant._root_connection
+    if spac.canopy.structure.state.lai <= 0 || !spac.plant._root_connection
         return nothing
     end;
 

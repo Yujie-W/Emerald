@@ -99,6 +99,7 @@ grid_simulation!(gm_dict::Nothing, wd_dict::Dict{String,Any}, state::Nothing) = 
 grid_simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::BulkSPACStates) = (
     sync_state!(state, CACHE_SPAC);
 
+    initialize_spac!(CACHE_CONFIG, CACHE_SPAC);
     prescribe_traits_environment!(gm_dict, wd_dict);
     soil_plant_air_continuum!(CACHE_CONFIG, CACHE_SPAC, 3600);
     mean_tleaf = nanmean([_layer.energy.auxil.t for _layer in CACHE_SPAC.plant.leaves]);

@@ -39,6 +39,7 @@ if gethostname()[1:5] == "curry"
 
     begin
         EmeraldLand.Namespace.sync_state!(st11, EmeraldEarth.CACHE_SPAC);
+        EmeraldLand.SPAC.initialize_spac!(EmeraldEarth.CACHE_CONFIG, EmeraldEarth.CACHE_SPAC);
         EmeraldEarth.prescribe_traits_environment!(gm11, wd11);
         EmeraldLand.SPAC.spac!(EmeraldEarth.CACHE_CONFIG, EmeraldEarth.CACHE_SPAC, 3600);
     end;

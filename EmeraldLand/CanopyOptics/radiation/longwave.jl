@@ -7,6 +7,7 @@
 #     2023-Oct-11: add function longwave_radiation!
 #     2023-Oct-14: if LAI <= 0, run soil longwave radiation only
 #     2023-Oct-18: partition the energy between leaf and stem
+#     2024-Feb-23: fix the energy budget when lai=0 but sai>0
 #
 #######################################################################################################################################################################################################
 """
@@ -55,7 +56,11 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
         # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
         f_leaf = can_str.state.δlai[irt] / (can_str.state.δlai[irt] + can_str.state.δsai[irt]);
         f_stem = 1 - f_leaf;
-        can_str.auxil.lw_layer_leaf[irt] = leaf.energy.auxil.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
+        if f_leaf > 0
+            can_str.auxil.lw_layer_leaf[irt] = leaf.energy.auxil.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
+        else
+            can_str.auxil.lw_layer_leaf[irt] = 0;
+        end;
         can_str.auxil.lw_layer_stem[irt] = stem.energy.auxil.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
         can_str.auxil.lw_layer[irt] = can_str.auxil.lw_layer_leaf[irt] + can_str.auxil.lw_layer_stem[irt];
     end;
