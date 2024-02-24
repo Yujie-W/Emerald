@@ -9,7 +9,7 @@ using ..EmeraldData.WeatherDrivers: weather_driver_file
 using ..EmeraldLand.Namespace: BulkSPAC, SPACConfiguration
 using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PAR, PPAR, T_VEG, ΦDFNP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF
 using ..EmeraldLand.SPAC: MODIS_BLUE, MODIS_EVI, MODIS_NDVI, MODIS_NIR, MODIS_NIRv, MODIS_NIRvR, MODIS_RED, OCO2_SIF759, OCO2_SIF770, TROPOMI_SIF683, TROPOMI_SIF740
-using ..EmeraldLand.SPAC: initialize!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!
+using ..EmeraldLand.SPAC: initialize_spac!, initialize_states!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!
 using ..EmeraldMath.Data: interpolate_data
 using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O

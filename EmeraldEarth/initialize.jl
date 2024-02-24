@@ -112,7 +112,8 @@ initial_state(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Dic
     prescribe_traits!(CACHE_CONFIG, spac; cab = chl, car = chl / 7);
 
     # initialize the spac with non-saturated soil
-    initialize!(CACHE_CONFIG, spac);
+    initialize_states!(CACHE_CONFIG, spac);
+    initialize_spac!(CACHE_CONFIG, spac);
     soil_plant_air_continuum!(CACHE_CONFIG, spac, FT(0));
     sync_state!(spac, CACHE_STATE);
 

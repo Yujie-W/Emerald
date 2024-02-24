@@ -25,6 +25,7 @@ using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductan
 
 
 # general instructions to run SPAC
+include("instructions/initialize_state.jl");
 include("instructions/initialize.jl");
 include("instructions/prescribe.jl");
 include("instructions/update_auxil.jl");

@@ -7,7 +7,8 @@ import Emerald.EmeraldLand.SPAC as SPAC
     @testset "State constructors" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_states!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         states = NS.BulkSPACStates(spac);
         @test true;
         NS.sync_state!(spac, states);

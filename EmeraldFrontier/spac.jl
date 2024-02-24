@@ -60,7 +60,8 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     prescribe_traits!(config, _spac; vcmax = nanmean(gmdict["VCMAX25"]), vcmax_expo = 0.3);
 
     # initialize the spac
-    initialize!(config, _spac);
+    initialize_states!(config, _spac);
+    initialize_spac!(config, _spac);
 
     return _spac
 end;
