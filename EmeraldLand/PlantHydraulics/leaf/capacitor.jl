@@ -17,10 +17,10 @@ Update the extraxylary pressure profile, given
 """
 function extraxylary_pressure_profile! end;
 
-extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT} = extraxylary_pressure_profile!(leaf.xylem.state, leaf.xylem.auxil, leaf.capacitor.trait, leaf.capacitor.auxil, leaf.energy.s_aux.t);
+extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT} = extraxylary_pressure_profile!(leaf.xylem.trait, leaf.xylem.auxil, leaf.capacitor.trait, leaf.capacitor.auxil, leaf.energy.s_aux.t);
 
 extraxylary_pressure_profile!(
-            x_state::XylemHydraulicsState{FT},
+            x_trait::XylemHydraulicsTrait{FT},
             x_auxil::XylemHydraulicsAuxilNSS{FT},
             c_trait::ExtraXylemCapacitorTrait{FT},
             c_auxil::ExtraXylemCapacitorAuxil{FT},
@@ -32,12 +32,12 @@ extraxylary_pressure_profile!(
 );
 
 extraxylary_pressure_profile!(
-            x_state::XylemHydraulicsState{FT},
+            x_trait::XylemHydraulicsTrait{FT},
             x_auxil::XylemHydraulicsAuxilSS{FT},
             c_trait::ExtraXylemCapacitorTrait{FT},
             c_auxil::ExtraXylemCapacitorAuxil{FT},
             t::FT) where {FT} = (
-    k_max = x_state.area * c_trait.k_max;
+    k_max = x_trait.area * c_trait.k_max;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
     flow = flow_out(x_auxil);

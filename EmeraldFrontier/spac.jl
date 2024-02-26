@@ -43,8 +43,8 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
     # for _organ in [spac.plant.leaves; spac.plant.branches; spac.plant.trunk; spac.plant.roots]
-    #     _organ.xylem.state.vc.B = 10;
-    #     _organ.xylem.state.vc.C = 1;
+    #     _organ.xylem.trait.vc.B = 10;
+    #     _organ.xylem.trait.vc.C = 1;
     # end;
 
     # update leaf mass per area and stomtal model

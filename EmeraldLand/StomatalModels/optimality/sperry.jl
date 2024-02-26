@@ -14,7 +14,7 @@
     # compute the E at the current setting
     gs = leaf.flux.state.g_H₂O_s_shaded;
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air * leaf.xylem.state.area;
+    e  = gh * d / air.state.p_air * leaf.xylem.trait.area;
 
     dEdP_1 = ∂E∂P(leaf, e; δe = δe);
     dEdP_2 = ∂E∂P(leaf, e; δe = -δe);
@@ -43,7 +43,7 @@
     # compute the E at the current setting
     gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air * leaf.xylem.state.area;
+    e  = gh * d / air.state.p_air * leaf.xylem.trait.area;
 
     dEdP_1 = ∂E∂P(leaf, e; δe = δe);
     dEdP_2 = ∂E∂P(leaf, e; δe = -δe);

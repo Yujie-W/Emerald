@@ -24,7 +24,7 @@ function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Leaf{FT}, p
     xylem_pressure_profile!(leaf.xylem, leaf.energy.s_aux.t);
     extraxylary_pressure_profile!(leaf);
 
-    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, leaf.energy.s_aux.t, leaf.xylem.auxil.e_crit) / leaf.xylem.state.area;
+    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, leaf.energy.s_aux.t, leaf.xylem.auxil.e_crit) / leaf.xylem.trait.area;
 
     return nothing
 end;

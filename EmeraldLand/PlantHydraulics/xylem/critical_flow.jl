@@ -18,7 +18,7 @@ Return the xylem pressure at the end; of xylem, given
 
 """
 function xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {FT}
-    k_max = xylem.state.area * xylem.state.k_max / xylem.state.l;
+    k_max = xylem.trait.area * xylem.trait.k_max / xylem.trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -30,13 +30,13 @@ function xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {
 
         p₂₅ = p / f_st;
         if p₂₅ < p_mem
-            k = relative_xylem_k(xylem.state.vc, p₂₅) / f_vis * k_max * N;
+            k = relative_xylem_k(xylem.trait.vc, p₂₅) / f_vis * k_max * N;
         else
             k = k_mem / f_vis * k_max * N;
         end;
 
         # flow rate is the mean of that at two planes (i and i+1)
-        p -= flow / k + ρg_MPa(FT) * xylem.state.Δh / N;
+        p -= flow / k + ρg_MPa(FT) * xylem.trait.Δh / N;
     end;
 
     return p
@@ -67,7 +67,7 @@ function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}
     # compute the misc variables
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
-    p_crt = xylem_pressure(xylem.state.vc, KR_THRESHOLD) * f_st;
+    p_crt = xylem_pressure(xylem.trait.vc, KR_THRESHOLD) * f_st;
 
     # add a judgement to make sure p_ups is higher than p_crt
     if xylem.auxil.pressure[1] < p_crt
@@ -75,7 +75,7 @@ function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}
     end;
 
     # set up method to calculate critical flow
-    fh = (xylem.auxil.pressure[1] - p_crt) * xylem.state.k_max * xylem.state.area / f_vis;
+    fh = (xylem.auxil.pressure[1] - p_crt) * xylem.trait.k_max * xylem.trait.area / f_vis;
     fl = FT(0);
     ms = NewtonBisectionMethod{FT}(x_min = fl, x_max = fh, x_ini = min((fh+fl)/2, ini));
     st = SolutionTolerance{FT}(eps(FT)*100, 50);

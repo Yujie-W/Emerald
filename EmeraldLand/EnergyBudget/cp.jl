@@ -29,7 +29,7 @@ heat_capacitance(soil::SoilLayer{FT}; runoff::FT = FT(0)) where {FT} = (
 
 heat_capacitance(xylem::XylemHydraulics{FT}) where {FT} = (
     # The heat capaciatance of the xylem is the sum of the heat capaciatance of the water stored in the xylem and the heat capaciatance of the xylem itself
-    return sum(xylem.state.v_storage) * CP_L_MOL(FT) + xylem.state.cp * xylem.state.area * xylem.state.l
+    return sum(xylem.state.v_storage) * CP_L_MOL(FT) + xylem.trait.cp * xylem.trait.area * xylem.trait.l
 );
 
 heat_capacitance(root::Root{FT}) where {FT} = heat_capacitance(root.xylem);
@@ -41,12 +41,12 @@ heat_capacitance(junc::JunctionCapacitor{FT}) where {FT} = (
 
 heat_capacitance(root::Stem{FT}) where {FT} = heat_capacitance(root.xylem);
 
-heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(leaf.capacitor.state, leaf.xylem.state, leaf.bio.trait);
+heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(leaf.capacitor.state, leaf.xylem.trait, leaf.bio.trait);
 
-heat_capacitance(capst::ExtraXylemCapacitorState{FT}, xylst::XylemHydraulicsState{FT}, biotr::LeafBioTrait{FT}) where {FT} = (
+heat_capacitance(capst::ExtraXylemCapacitorState{FT}, xyltr::XylemHydraulicsTrait{FT}, biotr::LeafBioTrait{FT}) where {FT} = (
     # leaf heat capaciatance is the sum of the heat capaciatance of the water stored in the leaf and the heat capaciatance of the leaf itself
     # here convert lma from g cm⁻² to kg m⁻² with the factor 10
-    return (capst.v_storage * CP_L_MOL(FT) + xylst.cp * biotr.lma * 10) * xylst.area
+    return (capst.v_storage * CP_L_MOL(FT) + xyltr.cp * biotr.lma * 10) * xyltr.area
 );
 
 heat_capacitance(air::AirLayer{FT}) where {FT} = heat_capacitance(air.state);

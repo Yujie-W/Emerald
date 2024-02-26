@@ -213,7 +213,7 @@ function prescribe_traits!(
         can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
         for irt in 1:n_layer
             ilf = n_layer - irt + 1;
-            leaves[ilf].xylem.state.area = sbulk.trait.area * can_str.trait.δlai[irt];
+            leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
         end;
     end;
 
@@ -271,7 +271,7 @@ function prescribe_traits!(
     if !isnothing(kmax)
         # set up the kmax assuming 50% resistance in root, 25% in stem, and 25% in leaves
         ks = if kmax isa Number
-            trunk_percent = trunk.xylem.state.Δh / (trunk.xylem.state.Δh + branches[end].xylem.state.Δh);
+            trunk_percent = trunk.xylem.trait.Δh / (trunk.xylem.trait.Δh + branches[end].xylem.trait.Δh);
             (2 * kmax, 4 * kmax / trunk_percent, 4 * kmax / (1 - trunk_percent), 4 * kmax)
         else
             @assert length(kmax) == 4 "kmax must be a number or a tuple of length 4";
@@ -280,16 +280,16 @@ function prescribe_traits!(
 
         # partition kmax into the roots based on xylem area
         for root in roots
-            # root.xylem.state.k_max = root.xylem.state.area / trunk.xylem.state.area * ks[1] * root.xylem.state.l / root.xylem.state.area;
-            root.xylem.state.k_max = ks[1] * root.xylem.state.l / trunk.xylem.state.area;
+            # root.xylem.trait.k_max = root.xylem.trait.area / trunk.xylem.trait.area * ks[1] * root.xylem.trait.l / root.xylem.trait.area;
+            root.xylem.trait.k_max = ks[1] * root.xylem.trait.l / trunk.xylem.trait.area;
         end;
-        trunk.xylem.state.k_max = ks[2] * trunk.xylem.state.l / trunk.xylem.state.area;
+        trunk.xylem.trait.k_max = ks[2] * trunk.xylem.trait.l / trunk.xylem.trait.area;
         for stem in branches
-            #stem.xylem.state.kmax = stem.xylem.state.area / trunk.xylem.state.area * ks[3] * stem.xylem.state.l / stem.xylem.state.area;
-            stem.xylem.state.kmax = ks[3] * stem.xylem.state.l / trunk.xylem.state.area;
+            #stem.xylem.state.kmax = stem.xylem.trait.area / trunk.xylem.trait.area * ks[3] * stem.xylem.trait.l / stem.xylem.trait.area;
+            stem.xylem.state.kmax = ks[3] * stem.xylem.trait.l / trunk.xylem.trait.area;
         end;
         for leaf in leaves
-            leaf.xylem.state.k_max = ks[4] / (can_str.trait.lai * sbulk.trait.area);
+            leaf.xylem.trait.k_max = ks[4] / (can_str.trait.lai * sbulk.trait.area);
         end;
     end;
 
@@ -303,7 +303,7 @@ function prescribe_traits!(
     # re-initialize leaf energy if LAI or t_leaf is updated
     if !isnothing(lai) || !isnothing(t_leaf)
         for leaf in leaves
-            initialize_states!(leaf; k_sla = leaf.xylem.state.k_max);
+            initialize_states!(leaf; k_sla = leaf.xylem.trait.k_max);
         end;
     end;
 

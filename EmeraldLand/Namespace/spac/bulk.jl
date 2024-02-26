@@ -98,14 +98,14 @@ BulkSPAC(config::SPACConfiguration{FT};
     ind_root = n_root > 1 ? [findfirst(plant_zs[1] .< soil_bounds .< 0) - 1; mask_soil] : mask_soil;
     roots = Root{FT}[Root(config) for _ in 1:n_root];
     for i in eachindex(roots)
-        roots[i].xylem.state.area = basal_area / n_root;
-        roots[i].xylem.state.Δh = 0 - max(plant_zs[1], soil_bounds[ind_root[i]+1]);
+        roots[i].xylem.trait.area = basal_area / n_root;
+        roots[i].xylem.trait.Δh = 0 - max(plant_zs[1], soil_bounds[ind_root[i]+1]);
     end;
 
     # set up the trunk
     trunk = Stem(config);
-    trunk.xylem.state.area = basal_area;
-    trunk.xylem.state.Δh = plant_zs[2];
+    trunk.xylem.trait.area = basal_area;
+    trunk.xylem.trait.Δh = plant_zs[2];
 
     # set up the branches
     mask_air = findall(plant_zs[2] .< air_bounds .< plant_zs[3]);
@@ -113,8 +113,8 @@ BulkSPAC(config::SPACConfiguration{FT};
     ind_layer = n_layer > 1 ? [findfirst(plant_zs[2] .< air_bounds .< plant_zs[3])[1] - 1; mask_air] : mask_air;
     branches = Stem{FT}[Stem(config) for _ in 1:n_layer];
     for i in eachindex(branches)
-        branches[i].xylem.state.area = basal_area / n_layer;
-        branches[i].xylem.state.Δh = (min(plant_zs[3], air_bounds[ind_layer[i]+1]) - plant_zs[2]);
+        branches[i].xylem.trait.area = basal_area / n_layer;
+        branches[i].xylem.trait.Δh = (min(plant_zs[3], air_bounds[ind_layer[i]+1]) - plant_zs[2]);
     end;
 
     # set up the leaves

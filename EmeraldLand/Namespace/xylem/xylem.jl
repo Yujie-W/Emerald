@@ -4,6 +4,44 @@
 #
 # Changes to this struct
 # General
+#     2024-Feb-26: add struct XylemHydraulicsTrait
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for xylem hydraulics
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct XylemHydraulicsTrait{FT}
+    "Area of xylem (root and stem) or of leaf `[m²]`"
+    area::FT = 1
+    "Heat capacity of the xylem per volume or of leaf per mass `[J m⁻³ K⁻¹]`"
+    cp::FT = 1e6
+    "Maximal xylem hydraulic conductivity `[mol s⁻¹ MPa⁻¹ m⁻¹]` for root and stem; `[mol s⁻¹ MPa⁻¹ m⁻²]` for leaf"
+    k_max::FT = 25
+    "Length `[m]`"
+    l::FT = 1
+    "Pressure volume curve"
+    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
+    "Maximum capaciatance per volume of wood `[mol m⁻³]`"
+    v_max::FT = 0.1 * ρ_H₂O() / M_H₂O()
+    "Vulnerability curve"
+    vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}()
+    "Height change `[m]`"
+    Δh::FT = 1
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Sep-22: define the struct to store the state variables used in xylem hydraulics
 #     2023-Sep-22: add field v_max, pv
 #     2023-Sep-23: add field cp
@@ -21,34 +59,15 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemHydraulicsState{FT}
-    "Area of xylem (root and stem) or of leaf `[m²]`"
-    area::FT = 1
-    "Heat capacity of the xylem per volume or of leaf per mass `[J m⁻³ K⁻¹]`"
-    cp::FT = 1e6
-    "Maximal xylem hydraulic conductivity `[mol s⁻¹ MPa⁻¹ m⁻¹]` for root and stem; `[mol s⁻¹ MPa⁻¹ m⁻²]` for leaf"
-    k_max::FT = 25
-    "Length `[m]`"
-    l::FT = 1
     "Vector of xylem water pressure history (normalized to 298.15 K) `[MPa]`"
     p_history::Vector{FT}
-    "Pressure volume curve"
-    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
     "Storage per element `[mol]`"
     v_storage::Vector{FT}
-    "Maximum capaciatance per volume of wood `[mol m⁻³]`"
-    v_max::FT
-    "Vulnerability curve"
-    vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}()
-    "Height change `[m]`"
-    Δh::FT = 1
 end;
 
-XylemHydraulicsState(config::SPACConfiguration{FT}; area::Number = 1, l::Number = 1, v_max::Number = 0.1 * ρ_H₂O() / M_H₂O()) where {FT} = XylemHydraulicsState{FT}(
-            area      = area,
-            l         = l,
+XylemHydraulicsState(config::SPACConfiguration{FT}) where {FT} = XylemHydraulicsState{FT}(
             p_history = zeros(FT, config.DIM_XYLEM),
-            v_storage = ones(FT, config.DIM_XYLEM) ./ config.DIM_XYLEM .* (v_max * area * l),
-            v_max     = v_max
+            v_storage = ones(FT, config.DIM_XYLEM) ./ config.DIM_XYLEM .* (0.1 * ρ_H₂O() / M_H₂O()),
 );
 
 
@@ -154,6 +173,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemHydraulics{FT}
+    "Trait variables"
+    trait::XylemHydraulicsTrait{FT} = XylemHydraulicsTrait{FT}()
     "State variables"
     state::XylemHydraulicsState{FT}
     "Auxiliary variables"

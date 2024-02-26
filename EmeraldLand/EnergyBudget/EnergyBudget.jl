@@ -9,7 +9,7 @@ using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, M_Hâ
 using ..Namespace: XylemHydraulics
 using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
 using ..Namespace: AirLayer, AirLayerState, SoilLayer
-using ..Namespace: ExtraXylemCapacitorState, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil, XylemHydraulicsState
+using ..Namespace: ExtraXylemCapacitorState, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil, XylemHydraulicsState, XylemHydraulicsTrait
 using ..Namespace: BulkSPAC
 using ..PhysicalChemistry: latent_heat_vapor
 using ..PlantHydraulics: flow_in, flow_out

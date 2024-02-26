@@ -7,7 +7,7 @@ using ..EmeraldPhysics.Constant: GAS_R, ρg_MPa
 using ..Namespace: ComplexVC, LogisticVC, PowerVC, WeibullVC
 using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve
 using ..Namespace: ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState, ExtraXylemCapacitorTrait
-using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
+using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState, XylemHydraulicsTrait
 using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
 using ..Namespace: SoilLayer
 using ..Namespace: BulkSPAC, SPACConfiguration

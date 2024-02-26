@@ -97,14 +97,15 @@ update_substep_auxils!(root::Root{FT}) where {FT} = (
 
     # update the root buffer pressure and flow
     x_aux = root.xylem.auxil;
+    x_tra = root.xylem.trait;
     x_sta = root.xylem.state;
     if x_aux isa XylemHydraulicsAuxilNSS
         N = length(x_sta.v_storage);
         f_vis = relative_viscosity(root.energy.auxil.t);
-        v_max_i = x_sta.v_max * x_sta.area * x_sta.l / N;
+        v_max_i = x_tra.v_max * x_tra.area * x_tra.l / N;
         for i in 1:N
-            x_aux.p_storage[i] = capacitance_pressure(x_sta.pv, x_sta.v_storage[i] / v_max_i, root.energy.auxil.t);
-            x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_sta.pv.k_refill / f_vis * x_sta.v_storage[i];
+            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, root.energy.auxil.t);
+            x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_tra.pv.k_refill / f_vis * x_sta.v_storage[i];
         end;
     end;
 
@@ -136,14 +137,15 @@ update_substep_auxils!(stem::Stem{FT}) where {FT} = (
 
     # update the stem buffer pressure and flow
     x_aux = stem.xylem.auxil;
+    x_tra = stem.xylem.trait;
     x_sta = stem.xylem.state;
     if x_aux isa XylemHydraulicsAuxilNSS
         N = length(x_sta.v_storage);
         f_vis = relative_viscosity(stem.energy.auxil.t);
-        v_max_i = x_sta.v_max * x_sta.area * x_sta.l / N;
+        v_max_i = x_tra.v_max * x_tra.area * x_tra.l / N;
         for i in 1:N
-            x_aux.p_storage[i] = capacitance_pressure(x_sta.pv, x_sta.v_storage[i] / v_max_i, stem.energy.auxil.t);
-            x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_sta.pv.k_refill / f_vis * x_sta.v_storage[i];
+            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, stem.energy.auxil.t);
+            x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_tra.pv.k_refill / f_vis * x_sta.v_storage[i];
         end;
     end;
 
@@ -162,12 +164,12 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
     x_aux = leaf.xylem.auxil;
     c_aux = leaf.capacitor.auxil;
     if x_aux isa XylemHydraulicsAuxilNSS
-        x_sta = leaf.xylem.state;
+        x_tra = leaf.xylem.trait;
         c_tra = leaf.capacitor.trait;
         c_sta = leaf.capacitor.state;
         f_vis = relative_viscosity(leaf.energy.s_aux.t);
         c_aux.p = capacitance_pressure(c_tra.pv, c_sta.v_storage / c_tra.v_max, leaf.energy.s_aux.t);
-        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_tra.pv.k_refill / f_vis * c_sta.v_storage * x_sta.area;
+        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_tra.pv.k_refill / f_vis * c_sta.v_storage * x_tra.area;
     else
         c_aux.flow = 0;
     end;

@@ -26,7 +26,7 @@ Use solver to determine the root flow rate, given
 function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, junction::JunctionCapacitor{FT}) where {FT}
     # if the root is not connected to the soil, set the flow to be the sum from the buffer system
     # else, use a solver to find the root flow rate
-    if soil.s_aux.ψ <= xylem_pressure(root.xylem.state.vc, config.KR_THRESHOLD)
+    if soil.s_aux.ψ <= xylem_pressure(root.xylem.trait.vc, config.KR_THRESHOLD)
         root.xylem.auxil.connected = false;
 
         # if at non-steady state, set the flow rate to be the sum of the buffer system so that flow from the soil is zero
@@ -39,8 +39,8 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
         root.xylem.auxil.connected = true;
 
         # 1. set a max and min flow rate to use a bisection method to find the root flow rate
-        p = abs(soil.s_aux.ψ - junction.auxil.pressure - ρg_MPa(FT) * root.xylem.state.Δh);
-        k = 1 / (1 / (root.rhizosphere.state.k_max * root.xylem.state.area) + 1 / (root.xylem.state.k_max * root.xylem.state.area / root.xylem.state.l));
+        p = abs(soil.s_aux.ψ - junction.auxil.pressure - ρg_MPa(FT) * root.xylem.trait.Δh);
+        k = 1 / (1 / (root.rhizosphere.state.k_max * root.xylem.trait.area) + 1 / (root.xylem.trait.k_max * root.xylem.trait.area / root.xylem.trait.l));
         f_max = k * p;
         f_min = -f_max;
 

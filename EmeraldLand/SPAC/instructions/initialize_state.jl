@@ -28,7 +28,7 @@ initialize_states!(soil::SoilLayer{FT}, air::AirLayer{FT}) where {FT} = (
 );
 
 initialize_states!(root::Root{FT}) where {FT} = (
-    root.xylem.state.v_storage .= (root.xylem.state.v_max * root.xylem.state.area * root.xylem.state.l) / length(root.xylem.state.v_storage);
+    root.xylem.state.v_storage .= (root.xylem.trait.v_max * root.xylem.trait.area * root.xylem.trait.l) / length(root.xylem.state.v_storage);
     root.energy.auxil.cp = heat_capacitance(root);
     root.energy.state.Σe = root.energy.auxil.cp * root.energy.auxil.t;
 
@@ -36,7 +36,7 @@ initialize_states!(root::Root{FT}) where {FT} = (
 );
 
 initialize_states!(stem::Stem{FT}) where {FT} = (
-    stem.xylem.state.v_storage .= (stem.xylem.state.v_max * stem.xylem.state.area * stem.xylem.state.l) / length(stem.xylem.state.v_storage);
+    stem.xylem.state.v_storage .= (stem.xylem.trait.v_max * stem.xylem.trait.area * stem.xylem.trait.l) / length(stem.xylem.state.v_storage);
     stem.energy.auxil.cp = heat_capacitance(stem);
     stem.energy.state.Σe = stem.energy.auxil.cp * stem.energy.auxil.t;
 
@@ -44,8 +44,8 @@ initialize_states!(stem::Stem{FT}) where {FT} = (
 );
 
 initialize_states!(leaf::Leaf{FT}; k_sla::Number = 0.04) where {FT} = (
-    leaf.xylem.state.cp = 1780;
-    leaf.xylem.state.k_max = k_sla;
+    leaf.xylem.trait.cp = 1780;
+    leaf.xylem.trait.k_max = k_sla;
     leaf.capacitor.state.v_storage = leaf.capacitor.trait.v_max;
     leaf.energy.s_aux.cp = heat_capacitance(leaf);
     leaf.energy.state.Σe = leaf.energy.s_aux.cp * leaf.energy.s_aux.t;
@@ -97,7 +97,7 @@ initialize_states!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     # make sure leaf area index setup and energy are correct
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        leaves[ilf].xylem.state.area = sbulk.trait.area * can_str.trait.δlai[irt];
+        leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
         initialize_states!(leaves[ilf]);
     end;
 

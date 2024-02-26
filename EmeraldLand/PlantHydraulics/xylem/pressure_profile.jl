@@ -21,10 +21,10 @@ Update the xylem pressure profile, given
 """
 function xylem_pressure_profile! end;
 
-xylem_pressure_profile!(xylem::XylemHydraulics{FT}, t::FT) where {FT} = xylem_pressure_profile!(xylem.state, xylem.auxil, t);
+xylem_pressure_profile!(xylem::XylemHydraulics{FT}, t::FT) where {FT} = xylem_pressure_profile!(xylem.trait, xylem.state, xylem.auxil, t);
 
-xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT) where {FT} = (
-    k_max = x_state.area * x_state.k_max / x_state.l;
+xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT) where {FT} = (
+    k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -35,20 +35,20 @@ xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulic
 
         p₂₅ = x_aux.pressure[i] / f_st;
         if p₂₅ < p_mem
-            k = relative_xylem_k(x_state.vc, p₂₅) / f_vis * k_max * N;
+            k = relative_xylem_k(x_trait.vc, p₂₅) / f_vis * k_max * N;
         else
             k = k_mem / f_vis * k_max * N;
         end;
 
         # flow rate is the mean of that at two planes (i and i+1)
-        x_aux.pressure[i+1] = x_aux.pressure[i] - (x_aux.flow[i] + x_aux.flow[i+1]) / 2 / k - ρg_MPa(FT) * x_state.Δh / N;
+        x_aux.pressure[i+1] = x_aux.pressure[i] - (x_aux.flow[i] + x_aux.flow[i+1]) / 2 / k - ρg_MPa(FT) * x_trait.Δh / N;
     end;
 
     return nothing
 );
 
-xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT) where {FT} = (
-    k_max = x_state.area * x_state.k_max / x_state.l;
+xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT) where {FT} = (
+    k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -59,21 +59,21 @@ xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulic
 
         p₂₅ = x_aux.pressure[i] / f_st;
         if p₂₅ < p_mem
-            k = relative_xylem_k(x_state.vc, p₂₅) / f_vis * k_max * N;
+            k = relative_xylem_k(x_trait.vc, p₂₅) / f_vis * k_max * N;
         else
             k = k_mem / f_vis * k_max * N;
         end;
 
-        x_aux.pressure[i+1] = x_aux.pressure[i] - x_aux.flow / k - ρg_MPa(FT) * x_state.Δh / N;
+        x_aux.pressure[i+1] = x_aux.pressure[i] - x_aux.flow / k - ρg_MPa(FT) * x_trait.Δh / N;
     end;
 
     return nothing
 );
 
-xylem_pressure_profile!(xylem::XylemHydraulics{FT}, t::FT, rev::Bool) where {FT} = xylem_pressure_profile!(xylem.state, xylem.auxil, t, rev);
+xylem_pressure_profile!(xylem::XylemHydraulics{FT}, t::FT, rev::Bool) where {FT} = xylem_pressure_profile!(xylem.trait, xylem.state, xylem.auxil, t, rev);
 
-xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT, ::Bool) where {FT} = (
-    k_max = x_state.area * x_state.k_max / x_state.l;
+xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT, ::Bool) where {FT} = (
+    k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -84,20 +84,20 @@ xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulic
 
         p₂₅ = x_aux.pressure[i+1] / f_st;
         if p₂₅ < p_mem
-            k = relative_xylem_k(x_state.vc, p₂₅) / f_vis * k_max * N;
+            k = relative_xylem_k(x_trait.vc, p₂₅) / f_vis * k_max * N;
         else
             k = k_mem / f_vis * k_max * N;
         end;
 
         # flow rate is the mean of that at two planes (i and i+1)
-        x_aux.pressure[i] = x_aux.pressure[i+1] + (x_aux.flow[i] + x_aux.flow[i+1]) / 2 / k + ρg_MPa(FT) * x_state.Δh / N;
+        x_aux.pressure[i] = x_aux.pressure[i+1] + (x_aux.flow[i] + x_aux.flow[i+1]) / 2 / k + ρg_MPa(FT) * x_trait.Δh / N;
     end;
 
     return nothing
 );
 
-xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT, ::Bool) where {FT} = (
-    k_max = x_state.area * x_state.k_max / x_state.l;
+xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT, ::Bool) where {FT} = (
+    k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -108,12 +108,12 @@ xylem_pressure_profile!(x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulic
 
         p₂₅ = x_aux.pressure[i+1] / f_st;
         if p₂₅ < p_mem
-            k = relative_xylem_k(x_state.vc, p₂₅) / f_vis * k_max * N;
+            k = relative_xylem_k(x_trait.vc, p₂₅) / f_vis * k_max * N;
         else
             k = k_mem / f_vis * k_max * N;
         end;
 
-        x_aux.pressure[i] = x_aux.pressure[i+1] + x_aux.flow / k + ρg_MPa(FT) * x_state.Δh / N;
+        x_aux.pressure[i] = x_aux.pressure[i+1] + x_aux.flow / k + ρg_MPa(FT) * x_trait.Δh / N;
     end;
 
     return nothing

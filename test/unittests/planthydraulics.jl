@@ -71,8 +71,8 @@ import Emerald.EmeraldLand.SPAC
         PH.set_flow_profile!(ssflow, 1.0);
 
         PH.xylem_pressure_profile!(xylem, 298.15);
-        PH.xylem_pressure_profile!(xylem.state, nssflow, 298.15);
-        PH.xylem_pressure_profile!(xylem.state, ssflow, 298.15);
+        PH.xylem_pressure_profile!(xylem.trait, xylem.state, nssflow, 298.15);
+        PH.xylem_pressure_profile!(xylem.trait, xylem.state, ssflow, 298.15);
 
         @test xylem.auxil.pressure[end] == nssflow.pressure[end] == ssflow.pressure[end] < 0;
         @test all(xylem.auxil.pressure[2:end] .< 0);
@@ -179,13 +179,13 @@ import Emerald.EmeraldLand.SPAC
         @test PH.flow_out(spac.plant.trunk) == sum([PH.flow_in(branch) for branch in spac.plant.branches]);
 
         # make sure the water in the leaf capacitor changes with the total water in (from stem) and total water out (to air)
-        q1s = [leaf.capacitor.state.v_storage * leaf.xylem.state.area for leaf in spac.plant.leaves];
+        q1s = [leaf.capacitor.state.v_storage * leaf.xylem.trait.area for leaf in spac.plant.leaves];
         fis = [PH.flow_in(leaf) for leaf in spac.plant.leaves];
         fos = [PH.flow_out(leaf) for leaf in spac.plant.leaves];
         PH.plant_water_budget!(spac, 1.0);
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
-        q2s = [leaf.capacitor.state.v_storage * leaf.xylem.state.area for leaf in spac.plant.leaves];
+        q2s = [leaf.capacitor.state.v_storage * leaf.xylem.trait.area for leaf in spac.plant.leaves];
         @test all(q2s .- q1s .≈ fis .- fos);
 
         # make sure the water in the branch capacitor changes with the total water in (from trunk) and total water out (to leaf)

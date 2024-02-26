@@ -157,7 +157,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Derivatives (for stomatal models)" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        leaf.xylem.state.k_max = 0.05;
+        leaf.xylem.trait.k_max = 0.05;
         @test PS.∂R∂T(leaf) > 0;
 
         for td in [NS.Arrhenius{Float64}(T_REF = 298.15, VAL_REF = NaN , ΔHA = 46390.0),
@@ -171,7 +171,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Leaf photosynthesis" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        leaf.xylem.state.k_max = 0.05;
+        leaf.xylem.trait.k_max = 0.05;
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar_sunlit .= 100.0;
         leaf.flux.auxil.ppar_shaded = 100.0;
