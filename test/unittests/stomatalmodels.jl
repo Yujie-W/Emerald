@@ -19,7 +19,7 @@ import Emerald.EmeraldLand.SPAC
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
 
         for sm in [NS.BallBerrySM{Float64}(), NS.GentineSM{Float64}(), NS.LeuningSM{Float64}(), NS.MedlynSM{Float64}()]
-            leaf.flux.state.stomatal_model = sm;
+            leaf.flux.trait.stomatal_model = sm;
             gsh = SM.empirical_equation(sm, leaf, air);
             gsl = SM.empirical_equation(sm, leaf, air, 1);
             @test gsh > 0.0;
@@ -62,8 +62,8 @@ import Emerald.EmeraldLand.SPAC
         # BetaParameterKleaf
         for param_x in [NS.BetaParameterKleaf(), NS.BetaParameterKsoil(), NS.BetaParameterPleaf(), NS.BetaParameterPsoil(), NS.BetaParameterΘ()]
             for leaf in spac.plant.leaves
-                leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-                leaf.flux.state.stomatal_model.β.PARAM_X = param_x;
+                leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
+                leaf.flux.trait.stomatal_model.β.PARAM_X = param_x;
             end;
             SM.β_factor!(spac);
             for leaf in spac.plant.leaves

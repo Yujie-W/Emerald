@@ -19,7 +19,7 @@ Compute the ∂Θₙ∂E for nocturnal stomatal opening, given
 """
 function ∂Θₙ∂E end;
 
-∂Θₙ∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(leaf.flux.state.stomatal_model, leaf, air);
+∂Θₙ∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(leaf.flux.trait.stomatal_model, leaf, air);
 
 ∂Θₙ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     (; F_FITNESS) = sm;

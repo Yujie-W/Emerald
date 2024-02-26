@@ -26,7 +26,7 @@ Return the marginal change in stomatal conductance, given
 function ∂g∂t end;
 
 # for shaded leaves
-∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.flux.state.stomatal_model, leaf, air; δe = δe);
+∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.flux.trait.stomatal_model, leaf, air; δe = δe);
 
 ∂g∂t(sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     return max(-0.001, min(0.001, sm.K * (∂A∂E(leaf, air) - ∂Θ∂E(sm, leaf, air; δe = δe))))
@@ -49,7 +49,7 @@ function ∂g∂t end;
 );
 
 # for sunlit leaves
-∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.flux.state.stomatal_model, leaf, air, ind; δe = δe);
+∂g∂t(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = ∂g∂t(leaf.flux.trait.stomatal_model, leaf, air, ind; δe = δe);
 
 ∂g∂t(sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
     dade = ∂A∂E(leaf, air, ind);

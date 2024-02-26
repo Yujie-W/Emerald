@@ -34,7 +34,7 @@ function β_factor! end;
     soils = spac.soils;
 
     for i in eachindex(leaves)
-        β_factor!(roots, soils, leaves[i], leaves[i].flux.state.stomatal_model);
+        β_factor!(roots, soils, leaves[i], leaves[i].flux.trait.stomatal_model);
     end;
 
     return nothing

@@ -167,23 +167,23 @@ import Emerald.EmeraldLand.SPAC
         @test true;
 
         # optimality stomatal model
-        leaf.flux.state.stomatal_model = NS.WangSM{Float64}();
+        leaf.flux.trait.stomatal_model = NS.WangSM{Float64}();
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(); rd_only = false);
         @test true;
         PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(); rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on G1)
-        leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-        leaf.flux.state.stomatal_model.β.PARAM_Y = NS.BetaParameterG1();
+        leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
+        leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterG1();
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(); rd_only = false);
         @test true;
         PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(); rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on Vcmax)
-        leaf.flux.state.stomatal_model = NS.BallBerrySM{Float64}();
-        leaf.flux.state.stomatal_model.β.PARAM_Y = NS.BetaParameterVcmax();
+        leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
+        leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterVcmax();
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(); rd_only = false);
         @test true;
         PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(); rd_only = false);

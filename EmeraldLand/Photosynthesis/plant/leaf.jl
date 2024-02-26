@@ -36,7 +36,7 @@ function leaf_photosynthesis! end;
 
 # This method takes out stomtal model out and use it to determine whether to apply beta to Vcmax, Jmax, and Rd
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT} =
-    leaf_photosynthesis!(leaf, air, mode, leaf.flux.state.stomatal_model; rd_only = rd_only);
+    leaf_photosynthesis!(leaf, air, mode, leaf.flux.trait.stomatal_model; rd_only = rd_only);
 
 # if stomtal model is not empirical model, then use the default β = 1
 leaf_photosynthesis!(

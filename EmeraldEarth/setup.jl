@@ -38,7 +38,7 @@ function setup_cache!(FT::DataType = Float64)
     @inline linear_p_soil(x) = min(1, max(eps(FT), 1 + x / 5));
     bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
     for leaf in CACHE_SPAC.plant.leaves
-        leaf.flux.state.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = bt);
+        leaf.flux.trait.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = bt);
     end;
 
     # initialize the spac with non-saturated soil

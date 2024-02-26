@@ -4,6 +4,32 @@
 #
 # Changes to this struct
 # General
+#     2024-Feb-26: add sturct LeafFluxTrait
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains leaf flux trait variables.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct LeafFluxTrait{FT}
+    "Stomtal model"
+    stomatal_model::Union{AndereggSM{FT}, BallBerrySM{FT}, EllerSM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}} = WangSM{FT}()
+    "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
+    g_limits::Vector{FT} = FT[1e-4, 0.3]
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Oct-03: add sturct LeafFluxState
 #
 #######################################################################################################################################################################################################
@@ -19,12 +45,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafFluxState{FT}
-    "Stomtal model"
-    stomatal_model::Union{AndereggSM{FT}, BallBerrySM{FT}, EllerSM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}} = WangSM{FT}()
-    "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    g_limits::Vector{FT} = FT[1e-3, 0.3]
-
-    # Prognostic variables
     "Stomatal conductance to water vapor for shaded leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_shaded::FT = 0.01
     "Stomatal conductance to water vapor for sunlit leaves `[mol m⁻² s⁻¹]`"
@@ -163,6 +183,7 @@ LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
 # Changes to this struct
 # General
 #     2023-Oct-03: add sturct LeafFlux
+#     2024-Feb-26: add fiel trait
 #
 #######################################################################################################################################################################################################
 """
@@ -177,7 +198,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafFlux{FT}
-    # Embedded structures
+    "Trait variables"
+    trait::LeafFluxTrait{FT} = LeafFluxTrait{FT}()
     "Leaf flux state variables"
     state::LeafFluxState{FT}
     "Leaf flux auxiliary variables"
