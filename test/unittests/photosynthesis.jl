@@ -18,8 +18,11 @@ import Emerald.EmeraldLand.SPAC
     @testset "Electron transport" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()]
-            ps.state = pss;
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
+        psss = [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()];
+        for i in 1:3
+            ps.trait = psts[i];
+            ps.state = psss[i];
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             @test true;
@@ -29,8 +32,11 @@ import Emerald.EmeraldLand.SPAC
     @testset "RubisCO limited rate" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()]
-            ps.state = pss;
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
+        psss = [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()];
+        for i in 1:3
+            ps.trait = psts[i];
+            ps.state = psss[i];
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             PS.rubisco_limited_rate!(ps, 20.0);
@@ -46,8 +52,11 @@ import Emerald.EmeraldLand.SPAC
     @testset "Light limited rate" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()]
-            ps.state = pss;
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
+        psss = [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()];
+        for i in 1:3
+            ps.trait = psts[i];
+            ps.state = psss[i];
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             PS.light_limited_rate!(ps);
@@ -63,8 +72,11 @@ import Emerald.EmeraldLand.SPAC
     @testset "Product limited rate" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()]
-            ps.state = pss;
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
+        psss = [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()];
+        for i in 1:3
+            ps.trait = psts[i];
+            ps.state = psss[i];
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             PS.product_limited_rate!(ps, 20.0);
@@ -80,8 +92,11 @@ import Emerald.EmeraldLand.SPAC
     @testset "Photosynthesis colimitation" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()]
-            ps.state = pss;
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
+        psss = [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()];
+        for i in 1:3
+            ps.trait = psts[i];
+            ps.state = psss[i];
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             PS.rubisco_limited_rate!(ps, 20.0);
@@ -95,8 +110,11 @@ import Emerald.EmeraldLand.SPAC
     @testset "Fluorescence coefficients" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()]
-            ps.state = pss;
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
+        psss = [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()];
+        for i in 1:3
+            ps.trait = psts[i];
+            ps.state = psss[i];
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             PS.rubisco_limited_rate!(ps, 20.0);
@@ -108,9 +126,10 @@ import Emerald.EmeraldLand.SPAC
         end;
 
         # try out the qL based fluorescence model (CXVJP model only)
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}()]
-            ps.state = pss;
-            ps.state.FLM = NS.QLFluoscenceModel{Float64}();
+        for i in 1:2
+            ps.trait = psts[i];
+            ps.state = psss[i];
+            ps.trait.FLM = NS.QLFluoscenceModel{Float64}();
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             PS.rubisco_limited_rate!(ps, 20.0);
@@ -125,8 +144,11 @@ import Emerald.EmeraldLand.SPAC
     @testset "Photosynthesis only (for stomatal models)" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        for pss in [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()]
-            ps.state = pss;
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
+        psss = [NS.C3VJPState{Float64}(), NS.C4VJPState{Float64}(), NS.C3CytoState{Float64}()];
+        for i in 1:3
+            ps.trait = psts[i];
+            ps.state = psss[i];
             PS.photosynthesis_only!(ps, air, 0.2, 100.0, 298.15);
             @test true;
         end;

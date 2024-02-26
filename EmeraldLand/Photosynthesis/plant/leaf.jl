@@ -77,7 +77,7 @@ leaf_photosynthesis!(
 # This method computes and save the photosynthetic rates into leaf flux struct for GCO₂Mode
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
     if rd_only
-        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.s_aux.t);
+        leaf.photosystem.auxil.r_d   = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
         leaf.flux.auxil.a_g_sunlit  .= 0;
         leaf.flux.auxil.etr_sunlit  .= 0;
@@ -159,7 +159,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
 # This method computes and save the photosynthetic rates into leaf flux struct for PCO₂Mode
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
     if rd_only
-        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.s_aux.t);
+        leaf.photosystem.auxil.r_d   = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
         leaf.flux.auxil.a_g_sunlit  .= 0;
         leaf.flux.auxil.etr_sunlit  .= 0;

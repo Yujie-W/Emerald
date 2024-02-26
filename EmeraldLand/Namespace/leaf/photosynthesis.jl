@@ -4,27 +4,21 @@
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add C3CytoState struct
+#     2024-Feb-26: add C3CytoTrait struct
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the state variables for C3 photosynthesis (Cytochrome model)
+Struct that contains the trait variables for C3 photosynthesis (Cytochrome model)
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3CytoState{FT}
-    # General model information
-    "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
-    EFF_1::FT = 4
-    "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
-    EFF_2::FT = 8
-
+Base.@kwdef mutable struct C3CytoTrait{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
     COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
@@ -79,28 +73,48 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add C3VJPState struct
-#     2023-Oct-28: add support to QLFluoscenceModel
+#     2023-Oct-03: add C3CytoState struct
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the state variables for C3 photosynthesis (VJP model)
+Struct that contains the state variables for C3 photosynthesis (Cytochrome model)
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3VJPState{FT}
+Base.@kwdef mutable struct C3CytoState{FT}
     # General model information
     "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
     EFF_1::FT = 4
     "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
     EFF_2::FT = 8
+end;
 
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Feb-26: add C3VJPTrait struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C3 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C3VJPTrait{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
     COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
@@ -138,8 +152,6 @@ Base.@kwdef mutable struct C3VJPState{FT}
     # Prognostic variables
     "Maximal electron transport rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     j_max25::FT = 83.5
-    "Sustained NPQ rate constant (for seasonal changes, default is zero)"
-    k_npq_sus::FT = 0
     "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     r_d25::FT = 0.75
     "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
@@ -151,7 +163,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add C4VJPState struct
+#     2023-Oct-03: add C3VJPState struct
 #     2023-Oct-28: add support to QLFluoscenceModel
 #
 #######################################################################################################################################################################################################
@@ -159,14 +171,45 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the state variables for C4 photosynthesis (VJP model)
+Struct that contains the state variables for C3 photosynthesis (VJP model)
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C4VJPState{FT}
+Base.@kwdef mutable struct C3VJPState{FT}
+    # General model information
+    "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
+    EFF_1::FT = 4
+    "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
+    EFF_2::FT = 8
+
+    # Prognostic variables
+    "Sustained NPQ rate constant (for seasonal changes, default is zero)"
+    k_npq_sus::FT = 0
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Feb-26: add C4VJPTrait struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C4 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C4VJPTrait{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
     COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
@@ -196,14 +239,38 @@ Base.@kwdef mutable struct C4VJPState{FT}
     FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
 
     # Prognostic variables
-    "Sustained NPQ rate constant (for seasonal changes, default is zero)"
-    k_npq_sus::FT = 0
     "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     r_d25::FT = 0.75
     "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     v_cmax25::FT = 50
     "Maximal PEP carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     v_pmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2023-Oct-03: add C4VJPState struct
+#     2023-Oct-28: add support to QLFluoscenceModel
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the state variables for C4 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C4VJPState{FT}
+    # Prognostic variables
+    "Sustained NPQ rate constant (for seasonal changes, default is zero)"
+    k_npq_sus::FT = 0
 end;
 
 
@@ -328,10 +395,6 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     ϕ_psi_max::FT = 0
     "max PSII yield (_k_npq_rev = 0, all RC open)"
     ϕ_psii_max::FT = 0
-
-    # cache variables
-    "Last leaf temperature. If different from leaf t, then make temperature correction"
-    _t::FT = 0
 end;
 
 
@@ -341,6 +404,7 @@ end;
 # General
 #     2023-Oct-03: add C3VJP, C3Cyto, and C4VJP structs
 #     2023-Oct-36: combine C3Cyto, C3VJP, and C4VJP into LeafPhotosystem
+#     2024-Feb-26: add field trait
 #
 #######################################################################################################################################################################################################
 """
@@ -355,6 +419,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
+    "Trait variables"
+    trait::Union{C3CytoTrait{FT}, C3VJPTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3CytoState{FT}, C3VJPState{FT}, C4VJPState{FT}} = C3VJPState{FT}()
     "Auxilary variables"

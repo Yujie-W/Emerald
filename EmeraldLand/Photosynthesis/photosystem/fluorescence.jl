@@ -21,6 +21,7 @@
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
 #                  note here that in CliMA v0.1, this e_to_c is not updated properly.
+#     2024-Feb-26: use k_d from auxil rather than from trait (because k_d is updated in the auxil to account for its TD)
 # To do
 #     TODO: add more calculations such as NPQ when the model is ready
 #
@@ -37,9 +38,9 @@ Update the rate constants and coefficients in reaction center, given
 """
 function photosystem_coefficients! end;
 
-photosystem_coefficients!(psm::LeafPhotosystem{FT}, ppar::FT; β::FT = FT(1)) where {FT} = photosystem_coefficients!(psm.state, psm.auxil, ppar; β = β);
+photosystem_coefficients!(psm::LeafPhotosystem{FT}, ppar::FT; β::FT = FT(1)) where {FT} = photosystem_coefficients!(psm.trait, psm.state, psm.auxil, ppar; β = β);
 
-photosystem_coefficients!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(pst::C3CytoTrait{FT}, pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
         psa.ϕ_f = 0;
         psa.ϕ_p = 0;
@@ -55,19 +56,19 @@ photosystem_coefficients!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT; β:
 
     # solve PSII K_N
     k_sum_na = ϕ_P2_a;
-    k_sum_nb = -1 * (pss.K_U * ϕ_P2_a + pss.K_PSII * (q2 - ϕ_P2_a));
-    k_sum_nc = -1 * (ϕ_P2_a * (1 - q2) * pss.K_U * pss.K_PSII);
+    k_sum_nb = -1 * (pst.K_U * ϕ_P2_a + pst.K_PSII * (q2 - ϕ_P2_a));
+    k_sum_nc = -1 * (ϕ_P2_a * (1 - q2) * pst.K_U * pst.K_PSII);
     k_sum    = upper_quadratic(k_sum_na, k_sum_nb, k_sum_nc);
-    k_n      = k_sum - pss.K_F - pss.K_U - pss.K_D;
+    k_n      = k_sum - pst.K_F - pst.K_U - pst.K_D;
 
     # compute PSII and PSI yeilds
-    k_sum_1 = pss.K_D + pss.K_F + pss.K_U + k_n;
-    k_sum_2 = pss.K_D + pss.K_F + pss.K_U + k_n + pss.K_PSII;
-    k_sum_3 = pss.K_D + pss.K_F + pss.K_PSI;
-    k_sum_4 = pss.K_D + pss.K_F + pss.K_X;
-    ϕ_U2_a  =  q2 * pss.K_U / k_sum_2 + (1 - q2) * pss.K_U / k_sum_1;
-    ϕ_F2_a  = (q2 * pss.K_F / k_sum_2 + (1 - q2) * pss.K_F / k_sum_1) / (1 - ϕ_U2_a);
-    ϕ_F1_a  = pss.K_F / k_sum_3 * q1 + pss.K_F / k_sum_4 * (1 - q1);
+    k_sum_1 = pst.K_D + pst.K_F + pst.K_U + k_n;
+    k_sum_2 = pst.K_D + pst.K_F + pst.K_U + k_n + pst.K_PSII;
+    k_sum_3 = pst.K_D + pst.K_F + pst.K_PSI;
+    k_sum_4 = pst.K_D + pst.K_F + pst.K_X;
+    ϕ_U2_a  =  q2 * pst.K_U / k_sum_2 + (1 - q2) * pst.K_U / k_sum_1;
+    ϕ_F2_a  = (q2 * pst.K_F / k_sum_2 + (1 - q2) * pst.K_F / k_sum_1) / (1 - ϕ_U2_a);
+    ϕ_F1_a  = pst.K_F / k_sum_3 * q1 + pst.K_F / k_sum_4 * (1 - q1);
 
     # save the weighted fluorescence and photosynthesis yields in reaction center
     psa.ϕ_f1 = ϕ_F1_a;
@@ -102,9 +103,10 @@ photosystem_coefficients!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, ppar::FT; β:
     =#
 );
 
-photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = photosystem_coefficients!(pss, pss.FLM, psa, ppar; β = β);
+photosystem_coefficients!(pst::Union{C3VJPTrait{FT}, C4VJPTrait{FT}}, pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} =
+    photosystem_coefficients!(pst, pss, pst.FLM, psa, ppar; β = β);
 
-photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::KNFluoscenceModel{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(pst::Union{C3VJPTrait{FT}, C4VJPTrait{FT}}, pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::KNFluoscenceModel{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
         psa.ϕ_f = 0;
         psa.ϕ_p = 0;
@@ -119,7 +121,7 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::KNFlu
     x  = max(0, 1 - psa.ϕ_p / psa.ϕ_psii_max);
     xᵅ = x ^ flm.K_A;
     psa.k_n = flm.K_0 * (1 + flm.K_B) * xᵅ / (flm.K_B + xᵅ);
-    psa.k_p = max(0, psa.ϕ_p * (pss.K_F + psa.k_d + psa.k_n + pss.k_npq_sus) / (1 - psa.ϕ_p) );
+    psa.k_p = max(0, psa.ϕ_p * (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus) / (1 - psa.ϕ_p) );
 
     # TODO: whether to consider sustained K_N in the calculations of f_o and f_m
     # rc._f_o  = K_F / (K_F + K_PSII + rc._k_d + rc.k_npq_sus);
@@ -128,13 +130,13 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::KNFlu
     # rc._f_m′ = K_F / (K_F + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
 
     # calculate fluorescence quantum yield
-    psa.f_o  = pss.K_F / (pss.K_F + pss.K_PSII + psa.k_d);
-    psa.f_o′ = pss.K_F / (pss.K_F + pss.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
-    psa.f_m  = pss.K_F / (pss.K_F + psa.k_d);
-    psa.f_m′ = pss.K_F / (pss.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_o  = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
+    psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
+    psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
-    psa.ϕ_d  = psa.k_d / pss.K_F * psa.ϕ_f;
-    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pss.K_F * psa.ϕ_f;
+    psa.ϕ_d  = psa.k_d / pst.K_F * psa.ϕ_f;
+    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pst.K_F * psa.ϕ_f;
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
 
@@ -144,12 +146,12 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::KNFlu
     # calculate quenching rates
     psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
     psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    psa.npq = (psa.k_n + pss.k_npq_sus) / (pss.K_F + psa.k_d);
+    psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
 
     return nothing
 );
 
-photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::QLFluoscenceModel{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(pst::Union{C3VJPTrait{FT}, C4VJPTrait{FT}}, pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::QLFluoscenceModel{FT}, psa::PSMAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
     if ppar == 0
         psa.ϕ_f = 0;
         psa.ϕ_p = 0;
@@ -162,17 +164,17 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::QLFlu
 
     # calculate the qL
     q_l = exp(-flm.K_B * ppar);
-    psa.k_p = pss.K_PSII * q_l;
-    psa.k_n = (psa.k_p - psa.ϕ_p * (pss.K_F + pss.K_D + psa.k_p)) / psa.ϕ_p;
+    psa.k_p = pst.K_PSII * q_l;
+    psa.k_n = (psa.k_p - psa.ϕ_p * (pst.K_F + psa.k_d + psa.k_p)) / psa.ϕ_p;
 
     # calculate fluorescence quantum yield
-    psa.f_o  = pss.K_F / (pss.K_F + pss.K_PSII + pss.K_D);
-    psa.f_o′ = pss.K_F / (pss.K_F + pss.K_PSII + pss.K_D + psa.k_n + pss.k_npq_sus);
-    psa.f_m  = pss.K_F / (pss.K_F + pss.K_D);
-    psa.f_m′ = pss.K_F / (pss.K_F + pss.K_D + psa.k_n + pss.k_npq_sus);
+    psa.f_o  = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
+    psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
+    psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
-    psa.ϕ_d  = pss.K_D / pss.K_F * psa.ϕ_f;
-    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pss.K_F * psa.ϕ_f;
+    psa.ϕ_d  = psa.k_d / pst.K_F * psa.ϕ_f;
+    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pst.K_F * psa.ϕ_f;
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
 
@@ -182,7 +184,7 @@ photosystem_coefficients!(pss::Union{C3VJPState{FT}, C4VJPState{FT}}, flm::QLFlu
     # calculate quenching rates
     psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
     psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    psa.npq = (psa.k_n + pss.k_npq_sus) / (pss.K_F + pss.K_D);
+    psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
 
     return nothing
 );

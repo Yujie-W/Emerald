@@ -55,8 +55,8 @@ Colimit the photosynthesis by rubisco-, light-, and product-limited photosynthet
 
 """
 function colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT}
-    a_i = colimited_rate(psm.auxil.a_c, psm.auxil.a_j, psm.state.COLIMIT_CJ);
-    psm.auxil.a_g = colimited_rate(psm.auxil.a_p, a_i, psm.state.COLIMIT_IP);
+    a_i = colimited_rate(psm.auxil.a_c, psm.auxil.a_j, psm.trait.COLIMIT_CJ);
+    psm.auxil.a_g = colimited_rate(psm.auxil.a_p, a_i, psm.trait.COLIMIT_IP);
     psm.auxil.a_n = psm.auxil.a_g - β * psm.auxil.r_d;
 
     return nothing

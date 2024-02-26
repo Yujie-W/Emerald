@@ -218,7 +218,7 @@ function prescribe_traits!(
     end;
 
     if !isnothing(vcmax)
-        leaves[end].photosystem.state.v_cmax25 = vcmax;
+        leaves[end].photosystem.trait.v_cmax25 = vcmax;
     end;
 
     if !isnothing(vcmax) || !isnothing(lai)
@@ -227,15 +227,13 @@ function prescribe_traits!(
             ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.trait.δlai[1:irt-1]));
             leaf = leaves[ilf];
             if leaf.photosystem.state isa C3VJPState
-                leaf.photosystem.state.v_cmax25 = leaves[end].photosystem.state.v_cmax25 * ratio;
-                leaf.photosystem.state.j_max25 = leaves[end].photosystem.state.v_cmax25 * 1.67 * ratio;
-                leaf.photosystem.state.r_d25 = leaves[end].photosystem.state.v_cmax25 * 0.015 * ratio;
-                leaf.photosystem.auxil._t = 0;
+                leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
+                leaf.photosystem.trait.j_max25 = leaves[end].photosystem.trait.v_cmax25 * 1.67 * ratio;
+                leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.v_cmax25 * 0.015 * ratio;
             elseif leaf.photosystem.state isa C3CytoState
-                leaf.photosystem.state.v_cmax25 = leaves[end].photosystem.state.v_cmax25 * ratio;
-                leaf.photosystem.state.b₆f = leaves[end].photosystem.state.v_cmax25 * 7 / 300 * ratio;
-                leaf.photosystem.state.r_d25 = leaves[end].photosystem.state.v_cmax25 * 0.015 * ratio;
-                leaf.photosystem.auxil._t = 0;
+                leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
+                leaf.photosystem.trait.b₆f = leaves[end].photosystem.trait.v_cmax25 * 7 / 300 * ratio;
+                leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.v_cmax25 * 0.015 * ratio;
             else
                 error("Vcmax profile is only available for C3VJPState and C3CytoState.");
             end;
@@ -263,8 +261,8 @@ function prescribe_traits!(
     if !isnothing(t_clm)
         for leaf in leaves
             if T_CLM
-                leaf.photosystem.state.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-                leaf.photosystem.state.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+                leaf.photosystem.trait.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+                leaf.photosystem.trait.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
             end;
         end;
     end;

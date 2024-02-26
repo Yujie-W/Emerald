@@ -20,7 +20,7 @@ function ∂R∂T end;
 
 ∂R∂T(leaf::Leaf{FT}) where {FT} = ∂R∂T(leaf.photosystem, leaf.energy.s_aux.t);
 
-∂R∂T(ps::LeafPhotosystem{FT}, t::FT) where {FT} = ∂R∂T(ps.state.TD_R, ps.state.r_d25, t);
+∂R∂T(ps::LeafPhotosystem{FT}, t::FT) where {FT} = ∂R∂T(ps.trait.TD_R, ps.trait.r_d25, t);
 
 ∂R∂T(td::Arrhenius{FT}, r_ref::FT, t::FT) where {FT} = r_ref * exp(td.ΔHA / GAS_R(FT) * (1/td.T_REF - 1/t)) * td.ΔHA / (GAS_R(FT) * t ^ 2);
 

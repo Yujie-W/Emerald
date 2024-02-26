@@ -42,10 +42,9 @@ using Test;
     #     - Sustained NPQ (k_npq_sus; C3VJP and C4VJP only)
     # Note to change the memory temperature to a different value so that the temperature dependence
     # Afterward, you need to run the above steps again to update the quantum yields
-    ps.state.v_cmax25 = 80;
-    ps.state.j_max25 = 160;
-    ps.state.r_d25 = 2;
-    ps.auxil._t = 0;
+    ps.trait.v_cmax25 = 80;
+    ps.trait.j_max25 = 160;
+    ps.trait.r_d25 = 2;
 
     EmeraldLand.Photosynthesis.photosystem_temperature_dependence!(ps, air, t_leaf);
     EmeraldLand.Photosynthesis.photosystem_electron_transport!(ps, ppar, p_co2);
