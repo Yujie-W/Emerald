@@ -35,10 +35,10 @@ function root_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         f_i = flow_in(root);
         if f_i >= 0
             root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.auxil.t;
-            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * soil.auxil.t / sbulk.state.area;
+            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * soil.auxil.t / sbulk.trait.area;
         else
             root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.energy.auxil.t;
-            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * root.energy.auxil.t / sbulk.state.area;
+            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * root.energy.auxil.t / sbulk.trait.area;
         end;
 
         # if the flow into the junction is positive, then the energy flow is negative

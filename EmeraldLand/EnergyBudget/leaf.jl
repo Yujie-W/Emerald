@@ -62,7 +62,7 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         leaf.energy.auxil.∂e∂t_sh = sh;
 
         # add the net radiation energy to the leaf (to total leaf area)
-        leaf.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_leaf[irt] + canopy.structure.auxil.r_net_lw_leaf[irt]) * sbulk.state.area;
+        leaf.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_leaf[irt] + canopy.structure.auxil.r_net_lw_leaf[irt]) * sbulk.trait.area;
     end;
 
     return nothing

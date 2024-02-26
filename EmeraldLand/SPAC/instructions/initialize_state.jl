@@ -97,7 +97,7 @@ initialize_states!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     # make sure leaf area index setup and energy are correct
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        leaves[ilf].xylem.state.area = sbulk.state.area * can_str.trait.δlai[irt];
+        leaves[ilf].xylem.state.area = sbulk.trait.area * can_str.trait.δlai[irt];
         initialize_states!(leaves[ilf]);
     end;
 

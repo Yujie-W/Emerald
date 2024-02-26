@@ -82,7 +82,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     end;
 
     # update the effective longwave reflectance and transmittance
-    can_str.auxil.ρ_lw[end] = sbulk.auxil.ρ_lw;
+    can_str.auxil.ρ_lw[end] = sbulk.trait.ρ_lw;
     for i in n_layer:-1:1
         denom = 1 - can_str.auxil.ρ_lw_layer[i] * can_str.auxil.ρ_lw[i+1];
         can_str.auxil.τ_lw[i] = can_str.auxil.τ_lw_layer[i] / denom;                                                        # it, rescale

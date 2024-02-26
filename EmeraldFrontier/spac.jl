@@ -29,7 +29,7 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
                 longitude = gmdict["LONGITUDE"],
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
                 plant_zs = [-2, z_canopy/2, z_canopy]);
-    spac.soil_bulk.state.color = gmdict["SOIL_COLOR"];
+    spac.soil_bulk.trait.color = gmdict["SOIL_COLOR"];
 
     # update soil type information per layer
     for i in eachindex(spac.soils)

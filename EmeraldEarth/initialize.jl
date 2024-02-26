@@ -59,7 +59,7 @@ initial_state(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Dic
                 longitude = gm_dict["LONGITUDE"],
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
                 plant_zs = [-2, zc/2, zc]);
-    spac.soil_bulk.state.color = gm_dict["SOIL_COLOR"];
+    spac.soil_bulk.trait.color = gm_dict["SOIL_COLOR"];
     for i in eachindex(spac.plant.leaves)
         spac.plant.leaves[i].bio.trait.lma = gm_dict["LMA"];
         spac.plant.leaves[i].flux.trait.stomatal_model = deepcopy(CACHE_SPAC.plant.leaves[i].flux.trait.stomatal_model);

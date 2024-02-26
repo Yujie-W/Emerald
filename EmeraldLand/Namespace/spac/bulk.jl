@@ -60,17 +60,17 @@ BulkSPAC(config::SPACConfiguration{FT};
     # set up soil bulk parameters
     n_soil = length(soil_bounds) - 1;
     spac_sbulk = SoilBulk(config, n_soil);
-    spac_sbulk.state.area = ground_area;
+    spac_sbulk.trait.area = ground_area;
 
     # set up soil albedo algorithm
     if config.α_CLM && config.α_FITTING
-        spac_sbulk.state.albedo = SoilAlbedoHyperspectralCLM();
+        spac_sbulk.trait.albedo = SoilAlbedoHyperspectralCLM();
     elseif config.α_CLM
-        spac_sbulk.state.albedo = SoilAlbedoBroadbandCLM();
+        spac_sbulk.trait.albedo = SoilAlbedoBroadbandCLM();
     elseif !config.α_CLM && config.α_FITTING
-        spac_sbulk.state.albedo = SoilAlbedoHyperspectralCLIMA();
+        spac_sbulk.trait.albedo = SoilAlbedoHyperspectralCLIMA();
     else
-        spac_sbulk.state.albedo = SoilAlbedoBroadbandCLIMA();
+        spac_sbulk.trait.albedo = SoilAlbedoBroadbandCLIMA();
     end;
 
     # set up the soil layers (energy updated in initialize! function)
@@ -168,8 +168,6 @@ mutable struct BulkSPACStates{FT}
     "General information"
     info::SPACInfo{FT}
 
-    "Soil bulk variables"
-    soil_bulk::SoilBulkState{FT}
     "Soil layers"
     soils::Vector{SoilLayerState{FT}}
 
@@ -184,7 +182,6 @@ end;
 
 BulkSPACStates(spac::BulkSPAC{FT}) where {FT} = BulkSPACStates{FT}(
             spac.info,
-            spac.soil_bulk.state,
             [soil.state for soil in spac.soils],
             [air.state for air in spac.airs],
             PlantStates(spac.plant),
@@ -193,7 +190,6 @@ BulkSPACStates(spac::BulkSPAC{FT}) where {FT} = BulkSPACStates{FT}(
 
 sync_state!(spac::BulkSPAC{FT}, states::BulkSPACStates{FT}) where {FT} = (
     sync_state!(spac.info, states.info);
-    sync_state!(spac.soil_bulk.state, states.soil_bulk);
     for i in eachindex(spac.soils)
         sync_state!(spac.soils[i].state, states.soils[i]);
     end;
@@ -208,7 +204,6 @@ sync_state!(spac::BulkSPAC{FT}, states::BulkSPACStates{FT}) where {FT} = (
 
 sync_state!(states::BulkSPACStates{FT}, spac::BulkSPAC{FT}) where {FT} = (
     sync_state!(states.info, spac.info);
-    sync_state!(states.soil_bulk, spac.soil_bulk.state);
     for i in eachindex(states.soils)
         sync_state!(states.soils[i], spac.soils[i].state);
     end;

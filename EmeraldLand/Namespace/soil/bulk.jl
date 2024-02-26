@@ -4,7 +4,7 @@
 #
 # Changes to this struct
 # General
-#     2023-Oct-05: add struct SoilBulkState
+#     2023-Oct-05: add struct SoilBulkTrait
 #     2023-Oct-26: add field albedo for soil albedo algorithm
 #
 #######################################################################################################################################################################################################
@@ -12,20 +12,22 @@
 
 $(TYPEDEF)
 
-Struct for soil bulk state variables
+Struct for soil bulk trait variables
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SoilBulkState{FT}
+Base.@kwdef mutable struct SoilBulkTrait{FT}
     "Soil albedo method"
     albedo::Union{SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
     "Total area of the soil `[m²]`"
     area::FT = 500
     "Color class as in CLM"
     color::Int = 1
+    "Reflectance for longwave radiation"
+    ρ_lw::FT = 0.06
 end;
 
 
@@ -60,8 +62,6 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     r_net_sw::FT = 0
     "Weights of the four characteristic curves"
     weight::Vector{FT} = zeros(FT, 4)
-    "Reflectance for longwave radiation"
-    ρ_lw::FT = 0.06
     "Reflectance for shortwave radiation"
     ρ_sw::Vector{FT}
 
@@ -82,10 +82,6 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     δψ::Vector{FT}
     "Soil thermal conductance between layers per area `[W m⁻² K⁻¹]`"
     λ_layers::Vector{FT}
-
-    # cache variables
-    "Last soil moisture used to compute albedo"
-    _θ::FT = -1
 end;
 
 SoilBulkAuxil(config::SPACConfiguration{FT}, n_soil::Int) where {FT} = SoilBulkAuxil{FT}(
@@ -121,8 +117,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SoilBulk{FT}
-    "State variables"
-    state::SoilBulkState{FT} = SoilBulkState{FT}()
+    "Trait variables"
+    trait::SoilBulkTrait{FT} = SoilBulkTrait{FT}()
     "Auxiliary variables"
     auxil::SoilBulkAuxil{FT}
 end;

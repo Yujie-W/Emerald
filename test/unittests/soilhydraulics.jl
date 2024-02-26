@@ -227,7 +227,7 @@ import Emerald.EmeraldLand.SPAC
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
         water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
-        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.state.area ≈ water_ini;
+        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.trait.area ≈ water_ini;
 
         # the case with root water uptake and surface runoff (water flow already defined above)
         spac.soils[1].state.θ = 0.7;
@@ -236,7 +236,7 @@ import Emerald.EmeraldLand.SPAC
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
         water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
-        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.state.area + spac.soil_bulk.auxil.runoff ≈ water_ini;
+        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.trait.area + spac.soil_bulk.auxil.runoff ≈ water_ini;
 
         # the case with precipitation (water flow already defined above)
         SPAC.update_substep_auxils!(spac);
@@ -245,6 +245,6 @@ import Emerald.EmeraldLand.SPAC
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
         water_end = sum([soil.state.θ * soil.auxil.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
-        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.state.area + spac.soil_bulk.auxil.runoff ≈ water_ini + spac.meteo.rain * 10;
+        @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.trait.area + spac.soil_bulk.auxil.runoff ≈ water_ini + spac.meteo.rain * 10;
     end;
 end;

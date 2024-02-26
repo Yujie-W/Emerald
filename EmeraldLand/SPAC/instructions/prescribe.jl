@@ -213,7 +213,7 @@ function prescribe_traits!(
         can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
         for irt in 1:n_layer
             ilf = n_layer - irt + 1;
-            leaves[ilf].xylem.state.area = sbulk.state.area * can_str.trait.δlai[irt];
+            leaves[ilf].xylem.state.area = sbulk.trait.area * can_str.trait.δlai[irt];
         end;
     end;
 
@@ -289,7 +289,7 @@ function prescribe_traits!(
             stem.xylem.state.kmax = ks[3] * stem.xylem.state.l / trunk.xylem.state.area;
         end;
         for leaf in leaves
-            leaf.xylem.state.k_max = ks[4] / (can_str.trait.lai * sbulk.state.area);
+            leaf.xylem.state.k_max = ks[4] / (can_str.trait.lai * sbulk.trait.area);
         end;
     end;
 
