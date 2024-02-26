@@ -12,9 +12,10 @@ using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BetaLIDF, VerhoefLIDF
-using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil, SunGeometryState, SunGeometrySDAuxil
+using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil, SensorGeometryState, SensorGeometrySDAuxil, SunGeometryState, SunGeometrySDAuxil
 using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoHyperspectralCLIMA, SoilAlbedoHyperspectralCLM
 using ..Namespace: SoilLayer, SoilBulk
+using ..Namespace: MultiLayerCanopy
 using ..Namespace: BulkSPAC, SPACConfiguration
 
 

@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2024-Feb-25: add t_aux! method for CanopyStructureTrait-dependent variables
+#     2024-Feb-25: add t_aux! method for the combined MultiLayerCanopy
 #
 #######################################################################################################################################################################################################
 t_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}, t_aux::CanopyStructureTDAuxil{FT}) where {FT} = (
@@ -26,3 +27,5 @@ t_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}, t_aux::Ca
 
     return nothing
 );
+
+t_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = t_aux!(config, can.structure.trait, can.structure.t_aux);

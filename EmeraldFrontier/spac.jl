@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2023-Mar-20: add function to create data from dict
+#     2024-Feb-25: add t_aux! and s_aux! functions to update the axiliary variables
 #
 #######################################################################################################################################################################################################
 """
@@ -16,38 +17,38 @@ Create a SPAC, given
 """
 function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     # read in canopy height
-    _z_canopy   = max(FT(0.1), gmdict["CANOPY_HEIGHT"]);
-    _Δz         = _z_canopy / 20;
-    _air_bounds = _Δz .* collect(0:21);
+    z_canopy   = max(FT(0.1), gmdict["CANOPY_HEIGHT"]);
+    Δz         = z_canopy / 20;
+    air_bounds = Δz .* collect(0:21);
 
     # create a SPAC to work on
-    _spac = BulkSPAC(
+    spac = BulkSPAC(
                 config;
-                air_bounds = _air_bounds,
+                air_bounds = air_bounds,
                 latitude = gmdict["LATITUDE"],
                 longitude = gmdict["LONGITUDE"],
                 soil_bounds = [0, -0.1, -0.35, -1, -3],
-                plant_zs = [-2, _z_canopy/2, _z_canopy]);
-    _spac.soil_bulk.state.color = gmdict["SOIL_COLOR"];
+                plant_zs = [-2, z_canopy/2, z_canopy]);
+    spac.soil_bulk.state.color = gmdict["SOIL_COLOR"];
 
     # update soil type information per layer
-    for i in eachindex(_spac.soils)
+    for i in eachindex(spac.soils)
         # TODO: add a line to parameterize K_MAX
-        _spac.soils[i].state.vc.α = gmdict["SOIL_α"][i];
-        _spac.soils[i].state.vc.N = gmdict["SOIL_N"][i];
-        _spac.soils[i].state.vc.M = 1 - 1 / _spac.soils[i].state.vc.N;
-        _spac.soils[i].state.vc.Θ_RES = gmdict["SOIL_ΘR"][i];
-        _spac.soils[i].state.vc.Θ_SAT = gmdict["SOIL_ΘS"][i];
+        spac.soils[i].state.vc.α = gmdict["SOIL_α"][i];
+        spac.soils[i].state.vc.N = gmdict["SOIL_N"][i];
+        spac.soils[i].state.vc.M = 1 - 1 / spac.soils[i].state.vc.N;
+        spac.soils[i].state.vc.Θ_RES = gmdict["SOIL_ΘR"][i];
+        spac.soils[i].state.vc.Θ_SAT = gmdict["SOIL_ΘS"][i];
     end;
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)
-    # for _organ in [_spac.plant.leaves; _spac.plant.branches; _spac.plant.trunk; _spac.plant.roots]
+    # for _organ in [spac.plant.leaves; spac.plant.branches; spac.plant.trunk; spac.plant.roots]
     #     _organ.xylem.state.vc.B = 10;
     #     _organ.xylem.state.vc.C = 1;
     # end;
 
     # update leaf mass per area and stomtal model
-    for leaf in _spac.plant.leaves
+    for leaf in spac.plant.leaves
         leaf.bio.state.lma = gmdict["LMA"];
     end;
 
@@ -57,11 +58,13 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     # end;
 
     # update the vcmax for C3 model
-    prescribe_traits!(config, _spac; vcmax = nanmean(gmdict["VCMAX25"]), vcmax_expo = 0.3);
+    prescribe_traits!(config, spac; vcmax = nanmean(gmdict["VCMAX25"]), vcmax_expo = 0.3);
 
     # initialize the spac
-    initialize_states!(config, _spac);
-    initialize_spac!(config, _spac);
+    initialize_states!(config, spac);
+    initialize_spac!(config, spac);
+    t_aux!(config, spac.canopy);
+    s_aux!(config, spac.canopy);
 
-    return _spac
+    return spac
 end;

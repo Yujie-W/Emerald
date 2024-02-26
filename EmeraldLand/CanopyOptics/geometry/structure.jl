@@ -27,7 +27,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     end;
 
     # run the canopy structure function only when LAI+SAI > 0
-    (; SPECTRA, Θ_INCL) = config;
+    (; SPECTRA) = config;
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
     n_layer = length(leaves);

@@ -45,6 +45,8 @@ function setup_cache!(FT::DataType = Float64)
     prescribe_soil!(CACHE_SPAC; swcs = Tuple(max(soil.state.vc.Θ_SAT - 0.02, (soil.state.vc.Θ_SAT + soil.state.vc.Θ_RES) / 2) for soil in CACHE_SPAC.soils));
     initialize_states!(CACHE_CONFIG, CACHE_SPAC);
     initialize_spac!(CACHE_CONFIG, CACHE_SPAC);
+    t_aux!(CACHE_CONFIG, CACHE_SPAC.canopy);
+    s_aux!(CACHE_CONFIG, CACHE_SPAC.canopy);
 
     # create a state struct based on the spac
     CACHE_STATE = BulkSPACStates(CACHE_SPAC);

@@ -211,7 +211,6 @@ function prescribe_traits!(
         epslai = max(eps(FT), lai);
         can_str.trait.lai = epslai;
         can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
-        can_str.t_aux.x_bnds = ([0; [sum(can_str.trait.δlai[1:i]) + sum(can_str.trait.δsai[1:i]) for i in 1:n_layer]] ./ -(epslai + can_str.trait.sai));
         for irt in 1:n_layer
             ilf = n_layer - irt + 1;
             leaves[ilf].xylem.state.area = sbulk.state.area * can_str.trait.δlai[irt];
@@ -252,7 +251,12 @@ function prescribe_traits!(
     if !isnothing(sai)
         can_str.trait.sai = sai;
         can_str.trait.δsai = sai .* ones(FT, n_layer) ./ n_layer;
-        can_str.t_aux.x_bnds = ([0; [sum(can_str.trait.δlai[1:i]) + sum(can_str.trait.δsai[1:i]) for i in 1:n_layer]] ./ -(can_str.trait.lai + sai));
+    end;
+
+    # if lai, sai, or ci is updated, re-initialize the canopy structure
+    if !isnothing(lai) || !isnothing(sai) || !isnothing(ci)
+        t_aux!(config, spac.canopy);
+        s_aux!(config, spac.canopy);
     end;
 
     # update Vcmax and Jmax TD

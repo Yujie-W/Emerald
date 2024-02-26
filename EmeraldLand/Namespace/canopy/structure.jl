@@ -192,6 +192,7 @@ CanopyStructureAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = C
 # Changes to this struct
 # General
 #     2023-Oct-09: add struct CanopyStructure
+#     2024-Feb-25: add field trait, t_aux, and s_aux
 #
 #######################################################################################################################################################################################################
 """

@@ -129,6 +129,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
+        NS.t_aux!(config, spac.canopy);
+        NS.s_aux!(config, spac.canopy);
         for leaf in spac.plant.leaves
             leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
             leaf.flux.state.g_H₂O_s_shaded = 0.1;
@@ -160,6 +162,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
+        NS.t_aux!(config, spac.canopy);
+        NS.s_aux!(config, spac.canopy);
         for leaf in spac.plant.leaves
             leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
             leaf.flux.state.g_H₂O_s_shaded = 0.1;

@@ -23,8 +23,8 @@ using Test;
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_states!(config, spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        EmeraldLand.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
-        EmeraldLand.CanopyOptics.s_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux, spac.canopy.sun_geometry.state, spac.canopy.sun_geometry.s_aux);
+        EmeraldLand.Namespace.t_aux!(config, spac.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac.canopy);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);
         @test true;
 
@@ -49,8 +49,8 @@ using Test;
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_states!(config, spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        EmeraldLand.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
-        EmeraldLand.CanopyOptics.s_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux, spac.canopy.sun_geometry.state, spac.canopy.sun_geometry.s_aux);
+        EmeraldLand.Namespace.t_aux!(config, spac.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac.canopy);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.5);
         @test true;
 
@@ -75,8 +75,8 @@ using Test;
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_states!(config, spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        EmeraldLand.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
-        EmeraldLand.CanopyOptics.s_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux, spac.canopy.sun_geometry.state, spac.canopy.sun_geometry.s_aux);
+        EmeraldLand.Namespace.t_aux!(config, spac.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac.canopy);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
         @test true;
 
@@ -101,8 +101,8 @@ using Test;
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_states!(config, spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        EmeraldLand.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
-        EmeraldLand.CanopyOptics.s_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux, spac.canopy.sun_geometry.state, spac.canopy.sun_geometry.s_aux);
+        EmeraldLand.Namespace.t_aux!(config, spac.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac.canopy);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
         @test true;
 
@@ -129,8 +129,8 @@ using Test;
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_states!(config, spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        EmeraldLand.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
-        EmeraldLand.CanopyOptics.s_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux, spac.canopy.sun_geometry.state, spac.canopy.sun_geometry.s_aux);
+        EmeraldLand.Namespace.t_aux!(config, spac.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac.canopy);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);
         @test true;
 

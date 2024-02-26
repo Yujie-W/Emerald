@@ -26,6 +26,24 @@ Base.@kwdef mutable struct SunGeometryState{FT}
 end;
 
 
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General
+#     2024-Feb-25: add struct SunGeometrySDAuxil
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct to store the the state-dependent auxiliary variables of the sun geometry
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
 Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
     # Scattering coefficients
     "Backward direct->diffuse scatter weight"
@@ -276,6 +294,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGe
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SunGeometry
+#     2024-Feb-25: add field trait, t_aux, s_aux
 #
 #######################################################################################################################################################################################################
 """

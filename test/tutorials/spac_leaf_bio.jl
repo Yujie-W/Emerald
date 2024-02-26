@@ -8,8 +8,8 @@ using Test;
     spac = EmeraldLand.Namespace.BulkSPAC(config);
     EmeraldLand.SPAC.initialize_states!(config, spac);
     EmeraldLand.SPAC.initialize_spac!(config, spac);
-    EmeraldLand.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
-    EmeraldLand.CanopyOptics.s_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux, spac.canopy.sun_geometry.state, spac.canopy.sun_geometry.s_aux);
+    EmeraldLand.Namespace.t_aux!(config, spac.canopy);
+    EmeraldLand.Namespace.s_aux!(config, spac.canopy);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
 
     # There are two ways to change leaf biophysical parameters.

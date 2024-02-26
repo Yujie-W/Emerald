@@ -45,6 +45,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
+        NS.t_aux!(config, spac.canopy);
+        NS.s_aux!(config, spac.canopy);
 
         # the function does not for optimality models
         SM.β_factor!(spac);
@@ -186,6 +188,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
+        NS.t_aux!(config, spac.canopy);
+        NS.s_aux!(config, spac.canopy);
         for leaf in spac.plant.leaves
             leaf.flux.auxil.ppar_shaded = 100.0;
             leaf.flux.auxil.ppar_sunlit .= 200.0;
@@ -206,6 +210,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
+        NS.t_aux!(config, spac.canopy);
+        NS.s_aux!(config, spac.canopy);
         g_shaded = [];
         g_sunlit = [];
         for leaf in spac.plant.leaves

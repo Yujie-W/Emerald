@@ -24,8 +24,6 @@ function t_aux! end;
 #######################################################################################################################################################################################################
 """
 
-    s_aux!(config::SPACConfiguration, state, s_aux)
-
 Update the state-dependent auxilary variables from state (and trait and t_aux) variables
 
 """

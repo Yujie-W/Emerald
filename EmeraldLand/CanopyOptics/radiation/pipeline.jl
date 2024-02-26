@@ -18,8 +18,8 @@ Update the canopy radiation related auxiliary variables, given
 """
 function canopy_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     # update the trait- and/or state-dependent variables
-    t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
-    s_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux, spac.canopy.sun_geometry.state, spac.canopy.sun_geometry.s_aux);
+    t_aux!(config, spac.canopy);
+    s_aux!(config, spac.canopy);
 
     # update the canopy structure
     canopy_structure!(config, spac);
