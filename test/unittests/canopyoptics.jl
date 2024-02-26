@@ -60,9 +60,9 @@ import Emerald.EmeraldLand.SPAC
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
 
-        @test 0 <= spac.canopy.structure.auxil.bf <= 1;
-        @test spac.canopy.structure.auxil.ddb >= 0;
-        @test spac.canopy.structure.auxil.ddf >= 0;
+        @test 0 <= spac.canopy.structure.t_aux.bf <= 1;
+        @test spac.canopy.structure.t_aux.ddb >= 0;
+        @test spac.canopy.structure.t_aux.ddf >= 0;
         @test all(0 .< spac.canopy.structure.auxil.ρ_dd_layer .< 1);
         @test all(0 .< spac.canopy.structure.auxil.τ_dd_layer .< 1);
         @test all(0 .< spac.canopy.structure.auxil.ρ_dd .< 1);

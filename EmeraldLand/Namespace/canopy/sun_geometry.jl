@@ -26,6 +26,11 @@ Base.@kwdef mutable struct SunGeometryState{FT}
 end;
 
 
+#Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
+#    ;
+#end;
+
+
 #######################################################################################################################################################################################################
 #
 # Changes to the struct

@@ -67,6 +67,15 @@ Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
     p_incl::Vector{FT}
     "Canopy level boundary locations"
     x_bnds::Vector{FT}
+
+    # canopy scattering coefficients
+    "Weighted sum of cos²(inclination)"
+    bf::FT = 0
+    "Backward diffuse->diffuse scatter weight"
+    ddb::FT = 0
+    "Forward diffuse->diffuse scatter weight"
+    ddf::FT = 0
+
 end;
 
 CanopyStructureTDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureTDAuxil{FT}(
@@ -95,14 +104,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureAuxil{FT}
-    # canopy scattering coefficients
-    "Weighted sum of cos²(inclination)"
-    bf::FT = 0
-    "Backward diffuse->diffuse scatter weight"
-    ddb::FT = 0
-    "Forward diffuse->diffuse scatter weight"
-    ddf::FT = 0
-
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of leaf"
     ddb_leaf::Matrix{FT}

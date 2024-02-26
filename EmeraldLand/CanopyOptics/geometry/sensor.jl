@@ -82,8 +82,8 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     sen_geo.auxil.ko = can_str.t_aux.p_incl' * sen_geo.auxil.ko_incl;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    sen_geo.auxil.dob = (sen_geo.auxil.ko + can_str.auxil.bf) / 2;
-    sen_geo.auxil.dof = (sen_geo.auxil.ko - can_str.auxil.bf) / 2;
+    sen_geo.auxil.dob = (sen_geo.auxil.ko + can_str.t_aux.bf) / 2;
+    sen_geo.auxil.dof = (sen_geo.auxil.ko - can_str.t_aux.bf) / 2;
     sen_geo.auxil.sob = can_str.t_aux.p_incl' * sen_geo.auxil.sb_incl;
     sen_geo.auxil.sof = can_str.t_aux.p_incl' * sen_geo.auxil.sf_incl;
 

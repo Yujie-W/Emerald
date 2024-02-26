@@ -32,14 +32,6 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     sbulk = spac.soil_bulk;
     n_layer = length(leaves);
 
-    # compute the weighed average of the leaf inclination angle distribution
-    can_str.auxil.bf = 0;
-    for i in eachindex(Θ_INCL)
-        can_str.auxil.bf += can_str.t_aux.p_incl[i] * cosd(Θ_INCL[i]) ^ 2;;
-    end;
-    can_str.auxil.ddb = (1 + can_str.auxil.bf) / 2;
-    can_str.auxil.ddf = (1 - can_str.auxil.bf) / 2;
-
     # update the clumping index
     # note here the clumping index should not be a solar zenith angle dependent variable for diffuse light !!!
     # TODO: redesign the clumping index model
@@ -48,10 +40,10 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
-        can_str.auxil.ddb_leaf[:,irt] .= can_str.auxil.ddb * leaf.bio.auxil.ρ_leaf .+ can_str.auxil.ddf * leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddf_leaf[:,irt] .= can_str.auxil.ddf * leaf.bio.auxil.ρ_leaf .+ can_str.auxil.ddb * leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddb_stem[:,irt] .= can_str.auxil.ddb * SPECTRA.ρ_STEM;
-        can_str.auxil.ddf_stem[:,irt] .= can_str.auxil.ddf * SPECTRA.ρ_STEM;
+        can_str.auxil.ddb_leaf[:,irt] .= can_str.t_aux.ddb * leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddf * leaf.bio.auxil.τ_leaf;
+        can_str.auxil.ddf_leaf[:,irt] .= can_str.t_aux.ddf * leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddb * leaf.bio.auxil.τ_leaf;
+        can_str.auxil.ddb_stem[:,irt] .= can_str.t_aux.ddb * SPECTRA.ρ_STEM;
+        can_str.auxil.ddf_stem[:,irt] .= can_str.t_aux.ddf * SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -82,8 +74,8 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
         ipai = (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]) * can_str.trait.ci;
-        σ_lw_b = can_str.auxil.ddb * leaf.bio.auxil.ρ_lw + can_str.auxil.ddf * leaf.bio.auxil.τ_lw;
-        σ_lw_f = can_str.auxil.ddf * leaf.bio.auxil.ρ_lw + can_str.auxil.ddb * leaf.bio.auxil.τ_lw;
+        σ_lw_b = can_str.t_aux.ddb * leaf.bio.auxil.ρ_lw + can_str.t_aux.ddf * leaf.bio.auxil.τ_lw;
+        σ_lw_f = can_str.t_aux.ddf * leaf.bio.auxil.ρ_lw + can_str.t_aux.ddb * leaf.bio.auxil.τ_lw;
         can_str.auxil.τ_lw_layer[irt] = exp(-1 * (1 - σ_lw_f) * ipai);
         can_str.auxil.ρ_lw_layer[irt] = 1 - exp(-1 * σ_lw_b * ipai);
         can_str.auxil.ϵ_lw_layer[irt] = 1 - can_str.auxil.τ_lw_layer[irt] - can_str.auxil.ρ_lw_layer[irt];

@@ -46,8 +46,8 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     sun_geo.auxil.ks = can_str.t_aux.p_incl' * sun_geo.auxil.ks_incl;
 
     # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
-    sun_geo.auxil.sdb = (sun_geo.auxil.ks + can_str.auxil.bf) / 2;
-    sun_geo.auxil.sdf = (sun_geo.auxil.ks - can_str.auxil.bf) / 2;
+    sun_geo.auxil.sdb = (sun_geo.auxil.ks + can_str.t_aux.bf) / 2;
+    sun_geo.auxil.sdf = (sun_geo.auxil.ks - can_str.t_aux.bf) / 2;
 
     # compute the fs and fs_abs matrices
     for i in eachindex(Θ_AZI)
