@@ -36,8 +36,8 @@ using Test;
     @test true;
 
     # If you change leaf biophysical traits such as chlorophyll content, you can change them in the state field of the bio
-    bio.state.cab = 20;
-    bio.state.car = 5;
+    bio.trait.cab = 20;
+    bio.trait.car = 5;
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 end;

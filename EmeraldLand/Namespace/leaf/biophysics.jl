@@ -4,10 +4,59 @@
 #
 # Changes to this struct
 # General
+#     2024-Feb-26: add struct LeafBioTrait
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables of leaf biophysical traits.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct LeafBioTrait{FT<:AbstractFloat}
+    "Anthocyanin content `[μg cm⁻²]`"
+    ant::FT = 0
+    "Senescent material (brown pigments) fraction `[-]`"
+    brown::FT = 0
+    "Chlorophyll a and b content `[μg cm⁻²]`"
+    cab::FT = 40
+    "Carotenoid content `[μg cm⁻²]`"
+    car::FT = 40 / 7
+    "Carbon-based constituents in lma `[g cm⁻²]`"
+    cbc::FT = 0
+    "Dry matter content (dry leaf mass per unit area) `[g cm⁻²]`"
+    lma::FT = 0.012
+    "Leaf mesophyll structural parameter that describes the number of thin layers with a leaf"
+    meso_n::FT = 1.4
+    "Protein content in lma (pro = lma - cbc) `[g cm⁻²]`"
+    pro::FT = 0
+
+    # leaf width
+    "leaf width `[m]`"
+    width::FT = 0.05
+
+    # longwave radiation
+    "Broadband thermal reflectance, related to blackbody emittance `[-]`"
+    ρ_lw::FT = 0.01
+    "Broadband thermal transmission, related to blackbody emittance `[-]`"
+    τ_lw::FT = 0.01
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Sep-14: add struct LeafBioState
 #     2023-Sep-14: add fields ϕ_car and ϕ_car_ppar
 #     2023-Oct-03: add field width
 #     2024-Jan-20: set ϕ_car_ppar to 0 by default
+#     2024-Feb-26: move the traits to a separate struct
 #
 #######################################################################################################################################################################################################
 """
@@ -22,26 +71,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafBioState{FT<:AbstractFloat}
-    "Anthocyanin content `[μg cm⁻²]`"
-    ant::FT = 0
-    "Senescent material (brown pigments) fraction `[-]`"
-    brown::FT = 0
-    "Chlorophyll a and b content `[μg cm⁻²]`"
-    cab::FT = 40
-    "Carotenoid content `[μg cm⁻²]`"
-    car::FT = 40 / 7
-    "Carbon-based constituents in lma `[g cm⁻²]`"
-    cbc::FT = 0
     "Zeaxanthin fraction in Carotenoid (1=all Zeaxanthin, 0=all Violaxanthin) `[-]`"
     f_zeax::FT = 0
-    "Dry matter content (dry leaf mass per unit area) `[g cm⁻²]`"
-    lma::FT = 0.012
-    "Leaf mesophyll structural parameter that describes the number of thin layers with a leaf"
-    meso_n::FT = 1.4
-    "Protein content in lma (pro = lma - cbc) `[g cm⁻²]`"
-    pro::FT = 0
-    "leaf width `[m]`"
-    width::FT = 0.05
     "Fraction of carotenoid aborption into SIF `[-]`"
     ϕ_car::FT = 0
     "Fraction of carotenoid aborption into PPAR `[-]`"
@@ -182,12 +213,6 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
     psii_mat_diff::Matrix{FT}
 
-    # longwave radiation
-    "Broadband thermal reflectance, related to blackbody emittance `[-]`"
-    ρ_lw::FT = 0.01
-    "Broadband thermal transmission, related to blackbody emittance `[-]`"
-    τ_lw::FT = 0.01
-
     # cache variables
     "SIF PDF based on the wavelength of excitation `[-]`"
     _ϕ_sif::Vector{FT}
@@ -255,6 +280,7 @@ LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
 # Changes to this struct
 # General
 #     2023-Sep-14: add new struct to use with the new leaf optics model (copied from HyperspectralLeafBiophysics)
+#     2024-Feb-26: add field trait, t_aux, and s_aux
 #
 #######################################################################################################################################################################################################
 """
@@ -270,8 +296,14 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafBio{FT<:AbstractFloat}
     # state variables (prognostic or structural)
+    "Trait variables"
+    trait::LeafBioTrait{FT} = LeafBioTrait{FT}()
     "State variables"
     state::LeafBioState{FT} = LeafBioState{FT}()
+    "Trait derived auxiliary variables"
+    t_aux::Nothing = nothing
+    "State derived auxiliary variables"
+    s_aux::Nothing = nothing
     "Auxiliary variables"
     auxil::LeafBioAuxil{FT}
 end;

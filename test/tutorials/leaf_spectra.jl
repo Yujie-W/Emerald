@@ -17,8 +17,8 @@ using Test;
     @test true;
 
     # Change the leaf biophysical parameters
-    bio.state.cab = 20;
-    bio.state.car = 5;
+    bio.trait.cab = 20;
+    bio.trait.car = 5;
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 end;

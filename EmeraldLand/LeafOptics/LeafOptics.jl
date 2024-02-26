@@ -4,7 +4,7 @@ using SpecialFunctions: expint
 
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
 
-using ..Namespace: LeafBio, LeafBioState
+using ..Namespace: LeafBio, LeafBioState, LeafBioTrait
 using ..Namespace: BulkSPAC, SPACConfiguration
 
 

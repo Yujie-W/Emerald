@@ -16,11 +16,11 @@ using Test;
     # The first method is to do it manually.
     # However, users need to run function leaf_spectra! to force the model update leaf level spectra.
     for leaf in spac.plant.leaves
-        leaf.bio.state.cab = 40;        # chlorophyll a and b content
-        leaf.bio.state.car = 10;        # carotenoid content
-        leaf.bio.state.cbc = 0.011;     # strutural carbon content
-        leaf.bio.state.lma = 0.012;     # leaf mass per area lma = cbc + pro
-        leaf.bio.state.pro = 0.001;     # protein content
+        leaf.bio.trait.cab = 40;        # chlorophyll a and b content
+        leaf.bio.trait.car = 10;        # carotenoid content
+        leaf.bio.trait.cbc = 0.011;     # strutural carbon content
+        leaf.bio.trait.lma = 0.012;     # leaf mass per area lma = cbc + pro
+        leaf.bio.trait.pro = 0.001;     # protein content
     end;
     EmeraldLand.LeafOptics.plant_leaf_spectra!(config, spac);
     @test true;

@@ -74,8 +74,8 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
         ipai = (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]) * can_str.trait.ci;
-        σ_lw_b = can_str.t_aux.ddb * leaf.bio.auxil.ρ_lw + can_str.t_aux.ddf * leaf.bio.auxil.τ_lw;
-        σ_lw_f = can_str.t_aux.ddf * leaf.bio.auxil.ρ_lw + can_str.t_aux.ddb * leaf.bio.auxil.τ_lw;
+        σ_lw_b = can_str.t_aux.ddb * leaf.bio.trait.ρ_lw + can_str.t_aux.ddf * leaf.bio.trait.τ_lw;
+        σ_lw_f = can_str.t_aux.ddf * leaf.bio.trait.ρ_lw + can_str.t_aux.ddb * leaf.bio.trait.τ_lw;
         can_str.auxil.τ_lw_layer[irt] = exp(-1 * (1 - σ_lw_f) * ipai);
         can_str.auxil.ρ_lw_layer[irt] = 1 - exp(-1 * σ_lw_b * ipai);
         can_str.auxil.ϵ_lw_layer[irt] = 1 - can_str.auxil.τ_lw_layer[irt] - can_str.auxil.ρ_lw_layer[irt];

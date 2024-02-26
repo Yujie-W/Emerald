@@ -7,9 +7,10 @@
 #######################################################################################################################################################################################################
 """
 
-    sublayer_f_cab(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+    sublayer_f_cab(biot::LeafBioTrait{FT}, bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
 
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
+- `biot` leaf biophysical trait variables
 - `bios` leaf biophysical state variables
 - `k_ant` anthocynanin absorption coefficient
 - `k_brown` brown pigments absorption coefficient
@@ -23,18 +24,18 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `lwc` leaf water content
 
 """
-function sublayer_f_cab(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
-    Σkx = k_ant * bios.ant +                            # anthocynanin absorption absorption
-          k_brown * bios.brown +                        # brown pigments
-          k_cab * bios.cab +                            # chlorophyll a + b absorption
-          k_car_v * bios.car * (1 - bios.f_zeax) +      # violaxanthin carotenoid absorption
-          k_car_z * bios.car * bios.f_zeax +            # zeaxanthin carotenoid absorption
-          k_cbc * bios.cbc +                            # carbon-based constituents absorption
+function sublayer_f_cab(biot::LeafBioTrait{FT}, bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+    Σkx = k_ant * biot.ant +                            # anthocynanin absorption absorption
+          k_brown * biot.brown +                        # brown pigments
+          k_cab * biot.cab +                            # chlorophyll a + b absorption
+          k_car_v * biot.car * (1 - bios.f_zeax) +      # violaxanthin carotenoid absorption
+          k_car_z * biot.car * bios.f_zeax +            # zeaxanthin carotenoid absorption
+          k_cbc * biot.cbc +                            # carbon-based constituents absorption
           k_H₂O * (lwc * M_H₂O(FT) / ρ_H₂O(FT) * 100) + # water absorption
-          k_lma * (bios.lma - bios.cbc - bios.pro) +    # dry mass absorption (if some remained)
-          k_pro * bios.pro;                             # protein absorption
+          k_lma * (biot.lma - biot.cbc - biot.pro) +    # dry mass absorption (if some remained)
+          k_pro * biot.pro;                             # protein absorption
 
-    return k_cab * bios.cab / Σkx
+    return k_cab * biot.cab / Σkx
 end;
 
 
@@ -47,9 +48,10 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    sublayer_f_car(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+    sublayer_f_car(biot::LeafBioTrait{FT}, bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
 
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
+- `bios` leaf biophysical state variables
 - `bios` leaf biophysical state variables
 - `k_ant` anthocynanin absorption coefficient
 - `k_brown` brown pigments absorption coefficient
@@ -63,18 +65,18 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `lwc` leaf water content
 
 """
-function sublayer_f_car(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
-    Σkx = k_ant * bios.ant +
-          k_brown * bios.brown +
-          k_cab * bios.cab +
-          k_car_v * bios.car * (1 - bios.f_zeax) +
-          k_car_z * bios.car * bios.f_zeax +
-          k_cbc * bios.cbc +
+function sublayer_f_car(biot::LeafBioTrait{FT}, bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
+    Σkx = k_ant * biot.ant +
+          k_brown * biot.brown +
+          k_cab * biot.cab +
+          k_car_v * biot.car * (1 - bios.f_zeax) +
+          k_car_z * biot.car * bios.f_zeax +
+          k_cbc * biot.cbc +
           k_H₂O * (lwc * M_H₂O(FT) / ρ_H₂O(FT) * 100) +
-          k_lma * (bios.lma - bios.cbc - bios.pro) +
-          k_pro * bios.pro;
+          k_lma * (biot.lma - biot.cbc - biot.pro) +
+          k_pro * biot.pro;
 
-    return (k_car_v * bios.car * (1 - bios.f_zeax) + k_car_z * bios.car * bios.f_zeax) / Σkx
+    return (k_car_v * biot.car * (1 - bios.f_zeax) + k_car_z * biot.car * bios.f_zeax) / Σkx
 end;
 
 
@@ -87,7 +89,20 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    sublayer_τ(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT, x::FT, N::Int) where {FT}
+    sublayer_τ(biot::LeafBioTrait{FT},
+               bios::LeafBioState{FT},
+               k_ant::FT,
+               k_brown::FT,
+               k_cab::FT,
+               k_car_v::FT,
+               k_car_z::FT,
+               k_cbc::FT,
+               k_H₂O::FT,
+               k_lma::FT,
+               k_pro::FT,
+               lwc::FT,
+               x::FT,
+               N::Int) where {FT}
 
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `bios` leaf biophysical state variables
@@ -105,16 +120,30 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `N` number of sublayers of each layer
 
 """
-function sublayer_τ(bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT, x::FT, N::Int) where {FT}
-    Σkx = k_ant * bios.ant +
-          k_brown * bios.brown +
-          k_cab * bios.cab +
-          k_car_v * bios.car * (1 - bios.f_zeax) +
-          k_car_z * bios.car * bios.f_zeax +
-          k_cbc * bios.cbc +
+function sublayer_τ(
+            biot::LeafBioTrait{FT},
+            bios::LeafBioState{FT},
+            k_ant::FT,
+            k_brown::FT,
+            k_cab::FT,
+            k_car_v::FT,
+            k_car_z::FT,
+            k_cbc::FT,
+            k_H₂O::FT,
+            k_lma::FT,
+            k_pro::FT,
+            lwc::FT,
+            x::FT,
+            N::Int) where {FT}
+    Σkx = k_ant * biot.ant +
+          k_brown * biot.brown +
+          k_cab * biot.cab +
+          k_car_v * biot.car * (1 - bios.f_zeax) +
+          k_car_z * biot.car * bios.f_zeax +
+          k_cbc * biot.cbc +
           k_H₂O * (lwc * M_H₂O(FT) / ρ_H₂O(FT) * 100) +
-          k_lma * (bios.lma - bios.cbc - bios.pro) +
-          k_pro * bios.pro;
+          k_lma * (biot.lma - biot.cbc - biot.pro) +
+          k_pro * biot.pro;
     Σkx *= x;
     τ_layer = (1 - Σkx) * exp(-Σkx) + Σkx^2 * expint(Σkx + eps(FT));
 
@@ -175,15 +204,15 @@ Update the sublayer absorption and transmittance within `bio`, given
 function leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT}
     (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = config.SPECTRA;
 
-    x = 1 / bio.state.meso_n;
-    bio.auxil.f_cab  .= sublayer_f_cab.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
-    bio.auxil.f_car  .= sublayer_f_car.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    x = 1 / bio.trait.meso_n;
+    bio.auxil.f_cab  .= sublayer_f_cab.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    bio.auxil.f_car  .= sublayer_f_car.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
     bio.auxil.f_ppar .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car_ppar;
     bio.auxil.f_psii .= psii_fraction.(Λ);
     bio.auxil.f_sife .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car;
 
-    bio.auxil.τ_sub_1 .= sublayer_τ.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x, N);
-    bio.auxil.τ_sub_2 .= sublayer_τ.((bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, 1-x, N);
+    bio.auxil.τ_sub_1 .= sublayer_τ.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x, N);
+    bio.auxil.τ_sub_2 .= sublayer_τ.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, 1-x, N);
     bio.auxil.τ_all_1 .= bio.auxil.τ_sub_1 .^ N;
     bio.auxil.τ_all_2 .= bio.auxil.τ_sub_2 .^ N;
 

@@ -192,13 +192,13 @@ function prescribe_traits!(
     # update chlorophyll and carotenoid contents (and spectra)
     if !isnothing(cab)
         for leaf in leaves
-            leaf.bio.state.cab = cab;
+            leaf.bio.trait.cab = cab;
         end;
     end;
 
     if !isnothing(car)
         for leaf in leaves
-            leaf.bio.state.car = car;
+            leaf.bio.trait.car = car;
         end;
     end;
 

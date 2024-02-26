@@ -49,7 +49,7 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
 
     # update leaf mass per area and stomtal model
     for leaf in spac.plant.leaves
-        leaf.bio.state.lma = gmdict["LMA"];
+        leaf.bio.trait.lma = gmdict["LMA"];
     end;
 
     # TODO: add support to C4 photosynthesis

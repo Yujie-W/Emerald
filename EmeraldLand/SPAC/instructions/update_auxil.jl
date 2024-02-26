@@ -218,7 +218,7 @@ update_step_auxils!(spac::BulkSPAC{FT}) where {FT} = (
     for i in eachindex(leaves)
         leaf = leaves[i];
         air = airs[lindex[i]];
-        leaf.flux.auxil.g_CO₂_b = FT(0.14) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.state.width));
+        leaf.flux.auxil.g_CO₂_b = FT(0.14) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.trait.width));
     end;
 
     return nothing
