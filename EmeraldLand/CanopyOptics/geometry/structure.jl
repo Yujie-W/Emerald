@@ -22,7 +22,7 @@ Update canopy structure related auxiliary variables, given
 function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     can_str = spac.canopy.structure;
 
-    if can_str.state.lai <= 0 && can_str.state.sai <= 0
+    if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         return nothing
     end;
 
@@ -35,7 +35,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     # compute the weighed average of the leaf inclination angle distribution
     can_str.auxil.bf = 0;
     for i in eachindex(Θ_INCL)
-        can_str.auxil.bf += can_str.auxil.p_incl[i] * cosd(Θ_INCL[i]) ^ 2;;
+        can_str.auxil.bf += can_str.t_aux.p_incl[i] * cosd(Θ_INCL[i]) ^ 2;;
     end;
     can_str.auxil.ddb = (1 + can_str.auxil.bf) / 2;
     can_str.auxil.ddf = (1 - can_str.auxil.bf) / 2;
@@ -43,8 +43,6 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     # update the clumping index
     # note here the clumping index should not be a solar zenith angle dependent variable for diffuse light !!!
     # TODO: redesign the clumping index model
-    # can_str.auxil.ci = can_str.state.Ω_A + can_str.state.Ω_B * (1 - cosd(spac.canopy.sun_geometry.state.sza));
-    can_str.auxil.ci = can_str.state.Ω_A;
 
     # compute the scattering coefficients for the solar radiation per leaf area
     for irt in 1:n_layer
@@ -57,11 +55,11 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    # can_str.auxil.τ_dd_layer .= exp.(-1 .* (1 .- can_str.auxil.ddf_leaf) .* can_str.state.δlai' .* can_str.auxil.ci);
-    # can_str.auxil.ρ_dd_layer .= 1 .- exp.(-1 .* can_str.auxil.ddb_leaf .* can_str.state.δlai' .* can_str.auxil.ci);
+    # can_str.auxil.τ_dd_layer .= exp.(-1 .* (1 .- can_str.auxil.ddf_leaf) .* can_str.trait.δlai' .* can_str.trait.ci);
+    # can_str.auxil.ρ_dd_layer .= 1 .- exp.(-1 .* can_str.auxil.ddb_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
     for i in 1:n_layer
-        k_τ_x = (can_str.state.δlai[i] .* (1 .- can_str.auxil.ddf_leaf[:,i]) .+ can_str.state.δsai[i] .* (1 .- can_str.auxil.ddf_stem[:,i])) .* can_str.auxil.ci;
-        k_ρ_x = (can_str.state.δlai[i] .* can_str.auxil.ddb_leaf[:,i] .+ can_str.state.δsai[i] .* can_str.auxil.ddb_stem[:,i]) .* can_str.auxil.ci;
+        k_τ_x = (can_str.trait.δlai[i] .* (1 .- can_str.auxil.ddf_leaf[:,i]) .+ can_str.trait.δsai[i] .* (1 .- can_str.auxil.ddf_stem[:,i])) .* can_str.trait.ci;
+        k_ρ_x = (can_str.trait.δlai[i] .* can_str.auxil.ddb_leaf[:,i] .+ can_str.trait.δsai[i] .* can_str.auxil.ddb_stem[:,i]) .* can_str.trait.ci;
         can_str.auxil.τ_dd_layer[:,i] .= exp.(-1 .* k_τ_x);
         can_str.auxil.ρ_dd_layer[:,i] .= 1 .- exp.(-1 .* k_ρ_x);
     end;
@@ -83,7 +81,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
-        ipai = (can_str.state.δlai[irt] + can_str.state.δsai[irt]) * can_str.auxil.ci;
+        ipai = (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]) * can_str.trait.ci;
         σ_lw_b = can_str.auxil.ddb * leaf.bio.auxil.ρ_lw + can_str.auxil.ddf * leaf.bio.auxil.τ_lw;
         σ_lw_f = can_str.auxil.ddf * leaf.bio.auxil.ρ_lw + can_str.auxil.ddb * leaf.bio.auxil.τ_lw;
         can_str.auxil.τ_lw_layer[irt] = exp(-1 * (1 - σ_lw_f) * ipai);

@@ -209,12 +209,12 @@ function prescribe_traits!(
     # update LAI and Vcmax (with scaling factor)
     if !isnothing(lai)
         epslai = max(eps(FT), lai);
-        can_str.state.lai = epslai;
-        can_str.state.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
-        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:n_layer]] ./ -(epslai + can_str.state.sai));
+        can_str.trait.lai = epslai;
+        can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
+        can_str.t_aux.x_bnds = ([0; [sum(can_str.trait.δlai[1:i]) + sum(can_str.trait.δsai[1:i]) for i in 1:n_layer]] ./ -(epslai + can_str.trait.sai));
         for irt in 1:n_layer
             ilf = n_layer - irt + 1;
-            leaves[ilf].xylem.state.area = sbulk.state.area * can_str.state.δlai[irt];
+            leaves[ilf].xylem.state.area = sbulk.state.area * can_str.trait.δlai[irt];
         end;
     end;
 
@@ -225,7 +225,7 @@ function prescribe_traits!(
     if !isnothing(vcmax) || !isnothing(lai)
         for irt in 1:n_layer
             ilf = n_layer - irt + 1;
-            ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.state.δlai[1:irt-1]));
+            ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.trait.δlai[1:irt-1]));
             leaf = leaves[ilf];
             if leaf.photosystem.state isa C3VJPState
                 leaf.photosystem.state.v_cmax25 = leaves[end].photosystem.state.v_cmax25 * ratio;
@@ -245,16 +245,14 @@ function prescribe_traits!(
 
     # update CI
     if !isnothing(ci)
-        can_str.state.Ω_A = ci;
-        can_str.state.Ω_B = 0;
-        can_str.auxil.ci = ci;
+        can_str.trait.ci = ci;
     end;
 
     # update SAI
     if !isnothing(sai)
-        can_str.state.sai = sai;
-        can_str.state.δsai = sai .* ones(FT, n_layer) ./ n_layer;
-        can_str.auxil.x_bnds = ([0; [sum(can_str.state.δlai[1:i]) + sum(can_str.state.δsai[1:i]) for i in 1:n_layer]] ./ -(can_str.state.lai + sai));
+        can_str.trait.sai = sai;
+        can_str.trait.δsai = sai .* ones(FT, n_layer) ./ n_layer;
+        can_str.t_aux.x_bnds = ([0; [sum(can_str.trait.δlai[1:i]) + sum(can_str.trait.δsai[1:i]) for i in 1:n_layer]] ./ -(can_str.trait.lai + sai));
     end;
 
     # update Vcmax and Jmax TD
@@ -289,7 +287,7 @@ function prescribe_traits!(
             stem.xylem.state.kmax = ks[3] * stem.xylem.state.l / trunk.xylem.state.area;
         end;
         for leaf in leaves
-            leaf.xylem.state.k_max = ks[4] / (can_str.state.lai * sbulk.state.area);
+            leaf.xylem.state.k_max = ks[4] / (can_str.trait.lai * sbulk.state.area);
         end;
     end;
 

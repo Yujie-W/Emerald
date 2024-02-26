@@ -29,7 +29,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     sun_geo = spac.canopy.sun_geometry;
     n_layer = length(leaves);
 
-    if sun_geo.state.sza > 89 || can_str.state.lai <= 0
+    if sun_geo.state.sza > 89 || can_str.trait.lai <= 0
         sun_geo.auxil.e_sif_chl .= 0;
         sun_geo.auxil.e_sifꜜ_layer .= 0;
         sun_geo.auxil.e_sifꜛ_layer .= 0;
@@ -56,8 +56,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[irt];
-        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[irt];
+        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.trait.δlai[irt];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.trait.δsai[irt];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # integrate the energy absorbed by chl (and car) in each wave length bins
@@ -88,8 +88,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         end;
 
         # add up the SIF from sunlit and shaded leaves for each layer through accounting for the SIF quantum yield
-        ϕ_sunlit_dif = lidf_weight(leaf.flux.auxil.ϕ_f_sunlit, can_str.auxil.p_incl, sun_geo.auxil._vec_azi);
-        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, leaf.flux.auxil.ϕ_f_sunlit, sun_geo.auxil.fs_abs, sun_geo.auxil._vec_azi, can_str.auxil.p_incl);
+        ϕ_sunlit_dif = lidf_weight(leaf.flux.auxil.ϕ_f_sunlit, can_str.t_aux.p_incl, sun_geo.auxil._vec_azi);
+        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, leaf.flux.auxil.ϕ_f_sunlit, sun_geo.auxil.fs_abs, sun_geo.auxil._vec_azi, can_str.t_aux.p_incl);
         sun_geo.auxil.e_sif_chl[:,irt] .= sun_geo.auxil._e_dif_shaded .* leaf.flux.auxil.ϕ_f_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
     end;
 
@@ -98,7 +98,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # function to weight matrices by inclination angles
     @inline local_lidf_weight(mat_0, mat_1) = (
         sun_geo.auxil._mat_incl_azi .= mat_0 .* mat_1;
-        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.auxil.p_incl);
+        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.t_aux.p_incl);
 
         return mean(sun_geo.auxil._vec_azi)
     );
@@ -107,8 +107,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.state.δlai[irt];
-        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.state.δsai[irt];
+        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.trait.δlai[irt];
+        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.trait.δsai[irt];
         f_leaf = a_leaf ./ (a_leaf .+ a_stem);
 
         # compute the energy used for SIF excitation
@@ -184,7 +184,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
                                            sun_geo.auxil._e_difꜛ_sif_mean .* sh_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_oθ;
 
         # total emitted SIF for upward and downward direction
-        ilai = can_str.state.δlai[irt] * can_str.auxil.ci;
+        ilai = can_str.trait.δlai[irt] * can_str.trait.ci;
         sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ .* ilai .* sun_geo.auxil.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜜ .* ilai .* (1 - sun_geo.auxil.p_sunlit[irt]);
         sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ .* ilai .* sun_geo.auxil.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜛ .* ilai .* (1 - sun_geo.auxil.p_sunlit[irt]);
     end;
@@ -227,13 +227,13 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
     # 4. compute SIF from the observer direction
     vec_layer = ones(FT, n_layer);
-    vec_layer .= sen_geo.auxil.p_sun_sensor .* can_str.state.δlai .* can_str.auxil.ci ./ FT(π);
+    vec_layer .= sen_geo.auxil.p_sun_sensor .* can_str.trait.δlai .* can_str.trait.ci ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_sunlit, sen_geo.auxil.sif_sunlit, vec_layer);
 
-    vec_layer .= (sen_geo.auxil.p_sensor .- sen_geo.auxil.p_sun_sensor) .* can_str.state.δlai .* can_str.auxil.ci ./ FT(π);
+    vec_layer .= (sen_geo.auxil.p_sensor .- sen_geo.auxil.p_sun_sensor) .* can_str.trait.δlai .* can_str.trait.ci ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_shaded, sen_geo.auxil.sif_shaded, vec_layer);
 
-    vec_layer .= sen_geo.auxil.p_sensor .* can_str.state.δlai .* can_str.auxil.ci ./ FT(π);
+    vec_layer .= sen_geo.auxil.p_sensor .* can_str.trait.δlai .* can_str.trait.ci ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_scattered, sen_geo.auxil.sif_scattered, vec_layer);
 
     sen_geo.auxil.sif_obs_soil .= view(sun_geo.auxil.e_sifꜛ,:,n_layer+1) .* sen_geo.auxil.p_sensor_soil ./ FT(π);

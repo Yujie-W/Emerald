@@ -27,7 +27,7 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
     top_soil = spac.soils[1];
     n_layer = length(leaves);
 
-    if can_str.state.lai <= 0 && can_str.state.sai <= 0
+    if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         # 1. compute longwave radiation out from the leaves and soil
         can_str.auxil.lw_layer .= 0;
         r_lw_soil = K_STEFAN(FT) * (1 - sbulk.auxil.ρ_lw) * top_soil.auxil.t ^ 4;
@@ -54,7 +54,7 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
         leaf = leaves[ilf];
         stem = branches[ilf];
         # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
-        f_leaf = can_str.state.δlai[irt] / (can_str.state.δlai[irt] + can_str.state.δsai[irt]);
+        f_leaf = can_str.trait.δlai[irt] / (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]);
         f_stem = 1 - f_leaf;
         if f_leaf > 0
             can_str.auxil.lw_layer_leaf[irt] = leaf.energy.auxil.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
@@ -92,8 +92,8 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
     # 4. compute the net longwave radiation per canopy layer and soil
     for i in 1:n_layer
         # can_str.auxil.r_net_lw[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] - 2 * can_str.auxil.lw_layer[i];
-        # can_str.auxil.r_net_lw[i] /= can_str.state.δlai[i];
-        f_leaf = can_str.state.δlai[i] / (can_str.state.δlai[i] + can_str.state.δsai[i]);
+        # can_str.auxil.r_net_lw[i] /= can_str.trait.δlai[i];
+        f_leaf = can_str.trait.δlai[i] / (can_str.trait.δlai[i] + can_str.trait.δsai[i]);
         f_stem = 1 - f_leaf;
         can_str.auxil.r_net_lw_leaf[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] * f_leaf - 2 * can_str.auxil.lw_layer_leaf[i];
         can_str.auxil.r_net_lw_stem[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] * f_stem - 2 * can_str.auxil.lw_layer_stem[i];

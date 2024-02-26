@@ -74,14 +74,14 @@ Update the frequency of leaf inclination angles, given
 function inclination_angles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     can_str = spac.canopy.structure;
 
-    if can_str.state.lai <= 0 && can_str.state.sai <= 0
+    if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         return nothing
     end;
 
     (; Θ_INCL_BNDS) = config;
 
-    for i in eachindex(can_str.auxil.p_incl)
-        can_str.auxil.p_incl[i] = lidf_cdf(can_str.state.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(can_str.state.lidf, Θ_INCL_BNDS[i,1]);
+    for i in eachindex(can_str.t_aux.p_incl)
+        can_str.t_aux.p_incl[i] = lidf_cdf(can_str.trait.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(can_str.trait.lidf, Θ_INCL_BNDS[i,1]);
     end;
 
     return nothing

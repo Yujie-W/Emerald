@@ -25,7 +25,7 @@ T_VEG(spac::BulkSPAC{FT}) where {FT} = (
     tran::FT = 0;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        tran += flow_out(leaves[ilf]) * canopy.structure.state.δlai[irt];
+        tran += flow_out(leaves[ilf]) * canopy.structure.trait.δlai[irt];
     end;
 
     return tran

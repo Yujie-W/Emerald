@@ -30,7 +30,7 @@ function reflection_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     sbulk = spac.soil_bulk;
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
-    n_layer = length(can_str.state.δlai);
+    n_layer = length(can_str.trait.δlai);
 
     if sun_geo.state.sza > 89
         sen_geo.auxil.e_sensor_layer .= 0;
@@ -40,7 +40,7 @@ function reflection_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         return nothing
     end;
 
-    if can_str.state.lai <= 0 && can_str.state.sai <= 0
+    if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         sen_geo.auxil.e_sensor_layer .= 0;
         sen_geo.auxil.e_sensor_layer[:,end] .= view(sun_geo.auxil.e_difꜛ,:,n_layer+1);
         sen_geo.auxil.e_sensor .= view(sun_geo.auxil.e_difꜛ,:,n_layer+1) ./ FT(π);
@@ -64,8 +64,8 @@ function reflection_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         dof_s = view(sen_geo.auxil.dof_stem,:,i);       # scattering coefficient forward for diffuse->observer
         so_s  = view(sen_geo.auxil.so_stem ,:,i);       # bidirectional from solar to observer
 
-        ciilai = can_str.state.δlai[i] * can_str.auxil.ci;
-        ciisai = can_str.state.δsai[i] * can_str.auxil.ci;
+        ciilai = can_str.trait.δlai[i] * can_str.trait.ci;
+        ciisai = can_str.trait.δsai[i] * can_str.trait.ci;
         sen_i .= sen_geo.auxil.p_sensor[i] .* ciilai .* (dob_l .* e_d_i .+ dof_l .* e_u_i) .+ sen_geo.auxil.p_sun_sensor[i] .* ciilai .* so_l .* rad_sw.e_dir .+
                  sen_geo.auxil.p_sensor[i] .* ciisai .* (dob_s .* e_d_i .+ dof_s .* e_u_i) .+ sen_geo.auxil.p_sun_sensor[i] .* ciisai .* so_s .* rad_sw.e_dir;
     end;

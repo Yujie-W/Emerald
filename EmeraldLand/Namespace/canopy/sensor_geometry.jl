@@ -186,9 +186,9 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometry{FT}
-    "Trait variables"
+    "Trait variables that need to be presribed from GriddingMachine"
     trait::Nothing = nothing
-    "State variables"
+    "State variables that may evolve with time"
     state::SensorGeometryState{FT} = SensorGeometryState{FT}()
     "Trait-dependent variables"
     t_aux::Nothing = nothing

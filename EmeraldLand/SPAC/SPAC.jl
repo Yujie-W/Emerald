@@ -2,10 +2,12 @@ module SPAC
 
 using Statistics: mean
 
+import ..Namespace: s_aux!, t_aux!
+
 using ..EmeraldPhysics.Constant: F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O
 using ..EmeraldPhysics.Optics: photon
 
-using ..CanopyOptics: canopy_structure!, inclination_angles!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!
+using ..CanopyOptics: canopy_structure!, inclination_angles!, lidf_cdf, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!
 using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geometry!
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
@@ -14,6 +16,7 @@ using ..Namespace: C3CytoState, C3VJPState, C4VJPState
 using ..Namespace: GCO₂Mode
 using ..Namespace: XylemHydraulicsAuxilNSS
 using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
+using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil
 using ..Namespace: MultiLayerCanopy
 using ..Namespace: AirLayer, SoilBulk, SoilLayer
 using ..Namespace: BulkSPAC, SPACConfiguration
@@ -28,6 +31,7 @@ using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductan
 include("instructions/initialize_state.jl");
 include("instructions/initialize.jl");
 include("instructions/prescribe.jl");
+include("instructions/t_aux.jl");
 include("instructions/update_auxil.jl");
 
 

@@ -44,7 +44,7 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
 
         # if total count exceeds 100
         if (count > 1000) && (t_step < 0.01) && (t_res > 10)
-            @info "Number of steppers exceeds 1000, breaking..." spac.canopy.structure.state.lai t_res t_step;
+            @info "Number of steppers exceeds 1000, breaking..." spac.canopy.structure.trait.lai t_res t_step;
             break;
         end;
 

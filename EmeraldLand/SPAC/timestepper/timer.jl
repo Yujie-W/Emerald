@@ -28,7 +28,7 @@ Return adjusted time that soil does not over saturate or drain, given
 function adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
     branches = spac.plant.branches;
     junction = spac.plant.junction;
-    lai = spac.canopy.structure.state.lai;
+    lai = spac.canopy.structure.trait.lai;
     leaves = spac.plant.leaves;
     soils = spac.soils;
     trunk = spac.plant.trunk;

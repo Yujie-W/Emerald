@@ -22,7 +22,7 @@ stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
     can_str = spac.canopy.structure;
 
     # if lai = 0 or roots are not connected, do nothing
-    if can_str.state.lai <= 0 || !spac.plant._root_connection
+    if can_str.trait.lai <= 0 || !spac.plant._root_connection
         return nothing
     end;
 

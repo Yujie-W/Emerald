@@ -12,14 +12,14 @@
 
 $(TYPEDEF)
 
-Structure that stores canopy structural state variables.
+Structure that stores canopy structural trait variables.
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct CanopyStructureState{FT}
+Base.@kwdef mutable struct CanopyStructureTrait{FT}
     # canopy structure
     "Hot spot parameter"
     hot_spot::FT = 0.05
@@ -38,12 +38,41 @@ Base.@kwdef mutable struct CanopyStructureState{FT}
     "Stem area index distribution"
     δsai::Vector{FT}
 
-    # Clumping index
-    "Clumping structure a"
-    Ω_A::FT = 1
-    "Clumping structure b"
-    Ω_B::FT = 0
+    # Clumping index of the canopy
+    "Clumping index"
+    ci::FT = 1
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Feb-25: add struct CanopyStructureTDAuxil
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure that stores canopy structural trait-dependent auxiliary variables.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
+    "Inclination angle distribution"
+    p_incl::Vector{FT}
+    "Canopy level boundary locations"
+    x_bnds::Vector{FT}
+end;
+
+CanopyStructureTDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureTDAuxil{FT}(
+            p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL,
+            x_bnds = zeros(FT, n_layer + 1),
+);
 
 
 #######################################################################################################################################################################################################
@@ -66,13 +95,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureAuxil{FT}
-    "Clumping index"
-    ci::FT = 1
-    "Inclination angle distribution"
-    p_incl::Vector{FT}
-    "Canopy level boundary locations"
-    x_bnds::Vector{FT}
-
     # canopy scattering coefficients
     "Weighted sum of cos²(inclination)"
     bf::FT = 0
@@ -139,8 +161,6 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
 end;
 
 CanopyStructureAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureAuxil{FT}(
-            p_incl        = zeros(FT, config.DIM_INCL),
-            x_bnds        = zeros(FT, n_layer + 1),
             ddb_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             ddf_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             ddb_stem      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
@@ -185,8 +205,14 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructure{FT}
-    "State variables"
-    state::CanopyStructureState{FT}
+    "Trait variables that need to be presribed from GriddingMachine"
+    trait::CanopyStructureTrait{FT}
+    "State variables that may evolve with time"
+    state::Nothing = nothing
+    "Trait-dependent variables"
+    t_aux::CanopyStructureTDAuxil{FT}
+    "State-dependent variables"
+    s_aux::Nothing = nothing
     "Auxiliary variables"
     auxil::CanopyStructureAuxil{FT}
 end;
@@ -197,12 +223,11 @@ CanopyStructure(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
     sai = 0.5;
     δsai = 0.5 .* ones(FT, n_layer) ./ n_layer;
 
-    cs_auxil = CanopyStructureAuxil(config, n_layer);
-    cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
-    cs_auxil.p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
+    trait = CanopyStructureTrait{FT}(lai = lai, δlai = δlai, sai = sai, δsai = δsai);
+    t_aux = CanopyStructureTDAuxil(config, n_layer);
+    auxil = CanopyStructureAuxil(config, n_layer);
+    t_aux.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
+    t_aux.p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
-    return CanopyStructure{FT}(
-                state = CanopyStructureState{FT}(lai = lai, δlai = δlai, sai = sai, δsai = δsai),
-                auxil = cs_auxil,
-    )
+    return CanopyStructure{FT}(trait = trait, t_aux = t_aux, auxil = auxil)
 );

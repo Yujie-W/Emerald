@@ -20,7 +20,7 @@ Updates leaf photosynthetic rates for SPAC, given
 
 """
 function plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT}
-    if spac.canopy.structure.state.lai <= 0
+    if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
 

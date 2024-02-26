@@ -86,7 +86,7 @@ import Emerald.EmeraldLand.SPAC
         @test spac.canopy.sun_geometry.auxil.ks >= 0;
         @test spac.canopy.sun_geometry.auxil.sdb >= 0;
         @test spac.canopy.sun_geometry.auxil.sdf >= 0;
-        @test 0 < spac.canopy.structure.auxil.ci <= 1;
+        @test 0 < spac.canopy.structure.trait.ci <= 1;
         @test all(0 .< spac.canopy.sun_geometry.auxil.p_sunlit .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.ρ_sd_layer .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.τ_ss_layer .< 1);
@@ -279,8 +279,8 @@ import Emerald.EmeraldLand.SPAC
 
         # LAI <= 0 and SAI <= 0
         spac.canopy.sun_geometry.state.sza = 30;
-        spac.canopy.structure.state.lai = 0;
-        spac.canopy.structure.state.sai = 0;
+        spac.canopy.structure.trait.lai = 0;
+        spac.canopy.structure.trait.sai = 0;
         CO.canopy_radiation!(config, spac);
         @test all(spac.canopy.sun_geometry.auxil.e_dirꜜ .> 0);
         @test all(spac.canopy.sun_geometry.auxil.e_difꜜ .> 0);
