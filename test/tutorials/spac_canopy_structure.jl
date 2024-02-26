@@ -30,7 +30,7 @@ using Test;
     #     (0,1) gives extremophile distribution.
     spac.canopy.structure.trait.lidf.A = -0.35;
     spac.canopy.structure.trait.lidf.B = -0.15;
-    EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
+    Emerald.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
@@ -44,14 +44,14 @@ using Test;
     spac.canopy.structure.trait.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
     spac.canopy.structure.trait.lidf.A = 1;
     spac.canopy.structure.trait.lidf.B = 1;
-    EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
+    Emerald.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
     # By default, we use VerhoefLIDF method to compute LIDF, but we also support the use of Beta function.
     # To use the BetaLIDF, you need to change the parameter to BetaLIDF first.
     spac.canopy.structure.trait.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
-    EmeraldLand.CanopyOptics.inclination_angles!(config, spac);
+    Emerald.CanopyOptics.t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 end;

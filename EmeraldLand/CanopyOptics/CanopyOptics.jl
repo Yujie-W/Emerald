@@ -5,11 +5,14 @@ using QuadGK: quadgk
 using SpecialFunctions: beta_inc
 using Statistics: mean
 
+import ..Namespace: s_aux!, t_aux!
+
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BetaLIDF, VerhoefLIDF
+using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil
 using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoHyperspectralCLIMA, SoilAlbedoHyperspectralCLM
 using ..Namespace: SoilLayer, SoilBulk
 using ..Namespace: BulkSPAC, SPACConfiguration
@@ -18,13 +21,12 @@ using ..Namespace: BulkSPAC, SPACConfiguration
 # functions related to canopy geometry
 include("geometry/extinction.jl");
 include("geometry/inclination.jl");
+include("geometry/sensor.jl");
 include("geometry/soil_albedo.jl");
-
 include("geometry/structure.jl");
-
 include("geometry/sun.jl");
 
-include("geometry/sensor.jl");
+include("geometry/t_aux.jl");
 
 
 # function related to canopy radiation

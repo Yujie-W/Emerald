@@ -36,7 +36,7 @@ function initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     plant_leaf_spectra!(config, spac);
 
     # initialize canopy structure
-    inclination_angles!(config, spac);
+    t_aux!(config, spac.canopy.structure.trait, spac.canopy.structure.t_aux);
     canopy_structure!(config, spac);
 
     return nothing
