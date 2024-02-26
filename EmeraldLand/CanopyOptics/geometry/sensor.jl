@@ -49,9 +49,9 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
         sen_geo.auxil.ko_incl[i] = 2 / FT(π) / cosd(FT(π)) * (Co * (βo - FT(π)/2) + So * sin(βo));
 
         # compute the scattering coefficients
-        Cs = sun_geo.auxil.Cs_incl[i];
-        Ss = sun_geo.auxil.Ss_incl[i];
-        βs = sun_geo.auxil.βs_incl[i];
+        Cs = sun_geo.s_aux.Cs_incl[i];
+        Ss = sun_geo.s_aux.Ss_incl[i];
+        βs = sun_geo.s_aux.βs_incl[i];
 
         # 1 compute the Δ and β angles
         Δ₁ = abs(βs - βo);
@@ -97,7 +97,7 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     for i in eachindex(Θ_INCL)
         view(sen_geo.auxil.fo_cos²_incl,i,:) .= view(sen_geo.auxil.fo,i,:) * cosd(Θ_INCL[i]) ^ 2;
     end;
-    sen_geo.auxil.fo_fs .= sun_geo.auxil.fs .* sen_geo.auxil.fo;
+    sen_geo.auxil.fo_fs .= sun_geo.s_aux.fs .* sen_geo.auxil.fo;
     sen_geo.auxil.fo_fs_abs .= abs.(sen_geo.auxil.fo_fs);
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
@@ -111,8 +111,8 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
 
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
     dso = sqrt( tand(sun_geo.state.sza) ^ 2 + tand(sen_geo.state.vza) ^ 2 - 2 * tand(sun_geo.state.sza) * tand(sen_geo.state.vza) * cosd(sen_geo.state.vaa - sun_geo.state.saa) );
-    Σk = sen_geo.auxil.ko + sun_geo.auxil.ks;
-    Πk = sen_geo.auxil.ko * sun_geo.auxil.ks;
+    Σk = sen_geo.auxil.ko + sun_geo.s_aux.ks;
+    Πk = sen_geo.auxil.ko * sun_geo.s_aux.ks;
     cl = can_str.trait.ci * (can_str.trait.lai + can_str.trait.sai);
     α  = dso / can_str.trait.hot_spot * 2 / Σk;
     pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );

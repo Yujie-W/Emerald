@@ -12,7 +12,7 @@ using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BetaLIDF, VerhoefLIDF
-using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil
+using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil, SunGeometryState, SunGeometrySDAuxil
 using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoHyperspectralCLIMA, SoilAlbedoHyperspectralCLM
 using ..Namespace: SoilLayer, SoilBulk
 using ..Namespace: BulkSPAC, SPACConfiguration
@@ -26,6 +26,7 @@ include("geometry/soil_albedo.jl");
 include("geometry/structure.jl");
 include("geometry/sun.jl");
 
+include("geometry/s_aux.jl");
 include("geometry/t_aux.jl");
 
 

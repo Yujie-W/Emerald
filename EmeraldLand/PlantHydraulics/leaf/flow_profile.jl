@@ -36,7 +36,7 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
 
     for i in eachindex(leaves)
         leaf = leaves[i];
-        f_sl = canopy.sun_geometry.auxil.p_sunlit[n_layer + 1 - i];
+        f_sl = canopy.sun_geometry.s_aux.p_sunlit[n_layer + 1 - i];
 
         g_sh = 1 / (1 /leaf.flux.state.g_H₂O_s_shaded + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
         g_sl = 0;

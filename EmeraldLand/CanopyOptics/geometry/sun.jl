@@ -28,62 +28,27 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     end;
 
     # if sza <= 89 and LAI+SAI > 0, run the sun geometry function
-    (; SPECTRA, Θ_AZI, Θ_INCL) = config;
+    (; SPECTRA) = config;
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
     n_layer = length(leaves);
-
-    # extinction coefficients for the solar radiation
-    for i in eachindex(Θ_INCL)
-        Cs = cosd(Θ_INCL[i]) * cosd(sun_geo.state.sza);
-        Ss = sind(Θ_INCL[i]) * sind(sun_geo.state.sza);
-        βs = (Cs >= Ss ? FT(π) : acos(-Cs/Ss));
-        sun_geo.auxil.Cs_incl[i] = Cs;
-        sun_geo.auxil.Ss_incl[i] = Ss;
-        sun_geo.auxil.βs_incl[i] = βs;
-        sun_geo.auxil.ks_incl[i] = 2 / FT(π) / cosd(sun_geo.state.sza) * (Cs * (βs - FT(π)/2) + Ss * sin(βs));
-    end;
-    sun_geo.auxil.ks = can_str.t_aux.p_incl' * sun_geo.auxil.ks_incl;
-
-    # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
-    sun_geo.auxil.sdb = (sun_geo.auxil.ks + can_str.t_aux.bf) / 2;
-    sun_geo.auxil.sdf = (sun_geo.auxil.ks - can_str.t_aux.bf) / 2;
-
-    # compute the fs and fs_abs matrices
-    for i in eachindex(Θ_AZI)
-        view(sun_geo.auxil.fs,:,i) .= sun_geo.auxil.Cs_incl .+ sun_geo.auxil.Ss_incl .* cosd(Θ_AZI[i]);
-    end;
-    sun_geo.auxil.fs ./= cosd(sun_geo.state.sza);
-    sun_geo.auxil.fs_abs .= abs.(sun_geo.auxil.fs);
-    mul!(sun_geo.auxil.fs_abs_mean, sun_geo.auxil.fs_abs', can_str.t_aux.p_incl);
-    for i in eachindex(Θ_INCL)
-        view(sun_geo.auxil.fs_cos²_incl,i,:) .= view(sun_geo.auxil.fs,i,:) * cosd(Θ_INCL[i]) ^ 2;
-    end;
-
-    # compute the sunlit leaf fraction
-    # sun_geo.auxil.ps = exp.(sun_geo.auxil.ks .* can_str.trait.ci * can_str.trait.lai .* can_str.t_aux.x_bnds);
-    kscipai = sun_geo.auxil.ks * can_str.trait.ci * (can_str.trait.lai + can_str.trait.sai);
-    for i in 1:n_layer
-        ksciipai = sun_geo.auxil.ks * can_str.trait.ci * (can_str.trait.δlai[i] + can_str.trait.δsai[i]);
-        sun_geo.auxil.p_sunlit[i] = 1 / ksciipai * (exp(kscipai * can_str.t_aux.x_bnds[i]) - exp(kscipai * can_str.t_aux.x_bnds[i+1]));
-    end;
 
     # compute the scattering coefficients for the solar radiation per leaf area
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.auxil.sdb * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdf * leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.auxil.sdf * leaf.bio.auxil.ρ_leaf .+ sun_geo.auxil.sdb * leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.auxil.sdb * SPECTRA.ρ_STEM;
-        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.auxil.sdf * SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb * leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdf * leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf * leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdb * leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.s_aux.sdb * SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.s_aux.sdf * SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    # sun_geo.auxil.τ_ss_layer .= exp.(-1 .* sun_geo.auxil.ks .* can_str.trait.δlai .* can_str.trait.ci);
+    # sun_geo.auxil.τ_ss_layer .= exp.(-1 .* sun_geo.s_aux.ks .* can_str.trait.δlai .* can_str.trait.ci);
     # sun_geo.auxil.τ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdf_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
     # sun_geo.auxil.ρ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdb_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
     for i in 1:n_layer
-        kt_ss_x = sun_geo.auxil.ks .* (can_str.trait.δlai[i] + can_str.trait.δsai[i]) .* can_str.trait.ci;
+        kt_ss_x = sun_geo.s_aux.ks .* (can_str.trait.δlai[i] + can_str.trait.δsai[i]) .* can_str.trait.ci;
         kt_sd_x = (sun_geo.auxil.sdf_leaf[:,i] .* can_str.trait.δlai[i] .+ sun_geo.auxil.sdf_stem[:,i] .* can_str.trait.δsai[i]) .* can_str.trait.ci;
         kr_sd_x = (sun_geo.auxil.sdb_leaf[:,i] .* can_str.trait.δlai[i] .+ sun_geo.auxil.sdb_stem[:,i] .* can_str.trait.δsai[i]) .* can_str.trait.ci;
         sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);

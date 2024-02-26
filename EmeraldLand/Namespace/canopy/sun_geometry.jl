@@ -26,9 +26,51 @@ Base.@kwdef mutable struct SunGeometryState{FT}
 end;
 
 
-#Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
-#    ;
-#end;
+Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
+    # Scattering coefficients
+    "Backward direct->diffuse scatter weight"
+    sdb::FT = 0
+    "Forward direct->diffuse scatter weight"
+    sdf::FT = 0
+    "Solar direction beam extinction coefficient weight (direct)"
+    ks::FT = 0
+
+    # Extinction coefficient related (for different inclination angles)
+    "cos(inclination) * cos(sza) at different inclination angles"
+    Cs_incl::Vector{FT}
+    "sin(inclination) * sin(sza) at different inclination angles"
+    Ss_incl::Vector{FT}
+    "Cs >= Ss ? FT(π) : acos(-Cs/Ss)"
+    βs_incl::Vector{FT}
+    "Solar beam extinction coefficient weights at different inclination angles"
+    ks_incl::Vector{FT}
+
+    # Extinction coefficient related
+    "Probability of directly viewing a leaf in solar direction at different layers"
+    p_sunlit::Vector{FT}
+
+    # Matrix used for solar radiation
+    "Conversion factor fs for angles from solar at different inclination and azimuth angles"
+    fs::Matrix{FT}
+    "Absolute value of fs"
+    fs_abs::Matrix{FT}
+    "Mean fs_abs at different azimuth angles"
+    fs_abs_mean::Vector{FT}
+    "fs * cos Θ_INCL"
+    fs_cos²_incl::Matrix{FT}
+end;
+
+SunGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGeometrySDAuxil{FT}(
+            Cs_incl      = zeros(FT, config.DIM_INCL),
+            Ss_incl      = zeros(FT, config.DIM_INCL),
+            βs_incl      = zeros(FT, config.DIM_INCL),
+            ks_incl      = zeros(FT, config.DIM_INCL),
+            p_sunlit     = zeros(FT, n_layer),
+            fs           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_abs_mean  = zeros(FT, config.DIM_AZI),
+            fs_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+);
 
 
 #######################################################################################################################################################################################################
@@ -52,38 +94,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometryAuxil{FT}
-    # Scattering coefficients
-    "Backward direct->diffuse scatter weight"
-    sdb::FT = 0
-    "Forward direct->diffuse scatter weight"
-    sdf::FT = 0
-
-    # Extinction coefficient related
-    "Solar direction beam extinction coefficient weight (direct)"
-    ks::FT = 0
-    "Probability of directly viewing a leaf in solar direction at different layers"
-    p_sunlit::Vector{FT}
-
-    # Extinction coefficient related (for different inclination angles)
-    "cos(inclination) * cos(sza) at different inclination angles"
-    Cs_incl::Vector{FT}
-    "sin(inclination) * sin(sza) at different inclination angles"
-    Ss_incl::Vector{FT}
-    "Solar beam extinction coefficient weights at different inclination angles"
-    ks_incl::Vector{FT}
-    "Cs >= Ss ? FT(π) : acos(-Cs/Ss)"
-    βs_incl::Vector{FT}
-
-    # Matrix used for solar radiation
-    "Conversion factor fs for angles from solar at different inclination and azimuth angles"
-    fs::Matrix{FT}
-    "Absolute value of fs"
-    fs_abs::Matrix{FT}
-    "Mean fs_abs at different azimuth angles"
-    fs_abs_mean::Vector{FT}
-    "fs * cos Θ_INCL"
-    fs_cos²_incl::Matrix{FT}
-
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
     sdb_leaf::Matrix{FT}
@@ -208,15 +218,6 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
 end;
 
 SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGeometryAuxil{FT}(
-            p_sunlit         = zeros(FT, n_layer),
-            Cs_incl          = zeros(FT, config.DIM_INCL),
-            Ss_incl          = zeros(FT, config.DIM_INCL),
-            ks_incl          = zeros(FT, config.DIM_INCL),
-            βs_incl          = zeros(FT, config.DIM_INCL),
-            fs               = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fs_abs           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fs_abs_mean      = zeros(FT, config.DIM_AZI),
-            fs_cos²_incl     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             sdb_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             sdf_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             sdb_stem         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
@@ -289,10 +290,19 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometry{FT}
+    "Trait variables"
+    trait::Nothing = nothing
     "State variables"
     state::SunGeometryState{FT} = SunGeometryState{FT}()
+    "Trait-dependent auxiliary variables"
+    t_aux::Nothing = nothing
+    "State-dependent auxiliary variables"
+    s_aux::SunGeometrySDAuxil{FT} = SunGeometrySDAuxil{FT}()
     "Auxiliary variables"
     auxil::SunGeometryAuxil{FT}
 end;
 
-SunGeometry(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGeometry{FT}(auxil = SunGeometryAuxil(config, n_layer));
+SunGeometry(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGeometry{FT}(
+            s_aux = SunGeometrySDAuxil(config, n_layer),
+            auxil = SunGeometryAuxil(config, n_layer)
+);

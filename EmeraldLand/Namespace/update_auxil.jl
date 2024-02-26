@@ -9,16 +9,10 @@
 #######################################################################################################################################################################################################
 """
 
-    t_aux!(trait, t_aux)
-
-Update the trait-dependent auxilary variables, given
-- `trait` the trait variables
-- `t_aux` the t_aux variables to be updated
+Update the trait-dependent auxilary variables from traits
 
 """
 function t_aux! end;
-
-t_aux!(config::SPACConfiguration, trait::Union{DataType,Nothing}, t_aux::Nothing) = nothing;
 
 
 #######################################################################################################################################################################################################
@@ -30,13 +24,9 @@ t_aux!(config::SPACConfiguration, trait::Union{DataType,Nothing}, t_aux::Nothing
 #######################################################################################################################################################################################################
 """
 
-    s_aux!(state, s_aux)
+    s_aux!(config::SPACConfiguration, state, s_aux)
 
-Update the state-dependent auxilary variables, given
-- `state` the state variables
-- `s_aux` the s_aux variables to be updated
+Update the state-dependent auxilary variables from state (and trait and t_aux) variables
 
 """
 function s_aux! end;
-
-s_aux!(config::SPACConfiguration, state::Union{DataType,Nothing}, s_aux::Nothing) = nothing;

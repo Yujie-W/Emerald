@@ -24,8 +24,8 @@ function ΣETR end;
     Σetr::FT = 0;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        Σetr += (canopy.sun_geometry.auxil.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.etr_sunlit) +
-                (1 - canopy.sun_geometry.auxil.p_sunlit[irt]) * leaves[ilf].flux.auxil.etr_shaded) * canopy.structure.trait.δlai[irt];
+        Σetr += (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.etr_sunlit) +
+                (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaves[ilf].flux.auxil.etr_shaded) * canopy.structure.trait.δlai[irt];
     end;
 
     return Σetr

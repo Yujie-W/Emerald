@@ -134,7 +134,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
 
     # 3. compute net absorption for leaves and soil
     # 4. compute leaf level PAR, APAR, and PPAR per ground area
-    normi = 1 / mean(sun_geo.auxil.fs_abs_mean);
+    normi = 1 / mean(sun_geo.s_aux.fs_abs_mean);
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
@@ -158,7 +158,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
             p_leaf = view(f_leaf, SPECTRA.IΛ_PAR);
             # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
             sun_geo.auxil._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt];
-            sun_geo.auxil._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt] ./ sun_geo.auxil.p_sunlit[irt];
+            sun_geo.auxil._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt] ./ sun_geo.s_aux.p_sunlit[irt];
             sun_geo.auxil._ppar_shaded .= sun_geo.auxil._apar_shaded .* α_apar;
             sun_geo.auxil._ppar_sunlit .= sun_geo.auxil._apar_sunlit .* α_apar;
 
@@ -166,7 +166,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
             Σ_apar_dif = sun_geo.auxil._apar_shaded' * SPECTRA.ΔΛ_PAR;
             Σ_apar_dir = sun_geo.auxil._apar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
             leaf.flux.auxil.apar_shaded = Σ_apar_dif;
-            leaf.flux.auxil.apar_sunlit .= sun_geo.auxil.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
+            leaf.flux.auxil.apar_sunlit .= sun_geo.s_aux.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
 
             # PPAR for leaves (set PPAR to be the minimum of 2PPAR_700 and PPAR_750)
             Σ_ppar_dif_700 = view(sun_geo.auxil._ppar_shaded, SPECTRA.IΛ_PAR_700)' * SPECTRA.ΔΛ_PAR_700;
@@ -176,7 +176,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
             Σ_ppar_dif = min(2Σ_ppar_dif_700, Σ_ppar_dif_750);
             Σ_ppar_dir = min(2Σ_ppar_dir_700, Σ_ppar_dir_750);
             leaf.flux.auxil.ppar_shaded = Σ_ppar_dif;
-            leaf.flux.auxil.ppar_sunlit .= sun_geo.auxil.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
+            leaf.flux.auxil.ppar_sunlit .= sun_geo.s_aux.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
         else
             leaf.flux.auxil.apar_shaded = 0;
             leaf.flux.auxil.apar_sunlit .= 0;

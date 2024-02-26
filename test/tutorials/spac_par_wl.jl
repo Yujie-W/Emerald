@@ -10,6 +10,8 @@ using Test;
     spac_uvparfr = EmeraldLand.Namespace.BulkSPAC(config_uvparfr);
     EmeraldLand.SPAC.initialize_states!(config_uvparfr, spac_uvparfr);
     EmeraldLand.SPAC.initialize_spac!(config_uvparfr, spac_uvparfr);
+    EmeraldLand.CanopyOptics.t_aux!(config_uvparfr, spac_uvparfr.canopy.structure.trait, spac_uvparfr.canopy.structure.t_aux);
+    EmeraldLand.CanopyOptics.s_aux!(config_uvparfr, spac_uvparfr.canopy.structure.trait, spac_uvparfr.canopy.structure.t_aux, spac_uvparfr.canopy.sun_geometry.state, spac_uvparfr.canopy.sun_geometry.s_aux);
     EmeraldLand.SPAC.spac!(config_uvparfr, spac_uvparfr, FT(600));
     @test true;
 
@@ -19,6 +21,8 @@ using Test;
     spac_paronly = EmeraldLand.Namespace.BulkSPAC(config_paronly);
     EmeraldLand.SPAC.initialize_states!(config_paronly, spac_paronly);
     EmeraldLand.SPAC.initialize_spac!(config_paronly, spac_paronly);
+    EmeraldLand.CanopyOptics.t_aux!(config_paronly, spac_paronly.canopy.structure.trait, spac_paronly.canopy.structure.t_aux);
+    EmeraldLand.CanopyOptics.s_aux!(config_paronly, spac_paronly.canopy.structure.trait, spac_paronly.canopy.structure.t_aux, spac_paronly.canopy.sun_geometry.state, spac_paronly.canopy.sun_geometry.s_aux);
     EmeraldLand.SPAC.spac!(config_paronly, spac_paronly, FT(600));
     @test true;
 end;
