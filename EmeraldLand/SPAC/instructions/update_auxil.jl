@@ -155,8 +155,8 @@ update_substep_auxils!(stem::Stem{FT}) where {FT} = (
 
 update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
     # update leaf cp and temperature
-    leaf.energy.auxil.cp = heat_capacitance(leaf);
-    leaf.energy.auxil.t = leaf.energy.state.Σe / leaf.energy.auxil.cp;
+    leaf.energy.s_aux.cp = heat_capacitance(leaf);
+    leaf.energy.s_aux.t = leaf.energy.state.Σe / leaf.energy.s_aux.cp;
 
     # update the leaf buffer pressure and flow
     x_aux = leaf.xylem.auxil;
@@ -164,8 +164,8 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
     if x_aux isa XylemHydraulicsAuxilNSS
         x_sta = leaf.xylem.state;
         c_sta = leaf.capacitor.state;
-        f_vis = relative_viscosity(leaf.energy.auxil.t);
-        c_aux.p = capacitance_pressure(c_sta.pv, c_sta.v_storage / c_sta.v_max, leaf.energy.auxil.t);
+        f_vis = relative_viscosity(leaf.energy.s_aux.t);
+        c_aux.p = capacitance_pressure(c_sta.pv, c_sta.v_storage / c_sta.v_max, leaf.energy.s_aux.t);
         c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_sta.pv.k_refill / f_vis * c_sta.v_storage * x_sta.area;
     else
         c_aux.flow = 0;

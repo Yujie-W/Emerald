@@ -77,7 +77,7 @@ leaf_photosynthesis!(
 # This method computes and save the photosynthetic rates into leaf flux struct for GCO₂Mode
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
     if rd_only
-        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.auxil.t);
+        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
         leaf.flux.auxil.a_g_sunlit  .= 0;
         leaf.flux.auxil.etr_sunlit  .= 0;
@@ -94,7 +94,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
         return nothing
     end;
 
-    photosystem_temperature_dependence!(leaf.photosystem, air, leaf.energy.auxil.t);
+    photosystem_temperature_dependence!(leaf.photosystem, air, leaf.energy.s_aux.t);
 
     # leaf._p_CO₂_i is not accurate here in the first call, thus need a second call after p_CO₂_i is analytically resolved
     # loop through sunlit leaf
@@ -159,7 +159,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
 # This method computes and save the photosynthetic rates into leaf flux struct for PCO₂Mode
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
     if rd_only
-        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.auxil.t);
+        leaf.photosystem.auxil.r_d   = leaf.photosystem.state.r_d25 * temperature_correction(leaf.photosystem.state.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
         leaf.flux.auxil.a_g_sunlit  .= 0;
         leaf.flux.auxil.etr_sunlit  .= 0;
@@ -176,7 +176,7 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT
         return nothing
     end;
 
-    photosystem_temperature_dependence!(leaf.photosystem, air, leaf.energy.auxil.t);
+    photosystem_temperature_dependence!(leaf.photosystem, air, leaf.energy.s_aux.t);
 
     # loop through the ppars for sunlit leaf
     for i in eachindex(leaf.flux.auxil.ppar_sunlit)

@@ -27,7 +27,7 @@ Return the partial derivative of A per E, given
 function ∂A∂E end;
 
 ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the A and E at the current setting
@@ -40,7 +40,7 @@ function ∂A∂E end;
     gs2 = gs1 + FT(0.0001);
     gh2 = 1 / (1 / gs2 + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc2 = 1 / (FT(1.6) / gs2 + 1 / leaf.flux.auxil.g_CO₂_b);
-    photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_shaded, leaf.energy.auxil.t);
+    photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_shaded, leaf.energy.s_aux.t);
     e2 = gh2 * d / air.state.p_air;
     a2 = leaf.photosystem.auxil.a_n;
 
@@ -48,7 +48,7 @@ function ∂A∂E end;
 );
 
 ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the A and E at the current setting
@@ -61,7 +61,7 @@ function ∂A∂E end;
     gs2 = gs1 + FT(0.0001);
     gh2 = 1 / (1 / gs2 + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc2 = 1 / (FT(1.6) / gs2 + 1 / leaf.flux.auxil.g_CO₂_b);
-    photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_sunlit[ind], leaf.energy.auxil.t);
+    photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_sunlit[ind], leaf.energy.s_aux.t);
     e2 = gh2 * d / air.state.p_air;
     a2 = leaf.photosystem.auxil.a_n;
 

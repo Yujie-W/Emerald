@@ -59,7 +59,7 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         if f_o >= 0
             stem.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * stem.energy.auxil.t;
         else
-            stem.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * leaf.energy.auxil.t;
+            stem.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * leaf.energy.s_aux.t;
         end;
 
         # add the net radiation energy to the leaf (to total leaf area)

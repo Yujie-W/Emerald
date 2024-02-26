@@ -53,11 +53,11 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
         stem = branches[ilf];
-        # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
+        # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.s_aux.t ^ 4;
         f_leaf = can_str.trait.δlai[irt] / (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]);
         f_stem = 1 - f_leaf;
         if f_leaf > 0
-            can_str.auxil.lw_layer_leaf[irt] = leaf.energy.auxil.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
+            can_str.auxil.lw_layer_leaf[irt] = leaf.energy.s_aux.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
         else
             can_str.auxil.lw_layer_leaf[irt] = 0;
         end;

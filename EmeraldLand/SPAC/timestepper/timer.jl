@@ -63,7 +63,7 @@ function adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
 
     if lai > 0
         for leaf in leaves
-            ∂T∂t = leaf.energy.auxil.∂e∂t / leaf.energy.auxil.cp;
+            ∂T∂t = leaf.energy.auxil.∂e∂t / leaf.energy.s_aux.cp;
             δt_2 = min(1 / abs(∂T∂t), δt_2);
         end;
     end;

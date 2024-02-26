@@ -46,7 +46,7 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
         g_sl /= length(leaf.flux.state.g_H₂O_s_sunlit);
 
         g = g_sh * (1 - f_sl) + g_sl * f_sl;
-        d = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000) - airs[lindex[i]].s_aux.ps[3];
+        d = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000) - airs[lindex[i]].s_aux.ps[3];
         ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
         f = g * d / airs[lindex[i]].state.p_air;
 

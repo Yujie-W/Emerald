@@ -199,7 +199,7 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
 
     # run the model
     soil_plant_air_continuum!(config, spac, δt);
-    mean_tleaf = nanmean([l.energy.auxil.t for l in spac.plant.leaves]);
+    mean_tleaf = nanmean([l.energy.s_aux.t for l in spac.plant.leaves]);
     push!(spac.plant.memory.t_history, mean_tleaf);
     if length(spac.plant.memory.t_history) > 240 deleteat!(spac.plant.memory.t_history,1) end;
 
@@ -242,7 +242,7 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
     dfr.MOD_SWC_3 = spac.soils[3].state.θ;
     dfr.MOD_SWC_4 = spac.soils[4].state.θ;
 
-    _tleaf = [leaf.energy.auxil.t for leaf in spac.plant.leaves];
+    _tleaf = [leaf.energy.s_aux.t for leaf in spac.plant.leaves];
     dfr.MOD_T_L_MAX  = nanmax(_tleaf);
     dfr.MOD_T_L_MEAN = nanmean(_tleaf);
     dfr.MOD_T_L_MIN  = nanmin(_tleaf);

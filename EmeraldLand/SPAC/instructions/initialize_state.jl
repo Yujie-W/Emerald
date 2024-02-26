@@ -47,8 +47,8 @@ initialize_states!(leaf::Leaf{FT}; k_sla::Number = 0.04) where {FT} = (
     leaf.xylem.state.cp = 1780;
     leaf.xylem.state.k_max = k_sla;
     leaf.capacitor.state.v_storage = leaf.capacitor.state.v_max;
-    leaf.energy.auxil.cp = heat_capacitance(leaf);
-    leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
+    leaf.energy.s_aux.cp = heat_capacitance(leaf);
+    leaf.energy.state.Σe = leaf.energy.s_aux.cp * leaf.energy.s_aux.t;
 
     return nothing
 );

@@ -21,10 +21,10 @@ Update the leaf pressure profile, given
 """
 function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Leaf{FT}, p_dos::FT) where {FT}
     leaf.xylem.auxil.pressure[1] = p_dos;
-    xylem_pressure_profile!(leaf.xylem, leaf.energy.auxil.t);
+    xylem_pressure_profile!(leaf.xylem, leaf.energy.s_aux.t);
     extraxylary_pressure_profile!(leaf);
 
-    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, leaf.energy.auxil.t, leaf.xylem.auxil.e_crit) / leaf.xylem.state.area;
+    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, leaf.energy.s_aux.t, leaf.xylem.auxil.e_crit) / leaf.xylem.state.area;
 
     return nothing
 end;

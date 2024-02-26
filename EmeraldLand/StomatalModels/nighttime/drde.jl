@@ -19,5 +19,5 @@ Returns the marginal increase in leaf respiration rate per transpiration rate (p
 
 """
 function ∂R∂E(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT}
-    return ∂R∂T(leaf) * ∂T∂E(eff_ϵ, leaf.energy.auxil.t, leaf.bio.trait.width, air.auxil.wind) * leaf.xylem.state.area
+    return ∂R∂T(leaf) * ∂T∂E(eff_ϵ, leaf.energy.s_aux.t, leaf.bio.trait.width, air.auxil.wind) * leaf.xylem.state.area
 end;

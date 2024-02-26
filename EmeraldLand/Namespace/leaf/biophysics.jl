@@ -280,7 +280,7 @@ LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
 # Changes to this struct
 # General
 #     2023-Sep-14: add new struct to use with the new leaf optics model (copied from HyperspectralLeafBiophysics)
-#     2024-Feb-26: add field trait, t_aux, and s_aux
+#     2024-Feb-26: add field trait
 #
 #######################################################################################################################################################################################################
 """
@@ -300,10 +300,6 @@ Base.@kwdef mutable struct LeafBio{FT<:AbstractFloat}
     trait::LeafBioTrait{FT} = LeafBioTrait{FT}()
     "State variables"
     state::LeafBioState{FT} = LeafBioState{FT}()
-    "Trait derived auxiliary variables"
-    t_aux::Nothing = nothing
-    "State derived auxiliary variables"
-    s_aux::Nothing = nothing
     "Auxiliary variables"
     auxil::LeafBioAuxil{FT}
 end;

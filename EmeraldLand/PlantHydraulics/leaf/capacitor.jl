@@ -17,7 +17,7 @@ Update the extraxylary pressure profile, given
 """
 function extraxylary_pressure_profile! end;
 
-extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT} = extraxylary_pressure_profile!(leaf.xylem.state, leaf.xylem.auxil, leaf.capacitor.state, leaf.capacitor.auxil, leaf.energy.auxil.t);
+extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT} = extraxylary_pressure_profile!(leaf.xylem.state, leaf.xylem.auxil, leaf.capacitor.state, leaf.capacitor.auxil, leaf.energy.s_aux.t);
 
 extraxylary_pressure_profile!(
             x_state::XylemHydraulicsState{FT},

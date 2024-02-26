@@ -294,7 +294,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGe
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SunGeometry
-#     2024-Feb-25: add field trait, t_aux, s_aux
+#     2024-Feb-25: add field s_aux
 #
 #######################################################################################################################################################################################################
 """
@@ -309,12 +309,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometry{FT}
-    "Trait variables"
-    trait::Nothing = nothing
     "State variables"
     state::SunGeometryState{FT} = SunGeometryState{FT}()
-    "Trait-dependent auxiliary variables"
-    t_aux::Nothing = nothing
     "State-dependent auxiliary variables"
     s_aux::SunGeometrySDAuxil{FT} = SunGeometrySDAuxil{FT}()
     "Auxiliary variables"

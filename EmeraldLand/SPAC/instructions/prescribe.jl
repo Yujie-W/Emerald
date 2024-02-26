@@ -298,7 +298,7 @@ function prescribe_traits!(
     # prescribe leaf temperature
     if !isnothing(t_leaf)
         for leaf in leaves
-            leaf.energy.auxil.t = t_leaf;
+            leaf.energy.s_aux.t = t_leaf;
         end;
     end;
 

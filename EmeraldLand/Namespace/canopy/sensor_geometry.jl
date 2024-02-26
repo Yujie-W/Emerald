@@ -196,7 +196,7 @@ SensorGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = Se
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SensorGeometry
-#     2023-Oct-18: add fields trait, t_aux, and s_aux
+#     2023-Oct-18: add field s_aux
 #
 #######################################################################################################################################################################################################
 """
@@ -211,12 +211,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometry{FT}
-    "Trait variables that need to be presribed from GriddingMachine"
-    trait::Nothing = nothing
     "State variables that may evolve with time"
     state::SensorGeometryState{FT} = SensorGeometryState{FT}()
-    "Trait-dependent variables"
-    t_aux::Nothing = nothing
     "State-dependent variables"
     s_aux::SensorGeometrySDAuxil{FT}
     "Auxiliary variables"

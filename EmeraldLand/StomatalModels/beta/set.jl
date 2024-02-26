@@ -48,7 +48,7 @@ function β_factor! end;
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
-    f_st = relative_surface_tension(leaf.energy.auxil.t);
+    f_st = relative_surface_tension(leaf.energy.s_aux.t);
 
     leaf.flux.auxil.β = β_factor(β.FUNC, relative_xylem_k(leaf.xylem.state.vc, leaf.xylem.auxil.pressure[end] / f_st));
 

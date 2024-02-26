@@ -8,7 +8,7 @@
 #
 #######################################################################################################################################################################################################
 ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting
@@ -30,14 +30,14 @@
         gsm = FT(Inf);
         gcm = leaf.flux.auxil.g_CO₂_b;
     end;
-    photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_shaded, leaf.energy.auxil.t);
+    photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_shaded, leaf.energy.s_aux.t);
     am = leaf.photosystem.auxil.a_n;
 
     return dKdE * am / dEdP_m
 );
 
 ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting
@@ -59,7 +59,7 @@
         gsm = FT(Inf);
         gcm = leaf.flux.auxil.g_CO₂_b;
     end;
-    photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_sunlit[ind], leaf.energy.auxil.t);
+    photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_sunlit[ind], leaf.energy.s_aux.t);
     am = leaf.photosystem.auxil.a_n;
 
     return dKdE * am / dEdP_m

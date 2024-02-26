@@ -192,7 +192,7 @@ CanopyStructureAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = C
 # Changes to this struct
 # General
 #     2023-Oct-09: add struct CanopyStructure
-#     2024-Feb-25: add field trait, t_aux, and s_aux
+#     2024-Feb-25: add field trait, t_aux (remove state)
 #
 #######################################################################################################################################################################################################
 """
@@ -209,12 +209,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct CanopyStructure{FT}
     "Trait variables that need to be presribed from GriddingMachine"
     trait::CanopyStructureTrait{FT}
-    "State variables that may evolve with time"
-    state::Nothing = nothing
     "Trait-dependent variables"
     t_aux::CanopyStructureTDAuxil{FT}
-    "State-dependent variables"
-    s_aux::Nothing = nothing
     "Auxiliary variables"
     auxil::CanopyStructureAuxil{FT}
 end;

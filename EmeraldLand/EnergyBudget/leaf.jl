@@ -42,7 +42,7 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         if f_i >= 0
             leaf.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * stem.energy.auxil.t;
         else
-            leaf.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * leaf.energy.auxil.t;
+            leaf.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * leaf.energy.s_aux.t;
         end;
 
         # if flow out is positive, then energy flow is negative for leaf
@@ -50,14 +50,14 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         # note here that CP_L_MOL is included in the latent_heat_vapor TD function
         # so here we only need to calculate the heat mass flow from water vapor in gas phase
         f_o = flow_out(leaf);
-        leaf.energy.auxil.∂e∂t -= f_o * M_H₂O(FT) * latent_heat_vapor(leaf.energy.auxil.t);
-        le = f_o >= 0 ? f_o * CP_V_MOL(FT) * leaf.energy.auxil.t : f_o * CP_V_MOL(FT) * air.s_aux.t;
+        leaf.energy.auxil.∂e∂t -= f_o * M_H₂O(FT) * latent_heat_vapor(leaf.energy.s_aux.t);
+        le = f_o >= 0 ? f_o * CP_V_MOL(FT) * leaf.energy.s_aux.t : f_o * CP_V_MOL(FT) * air.s_aux.t;
         leaf.energy.auxil.∂e∂t -= le;
         leaf.energy.auxil.∂e∂t_le = le;
 
         # add the sensible heat flux from the leaf to air (to total leaf area)
         g_be = FT(1.35) * leaf.flux.auxil.g_CO₂_b;
-        sh = 2 * g_be * CP_D_MOL(FT) * (leaf.energy.auxil.t - air.s_aux.t) * leaf.xylem.state.area;
+        sh = 2 * g_be * CP_D_MOL(FT) * (leaf.energy.s_aux.t - air.s_aux.t) * leaf.xylem.state.area;
         leaf.energy.auxil.∂e∂t -= sh;
         leaf.energy.auxil.∂e∂t_sh = sh;
 
