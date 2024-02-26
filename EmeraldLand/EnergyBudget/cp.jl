@@ -47,4 +47,6 @@ heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(
     return (leaf.capacitor.state.v_storage * CP_L_MOL(FT) + leaf.xylem.state.cp * leaf.bio.state.lma * 10) * leaf.xylem.state.area
 );
 
-heat_capacitance(air::AirLayer{FT}) where {FT} = (air.state.p_air - air.auxil.ps[3]) * air.auxil.δz / GAS_R(FT) * CP_D_MOL(FT) + air.state.ns[3] * CP_V_MOL(FT);
+heat_capacitance(air::AirLayer{FT}) where {FT} = heat_capacitance(air.state);
+
+heat_capacitance(airst::AirLayerState{FT}) where {FT} = (airst.ns[1] + airst.ns[2] + airst.ns[4] + airst.ns[5]) * CP_D_MOL(FT) + airst.ns[3] * CP_V_MOL(FT);

@@ -43,13 +43,13 @@ function prescribe_air!(
             vpd::Union{Number,Nothing} = nothing,
             wind::Union{Number,Nothing} = nothing
 ) where {FT}
-    if !isnothing(t) air.auxil.t = t; end;
+    if !isnothing(t) air.s_aux.t = t; end;
     if !isnothing(wind) air.auxil.wind = wind; end;
-    if !isnothing(f_CO₂) air.auxil.f_CO₂ = f_CO₂; air.auxil.ps[2] = air.auxil.f_CO₂ * air.state.p_air * 1e-6; end;
-    if !isnothing(p_CO₂) air.auxil.ps[2] = p_CO₂; air.auxil.f_CO₂ = air.auxil.ps[2] / air.state.p_air * 1e6; end;
-    if !isnothing(p_H₂O) air.auxil.ps[3] = p_H₂O; end;
-    if !isnothing(rh) air.auxil.ps[3] = saturation_vapor_pressure(air.auxil.t) * rh; end;
-    if !isnothing(vpd) air.auxil.ps[3] = max(0, saturation_vapor_pressure(air.auxil.t) - vpd); end;
+    if !isnothing(f_CO₂) air.s_aux.f_CO₂ = f_CO₂; air.s_aux.ps[2] = air.s_aux.f_CO₂ * air.state.p_air * 1e-6; end;
+    if !isnothing(p_CO₂) air.s_aux.ps[2] = p_CO₂; air.s_aux.f_CO₂ = air.s_aux.ps[2] / air.state.p_air * 1e6; end;
+    if !isnothing(p_H₂O) air.s_aux.ps[3] = p_H₂O; end;
+    if !isnothing(rh) air.s_aux.ps[3] = saturation_vapor_pressure(air.s_aux.t) * rh; end;
+    if !isnothing(vpd) air.s_aux.ps[3] = max(0, saturation_vapor_pressure(air.s_aux.t) - vpd); end;
 
     # if any of temperature or air mole fraction changes, re-initialize the air layer
     if !isnothing(t) || !isnothing(f_CO₂) || !isnothing(p_CO₂) || !isnothing(p_H₂O) || !isnothing(rh) || !isnothing(vpd)

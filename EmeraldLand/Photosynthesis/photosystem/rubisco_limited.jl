@@ -46,7 +46,7 @@ rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil
     b = β * psa.v_cmax * psa.γ_star;
     d = psa.k_m;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.auxil.ps[2];
+    p = air.s_aux.ps[2];
     r = β * psa.r_d;
 
     qa = f;

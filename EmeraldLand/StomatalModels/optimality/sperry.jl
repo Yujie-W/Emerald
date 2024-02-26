@@ -9,7 +9,7 @@
 #######################################################################################################################################################################################################
 ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
-    d = max(1, p_s - air.auxil.ps[3]);
+    d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting
     gs = leaf.flux.state.g_H₂O_s_shaded;
@@ -38,7 +38,7 @@
 
 ∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
     p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
-    d = max(1, p_s - air.auxil.ps[3]);
+    d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting
     gs = leaf.flux.state.g_H₂O_s_sunlit[ind];

@@ -44,9 +44,9 @@ function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
     # update the energy for diffusion from top soil to the first air layer
     δn1 = sbulk.auxil.dndt[1,3];
     δn4 = sbulk.auxil.dndt[1,1] + sbulk.auxil.dndt[1,2] + sbulk.auxil.dndt[1,4] + sbulk.auxil.dndt[1,5];
-    t = δn1 > 0 ? soils[1].auxil.t : air.auxil.t;
+    t = δn1 > 0 ? soils[1].auxil.t : air.s_aux.t;
     soils[1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * t;
-    t = δn4 > 0 ? soils[1].auxil.t : air.auxil.t;
+    t = δn4 > 0 ? soils[1].auxil.t : air.s_aux.t;
     soils[1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * t;
 
     # update the diffusion among soil layers

@@ -41,7 +41,7 @@ product_limited_rate!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT},
     a = β * psa.v_pmax;
     d = psa.k_pep;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.auxil.ps[2];
+    p = air.s_aux.ps[2];
     r = β * psa.r_d;
 
     qa = f;

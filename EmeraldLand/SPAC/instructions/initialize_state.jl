@@ -54,15 +54,15 @@ initialize_states!(leaf::Leaf{FT}; k_sla::Number = 0.04) where {FT} = (
 );
 
 initialize_states!(air::AirLayer{FT}) where {FT} = (
-    air.auxil.ps[2] = air.auxil.f_CO₂ * air.state.p_air * 1e-6;
-    air.auxil.ps[4] = F_N₂(FT) * air.state.p_air;
-    air.auxil.ps[5] = F_O₂(FT) * air.state.p_air;
+    air.s_aux.ps[2] = air.s_aux.f_CO₂ * air.state.p_air * 1e-6;
+    air.s_aux.ps[4] = F_N₂(FT) * air.state.p_air;
+    air.s_aux.ps[5] = F_O₂(FT) * air.state.p_air;
 
     for i in 1:5
-        air.state.ns[i] = air.auxil.ps[i] * air.auxil.δz / (GAS_R(FT) * air.auxil.t);
+        air.state.ns[i] = air.s_aux.ps[i] * air.t_aux.δz / (GAS_R(FT) * air.s_aux.t);
     end;
 
-    air.state.Σe = heat_capacitance(air) * air.auxil.t;
+    air.state.Σe = heat_capacitance(air) * air.s_aux.t;
 
     return nothing
 );

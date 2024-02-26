@@ -17,7 +17,8 @@ using ..Namespace: GCO₂Mode
 using ..Namespace: XylemHydraulicsAuxilNSS
 using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
 using ..Namespace: MultiLayerCanopy
-using ..Namespace: AirLayer, SoilBulk, SoilLayer
+using ..Namespace: AirLayer, AirLayerState, AirLayerSDAuxil, AirLayerTDAuxil
+using ..Namespace: SoilBulk, SoilLayer
 using ..Namespace: BulkSPAC, SPACConfiguration
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
@@ -30,6 +31,7 @@ using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductan
 include("instructions/initialize_state.jl");
 include("instructions/initialize.jl");
 include("instructions/prescribe.jl");
+include("instructions/s_aux.jl");
 include("instructions/t_aux.jl");
 include("instructions/update_auxil.jl");
 

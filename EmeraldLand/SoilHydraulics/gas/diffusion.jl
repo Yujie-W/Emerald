@@ -31,18 +31,18 @@ function trace_gas_diffusion!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     #     - the impact from wind speed on the boundary layer thickness need to be accounted for
     #
     air = spac.airs[1];
-    rt_air = GAS_R(FT) * air.auxil.t;
+    rt_air = GAS_R(FT) * air.s_aux.t;
     rel_kd = 2 * soils[1].auxil.kd;
     rel_kv = 2 * soils[1].auxil.kv;
     v_gas = max(0, soils[1].state.vc.Θ_SAT - soils[1].state.θ) * soils[1].auxil.δz;
     if v_gas > 0
-        sbulk.auxil.dndt[1,1] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_CH₄, TRACE_AIR) * (soils[1].state.ns[1] / v_gas - air.auxil.ps[1] / rt_air);
-        sbulk.auxil.dndt[1,2] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_CO₂, TRACE_AIR) * (soils[1].state.ns[2] / v_gas - air.auxil.ps[2] / rt_air);
-        sbulk.auxil.dndt[1,4] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_N₂ , TRACE_AIR) * (soils[1].state.ns[4] / v_gas - air.auxil.ps[4] / rt_air);
-        sbulk.auxil.dndt[1,5] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_O₂ , TRACE_AIR) * (soils[1].state.ns[5] / v_gas - air.auxil.ps[5] / rt_air);
+        sbulk.auxil.dndt[1,1] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_CH₄, TRACE_AIR) * (soils[1].state.ns[1] / v_gas - air.s_aux.ps[1] / rt_air);
+        sbulk.auxil.dndt[1,2] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_CO₂, TRACE_AIR) * (soils[1].state.ns[2] / v_gas - air.s_aux.ps[2] / rt_air);
+        sbulk.auxil.dndt[1,4] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_N₂ , TRACE_AIR) * (soils[1].state.ns[4] / v_gas - air.s_aux.ps[4] / rt_air);
+        sbulk.auxil.dndt[1,5] = rel_kd * diffusive_coefficient(soils[1].auxil.t, TRACE_O₂ , TRACE_AIR) * (soils[1].state.ns[5] / v_gas - air.s_aux.ps[5] / rt_air);
     end;
     v_vap = v_gas + FT(0.01);
-    sbulk.auxil.dndt[1,3] = rel_kv * diffusive_coefficient(soils[1].auxil.t, TRACE_H₂O, TRACE_AIR) * (soils[1].state.ns[3] / v_vap - air.auxil.ps[3] / rt_air);
+    sbulk.auxil.dndt[1,3] = rel_kv * diffusive_coefficient(soils[1].auxil.t, TRACE_H₂O, TRACE_AIR) * (soils[1].state.ns[3] / v_vap - air.s_aux.ps[3] / rt_air);
 
     #
     # Diffusion among soi layers

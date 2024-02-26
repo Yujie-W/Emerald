@@ -94,13 +94,13 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wher
         top_soil.state.ns[2] += n_mass * air.state.ns[2] / a_dry;
         top_soil.state.ns[4] += n_mass * air.state.ns[4] / a_dry;
         top_soil.state.ns[5] += n_mass * air.state.ns[5] / a_dry;
-        top_soil.state.Σe += n_mass * CP_D_MOL(FT) * air.auxil.t / top_soil.auxil.δz;
+        top_soil.state.Σe += n_mass * CP_D_MOL(FT) * air.s_aux.t / top_soil.auxil.δz;
         if !PRESCRIBE_AIR
             air.state.ns[1] -= n_mass * air.state.ns[1] / a_dry;
             air.state.ns[2] -= n_mass * air.state.ns[2] / a_dry;
             air.state.ns[4] -= n_mass * air.state.ns[4] / a_dry;
             air.state.ns[5] -= n_mass * air.state.ns[5] / a_dry;
-            air.state.Σe -= n_mass * CP_D_MOL(FT) * air.auxil.t;
+            air.state.Σe -= n_mass * CP_D_MOL(FT) * air.s_aux.t;
         end;
     elseif s_max < s_dry
         n_mass = s_dry - s_max;

@@ -52,7 +52,7 @@ light_limited_rate!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, 
     c = eff_1;
     d = eff_2 * psa.γ_star;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.auxil.ps[2];
+    p = air.s_aux.ps[2];
     r = β * psa.r_d;
 
     qa = c * f;
@@ -81,7 +81,7 @@ light_limited_rate!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g
     c = pss.EFF_1;
     d = pss.EFF_2 * psa.γ_star;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.auxil.ps[2];
+    p = air.s_aux.ps[2];
     r = β * psa.r_d;
 
     qa = c * f;

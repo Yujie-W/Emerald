@@ -106,8 +106,8 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
         colimit_photosynthesis!(leaf.photosystem; β = β);
 
         # update CO₂ partial pressures at the leaf surface and internal airspace (evaporative front)
-        leaf.flux.auxil.p_CO₂_i_sunlit[i] = air.auxil.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_sunlit[i] * air.state.p_air * FT(1e-6);
-        leaf.flux.auxil.p_CO₂_s_sunlit[i] = air.auxil.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_b         * air.state.p_air * FT(1e-6);
+        leaf.flux.auxil.p_CO₂_i_sunlit[i] = air.s_aux.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_sunlit[i] * air.state.p_air * FT(1e-6);
+        leaf.flux.auxil.p_CO₂_s_sunlit[i] = air.s_aux.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_b         * air.state.p_air * FT(1e-6);
 
         # update leaf ETR again to ensure that j_pot and e_to_c are correct for C3CytochromeModel
         photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i], leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
@@ -135,8 +135,8 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
     colimit_photosynthesis!(leaf.photosystem; β = β);
 
     # update CO₂ partial pressures at the leaf surface and internal airspace (evaporative front)
-    leaf.flux.auxil.p_CO₂_i_shaded = air.auxil.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_shaded * air.state.p_air * FT(1e-6);
-    leaf.flux.auxil.p_CO₂_s_shaded = air.auxil.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_b      * air.state.p_air * FT(1e-6);
+    leaf.flux.auxil.p_CO₂_i_shaded = air.s_aux.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_shaded * air.state.p_air * FT(1e-6);
+    leaf.flux.auxil.p_CO₂_s_shaded = air.s_aux.ps[2] - leaf.photosystem.auxil.a_n / leaf.flux.auxil.g_CO₂_b      * air.state.p_air * FT(1e-6);
 
     # update leaf ETR again to ensure that j_pot and e_to_c are correct for C3CytochromeModel
     photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_shaded, leaf.flux.auxil.p_CO₂_i_shaded; β = β);

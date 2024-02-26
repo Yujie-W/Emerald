@@ -85,9 +85,8 @@ BulkSPAC(config::SPACConfiguration{FT};
     n_air = length(air_bounds) - 1;
     air_layers = AirLayer{FT}[AirLayer{FT}() for _ in 1:n_air];
     for i in eachindex(air_layers)
-        air_layers[i].state.zs = air_bounds[i:i+1];
-        air_layers[i].auxil.z = (air_bounds[i] + air_bounds[i+1]) / 2;
-        air_layers[i].auxil.δz = (air_bounds[i+1] - air_bounds[i]);
+        air_layers[i].trait.zs = air_bounds[i:i+1];
+        t_aux!(air_layers[i]);
     end;
 
     # set up the meteorology

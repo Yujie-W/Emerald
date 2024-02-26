@@ -25,7 +25,7 @@ function ∂Θₙ∂E end;
     (; F_FITNESS) = sm;
 
     p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.auxil.p_leaf * 1000000);
-    d = max(1, p_s - air.auxil.ps[3]);
+    d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the A and E at the current setting
     gs = leaf.flux.state.g_H₂O_s_shaded;
