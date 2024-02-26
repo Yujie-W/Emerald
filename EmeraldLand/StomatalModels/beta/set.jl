@@ -61,7 +61,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].auxil.k);
+        beta = β_factor(β.FUNC, soils[i].s_aux.k);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;
@@ -94,7 +94,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].auxil.ψ);
+        beta = β_factor(β.FUNC, soils[i].s_aux.ψ);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
         norm += beta * kmax;

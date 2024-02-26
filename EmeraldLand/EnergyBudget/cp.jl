@@ -20,11 +20,11 @@ Return the heat capacitance of the organ (xylem, root, stem, and leaf)
 function heat_capacitance end;
 
 heat_capacitance(soil::SoilLayer{FT}; runoff::FT = FT(0)) where {FT} = (
-    cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.auxil.δz;
+    cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.t_aux.δz;
 
     # runoff in mol m⁻² s⁻¹, convert it to kg and then
 
-    return soil.state.ρ * soil.state.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + cp_gas + runoff * CP_L_MOL(FT) / soil.auxil.δz
+    return soil.trait.ρ * soil.trait.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + cp_gas + runoff * CP_L_MOL(FT) / soil.t_aux.δz
 );
 
 heat_capacitance(xylem::XylemHydraulics{FT}) where {FT} = (

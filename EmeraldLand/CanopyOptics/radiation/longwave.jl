@@ -30,7 +30,7 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
     if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         # 1. compute longwave radiation out from the leaves and soil
         can_str.auxil.lw_layer .= 0;
-        r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.auxil.t ^ 4;
+        r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.s_aux.t ^ 4;
 
         # 2. account for the longwave emission from bottom to up
         can_str.auxil.emitꜜ .= 0;
@@ -64,7 +64,7 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
         can_str.auxil.lw_layer_stem[irt] = stem.energy.auxil.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
         can_str.auxil.lw_layer[irt] = can_str.auxil.lw_layer_leaf[irt] + can_str.auxil.lw_layer_stem[irt];
     end;
-    r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.auxil.t ^ 4;
+    r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.s_aux.t ^ 4;
 
     # 2. account for the longwave emission from bottom to up
     can_str.auxil.emitꜛ[end] = r_lw_soil;

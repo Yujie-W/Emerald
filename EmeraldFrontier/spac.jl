@@ -34,11 +34,11 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     # update soil type information per layer
     for i in eachindex(spac.soils)
         # TODO: add a line to parameterize K_MAX
-        spac.soils[i].state.vc.α = gmdict["SOIL_α"][i];
-        spac.soils[i].state.vc.N = gmdict["SOIL_N"][i];
-        spac.soils[i].state.vc.M = 1 - 1 / spac.soils[i].state.vc.N;
-        spac.soils[i].state.vc.Θ_RES = gmdict["SOIL_ΘR"][i];
-        spac.soils[i].state.vc.Θ_SAT = gmdict["SOIL_ΘS"][i];
+        spac.soils[i].trait.vc.α = gmdict["SOIL_α"][i];
+        spac.soils[i].trait.vc.N = gmdict["SOIL_N"][i];
+        spac.soils[i].trait.vc.M = 1 - 1 / spac.soils[i].trait.vc.N;
+        spac.soils[i].trait.vc.Θ_RES = gmdict["SOIL_ΘR"][i];
+        spac.soils[i].trait.vc.Θ_SAT = gmdict["SOIL_ΘS"][i];
     end;
 
     # set hydraulic traits to very high so as to not triggering NaN (they do not impact result anyway)

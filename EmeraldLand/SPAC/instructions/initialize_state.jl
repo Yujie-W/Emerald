@@ -16,13 +16,13 @@ Initialize the energy and state variables of the SPAC structs.
 function initialize_states! end;
 
 initialize_states!(soil::SoilLayer{FT}, air::AirLayer{FT}) where {FT} = (
-    δθ = max(0, soil.state.vc.Θ_SAT - soil.state.θ);
-    rt = GAS_R(FT) * soil.auxil.t;
-    soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t, soil.auxil.ψ * 1000000) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
-    soil.state.ns[4] = air.state.p_air * F_N₂(FT) * soil.auxil.δz * δθ / rt;
-    soil.state.ns[5] = air.state.p_air * F_O₂(FT) * soil.auxil.δz * δθ / rt;
-    soil.auxil.cp = heat_capacitance(soil);
-    soil.state.Σe = soil.auxil.cp * soil.auxil.t;
+    δθ = max(0, soil.trait.vc.Θ_SAT - soil.state.θ);
+    rt = GAS_R(FT) * soil.s_aux.t;
+    soil.state.ns[3] = saturation_vapor_pressure(soil.s_aux.t, soil.s_aux.ψ * 1000000) * soil.t_aux.δz * (δθ + FT(0.01)) / rt;
+    soil.state.ns[4] = air.state.p_air * F_N₂(FT) * soil.t_aux.δz * δθ / rt;
+    soil.state.ns[5] = air.state.p_air * F_O₂(FT) * soil.t_aux.δz * δθ / rt;
+    soil.s_aux.cp = heat_capacitance(soil);
+    soil.state.Σe = soil.s_aux.cp * soil.s_aux.t;
 
     return nothing
 );

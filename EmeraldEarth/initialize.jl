@@ -74,11 +74,11 @@ initial_state(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Dic
         # TODO: add a line to parameterize K_MAX
         # TODO: fix these later with better data source
         if !isnan(gm_dict["SOIL_α"][i]) && !isnan(gm_dict["SOIL_N"][i]) && !isnan(gm_dict["SOIL_ΘR"][i]) && !isnan(gm_dict["SOIL_ΘS"][i])
-            spac.soils[i].state.vc.α = gm_dict["SOIL_α"][i];
-            spac.soils[i].state.vc.N = gm_dict["SOIL_N"][i];
-            spac.soils[i].state.vc.M = 1 - 1 / spac.soils[i].state.vc.N;
-            spac.soils[i].state.vc.Θ_RES = gm_dict["SOIL_ΘR"][i];
-            spac.soils[i].state.vc.Θ_SAT = gm_dict["SOIL_ΘS"][i];
+            spac.soils[i].trait.vc.α = gm_dict["SOIL_α"][i];
+            spac.soils[i].trait.vc.N = gm_dict["SOIL_N"][i];
+            spac.soils[i].trait.vc.M = 1 - 1 / spac.soils[i].trait.vc.N;
+            spac.soils[i].trait.vc.Θ_RES = gm_dict["SOIL_ΘR"][i];
+            spac.soils[i].trait.vc.Θ_SAT = gm_dict["SOIL_ΘS"][i];
         end;
     end;
 
@@ -100,7 +100,7 @@ initial_state(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Dic
     # prescribe soil water content
     swckeys = ["SWC_1", "SWC_2", "SWC_3", "SWC_4"];
     tslkeys = ["T_S_1", "T_S_2", "T_S_3", "T_S_4"];
-    prescribe_soil!(spac; swcs = Tuple(min(spac.soils[i].state.vc.Θ_SAT - 0.001, ss_dict[swckeys[i]]) for i in 1:4), t_soils = Tuple(ss_dict[tslkeys[i]] for i in 1:4));
+    prescribe_soil!(spac; swcs = Tuple(min(spac.soils[i].trait.vc.Θ_SAT - 0.001, ss_dict[swckeys[i]]) for i in 1:4), t_soils = Tuple(ss_dict[tslkeys[i]] for i in 1:4));
 
     # prescribe leaf temperature from skin temperature
     spac.plant.memory.t_history = FT[ss_dict["T_SKN"]];

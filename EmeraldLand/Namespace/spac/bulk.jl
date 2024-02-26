@@ -76,9 +76,8 @@ BulkSPAC(config::SPACConfiguration{FT};
     # set up the soil layers (energy updated in initialize! function)
     soil_layers = SoilLayer{FT}[SoilLayer{FT}() for _ in 1:n_soil];
     for i in eachindex(soil_layers)
-        soil_layers[i].state.zs = soil_bounds[i:i+1];
-        soil_layers[i].auxil.z = (soil_bounds[i] + soil_bounds[i+1]) / 2;
-        soil_layers[i].auxil.δz = (soil_bounds[i] - soil_bounds[i+1]);
+        soil_layers[i].trait.zs = soil_bounds[i:i+1];
+        t_aux!(soil_layers[i]);
     end;
 
     # set up the air layers

@@ -94,14 +94,14 @@ function prescribe_soil!(spac::BulkSPAC{FT}; swcs::Union{Tuple,Nothing} = nothin
     # prescribe soil water content (within [Θ_RES,Θ_SAT])
     if !isnothing(swcs)
         for i in eachindex(swcs)
-            soils[i].state.θ = max(soils[i].state.vc.Θ_RES + eps(FT), min(soils[i].state.vc.Θ_SAT - eps(FT), swcs[i]));
+            soils[i].state.θ = max(soils[i].trait.vc.Θ_RES + eps(FT), min(soils[i].trait.vc.Θ_SAT - eps(FT), swcs[i]));
         end;
     end;
 
     # prescribe soil temperature
     if !isnothing(t_soils)
         for i in eachindex(t_soils)
-            soils[i].auxil.t = t_soils[i];
+            soils[i].s_aux.t = t_soils[i];
         end;
     end;
 

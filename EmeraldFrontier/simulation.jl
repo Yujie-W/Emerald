@@ -246,10 +246,10 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
     dfr.MOD_T_L_MAX  = nanmax(_tleaf);
     dfr.MOD_T_L_MEAN = nanmean(_tleaf);
     dfr.MOD_T_L_MIN  = nanmin(_tleaf);
-    dfr.MOD_T_S_1    = spac.soils[1].auxil.t;
-    dfr.MOD_T_S_2    = spac.soils[2].auxil.t;
-    dfr.MOD_T_S_3    = spac.soils[3].auxil.t;
-    dfr.MOD_T_S_4    = spac.soils[4].auxil.t;
+    dfr.MOD_T_S_1    = spac.soils[1].s_aux.t;
+    dfr.MOD_T_S_2    = spac.soils[2].s_aux.t;
+    dfr.MOD_T_S_3    = spac.soils[3].s_aux.t;
+    dfr.MOD_T_S_4    = spac.soils[4].s_aux.t;
 
     # save the total flux into the DataFrame
     dfr.BETA  = BETA(spac);

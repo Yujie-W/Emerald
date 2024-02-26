@@ -109,7 +109,7 @@ soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilL
     (; SPECTRA) = config;
 
     # use linear interpolation method or CLM method (with upper limit)
-    rwc = top_soil.state.θ / top_soil.state.vc.Θ_SAT;
+    rwc = top_soil.state.θ / top_soil.trait.vc.Θ_SAT;
     par::FT = SOIL_ALBEDOS[sbulk.trait.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,3];
     nir::FT = SOIL_ALBEDOS[sbulk.trait.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,4];
     sbulk.auxil.ρ_sw[SPECTRA.IΛ_PAR] .= par;
@@ -122,7 +122,7 @@ soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilL
     (; SPECTRA) = config;
 
     # use linear interpolation method or CLM method (with upper limit)
-    rwc = top_soil.state.θ / top_soil.state.vc.Θ_SAT;
+    rwc = top_soil.state.θ / top_soil.trait.vc.Θ_SAT;
     par::FT = SOIL_ALBEDOS[sbulk.trait.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,3];
     nir::FT = SOIL_ALBEDOS[sbulk.trait.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,4];
 

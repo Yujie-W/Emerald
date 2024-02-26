@@ -38,7 +38,7 @@ function adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
     for soil in soils
         δt_1 = min(FT(0.01) / abs(soil.auxil.∂θ∂t), δt_1);
         if soil.auxil.∂θ∂t < 0
-            δt_drain = (soil.state.vc.Θ_RES - soil.state.θ) / soil.auxil.∂θ∂t;
+            δt_drain = (soil.trait.vc.Θ_RES - soil.state.θ) / soil.auxil.∂θ∂t;
             δt_1 = min(δt_drain, δt_1);
         end;
     end;
@@ -46,7 +46,7 @@ function adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
     # make sure temperatures do not change more than 1 K per time step
     δt_2 = δt_1;
     for soil in soils
-        ∂T∂t = soil.auxil.∂e∂t / soil.auxil.cp;
+        ∂T∂t = soil.auxil.∂e∂t / soil.s_aux.cp;
         δt_2 = min(1 / abs(∂T∂t), δt_2);
     end;
 

@@ -64,15 +64,15 @@ update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
 );
 
 update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
-    soil.auxil.cp = heat_capacitance(soil);
-    soil.auxil.t = soil.state.Σe / soil.auxil.cp;
+    soil.s_aux.cp = heat_capacitance(soil);
+    soil.s_aux.t = soil.state.Σe / soil.s_aux.cp;
 
     # update the conductance, potential, diffusivity, and thermal conductivity (0.5 for tortuosity factor)
-    soil.auxil.k = relative_soil_k(soil.state.vc, soil.state.θ) * soil.state.vc.K_MAX * relative_viscosity(soil.auxil.t) / soil.auxil.δz;
-    soil.auxil.ψ = soil_ψ_25(soil.state.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.auxil.t);
-    soil.auxil.kd = 0.5 * max(0, soil.state.vc.Θ_SAT - soil.state.θ) / soil.auxil.δz;
-    soil.auxil.kv = 0.5 * soil.state.vc.Θ_SAT / max(FT(0.01), soil.state.vc.Θ_SAT - soil.state.θ) / soil.auxil.δz;
-    soil.auxil.λ_soil_water = (soil.state.λ_soil + soil.state.θ * Λ_THERMAL_H₂O(FT)) / soil.auxil.δz;
+    soil.s_aux.k = relative_soil_k(soil.trait.vc, soil.state.θ) * soil.trait.vc.K_MAX * relative_viscosity(soil.s_aux.t) / soil.t_aux.δz;
+    soil.s_aux.ψ = soil_ψ_25(soil.trait.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.s_aux.t);
+    soil.s_aux.kd = 0.5 * max(0, soil.trait.vc.Θ_SAT - soil.state.θ) / soil.t_aux.δz;
+    soil.s_aux.kv = 0.5 * soil.trait.vc.Θ_SAT / max(FT(0.01), soil.trait.vc.Θ_SAT - soil.state.θ) / soil.t_aux.δz;
+    soil.s_aux.λ_soil_water = (soil.trait.λ_soil + soil.state.θ * Λ_THERMAL_H₂O(FT)) / soil.t_aux.δz;
 
     # clean up the partial derivatives
     soil.auxil.∂e∂t = 0;
