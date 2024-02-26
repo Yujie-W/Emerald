@@ -163,10 +163,11 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
     c_aux = leaf.capacitor.auxil;
     if x_aux isa XylemHydraulicsAuxilNSS
         x_sta = leaf.xylem.state;
+        c_tra = leaf.capacitor.trait;
         c_sta = leaf.capacitor.state;
         f_vis = relative_viscosity(leaf.energy.s_aux.t);
-        c_aux.p = capacitance_pressure(c_sta.pv, c_sta.v_storage / c_sta.v_max, leaf.energy.s_aux.t);
-        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_sta.pv.k_refill / f_vis * c_sta.v_storage * x_sta.area;
+        c_aux.p = capacitance_pressure(c_tra.pv, c_sta.v_storage / c_tra.v_max, leaf.energy.s_aux.t);
+        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_tra.pv.k_refill / f_vis * c_sta.v_storage * x_sta.area;
     else
         c_aux.flow = 0;
     end;

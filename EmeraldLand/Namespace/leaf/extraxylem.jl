@@ -4,6 +4,36 @@
 #
 # Changes to this struct
 # General
+#     2024-Feb-26: add struct ExtraXylemCapacitorTrait
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for extraxylary capacitor
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct ExtraXylemCapacitorTrait{FT}
+    "Maximum extraxylary hydraulic conductance `[mol s⁻¹ MPa⁻¹ m⁻²]`"
+    k_max::FT = 100
+    "Pressure volume curve of the capacitor"
+    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = SegmentedPVCurve{FT}()
+    "Capacitor maximum volume per basal area or per leaf area `[mol m⁻²]`"
+    v_max::FT = 5
+    "Vulnerability curve of the extraxylary capacitor"
+    vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}(5,1)
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Sep-26: define the struct to store the state variables used in extraxylary capacitor
 #
 #######################################################################################################################################################################################################
@@ -19,16 +49,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
-    "Maximum extraxylary hydraulic conductance `[mol s⁻¹ MPa⁻¹ m⁻²]`"
-    k_max::FT = 100
-    "Pressure volume curve of the capacitor"
-    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = SegmentedPVCurve{FT}()
     "Current volume of the capacitor `[mol]`"
     v_storage::FT = 0
-    "Capacitor maximum volume per basal area or per leaf area `[mol m⁻²]`"
-    v_max::FT = 5
-    "Vulnerability curve of the extraxylary capacitor"
-    vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}(5,1)
 end;
 
 
@@ -68,6 +90,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Sep-26: define the struct to store the capacitor
+#     2024-Feb-26: add field trait
 #
 #######################################################################################################################################################################################################
 """
@@ -82,6 +105,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct ExtraXylemCapacitor{FT}
+    "Trait variables of the capacitor"
+    trait::ExtraXylemCapacitorTrait{FT} = ExtraXylemCapacitorTrait{FT}()
     "State variables of the capacitor"
     state::ExtraXylemCapacitorState{FT} = ExtraXylemCapacitorState{FT}()
     "Auxilary variables of the capacitor"
