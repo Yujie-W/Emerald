@@ -1,6 +1,4 @@
-# This file contains functions to update the auxiliary variables at different time steps
-#     - Big time step (such as the integrated values: GPP, ET, etc.)
-#     - Sub time step within a big time step (such as the cache variables which can be recomputed: t, cp, and p)
+# This file contains functions to update the auxiliary variables at sub time steps
 
 #######################################################################################################################################################################################################
 #
@@ -11,22 +9,22 @@
 #     2023-Oct-06: add soil auxiliary variable calculations
 #     2023-Oct-07: add soil bulk auxiliary variable calculations
 #     2023-Oct-16: add leaf stomatal conductance variables calculations
+#     2023-Oct-17: rename the function to substep_aux! to be consistent with the other function names such as t_aux!, s_aux!, dull_aux!, and step_aux!
 #
 #######################################################################################################################################################################################################
 """
 
-    update_substep_auxils!(spac::BulkSPAC{FT}) where {FT}
+substep_aux!(spac::BulkSPAC{FT}) where {FT}
 
 Update the auxiliary variables at sub time step within a big time step, given
 - `spac` `BulkSPAC` SPAC
 
 """
-function update_substep_auxils! end;
+function substep_aux! end;
 
-update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
+substep_aux!(spac::BulkSPAC{FT}) where {FT} = (
     soils = spac.soils;
     sbulk = spac.soil_bulk;
-
     roots = spac.plant.roots;
     junction = spac.plant.junction;
     trunk = spac.plant.trunk;
@@ -35,35 +33,35 @@ update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
 
     # update the soil layer auxiliary variables
     for soil in soils
-        update_substep_auxils!(soil);
+        substep_aux!(soil);
     end;
 
     # update soil bulk auxiliary variables
-    update_substep_auxils!(sbulk);
+    substep_aux!(sbulk);
 
     # update the root auxiliary variables
     for root in roots
-        update_substep_auxils!(root);
+        substep_aux!(root);
     end;
 
     # update the junction auxiliary variables
-    update_substep_auxils!(junction);
+    substep_aux!(junction);
 
     # update the stem auxiliary variables
-    update_substep_auxils!(trunk);
+    substep_aux!(trunk);
     for stem in branches
-        update_substep_auxils!(stem);
+        substep_aux!(stem);
     end;
 
     # update the leaf auxiliary variables
     for leaf in leaves
-        update_substep_auxils!(leaf);
+        substep_aux!(leaf);
     end;
 
     return nothing
 );
 
-update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
+substep_aux!(soil::SoilLayer{FT}) where {FT} = (
     # clean up the partial derivatives
     soil.auxil.∂e∂t = 0;
     soil.auxil.∂n∂t .= 0;
@@ -72,7 +70,7 @@ update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
     return nothing
 );
 
-update_substep_auxils!(sbulk::SoilBulk{FT}) where {FT} = (
+substep_aux!(sbulk::SoilBulk{FT}) where {FT} = (
     # clear the dndt cahche
     sbulk.auxil.dndt .= 0;
     sbulk.auxil.runoff = 0;
@@ -80,7 +78,7 @@ update_substep_auxils!(sbulk::SoilBulk{FT}) where {FT} = (
     return nothing
 );
 
-update_substep_auxils!(root::Root{FT}) where {FT} = (
+substep_aux!(root::Root{FT}) where {FT} = (
     # update the root buffer pressure and flow
     x_aux = root.xylem.auxil;
     x_tra = root.xylem.trait;
@@ -101,7 +99,7 @@ update_substep_auxils!(root::Root{FT}) where {FT} = (
     return nothing
 );
 
-update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
+substep_aux!(junc::JunctionCapacitor{FT}) where {FT} = (
     # clear the partial derivatives
     junc.auxil.∂e∂t = 0;
     junc.auxil.∂w∂t = 0;
@@ -109,7 +107,7 @@ update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
     return nothing
 );
 
-update_substep_auxils!(stem::Stem{FT}) where {FT} = (
+substep_aux!(stem::Stem{FT}) where {FT} = (
     # update the stem buffer pressure and flow
     x_aux = stem.xylem.auxil;
     x_tra = stem.xylem.trait;
@@ -130,7 +128,7 @@ update_substep_auxils!(stem::Stem{FT}) where {FT} = (
     return nothing
 );
 
-update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
+substep_aux!(leaf::Leaf{FT}) where {FT} = (
     # update the leaf buffer pressure and flow
     x_aux = leaf.xylem.auxil;
     c_aux = leaf.capacitor.auxil;
@@ -155,51 +153,6 @@ update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
     leaf.energy.auxil.∂e∂t = 0;
     leaf.flux.auxil.∂g∂t_shaded = 0;
     leaf.flux.auxil.∂g∂t_sunlit .= 0;
-
-    return nothing
-);
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2023-Sep-30: add update_step_auxils! function
-#     2024-Jan-24: update leaf boundary layer conductance based on wind speed and leaf width
-#
-#######################################################################################################################################################################################################
-"""
-
-    update_step_auxils!(spac::BulkSPAC{FT}) where {FT}
-
-Update the auxiliary variables at big time step, given
-- `spac` `BulkSPAC` SPAC
-
-"""
-function update_step_auxils! end;
-
-update_step_auxils!(spac::BulkSPAC{FT}) where {FT} = (
-    airs = spac.airs;
-    leaves = spac.plant.leaves;
-    lindex = spac.plant.leaves_index;
-
-    # clear the integrated values
-    for leaf in leaves
-        update_step_auxils!(leaf);
-    end;
-
-    # update leaf boundary layer conductance
-    for i in eachindex(leaves)
-        leaf = leaves[i];
-        air = airs[lindex[i]];
-        leaf.flux.auxil.g_CO₂_b = FT(0.14) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.trait.width));
-    end;
-
-    return nothing
-);
-
-update_step_auxils!(leaf::Leaf{FT}) where {FT} = (
-    leaf.flux.auxil.∫∂w∂t_out = 0;
 
     return nothing
 );

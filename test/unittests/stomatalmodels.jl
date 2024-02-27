@@ -75,7 +75,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_shaded = 100.0;
         leaf.flux.state.g_H₂O_s_shaded = 0.02;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
-        SPAC.update_substep_auxils!(leaf);
+        SPAC.substep_aux!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
 
         @test SM.∂A∂E(leaf, air) > 0;
@@ -90,7 +90,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_shaded = 100.0;
         leaf.flux.state.g_H₂O_s_shaded = 0.2;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.2;
-        SPAC.update_substep_auxils!(leaf);
+        SPAC.substep_aux!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, -1.0);
 
@@ -108,7 +108,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
         leaf.flux.auxil.ppar_sunlit .= 0;
         leaf.flux.auxil.ppar_shaded = 0;
-        SPAC.update_substep_auxils!(leaf);
+        SPAC.substep_aux!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, 0.0);
 
@@ -124,7 +124,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.state.g_H₂O_s_sunlit .= 0.001;
         leaf.flux.auxil.ppar_sunlit .= 100;
         leaf.flux.auxil.ppar_shaded = 100;
-        SPAC.update_substep_auxils!(leaf);
+        SPAC.substep_aux!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, 0.0);
 
@@ -147,12 +147,12 @@ import Emerald.EmeraldLand.SPAC
         # ∂gₙ∂t is only valid for WangSM
         leaf.flux.state.g_H₂O_s_shaded = 0.001;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.001;
-        SPAC.update_substep_auxils!(leaf);
+        SPAC.substep_aux!(leaf);
         @test SM.∂gₙ∂t(leaf, air, 1.0) > 0;
 
         leaf.flux.state.g_H₂O_s_shaded = 0.2;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.2;
-        SPAC.update_substep_auxils!(leaf);
+        SPAC.substep_aux!(leaf);
         @test SM.∂gₙ∂t(leaf, air, 1.0) < 0;
     end;
 

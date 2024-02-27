@@ -28,7 +28,7 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
     t_res = FT(δt);
     while t_res > 0
         # run the pipelines before update the sub time step
-        update_substep_auxils!(spac);
+        substep_aux!(spac);
         plant_flow_profile!(config, spac);
         plant_pressure_profile!(config, spac);
         longwave_radiation!(spac);
