@@ -36,10 +36,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Trace gas diffusion" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
 
         # set the soil to be not saturated
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
@@ -84,10 +81,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Soil infiltration" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
 
         # set the soil to be not saturated
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
@@ -109,10 +103,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Soil gas and water volume" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
         SPAC.update_substep_auxils!(spac);
 
@@ -151,10 +142,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Surface runoff" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
 
         # set every layer to be unsaturated
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
@@ -193,10 +181,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Water conservation" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
 
         # the case of no root water uptake

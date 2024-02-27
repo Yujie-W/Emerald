@@ -332,7 +332,7 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         ϕ1 .*= 1 - f_psii;
         ϕ2 .*= f_psii;
 
-        # read in the values from the auxilary variables
+        # read in the values from the auxiliary variables
         vec_b_1     = view(bio.auxil.mat_b_1, :, i);
         vec_f_1     = view(bio.auxil.mat_f_1, :, i);
         vec_b_2     = view(bio.auxil.mat_b_2, :, i);

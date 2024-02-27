@@ -115,8 +115,6 @@ import Emerald.EmeraldLand.SPAC
         config2 = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
         leaf1 = NS.Leaf(config1);
         leaf2 = NS.Leaf(config2);
-        SPAC.initialize_states!(leaf1);
-        SPAC.initialize_states!(leaf2);
         PH.leaf_pressure_profile!(config1, leaf1, -0.1);
         PH.leaf_pressure_profile!(config2, leaf2, -0.1);
 
@@ -127,10 +125,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Plant hydraulics (steady state)" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
         for leaf in spac.plant.leaves
             leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
             leaf.flux.state.g_H₂O_s_shaded = 0.1;
@@ -160,10 +155,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Plant hydraulics (non-steady state)" begin
         config = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
         for leaf in spac.plant.leaves
             leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
             leaf.flux.state.g_H₂O_s_shaded = 0.1;

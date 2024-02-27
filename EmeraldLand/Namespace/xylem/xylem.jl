@@ -1,4 +1,4 @@
-# This file contains the state and auxilary variables for xylem hydraulics
+# This file contains the state and auxiliary variables for xylem hydraulics
 
 #######################################################################################################################################################################################################
 #
@@ -75,7 +75,7 @@ XylemHydraulicsState(config::SPACConfiguration{FT}) where {FT} = XylemHydraulics
 #
 # Changes to this struct
 # General
-#     2023-Sep-22: define the struct to store the non-steady state auxilary variables used in xylem hydraulics
+#     2023-Sep-22: define the struct to store the non-steady state auxiliary variables used in xylem hydraulics
 #     2023-Sep-30: add field connected
 #
 #######################################################################################################################################################################################################
@@ -83,7 +83,7 @@ XylemHydraulicsState(config::SPACConfiguration{FT}) where {FT} = XylemHydraulics
 
 $(TYPEDEF)
 
-Struct that contains the auxilary variables for xylem hydraulics at non-steady state mode
+Struct that contains the auxiliary variables for xylem hydraulics at non-steady state mode
 
 # Fields
 
@@ -120,7 +120,7 @@ XylemHydraulicsAuxilNSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraul
 #
 # Changes to this struct
 # General
-#     2023-Sep-22: define the struct to store the steady state auxilary variables used in xylem hydraulics
+#     2023-Sep-22: define the struct to store the steady state auxiliary variables used in xylem hydraulics
 #     2023-Sep-30: add field connected
 #
 #######################################################################################################################################################################################################
@@ -128,7 +128,7 @@ XylemHydraulicsAuxilNSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraul
 
 $(TYPEDEF)
 
-Struct that contains the auxilary variables for xylem hydraulics at steady state mode
+Struct that contains the auxiliary variables for xylem hydraulics at steady state mode
 
 # Fields
 
@@ -158,14 +158,14 @@ XylemHydraulicsAuxilSS(config::SPACConfiguration{FT}) where {FT} = XylemHydrauli
 #
 # Changes to this struct
 # General
-#     2023-Sep-22: define the struct to store the auxilary variables used in xylem hydraulics
+#     2023-Sep-22: define the struct to store the auxiliary variables used in xylem hydraulics
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the state and auxilary fields for xylem hydraulics
+Struct that contains the state and auxiliary fields for xylem hydraulics
 
 # Fields
 

@@ -42,7 +42,7 @@ Run SPAC model and move forward in time with time stepper controller, given
 
 """
 function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
-    # 1. clear the auxilary variables per large time step (e.g. integrated variables)
+    # 1. clear the auxiliary variables per large time step (e.g. integrated variables)
     update_step_auxils!(spac);
 
     # 2. run the functions are do not need to be run at sub time step (e.g. shortwave radiation)

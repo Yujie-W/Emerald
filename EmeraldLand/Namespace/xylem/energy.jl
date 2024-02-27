@@ -97,7 +97,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemEnergy{FT}
     "Xylem energy state"
     state::XylemEnergyState{FT} = XylemEnergyState{FT}()
-    "State dependent auxilary variables"
+    "State dependent auxiliary variables"
     s_aux::XylemEnergySDAuxil{FT} = XylemEnergySDAuxil{FT}()
     "Xylem energy auxil"
     auxil::XylemEnergyAuxil{FT} = XylemEnergyAuxil{FT}()

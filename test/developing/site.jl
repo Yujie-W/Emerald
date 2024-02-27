@@ -19,7 +19,6 @@ FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 spac.meteo.rad_lw = 300;
-EmeraldLand.SPAC.initialize_states!(config, spac);
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
 
@@ -33,7 +32,6 @@ FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 #EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
-EmeraldLand.SPAC.initialize_states!(config, spac);
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 spac.meteo.rad_lw = 300;
 EmeraldLand.SPAC.spac!(config, spac, FT(360));
@@ -111,7 +109,6 @@ FT = Float64;
 config = EmeraldLand.Namespace.SPACConfiguration{FT}();
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
-EmeraldLand.SPAC.initialize_states!(config, spac);
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 spac.meteo.rad_lw = 300;
 

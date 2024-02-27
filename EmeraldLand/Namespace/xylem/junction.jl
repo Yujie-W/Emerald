@@ -63,7 +63,7 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the state dependent auxilary variables for junction capacitor
+Struct that contains the state dependent auxiliary variables for junction capacitor
 
 # Fields
 
@@ -84,7 +84,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-26: define the struct to store the auxilary variables used in junction capacitor
+#     2023-Sep-26: define the struct to store the auxiliary variables used in junction capacitor
 #     2023-Sep-30: add fields ∂e∂t and ∂w∂t
 #     2023-Oct-02: add field cp
 #
@@ -93,7 +93,7 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the auxilary variables for junction capacitor
+Struct that contains the auxiliary variables for junction capacitor
 
 # Fields
 
@@ -119,7 +119,7 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the capacitor state and auxilary variables
+Struct that contains the capacitor state and auxiliary variables
 
 # Fields
 
@@ -131,7 +131,7 @@ Base.@kwdef mutable struct JunctionCapacitor{FT}
     trait::JunctionCapacitorTrait{FT} = JunctionCapacitorTrait{FT}()
     "State variables of the capacitor"
     state::JunctionCapacitorState{FT} = JunctionCapacitorState{FT}()
-    "State dependent auxilary variables of the capacitor"
+    "State dependent auxiliary variables of the capacitor"
     s_aux::JunctionCapacitorSDAuxil{FT} = JunctionCapacitorSDAuxil{FT}()
     "Auxilary variables of the capacitor"
     auxil::JunctionCapacitorAuxil{FT} = JunctionCapacitorAuxil{FT}()

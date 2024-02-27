@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-26: add Leaf struct
 #     2023-Oct-03: add fields photosystem, flux
+#     2024-Feb-27: add the leaf cp and k_max in the constructor function
 #
 #######################################################################################################################################################################################################
 """
@@ -43,7 +44,13 @@ Return the leaf struct with initialized energy states, given
 - `config` `SPACConfiguration` type struct
 
 """
-Leaf(config::SPACConfiguration{FT}) where {FT} = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), xylem = XylemHydraulics(config));
+Leaf(config::SPACConfiguration{FT}) where {FT} = (
+    leaf = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), xylem = XylemHydraulics(config));
+    leaf.xylem.trait.cp = 1780;
+    leaf.xylem.trait.k_max = 0.04;
+
+    return leaf
+);
 
 
 #######################################################################################################################################################################################################

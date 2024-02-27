@@ -28,7 +28,7 @@ sync_state!(from::ST, to::ST) where {ST} = sync_struct!(from, to);
 #######################################################################################################################################################################################################
 """
 
-Update the trait-dependent auxilary variables from traits
+Update the trait-dependent auxiliary variables from traits
 
 """
 function t_aux! end;
@@ -43,7 +43,7 @@ function t_aux! end;
 #######################################################################################################################################################################################################
 """
 
-Update the state-dependent auxilary variables from state (and trait and t_aux) variables
+Update the state-dependent auxiliary variables from state (and trait and t_aux) variables
 
 """
 function s_aux! end;

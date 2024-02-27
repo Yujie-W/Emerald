@@ -10,7 +10,6 @@ import Emerald.EmeraldLand.SPAC
     @testset "Empirical equations" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        SPAC.initialize_states!(leaf);
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar_sunlit .= 100.0;
         leaf.flux.auxil.ppar_shaded = 100.0;
@@ -36,17 +35,13 @@ import Emerald.EmeraldLand.SPAC
         # read the beta from stomatal models
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        SPAC.initialize_states!(leaf);
         SM.read_β(leaf);
         @test true;
 
         # set the beta factor based on stomatal models
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
 
         # the function does not for optimality models
         SM.β_factor!(spac);
@@ -75,7 +70,6 @@ import Emerald.EmeraldLand.SPAC
     @testset "∂A∂E" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        SPAC.initialize_states!(leaf);
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar_sunlit .= 100.0;
         leaf.flux.auxil.ppar_shaded = 100.0;
@@ -91,7 +85,6 @@ import Emerald.EmeraldLand.SPAC
     @testset "∂Θ∂E" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        SPAC.initialize_states!(leaf);
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar_sunlit .= 100.0;
         leaf.flux.auxil.ppar_shaded = 100.0;
@@ -110,7 +103,6 @@ import Emerald.EmeraldLand.SPAC
     @testset "Nighttime model" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        SPAC.initialize_states!(leaf);
         air = NS.AirLayer{Float64}();
         leaf.flux.state.g_H₂O_s_shaded = 0.02;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
@@ -127,7 +119,6 @@ import Emerald.EmeraldLand.SPAC
     @testset "∂g∂t & ∂gₙ∂t" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        SPAC.initialize_states!(leaf);
         air = NS.AirLayer{Float64}();
         leaf.flux.state.g_H₂O_s_shaded = 0.001;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.001;
@@ -168,7 +159,6 @@ import Emerald.EmeraldLand.SPAC
     @testset "Stomatal limits" begin
         config = NS.SPACConfiguration{Float64}();
         leaf = NS.Leaf(config);
-        SPAC.initialize_states!(leaf);
 
         leaf.flux.state.g_H₂O_s_shaded = 0;
         leaf.flux.state.g_H₂O_s_sunlit .= 0;
@@ -186,10 +176,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Stomatal profiles" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
         for leaf in spac.plant.leaves
             leaf.flux.auxil.ppar_shaded = 100.0;
             leaf.flux.auxil.ppar_sunlit .= 200.0;
@@ -208,10 +195,7 @@ import Emerald.EmeraldLand.SPAC
     @testset "Stomatal budgets" begin
         config = NS.SPACConfiguration{Float64}();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac);
-        NS.s_aux!(config, spac);
         g_shaded = [];
         g_sunlit = [];
         for leaf in spac.plant.leaves

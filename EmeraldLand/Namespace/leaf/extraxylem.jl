@@ -58,7 +58,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Sep-26: define the struct to store the auxilary variables used in extraxylary capacitor
+#     2023-Sep-26: define the struct to store the auxiliary variables used in extraxylary capacitor
 #     2023-Sep-27: add field p
 #
 #######################################################################################################################################################################################################
@@ -66,7 +66,7 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the auxilary variables for extraxylary capacitor
+Struct that contains the auxiliary variables for extraxylary capacitor
 
 # Fields
 
@@ -97,7 +97,7 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the capacitor state and auxilary variables
+Struct that contains the capacitor state and auxiliary variables
 
 # Fields
 

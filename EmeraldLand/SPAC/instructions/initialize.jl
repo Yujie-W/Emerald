@@ -16,19 +16,31 @@
 #     2023-Oct-17: update step and subtep auxils during initialization
 #     2023-Oct-18: initialize leaf inclination angles and canopy structure during initialization
 #     2024-Feb-23: separate initialize_states! from initialize_spac!
+#     2024-Feb-27: redo the operation order in the initialization
 #
 #######################################################################################################################################################################################################
 """
 
     initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
-Initialize the SPAC, given
+Initialize the SPAC from scratch (traits, states, and one-time auxiliary parameters), given
 - `config` Configurations of spac model
 - `spac` `BulkSPAC` SPAC
 
 """
 function initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    # make sure tha auxilary variables are correctly initialized
+    # 1. update the trait based auxiliary variables
+    t_aux!(config, spac);
+
+    # 2. initialize the energy states
+    initialize_energy_states!(spac);
+
+    # 3. update the state based auxiliary variables (including energy)
+    s_aux!(config, spac);
+
+
+    #
+    # make sure tha auxiliary variables are correctly initialized
     update_step_auxils!(spac);
     update_substep_auxils!(spac);
 

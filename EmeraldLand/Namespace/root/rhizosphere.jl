@@ -69,6 +69,6 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct Rhizosphere{FT}
     "Rhizosphere state"
     state::RhizosphereState{FT} = RhizosphereState{FT}()
-    "Rhizosphere auxilary variables"
+    "Rhizosphere auxiliary variables"
     auxil::RhizosphereAuxil{FT} = RhizosphereAuxil{FT}()
 end;

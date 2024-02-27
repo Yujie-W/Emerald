@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-17: add struct BulkSPAC
 #     2023-Oct-17: add step to customize soil albedo algorithm from spac settings
+#     2024-Feb-27: customize leaf area from leaf area index per layer in the constructor function
 #
 #######################################################################################################################################################################################################
 """
@@ -115,8 +116,15 @@ BulkSPAC(config::SPACConfiguration{FT};
         branches[i].xylem.trait.Δh = (min(plant_zs[3], air_bounds[ind_layer[i]+1]) - plant_zs[2]);
     end;
 
+    # set up the canopy
+    spac_canopy = MultiLayerCanopy(config, n_layer);
+
     # set up the leaves
     leaves = Leaf{FT}[Leaf(config) for i in 1:n_layer];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaves[ilf].xylem.trait.area = spac_sbulk.trait.area * spac_canopy.structure.trait.δlai[irt];
+    end;
 
     # set up the plant
     plant = Plant{FT}(
@@ -127,9 +135,6 @@ BulkSPAC(config::SPACConfiguration{FT};
                 branches     = branches,
                 leaves       = leaves,
                 leaves_index = ind_layer);
-
-    # set up the canopy
-    spac_canopy = MultiLayerCanopy(config, n_layer);
 
     return BulkSPAC{FT}(
                 info      = spac_info,

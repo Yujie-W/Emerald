@@ -93,20 +93,20 @@ s_aux!(plant::Plant{FT}) where {FT} = (
 
 s_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     # update the s_aux for each of the field in the bulk spac system (the order might matter, will need to check)
-    # the soil auxilary variables
+    # the soil auxiliary variables
     for soil in spac.soils
         s_aux!(soil);
     end;
 
-    # the air auxilary variables
+    # the air auxiliary variables
     for air in spac.airs
         s_aux!(air);
     end;
 
-    # the plant auxilary variables
+    # the plant auxiliary variables
     s_aux!(spac.plant);
 
-    # the canopy auxilary variables
+    # the canopy auxiliary variables
     s_aux!(config, spac.canopy);
 
     return nothing

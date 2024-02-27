@@ -1,4 +1,4 @@
-# This file contains the state and auxilary variables for leaf biophysics
+# This file contains the state and auxiliary variables for leaf biophysics
 
 #######################################################################################################################################################################################################
 #

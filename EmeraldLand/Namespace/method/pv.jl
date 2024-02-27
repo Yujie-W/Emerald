@@ -1,5 +1,5 @@
 # The file contains the definitions of the pressure volume curve models
-# Because PV curve is a trait (a state), so there is no need to split the struct into state and auxilary parts.
+# Because PV curve is a trait (a state), so there is no need to split the struct into state and auxiliary parts.
 
 #######################################################################################################################################################################################################
 #

@@ -1,4 +1,4 @@
-# This file contains the state and auxilary variables for leaf photosynthesis
+# This file contains the state and auxiliary variables for leaf photosynthesis
 
 #######################################################################################################################################################################################################
 #
@@ -286,7 +286,7 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the auxilary variables for leaf photosynthesis
+Struct that contains the auxiliary variables for leaf photosynthesis
 
 # Fields
 

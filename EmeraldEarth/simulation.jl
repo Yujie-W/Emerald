@@ -50,7 +50,8 @@ function prescribe_traits_environment!(gm_dict::Dict{String,Any}, wd_dict::Dict{
     prescribe_traits!(CACHE_CONFIG, CACHE_SPAC; cab = chl, car = chl / 7);
 
     # initialize the spac with non-saturated soil
-    initialize_spac!(CACHE_CONFIG, CACHE_SPAC);
+    # TODO: do something here
+    # initialize_spac!(CACHE_CONFIG, CACHE_SPAC);
 
     return nothing
 end;

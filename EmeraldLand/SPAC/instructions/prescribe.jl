@@ -53,7 +53,7 @@ function prescribe_air!(
 
     # if any of temperature or air mole fraction changes, re-initialize the air layer
     if !isnothing(t) || !isnothing(f_CO₂) || !isnothing(p_CO₂) || !isnothing(p_H₂O) || !isnothing(rh) || !isnothing(vpd)
-        initialize_states!(air);
+        initialize_energy_states!(air);
     end;
 
     return nothing
@@ -108,7 +108,7 @@ function prescribe_soil!(spac::BulkSPAC{FT}; swcs::Union{Tuple,Nothing} = nothin
     # if any of soil water content or temperature changes, re-initialize the soil layer
     if !isnothing(swcs) || !isnothing(t_soils)
         for soil in soils
-            initialize_states!(soil, airs[1]);
+            initialize_energy_states!(soil, airs[1]);
         end;
     end;
 
@@ -303,7 +303,7 @@ function prescribe_traits!(
     # re-initialize leaf energy if LAI or t_leaf is updated
     if !isnothing(lai) || !isnothing(t_leaf)
         for leaf in leaves
-            initialize_states!(leaf; k_sla = leaf.xylem.trait.k_max);
+            initialize_energy_states!(leaf);
         end;
     end;
 
