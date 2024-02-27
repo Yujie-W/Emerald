@@ -28,13 +28,14 @@ using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductan
 
 
 # general instructions to run SPAC
-include("instructions/dull_aux.jl");
+include("instructions/aux_dull.jl");
+include("instructions/aux_state.jl");
+include("instructions/aux_step.jl");
+include("instructions/aux_substep.jl");
+include("instructions/aux_trait.jl");
+
 include("instructions/initialize.jl");
 include("instructions/prescribe.jl");
-include("instructions/s_aux.jl");
-include("instructions/step_aux.jl");
-include("instructions/t_aux.jl");
-include("instructions/substep_aux.jl");
 
 
 # time stepper

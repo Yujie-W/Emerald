@@ -131,6 +131,7 @@ end;
 #     2024-Jan-11: add option to prescribe sai
 #     2024-Feb-08: fix the issue in Vcmax profiles (was opposite)
 #     2024-Feb-08: add support to C3CytoState and C3VJPState
+#     2024-Feb-27: run dull_aux! when any of the canopy structural parameters or leaf pigments is updated
 #
 #######################################################################################################################################################################################################
 """
@@ -200,10 +201,6 @@ function prescribe_traits!(
         for leaf in leaves
             leaf.bio.trait.car = car;
         end;
-    end;
-
-    if !isnothing(cab) || !isnothing(car)
-        plant_leaf_spectra!(config, spac);
     end;
 
     # update LAI and Vcmax (with scaling factor)
@@ -308,8 +305,8 @@ function prescribe_traits!(
     end;
 
     # recalibrate the canopy structure parameters if any of LAI, Cab, Car, etc. is updated
-    if !isnothing(lai) || !isnothing(cab) || !isnothing(car) || !isnothing(ci)
-        canopy_structure!(config, spac);
+    if !isnothing(cab) || !isnothing(car) || !isnothing(ci) || !isnothing(lai) || !isnothing(sai)
+        dull_aux!(config, spac);
     end;
 
     return nothing
