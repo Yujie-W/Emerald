@@ -18,7 +18,7 @@ Update the stem xylem pressure profile, given
 """
 function stem_pressure_profile!(stem::Stem{FT}, p_dos::FT) where {FT}
     stem.xylem.auxil.pressure[1] = p_dos;
-    xylem_pressure_profile!(stem.xylem, stem.energy.auxil.t);
+    xylem_pressure_profile!(stem.xylem, stem.energy.s_aux.t);
 
     return nothing
 end;

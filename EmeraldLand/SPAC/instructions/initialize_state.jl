@@ -29,16 +29,16 @@ initialize_states!(soil::SoilLayer{FT}, air::AirLayer{FT}) where {FT} = (
 
 initialize_states!(root::Root{FT}) where {FT} = (
     root.xylem.state.v_storage .= (root.xylem.trait.v_max * root.xylem.trait.area * root.xylem.trait.l) / length(root.xylem.state.v_storage);
-    root.energy.auxil.cp = heat_capacitance(root);
-    root.energy.state.Σe = root.energy.auxil.cp * root.energy.auxil.t;
+    root.energy.s_aux.cp = heat_capacitance(root);
+    root.energy.state.Σe = root.energy.s_aux.cp * root.energy.s_aux.t;
 
     return nothing
 );
 
 initialize_states!(stem::Stem{FT}) where {FT} = (
     stem.xylem.state.v_storage .= (stem.xylem.trait.v_max * stem.xylem.trait.area * stem.xylem.trait.l) / length(stem.xylem.state.v_storage);
-    stem.energy.auxil.cp = heat_capacitance(stem);
-    stem.energy.state.Σe = stem.energy.auxil.cp * stem.energy.auxil.t;
+    stem.energy.s_aux.cp = heat_capacitance(stem);
+    stem.energy.state.Σe = stem.energy.s_aux.cp * stem.energy.s_aux.t;
 
     return nothing
 );

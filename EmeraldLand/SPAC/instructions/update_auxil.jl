@@ -92,8 +92,8 @@ update_substep_auxils!(sbulk::SoilBulk{FT}) where {FT} = (
 
 update_substep_auxils!(root::Root{FT}) where {FT} = (
     # update root cp and temperature
-    root.energy.auxil.cp = heat_capacitance(root);
-    root.energy.auxil.t = root.energy.state.Σe / root.energy.auxil.cp;
+    root.energy.s_aux.cp = heat_capacitance(root);
+    root.energy.s_aux.t = root.energy.state.Σe / root.energy.s_aux.cp;
 
     # update the root buffer pressure and flow
     x_aux = root.xylem.auxil;
@@ -101,10 +101,10 @@ update_substep_auxils!(root::Root{FT}) where {FT} = (
     x_sta = root.xylem.state;
     if x_aux isa XylemHydraulicsAuxilNSS
         N = length(x_sta.v_storage);
-        f_vis = relative_viscosity(root.energy.auxil.t);
+        f_vis = relative_viscosity(root.energy.s_aux.t);
         v_max_i = x_tra.v_max * x_tra.area * x_tra.l / N;
         for i in 1:N
-            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, root.energy.auxil.t);
+            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, root.energy.s_aux.t);
             x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_tra.pv.k_refill / f_vis * x_sta.v_storage[i];
         end;
     end;
@@ -132,8 +132,8 @@ update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
 
 update_substep_auxils!(stem::Stem{FT}) where {FT} = (
     # update stem cp and temperature
-    stem.energy.auxil.cp = heat_capacitance(stem);
-    stem.energy.auxil.t = stem.energy.state.Σe / stem.energy.auxil.cp;
+    stem.energy.s_aux.cp = heat_capacitance(stem);
+    stem.energy.s_aux.t = stem.energy.state.Σe / stem.energy.s_aux.cp;
 
     # update the stem buffer pressure and flow
     x_aux = stem.xylem.auxil;
@@ -141,10 +141,10 @@ update_substep_auxils!(stem::Stem{FT}) where {FT} = (
     x_sta = stem.xylem.state;
     if x_aux isa XylemHydraulicsAuxilNSS
         N = length(x_sta.v_storage);
-        f_vis = relative_viscosity(stem.energy.auxil.t);
+        f_vis = relative_viscosity(stem.energy.s_aux.t);
         v_max_i = x_tra.v_max * x_tra.area * x_tra.l / N;
         for i in 1:N
-            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, stem.energy.auxil.t);
+            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, stem.energy.s_aux.t);
             x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_tra.pv.k_refill / f_vis * x_sta.v_storage[i];
         end;
     end;

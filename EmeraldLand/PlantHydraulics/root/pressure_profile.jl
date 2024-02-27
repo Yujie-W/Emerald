@@ -24,10 +24,10 @@ function root_pressure_profile!(soil::SoilLayer{FT}, root::Root{FT}, junction::J
     if root.xylem.auxil.connected
         rhizosphere_pressure_profile!(root, soil);
         root.xylem.auxil.pressure[1] = root.rhizosphere.auxil.p_rhizo;
-        xylem_pressure_profile!(root.xylem, root.energy.auxil.t);
+        xylem_pressure_profile!(root.xylem, root.energy.s_aux.t);
     else
         root.xylem.auxil.pressure[end] = junction.s_aux.pressure;
-        xylem_pressure_profile!(root.xylem, root.energy.auxil.t, true);
+        xylem_pressure_profile!(root.xylem, root.energy.s_aux.t, true);
     end;
 
     return nothing

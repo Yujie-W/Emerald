@@ -102,7 +102,7 @@ grid_simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::Bu
     initialize_spac!(CACHE_CONFIG, CACHE_SPAC);
     prescribe_traits_environment!(gm_dict, wd_dict);
     soil_plant_air_continuum!(CACHE_CONFIG, CACHE_SPAC, 3600);
-    mean_tleaf = nanmean([_layer.energy.auxil.t for _layer in CACHE_SPAC.plant.leaves]);
+    mean_tleaf = nanmean([l.energy.s_aux.t for l in CACHE_SPAC.plant.leaves]);
     push!(CACHE_SPAC.plant.memory.t_history, mean_tleaf);
     if length(CACHE_SPAC.plant.memory.t_history) > 240 deleteat!(CACHE_SPAC.plant.memory.t_history,1) end;
 

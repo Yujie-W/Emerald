@@ -53,11 +53,11 @@ function adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
     ∂T∂t = junction.auxil.∂e∂t / junction.s_aux.cp;
     δt_2 = min(1 / abs(∂T∂t), δt_2);
 
-    ∂T∂t = trunk.energy.auxil.∂e∂t / trunk.energy.auxil.cp;
+    ∂T∂t = trunk.energy.auxil.∂e∂t / trunk.energy.s_aux.cp;
     δt_2 = min(1 / abs(∂T∂t), δt_2);
 
     for stem in branches
-        ∂T∂t = stem.energy.auxil.∂e∂t / stem.energy.auxil.cp;
+        ∂T∂t = stem.energy.auxil.∂e∂t / stem.energy.s_aux.cp;
         δt_2 = min(1 / abs(∂T∂t), δt_2);
     end;
 

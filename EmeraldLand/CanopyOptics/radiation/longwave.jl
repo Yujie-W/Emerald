@@ -61,7 +61,7 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
         else
             can_str.auxil.lw_layer_leaf[irt] = 0;
         end;
-        can_str.auxil.lw_layer_stem[irt] = stem.energy.auxil.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
+        can_str.auxil.lw_layer_stem[irt] = stem.energy.s_aux.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
         can_str.auxil.lw_layer[irt] = can_str.auxil.lw_layer_leaf[irt] + can_str.auxil.lw_layer_stem[irt];
     end;
     r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.s_aux.t ^ 4;

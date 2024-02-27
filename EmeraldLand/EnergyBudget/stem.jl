@@ -33,7 +33,7 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     if f_i >= 0
         trunk.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * junction.s_aux.t;
     else
-        trunk.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * trunk.energy.auxil.t;
+        trunk.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * trunk.energy.s_aux.t;
     end;
 
     # for the branches, the total energy is the difference of
@@ -47,17 +47,17 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         # if flow in is positive, then energy flow is positive for branches but negative for trunk
         f_i = flow_in(stem);
         if f_i >= 0
-            stem.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * trunk.energy.auxil.t;
-            trunk.energy.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * trunk.energy.auxil.t;
+            stem.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * trunk.energy.s_aux.t;
+            trunk.energy.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * trunk.energy.s_aux.t;
         else
-            stem.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * stem.energy.auxil.t;
-            trunk.energy.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * stem.energy.auxil.t;
+            stem.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * stem.energy.s_aux.t;
+            trunk.energy.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * stem.energy.s_aux.t;
         end;
 
         # if flow out is positive, then energy flow is negative for branchesß
         f_o = flow_out(stem);
         if f_o >= 0
-            stem.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * stem.energy.auxil.t;
+            stem.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * stem.energy.s_aux.t;
         else
             stem.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * leaf.energy.s_aux.t;
         end;

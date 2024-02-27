@@ -29,6 +29,32 @@ end;
 #
 # Changes to this struct
 # General
+#     2024-Feb-27: add XylemEnergySDAuxil
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure to save root energy auxiliary variables
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct XylemEnergySDAuxil{FT}
+    "Combined heat capacity of root and water `[J K⁻¹]`"
+    cp::FT = 0
+    "Temperature `[K]`"
+    t::FT = 298.15
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Sep-23: add XylemEnergyAuxil
 #
 #######################################################################################################################################################################################################
@@ -44,10 +70,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemEnergyAuxil{FT}
-    "Combined heat capacity of root and water `[J K⁻¹]`"
-    cp::FT = 0
-    "Temperature `[K]`"
-    t::FT = 298.15
     "Partial derivative of the energy per time `[J s⁻¹]`"
     ∂e∂t::FT = 0
 end;
@@ -58,6 +80,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Sep-23: add XylemEnergy
+#     2024-Feb-27: add s_aux
 #
 #######################################################################################################################################################################################################
 """
@@ -74,6 +97,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemEnergy{FT}
     "Xylem energy state"
     state::XylemEnergyState{FT} = XylemEnergyState{FT}()
+    "State dependent auxilary variables"
+    s_aux::XylemEnergySDAuxil{FT} = XylemEnergySDAuxil{FT}()
     "Xylem energy auxil"
     auxil::XylemEnergyAuxil{FT} = XylemEnergyAuxil{FT}()
 end;
