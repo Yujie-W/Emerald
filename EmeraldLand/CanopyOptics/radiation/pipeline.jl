@@ -17,10 +17,6 @@ Update the canopy radiation related auxiliary variables, given
 
 """
 function canopy_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    # update the trait- and/or state-dependent variables
-    t_aux!(config, spac.canopy);
-    s_aux!(config, spac.canopy);
-
     # update the canopy structure
     canopy_structure!(config, spac);
     soil_albedo!(config, spac);

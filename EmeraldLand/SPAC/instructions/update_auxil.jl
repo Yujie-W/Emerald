@@ -64,16 +64,6 @@ update_substep_auxils!(spac::BulkSPAC{FT}) where {FT} = (
 );
 
 update_substep_auxils!(soil::SoilLayer{FT}) where {FT} = (
-    soil.s_aux.cp = heat_capacitance(soil);
-    soil.s_aux.t = soil.state.Σe / soil.s_aux.cp;
-
-    # update the conductance, potential, diffusivity, and thermal conductivity (0.5 for tortuosity factor)
-    soil.s_aux.k = relative_soil_k(soil.trait.vc, soil.state.θ) * soil.trait.vc.K_MAX * relative_viscosity(soil.s_aux.t) / soil.t_aux.δz;
-    soil.s_aux.ψ = soil_ψ_25(soil.trait.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.s_aux.t);
-    soil.s_aux.kd = 0.5 * max(0, soil.trait.vc.Θ_SAT - soil.state.θ) / soil.t_aux.δz;
-    soil.s_aux.kv = 0.5 * soil.trait.vc.Θ_SAT / max(FT(0.01), soil.trait.vc.Θ_SAT - soil.state.θ) / soil.t_aux.δz;
-    soil.s_aux.λ_soil_water = (soil.trait.λ_soil + soil.state.θ * Λ_THERMAL_H₂O(FT)) / soil.t_aux.δz;
-
     # clean up the partial derivatives
     soil.auxil.∂e∂t = 0;
     soil.auxil.∂n∂t .= 0;
@@ -91,10 +81,6 @@ update_substep_auxils!(sbulk::SoilBulk{FT}) where {FT} = (
 );
 
 update_substep_auxils!(root::Root{FT}) where {FT} = (
-    # update root cp and temperature
-    root.energy.s_aux.cp = heat_capacitance(root);
-    root.energy.s_aux.t = root.energy.state.Σe / root.energy.s_aux.cp;
-
     # update the root buffer pressure and flow
     x_aux = root.xylem.auxil;
     x_tra = root.xylem.trait;
@@ -116,13 +102,6 @@ update_substep_auxils!(root::Root{FT}) where {FT} = (
 );
 
 update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
-    # update junction cp and temperature
-    junc.s_aux.cp = heat_capacitance(junc);
-    junc.s_aux.t = junc.state.Σe / junc.s_aux.cp;
-
-    # update the junction buffer pressure
-    junc.s_aux.pressure = capacitance_pressure(junc.trait.pv, junc.state.v_storage / junc.trait.v_max, junc.s_aux.t);
-
     # clear the partial derivatives
     junc.auxil.∂e∂t = 0;
     junc.auxil.∂w∂t = 0;
@@ -131,10 +110,6 @@ update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
 );
 
 update_substep_auxils!(stem::Stem{FT}) where {FT} = (
-    # update stem cp and temperature
-    stem.energy.s_aux.cp = heat_capacitance(stem);
-    stem.energy.s_aux.t = stem.energy.state.Σe / stem.energy.s_aux.cp;
-
     # update the stem buffer pressure and flow
     x_aux = stem.xylem.auxil;
     x_tra = stem.xylem.trait;
@@ -156,10 +131,6 @@ update_substep_auxils!(stem::Stem{FT}) where {FT} = (
 );
 
 update_substep_auxils!(leaf::Leaf{FT}) where {FT} = (
-    # update leaf cp and temperature
-    leaf.energy.s_aux.cp = heat_capacitance(leaf);
-    leaf.energy.s_aux.t = leaf.energy.state.Σe / leaf.energy.s_aux.cp;
-
     # update the leaf buffer pressure and flow
     x_aux = leaf.xylem.auxil;
     c_aux = leaf.capacitor.auxil;

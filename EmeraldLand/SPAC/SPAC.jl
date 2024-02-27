@@ -15,10 +15,10 @@ using ..Namespace: ReferenceSpectra
 using ..Namespace: C3CytoState, C3VJPState, C4VJPState
 using ..Namespace: GCO₂Mode
 using ..Namespace: XylemHydraulicsAuxilNSS
-using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
+using ..Namespace: JunctionCapacitor, Leaf, Plant, Root, Stem
 using ..Namespace: MultiLayerCanopy
 using ..Namespace: AirLayer, AirLayerState, AirLayerSDAuxil, AirLayerTDAuxil
-using ..Namespace: SoilBulk, SoilLayer
+using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLayerTrait, SoilLayerTDAuxil
 using ..Namespace: BulkSPAC, SPACConfiguration
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure

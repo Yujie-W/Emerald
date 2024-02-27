@@ -24,8 +24,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
@@ -34,8 +34,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
@@ -44,8 +44,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
@@ -54,8 +54,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
     end;
@@ -65,8 +65,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
 
@@ -89,8 +89,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.sun_geometry!(config, spac);
@@ -112,8 +112,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.sun_geometry!(config, spac);
@@ -134,8 +134,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.sun_geometry!(config, spac);
@@ -164,8 +164,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.longwave_radiation!(spac);
 
@@ -184,8 +184,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
         CO.sun_geometry!(config, spac);
@@ -203,8 +203,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
         for leaf in spac.plant.leaves
             leaf.flux.auxil.ϕ_f_shaded = 0.01;
             leaf.flux.auxil.ϕ_f_sunlit .= 0.01;
@@ -242,8 +242,8 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_states!(config, spac);
         SPAC.initialize_spac!(config, spac);
-        NS.t_aux!(config, spac.canopy);
-        NS.s_aux!(config, spac.canopy);
+        NS.t_aux!(config, spac);
+        NS.s_aux!(config, spac);
 
         # SZA < 90
         spac.canopy.sun_geometry.state.sza = 30;

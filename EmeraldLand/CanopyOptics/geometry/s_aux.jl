@@ -3,8 +3,8 @@
 # Changes to this function
 # General
 #     2024-Feb-25: add s_aux! method for SunGeometryState-dependent variables
-#     2024-Feb-25: add t_aux! method for SensorGeometryState-dependent variables
-#     2024-Feb-25: add t_aux! method for the combined MultiLayerCanopy
+#     2024-Feb-25: add s_aux! method for SensorGeometryState-dependent variables
+#     2024-Feb-25: add s_aux! method for the combined MultiLayerCanopy
 #
 #######################################################################################################################################################################################################
 s_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}, t_aux::CanopyStructureTDAuxil{FT}, sunst::SunGeometryState{FT}, sunsa::SunGeometrySDAuxil{FT}) where {FT} = (

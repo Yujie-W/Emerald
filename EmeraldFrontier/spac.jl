@@ -63,8 +63,8 @@ function spac_struct(gmdict::Dict, config::SPACConfiguration{FT}) where {FT}
     # initialize the spac
     initialize_states!(config, spac);
     initialize_spac!(config, spac);
-    t_aux!(config, spac.canopy);
-    s_aux!(config, spac.canopy);
+    t_aux!(config, spac);
+    s_aux!(config, spac);
 
     return spac
 end;

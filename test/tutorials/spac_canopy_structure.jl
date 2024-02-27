@@ -8,8 +8,8 @@ using Test;
     spac = EmeraldLand.Namespace.BulkSPAC(config);
     EmeraldLand.SPAC.initialize_states!(config, spac);
     EmeraldLand.SPAC.initialize_spac!(config, spac);
-    EmeraldLand.Namespace.t_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.s_aux!(config, spac.canopy);
+    EmeraldLand.Namespace.t_aux!(config, spac);
+    EmeraldLand.Namespace.s_aux!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
 

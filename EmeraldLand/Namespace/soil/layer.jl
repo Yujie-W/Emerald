@@ -54,7 +54,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct SoilLayerTDAuxil{FT}
     "Mean depth `[m]`"
-    z::FT = 0.5
+    z::FT = -0.5
     "Layer thickness `[m]`"
     δz::FT = 1
 end;
@@ -95,6 +95,24 @@ Base.@kwdef mutable struct SoilLayerState{FT}
 end;
 
 
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Feb-26: add struct SoilLayerSDAuxil
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct for soil layer state dependent auxiliary variables
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
 Base.@kwdef mutable struct SoilLayerSDAuxil{FT}
     "Combined specific heat capacity of soil `[J K⁻¹ kg⁻¹]`"
     cp::FT = 0

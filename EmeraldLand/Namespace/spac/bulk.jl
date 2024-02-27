@@ -77,7 +77,6 @@ BulkSPAC(config::SPACConfiguration{FT};
     soil_layers = SoilLayer{FT}[SoilLayer{FT}() for _ in 1:n_soil];
     for i in eachindex(soil_layers)
         soil_layers[i].trait.zs = soil_bounds[i:i+1];
-        t_aux!(soil_layers[i]);
     end;
 
     # set up the air layers
@@ -85,7 +84,6 @@ BulkSPAC(config::SPACConfiguration{FT};
     air_layers = AirLayer{FT}[AirLayer{FT}() for _ in 1:n_air];
     for i in eachindex(air_layers)
         air_layers[i].trait.zs = air_bounds[i:i+1];
-        t_aux!(air_layers[i]);
     end;
 
     # set up the meteorology
@@ -164,9 +162,6 @@ $(TYPEDFIELDS)
 
 """
 mutable struct BulkSPACStates{FT}
-    "General information"
-    info::SPACInfo{FT}
-
     "Soil layers"
     soils::Vector{SoilLayerState{FT}}
 
@@ -180,7 +175,6 @@ mutable struct BulkSPACStates{FT}
 end;
 
 BulkSPACStates(spac::BulkSPAC{FT}) where {FT} = BulkSPACStates{FT}(
-            spac.info,
             [soil.state for soil in spac.soils],
             [air.state for air in spac.airs],
             PlantStates(spac.plant),
@@ -188,7 +182,6 @@ BulkSPACStates(spac::BulkSPAC{FT}) where {FT} = BulkSPACStates{FT}(
 );
 
 sync_state!(spac::BulkSPAC{FT}, states::BulkSPACStates{FT}) where {FT} = (
-    sync_state!(spac.info, states.info);
     for i in eachindex(spac.soils)
         sync_state!(spac.soils[i].state, states.soils[i]);
     end;
@@ -202,7 +195,6 @@ sync_state!(spac::BulkSPAC{FT}, states::BulkSPACStates{FT}) where {FT} = (
 );
 
 sync_state!(states::BulkSPACStates{FT}, spac::BulkSPAC{FT}) where {FT} = (
-    sync_state!(states.info, spac.info);
     for i in eachindex(states.soils)
         sync_state!(states.soils[i], spac.soils[i].state);
     end;

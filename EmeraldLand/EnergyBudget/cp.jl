@@ -19,14 +19,18 @@ Return the heat capacitance of the organ (xylem, root, stem, and leaf)
 """
 function heat_capacitance end;
 
-heat_capacitance(soil::SoilLayer{FT}; runoff::FT = FT(0)) where {FT} = (
-    cp_gas = (soil.state.ns[3] * CP_V_MOL(FT) + (soil.state.ns[1] + soil.state.ns[2] + soil.state.ns[4] + soil.state.ns[5]) * CP_D_MOL(FT)) / soil.t_aux.δz;
+# soil
+heat_capacitance(soiltr::SoilLayerTrait{FT}, soilta::SoilLayerTDAuxil{FT}, soilst::SoilLayerState{FT}; runoff::FT = FT(0)) where {FT} = (
+    cp_gas = (soilst.ns[3] * CP_V_MOL(FT) + (soilst.ns[1] + soilst.ns[2] + soilst.ns[4] + soilst.ns[5]) * CP_D_MOL(FT)) / soilta.δz;
 
     # runoff in mol m⁻² s⁻¹, convert it to kg and then
 
-    return soil.trait.ρ * soil.trait.cp + soil.state.θ * ρ_H₂O(FT) * CP_L(FT) + cp_gas + runoff * CP_L_MOL(FT) / soil.t_aux.δz
+    return soiltr.ρ * soiltr.cp + soilst.θ * ρ_H₂O(FT) * CP_L(FT) + cp_gas + runoff * CP_L_MOL(FT) / soilta.δz
 );
 
+heat_capacitance(soil::SoilLayer{FT}; runoff::FT = FT(0)) where {FT} = heat_capacitance(soil.trait, soil.t_aux, soil.state, runoff = runoff);
+
+# plant
 heat_capacitance(xylem::XylemHydraulics{FT}) where {FT} = (
     # The heat capaciatance of the xylem is the sum of the heat capaciatance of the water stored in the xylem and the heat capaciatance of the xylem itself
     return sum(xylem.state.v_storage) * CP_L_MOL(FT) + xylem.trait.cp * xylem.trait.area * xylem.trait.l
@@ -41,14 +45,15 @@ heat_capacitance(junc::JunctionCapacitor{FT}) where {FT} = (
 
 heat_capacitance(root::Stem{FT}) where {FT} = heat_capacitance(root.xylem);
 
-heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(leaf.capacitor.state, leaf.xylem.trait, leaf.bio.trait);
-
 heat_capacitance(capst::ExtraXylemCapacitorState{FT}, xyltr::XylemHydraulicsTrait{FT}, biotr::LeafBioTrait{FT}) where {FT} = (
     # leaf heat capaciatance is the sum of the heat capaciatance of the water stored in the leaf and the heat capaciatance of the leaf itself
     # here convert lma from g cm⁻² to kg m⁻² with the factor 10
     return (capst.v_storage * CP_L_MOL(FT) + xyltr.cp * biotr.lma * 10) * xyltr.area
 );
 
-heat_capacitance(air::AirLayer{FT}) where {FT} = heat_capacitance(air.state);
+heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(leaf.capacitor.state, leaf.xylem.trait, leaf.bio.trait);
 
+# air
 heat_capacitance(airst::AirLayerState{FT}) where {FT} = (airst.ns[1] + airst.ns[2] + airst.ns[4] + airst.ns[5]) * CP_D_MOL(FT) + airst.ns[3] * CP_V_MOL(FT);
+
+heat_capacitance(air::AirLayer{FT}) where {FT} = heat_capacitance(air.state);
