@@ -31,7 +31,7 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     # if flow in is positive, then energy flow is positive
     f_i = flow_in(trunk);
     if f_i >= 0
-        trunk.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * junction.auxil.t;
+        trunk.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * junction.s_aux.t;
     else
         trunk.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * trunk.energy.auxil.t;
     end;

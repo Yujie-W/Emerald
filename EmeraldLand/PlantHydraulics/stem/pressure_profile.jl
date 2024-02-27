@@ -44,7 +44,7 @@ function stem_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
     junction = spac.plant.junction;
     trunk = spac.plant.trunk;
 
-    stem_pressure_profile!(trunk, junction.auxil.pressure);
+    stem_pressure_profile!(trunk, junction.s_aux.pressure);
     for stem in branches
         stem_pressure_profile!(stem, (trunk).xylem.auxil.pressure[end]);
     end;

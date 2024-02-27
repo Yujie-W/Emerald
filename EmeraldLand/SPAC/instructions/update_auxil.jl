@@ -117,11 +117,11 @@ update_substep_auxils!(root::Root{FT}) where {FT} = (
 
 update_substep_auxils!(junc::JunctionCapacitor{FT}) where {FT} = (
     # update junction cp and temperature
-    junc.auxil.cp = heat_capacitance(junc);
-    junc.auxil.t = junc.state.Σe / junc.auxil.cp;
+    junc.s_aux.cp = heat_capacitance(junc);
+    junc.s_aux.t = junc.state.Σe / junc.s_aux.cp;
 
     # update the junction buffer pressure
-    junc.auxil.pressure = capacitance_pressure(junc.state.pv, junc.state.v_storage / junc.state.v_max, junc.auxil.t);
+    junc.s_aux.pressure = capacitance_pressure(junc.trait.pv, junc.state.v_storage / junc.trait.v_max, junc.s_aux.t);
 
     # clear the partial derivatives
     junc.auxil.∂e∂t = 0;

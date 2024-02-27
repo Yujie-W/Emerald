@@ -46,7 +46,7 @@ function root_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         if f_o >= 0
             root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * root.energy.auxil.t;
         else
-            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * junction.auxil.t;
+            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * junction.s_aux.t;
         end;
     end;
 

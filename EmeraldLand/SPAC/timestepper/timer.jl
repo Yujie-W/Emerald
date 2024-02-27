@@ -50,7 +50,7 @@ function adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT}
         δt_2 = min(1 / abs(∂T∂t), δt_2);
     end;
 
-    ∂T∂t = junction.auxil.∂e∂t / junction.auxil.cp;
+    ∂T∂t = junction.auxil.∂e∂t / junction.s_aux.cp;
     δt_2 = min(1 / abs(∂T∂t), δt_2);
 
     ∂T∂t = trunk.energy.auxil.∂e∂t / trunk.energy.auxil.cp;
