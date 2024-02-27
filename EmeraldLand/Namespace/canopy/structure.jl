@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-09: add struct CanopyStructureState
 #     2023-Oct-18: add fields sai and δsai
+#     2024-Feb-27: move hot_spot parameter to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -21,8 +22,6 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct CanopyStructureTrait{FT}
     # canopy structure
-    "Hot spot parameter"
-    hot_spot::FT = 0.05
     "Leaf inclination angle distribution function algorithm"
     lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
 

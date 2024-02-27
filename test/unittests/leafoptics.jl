@@ -37,7 +37,7 @@ import Emerald.EmeraldLand.Namespace as NS
     end;
 
     @testset "Leaf interface ρ and τ" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        config = NS.SPACConfiguration(Float64; dataset = NS.LAND_2021_1NM);
         bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
 
@@ -50,7 +50,7 @@ import Emerald.EmeraldLand.Namespace as NS
     end;
 
     @testset "Leaf sublayer τ and f" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        config = NS.SPACConfiguration(Float64; dataset = NS.LAND_2021_1NM);
         bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
         LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
@@ -62,7 +62,7 @@ import Emerald.EmeraldLand.Namespace as NS
     end;
 
     @testset "Leaf layer ρ and τ" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        config = NS.SPACConfiguration(Float64; dataset = NS.LAND_2021_1NM);
         bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
         LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
@@ -80,7 +80,7 @@ import Emerald.EmeraldLand.Namespace as NS
     end;
 
     @testset "Leaf layer effective interface ρ" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        config = NS.SPACConfiguration(Float64; dataset = NS.LAND_2021_1NM);
         bio = NS.LeafBio(config);
         LO.leaf_interface_ρ_τ!(config, bio, 40.0);
         LO.leaf_sublayer_f_τ!(config, bio, 5.0, 10);
@@ -105,7 +105,7 @@ import Emerald.EmeraldLand.Namespace as NS
     end;
 
     @testset "Leaf ρ and τ" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        config = NS.SPACConfiguration(Float64; dataset = NS.LAND_2021_1NM);
         bio = NS.LeafBio(config);
 
         LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
@@ -120,7 +120,7 @@ import Emerald.EmeraldLand.Namespace as NS
     end;
 
     @testset "Leaf SIF backward and forward matrices" begin
-        config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+        config = NS.SPACConfiguration(Float64; dataset = NS.LAND_2021_1NM);
         bio = NS.LeafBio(config);
         LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
         rad = ones(Float64, size(bio.auxil.mat_b,2));

@@ -16,7 +16,7 @@ df_simu = EmeraldFrontier.simulation!(wd_tag, gm_dict; appending=true, selection
 using Emerald;
 
 FT = Float64;
-config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
+config = EmeraldLand.Namespace.SPACConfiguration(FT);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 spac.meteo.rad_lw = 300;
 EmeraldLand.SPAC.initialize_spac!(config, spac);
@@ -29,7 +29,7 @@ EmeraldLand.SPAC.spac!(config, spac, FT(360));
 using Emerald;
 
 FT = Float64;
-config = EmeraldLand.Namespace.SPACConfiguration{FT}(DEBUG = true);
+config = EmeraldLand.Namespace.SPACConfiguration(FT);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 #EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.43, 0.35, 0.43));
 EmeraldLand.SPAC.initialize_spac!(config, spac);
@@ -106,7 +106,7 @@ function show_spac_info(node)
 end;
 
 FT = Float64;
-config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+config = EmeraldLand.Namespace.SPACConfiguration(FT);;
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.35, 0.35, 0.35, 0.35, 0.35));
 EmeraldLand.SPAC.initialize_spac!(config, spac);

@@ -49,7 +49,7 @@ soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     @assert 1 <= sbulk.trait.color <=20;
 
-    soil_albedo!(config, sbulk, top_soil, sbulk.trait.albedo);
+    soil_albedo!(config, sbulk, top_soil, config.SOIL_ALBEDO);
 
     return nothing
 );

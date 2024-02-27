@@ -31,7 +31,6 @@ root_sink(x_aux::XylemHydraulicsAuxilSS{FT}) where {FT} = x_aux.flow;
 # Changes to the function
 # General
 #     2023-Jun-29: tease apart this function for better readability
-#     2023-Jul-06: add info into DEBUG code block
 #
 #######################################################################################################################################################################################################
 """

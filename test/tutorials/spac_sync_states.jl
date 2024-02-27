@@ -19,7 +19,7 @@ using Test;
     # create a SPAC to work on
 
     @testset "SPAC with LAI > 0 and SAI > 0" begin
-        config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+        config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);
@@ -42,7 +42,7 @@ using Test;
     end;
 
     @testset "SPAC with LAI > 0 and SAI > 0" begin
-        config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+        config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.5);
@@ -65,7 +65,7 @@ using Test;
     end;
 
     @testset "SPAC with LAI > 0 and SAI = 0" begin
-        config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+        config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
@@ -88,7 +88,7 @@ using Test;
     end;
 
     @testset "LAI and SAI changed (> 0)" begin
-        config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+        config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
@@ -113,7 +113,7 @@ using Test;
     end;
 
     @testset "LAI and SAI changed (= 0)" begin
-        config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+        config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);

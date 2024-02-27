@@ -5,7 +5,7 @@ import Emerald.EmeraldLand.SPAC as SPAC
 
 @testset verbose = true "Namespace.jl" begin
     @testset "State constructors" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         states = NS.BulkSPACStates(spac);

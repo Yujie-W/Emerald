@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-05: add struct SoilBulkTrait
 #     2023-Oct-26: add field albedo for soil albedo algorithm
+#     2024-Feb-27: move albedo method to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
@@ -20,8 +21,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SoilBulkTrait{FT}
-    "Soil albedo method"
-    albedo::Union{SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
     "Total area of the soil `[m²]`"
     area::FT = 500
     "Color class as in CLM"

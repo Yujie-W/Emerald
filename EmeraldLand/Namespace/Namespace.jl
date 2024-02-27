@@ -25,13 +25,6 @@ const LAND_2021_1NM = artifact"land_model_spectrum_V6" * "/clima_land_spectra_1n
 const SOIL_TEXT     = read_csv("$(@__DIR__)/../../data/SOIL-TEXTURE.csv");
 
 
-# The configuration of the SPAC system
-include("config/spectra.jl");
-include("config/trace.jl");
-
-include("config/config.jl");
-
-
 # General instructions to run SPAC (dependent on config)
 include("general.jl");
 
@@ -48,6 +41,13 @@ include("method/soil.jl");
 include("method/soil_albedo.jl");
 include("method/stomata.jl");
 include("method/xylem.jl");
+
+
+# The configuration of the SPAC system
+include("config/spectra.jl");
+include("config/trace.jl");
+
+include("config/config.jl");
 
 
 # Plant hydraulics (dependent on config and method)

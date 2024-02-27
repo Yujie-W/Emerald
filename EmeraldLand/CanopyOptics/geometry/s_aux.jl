@@ -65,7 +65,7 @@ s_aux!(config::SPACConfiguration{FT},
         return nothing
     end;
 
-    (; Θ_AZI, Θ_INCL) = config;
+    (; HOT_SPOT, Θ_AZI, Θ_INCL) = config;
 
     # extinction coefficients for the solar radiation
     vza = senst.vza;
@@ -146,7 +146,7 @@ s_aux!(config::SPACConfiguration{FT},
     Σk = sensa.ko + sunsa.ks;
     Πk = sensa.ko * sunsa.ks;
     cl = trait.ci * (trait.lai + trait.sai);
-    α  = dso / trait.hot_spot * 2 / Σk;
+    α  = dso / HOT_SPOT * 2 / Σk;
     pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
 
     for i in eachindex(trait.δlai)

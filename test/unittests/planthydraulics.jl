@@ -45,7 +45,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Read flow in/out of the xylem" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         xylem = NS.XylemHydraulics(config);
         nssflow = NS.XylemHydraulicsAuxilNSS(config);
         ssflow = NS.XylemHydraulicsAuxilSS(config);
@@ -62,7 +62,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Update pressure profile in xylem" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         xylem = NS.XylemHydraulics(config);
         nssflow = NS.XylemHydraulicsAuxilNSS(config);
         ssflow = NS.XylemHydraulicsAuxilSS(config);
@@ -81,7 +81,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Root flow and pressure profiles" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         root = NS.Root(config);
         soil = NS.SoilLayer{Float64}();
         junc = NS.JunctionCapacitor{Float64}();
@@ -100,7 +100,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Stem flow and pressure profiles" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         stem = NS.Stem(config);
         flow = 1.0;
         PH.set_flow_profile!(stem.xylem, flow);
@@ -111,8 +111,9 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Leaf flow and pressure profile" begin
-        config1 = NS.SPACConfiguration{Float64}();
-        config2 = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
+        config1 = NS.SPACConfiguration(Float64);
+        config2 = NS.SPACConfiguration(Float64);
+        config2.STEADY_STATE_FLOW = false;
         leaf1 = NS.Leaf(config1);
         leaf2 = NS.Leaf(config2);
         PH.leaf_pressure_profile!(config1, leaf1, -0.1);
@@ -123,7 +124,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Plant hydraulics (steady state)" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         for leaf in spac.plant.leaves
@@ -153,7 +154,8 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Plant hydraulics (non-steady state)" begin
-        config = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
+        config = NS.SPACConfiguration(Float64);
+        config.STEADY_STATE_FLOW = false;
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         for leaf in spac.plant.leaves

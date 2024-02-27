@@ -6,7 +6,6 @@
 # General
 #     2023-Jun-30: move function out of soil_budget!
 #     2023-Jul-06: sort the order of gas volume balance and water volume balance
-#     2023-Jul-06: add DEBUG code block
 #     2023-Jul-06: add PRESCRIBE_AIR mode to avoid the errors due to mass balance in air
 #     2023-Oct-07: limit the volume change from the source to 1/2 of the total dry air (soil and air)
 #

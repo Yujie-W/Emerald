@@ -155,7 +155,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Derivatives (for stomatal models)" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         leaf = NS.Leaf(config);
         leaf.xylem.trait.k_max = 0.05;
         @test PS.∂R∂T(leaf) > 0;
@@ -169,7 +169,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Leaf photosynthesis" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         leaf = NS.Leaf(config);
         leaf.xylem.trait.k_max = 0.05;
         air = NS.AirLayer{Float64}();
@@ -213,7 +213,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Plant photosynthesis" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
 

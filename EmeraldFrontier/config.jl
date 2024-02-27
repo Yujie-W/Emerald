@@ -14,7 +14,8 @@ Create a SPAC configuration struct, given
 
 """
 function spac_config(gmdict::Dict)
-    FT = gmdict["FT"];
+    config = SPACConfiguration(gmdict["FT"]);
+    config.MESSAGE_LEVEL = gmdict["MESSAGE_LEVEL"];
 
-    return SPACConfiguration{FT}(MESSAGE_LEVEL = gmdict["MESSAGE_LEVEL"])
+    return config
 end;

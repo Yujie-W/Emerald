@@ -63,17 +63,6 @@ BulkSPAC(config::SPACConfiguration{FT};
     spac_sbulk = SoilBulk(config, n_soil);
     spac_sbulk.trait.area = ground_area;
 
-    # set up soil albedo algorithm
-    if config.α_CLM && config.α_FITTING
-        spac_sbulk.trait.albedo = SoilAlbedoHyperspectralCLM();
-    elseif config.α_CLM
-        spac_sbulk.trait.albedo = SoilAlbedoBroadbandCLM();
-    elseif !config.α_CLM && config.α_FITTING
-        spac_sbulk.trait.albedo = SoilAlbedoHyperspectralCLIMA();
-    else
-        spac_sbulk.trait.albedo = SoilAlbedoBroadbandCLIMA();
-    end;
-
     # set up the soil layers (energy updated in initialize! function)
     soil_layers = SoilLayer{FT}[SoilLayer{FT}() for _ in 1:n_soil];
     for i in eachindex(soil_layers)

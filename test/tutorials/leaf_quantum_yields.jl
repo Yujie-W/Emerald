@@ -9,7 +9,7 @@ using Test;
     # To do so, users can define and use the variables at photosystem level to avoid unnecessary calculations
     #     - Photosystem (C3VJP, C4VJP, or C3Cyto)
     #     - Air layer
-    config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+    config = EmeraldLand.Namespace.SPACConfiguration(FT);
     ps = EmeraldLand.Namespace.LeafPhotosystem{FT}();
     air = EmeraldLand.Namespace.AirLayer{FT}();
 

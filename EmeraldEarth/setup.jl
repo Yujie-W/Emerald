@@ -25,7 +25,7 @@ function setup_cache!(FT::DataType = Float64)
 
     # create a SPAC to work on
     z_canopy = FT(10);
-    CACHE_CONFIG = SPACConfiguration{FT}();
+    CACHE_CONFIG = SPACConfiguration(FT);
     CACHE_SPAC = BulkSPAC(
                 CACHE_CONFIG;
                 air_bounds = collect(0:21) * z_canopy / 20,

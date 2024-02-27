@@ -34,7 +34,7 @@ import Emerald.EmeraldLand.SPAC
     =#
 
     @testset "Trace gas diffusion" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
 
@@ -79,7 +79,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Soil infiltration" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
 
@@ -101,7 +101,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Soil gas and water volume" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
@@ -140,7 +140,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Surface runoff" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
 
@@ -179,7 +179,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Water conservation" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));

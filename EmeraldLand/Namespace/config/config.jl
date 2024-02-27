@@ -20,6 +20,8 @@
 #     2023-Oct-02: add field MESSAGE_LEVEL
 #     2023-Oct-05: add field ENABLE_SIF
 #     2023-Oct-14: add field ENABLE_REF
+#     2024-Feb-27: add field HOT_SPOT and SOIL_ALBEDO
+#     2024-Feb-27: add constructor function to create the configuration using customized settings
 #
 #######################################################################################################################################################################################################
 """
@@ -35,24 +37,26 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
     # Debug mode
-    "Whether to print debug information"
-    DEBUG::Bool = false
     "Message level (0 for no, 1 for progress bar, and 2 for ind)"
     MESSAGE_LEVEL::Int = 0
 
     # File path to the Netcdf dataset
     "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
+    DATASET::String
 
     # Reference spectra
     "Reference Spetra"
-    SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(DATASET = DATASET)
+    SPECTRA::ReferenceSpectra{FT}
 
-    # features related to the leaf optics and fluorescence
+    # features related to the canopy optics and fluorescence
     "Whether to compute canopy reflectance"
     ENABLE_REF::Bool = true
     "Whether to compute fluorescence"
     ENABLE_SIF::Bool = true
+    "Hot spot parameter"
+    HOT_SPOT::FT = 0.05
+    "Soil albedo method"
+    SOIL_ALBEDO::Union{SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
     "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
@@ -73,12 +77,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     Θ_INCL_BNDS::Matrix{FT} = FT[ collect(FT, range(0, 90; length=DIM_INCL+1))[1:end-1] collect(FT, range(0, 90; length=DIM_INCL+1))[2:end] ]
     "Mean inclination angles `[°]`"
     Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
-
-    # Settings related to soil albedo
-    "Whether to use CLM soil albedo scheme"
-    α_CLM::Bool = false
-    "Whether to fit the data from broadband to hyperspectral"
-    α_FITTING::Bool = true
 
     # features related to plant hydraulics
     "Allow leaf condensation"
@@ -115,6 +113,12 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
 
 
 
+
+
+
+
+
+
     # features related to canopy sunlit/shaded fractions
     # Note
     #     1. to use the hyperspectral mode, set both to true
@@ -126,12 +130,14 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
     SUNLIT_FRACTION::Bool = true
 
-
-
-
     # Features to add
     "Allow leaf shedding"
     ALLOW_LEAF_SHEDDING::Bool = false
     "Enable drought legacy effect"
     ENABLE_DROUGHT_LEGACY::Bool = false
 end;
+
+SPACConfiguration(FT::DataType; dataset::String = LAND_2021, wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) = SPACConfiguration{FT}(
+            DATASET = dataset,
+            SPECTRA = ReferenceSpectra{FT}(dataset; wl_par = wl_par, wl_par_700 = wl_par_700),
+);
