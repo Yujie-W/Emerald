@@ -33,8 +33,7 @@ include("config/config.jl");
 
 
 # General instructions to run SPAC (dependent on config)
-include("sync_state.jl");
-include("update_auxil.jl");
+include("general.jl");
 
 
 # General methods (for users to choose from)
