@@ -138,7 +138,7 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
 
     # Integrators
     "Integrator for transpiration out"
-    ∫∂w∂t_out = 0
+    ∫∂w∂t_out::FT = 0
 
     # ppar from canopy radiation
     "Absorbed photosynthetically active radiation for shaded leaves `[μmol m⁻² s⁻¹]`"

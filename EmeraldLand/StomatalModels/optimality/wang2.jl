@@ -3,7 +3,7 @@
 ∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     (; A) = sm;
 
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting
@@ -13,13 +13,13 @@
 
     dedp = ∂E∂P(leaf, e; δe = δe) / leaf.xylem.trait.area;
 
-    return (-A * leaf.capacitor.auxil.p_leaf * leaf.flux.auxil.a_n_shaded) / dedp
+    return (-A * leaf.capacitor.state.p_leaf * leaf.flux.auxil.a_n_shaded) / dedp
 );
 
 ∂Θ∂E(sm::Wang2SM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
     (; A) = sm;
 
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting
@@ -29,5 +29,5 @@
 
     dedp = ∂E∂P(leaf, e; δe = δe) / leaf.xylem.trait.area;
 
-    return (-A * leaf.capacitor.auxil.p_leaf * leaf.flux.auxil.a_n_sunlit[ind]) / dedp
+    return (-A * leaf.capacitor.state.p_leaf * leaf.flux.auxil.a_n_sunlit[ind]) / dedp
 );

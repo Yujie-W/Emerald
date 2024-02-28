@@ -121,6 +121,7 @@ initialize_energy_states!(spac::BulkSPAC{FT}) where {FT} = (
 #     2023-Oct-18: initialize leaf inclination angles and canopy structure during initialization
 #     2024-Feb-23: separate initialize_states! from initialize_spac!
 #     2024-Feb-27: redo the operation order in the initialization
+#     2024-Feb-28: add method to initialize SPAC with states (do not initialize the energy states)
 #
 #######################################################################################################################################################################################################
 """
@@ -132,7 +133,9 @@ Initialize the SPAC from scratch (traits, states, and one-time auxiliary paramet
 - `spac` `BulkSPAC` SPAC
 
 """
-function initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+function initialize_spac! end;
+
+initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     # 1. update the trait based auxiliary variables
     t_aux!(config, spac);
 
@@ -146,4 +149,20 @@ function initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     dull_aux!(config, spac);
 
     return nothing
-end;
+);
+
+initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, states::BulkSPACStates{FT}) where {FT} = (
+    # 1. update the trait based auxiliary variables
+    t_aux!(config, spac);
+
+    # 2. synchronize the energy states
+    sync_state!(states, spac);
+
+    # 3. update the state based auxiliary variables (including energy)
+    s_aux!(spac);
+
+    # 4. update the slowly changing auxiliary variables
+    dull_aux!(config, spac);
+
+    return nothing
+);

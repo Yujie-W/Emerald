@@ -18,6 +18,33 @@ using Test;
     # In the following example, we will run the steps to see if our SPAC model can handle these scenarios.
     # create a SPAC to work on
 
+    @testset "Run SPAC with sync_state!" begin
+        # create a SPAC to work on
+        config = EmeraldLand.Namespace.SPACConfiguration(FT);
+        spac = EmeraldLand.Namespace.BulkSPAC(config);
+        spac_bak = deepcopy(spac);
+        EmeraldLand.SPAC.initialize_spac!(config, spac);
+        state_0 = EmeraldLand.Namespace.BulkSPACStates(spac);
+
+        # make a deepcopy and run the model for 1 hour twice
+        state_1 = deepcopy(state_0);
+        state_2 = deepcopy(state_0);
+        EmeraldUtility.StructEqual.compare_struct!(state_0, state_1);
+        spac_1 = deepcopy(spac);
+        for i in 1:2
+            EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
+            EmeraldLand.Namespace.sync_state!(spac_1, state_1);
+        end;
+
+        # make another deepcopy and sync the states back and forth
+        for i in 1:2
+            spac_2 = deepcopy(spac_bak);
+            EmeraldLand.SPAC.initialize_spac!(config, spac_2, state_2);
+            EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
+            EmeraldLand.Namespace.sync_state!(spac_2, state_2);
+        end;
+    end;
+
     @testset "SPAC with LAI > 0 and SAI > 0" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);

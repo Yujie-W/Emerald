@@ -151,6 +151,8 @@ substep_aux!(leaf::Leaf{FT}) where {FT} = (
 
     # clear the partial derivatives
     leaf.energy.auxil.∂e∂t = 0;
+    leaf.energy.auxil.∂e∂t_le = 0;
+    leaf.energy.auxil.∂e∂t_sh = 0;
     leaf.flux.auxil.∂g∂t_shaded = 0;
     leaf.flux.auxil.∂g∂t_sunlit .= 0;
 

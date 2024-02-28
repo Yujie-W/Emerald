@@ -1,7 +1,7 @@
 # This file contains function to compute the partial derivatives of Θ versus E for EllerSM optimality model
 
 ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting
@@ -17,7 +17,7 @@
 );
 
 ∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the E at the current setting

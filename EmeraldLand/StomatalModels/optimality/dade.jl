@@ -27,7 +27,7 @@ Return the partial derivative of A per E, given
 function ∂A∂E end;
 
 ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the A and E at the current setting
@@ -48,7 +48,7 @@ function ∂A∂E end;
 );
 
 ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.auxil.p_leaf * 1000000);
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the A and E at the current setting

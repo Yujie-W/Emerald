@@ -35,6 +35,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Sep-26: define the struct to store the state variables used in extraxylary capacitor
+#     2024-Feb-28: move field p_leaf to state (see the comment in the state struct for the reason)
 #
 #######################################################################################################################################################################################################
 """
@@ -51,6 +52,11 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
     "Current volume of the capacitor `[mol]`"
     v_storage::FT = 0
+    # note: This in theory should not be a state variable, but it is used to compute saturation vapor pressure in the next time step and then flow profile.
+    #       However, if we store this as an auxiliary variable, then we need to compute it after we know the flow profile. It is a chicken and egg problem, so we store it as a state here.
+    #       But, we still compute it still as an auxiliary variable.
+    "Pressure at the end; of the capacitor `[MPa]`"
+    p_leaf::FT = 0
 end;
 
 
@@ -60,6 +66,7 @@ end;
 # General
 #     2023-Sep-26: define the struct to store the auxiliary variables used in extraxylary capacitor
 #     2023-Sep-27: add field p
+#     2024-Feb-28: move field p_leaf to state (see the comment in the state struct for the reason)
 #
 #######################################################################################################################################################################################################
 """
@@ -80,8 +87,6 @@ Base.@kwdef mutable struct ExtraXylemCapacitorAuxil{FT}
     k::FT = 100
     "pressure of the capacitor `[MPa]`"
     p::FT = 0
-    "Pressure at the end; of the capacitor `[MPa]`"
-    p_leaf::FT = 0
 end;
 
 
