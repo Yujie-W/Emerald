@@ -24,82 +24,95 @@ Prescribe traits and environmental conditions, given
 """
 function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}
     # read the data out of dataframe row to reduce memory allocation
-    _df_atm::FT = dfr.P_ATM;
-    _df_chl::FT = dfr.CHLOROPHYLL;
-    _df_cli::FT = dfr.CI;
-    _df_co2::FT = dfr.CO2;
-    _df_dif::FT = dfr.RAD_DIF;
-    _df_dir::FT = dfr.RAD_DIR;
-    _df_doy::FT = dfr.FDOY;
-    _df_lai::FT = dfr.LAI;
-    _df_lwr::FT = dfr.RAD_LW;
-    _df_pcp::FT = dfr.PRECIP;
-    _df_tar::FT = dfr.T_AIR;
-    _df_vcm::FT = dfr.VCMAX25;
-    _df_vpd::FT = dfr.VPD;
-    _df_wnd::FT = dfr.WIND;
+    df_atm::FT = dfr.P_ATM;
+    df_chl::FT = dfr.CHLOROPHYLL;
+    df_cli::FT = dfr.CI;
+    df_co2::FT = dfr.CO2;
+    df_dif::FT = dfr.RAD_DIF;
+    df_dir::FT = dfr.RAD_DIR;
+    df_doy::FT = dfr.FDOY;
+    df_lai::FT = dfr.LAI;
+    df_lwr::FT = dfr.RAD_LW;
+    df_pcp::FT = dfr.PRECIP;
+    df_tar::FT = dfr.T_AIR;
+    df_vcm::FT = dfr.VCMAX25;
+    df_vpd::FT = dfr.VPD;
+    df_wnd::FT = dfr.WIND;
 
-    # adjust optimum t based on 10 day moving average skin temperature
-    prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.t_history));
-
-    # prescribe soil water contents and leaf temperature (for version B1 only)
+    # prescribe soil water contents and leaf temperature (for first time step only)
     if initialize_state
-        _df_tlf::FT = dfr.T_LEAF;
-        _df_ts1::FT = dfr.T_SOIL_1;
-        _df_ts2::FT = dfr.T_SOIL_2;
-        _df_ts3::FT = dfr.T_SOIL_3;
-        _df_ts4::FT = dfr.T_SOIL_4;
-        prescribe_traits!(config, spac; t_leaf = max(_df_tar, _df_tlf));
+        df_tlf::FT = dfr.T_LEAF;
+        df_ts1::FT = dfr.T_SOIL_1;
+        df_ts2::FT = dfr.T_SOIL_2;
+        df_ts3::FT = dfr.T_SOIL_3;
+        df_ts4::FT = dfr.T_SOIL_4;
+        df_sw1::FT = dfr.SWC_1;
+        df_sw2::FT = dfr.SWC_2;
+        df_sw3::FT = dfr.SWC_3;
+        df_sw4::FT = dfr.SWC_4;
 
-        _df_sw1::FT = dfr.SWC_1;
-        _df_sw2::FT = dfr.SWC_2;
-        _df_sw3::FT = dfr.SWC_3;
-        _df_sw4::FT = dfr.SWC_4;
-        prescribe_soil!(spac; swcs = (_df_sw1, _df_sw2, _df_sw3, _df_sw4), t_soils = (_df_ts1, _df_ts2, _df_ts3, _df_ts4));
+        # adjust optimum t based on the first known temperature
+        spac.plant.memory.t_history = FT[max(df_tar, df_tlf)];
+        prescribe_traits!(config, spac; t_clm = max(df_tar, df_tlf), t_leaf = max(df_tar, df_tlf));
+        prescribe_soil!(spac; swcs = (df_sw1, df_sw2, df_sw3, df_sw4), t_soils = (df_ts1, df_ts2, df_ts3, df_ts4));
+    else
+        # adjust optimum t based on 10 day moving average skin temperature
+        prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.t_history));
     end;
 
     # prescribe the precipitation related parameters
-    spac.meteo.rain = _df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
-    spac.meteo.t_precip = _df_tar;
+    spac.meteo.rain = df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
+    spac.meteo.t_precip = df_tar;
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
-    _trigger_lai::Bool = !isnan(_df_lai) && (_df_lai != spac.plant.memory.lai);
-    _trigger_vcm::Bool = !isnan(_df_vcm) && (_df_vcm != spac.plant.memory.vcmax25);
-    _trigger_chl::Bool = !isnan(_df_chl) && (_df_chl != spac.plant.memory.chl);
-    if _trigger_lai
-        prescribe_traits!(config, spac; lai = _df_lai, vcmax_expo = 0.3);
-        spac.plant.memory.lai = _df_lai;
+    trigger_lai::Bool = !isnan(df_lai) && (df_lai != spac.plant.memory.lai);
+    trigger_vcm::Bool = !isnan(df_vcm) && (df_vcm != spac.plant.memory.vcmax25);
+    trigger_chl::Bool = !isnan(df_chl) && (df_chl != spac.plant.memory.chl);
+    trigger_cli::Bool = !isnan(df_cli) && (df_cli != spac.plant.memory.ci);
+
+    if trigger_chl
+        prescribe_traits!(config, spac; cab = df_chl, car = df_chl / 7);
+        spac.plant.memory.chl = df_chl;
     end;
 
-    if _trigger_vcm
-        prescribe_traits!(config, spac; vcmax = _df_vcm, vcmax_expo = 0.3);
-        spac.plant.memory.vcmax25 = _df_vcm;
+    if trigger_vcm
+        prescribe_traits!(config, spac; vcmax = df_vcm, vcmax_expo = 0.3);
+        spac.plant.memory.vcmax25 = df_vcm;
     end;
 
-    if _trigger_chl
-        prescribe_traits!(config, spac; cab = _df_chl, car = _df_chl / 7);
-        spac.plant.memory.chl = _df_chl;
+    if trigger_lai
+        prescribe_traits!(config, spac; lai = df_lai, vcmax_expo = 0.3);
+        spac.plant.memory.lai = df_lai;
     end;
 
-    # update clumping index
-    prescribe_traits!(config, spac; ci = _df_cli);
+    if trigger_cli
+        prescribe_traits!(config, spac; ci = df_cli);
+        spac.plant.memory.ci = df_cli;
+    end;
 
     # update environmental conditions
     for air in spac.airs
-        air.state.p_air = _df_atm;
-        prescribe_air!(air; f_CO₂ = _df_co2, t = _df_tar, vpd = _df_vpd, wind = _df_wnd);
+        air.state.p_air = df_atm;
+        prescribe_air!(air; f_CO₂ = df_co2, t = df_tar, vpd = df_vpd, wind = df_wnd);
     end;
 
     # update downward shortwave and longwave radiation
-    _in_dir = view(config.SPECTRA.SOLAR_RAD,:,1)' * config.SPECTRA.ΔΛ / 1000;
-    _in_dif = view(config.SPECTRA.SOLAR_RAD,:,2)' * config.SPECTRA.ΔΛ / 1000;
-    spac.meteo.rad_sw.e_dir .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,_df_dir) ./ _in_dir;
-    spac.meteo.rad_sw.e_dif .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,_df_dif) ./ _in_dif;
-    spac.meteo.rad_lw = _df_lwr;
+    in_dir = view(config.SPECTRA.SOLAR_RAD,:,1)' * config.SPECTRA.ΔΛ / 1000;
+    in_dif = view(config.SPECTRA.SOLAR_RAD,:,2)' * config.SPECTRA.ΔΛ / 1000;
+    spac.meteo.rad_sw.e_dir .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,df_dir) ./ in_dir;
+    spac.meteo.rad_sw.e_dif .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,df_dif) ./ in_dif;
+    spac.meteo.rad_lw = df_lwr;
 
     # update solar zenith angle based on the time
-    _sza = solar_zenith_angle(spac.info.lat, FT(_df_doy));
-    spac.canopy.sun_geometry.state.sza = (_df_dir + _df_dif > 10) ? min(_sza, 88.999) : _sza;
+    sza = solar_zenith_angle(spac.info.lat, FT(df_doy));
+    spac.canopy.sun_geometry.state.sza = (df_dir + df_dif > 10) ? min(sza, 88.999) : sza;
+
+    if trigger_chl || trigger_lai || trigger_cli
+        @show "haha";
+        t_aux!(config, spac.canopy);
+        dull_aux!(config, spac);
+    end;
+    s_aux!(config, spac.canopy);
 
     return nothing
 end;
@@ -158,24 +171,24 @@ simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, i
 simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT} = (
     (; MESSAGE_LEVEL) = config;
 
-    _wdfr = eachrow(wdf);
+    wdfr = eachrow(wdf);
 
     # initialize spac based on initialize_state
-    prescribe!(config, spac, _wdfr[1]; initialize_state = initialize_state);
+    prescribe!(config, spac, wdfr[1]; initialize_state = initialize_state);
 
     # iterate through the time steps
     if MESSAGE_LEVEL == 0
-        for _dfr in _wdfr[selection]
-            simulation!(config, spac, _dfr);
+        for dfr in wdfr[selection]
+            simulation!(config, spac, dfr);
         end;
     elseif MESSAGE_LEVEL == 1
-        @showprogress for _dfr in _wdfr[selection]
-            simulation!(config, spac, _dfr);
+        @showprogress for dfr in wdfr[selection]
+            simulation!(config, spac, dfr);
         end;
     elseif MESSAGE_LEVEL == 2
-        for _dfr in _wdfr[selection]
-            @show _dfr.ind;
-            @time simulation!(config, spac, _dfr);
+        for dfr in wdfr[selection]
+            @show dfr.ind;
+            @time simulation!(config, spac, dfr);
         end;
     else
         error("MESSAGE_LEVEL should be 0, 1, or 2");
@@ -183,7 +196,7 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; i
 
     # save simulation results to hard drive
     if !isnothing(saving)
-        save_nc!(saving, wdf[selection,[_n != "ind" for _n in names(wdf)]]);
+        save_nc!(saving, wdf[selection,[n != "ind" for n in names(wdf)]]);
     end;
 
     return nothing
@@ -191,8 +204,8 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; i
 
 simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; δt::Number = 3600) where {FT} = (
     # read the data out of dataframe row to reduce memory allocation
-    _df_dif::FT = dfr.RAD_DIF;
-    _df_dir::FT = dfr.RAD_DIR;
+    df_dif::FT = dfr.RAD_DIF;
+    df_dir::FT = dfr.RAD_DIR;
 
     # prescribe parameters
     prescribe!(config, spac, dfr);
@@ -204,7 +217,7 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
     if length(spac.plant.memory.t_history) > 240 deleteat!(spac.plant.memory.t_history,1) end;
 
     # save the SIF and reflectance if there is sunlight
-    if _df_dir + _df_dif >= 10
+    if df_dir + df_dif >= 10
         dfr.BLUE      = MODIS_BLUE(config, spac);
         dfr.EVI       = MODIS_EVI(config, spac);
         dfr.NDVI      = MODIS_NDVI(config, spac);
@@ -242,10 +255,10 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
     dfr.MOD_SWC_3 = spac.soils[3].state.θ;
     dfr.MOD_SWC_4 = spac.soils[4].state.θ;
 
-    _tleaf = [leaf.energy.s_aux.t for leaf in spac.plant.leaves];
-    dfr.MOD_T_L_MAX  = nanmax(_tleaf);
-    dfr.MOD_T_L_MEAN = nanmean(_tleaf);
-    dfr.MOD_T_L_MIN  = nanmin(_tleaf);
+    tleaf = [leaf.energy.s_aux.t for leaf in spac.plant.leaves];
+    dfr.MOD_T_L_MAX  = nanmax(tleaf);
+    dfr.MOD_T_L_MEAN = nanmean(tleaf);
+    dfr.MOD_T_L_MIN  = nanmin(tleaf);
     dfr.MOD_T_S_1    = spac.soils[1].s_aux.t;
     dfr.MOD_T_S_2    = spac.soils[2].s_aux.t;
     dfr.MOD_T_S_3    = spac.soils[3].s_aux.t;

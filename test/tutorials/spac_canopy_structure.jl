@@ -14,7 +14,12 @@ using Test;
     # Thus, it is not recommended to modify those parametes manually unless otherwise told to by developers.
     # It is highly recommended to use our embedded function prescribe_traits! to modify canopy structure.
     # Currently, function prescribe_traits! supports the modification of leaf area index and clumping index.
+    # However, the users should be aware of whether to run the t_aux!, s_aux!, and dull_aux! functions after the modification.
+    # Here, changes in LAI and CI imapct the canopy structural parameters and sun-sensor geometrical parameters.
     EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3, ci = 0.8);
+    EmeraldLand.Namespace.t_aux!(config, spac.canopy);
+    EmeraldLand.Namespace.s_aux!(config, spac.canopy);
+    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
     @test true;
 
     # Leaf inclination angle distribution is stored as a vector p_incl in field canopy.
@@ -31,6 +36,7 @@ using Test;
     spac.canopy.structure.trait.lidf.B = -0.15;
     EmeraldLand.Namespace.t_aux!(config, spac.canopy);
     EmeraldLand.Namespace.s_aux!(config, spac.canopy);
+    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
@@ -46,6 +52,7 @@ using Test;
     spac.canopy.structure.trait.lidf.B = 1;
     EmeraldLand.Namespace.t_aux!(config, spac.canopy);
     EmeraldLand.Namespace.s_aux!(config, spac.canopy);
+    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
@@ -54,6 +61,7 @@ using Test;
     spac.canopy.structure.trait.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
     EmeraldLand.Namespace.t_aux!(config, spac.canopy);
     EmeraldLand.Namespace.s_aux!(config, spac.canopy);
+    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 end;

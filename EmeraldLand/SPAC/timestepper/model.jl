@@ -42,21 +42,14 @@ Run SPAC model and move forward in time with time stepper controller, given
 
 """
 function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
-    # 1. clear the auxiliary variables per large time step (e.g. integrated variables)
-    step_aux!(spac);
+    # 1. run the functions are do not need to be run at sub time step (e.g. shortwave radiation)
+    step_preparations!(config, spac);
 
-    # 2. run the functions are do not need to be run at sub time step (e.g. shortwave radiation)
-    soil_albedo!(config, spac);
-    sun_geometry!(config, spac);
-    shortwave_radiation!(config, spac);
-
-    # 3. use time stepper to run the functions that need to be run at sub time step
+    # 2. use time stepper to run the functions that need to be run at sub time step
     time_stepper!(config, spac, δt);
 
-    # 4. run canopy reflectance and fluorescence to use with remote sensing
-    sensor_geometry!(config, spac);
-    reflection_spectrum!(config, spac);
-    fluorescence_spectrum!(config, spac);
+    # 3. run canopy reflectance and fluorescence to use with remote sensing
+    step_remote_sensing!(config, spac);
 
     return nothing
 end;

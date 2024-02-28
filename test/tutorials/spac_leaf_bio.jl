@@ -27,5 +27,6 @@ using Test;
     # Note that it is recommended to change both at the same time, otherwise leaf_spectra! will run twice.
     # As to the supported options of the function prescribe_traits!, please check out the documentation.
     EmeraldLand.SPAC.prescribe_traits!(config, spac; cab = 40, car = 10);
+    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
     @test true;
 end;

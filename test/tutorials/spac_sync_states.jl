@@ -21,8 +21,8 @@ using Test;
     @testset "SPAC with LAI > 0 and SAI > 0" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);
+        EmeraldLand.SPAC.initialize_spac!(config, spac);
         @test true;
 
         # create a state to sync to
@@ -44,8 +44,8 @@ using Test;
     @testset "SPAC with LAI > 0 and SAI > 0" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.5);
+        EmeraldLand.SPAC.initialize_spac!(config, spac);
         @test true;
 
         # create a state to sync to
@@ -67,8 +67,8 @@ using Test;
     @testset "SPAC with LAI > 0 and SAI = 0" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
+        EmeraldLand.SPAC.initialize_spac!(config, spac);
         @test true;
 
         # create a state to sync to
@@ -90,8 +90,8 @@ using Test;
     @testset "LAI and SAI changed (> 0)" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
+        EmeraldLand.SPAC.initialize_spac!(config, spac);
         @test true;
 
         # create a state to sync to
@@ -101,6 +101,9 @@ using Test;
         # run the spac model for 1 hour
         spac_1 = deepcopy(spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac_1; lai = 3.0, sai = 0.5);
+        EmeraldLand.Namespace.t_aux!(config, spac_1.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac_1.canopy);
+        EmeraldLand.SPAC.dull_aux!(config, spac_1);
         EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
         @test true;
 
@@ -108,6 +111,9 @@ using Test;
         spac_2 = deepcopy(spac);
         EmeraldLand.Namespace.sync_state!(state, spac_2);
         EmeraldLand.SPAC.prescribe_traits!(config, spac_2; lai = 3.0, sai = 0.5);
+        EmeraldLand.Namespace.t_aux!(config, spac_2.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac_2.canopy);
+        EmeraldLand.SPAC.dull_aux!(config, spac_2);
         EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
         @test true;
     end;
@@ -115,8 +121,8 @@ using Test;
     @testset "LAI and SAI changed (= 0)" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);
+        EmeraldLand.SPAC.initialize_spac!(config, spac);
         @test true;
 
         # create a state to sync to
@@ -126,6 +132,9 @@ using Test;
         # run the spac model for 1 hour
         spac_1 = deepcopy(spac);
         EmeraldLand.SPAC.prescribe_traits!(config, spac_1; lai = 0.0, sai = 0.0);
+        EmeraldLand.Namespace.t_aux!(config, spac_1.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac_1.canopy);
+        EmeraldLand.SPAC.dull_aux!(config, spac_1);
         EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
         @test true;
 
@@ -133,6 +142,9 @@ using Test;
         spac_2 = deepcopy(spac);
         EmeraldLand.Namespace.sync_state!(state, spac_2);
         EmeraldLand.SPAC.prescribe_traits!(config, spac_2; lai = 0.0, sai = 0.0);
+        EmeraldLand.Namespace.t_aux!(config, spac_2.canopy);
+        EmeraldLand.Namespace.s_aux!(config, spac_2.canopy);
+        EmeraldLand.SPAC.dull_aux!(config, spac_2);
         EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
         @test true;
     end;

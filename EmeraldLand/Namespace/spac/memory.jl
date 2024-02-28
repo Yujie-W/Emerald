@@ -22,6 +22,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct PlantMemory{FT}
     "Chlorophyll content used for last time step"
     chl::FT = -1
+    "Clumping index used for last time step"
+    ci::FT = -1
     "LAI used for last time step"
     lai::FT = -1
     "Memory about the historical temperature"
@@ -32,6 +34,7 @@ end;
 
 sync_state!(state_from::PlantMemory{FT}, state_to::PlantMemory{FT}) where {FT} = (
     state_to.chl = state_from.chl;
+    state_to.ci = state_from.ci;
     state_to.lai = state_from.lai;
     state_to.t_history = deepcopy(state_from.t_history);
     state_to.vcmax25 = state_from.vcmax25;

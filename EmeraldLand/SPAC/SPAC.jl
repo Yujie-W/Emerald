@@ -33,17 +33,18 @@ include("instructions/aux_state.jl");
 include("instructions/aux_step.jl");
 include("instructions/aux_substep.jl");
 include("instructions/aux_trait.jl");
-
 include("instructions/initialize.jl");
-include("instructions/prescribe.jl");
+include("instructions/model_step.jl");
+include("instructions/model_substep.jl");
+include("instructions/prescribe_air.jl");
+include("instructions/prescribe_plant.jl");
+include("instructions/prescribe_soil.jl");
 
 
 # time stepper
-include("timestepper/timer.jl");
-
-include("timestepper/stepper.jl");
-
 include("timestepper/model.jl");
+include("timestepper/stepper.jl");
+include("timestepper/timer.jl");
 
 
 # quantities of SPAC
@@ -57,10 +58,9 @@ include("quantity/par.jl");
 include("quantity/sif.jl");
 include("quantity/yield.jl");
 
-include("quantity/spectrum.jl");
-
 include("quantity/modis.jl");
 include("quantity/oco.jl");
+include("quantity/spectrum.jl");
 include("quantity/tropomi.jl");
 
 

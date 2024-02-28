@@ -18,23 +18,23 @@ Prepare weather driver dataframe to feed SPAC, given
 
 """
 function weather_driver(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false)
-    _nc_wd = weather_driver_file(wd_tag, gmdict; appending = appending)[1];
-    _df_wd = read_nc(_nc_wd);
+    nc_wd = weather_driver_file(wd_tag, gmdict; appending = appending)[1];
+    df_wd = read_nc(nc_wd);
 
     # interpolate the data to a new resolution
-    _df_wd[!,"CO2"        ] .= interpolate_data(gmdict["CO2"], gmdict["YEAR"]; out_reso = "1H");
-    _df_wd[!,"CHLOROPHYLL"] .= interpolate_data(gmdict["CHLOROPHYLL"], gmdict["YEAR"]; out_reso = "1H");
-    _df_wd[!,"CI"         ] .= interpolate_data(gmdict["CLUMPING"], gmdict["YEAR"]; out_reso = "1H");
-    _df_wd[!,"LAI"        ] .= interpolate_data(gmdict["LAI"], gmdict["YEAR"]; out_reso = "1H");
-    _df_wd[!,"VCMAX25"    ] .= interpolate_data(gmdict["VCMAX25"], gmdict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CO2"        ] .= interpolate_data(gmdict["CO2"], gmdict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CHLOROPHYLL"] .= interpolate_data(gmdict["CHLOROPHYLL"], gmdict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CI"         ] .= interpolate_data(gmdict["CLUMPING"], gmdict["YEAR"]; out_reso = "1H");
+    df_wd[!,"LAI"        ] .= interpolate_data(gmdict["LAI"], gmdict["YEAR"]; out_reso = "1H");
+    df_wd[!,"VCMAX25"    ] .= interpolate_data(gmdict["VCMAX25"], gmdict["YEAR"]; out_reso = "1H");
 
     # add the fields to store outputs
-    for _label in DF_VARIABLES
-        _df_wd[!,_label] .= 0.0;
+    for label in DF_VARIABLES
+        df_wd[!,label] .= 0.0;
     end;
-    for _label in DF_SIMULATIONS
-        _df_wd[!,_label] .= NaN;
+    for label in DF_SIMULATIONS
+        df_wd[!,label] .= NaN;
     end;
 
-    return _df_wd
+    return df_wd
 end;

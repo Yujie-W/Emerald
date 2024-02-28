@@ -25,36 +25,19 @@ Move forward in time for SPAC with time stepper controller, given
 function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
     # run the update function until time elapses
     count = 0;
-    t_res = FT(δt);
-    while t_res > 0
-        # run the pipelines before update the sub time step
-        substep_aux!(spac);
-        plant_flow_profile!(config, spac);
-        plant_pressure_profile!(config, spac);
-        longwave_radiation!(spac);
-        plant_photosynthesis!(spac, GCO₂Mode());
-        soil_profiles!(config, spac);
-        stomatal_conductance_profile!(spac);
-        spac_energy_flow!(spac);
+    δt_remain::FT = δt;
+    while δt_remain > 0
+        substep_preparations!(config, spac);
+        δt_step = adjusted_time(spac, δt_remain);
+        substep_budgets!(config, spac, δt_step);
+        δt_remain -= δt_step;
 
-
-        # determine the real time step without violating the stability condition
+        # if total count exceeds 1000, break the loop
         count += 1;
-        t_step = adjusted_time(spac, t_res);
-
-        # if total count exceeds 100
-        if (count > 1000) && (t_step < 0.01) && (t_res > 10)
-            @info "Number of steppers exceeds 1000, breaking..." spac.canopy.structure.trait.lai t_res t_step;
+        if (count > 1000) && (δt_step < 0.01) && (δt_remain > 10)
+            @warn "Number of steppers exceeds 1000, breaking..." spac.canopy.structure.trait.lai δt_remain δt_step;
             break;
         end;
-
-        # run the budgets for all ∂x∂t using the adjusted time step
-        soil_budgets!(config, spac, t_step);
-        stomatal_conductance!(spac, t_step);
-        spac_energy_budget!(spac, t_step);
-        plant_water_budget!(spac, t_step);
-
-        t_res -= t_step;
     end;
 
     return nothing
