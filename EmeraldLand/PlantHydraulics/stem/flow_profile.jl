@@ -12,6 +12,7 @@ flow_out(stem::Stem{FT}) where {FT} = flow_out(stem.xylem);
 #     2023-Sep-05: add function stem_flow_profiles!
 #     2023-Sep-28: update the branch and trunk flow profile at the same time
 #     2023-Sep-30: subtract the flow into trunk from the junction.auxil.∂w∂t
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -23,6 +24,11 @@ Set up stem flow profile, given
 
 """
 function stem_flow_profiles!(spac::BulkSPAC{FT}) where {FT}
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # run the flow profile calculation for each stem layer only if LAI > 0
     branches = spac.plant.branches;
     junction = spac.plant.junction;
     leaves = spac.plant.leaves;

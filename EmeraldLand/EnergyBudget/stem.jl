@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-30: add function to calculate the energy flow of the stem (trunk and branches)
 #     2023-Oct-18: add net radiation to branch energy budget
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -17,6 +18,11 @@ Calculate the energy flows of the trunk and branches, given
 
 """
 function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # run the energy budget for each stem layer only if LAI > 0
     branches = spac.plant.branches;
     canopy = spac.canopy;
     junction = spac.plant.junction;

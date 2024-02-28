@@ -16,6 +16,7 @@
 #     2024-Feb-08: fix the issue in Vcmax profiles (was opposite)
 #     2024-Feb-08: add support to C3CytoState and C3VJPState
 #     2024-Feb-27: run dull_aux! when any of the canopy structural parameters or leaf pigments is updated
+#     2024-Feb-28: set minimum LAI to 0 if a negative value is prescribed
 #
 #######################################################################################################################################################################################################
 """
@@ -136,7 +137,7 @@ function prescribe_traits!(
     #
     # update LAI and leaf area
     if !isnothing(lai)
-        epslai = max(eps(FT), lai);
+        epslai = max(0, lai);
         can_str.trait.lai = epslai;
         can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
         for irt in 1:n_layer

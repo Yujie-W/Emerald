@@ -50,6 +50,7 @@ leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) w
 # Changes to this function
 # General
 #     2023-Sep-28: add leaf_water_budgets! function
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -62,11 +63,14 @@ Set the flow profile of each leaf, given
 
 """
 function leaf_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
-    if spac.canopy.structure.trait.lai > 0
-        # do this way to avoid memory allocation of a [nothing...] vector
-        for leaf in spac.plant.leaves
-            leaf_water_budget!(leaf, (leaf).xylem.auxil, δt);
-        end;
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # run the water budget for each leaf layer only if LAI > 0
+    # do this way to avoid memory allocation of a [nothing...] vector
+    for leaf in spac.plant.leaves
+        leaf_water_budget!(leaf, (leaf).xylem.auxil, δt);
     end;
 
     return nothing

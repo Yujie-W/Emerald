@@ -12,165 +12,95 @@ using Test;
     #     3. Sync the states back to the SPAC struct
     #     4. Run the SPAC model again using the new states in the next time step
     # Currently, there are a few scenarios based on LAI and SAI:
-    #     1. LAI > 0 and SAI > 0 (vegetation with leaves)
+    #     1. LAI > 0 and SAI > 0 (vegetation with leaves, e.g. forest)
     #     2. LAI = 0 and SAI > 0 (vegetation without leaves, e.g. winter or dry season)
+    #     2. LAI > 0 and SAI = 0 (vegetation with leaves only, e.g. grassland or crops)
     #     3. LAI = 0 and SAI = 0 (bare soil)
     # In the following example, we will run the steps to see if our SPAC model can handle these scenarios.
     # create a SPAC to work on
 
     @testset "Run SPAC with sync_state!" begin
-        # create a SPAC to work on
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         spac_bak = deepcopy(spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
         state_0 = EmeraldLand.Namespace.BulkSPACStates(spac);
 
-        # make a deepcopy and run the model for 1 hour twice
+        # compare the models using different modes (regular or state sync modes)
         state_1 = deepcopy(state_0);
         state_2 = deepcopy(state_0);
-        EmeraldUtility.StructEqual.compare_struct!(state_0, state_1);
         spac_1 = deepcopy(spac);
-        for i in 1:2
-            EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
-            EmeraldLand.Namespace.sync_state!(spac_1, state_1);
-        end;
-
-        # make another deepcopy and sync the states back and forth
-        for i in 1:2
+        for i in 1:3
             spac_2 = deepcopy(spac_bak);
             EmeraldLand.SPAC.initialize_spac!(config, spac_2, state_2);
+            EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
             EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
+            EmeraldLand.Namespace.sync_state!(spac_1, state_1);
             EmeraldLand.Namespace.sync_state!(spac_2, state_2);
+            @test EmeraldUtility.StructEqual.compare_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
         end;
-    end;
-
-    @testset "SPAC with LAI > 0 and SAI > 0" begin
-        config = EmeraldLand.Namespace.SPACConfiguration(FT);
-        spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
-        @test true;
-
-        # create a state to sync to
-        state = EmeraldLand.Namespace.BulkSPACStates(spac);
-        @test true;
-
-        # run the spac model for 1 hour
-        spac_1 = deepcopy(spac);
-        EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
-        @test true;
-
-        # sync the states back to the original spac and run the model for 1 hour
-        spac_2 = deepcopy(spac);
-        EmeraldLand.Namespace.sync_state!(state, spac_2);
-        EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
-        @test true;
-    end;
-
-    @testset "SPAC with LAI > 0 and SAI > 0" begin
-        config = EmeraldLand.Namespace.SPACConfiguration(FT);
-        spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.5);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
-        @test true;
-
-        # create a state to sync to
-        state = EmeraldLand.Namespace.BulkSPACStates(spac);
-        @test true;
-
-        # run the spac model for 1 hour
-        spac_1 = deepcopy(spac);
-        EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
-        @test true;
-
-        # sync the states back to the original spac and run the model for 1 hour
-        spac_2 = deepcopy(spac);
-        EmeraldLand.Namespace.sync_state!(state, spac_2);
-        EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
-        @test true;
     end;
 
     @testset "SPAC with LAI > 0 and SAI = 0" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
+        EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 2.0, sai = 0.0);
+        spac_bak = deepcopy(spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        @test true;
+        state_0 = EmeraldLand.Namespace.BulkSPACStates(spac);
 
-        # create a state to sync to
-        state = EmeraldLand.Namespace.BulkSPACStates(spac);
-        @test true;
-
-        # run the spac model for 1 hour
+        # compare the models using different modes (regular or state sync modes)
+        state_1 = deepcopy(state_0);
+        state_2 = deepcopy(state_0);
         spac_1 = deepcopy(spac);
+        spac_2 = deepcopy(spac_bak);
+        EmeraldLand.SPAC.initialize_spac!(config, spac_2, state_2);
         EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
-        @test true;
-
-        # sync the states back to the original spac and run the model for 1 hour
-        spac_2 = deepcopy(spac);
-        EmeraldLand.Namespace.sync_state!(state, spac_2);
         EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
-        @test true;
+        EmeraldLand.Namespace.sync_state!(spac_1, state_1);
+        EmeraldLand.Namespace.sync_state!(spac_2, state_2);
+        @test EmeraldUtility.StructEqual.compare_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
     end;
 
-    @testset "LAI and SAI changed (> 0)" begin
+    @testset "SPAC with LAI = 0 and SAI > 0" begin
+        config = EmeraldLand.Namespace.SPACConfiguration(FT);
+        spac = EmeraldLand.Namespace.BulkSPAC(config);
+        EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.5);
+        spac_bak = deepcopy(spac);
+        EmeraldLand.SPAC.initialize_spac!(config, spac);
+        state_0 = EmeraldLand.Namespace.BulkSPACStates(spac);
+
+        # compare the models using different modes (regular or state sync modes)
+        state_1 = deepcopy(state_0);
+        state_2 = deepcopy(state_0);
+        spac_1 = deepcopy(spac);
+        spac_2 = deepcopy(spac_bak);
+        EmeraldLand.SPAC.initialize_spac!(config, spac_2, state_2);
+        EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
+        EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
+        EmeraldLand.Namespace.sync_state!(spac_1, state_1);
+        EmeraldLand.Namespace.sync_state!(spac_2, state_2);
+        @test EmeraldUtility.StructEqual.compare_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
+    end;
+
+    @testset "SPAC with LAI = 0 and SAI = 0" begin
         config = EmeraldLand.Namespace.SPACConfiguration(FT);
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0.0, sai = 0.0);
+        spac_bak = deepcopy(spac);
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        @test true;
+        state_0 = EmeraldLand.Namespace.BulkSPACStates(spac);
 
-        # create a state to sync to
-        state = EmeraldLand.Namespace.BulkSPACStates(spac);
-        @test true;
-
-        # run the spac model for 1 hour
+        # compare the models using different modes (regular or state sync modes)
+        state_1 = deepcopy(state_0);
+        state_2 = deepcopy(state_0);
         spac_1 = deepcopy(spac);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac_1; lai = 3.0, sai = 0.5);
-        EmeraldLand.SPAC.t_aux!(config, spac_1.canopy);
-        EmeraldLand.SPAC.dull_aux!(config, spac_1);
+        spac_2 = deepcopy(spac_bak);
+        EmeraldLand.SPAC.initialize_spac!(config, spac_2, state_2);
         EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
-        @test true;
-
-        # sync the states back to the original spac and run the model for 1 hour
-        spac_2 = deepcopy(spac);
-        EmeraldLand.Namespace.sync_state!(state, spac_2);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac_2; lai = 3.0, sai = 0.5);
-        EmeraldLand.SPAC.t_aux!(config, spac_2.canopy);
-        EmeraldLand.SPAC.dull_aux!(config, spac_2);
         EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
-        @test true;
+        EmeraldLand.Namespace.sync_state!(spac_1, state_1);
+        EmeraldLand.Namespace.sync_state!(spac_2, state_2);
+        @test EmeraldUtility.StructEqual.compare_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
     end;
-
-    @testset "LAI and SAI changed (= 0)" begin
-        config = EmeraldLand.Namespace.SPACConfiguration(FT);
-        spac = EmeraldLand.Namespace.BulkSPAC(config);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3.0, sai = 0.5);
-        EmeraldLand.SPAC.initialize_spac!(config, spac);
-        @test true;
-
-        # create a state to sync to
-        state = EmeraldLand.Namespace.BulkSPACStates(spac);
-        @test true;
-
-        # run the spac model for 1 hour
-        spac_1 = deepcopy(spac);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac_1; lai = 0.0, sai = 0.0);
-        EmeraldLand.SPAC.t_aux!(config, spac_1.canopy);
-        EmeraldLand.SPAC.dull_aux!(config, spac_1);
-        EmeraldLand.SPAC.spac!(config, spac_1, FT(3600));
-        @test true;
-
-        # sync the states back to the original spac and run the model for 1 hour
-        spac_2 = deepcopy(spac);
-        EmeraldLand.Namespace.sync_state!(state, spac_2);
-        EmeraldLand.SPAC.prescribe_traits!(config, spac_2; lai = 0.0, sai = 0.0);
-        EmeraldLand.SPAC.t_aux!(config, spac_2.canopy);
-        EmeraldLand.SPAC.dull_aux!(config, spac_2);
-        EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
-        @test true;
-    end;
-
-    @test true;
 end;

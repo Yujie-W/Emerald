@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Sep-27: add root_water_budget! function
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -24,6 +25,11 @@ Set the flow profile of the root or stem xylem, given
 function xylem_water_budget! end;
 
 xylem_water_budget!(xylem::XylemHydraulics{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
+    if xylem.trait.area <= 0
+        return nothing
+    end;
+
+    # run the water budget for the xylem only if xylem area > 0
     # make sure the buffer rate does not drain or overflow the capacictance
     N = length(xylem.state.v_storage);
     for i in 1:N

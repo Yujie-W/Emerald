@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-30: add function to calculate the energy flow of the leaf
 #     2023-Nov-03: save latent and sensible heat fluxes in leaf energy auxil
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -17,6 +18,11 @@ Calculate the energy flows of the leaf, given
 
 """
 function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # run the energy budget for each leaf layer only if LAI > 0
     airs = spac.airs;
     branches = spac.plant.branches;
     canopy = spac.canopy;

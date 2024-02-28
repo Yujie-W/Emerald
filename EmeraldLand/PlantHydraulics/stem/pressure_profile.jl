@@ -29,6 +29,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-28: add function stem_pressure_profiles!
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -40,6 +41,11 @@ Set up stem pressure profile for trunk and branches, given
 
 """
 function stem_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # run the pressure profile calculation for each stem layer only if LAI > 0
     branches = spac.plant.branches;
     junction = spac.plant.junction;
     trunk = spac.plant.trunk;

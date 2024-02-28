@@ -51,6 +51,7 @@ flow_out(x_aux::XylemHydraulicsAuxilSS{FT}) where {FT} = x_aux.flow;
 # Changes to this function
 # General
 #     2023-Sep-23: add function to set the flow rate profile in the xylem based on the flow rate out of the xylem
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -64,7 +65,16 @@ Set the flow rate profile in the xylem, given
 """
 function set_flow_profile! end;
 
-set_flow_profile!(xylem::XylemHydraulics{FT}, flow::FT) where {FT} = set_flow_profile!(xylem.auxil, flow);
+set_flow_profile!(xylem::XylemHydraulics{FT}, flow::FT) where {FT} = (
+    if xylem.trait.area <= 0
+        return nothing
+    end;
+
+    # update the flow profile calculation only if xylem area > 0
+    set_flow_profile!(xylem.auxil, flow);
+
+    return nothing
+);
 
 set_flow_profile!(x_aux::XylemHydraulicsAuxilNSS{FT}, flow::FT) where {FT} = (
     x_aux.flow[end] = flow;

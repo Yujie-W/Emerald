@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-26: add function to update the extraxylary pressure profile
 #     2024-Feb-28: p_leaf now is a state (see the comment in the state struct for the reason)
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -28,6 +29,11 @@ extraxylary_pressure_profile!(
             c_state::ExtraXylemCapacitorState{FT},
             c_auxil::ExtraXylemCapacitorAuxil{FT},
             t::FT) where {FT} = (
+    if x_trait.area <= 0
+        return nothing
+    end;
+
+    # run the pressure profile calculation only if xylem area > 0
     flow = flow_out(x_auxil) + c_auxil.flow;
     c_state.p_leaf = x_auxil.pressure[end] - flow / c_auxil.k;
 
@@ -41,6 +47,11 @@ extraxylary_pressure_profile!(
             c_state::ExtraXylemCapacitorState{FT},
             c_auxil::ExtraXylemCapacitorAuxil{FT},
             t::FT) where {FT} = (
+    if x_trait.area <= 0
+        return nothing
+    end;
+
+    # run the pressure profile calculation only if xylem area > 0
     k_max = x_trait.area * c_trait.k_max;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);

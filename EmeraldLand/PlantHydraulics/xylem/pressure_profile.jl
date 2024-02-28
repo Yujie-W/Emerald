@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-23: add function to update the xylem pressure profile
 #     2023-Sep-30: add method to update the xylem pressure profile in the reverse order
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -24,6 +25,11 @@ function xylem_pressure_profile! end;
 xylem_pressure_profile!(xylem::XylemHydraulics{FT}, t::FT) where {FT} = xylem_pressure_profile!(xylem.trait, xylem.state, xylem.auxil, t);
 
 xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT) where {FT} = (
+    if x_trait.area <= 0
+        return nothing
+    end;
+
+    # update the pressure profile calculation only if xylem area > 0
     k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
@@ -48,6 +54,11 @@ xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraul
 );
 
 xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT) where {FT} = (
+    if x_trait.area <= 0
+        return nothing
+    end;
+
+    # update the pressure profile calculation only if xylem area > 0
     k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
@@ -73,6 +84,11 @@ xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraul
 xylem_pressure_profile!(xylem::XylemHydraulics{FT}, t::FT, rev::Bool) where {FT} = xylem_pressure_profile!(xylem.trait, xylem.state, xylem.auxil, t, rev);
 
 xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, t::FT, ::Bool) where {FT} = (
+    if x_trait.area <= 0
+        return nothing
+    end;
+
+    # update the pressure profile calculation only if xylem area > 0
     k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
@@ -97,6 +113,11 @@ xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraul
 );
 
 xylem_pressure_profile!(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, t::FT, ::Bool) where {FT} = (
+    if x_trait.area <= 0
+        return nothing
+    end;
+
+    # update the pressure profile calculation only if xylem area > 0
     k_max = x_trait.area * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);

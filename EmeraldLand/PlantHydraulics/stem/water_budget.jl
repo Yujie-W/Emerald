@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Sep-27: add root_water_budgets! function
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -17,6 +18,11 @@ Set the flow profile of each stem (trunk and branches), given
 
 """
 function stem_water_budgets!(spac::BulkSPAC{FT}, δt::FT) where {FT}
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # run the water budget for each stem layer only if LAI > 0
     xylem_water_budget!(spac.plant.trunk.xylem, spac.plant.trunk.xylem.auxil, δt);
 
     for stem in spac.plant.branches

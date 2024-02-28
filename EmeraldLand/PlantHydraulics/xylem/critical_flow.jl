@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2023-Sep-27: add function to compute xylem end; pressure at steady state (no water exchange through the capacitor along the xylem)
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -18,6 +19,11 @@ Return the xylem pressure at the end; of xylem, given
 
 """
 function xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {FT}
+    if xylem.trait.area <= 0
+        return FT(0)
+    end;
+
+    # run the pressure profile calculation only if xylem area > 0
     k_max = xylem.trait.area * xylem.trait.k_max / xylem.trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
@@ -48,6 +54,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-27: add function to compute xylem critical pressure at steady state (no water exchange through the capacitor along the xylem)
+#     2024-Feb-28: add LAI <= 0 control
 #
 #######################################################################################################################################################################################################
 """
@@ -62,6 +69,11 @@ Return the critical flow rate that triggers a given amount of loss of hydraulic 
 
 """
 function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}, t::FT, ini::FT = FT(0.5)) where {FT}
+    if xylem.trait.area <= 0
+        return FT(0)
+    end;
+
+    # run the pressure profile calculation only if xylem area > 0
     (; KR_THRESHOLD) = config;
 
     # compute the misc variables
