@@ -5,8 +5,6 @@ using QuadGK: quadgk
 using SpecialFunctions: beta_inc
 using Statistics: mean
 
-import ..Namespace: s_aux!, t_aux!
-
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
 using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
@@ -26,10 +24,6 @@ include("geometry/sensor.jl");
 include("geometry/soil_albedo.jl");
 include("geometry/structure.jl");
 include("geometry/sun.jl");
-
-include("geometry/s_aux.jl");
-include("geometry/t_aux.jl");
-
 
 # function related to canopy radiation
 include("radiation/longwave.jl");

@@ -140,7 +140,7 @@ function initialize_spac!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     initialize_energy_states!(spac);
 
     # 3. update the state based auxiliary variables (including energy)
-    s_aux!(config, spac);
+    s_aux!(spac);
 
     # 4. update the slowly changing auxiliary variables
     dull_aux!(config, spac);

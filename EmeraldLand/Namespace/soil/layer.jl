@@ -59,13 +59,6 @@ Base.@kwdef mutable struct SoilLayerTDAuxil{FT}
     δz::FT = 1
 end;
 
-t_aux!(trait::SoilLayerTrait{FT}, t_aux::SoilLayerTDAuxil{FT}) where {FT} = (
-    t_aux.z = abs(trait.zs[1] + trait.zs[2]) / 2;
-    t_aux.δz = trait.zs[1] - trait.zs[2];
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -194,5 +187,3 @@ Base.@kwdef mutable struct SoilLayer{FT}
     "Auxiliary variables"
     auxil::SoilLayerAuxil{FT} = SoilLayerAuxil{FT}()
 end;
-
-t_aux!(layer::SoilLayer{FT}) where {FT} = t_aux!(layer.trait, layer.t_aux);

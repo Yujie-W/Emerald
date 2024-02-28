@@ -49,13 +49,6 @@ Base.@kwdef mutable struct AirLayerTDAuxil{FT}
     z::FT = 0.5
 end;
 
-t_aux!(trait::AirLayerTrait{FT}, t_aux::AirLayerTDAuxil{FT}) where {FT} = (
-    t_aux.δz = trait.zs[2] - trait.zs[1];
-    t_aux.z = (trait.zs[1] + trait.zs[2]) / 2;
-
-    return nothing
-);
-
 
 #######################################################################################################################################################################################################
 #
@@ -170,5 +163,3 @@ Base.@kwdef mutable struct AirLayer{FT<:AbstractFloat}
     "Auxiliary variables"
     auxil::AirLayerAuxil{FT} = AirLayerAuxil{FT}()
 end;
-
-t_aux!(air::AirLayer{FT}) where {FT} = t_aux!(air.trait, air.t_aux);

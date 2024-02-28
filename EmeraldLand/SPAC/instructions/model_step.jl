@@ -19,6 +19,7 @@ Run the functions that do not need to be run at sub time step (these functions a
 function step_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     step_aux!(spac);
     soil_albedo!(config, spac);
+    sun_geometry_aux!(config, spac);
     sun_geometry!(config, spac);
     shortwave_radiation!(config, spac);
 
@@ -43,6 +44,7 @@ Run the remote sensing functions that do not need to be run at sub time step (th
 
 """
 function step_remote_sensing!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    sensor_geometry_aux!(config, spac);
     sensor_geometry!(config, spac);
     reflection_spectrum!(config, spac);
     fluorescence_spectrum!(config, spac);

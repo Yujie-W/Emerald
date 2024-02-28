@@ -52,6 +52,7 @@ function substep_budgets!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt
     plant_water_budget!(spac, δt);
     spac_energy_budget!(spac, δt);
     stomatal_conductance!(spac, δt);
+    s_aux!(spac);
 
     return nothing
 end;

@@ -108,11 +108,9 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     spac.canopy.sun_geometry.state.sza = (df_dir + df_dif > 10) ? min(sza, 88.999) : sza;
 
     if trigger_chl || trigger_lai || trigger_cli
-        @show "haha";
         t_aux!(config, spac.canopy);
         dull_aux!(config, spac);
     end;
-    s_aux!(config, spac.canopy);
 
     return nothing
 end;

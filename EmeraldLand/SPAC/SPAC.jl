@@ -2,21 +2,19 @@ module SPAC
 
 using Statistics: mean
 
-import ..Namespace: s_aux!, t_aux!
-
 using ..EmeraldPhysics.Constant: F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O
 using ..EmeraldPhysics.Optics: photon
 
-using ..CanopyOptics: canopy_structure!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!
-using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geometry!
+using ..CanopyOptics: canopy_structure!, canopy_structure_aux!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!, sun_geometry_aux!
+using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geometry!, sensor_geometry_aux!
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
 using ..Namespace: ReferenceSpectra
 using ..Namespace: C3CytoState, C3VJPState, C4VJPState
 using ..Namespace: GCO₂Mode
-using ..Namespace: XylemHydraulicsAuxilNSS
+using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
 using ..Namespace: JunctionCapacitor, Leaf, Plant, Root, Stem
-using ..Namespace: MultiLayerCanopy
+using ..Namespace: CanopyStructure, CanopyStructureTrait, CanopyStructureTDAuxil, MultiLayerCanopy
 using ..Namespace: AirLayer, AirLayerState, AirLayerSDAuxil, AirLayerTDAuxil
 using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLayerTrait, SoilLayerTDAuxil
 using ..Namespace: BulkSPAC, SPACConfiguration

@@ -4,6 +4,7 @@
 # General
 #     2023-Mar-20: add function to create data from dict
 #     2024-Feb-25: add t_aux! and s_aux! functions to update the axiliary variables
+#     2024-Feb-27: t_aux! and s_aux! functions moved to initialize_spac!
 #
 #######################################################################################################################################################################################################
 """

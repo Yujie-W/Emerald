@@ -17,9 +17,8 @@ using Test;
     # However, the users should be aware of whether to run the t_aux!, s_aux!, and dull_aux! functions after the modification.
     # Here, changes in LAI and CI imapct the canopy structural parameters and sun-sensor geometrical parameters.
     EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3, ci = 0.8);
-    EmeraldLand.Namespace.t_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.s_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.t_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.dull_aux!(config, spac);
     @test true;
 
     # Leaf inclination angle distribution is stored as a vector p_incl in field canopy.
@@ -34,9 +33,8 @@ using Test;
     #     (0,1) gives extremophile distribution.
     spac.canopy.structure.trait.lidf.A = -0.35;
     spac.canopy.structure.trait.lidf.B = -0.15;
-    EmeraldLand.Namespace.t_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.s_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.t_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.dull_aux!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
@@ -50,18 +48,16 @@ using Test;
     spac.canopy.structure.trait.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
     spac.canopy.structure.trait.lidf.A = 1;
     spac.canopy.structure.trait.lidf.B = 1;
-    EmeraldLand.Namespace.t_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.s_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.t_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.dull_aux!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 
     # By default, we use VerhoefLIDF method to compute LIDF, but we also support the use of Beta function.
     # To use the BetaLIDF, you need to change the parameter to BetaLIDF first.
     spac.canopy.structure.trait.lidf = EmeraldLand.Namespace.BetaLIDF{FT}();
-    EmeraldLand.Namespace.t_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.s_aux!(config, spac.canopy);
-    EmeraldLand.Namespace.dull_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.t_aux!(config, spac.canopy);
+    EmeraldLand.SPAC.dull_aux!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
     @test true;
 end;

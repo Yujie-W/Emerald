@@ -20,6 +20,7 @@ function canopy_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     # update the canopy structure
     canopy_structure!(config, spac);
     soil_albedo!(config, spac);
+    sun_geometry_aux!(config, spac);
     sun_geometry!(config, spac);
 
     # run longwave and shortwave radiation

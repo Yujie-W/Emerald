@@ -4,6 +4,79 @@
 #
 # Changes to this function
 # General
+#     2024-Feb-27: add function sun_geometry_aux! to update the trait-dependent auxiliary variables for sun geometry (to call in step_preparations!)
+#
+#######################################################################################################################################################################################################
+"""
+
+    sun_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Update sun geometry related auxiliary variables, given
+- `config` SPAC configuration
+- `spac` SPAC
+
+"""
+function sun_geometry_aux! end;
+
+sun_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = sun_geometry_aux!(config, spac.canopy);
+
+sun_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
+    sun_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux);
+
+    return nothing
+);
+
+sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}, t_aux::CanopyStructureTDAuxil{FT}, sunst::SunGeometryState{FT}, sunsa::SunGeometrySDAuxil{FT}) where {FT} = (
+    # if sza > 89 or both LAI and SAI are zero, do nothing
+    if sunst.sza > 89 || (trait.lai <= 0 && trait.sai <= 0)
+        return nothing
+    end;
+
+    (; Θ_AZI, Θ_INCL) = config;
+
+    # extinction coefficients for the solar radiation
+    for i in eachindex(Θ_INCL)
+        Cs = cosd(Θ_INCL[i]) * cosd(sunst.sza);
+        Ss = sind(Θ_INCL[i]) * sind(sunst.sza);
+        βs = (Cs >= Ss ? FT(π) : acos(-Cs/Ss));
+        sunsa.Cs_incl[i] = Cs;
+        sunsa.Ss_incl[i] = Ss;
+        sunsa.βs_incl[i] = βs;
+        sunsa.ks_incl[i] = 2 / FT(π) / cosd(sunst.sza) * (Cs * (βs - FT(π)/2) + Ss * sin(βs));
+    end;
+    sunsa.ks = t_aux.p_incl' * sunsa.ks_incl;
+
+    # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
+    sunsa.sdb = (sunsa.ks + t_aux.bf) / 2;
+    sunsa.sdf = (sunsa.ks - t_aux.bf) / 2;
+
+    # compute the sunlit leaf fraction
+    # sunsa.ps = exp.(sunsa.ks .* trait.ci * trait.lai .* t_aux.x_bnds);
+    kscipai = sunsa.ks * trait.ci * (trait.lai + trait.sai);
+    for i in eachindex(trait.δlai)
+        ksciipai = sunsa.ks * trait.ci * (trait.δlai[i] + trait.δsai[i]);
+        sunsa.p_sunlit[i] = 1 / ksciipai * (exp(kscipai * t_aux.x_bnds[i]) - exp(kscipai * t_aux.x_bnds[i+1]));
+    end;
+
+    # compute the fs and fs_abs matrices
+    for i in eachindex(Θ_AZI)
+        view(sunsa.fs,:,i) .= sunsa.Cs_incl .+ sunsa.Ss_incl .* cosd(Θ_AZI[i]);
+    end;
+    sunsa.fs ./= cosd(sunst.sza);
+    sunsa.fs_abs .= abs.(sunsa.fs);
+    mul!(sunsa.fs_abs_mean, sunsa.fs_abs', t_aux.p_incl);
+    for i in eachindex(Θ_INCL)
+        view(sunsa.fs_cos²_incl,i,:) .= view(sunsa.fs,i,:) * cosd(Θ_INCL[i]) ^ 2;
+    end;
+
+    return nothing
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2023-Oct-10: add function sun_geometry! (run per solar zenith angle)
 #     2023-Oct-11: compute canopy layer scattering, reflectance, and transmittance
 #     2023-Oct-14: do nothing if sza > 89 or LAI <= 0

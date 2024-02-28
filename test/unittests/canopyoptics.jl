@@ -71,6 +71,7 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
 
         @test spac.canopy.sun_geometry.s_aux.ks >= 0;
@@ -91,7 +92,9 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
+        CO.sensor_geometry_aux!(config, spac);
         CO.sensor_geometry!(config, spac);
 
         @test spac.canopy.sensor_geometry.s_aux.ko >= 0;
@@ -110,6 +113,7 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
         CO.shortwave_radiation!(config, spac);
 
@@ -154,8 +158,10 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
         CO.shortwave_radiation!(config, spac);
+        CO.sensor_geometry_aux!(config, spac);
         CO.sensor_geometry!(config, spac);
         CO.reflection_spectrum!(config, spac);
 
@@ -176,8 +182,10 @@ import Emerald.EmeraldLand.SPAC
         end;
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
         CO.shortwave_radiation!(config, spac);
+        CO.sensor_geometry_aux!(config, spac);
         CO.sensor_geometry!(config, spac);
         CO.fluorescence_spectrum!(config, spac);
 

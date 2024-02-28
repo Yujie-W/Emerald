@@ -2,6 +2,46 @@
 
 #######################################################################################################################################################################################################
 #
+# Changes to this function
+# General
+#     2024-Feb-27: add function canopy_structure_aux! to update the trait-dependent auxiliary variables for canopy structure (to call in t_aux!)
+#
+#######################################################################################################################################################################################################
+"""
+
+    canopy_structure_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT}
+
+Update the trait-dependent auxiliary variables for canopy structure, given
+- `config` SPAC configuration
+- `can` MultiLayerCanopy
+
+"""
+function canopy_structure_aux! end;
+
+canopy_structure_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = canopy_structure_aux!(config, can.structure.trait, can.structure.t_aux);
+
+canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}, t_aux::CanopyStructureTDAuxil{FT}) where {FT} = (
+    (; Θ_INCL, Θ_INCL_BNDS) = config;
+
+    # compute the probability of leaf inclination angles based on lidf
+    for i in eachindex(t_aux.p_incl)
+        t_aux.p_incl[i] = lidf_cdf(trait.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(trait.lidf, Θ_INCL_BNDS[i,1]);
+    end;
+
+    # compute the weighed average of the leaf inclination angle distribution
+    t_aux.bf = 0;
+    for i in eachindex(Θ_INCL)
+        t_aux.bf += t_aux.p_incl[i] * cosd(Θ_INCL[i]) ^ 2;;
+    end;
+    t_aux.ddb = (1 + t_aux.bf) / 2;
+    t_aux.ddf = (1 - t_aux.bf) / 2;
+
+    return nothing
+);
+
+
+#######################################################################################################################################################################################################
+#
 # Changes to this file
 # General
 #     2023-Oct-10: add function canopy_structure! (run only once per inclination angle distribution)
