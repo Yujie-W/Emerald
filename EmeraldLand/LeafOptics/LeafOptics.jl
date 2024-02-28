@@ -3,6 +3,7 @@ module LeafOptics
 using SpecialFunctions: expint
 
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
+using ..EmeraldUtility.StructEqual: sync_struct!
 
 using ..Namespace: LeafBio, LeafBioState, LeafBioTrait
 using ..Namespace: BulkSPAC, SPACConfiguration
@@ -58,6 +59,7 @@ end;
 # General
 #     2022-Jun-29: add method for BulkSPAC
 #     2024-Feb-22: do nothing if lai is zero
+#     2024-Feb-28: support VERTICAL_BIO feature to update leaf spectra from top leaf
 #
 #######################################################################################################################################################################################################
 """
@@ -75,6 +77,19 @@ function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     end;
 
     # update leaf reflectance and transmittance only if LAI > 0
+    # use top leaf to update the rest
+    (; VERTICAL_BIO) = config;
+    if !VERTICAL_BIO
+        topleaf = spac.plant.leaves[end];
+        leaf_spectra!(config, topleaf.bio, topleaf.capacitor.state.v_storage);
+        for leaf in spac.plant.leaves[1:end-1]
+            sync_struct!(topleaf.bio, leaf.bio);
+        end;
+
+        return nothing
+    end;
+
+    # update all leaves
     for leaf in spac.plant.leaves
         leaf_spectra!(config, leaf.bio, leaf.capacitor.state.v_storage);
     end;

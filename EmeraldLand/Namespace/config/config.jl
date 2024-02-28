@@ -22,6 +22,7 @@
 #     2023-Oct-14: add field ENABLE_REF
 #     2024-Feb-27: add field HOT_SPOT and SOIL_ALBEDO
 #     2024-Feb-27: add constructor function to create the configuration using customized settings
+#     2024-Feb-28: add field VERTICAL_BIO
 #
 #######################################################################################################################################################################################################
 """
@@ -57,6 +58,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     HOT_SPOT::FT = 0.05
     "Soil albedo method"
     SOIL_ALBEDO::Union{SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
+    "Vertical distribution of leaf biophysical properties (if false, run leaf_spectra! only once)"
+    VERTICAL_BIO::Bool = false
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
     "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
