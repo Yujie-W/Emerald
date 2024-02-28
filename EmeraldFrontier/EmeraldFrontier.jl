@@ -5,6 +5,7 @@ using ProgressMeter: @showprogress
 
 using NetcdfIO: read_nc, save_nc!
 
+using ..EmeraldData.GlobalDatasets: grid_spac
 using ..EmeraldData.WeatherDrivers: weather_driver_file
 using ..EmeraldLand.Namespace: BulkSPAC, SPACConfiguration
 using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PAR, PPAR, T_VEG, ΦDFNP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF
@@ -25,7 +26,6 @@ DF_VARIABLES   = ["F_H2O", "F_CO2", "F_GPP", "BETA", "SIF683", "SIF740", "SIF757
 include("config.jl");
 include("driver.jl");
 include("simulation.jl");
-include("spac.jl");
 
 
 end; # EmeraldFrontier

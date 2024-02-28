@@ -39,27 +39,6 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     df_vpd::FT = dfr.VPD;
     df_wnd::FT = dfr.WIND;
 
-    # prescribe soil water contents and leaf temperature (for first time step only)
-    if initialize_state
-        df_tlf::FT = dfr.T_LEAF;
-        df_ts1::FT = dfr.T_SOIL_1;
-        df_ts2::FT = dfr.T_SOIL_2;
-        df_ts3::FT = dfr.T_SOIL_3;
-        df_ts4::FT = dfr.T_SOIL_4;
-        df_sw1::FT = dfr.SWC_1;
-        df_sw2::FT = dfr.SWC_2;
-        df_sw3::FT = dfr.SWC_3;
-        df_sw4::FT = dfr.SWC_4;
-
-        # adjust optimum t based on the first known temperature
-        spac.plant.memory.t_history = FT[max(df_tar, df_tlf)];
-        prescribe_traits!(config, spac; t_clm = max(df_tar, df_tlf), t_leaf = max(df_tar, df_tlf));
-        prescribe_soil!(spac; swcs = (df_sw1, df_sw2, df_sw3, df_sw4), t_soils = (df_ts1, df_ts2, df_ts3, df_ts4));
-    else
-        # adjust optimum t based on 10 day moving average skin temperature
-        prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.t_history));
-    end;
-
     # prescribe the precipitation related parameters
     spac.meteo.rain = df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
     spac.meteo.t_precip = df_tar;
@@ -90,6 +69,28 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
         spac.plant.memory.ci = df_cli;
     end;
 
+    # prescribe soil water contents and leaf temperature and initialize the spac (for first time step only)
+    if initialize_state
+        df_tlf::FT = dfr.T_LEAF;
+        df_ts1::FT = dfr.T_SOIL_1;
+        df_ts2::FT = dfr.T_SOIL_2;
+        df_ts3::FT = dfr.T_SOIL_3;
+        df_ts4::FT = dfr.T_SOIL_4;
+        df_sw1::FT = dfr.SWC_1;
+        df_sw2::FT = dfr.SWC_2;
+        df_sw3::FT = dfr.SWC_3;
+        df_sw4::FT = dfr.SWC_4;
+
+        # adjust optimum t based on the first known temperature
+        spac.plant.memory.t_history = FT[max(df_tar, df_tlf)];
+        prescribe_traits!(config, spac; t_clm = max(df_tar, df_tlf), t_leaf = max(df_tar, df_tlf));
+        prescribe_soil!(spac; swcs = (df_sw1, df_sw2, df_sw3, df_sw4), t_soils = (df_ts1, df_ts2, df_ts3, df_ts4));
+        initialize_spac!(config, spac);
+    else
+        # adjust optimum t based on 10 day moving average skin temperature
+        prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.t_history));
+    end;
+
     # update environmental conditions
     for air in spac.airs
         air.state.p_air = df_atm;
@@ -107,7 +108,8 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     sza = solar_zenith_angle(spac.info.lat, FT(df_doy));
     spac.canopy.sun_geometry.state.sza = (df_dir + df_dif > 10) ? min(sza, 88.999) : sza;
 
-    if trigger_chl || trigger_lai || trigger_cli
+    # run the t_aux! and dull_aux! functions if any of the LAI, CHL, or CI changes and initialize_state is false
+    if (trigger_chl || trigger_lai || trigger_cli) && !initialize_state
         t_aux!(config, spac.canopy);
         dull_aux!(config, spac);
     end;
@@ -137,12 +139,12 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :)
+    simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :)
     simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT}
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
-- `gmdict` GriddingMachine dict for site information
+- `gm_dict` GriddingMachine dict for site information
 - `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
 - `initialize_state` Initial state of spac: if is a bool, load the first data from the weather driver
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
@@ -156,10 +158,10 @@ The second method can be used to run externally prepared config, spac, and weath
 """
 function simulation! end;
 
-simulation!(wd_tag::String, gmdict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
-    config = spac_config(gmdict);
-    spac = spac_struct(gmdict, config);
-    wdf = weather_driver(wd_tag, gmdict; appending = appending);
+simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
+    config = spac_config(gm_dict);
+    spac = grid_spac(config, gm_dict);
+    wdf = weather_driver(wd_tag, gm_dict; appending = appending);
 
     simulation!(config, spac, wdf; initialize_state = initialize_state, saving = saving, selection = selection);
 

@@ -12,7 +12,7 @@ using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using NetcdfIO: append_nc!, create_nc!, grow_nc!, read_nc
 
 using ..EmeraldData.WeatherDrivers: ERA5_FOLDER, ERA5SingleLevelsDriver
-using ..EmeraldData.GlobalDatasets: LandDatasets, grid_dict, query_griddingmachine_data
+using ..EmeraldData.GlobalDatasets: LandDatasets, grid_dict, grid_spac, prescribe_gm_wd_data!, query_griddingmachine_data
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration
 using ..EmeraldLand.Namespace: sync_state!
@@ -29,9 +29,6 @@ using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 RESULT_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/simulations";
 SETUP_FOLDER  = "/home/wyujie/DATASERVER/model/CLIMA/LAND/setups";
 CACHE_CONFIG  = nothing;
-CACHE_SPAC    = nothing;
-CACHE_STATE   = nothing;
-
 
 include("setup.jl");
 include("threads.jl");

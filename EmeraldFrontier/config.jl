@@ -7,15 +7,15 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_config(gmdict::Dict)
+    spac_config(gm_dict::Dict)
 
 Create a SPAC configuration struct, given
-- `gmdict` Dictionary of GriddingMachine data in a grid
+- `gm_dict` Dictionary of GriddingMachine data in a grid
 
 """
-function spac_config(gmdict::Dict)
-    config = SPACConfiguration(gmdict["FT"]);
-    config.MESSAGE_LEVEL = gmdict["MESSAGE_LEVEL"];
+function spac_config(gm_dict::Dict)
+    config = SPACConfiguration(gm_dict["FT"]);
+    config.MESSAGE_LEVEL = gm_dict["MESSAGE_LEVEL"];
 
     return config
 end;

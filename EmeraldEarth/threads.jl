@@ -11,7 +11,7 @@
 
 Add processors to run code in multiple threadings, given
 - `threads` Number of threads
-- `FT` Floating type for the CACHE_SPAC (default is Float64)
+- `FT` Floating type for the SPAC (default is Float64)
 
 """
 function add_threads!(threads::Int, FT::DataType = Float64)
