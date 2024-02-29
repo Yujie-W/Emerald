@@ -19,22 +19,37 @@ if gethostname()[1:5] == "curry"
     #     wdi: weather drivers snapshot matrix
     #     mss: initial states snapshot matrix
     dts = EmeraldData.GlobalDatasets.LandDatasets{FT}(GMDATA_VER, 2019);
-    gms = EmeraldData.GlobalDatasets.grid_dict_mat(dts);
-    wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1);
+    gms = EmeraldData.GlobalDatasets.grid_dict_mat(dts; vegetation_only = true);
+    wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1, 1);
     iss = EmeraldData.WeatherDrivers.initial_soil_skin_states(WDRIVER_VER, 2019, 1, 1);
     wdi = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
     mss = EmeraldData.WeatherDrivers.initial_states_snapshot(iss);
 
-    # use multiple threads on curry
+    # use multiple threads on curry and initialize the states matrix with multiple threads
     EmeraldEarth.add_threads!(32, FT);
-
-    # prepare the initial states matrix
     sts = EmeraldEarth.initial_states(gms, wdi, mss);
 
+    # prepare the initial states matrix
+    # TODO: create a function to load the first snapshot of the weather drivers (wdi) to save time
 
-    gm11 = gms[1,1];
-    wd11 = wdi[1,1];
-    st11 = deepcopy(sts[1,1]);
+
+
+
+    EmeraldEarth.global_simulations!(gms, wdi, sts; single_thread = true);
+
+    new_sts = EmeraldEarth.global_simulations!(gms, wdi, sts);
+
+
+
+begin
+    i = 1;
+    j = 71;
+    gmij = gms[i,j];
+    wdij = wdi[i,j];
+    ssij = mss[i,j];
+    stij = deepcopy(sts[i,j]);
+    EmeraldEarth.grid_simulation!(gmij, wdij, stij);
+end;
 
 
     begin

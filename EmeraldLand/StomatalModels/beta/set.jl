@@ -11,6 +11,7 @@
 #     2022-Nov-18: use root K to weigh the beta among root layers
 #     2023-Mar-27: weigh the beta among root layers only if flow rate is positive (if all flows are negative, beta = 1)
 #     2023-Aug-27: add nan check for beta calculation of empirical models
+#     2024-Feb-29: add LAI = 0 controller
 # Bug fixes
 #     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaf, β, β.PARAM_X) as I forgot to write β_factor! before `()`
 #
@@ -29,6 +30,11 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 function β_factor! end;
 
 β_factor!(spac::BulkSPAC{FT}) where {FT} = (
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # update the beta factor for the leaves only if the LAI is positive
     leaves = spac.plant.leaves;
     roots = spac.plant.roots;
     soils = spac.soils;
@@ -42,8 +48,16 @@ function β_factor! end;
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = (
+    if leaf.xylem.trait.area <= 0
+        return nothing
+    end;
+
+    # update the beta factor for the leaf only if the LAI is positive
     β_factor!(roots, soils, leaf, sm.β);
+
+    return nothing
+);
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
 
