@@ -11,7 +11,7 @@ using ProgressMeter: @showprogress
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using NetcdfIO: append_nc!, create_nc!, grow_nc!, read_nc
 
-using ..EmeraldData.WeatherDrivers: ERA5_FOLDER, ERA5SingleLevelsDriver
+using ..EmeraldData.WeatherDrivers: ERA5_FOLDER, ERA5SingleLevelsDriver, dict_contains_nan
 using ..EmeraldData.GlobalDatasets: LandDatasets, grid_dict, grid_spac, prescribe_gm_wd_data!, query_griddingmachine_data
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration

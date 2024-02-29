@@ -29,6 +29,7 @@ end;
 #     2024-Feb-23: add function to initialize the state based on the gridding machine, weather driver, and initial state
 #     2024-Feb-23: set up SAI as well
 #     2024-Feb-28: move some prescribe gm, wd, and ss functions to EmeraldData
+#     2024-Feb-29: if any of gm_dict or ss_dict contains NaN, return nothing
 #
 #######################################################################################################################################################################################################
 """
@@ -47,6 +48,19 @@ function initial_state end;
 initial_state(gm_dict::Nothing, wd_dict::Dict{String,Any}, ss_dict::Dict{String,Any}) = nothing;
 
 initial_state(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Dict{String,Any}) = (
+    # if any ss_dict contains NaN, return nothing
+    if dict_contains_nan(ss_dict)
+        #@warn "Initial states contain NaN, skipping the simulation..." gm_dict["LATITUDE"] gm_dict["LONGITUDE"];
+        return nothing
+    end;
+
+    # if any of wd_dict contains NaN, return nothing
+    if dict_contains_nan(wd_dict)
+        #@warn "Weather driver contains NaN, skipping the simulation..." gm_dict["LATITUDE"] gm_dict["LONGITUDE"];
+        return nothing
+    end;
+
+    # continue only if wd_dict and ss_dict do not have NaN
     FT = gm_dict["FT"];
     spac = grid_spac(CACHE_CONFIG, gm_dict);
     prescribe_gm_wd_data!(CACHE_CONFIG, spac, gm_dict, wd_dict, ss_dict);
