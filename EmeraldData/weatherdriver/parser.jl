@@ -3,27 +3,40 @@
 # Changes to this function
 # General
 #     2024-Feb-23: add function to preload weather drivers based on the tag
+#     2024-Feb-29: add method to load weather drivers at a specific time index rather than loading all data
 #
 #######################################################################################################################################################################################################
 """
 
-    preloaded_weather_drivers(wd_tag::String, year::Int, nx::Int; prescribe_soil::Bool = false)
+    preloaded_weather_drivers(wd_tag::String, year::Int, nx::Int)
+    preloaded_weather_drivers(wd_tag::String, year::Int, nx::Int, ind::Int)
 
 Preload weather drivers, given
 - `wd_tag` Weather driver version tag
 - `year` Year of the data
 - `nx` Number of grids in the 1 degree lat/lon
-- `prescribe_soil` Whether to prescribe soil water and temperature conditions, default is false (not prescribing)
+- `ind` Time index of the data
 
 """
-function preloaded_weather_drivers(wd_tag::String, year::Int, nx::Int; prescribe_soil::Bool = false)
+function preloaded_weather_drivers end;
+
+preloaded_weather_drivers(wd_tag::String, year::Int, nx::Int) = (
     @assert wd_tag in ["wd1"] "Weather driver tag $(wd_tag) is not supported...";
 
     # wd1 is the ERA5 single level driver
     if wd_tag == "wd1"
-        return era5_weather_drivers(ERA5SingleLevelsDriver(), year, nx; prescribe_soil = prescribe_soil)
+        return era5_weather_drivers(ERA5SingleLevelsDriver(), year, nx)
     end;
-end;
+);
+
+preloaded_weather_drivers(wd_tag::String, year::Int, nx::Int, ind::Int) = (
+    @assert wd_tag in ["wd1"] "Weather driver tag $(wd_tag) is not supported...";
+
+    # wd1 is the ERA5 single level driver
+    if wd_tag == "wd1"
+        return era5_weather_drivers(ERA5SingleLevelsDriver(), year, nx, ind)
+    end;
+);
 
 
 #######################################################################################################################################################################################################
