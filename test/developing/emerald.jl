@@ -22,57 +22,50 @@ if gethostname()[1:5] == "curry"
     gms = EmeraldData.GlobalDatasets.grid_dict_mat(dts; vegetation_only = true);
     wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1, 1);
     iss = EmeraldData.WeatherDrivers.initial_soil_skin_states(WDRIVER_VER, 2019, 1, 1);
-    wdi = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
+    wd1 = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
     mss = EmeraldData.WeatherDrivers.initial_states_snapshot(iss);
 
-    # use multiple threads on curry and initialize the states matrix with multiple threads
-    EmeraldEarth.add_threads!(32, FT);
-    sts = EmeraldEarth.initial_states(gms, wdi, mss);
+    # use multiple threads on curry and initialize the states matrix with multiple threads and run the model for one time step
+    EmeraldEarth.add_threads!(160, FT);
+    ini_sts = EmeraldEarth.initial_states(gms, wd1, mss);
+    sts_2nd = EmeraldEarth.global_simulations!(gms, wd1, ini_sts);
 
-    # prepare the initial states matrix
-    # TODO: create a function to load the first snapshot of the weather drivers (wdi) to save time
-
-
-
-
-    EmeraldEarth.global_simulations!(gms, wdi, sts; single_thread = true);
-
-    new_sts = EmeraldEarth.global_simulations!(gms, wdi, sts);
+    # run the model for the second time step
+    wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1, 2);
+    wd2 = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
+    sts_3rd = EmeraldEarth.global_simulations!(gms, wd2, sts_2nd);
+    EmeraldEarth.global_simulations!(gms, wd2, sts_2nd; single_thread = true, single_thread_regions = (:,:));
 
 
 
-begin
-    i = 1;
-    j = 71;
-    gmij = gms[i,j];
-    wdij = wdi[i,j];
-    ssij = mss[i,j];
-    stij = deepcopy(sts[i,j]);
-    EmeraldEarth.grid_simulation!(gmij, wdij, stij);
-end;
 
 
-    begin
-        EmeraldLand.SPAC.initialize_spac!(EmeraldEarth.CACHE_CONFIG, EmeraldEarth.CACHE_SPAC, st11);
-        EmeraldEarth.prescribe_traits_environment!(gm11, wd11);
-        EmeraldLand.SPAC.spac!(EmeraldEarth.CACHE_CONFIG, EmeraldEarth.CACHE_SPAC, 3600);
+    # run the global simulations for 10 time steps
+    for i in 1:10
+        @time wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1, i);
+        @time wdi = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
+        @time new_sts = EmeraldEarth.global_simulations!(gms, wdi, new_sts);
     end;
 
 
-    st11 = EmeraldEarth.grid_simulation!(gm11, wd11, st11);
+
+
+    EmeraldEarth.global_simulations!(gms, wd1, ini_sts);
+    EmeraldEarth.global_simulations!(gms, wd1, ini_sts; single_thread = true, single_thread_regions = (90:119,:));
+
+    begin
+        i = 97;
+        j = 130;
+        gmij = gms[i,j];
+        wdij = wdi[i,j];
+        ssij = mss[i,j];
+        stij = deepcopy(sts[i,j]);
+        EmeraldEarth.grid_simulation!(gmij, wdij, stij);
+    end;
 
 
 
-    EmeraldEarth.grid_simulation!(gms[1,1], wdi[1,1], sts[1,1]);
 
-
-    wdi = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
-
-
-
-
-    # preload the weather driver
-    wds = EmeraldEarth.weather_drivers(dts, wdr);
 
     # run global scale simulation for one day
     rm("global-test.nc"; force = true);

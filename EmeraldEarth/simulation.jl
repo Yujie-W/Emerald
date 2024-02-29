@@ -4,6 +4,7 @@
 # General
 #     2024-Feb-28: redesign the global simulations
 #     2024-Feb-28: add option single_thread for debugging purpose
+#     2024-Feb-29: add option single_thread_regions for debugging purpose
 #
 #######################################################################################################################################################################################################
 """
@@ -12,27 +13,30 @@
                 gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
                 wd_mat::Matrix{Dict{String,Any}},
                 st_mat::Matrix{Union{Nothing,BulkSPACStates{FT}}};
-                single_thread::Bool = false) where {FT}
+                single_thread::Bool = false,
+                single_thread_regions::Tuple = (:,:)) where {FT}
 
 Run global simulations per time step, given
 - `gm_mat` GriddingMachine inputs matrix
 - `wd_mat` Weather drivers matrix
 - `st_mat` Initial states matrix
 - `single_thread` Run the simulations in single thread mode for debugging purpose
+- `single_thread_regions` Regions to run the simulations in single thread mode
 
 """
 function global_simulations!(
             gm_mat::Matrix{Union{Nothing,Dict{String,Any}}},
             wd_mat::Matrix{Dict{String,Any}},
             st_mat::Matrix{Union{Nothing,BulkSPACStates{FT}}};
-            single_thread::Bool = false) where {FT}
+            single_thread::Bool = false,
+            single_thread_regions::Tuple = (:,:)) where {FT}
     if single_thread
-        for i in axes(gm_mat, 1), j in axes(gm_mat, 2)
+        for i in axes(gm_mat,1)[single_thread_regions[1]], j in axes(gm_mat,2)[single_thread_regions[2]]
             @tinfo "Running simulation for grid $(i), $(j)";
             gm_dict = gm_mat[i,j];
             wd_dict = wd_mat[i,j];
             state = st_mat[i,j];
-            new_state = grid_simulation!(gm_dict, wd_dict, state);
+            grid_simulation!(gm_dict, wd_dict, state);
         end;
 
         return nothing

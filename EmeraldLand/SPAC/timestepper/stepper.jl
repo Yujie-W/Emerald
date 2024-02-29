@@ -10,6 +10,7 @@
 #     2022-Nov-18: add option p_on to enable/disable plant flow and pressure profiles
 #     2023-Jun-15: add judge for root connection
 #     2023-Oct-18: redesign the logic flow to call the sub step functions in the time stepper
+#     2024-Feb-29: when totoal count exceeds 1000, break the loop with an error (this need to be set as a BUG instead of warning)
 #
 #######################################################################################################################################################################################################
 """
@@ -35,8 +36,8 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
         # if total count exceeds 1000, break the loop
         count += 1;
         if (count > 1000) && (δt_step < 0.01) && (δt_remain > 10)
-            @warn "Number of steppers exceeds 1000, breaking..." spac.canopy.structure.trait.lai δt_remain δt_step;
-            break;
+            @error "Number of steppers exceeds 1000, breaking..." δt_remain δt_step;
+            return error("Number of steppers exceeds 1000!")
         end;
     end;
 
