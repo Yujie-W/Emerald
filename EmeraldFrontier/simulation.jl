@@ -14,12 +14,13 @@
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; t_on::Bool = true, θ_on::Bool = true) where {FT}
+    prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}
 
 Prescribe traits and environmental conditions, given
 - `config` `SPACConfiguration` type SPAC configuration
 - `spac` `BulkSPAC` type SPAC
 - `dfr` `DataFrameRow` type weather driver
+- `initialize_state` If true, initialize the energy state of spac
 
 """
 function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}

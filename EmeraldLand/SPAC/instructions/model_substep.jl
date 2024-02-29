@@ -5,6 +5,7 @@
 # Changes to the function
 # General
 #     2024-Feb-27: add function substep_preparations! to run the steps to compute partial deriative of the state variables
+#     2024-Feb-28: add β_factor! to compute β factor before running plant_photosynthesis! and stomatal_conductance_profile! (for empirical stomatal models)
 #
 #######################################################################################################################################################################################################
 """
@@ -22,6 +23,7 @@ function substep_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
     plant_flow_profile!(config, spac);
     plant_pressure_profile!(config, spac);
     soil_profiles!(config, spac);
+    β_factor!(spac);
     plant_photosynthesis!(spac, GCO₂Mode());
     stomatal_conductance_profile!(spac);
     spac_energy_flow!(spac);

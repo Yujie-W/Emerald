@@ -10,14 +10,14 @@
 #######################################################################################################################################################################################################
 """
 
-    grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}, ) where {FT}
+    grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}) where {FT}
 
 Create a un-initialized SPAC using the data from a grid (CHL, VCMAX25, LAI, and CI are not prescribed as these changes with time), given
 - `config` Configurations for SPAC
 - `gm_dict` Dictionary of GriddingMachine data in a grid
 
 """
-function grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}, ) where {FT}
+function grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}) where {FT}
     #
     # TODO: add support to C4 photosynthesis
     #
