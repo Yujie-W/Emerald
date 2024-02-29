@@ -9,6 +9,7 @@
 #     2022-Feb-01: add method for WeibullVC
 #     2022-Feb-01: add method for ComplexVC
 #     2022-Oct-21: make sure relative K does not exceed 1
+#     2024-Feb-29: set the minimum value of relative K to eps(FT)
 #
 #######################################################################################################################################################################################################
 """
@@ -42,7 +43,7 @@ relative_xylem_k(vc::LogisticVC{FT}, p_25::FT) where {FT} = (
         return FT(1)
     end;
 
-    return min(1, max(0, (1 - 1/(1 + vc.A * exp(vc.B * p_25))) * (vc.A + 1) / vc.A))
+    return min(1, max(eps(FT), (1 - 1/(1 + vc.A * exp(vc.B * p_25))) * (vc.A + 1) / vc.A))
 );
 
 relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT} = (
@@ -50,7 +51,7 @@ relative_xylem_k(vc::PowerVC{FT}, p_25::FT) where {FT} = (
         return FT(1)
     end;
 
-    return min(1, max(0, 1 / (1 + vc.A * (-p_25) ^ vc.B)))
+    return min(1, max(eps(FT), 1 / (1 + vc.A * (-p_25) ^ vc.B)))
 );
 
 relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT} = (
@@ -58,7 +59,7 @@ relative_xylem_k(vc::WeibullVC{FT}, p_25::FT) where {FT} = (
         return FT(1)
     end;
 
-    return min(1, max(0, exp(-1 * (-p_25 / vc.B) ^ vc.C)))
+    return min(1, max(eps(FT), exp(-1 * (-p_25 / vc.B) ^ vc.C)))
 );
 
 
