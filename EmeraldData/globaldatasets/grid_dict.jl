@@ -8,6 +8,7 @@
 #     2024-Feb-22: separate the grid_dict function from the gm_grids function that prepare all the grids
 #     2024-Feb-23: use 0 for the plant-related fields for non-vegetated land
 #     2024-Feb-23: set SAI to be 1/10 of the maximum LAI
+#     2024-Feb-29: veritfy the GriddingMachine data dictionary before returning
 #
 #######################################################################################################################################################################################################
 """
@@ -41,7 +42,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
 
     # return the grid dictionary if the grid is masked as soil
     if dts.mask_soil[ilon,ilat]
-        return Dict{String,Any}(
+        gm_dict = Dict{String,Any}(
                     "CANOPY_HEIGHT" => 0,
                     "CHLOROPHYLL"   => [0],
                     "CLUMPING"      => [1],
@@ -76,6 +77,9 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                     "τ_NIR_C4"      => 0,
                     "τ_PAR_C3"      => 0,
                     "τ_PAR_C4"      => 0);
+        verify_grid_dict!(gm_dict);
+
+        return gm_dict
     end;
 
     # else return the grid dictionary if the grid is masked as plant
@@ -95,23 +99,26 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
 
     # compute g1 for Medlyn model
     ind_c3 = [2:14;16;17];
-    ind_c4 = [15];
+    ind_c4 = 15;
 
     g1_c3_medlyn = CLM5_PFTG[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
-    g1_c4_medlyn = CLM5_PFTG[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
     if isnan(g1_c3_medlyn) g1_c3_medlyn = nanmean(CLM5_PFTG[ind_c3]) end;
-    if isnan(g1_c4_medlyn) g1_c4_medlyn = nanmean(CLM5_PFTG[ind_c4]) end;
+    g1_c4_medlyn = CLM5_PFTG[ind_c4];
 
     ρ_par_c3 = CLM5_ρPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     τ_par_c3 = CLM5_τPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     ρ_nir_c3 = CLM5_ρNIR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     τ_nir_c3 = CLM5_τNIR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
-    ρ_par_c4 = CLM5_ρPAR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
-    τ_par_c4 = CLM5_τPAR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
-    ρ_nir_c4 = CLM5_ρNIR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
-    τ_nir_c4 = CLM5_τNIR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
+    if isnan(ρ_par_c3) ρ_par_c3 = nanmean(CLM5_ρPAR[ind_c3]) end;
+    if isnan(τ_par_c3) τ_par_c3 = nanmean(CLM5_τPAR[ind_c3]) end;
+    if isnan(ρ_nir_c3) ρ_nir_c3 = nanmean(CLM5_ρNIR[ind_c3]) end;
+    if isnan(τ_nir_c3) τ_nir_c3 = nanmean(CLM5_τNIR[ind_c3]) end;
+    ρ_par_c4 = CLM5_ρPAR[ind_c4];
+    τ_par_c4 = CLM5_τPAR[ind_c4];
+    ρ_nir_c4 = CLM5_ρNIR[ind_c4];
+    τ_nir_c4 = CLM5_τNIR[ind_c4];
 
-    return Dict{String,Any}(
+    gm_dict = Dict{String,Any}(
                 "CANOPY_HEIGHT" => max(0.1, zc),
                 "CHLOROPHYLL"   => chls,
                 "CLUMPING"      => cis,
@@ -146,6 +153,9 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                 "τ_NIR_C4"      => τ_nir_c4,
                 "τ_PAR_C3"      => τ_par_c3,
                 "τ_PAR_C4"      => τ_par_c4);
+    verify_grid_dict!(gm_dict);
+
+    return gm_dict
 );
 
 grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64, ccs::DataFrame = CCS) = (
@@ -187,23 +197,26 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
 
     # compute g1 for Medlyn model
     ind_c3 = [2:14;16;17];
-    ind_c4 = [15];
+    ind_c4 = 15;
 
     g1_c3_medlyn = CLM5_PFTG[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
-    g1_c4_medlyn = CLM5_PFTG[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
     if isnan(g1_c3_medlyn) g1_c3_medlyn = nanmean(CLM5_PFTG[ind_c3]) end;
-    if isnan(g1_c4_medlyn) g1_c4_medlyn = nanmean(CLM5_PFTG[ind_c4]) end;
+    g1_c4_medlyn = CLM5_PFTG[ind_c4];
 
     ρ_par_c3 = CLM5_ρPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     τ_par_c3 = CLM5_τPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     ρ_nir_c3 = CLM5_ρNIR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     τ_nir_c3 = CLM5_τNIR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
-    ρ_par_c4 = CLM5_ρPAR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
-    τ_par_c4 = CLM5_τPAR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
-    ρ_nir_c4 = CLM5_ρNIR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
-    τ_nir_c4 = CLM5_τNIR[ind_c4]' * pfts[ind_c4] / sum(pfts[ind_c4]);
+    if isnan(ρ_par_c3) ρ_par_c3 = nanmean(CLM5_ρPAR[ind_c3]) end;
+    if isnan(τ_par_c3) τ_par_c3 = nanmean(CLM5_τPAR[ind_c3]) end;
+    if isnan(ρ_nir_c3) ρ_nir_c3 = nanmean(CLM5_ρNIR[ind_c3]) end;
+    if isnan(τ_nir_c3) τ_nir_c3 = nanmean(CLM5_τNIR[ind_c3]) end;
+    ρ_par_c4 = CLM5_ρPAR[ind_c4];
+    τ_par_c4 = CLM5_τPAR[ind_c4];
+    ρ_nir_c4 = CLM5_ρNIR[ind_c4];
+    τ_nir_c4 = CLM5_τNIR[ind_c4];
 
-    return Dict{String,Any}(
+    gm_dict = Dict{String,Any}(
                 "CANOPY_HEIGHT" => max(0.1, zc),
                 "CHLOROPHYLL"   => chls,
                 "CLUMPING"      => cis,
@@ -238,7 +251,43 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
                 "τ_NIR_C4"      => τ_nir_c4,
                 "τ_PAR_C3"      => τ_par_c3,
                 "τ_PAR_C4"      => τ_par_c4);
+    verify_grid_dict!(gm_dict);
+
+    return gm_dict
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Feb-29: add function to vertify the GriddingMachine data dictionary
+#
+#######################################################################################################################################################################################################
+"""
+
+    verify_grid_dict!(gm_dict::Dict{String,Any})
+
+Verify the dictionary per key and value to make sure there is not NaN, given
+- `gm_dict` GriddingMachine data dictionary
+
+"""
+function verify_grid_dict!(gm_dict::Dict{String,Any})
+    # verify the GriddingMachine data dictionary per key and value to make sure there is not NaN
+    for (key, value) in gm_dict
+        if typeof(value) <: Number
+            if isnan(value)
+                return error("Key $key is NaN!");
+            end;
+        elseif typeof(value) <: AbstractArray
+            if any(isnan.(value))
+                return error("Key $key contains NaN!");
+            end;
+        end;
+    end;
+
+    return nothing
+end;
 
 
 #######################################################################################################################################################################################################
@@ -248,24 +297,32 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
 #     2023-Mar-11: migrate from research repo to Emerald
 #     2023-Jun-15: add non-vegetated land in global simulations
 #     2024-Feb-23: rename the function to grid_dict_mat after separating the grid_dict function
+#     2024-Feb-29: add option vegetation_only to return the matrix with only the vegetated grids
 #
 #######################################################################################################################################################################################################
 """
 
-    grid_dict_mat(dts::LandDatasets{FT}) where {FT}
+    grid_dict_mat(dts::LandDatasets{FT}; vegetation_only::Bool = true) where {FT}
 
 Prepare a matrix of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct
+- `vegetation_only` Return the matrix with only the vegetated grids (other grids are filled with `nothing`)
 
 """
-function grid_dict_mat(dts::LandDatasets{FT}) where {FT}
+function grid_dict_mat(dts::LandDatasets{FT}; vegetation_only::Bool = true) where {FT}
     # create a matrix of GriddingMachine data
     # TODO: add a step to verify the input datasets
     @tinfo "Preparing a matrix of GriddingMachine data to work on...";
     mat_gm = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
     for ilon in axes(dts.t_lm,1), ilat in axes(dts.t_lm,2)
-        if dts.mask_spac[ilon,ilat] || dts.mask_soil[ilon,ilat]
-            mat_gm[ilon,ilat] = grid_dict(dts, ilat, ilon);
+        if vegetation_only
+            if dts.mask_spac[ilon,ilat]
+                mat_gm[ilon,ilat] = grid_dict(dts, ilat, ilon);
+            end;
+        else
+            if dts.mask_spac[ilon,ilat] || dts.mask_soil[ilon,ilat]
+                mat_gm[ilon,ilat] = grid_dict(dts, ilat, ilon);
+            end;
         end;
     end;
 
