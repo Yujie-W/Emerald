@@ -5,6 +5,8 @@
 # Changes to this function
 # General
 #     2024-Feb-27: add function canopy_structure_aux! to update the trait-dependent auxiliary variables for canopy structure (to call in t_aux!)
+#     2024-Mar-01: compute the extinction coefficients for the diffuse radiation (isotropic)
+#     2024-Mar-01: compute the fraction of ddb and ddf (relative fraction of purely backward and forward scattering)
 #
 #######################################################################################################################################################################################################
 """
@@ -28,13 +30,22 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait
         t_aux.p_incl[i] = lidf_cdf(trait.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(trait.lidf, Θ_INCL_BNDS[i,1]);
     end;
 
-    # compute the weighed average of the leaf inclination angle distribution
-    t_aux.bf = 0;
+    # compute the extinction coefficients for the diffuse radiation (isotropic)
+    t_aux.kd = 0;
     for i in eachindex(Θ_INCL)
-        t_aux.bf += t_aux.p_incl[i] * cosd(Θ_INCL[i]) ^ 2;;
+        t_aux.kd += extinction_coefficient(Θ_INCL[i]) * t_aux.p_incl[i];
     end;
-    t_aux.ddb = (1 + t_aux.bf) / 2;
-    t_aux.ddf = (1 - t_aux.bf) / 2;
+
+    # compute the weighed average of the leaf inclination angle distribution
+    t_aux.ddb = 0;
+    t_aux.ddf = 0;
+    for i in eachindex(Θ_INCL)
+        f_ada = f_adaxial(Θ_INCL[i]);
+        f_aba = 1 - f_ada;
+        f_inc = Θ_INCL[i] / 180;
+        t_aux.ddb += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl[i];
+        t_aux.ddf += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl[i];
+    end;
 
     return nothing
 );
@@ -48,6 +59,7 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait
 #     2023-Oct-11: compute longwave reflectance, transmittance, and emissivity
 #     2023-Oct-14: if LAI <= 0, do nothing
 #     2023-Oct-18: account for SAI in the canopy structure calculation
+#     2024-Mar-01: compute the layer shortwave and longwave scattering coefficients based on the new theory
 #
 #######################################################################################################################################################################################################
 """
@@ -87,13 +99,24 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    # can_str.auxil.τ_dd_layer .= exp.(-1 .* (1 .- can_str.auxil.ddf_leaf) .* can_str.trait.δlai' .* can_str.trait.ci);
-    # can_str.auxil.ρ_dd_layer .= 1 .- exp.(-1 .* can_str.auxil.ddb_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
+    #     can_str.auxil.τ_dd_layer .= exp.(-1 .* (1 .- can_str.auxil.ddf_leaf) .* can_str.trait.δlai' .* can_str.trait.ci);
+    #     can_str.auxil.ρ_dd_layer .= 1 .- exp.(-1 .* can_str.auxil.ddb_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
+    # Later, we included support to SAI as well.
+    # However, as of 2024-Feb-29, we found an issue with the equations above when LAI and SAI are big enough in a single layer that sum of reflectance and transmittance is greater than 1.
+    # Therefore, we revised the equations using calculus and the equations for the whole layer are as follows (for the transmitted and reflected light):
+    #     can_str.auxil.ρ_dd_layer = ∫_0^iCIPAI (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
+    #     can_str.auxil.τ_dd_layer = ∫_0^iCIPAI (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
+    # Then, the total transmitted radiation need to plus the radiation that has not passed though any leaf, namely τ_dd_solar.
     for i in 1:n_layer
-        k_τ_x = (can_str.trait.δlai[i] .* (1 .- can_str.auxil.ddf_leaf[:,i]) .+ can_str.trait.δsai[i] .* (1 .- can_str.auxil.ddf_stem[:,i])) .* can_str.trait.ci;
-        k_ρ_x = (can_str.trait.δlai[i] .* can_str.auxil.ddb_leaf[:,i] .+ can_str.trait.δsai[i] .* can_str.auxil.ddb_stem[:,i]) .* can_str.trait.ci;
-        can_str.auxil.τ_dd_layer[:,i] .= exp.(-1 .* k_τ_x);
-        can_str.auxil.ρ_dd_layer[:,i] .= 1 .- exp.(-1 .* k_ρ_x);
+        δlai = can_str.trait.δlai[i];
+        δsai = can_str.trait.δsai[i];
+        δpai = δlai + δsai;
+        kt_dd_x = can_str.t_aux.kd .* δpai .* can_str.trait.ci;
+        k_τ_x = (can_str.auxil.ddf_leaf[:,i] .* δlai .+ can_str.auxil.ddf_stem[:,i] .* δsai) ./ δpai;
+        k_ρ_x = (can_str.auxil.ddb_leaf[:,i] .* δlai .+ can_str.auxil.ddb_stem[:,i] .* δsai) ./ δpai;
+        τ_dd_solar = exp(-kt_dd_x);
+        can_str.auxil.τ_dd_layer[:,i] .= (1 - τ_dd_solar) .* k_τ_x .+ τ_dd_solar;
+        can_str.auxil.ρ_dd_layer[:,i] .= (1 - τ_dd_solar) .* k_ρ_x;
     end;
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)
@@ -110,14 +133,23 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     end;
 
     # compute longwave effective emissivity, reflectance, and transmittance per layer without correction (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
+    # Similar to the bug fix related to diffuse radiation, we fix the equations for the longwave radiation as well.
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
-        ipai = (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]) * can_str.trait.ci;
-        σ_lw_b = can_str.t_aux.ddb * leaf.bio.trait.ρ_lw + can_str.t_aux.ddf * leaf.bio.trait.τ_lw;
-        σ_lw_f = can_str.t_aux.ddf * leaf.bio.trait.ρ_lw + can_str.t_aux.ddb * leaf.bio.trait.τ_lw;
-        can_str.auxil.τ_lw_layer[irt] = exp(-1 * (1 - σ_lw_f) * ipai);
-        can_str.auxil.ρ_lw_layer[irt] = 1 - exp(-1 * σ_lw_b * ipai);
+        δlai = can_str.trait.δlai[irt];
+        δsai = can_str.trait.δsai[irt];
+        δpai = δlai + δsai;
+        kt_dd_x = can_str.t_aux.kd .* δpai .* can_str.trait.ci;
+        σ_leaf_b = can_str.t_aux.ddb * leaf.bio.trait.ρ_lw + can_str.t_aux.ddf * leaf.bio.trait.τ_lw;
+        σ_leaf_f = can_str.t_aux.ddf * leaf.bio.trait.ρ_lw + can_str.t_aux.ddb * leaf.bio.trait.τ_lw;
+        σ_stem_b = can_str.t_aux.ddb * leaf.bio.trait.ρ_lw;
+        σ_stem_f = can_str.t_aux.ddf * leaf.bio.trait.ρ_lw;
+        k_ρ_x = (σ_leaf_b * δlai .+ σ_stem_b * δsai) ./ δpai;
+        k_τ_x = (σ_leaf_f * δlai .+ σ_stem_f * δsai) ./ δpai;
+        τ_dd_lw = exp(-kt_dd_x);
+        can_str.auxil.τ_lw_layer[irt] = (1 - τ_dd_lw) .* k_τ_x .+ τ_dd_lw;
+        can_str.auxil.ρ_lw_layer[irt] = (1 - τ_dd_lw) .* k_ρ_x;
         can_str.auxil.ϵ_lw_layer[irt] = 1 - can_str.auxil.τ_lw_layer[irt] - can_str.auxil.ρ_lw_layer[irt];
     end;
 

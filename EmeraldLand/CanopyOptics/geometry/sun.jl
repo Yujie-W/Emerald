@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2024-Feb-27: add function sun_geometry_aux! to update the trait-dependent auxiliary variables for sun geometry (to call in step_preparations!)
+#     2024-Mar-01: compute the layer shortwave scattering fractions based on the new theory
 #
 #######################################################################################################################################################################################################
 """
@@ -47,8 +48,15 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
     sunsa.ks = t_aux.p_incl' * sunsa.ks_incl;
 
     # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
-    sunsa.sdb = (sunsa.ks + t_aux.bf) / 2;
-    sunsa.sdf = (sunsa.ks - t_aux.bf) / 2;
+    sunsa.sdb = 0;
+    sunsa.sdf = 0;
+    for i in eachindex(Θ_INCL)
+        f_ada = f_adaxial(sunst.sza, Θ_INCL[i]);
+        f_aba = 1 - f_ada;
+        f_inc = Θ_INCL[i] / 180;
+        sunsa.sdb += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl[i];
+        sunsa.sdf += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl[i];
+    end;
 
     # compute the sunlit leaf fraction
     # sunsa.ps = exp.(sunsa.ks .* trait.ci * trait.lai .* t_aux.x_bnds);
@@ -81,6 +89,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
 #     2023-Oct-11: compute canopy layer scattering, reflectance, and transmittance
 #     2023-Oct-14: do nothing if sza > 89 or LAI <= 0
 #     2023-Oct-18: account for SAI in the sun geometry calculation
+#     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
 #
 #######################################################################################################################################################################################################
 """
@@ -117,16 +126,26 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
-    # sun_geo.auxil.τ_ss_layer .= exp.(-1 .* sun_geo.s_aux.ks .* can_str.trait.δlai .* can_str.trait.ci);
-    # sun_geo.auxil.τ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdf_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
-    # sun_geo.auxil.ρ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdb_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
+    # Similarly, we computed the transmittance and reflectance for the whole layer using expotential functions
+    #     sun_geo.auxil.τ_ss_layer .= exp.(-1 .* sun_geo.s_aux.ks .* can_str.trait.δlai .* can_str.trait.ci);
+    #     sun_geo.auxil.τ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdf_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
+    #     sun_geo.auxil.ρ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdb_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
+    # Later, we included SAI as well.
+    # However, as of 2024-Feb-29, we found an issue with the equations above when LAI and SAI are big enough in a single layer that sum of reflectance and transmittance is greater than 1.
+    # Therefore, we revised the equations using calculus and the equations for the whole layer are as follows:
+    #     sun_geo.auxil.ρ_sd_layer = ∫_0^iCIPAI (sdb_leaf * δLAI + sbd_stem * δSAI) / δPAI * ks * exp(-ks * x) * dx = (sdb_leaf * δLAI + sbd_stem * δSAI) / δPAI * (1 - exp(-ks * iCIPAI))
+    #     sun_geo.auxil.τ_sd_layer = ∫_0^iCIPAI (sdf_leaf * δLAI + sdf_stem * δSAI) / δPAI * ks * exp(-ks * x) * dx = (sdf_leaf * δLAI + sdf_stem * δSAI) / δPAI * (1 - exp(-ks * iCIPAI))
+    # Similarly, we used the same logic for sensor geometry and canopy structure.
     for i in 1:n_layer
-        kt_ss_x = sun_geo.s_aux.ks .* (can_str.trait.δlai[i] + can_str.trait.δsai[i]) .* can_str.trait.ci;
-        kt_sd_x = (sun_geo.auxil.sdf_leaf[:,i] .* can_str.trait.δlai[i] .+ sun_geo.auxil.sdf_stem[:,i] .* can_str.trait.δsai[i]) .* can_str.trait.ci;
-        kr_sd_x = (sun_geo.auxil.sdb_leaf[:,i] .* can_str.trait.δlai[i] .+ sun_geo.auxil.sdb_stem[:,i] .* can_str.trait.δsai[i]) .* can_str.trait.ci;
+        δlai = can_str.trait.δlai[i];
+        δsai = can_str.trait.δsai[i];
+        δpai = δlai + δsai;
+        kt_ss_x = sun_geo.s_aux.ks .* δpai .* can_str.trait.ci;
+        kt_sd_x = (sun_geo.auxil.sdf_leaf[:,i] .* δlai .+ sun_geo.auxil.sdf_stem[:,i] .* δsai) ./ δpai;
+        kr_sd_x = (sun_geo.auxil.sdb_leaf[:,i] .* δlai .+ sun_geo.auxil.sdb_stem[:,i] .* δsai) ./ δpai;
         sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);
-        sun_geo.auxil.τ_sd_layer[:,i] .= 1 .- exp.(-1 .* kt_sd_x);
-        sun_geo.auxil.ρ_sd_layer[:,i] .= 1 .- exp.(-1 .* kr_sd_x);
+        sun_geo.auxil.τ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kt_sd_x;
+        sun_geo.auxil.ρ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kr_sd_x;
     end;
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)

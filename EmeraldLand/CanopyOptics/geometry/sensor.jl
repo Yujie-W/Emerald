@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2024-Feb-22: add function sensor_geometry_aux! to update the state-dependent auxiliary variables for sensor geometry (to call in step_remote_sensing!)
+#     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
 #
 #######################################################################################################################################################################################################
 """
@@ -88,8 +89,15 @@ sensor_geometry_aux!(
     sensa.ko = t_aux.p_incl' * sensa.ko_incl;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    sensa.dob = (sensa.ko + t_aux.bf) / 2;
-    sensa.dof = (sensa.ko - t_aux.bf) / 2;
+    sensa.dob = 0;
+    sensa.dof = 0;
+    for i in eachindex(Θ_INCL)
+        f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
+        f_aba = 1 - f_ada;
+        f_inc = Θ_INCL[i] / 180;
+        sensa.dob += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl[i];
+        sensa.dof += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl[i];
+    end;
     sensa.sob = t_aux.p_incl' * sensa.sb_incl;
     sensa.sof = t_aux.p_incl' * sensa.sf_incl;
 

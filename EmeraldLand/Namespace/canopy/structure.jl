@@ -48,6 +48,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Feb-25: add struct CanopyStructureTDAuxil
+#     2024-Mar-01: add field kd for diffuse radiation extinction coefficient (purely unabsorbed, not after reabsorption)
 #
 #######################################################################################################################################################################################################
 """
@@ -67,14 +68,15 @@ Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
     "Canopy level boundary locations"
     x_bnds::Vector{FT}
 
+    # diffuse radiation extinction coefficients
+    "Diffuse radiation extinction coefficient weight"
+    kd::FT = 0
+
     # canopy scattering coefficients
-    "Weighted sum of cos²(inclination)"
-    bf::FT = 0
     "Backward diffuse->diffuse scatter weight"
     ddb::FT = 0
     "Forward diffuse->diffuse scatter weight"
     ddf::FT = 0
-
 end;
 
 CanopyStructureTDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureTDAuxil{FT}(
