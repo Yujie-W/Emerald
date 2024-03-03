@@ -18,6 +18,7 @@ using ..Namespace: BulkSPAC, SPACConfiguration
 
 
 # functions related to canopy geometry
+include("geometry/direction.jl");
 include("geometry/extinction.jl");
 include("geometry/inclination.jl");
 include("geometry/sensor.jl");
