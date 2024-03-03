@@ -50,8 +50,6 @@ Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
     sdb::FT = 0
     "Forward direct->diffuse scatter weight"
     sdf::FT = 0
-    "Solar direction beam extinction coefficient weight (direct)"
-    ks::FT = 0
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(sza) at different inclination angles"
@@ -64,6 +62,8 @@ Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
     ks_incl::Vector{FT}
 
     # Extinction coefficient related
+    "Solar direction beam extinction coefficient weight (direct)"
+    ks::FT = 0
     "Probability of directly viewing a leaf in solar direction at different layers"
     p_sunlit::Vector{FT}
 

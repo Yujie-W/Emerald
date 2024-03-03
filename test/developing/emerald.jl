@@ -46,6 +46,15 @@ if gethostname()[1:5] == "curry"
     sts_5th = EmeraldEarth.global_simulations!(gms, wd4, sts_4th);
 
 
+    EmeraldEarth.global_simulations!(gms, wd4, sts_4th; single_thread = true, single_thread_regions = (:,111:180));
+    begin
+        i = 274;
+        j = 112;
+        gmij = gms[i,j];
+        wdij = wd4[i,j];
+        stij = deepcopy(sts_4th[i,j]);
+        EmeraldEarth.grid_simulation!(gmij, wdij, stij);
+    end;
 
 
 
