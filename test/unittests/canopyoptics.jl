@@ -102,8 +102,24 @@ import Emerald.EmeraldLand.SPAC
         @test spac.canopy.sensor_geometry.s_aux.sob >= 0;
         @test spac.canopy.sensor_geometry.s_aux.sof >= 0;
         @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sensor .< 1);
-        @test 0 < spac.canopy.sensor_geometry.s_aux.p_sensor_soil < 1
+        @test 0 < spac.canopy.sensor_geometry.s_aux.p_sensor_soil < 1;
         @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< 1);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< spac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< spac.canopy.sensor_geometry.s_aux.p_sensor);
+
+        config = NS.SPACConfiguration(Float64);
+        tpac = NS.BulkSPAC(config);
+        SPAC.prescribe_traits!(config, tpac; ci = 0.5);
+        SPAC.initialize_spac!(config, tpac);
+        CO.soil_albedo!(config, tpac);
+        CO.canopy_structure!(config, tpac);
+        CO.sun_geometry_aux!(config, tpac);
+        CO.sun_geometry!(config, tpac);
+        CO.sensor_geometry_aux!(config, tpac);
+        CO.sensor_geometry!(config, tpac);
+        @test all(0 .< tpac.canopy.sun_geometry.s_aux.p_sunlit .< 1);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .< tpac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .< tpac.canopy.sensor_geometry.s_aux.p_sensor);
     end;
 
     @testset "Shortwave radiation" begin

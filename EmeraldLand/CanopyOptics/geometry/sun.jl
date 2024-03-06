@@ -6,6 +6,8 @@
 # General
 #     2024-Feb-27: add function sun_geometry_aux! to update the trait-dependent auxiliary variables for sun geometry (to call in step_preparations!)
 #     2024-Mar-01: compute the layer shortwave scattering fractions based on the new theory
+# Bug fixes
+#     2024-Mar-06: ci impact on fraction from solar direction
 #
 #######################################################################################################################################################################################################
 """
@@ -62,8 +64,8 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
     # sunsa.ps = exp.(sunsa.ks .* trait.ci * trait.lai .* t_aux.x_bnds);
     kscipai = sunsa.ks * trait.ci * (trait.lai + trait.sai);
     for i in eachindex(trait.δlai)
-        ksciipai = sunsa.ks * trait.ci * (trait.δlai[i] + trait.δsai[i]);
-        sunsa.p_sunlit[i] = 1 / ksciipai * (exp(kscipai * t_aux.x_bnds[i]) - exp(kscipai * t_aux.x_bnds[i+1]));
+        ksipai = sunsa.ks * (trait.δlai[i] + trait.δsai[i]);
+        sunsa.p_sunlit[i] = 1 / ksipai * (exp(kscipai * t_aux.x_bnds[i]) - exp(kscipai * t_aux.x_bnds[i+1]));
     end;
 
     # compute the fs and fs_abs matrices

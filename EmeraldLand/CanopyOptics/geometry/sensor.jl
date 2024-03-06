@@ -6,6 +6,8 @@
 # General
 #     2024-Feb-22: add function sensor_geometry_aux! to update the state-dependent auxiliary variables for sensor geometry (to call in step_remote_sensing!)
 #     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
+# Bug fixes
+#     2024-Mar-06: ci impact on fraction from viewer direction
 #
 #######################################################################################################################################################################################################
 """
@@ -118,8 +120,8 @@ sensor_geometry_aux!(
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
     kocipai = sensa.ko * trait.ci * (trait.lai + trait.sai);
     for i in eachindex(trait.δlai)
-        kociipai = sensa.ko * trait.ci * (trait.δlai[i] + trait.δsai[i]);
-        sensa.p_sensor[i] = 1 / kociipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
+        koipai = sensa.ko * (trait.δlai[i] + trait.δsai[i]);
+        sensa.p_sensor[i] = 1 / koipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
     end;
     sensa.p_sensor_soil = exp(-kocipai);
 
@@ -129,7 +131,7 @@ sensor_geometry_aux!(
     Πk = sensa.ko * sunsa.ks;
     cl = trait.ci * (trait.lai + trait.sai);
     α  = dso / HOT_SPOT * 2 / Σk;
-    pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
+    pso(x) = dso == 0 ? trait.ci * exp( (Σk - sqrt(Πk)) * cl * x ) : trait.ci * exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
 
     for i in eachindex(trait.δlai)
         sensa.p_sun_sensor[i] = quadgk(pso, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-2)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
