@@ -111,7 +111,7 @@ sensor_geometry_aux!(
     sensa.fo ./= cosd(senst.vza);
     sensa.fo_abs .= abs.(sensa.fo);
     for i in eachindex(Θ_INCL)
-        view(sensa.fo_cos²_incl,i,:) .= view(sensa.fo,i,:) * cosd(Θ_INCL[i]) ^ 2;
+        view(sensa.fo_cos²_incl,i,:) .= view(sensa.fo,i,:) * cosd(Θ_INCL[i]) ^ 2; # TODO: is this related to the bf calculation in SCOPE?
     end;
     sensa.fo_fs .= sunsa.fs .* sensa.fo;
     sensa.fo_fs_abs .= abs.(sensa.fo_fs);

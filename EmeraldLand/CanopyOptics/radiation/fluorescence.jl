@@ -7,6 +7,8 @@
 #     2023-Oct-14: add function fluorescence_spectrum! (run per sensor geometry)
 #     2023-Oct-14: if LAI < = 0 or SZA > 89, set all fluxes to 0
 #     2023-Oct-18: SIF excitation is rescaled to leaf partitioning (accounting stem)
+# Bug fixes
+#     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
 #
 #######################################################################################################################################################################################################
 """
@@ -183,10 +185,10 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         sen_geo.auxil.sif_shaded[:,irt] .= sun_geo.auxil._e_difꜜ_sif_mean .* sh_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sh_oθ .+
                                            sun_geo.auxil._e_difꜛ_sif_mean .* sh_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_oθ;
 
-        # total emitted SIF for upward and downward direction
-        ilai = can_str.trait.δlai[irt] * can_str.trait.ci;
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ .* ilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜜ .* ilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ .* ilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜛ .* ilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
+        # total emitted SIF for upward and downward direction (the SIF matrices are based on raw radiation, so CI needs to be applied here!)
+        ciilai = can_str.trait.δlai[irt] * can_str.trait.ci;
+        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ .* ciilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜜ .* ciilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
+        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ .* ciilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜛ .* ciilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
     end;
 
     # 2. account for the SIF emission from bottom to up
@@ -225,15 +227,15 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     sen_geo.auxil.sif_scattered .= view(sen_geo.auxil.dob_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜜ,:,1:n_layer) .+
                                    view(sen_geo.auxil.dof_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜛ,:,1:n_layer);
 
-    # 4. compute SIF from the observer direction
+    # 4. compute SIF from the observer direction (CI is accounted for in the p_sensor and p_sun_sensor already, so do NOT use CI here)
     vec_layer = ones(FT, n_layer);
-    vec_layer .= sen_geo.s_aux.p_sun_sensor .* can_str.trait.δlai .* can_str.trait.ci ./ FT(π);
+    vec_layer .= sen_geo.s_aux.p_sun_sensor .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_sunlit, sen_geo.auxil.sif_sunlit, vec_layer);
 
-    vec_layer .= (sen_geo.s_aux.p_sensor .- sen_geo.s_aux.p_sun_sensor) .* can_str.trait.δlai .* can_str.trait.ci ./ FT(π);
+    vec_layer .= (sen_geo.s_aux.p_sensor .- sen_geo.s_aux.p_sun_sensor) .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_shaded, sen_geo.auxil.sif_shaded, vec_layer);
 
-    vec_layer .= sen_geo.s_aux.p_sensor .* can_str.trait.δlai .* can_str.trait.ci ./ FT(π);
+    vec_layer .= sen_geo.s_aux.p_sensor .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_scattered, sen_geo.auxil.sif_scattered, vec_layer);
 
     sen_geo.auxil.sif_obs_soil .= view(sun_geo.auxil.e_sifꜛ,:,n_layer+1) .* sen_geo.s_aux.p_sensor_soil ./ FT(π);
