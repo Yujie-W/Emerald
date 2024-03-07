@@ -22,11 +22,11 @@ function weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bo
     df_wd = read_nc(nc_wd);
 
     # interpolate the data to a new resolution
-    df_wd[!,"CO2"        ] .= interpolate_data(gm_dict["CO2"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"CHLOROPHYLL"] .= interpolate_data(gm_dict["CHLOROPHYLL"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"CI"         ] .= interpolate_data(gm_dict["CLUMPING"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"LAI"        ] .= interpolate_data(gm_dict["LAI"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"VCMAX25"    ] .= interpolate_data(gm_dict["VCMAX25"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CO2"    ] .= interpolate_data(gm_dict["CO2"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CHL"    ] .= interpolate_data(gm_dict["CHLOROPHYLL"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CI"     ] .= interpolate_data(gm_dict["CLUMPING"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"LAI"    ] .= interpolate_data(gm_dict["LAI"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"VCMAX25"] .= interpolate_data(gm_dict["VCMAX25"], gm_dict["YEAR"]; out_reso = "1H");
 
     # add the fields to store outputs
     for label in DF_VARIABLES

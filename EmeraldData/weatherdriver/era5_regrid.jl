@@ -53,8 +53,8 @@ regrid_ERA5!(year::Int, zoom::Int = 1; notification::Bool = false) = (
 );
 
 regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
-    file_in  = "$(ERA5_FOLDER)/original/$(label)_SL_$(year).nc";
-    file_out = "$(ERA5_FOLDER)/reprocessed/$(label)_SL_$(year)_$(zoom)X.nc";
+    file_in  = "$(ERA5_FOLDER)/original/$(label)_$(year).nc";
+    file_out = "$(ERA5_FOLDER)/reprocessed/$(label)_$(year)_$(zoom)X.nc";
 
     # if file exists already, skip
     if isfile(file_out)
@@ -95,7 +95,7 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
 
     # save the regridded dataset
     @info "Saving regridded dataset to $(file_out)...";
-    attr = Dict(var_name => label * "_SL", "unit" => "Same as $(file_in)");
+    attr = Dict(var_name => label, "unit" => "Same as $(file_in)");
     save_nc!(file_out, var_name, matn, attr);
 
     # set the variables to nothing to clean the memory
