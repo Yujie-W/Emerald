@@ -131,4 +131,4 @@ function reprocessed_file_path end;
 
 reprocessed_file_path(gm_dict::Dict{String,Any}, varlabel::String) = reprocessed_file_path(varlabel, gm_dict["YEAR"], gm_dict["RESO_SPACE"]);
 
-reprocessed_file_path(varlabel::String, year::Int, nx::Int) = "$(ERA5_FOLDER)/reprocessed/$(varlabel)_$(year)_$(nx)X.nc";
+reprocessed_file_path(varlabel::String, year::Int, nx::Int) = "$(ERA5_FOLDER)/reprocessed/$(varlabel)_SL_$(year)_$(nx)X.nc";

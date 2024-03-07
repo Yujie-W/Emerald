@@ -26,7 +26,7 @@ Prescribe traits and environmental conditions, given
 function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}
     # read the data out of dataframe row to reduce memory allocation
     df_atm::FT = dfr.P_ATM;
-    df_chl::FT = dfr.CHLOROPHYLL;
+    df_chl::FT = dfr.CHL;
     df_cli::FT = dfr.CI;
     df_co2::FT = dfr.CO2;
     df_dif::FT = dfr.RAD_DIF;
@@ -136,6 +136,7 @@ end;
 #     2023-Sep-07: initialize integrators when starting a new simulation in a long time step
 #     2023-Sep-09: save the quantum yields when saving the simulation results
 #     2023-Sep-11: save the integrated SIF when saving the simulation results
+#     2024-Mar-07: add fields for saved parameters and simulations in the dataframe (as grid_weather_driver did not do it)
 #
 #######################################################################################################################################################################################################
 """
@@ -162,7 +163,15 @@ function simulation! end;
 simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
     config = spac_config(gm_dict);
     spac = grid_spac(config, gm_dict);
-    wdf = weather_driver(wd_tag, gm_dict; appending = appending);
+    wdf = grid_weather_driver(wd_tag, gm_dict; appending = appending);
+
+    # add the fields to store outputs
+    for label in DF_VARIABLES
+        wdf[!,label] .= 0.0;
+    end;
+    for label in DF_SIMULATIONS
+        wdf[!,label] .= NaN;
+    end;
 
     simulation!(config, spac, wdf; initialize_state = initialize_state, saving = saving, selection = selection);
 
