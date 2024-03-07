@@ -17,12 +17,11 @@ using ..EmeraldUtility.Email: send_email!
 DRIVER_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/drivers";
 
 # ERA5 settings and functions
-include("era5_regrid.jl");
-include("era5_setting.jl");
 include("era5_type.jl");
 
 include("era5_grid.jl");
 include("era5_load.jl");
+include("era5_regrid.jl");
 
 # parser and utility functions
 include("parser.jl");

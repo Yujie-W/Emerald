@@ -7,12 +7,12 @@
 #######################################################################################################################################################################################################
 """
 
-    regrid_ERA5!(year::Int, zoom::Int = 1; notification::Bool = false)
-    regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String)
+    regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false)
+    regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String)
 
 Regrid the ERA5 datasets, given
 - `year` Which year of data to regrid
-- `zoom` The spatial resolution is `1/zoom` degree
+- `nx` The spatial resolution is `1/nx` degree
 - `notification` If true, send out emails. Default is `false`
 - `label` File name label of the source NC dataset
 - `var_name` Variable label in the NC dataset
@@ -39,8 +39,11 @@ Thus, we need to regrid the dataset to ensure that the pixel orders match. For e
 """
 function regrid_ERA5! end;
 
-regrid_ERA5!(year::Int, zoom::Int = 1; notification::Bool = false) = (
-    regrid_ERA5!.(year, zoom, ERA5_LABELS, ERA5_LAYERS);
+regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false) = (
+    era5_wd = ERA5SingleLevelsDriver();
+    era5_labs = [getfield(era5_wd, fn)[2] for fn in fieldnames(ERA5SingleLevelsDriver)];
+    era5_vars = [getfield(era5_wd, fn)[1] for fn in fieldnames(ERA5SingleLevelsDriver)];
+    regrid_ERA5!.(year, nx, era5_labs, era5_vars);
     @info "Finished regridding all the datasets!";
     if notification
         send_email!("[ERA5 DATA STATUS] Regridding data for year $(year)",
@@ -52,9 +55,9 @@ regrid_ERA5!(year::Int, zoom::Int = 1; notification::Bool = false) = (
     return nothing;
 );
 
-regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
-    file_in  = "$(ERA5_FOLDER)/original/$(label)_$(year).nc";
-    file_out = "$(ERA5_FOLDER)/reprocessed/$(label)_$(year)_$(zoom)X.nc";
+regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String) = (
+    file_in = original_file_path(label, year);
+    file_out = reprocessed_file_path(label, year, nx);
 
     # if file exists already, skip
     if isfile(file_out)
@@ -65,11 +68,11 @@ regrid_ERA5!(year::Int, zoom::Int, label::String, var_name::String) = (
     # read the file per slice
     @info "Reading and regridding file $(file_in) per time slice...";
     times = read_nc(file_in, "time");
-    matn = zeros((360*zoom,180*zoom,length(times))) .* NaN;
+    matn = zeros((360nx,180nx,length(times))) .* NaN;
     @showprogress for _itim in eachindex(times)
         mati = read_nc(file_in, var_name, _itim);
         z_ss = Int(size(mati,1) / 360);
-        dxy  = Int(z_ss/zoom);
+        dxy  = Int(z_ss/nx);
         nvar = replace(mati, missing=>NaN);
         for ilon in axes(matn,1), ilat in axes(matn,2)
             # from +0 to +180
