@@ -12,7 +12,7 @@
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `biot` leaf biophysical trait variables
 - `bios` leaf biophysical state variables
-- `k_ant` anthocynanin absorption coefficient
+- `k_ant` anthocyanin absorption coefficient
 - `k_brown` brown pigments absorption coefficient
 - `k_cab` chlorophyll a and b absorption coefficient
 - `k_car_v` violaxanthin carotenoid absorption coefficient
@@ -25,7 +25,7 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 
 """
 function sublayer_f_cab(biot::LeafBioTrait{FT}, bios::LeafBioState{FT}, k_ant::FT, k_brown::FT, k_cab::FT, k_car_v::FT, k_car_z::FT, k_cbc::FT, k_H₂O::FT, k_lma::FT, k_pro::FT, lwc::FT) where {FT}
-    Σkx = k_ant * biot.ant +                            # anthocynanin absorption absorption
+    Σkx = k_ant * biot.ant +                            # anthocyanin absorption absorption
           k_brown * biot.brown +                        # brown pigments
           k_cab * biot.cab +                            # chlorophyll a + b absorption
           k_car_v * biot.car * (1 - bios.f_zeax) +      # violaxanthin carotenoid absorption
@@ -53,7 +53,7 @@ end;
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `bios` leaf biophysical state variables
 - `bios` leaf biophysical state variables
-- `k_ant` anthocynanin absorption coefficient
+- `k_ant` anthocyanin absorption coefficient
 - `k_brown` brown pigments absorption coefficient
 - `k_cab` chlorophyll a and b absorption coefficient
 - `k_car_v` violaxanthin carotenoid absorption coefficient
@@ -106,7 +106,7 @@ end;
 
 Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `bios` leaf biophysical state variables
-- `k_ant` anthocynanin absorption coefficient
+- `k_ant` anthocyanin absorption coefficient
 - `k_brown` brown pigments absorption coefficient
 - `k_cab` chlorophyll a and b absorption coefficient
 - `k_car_v` violaxanthin carotenoid absorption coefficient

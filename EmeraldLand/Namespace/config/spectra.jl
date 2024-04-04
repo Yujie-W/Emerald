@@ -43,7 +43,7 @@ Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
     ΔΛ::Vector{FT} = Λ_UPPER .- Λ_LOWER
 
     # Constant features for the leaf
-    "Specific absorption coefficients of anthocynanin `[-]`"
+    "Specific absorption coefficients of anthocyanin `[-]`"
     K_ANT::Vector{FT}
     "Specific absorption coefficients of senescent material (brown pigments) `[-]`"
     K_BROWN::Vector{FT}
