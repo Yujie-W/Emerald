@@ -81,6 +81,7 @@ end;
 #     2022-Feb-07: add method for C3CytochromeModel photosynthesis model
 #     2022-Feb-07: add v_qmax without temperature dependency
 #     2022-Mar-01: add temperature dependencies for k_q, v_qmax, η_c, and η_l
+#     2024-Apr-15: add support for C4CLMTrait model
 #
 #######################################################################################################################################################################################################
 """
@@ -124,6 +125,18 @@ photosystem_temperature_dependence!(pst::C3VJPTrait{FT}, psa::PSMAuxil{FT}, air:
     psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
     psa.j_max  = pst.j_max25  * temperature_correction(pst.TD_JMAX, t);
     psa.k_m    = psa.k_c * (1 + air.state.p_air * F_O₂(FT) / psa.k_o);
+
+    # TODO: add a TD_KD in the model in the future like psd.TD_KC
+    psa.k_d = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);
+    psa.ϕ_psii_max = pst.K_PSII / (psa.k_d + pst.K_F + pst.K_PSII);
+
+    return nothing
+);
+
+photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+    psa.k_pep  = temperature_corrected_value(pst.TD_KPEP, t);
+    psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
+    psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
 
     # TODO: add a TD_KD in the model in the future like psd.TD_KC
     psa.k_d = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);

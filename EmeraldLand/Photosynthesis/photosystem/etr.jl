@@ -42,7 +42,7 @@ photosystem_electron_transport!(pst::C3VJPTrait{FT}, pss::C3VJPState{FT}, psa::P
     return nothing
 );
 
-photosystem_electron_transport!(pst::C4VJPTrait{FT}, pss::C4VJPState{FT}, psa::PSMAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
+photosystem_electron_transport!(pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}}, pss::C4VJPState{FT}, psa::PSMAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.e2c   = 1 / 6;
     psa.j_pot = psa.f_psii * psa.ϕ_psii_max * ppar;
 

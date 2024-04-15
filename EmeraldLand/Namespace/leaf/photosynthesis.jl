@@ -195,6 +195,59 @@ end;
 #
 # Changes to this struct
 # General
+#     2024-Apr-15: add C4CLMTrait struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C4 photosynthesis (CLM VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C4CLMTrait{FT}
+    # Colimitation methods
+    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
+    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
+    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+
+    # Temperature dependency structures
+    "[`AbstractTemperatureDependency`](@ref) type Kpep temperature dependency"
+    TD_KPEP::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = Q10TDKpepCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type  respiration temperature dependency"
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+
+    # Constant coefficients
+    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
+    K_D::FT = 0.85
+    "Rate constant for fluorescence"
+    K_F::FT = 0.05
+    "Maximal rate constant for PSII photochemistry"
+    K_PSII::FT = 4
+
+    # Embedded structures
+    "Fluorescence model"
+    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
+
+    # Prognostic variables
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2024-Feb-26: add C4VJPTrait struct
 #
 #######################################################################################################################################################################################################
@@ -218,7 +271,7 @@ Base.@kwdef mutable struct C4VJPTrait{FT}
 
     # Temperature dependency structures
     "[`AbstractTemperatureDependency`](@ref) type Kpep temperature dependency"
-    TD_KPEP::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KpepTDCLM(FT)
+    TD_KPEP::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KpepTDBoyd(FT)
     "[`AbstractTemperatureDependency`](@ref) type  respiration temperature dependency"
     TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
@@ -420,7 +473,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoTrait{FT}, C3VJPTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3CytoState{FT}, C3VJPState{FT}, C4VJPState{FT}} = C3VJPState{FT}()
     "Auxilary variables"

@@ -184,7 +184,6 @@ KcTDBernacchi(FT)          = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 41.026
 KcTDCLM(FT)                = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 40.49     , ΔHA = 79430.0);
 KoTDBernacchi(FT)          = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 28208.88  , ΔHA = 36380.0);
 KoTDCLM(FT)                = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 27840.0   , ΔHA = 36380.0);
-KpepTDCLM(FT)              = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 8.0       , ΔHA = 36000.0);
 KpepTDBoyd(FT)             = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 16.0      , ΔHA = 36300.0);
 KqTDJohnson(FT)            = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 300       , ΔHA = 37000.0);
 RespirationTDBernacchi(FT) = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = NaN       , ΔHA = 46390.0);
@@ -205,3 +204,4 @@ VpmaxTDBoyd(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_R
 
 Q10TDAngiosperm(FT) = Q10{FT}(Q_10 = 1.4, T_REF = T₂₅(FT), VAL_REF = 0.0140/8760);
 Q10TDGymnosperm(FT) = Q10{FT}(Q_10 = 1.7, T_REF = T₂₅(FT), VAL_REF = 0.0425/8760);
+Q10TDKpepCLM(FT)    = Q10{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = 0.2);
