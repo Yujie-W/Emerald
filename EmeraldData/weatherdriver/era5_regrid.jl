@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2023-Mar-10: migrate from research repo to Emerald
+#     2024-Apr-15: skip regrid if the input file does not exist
 #
 #######################################################################################################################################################################################################
 """
@@ -62,6 +63,12 @@ regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String) = (
     # if file exists already, skip
     if isfile(file_out)
         @info "File $(file_out) already exists!";
+        return nothing;
+    end;
+
+    # if original file does not exist, skip
+    if !isfile(file_in)
+        @warn "File $(file_in) does not exist, skipping...";
         return nothing;
     end;
 

@@ -112,7 +112,7 @@ function original_file_path end;
 
 original_file_path(gm_dict::Dict{String,Any}, varlabel::String) = original_file_path(varlabel, gm_dict["YEAR"]);
 
-original_file_path(varlabel::String, year::Int) = "$(ERA5_FOLDER)/original/$(varlabel)_$(year).nc";
+original_file_path(varlabel::String, year::Int) = "$(ERA5_FOLDER)/original/$(varlabel)_SL_$(year).nc";
 
 
 """
