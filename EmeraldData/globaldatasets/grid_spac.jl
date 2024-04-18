@@ -70,6 +70,7 @@ end;
 #     2023-Jun-15: make sure prescribed soil parameters are not NaN and rad is >= 0
 #     2024-Feb-28: rename function to prescribe_gm_wd_data! and move it to EmeraldData
 #     2024-Feb-28: make it possible to initialize spac with ss_dict
+#     2024-Apr-17: update solar azimuth angle as well
 #
 #######################################################################################################################################################################################################
 """
@@ -97,7 +98,9 @@ function prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
     spac.meteo.rad_sw.e_dir .= view(config.SPECTRA.SOLAR_RAD,:,1) .* max(0,wd_dict["RAD_DIR"]) ./ ref_dir;
     spac.meteo.rad_sw.e_dif .= view(config.SPECTRA.SOLAR_RAD,:,2) .* max(0,wd_dict["RAD_DIF"]) ./ ref_dif;
     spac.meteo.rad_lw = wd_dict["RAD_LW"];
+    saa = solar_azimuth_angle(spac.info.lat, FT(wd_dict["FDOY"]));
     sza = solar_zenith_angle(spac.info.lat, FT(wd_dict["FDOY"]));
+    spac.canopy.sun_geometry.state.saa = saa;
     spac.canopy.sun_geometry.state.sza = (wd_dict["RAD_DIR"] + wd_dict["RAD_DIF"] > 10) ? min(sza, 88.999) : sza;
 
     # update t_clm to make Vcmax25 and Jmax25 TD temperature dependent

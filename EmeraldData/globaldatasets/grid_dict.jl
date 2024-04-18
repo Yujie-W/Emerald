@@ -14,7 +14,7 @@
 """
 
     grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) where {FT}
-    grid_dict(dtl::LandDatasetLabels, year::Int, nx::Int, lat::Number, lon::Number; ccs::DataFrame = CCS)
+    grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; ccs::DataFrame = CCS)
 
 Prepare a dictionary of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct

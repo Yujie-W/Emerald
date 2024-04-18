@@ -13,7 +13,7 @@ using ..EmeraldLand.SPAC: MODIS_BLUE, MODIS_EVI, MODIS_NDVI, MODIS_NIR, MODIS_NI
 using ..EmeraldLand.SPAC: dull_aux!, initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!, t_aux!
 using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
-using ..EmeraldPhysics.EarthGeometry: solar_zenith_angle
+using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 
 
 # Netcdf settings for output

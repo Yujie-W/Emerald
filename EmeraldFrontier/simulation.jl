@@ -8,6 +8,7 @@
 #     2023-Jun-15: add a controller over rad to make sure it is >= 0
 #     2023-Aug-25: make soil and leaf temperature and soil moisture optional
 #     2024-Feb-22: remove state and auxil from spac struct
+#     2024-Apr-17: update solar azimuth angle as well
 # Bug fixes
 #     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88.999
 #
@@ -106,7 +107,9 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     spac.meteo.rad_lw = df_lwr;
 
     # update solar zenith angle based on the time
+    saa = solar_azimuth_angle(spac.info.lat, FT(df_doy));
     sza = solar_zenith_angle(spac.info.lat, FT(df_doy));
+    spac.canopy.sun_geometry.state.saa = saa;
     spac.canopy.sun_geometry.state.sza = (df_dir + df_dif > 10) ? min(sza, 88.999) : sza;
 
     # run the t_aux! and dull_aux! functions if any of the LAI, CHL, or CI changes and initialize_state is false

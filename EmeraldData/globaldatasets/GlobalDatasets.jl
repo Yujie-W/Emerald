@@ -13,7 +13,7 @@ using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil
 using ..EmeraldLand.SPAC: initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!
 using ..EmeraldMath.Data: interpolate_data!
 using ..EmeraldMath.Stats: nanmax, nanmean
-using ..EmeraldPhysics.EarthGeometry: solar_zenith_angle
+using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 
