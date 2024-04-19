@@ -57,7 +57,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Hot spot parameter"
     HOT_SPOT::FT = 0.05
     "Soil albedo method"
-    SOIL_ALBEDO::Union{SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
+    SOIL_ALBEDO::Union{SoilAlbedoPrescribe, SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
     "Vertical distribution of leaf biophysical properties (if false, run leaf_spectra! only once)"
     VERTICAL_BIO::Bool = false
     "Whether to convert energy to photons when computing fluorescence"

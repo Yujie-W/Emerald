@@ -5,6 +5,7 @@
 # Changes to this type
 # General
 #     2023-Oct-26: add abstract type for soil albedo
+#     2024-Apr-19: add new method to prescribe soil albedo
 #
 #######################################################################################################################################################################################################
 """
@@ -12,6 +13,7 @@
 $(TYPEDEF)
 
 Hierarchy of AbstractSoilAlbedo:
+- [`SoilAlbedoPrescribe`](@ref)
 - [`SoilAlebedoBroadbandCLM`](@ref)
 - [`SoilAlebedoBroadbandCLIMA`](@ref)
 - [`SoilALbedoHyperspectralCLM`](@ref)
@@ -19,6 +21,10 @@ Hierarchy of AbstractSoilAlbedo:
 
 """
 abstract type AbstractSoilAlbedo end;
+
+
+""" Broadband soil albedo algorithm from CLM """
+struct SoilAlbedoPrescribe <: AbstractSoilAlbedo end;
 
 
 """ Broadband soil albedo algorithm from CLM """

@@ -30,6 +30,7 @@ const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;
 #     2022-Jun-14: migrate the function from CanopyLayers
 #     2022-Jun-14: add method to update broadband or hyperspectral soil albedo
 #     2023-Oct-26: add methods for four soil albedo algorithms
+#     2024-Apr-19: add new method to prescribe soil albedo (do nothing)
 #
 #######################################################################################################################################################################################################
 """
@@ -53,6 +54,8 @@ soil_albedo!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     return nothing
 );
+
+soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoPrescribe) where {FT} = nothing;
 
 soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoBroadbandCLM) where {FT} = (
     (; SPECTRA) = config;
