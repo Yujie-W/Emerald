@@ -32,6 +32,7 @@ solar_azimuth_angle(lat::FT, decl::FT, lha::FT) where {FT} = (
 
     _sin_sza = sqrt(1 - _cos_sza^2);
     _cos_saa = (sind(decl) - sind(lat) * _cos_sza) / (cosd(lat) * _sin_sza);
+    _cos_saa = min(1, max(-1, _cos_saa));
 
     return lha >= 0 ? 360 - acosd(_cos_saa) : acosd(_cos_saa)
 );
