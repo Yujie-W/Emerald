@@ -122,6 +122,25 @@ LandDatasetLabels(gm_tag::String, year::Int) = (
                     tag_t_ele = "ELEV_4X_1Y_V1",
                     tag_t_lm  = "LM_4X_1Y_V1",
                     tag_t_pft = "PFT_2X_1Y_V1")
+    elseif gm_tag == "gm4"
+        dtl = LandDatasetLabels(
+                    gm_tag    = gm_tag,
+                    year      = year,
+                    nx        = 1,
+                    tag_s_cc  = "SC_2X_1Y_V1",
+                    tag_s_α   = "SOIL_VGA_12X_1Y_V1",
+                    tag_s_n   = "SOIL_VGN_12X_1Y_V1",
+                    tag_s_Θr  = "SOIL_SWCR_12X_1Y_V1",
+                    tag_s_Θs  = "SOIL_SWCS_12X_1Y_V1",
+                    tag_p_ch  = "CH_20X_1Y_V1",
+                    tag_p_chl = "CHL_2X_7D_V1",
+                    tag_p_ci  = "CI_2X_1M_V3",
+                    tag_p_lai = "LAI_MODIS_2X_8D_$(year)_V1",
+                    tag_p_sla = "SLA_2X_1Y_V1",
+                    tag_p_vcm = "VCMAX_CESM_1X_1M_V3",
+                    tag_t_ele = "ELEV_4X_1Y_V1",
+                    tag_t_lm  = "LM_4X_1Y_V1",
+                    tag_t_pft = "PFT_2X_1Y_V1")
     else
         error("Tag $(gm_tag) is not supported!");
     end;
@@ -204,7 +223,7 @@ Constructor of LandDatasets, given
 LandDatasets{FT}(gm_tag::String, year::Int) where {FT} = (
     dtl = LandDatasetLabels(gm_tag, year);
     @tinfo "Querying data from GriddingMachine...";
-    if gm_tag in ["gm1", "gm2"]
+    if gm_tag in ["gm1", "gm2", "gm4"]
         dts = LandDatasets{FT}(LABELS = dtl);
     elseif gm_tag == "gm3"
         dts = LandDatasets{FT}(LABELS = dtl, p_vcm = regrid(read_LUT(query_collection("VCMAX_2X_1Y_V2"))[1], 1) .* 0.6);
