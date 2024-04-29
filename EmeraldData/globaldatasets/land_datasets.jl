@@ -63,7 +63,7 @@ Constructor of LandDatasetLabels, given
 
 """
 LandDatasetLabels(gm_tag::String, year::Int) = (
-    @assert gm_tag in ["gm1", "gm2", "gm3"] "Parameterization tag $(gm_tag) is not supported!";
+    @assert gm_tag in ["gm1", "gm2", "gm3", "gm4"] "Parameterization tag $(gm_tag) is not supported!";
 
     if gm_tag == "gm1"
         dtl = LandDatasetLabels(

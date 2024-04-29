@@ -7,7 +7,7 @@ using ProgressMeter;
 FT = Float64;
 
 EMERALD_VER = "b5";
-GMDATA_VER = "gm3";
+GMDATA_VER = "gm4";
 WDRIVER_VER = "wd1";
 
 if gethostname()[1:5] == "curry"
