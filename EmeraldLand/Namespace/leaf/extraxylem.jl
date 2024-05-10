@@ -55,7 +55,7 @@ Base.@kwdef mutable struct ExtraXylemCapacitorState{FT}
     # note: This in theory should not be a state variable, but it is used to compute saturation vapor pressure in the next time step and then flow profile.
     #       However, if we store this as an auxiliary variable, then we need to compute it after we know the flow profile. It is a chicken and egg problem, so we store it as a state here.
     #       But, we still compute it still as an auxiliary variable.
-    "Pressure at the end; of the capacitor `[MPa]`"
+    "Pressure at the end of the capacitor `[MPa]`"
     p_leaf::FT = 0
 end;
 

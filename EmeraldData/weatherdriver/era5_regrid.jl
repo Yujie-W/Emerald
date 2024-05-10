@@ -9,7 +9,7 @@
 """
 
     regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false)
-    regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String)
+    regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String = ERA5_FOLDER_HOURLY)
 
 Regrid the ERA5 datasets, given
 - `year` Which year of data to regrid
@@ -17,6 +17,7 @@ Regrid the ERA5 datasets, given
 - `notification` If true, send out emails. Default is `false`
 - `label` File name label of the source NC dataset
 - `var_name` Variable label in the NC dataset
+- `folder` The folder where the original NC datasets are stored. Default is `ERA5_FOLDER_HOURLY`
 
 To reduce memory allocation, `regrid_ERA5!` reads in the data per slice (in time index) and regrid the data per slice. What `regrid_ERA5!` does are
 
@@ -44,7 +45,7 @@ regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false) = (
     era5_wd = ERA5SingleLevelsDriver();
     era5_labs = [getfield(era5_wd, fn)[2] for fn in fieldnames(ERA5SingleLevelsDriver)];
     era5_vars = [getfield(era5_wd, fn)[1] for fn in fieldnames(ERA5SingleLevelsDriver)];
-    regrid_ERA5!.(year, nx, era5_labs, era5_vars);
+    regrid_ERA5!.(year, nx, era5_labs, era5_vars; folder = ERA5_FOLDER_HOURLY);
     @info "Finished regridding all the datasets!";
     if notification
         send_email!("[ERA5 DATA STATUS] Regridding data for year $(year)",
@@ -56,9 +57,9 @@ regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false) = (
     return nothing;
 );
 
-regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String) = (
-    file_in = original_file_path(label, year);
-    file_out = reprocessed_file_path(label, year, nx);
+regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String = ERA5_FOLDER_HOURLY) = (
+    file_in = original_file_path(label, year; folder = folder);
+    file_out = reprocessed_file_path(label, year, nx; folder = folder);
 
     # if file exists already, skip
     if isfile(file_out)
