@@ -165,6 +165,8 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     e_sifꜜ_layer::Matrix{FT}
     "Upward SIF emitted per layer"
     e_sifꜛ_layer::Matrix{FT}
+    "Upward SIF emitted per layer after lower layers reabsorption"
+    e_sifꜛ_layer_sum::Matrix{FT}
     "Downward effective emitted SIF per layer"
     e_sifꜜ_emit::Matrix{FT}
     "Upward effective emitted SIF per layer"

@@ -54,6 +54,12 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # run the fluorescence simulations only if fluorescence feature is enabled
     (; DIM_AZI, SPECTRA, Φ_PHOTON) = config;
 
+    #
+    #
+    # TODO: make sure to be consistent with leaf level calculations, such as Φ_SIF_WL, Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
+    # TODO: better use mat_b and mat_f for a non-reabsorbing scenario
+    #
+    #
     # 0. compute chloroplast SIF emissions for different layers
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
@@ -146,6 +152,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         #
         #
         # TODO: refactor this part when fully understand what is happening here
+        # TODO: whether should we apply CI?
         #
         #
         # add up the fluorescence at various wavelength bins for sunlit and (up- and down-ward) diffuse SIF
@@ -195,17 +202,19 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     sun_geo.auxil.e_sifꜛ_emit[:,end] .= 0;
     for i in n_layer:-1:1
         r__ = view(can_str.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );    # reflectance without correction
-        r_j = view(can_str.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);    # reflectance of the upper boundary (i) for SIF
+        r_j = view(can_str.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);    # reflectance of the lower boundary (i) for SIF
         t_i = view(can_str.auxil.τ_dd      ,SPECTRA.IΛ_SIF,i  );    # transmittance of the layer (i) for SIF
 
-        f_d_i = view(sun_geo.auxil.e_sifꜜ_layer,:,i  );            # downward emitted SIF from layer i
-        f_u_i = view(sun_geo.auxil.e_sifꜛ_layer,:,i  );            # downward emitted SIF from layer i
-        s_u_j = view(sun_geo.auxil.e_sifꜛ_emit ,:,i+1);            # upward SIF from the lower layer
-        s_d_i = view(sun_geo.auxil.e_sifꜜ_emit ,:,i  );            # downward SIF from the layer
-        s_u_i = view(sun_geo.auxil.e_sifꜛ_emit ,:,i  );            # upward SIF from the layer
+        f_d_i = view(sun_geo.auxil.e_sifꜜ_layer    ,:,i  );            # downward emitted SIF from layer i
+        f_u_i = view(sun_geo.auxil.e_sifꜛ_layer    ,:,i  );            # upward emitted SIF from layer i
+        s_a_i = view(sun_geo.auxil.e_sifꜛ_layer_sum,:,i  );            # final upward SIF in the layer (some of upward and transmitted downward SIF)
+        s_d_i = view(sun_geo.auxil.e_sifꜜ_emit     ,:,i  );            # downward SIF from the layer
+        s_u_i = view(sun_geo.auxil.e_sifꜛ_emit     ,:,i  );            # upward SIF from the layer
+        s_u_j = view(sun_geo.auxil.e_sifꜛ_emit     ,:,i+1);            # upward SIF from the lower layer
 
         s_d_i .= (f_d_i .+ s_u_j .* r__) ./ (1 .- r__ .* r_j);
         s_u_i .= f_u_i .+ s_u_j .* t_i .+ s_d_i .* r_j .* t_i;
+        s_a_i .= f_u_i .+ s_d_i .* r_j .* t_i;
     end;
 
     # 3. account for the SIF emission from up to bottom
