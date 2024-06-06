@@ -40,3 +40,47 @@ function ΦDFNP(spac::BulkSPAC{FT}) where {FT}
 
     return (sum_ϕda, sum_ϕfa, sum_ϕna, sum_ϕpa) ./ sum_a
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Jun-06: add function to compute the weighted average of ϕ_d, ϕ_f, ϕ_n, and ϕ_p per layer
+#
+#######################################################################################################################################################################################################
+"""
+
+    ΦDFNP_LAYER(spac::BulkSPAC{FT}) where {FT}
+
+Return the weighted average of ϕ_d, ϕ_f, ϕ_n, and ϕ_p per layer, given
+- `spac` `BulkSPAC` type struct
+
+"""
+function ΦDFNP_LAYER(spac::BulkSPAC{FT}) where {FT}
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    ϕda::Vector{FT} = zeros(FT, n_layer);
+    ϕfa::Vector{FT} = zeros(FT, n_layer);
+    ϕna::Vector{FT} = zeros(FT, n_layer);
+    ϕpa::Vector{FT} = zeros(FT, n_layer);
+    ∑aa::Vector{FT} = zeros(FT, n_layer);
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = leaves[ilf];
+        ϕda[irt] = (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaf.flux.auxil.a_g_sunlit .* leaf.flux.auxil.ϕ_d_sunlit) +
+                   (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaf.flux.auxil.a_g_shaded * leaf.flux.auxil.ϕ_d_shaded) * canopy.structure.trait.δlai[irt];
+        ϕfa[irt] = (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaf.flux.auxil.a_g_sunlit .* leaf.flux.auxil.ϕ_f_sunlit) +
+                   (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaf.flux.auxil.a_g_shaded * leaf.flux.auxil.ϕ_f_shaded) * canopy.structure.trait.δlai[irt];
+        ϕna[irt] = (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaf.flux.auxil.a_g_sunlit .* leaf.flux.auxil.ϕ_n_sunlit) +
+                   (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaf.flux.auxil.a_g_shaded * leaf.flux.auxil.ϕ_n_shaded) * canopy.structure.trait.δlai[irt];
+        ϕpa[irt] = (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaf.flux.auxil.a_g_sunlit .* leaf.flux.auxil.ϕ_p_sunlit) +
+                   (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaf.flux.auxil.a_g_shaded * leaf.flux.auxil.ϕ_p_shaded) * canopy.structure.trait.δlai[irt];
+        ∑aa[irt] = (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaf.flux.auxil.a_g_sunlit) +
+                   (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaf.flux.auxil.a_g_shaded) * canopy.structure.trait.δlai[irt];
+    end;
+
+    return ϕda ./ ∑aa, ϕfa ./ ∑aa, ϕna ./ ∑aa, ϕpa ./ ∑aa
+end;
