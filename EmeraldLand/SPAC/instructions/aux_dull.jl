@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2024-Feb-27: add function to update the slowly changing auxiliary variables
+#     2024-Jun-06: compute the canopy structure every time (because soil moisture may change)
 #
 #######################################################################################################################################################################################################
 """
@@ -21,7 +22,6 @@ function dull_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     #     1 . leaf optical properties related to leaf pigments
     #     2 . canopy optical properties related to leaf pigments and canopy structure (e.g., canopy diffuse radiation related parameters)
     plant_leaf_spectra!(config, spac);
-    canopy_structure!(config, spac);
 
     return nothing
 end;

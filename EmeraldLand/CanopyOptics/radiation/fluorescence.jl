@@ -7,6 +7,7 @@
 #     2023-Oct-14: add function fluorescence_spectrum! (run per sensor geometry)
 #     2023-Oct-14: if LAI < = 0 or SZA > 89, set all fluxes to 0
 #     2023-Oct-18: SIF excitation is rescaled to leaf partitioning (accounting stem)
+#     2024-Jun-07: add step to compute e_sifꜛ_layer_sum (contribution to upward SIF from the layer after relection from the lower layers)
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
 #

@@ -5,6 +5,7 @@
 # Changes to this function
 # General
 #     2024-Feb-27: add function to run preparation functions at the beginning of each time step
+#     2024-Jun-06: compute the canopy structure every time (because soil moisture may change)
 #
 #######################################################################################################################################################################################################
 """
@@ -19,6 +20,7 @@ Run the functions that do not need to be run at sub time step (these functions a
 function step_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     step_aux!(spac);
     soil_albedo!(config, spac);
+    canopy_structure!(config, spac);
     sun_geometry_aux!(config, spac);
     sun_geometry!(config, spac);
     shortwave_radiation!(config, spac);

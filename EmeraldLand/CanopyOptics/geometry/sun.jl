@@ -92,6 +92,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
 #     2023-Oct-14: do nothing if sza > 89 or LAI <= 0
 #     2023-Oct-18: account for SAI in the sun geometry calculation
 #     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
+#     2024-Jun-06: fix a typo in the calculation of ρ_sd
 #
 #######################################################################################################################################################################################################
 """
@@ -158,13 +159,13 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
         ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer,:,i  );
         ρ_sd_i     = view(sun_geo.auxil.ρ_sd      ,:,i  );
         ρ_sd_j     = view(sun_geo.auxil.ρ_sd      ,:,i+1);
-        τ_dd_layer = view(can_str.auxil.τ_dd_layer,:,i  );
+        τ_dd_i     = view(can_str.auxil.τ_dd      ,:,i  );
         τ_sd_layer = view(sun_geo.auxil.τ_sd_layer,:,i  );
         τ_sd_i     = view(sun_geo.auxil.τ_sd      ,:,i  );
         τ_ss_layer = view(sun_geo.auxil.τ_ss_layer,  i  );
 
         τ_sd_i .= (τ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* ρ_dd_layer) ./ (1 .- ρ_dd_layer .* ρ_dd_j);    # sdit + ssit-sdjr-ddit; rescale
-        ρ_sd_i .= ρ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* τ_dd_layer .+ τ_sd_i .* ρ_dd_j .* τ_dd_layer;   # sdir + ssit-sdjr-ddit + sdit-ddjr-ddit
+        ρ_sd_i .= ρ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* τ_dd_i .+ τ_sd_layer .* ρ_dd_j .* τ_dd_i;       # sdir + ssit-sdjr-ddit + sdit-ddjr-ddit
     end;
 
     return nothing
