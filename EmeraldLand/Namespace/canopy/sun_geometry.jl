@@ -143,6 +143,8 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     e_difꜜ::Matrix{FT}
     "Upwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
     e_difꜛ::Matrix{FT}
+    "Upwelling diffuse short-wave radiation at each canopy layer boundary (contribution from the layer only) `[mW m⁻² nm⁻¹]`"
+    e_difꜛ_layer::Matrix{FT}
     "Solar directly radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
     e_dirꜜ::Matrix{FT}
 
@@ -250,6 +252,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGe
             albedo           = zeros(FT, length(config.SPECTRA.Λ)),
             e_difꜜ           = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
             e_difꜛ           = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+            e_difꜛ_layer     = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
             e_dirꜜ           = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
             e_net_dif        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             e_net_dir        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
