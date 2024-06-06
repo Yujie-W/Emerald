@@ -100,18 +100,20 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         e_u_i = view(sun_geo.auxil.e_difꜛ      ,:,i  );    # upward diffuse radiation at upper boundary
         e_a_i = view(sun_geo.auxil.e_difꜛ_layer,:,i  );    # upward diffuse radiation at upper boundary (contribution from the layer only)
 
-        r_dd_i = view(can_str.auxil.ρ_dd      ,:,i);    # reflectance of the upper boundary (i)
-        r_sd_i = view(sun_geo.auxil.ρ_sd      ,:,i);    # reflectance of the upper boundary (i)
-        t_dd_i = view(can_str.auxil.τ_dd      ,:,i);    # transmittance of the layer (i)
-        t_sd_i = view(sun_geo.auxil.τ_sd      ,:,i);    # transmittance of the layer (i)
-        t_ss__ = view(sun_geo.auxil.τ_ss_layer,  i);    # transmittance for directional->directional
-        r_sd__ = view(sun_geo.auxil.ρ_sd_layer,  i);    # reflectance for directional->diffuse
-        r_dd__ = view(can_str.auxil.ρ_dd_layer,  i);    # reflectance for directional->directional
+        r_dd_i = view(can_str.auxil.ρ_dd      ,:,i  );  # reflectance of the upper boundary (i)
+        r_dd_j = view(can_str.auxil.ρ_dd      ,:,i+1);  # reflectance of the upper boundary (i)
+        r_sd_i = view(sun_geo.auxil.ρ_sd      ,:,i  );  # reflectance of the upper boundary (i)
+        t_dd_i = view(can_str.auxil.τ_dd      ,:,i  );  # transmittance of the layer (i)
+        t_sd_i = view(sun_geo.auxil.τ_sd      ,:,i  );  # transmittance of the layer (i)
+        t_ss__ = view(sun_geo.auxil.τ_ss_layer,  i  );  # transmittance for directional->directional
+        r_sd__ = view(sun_geo.auxil.ρ_sd_layer,  i  );  # reflectance for directional->diffuse
+        r_dd__ = view(can_str.auxil.ρ_dd_layer,  i  );  # reflectance for diffuse->diffuse
+        t_dd__ = view(can_str.auxil.τ_dd_layer,  i  );  # transmittance for diffuse->diffuse
 
         e_s_j .= t_ss__ .* e_s_i;
         e_d_j .= t_sd_i .* e_s_i .+ t_dd_i .* e_d_i;
         e_u_i .= r_sd_i .* e_s_i .+ r_dd_i .* e_d_i;
-        e_a_i .= r_sd__ .* e_s_i .+ r_dd__ .* e_d_i;
+        e_a_i .= r_sd__ .* e_s_i .+ r_dd__ .* e_d_i .+ r_dd_j .* e_d_j .* t_dd__ ./ (1 .- r_dd_j .* r_dd__);
     end;
     sun_geo.auxil.e_difꜛ[:,end] .= view(sun_geo.auxil.e_dirꜜ,:,n_layer+1) .* view(sun_geo.auxil.ρ_sd,:,n_layer+1) .+
                                    view(sun_geo.auxil.e_difꜜ,:,n_layer+1) .* view(can_str.auxil.ρ_dd,:,n_layer+1);
