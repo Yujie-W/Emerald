@@ -258,6 +258,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGe
             e_sif_chl        = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
             e_sifꜜ_layer     = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
             e_sifꜛ_layer     = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+            e_sifꜛ_layer_sum = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
             e_sifꜜ_emit      = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
             e_sifꜛ_emit      = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer + 1),
             e_sifꜜ           = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer + 1),
