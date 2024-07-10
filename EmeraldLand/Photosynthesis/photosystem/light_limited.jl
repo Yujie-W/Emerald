@@ -31,11 +31,11 @@ light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT} = light_limited_rate!(p
 
 light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = light_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
 
-light_limited_rate!(pss::Union{C3CytoState{FT}, C4VJPState{FT}}, psa::PSMAuxil{FT}) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);
+light_limited_rate!(pss::Union{C3CytoState{FT}, C4VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);
 
-light_limited_rate!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);
+light_limited_rate!(pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);
 
-light_limited_rate!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+light_limited_rate!(pss::C3CytoState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     if psa.j_psi == 0
         psa.a_j = 0;
 
@@ -69,7 +69,7 @@ light_limited_rate!(pss::C3CytoState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, 
     return nothing
 );
 
-light_limited_rate!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+light_limited_rate!(pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     if psa.j == 0
         psa.a_j = 0;
 
@@ -98,4 +98,4 @@ light_limited_rate!(pss::C3VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g
     return nothing
 );
 
-light_limited_rate!(psm::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);
+light_limited_rate!(psm::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);

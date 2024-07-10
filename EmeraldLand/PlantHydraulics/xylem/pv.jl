@@ -59,6 +59,7 @@ Return the relative capaciatance volume, given
 """
 function capacitance_volume end;
 
+# TODO: if pressure is really low, the volume gets too close to zero, thus there is a problem. Consider adding a baseline here, say 0.2 + 0.8 * exp(p * pv.slope)
 capacitance_volume(pv::ExponentialPVCurve{FT}, p::FT, t::FT) where {FT} = exp(p * pv.slope);
 
 capacitance_volume(pv::LinearPVCurve{FT}, p::FT, t::FT) where {FT} = max(0, 1 + p * pv.slope);

@@ -1,7 +1,47 @@
 const MODIS_BAND_1 = [ 620,  670];  # RED
 const MODIS_BAND_2 = [ 841,  876];  # NIR
 const MODIS_BAND_3 = [ 459,  479];  # BLUE
+const MODIS_BAND_4 = [ 545,  565];  # GREEN
+const MODIS_BAND_5 = [1230, 1250];  # SWIR
+const MODIS_BAND_6 = [1628, 1652];  # SWIR
 const MODIS_BAND_7 = [2105, 2155];  # SWIR
+const MODIS_BANDS = [MODIS_BAND_1, MODIS_BAND_2, MODIS_BAND_3, MODIS_BAND_4, MODIS_BAND_5, MODIS_BAND_6, MODIS_BAND_7];
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to these functions
+# General
+#     2024-Jul-10: add function to compute MODIS band reflectance (general)
+#
+#######################################################################################################################################################################################################
+"""
+
+    MODIS_BAND_REFL(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, i::Int; steps::Int = 4) where {FT}
+
+Return band reflectance for MODIS setup, given
+- `config` Configurations of spac model
+- `spac` `BulkSPAC` type SPAC
+- `i` Band index
+- `steps` Number of steps to compute reflectance
+
+"""
+function MODIS_BAND_REFL end;
+
+MODIS_BAND_REFL(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, i::Int; steps::Int = 4) where {FT} = MODIS_BAND_REFL(spac.canopy, config.SPECTRA, i; steps = steps);
+
+MODIS_BAND_REFL(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}, i::Int; steps::Int = 4) where {FT} = (
+    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BANDS[i][1]), FT(MODIS_BANDS[i][2]); steps = steps)
+);
+
+MODIS_RED(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS_BAND_REFL(config, spac, 1; steps = 6);
+MODIS_RED(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = MODIS_BAND_REFL(can, spectra, 1; steps = 6);
+MODIS_NIR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS_BAND_REFL(config, spac, 2; steps = 6);
+MODIS_NIR(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = MODIS_BAND_REFL(can, spectra, 2; steps = 6);
+MODIS_BLUE(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS_BAND_REFL(config, spac, 3; steps = 4);
+MODIS_BLUE(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = MODIS_BAND_REFL(can, spectra, 3; steps = 4);
+MODIS_SWIR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS_BAND_REFL(config, spac, 7; steps = 5);
+MODIS_SWIR(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = MODIS_BAND_REFL(can, spectra, 7; steps = 5);
 
 
 #######################################################################################################################################################################################################
@@ -12,24 +52,6 @@ const MODIS_BAND_7 = [2105, 2155];  # SWIR
 #     2022-Oct-19: add function to compute MODIS BLUE, NIR, RED, and NIRv radiance
 #
 #######################################################################################################################################################################################################
-"""
-
-    MODIS_BLUE(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-
-Return blue band reflectance for MODIS setup, given
-- `config` Configurations of spac model
-- `spac` `BulkSPAC` type SPAC
-
-"""
-function MODIS_BLUE end;
-
-MODIS_BLUE(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS_BLUE(spac.canopy, config.SPECTRA);
-
-MODIS_BLUE(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_3[1]), FT(MODIS_BAND_3[2]); steps=4)
-);
-
-
 """
 
     MODIS_EVI(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
@@ -88,7 +110,7 @@ MODIS_LSWI(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS
 
 MODIS_LSWI(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
     nir  = MODIS_NIR(can, spectra);
-    swir = read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_7[1]), FT(MODIS_BAND_7[2]); steps=5);
+    swir = MODIS_SWIR(can, spectra);
 
     return (nir - swir) / (nir + swir)
 );
@@ -112,24 +134,6 @@ MODIS_NDVI(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} 
     nir = MODIS_NIR(can, spectra);
 
     return (nir - red) / (nir + red)
-);
-
-
-"""
-
-    MODIS_NIR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-
-Return near infrared band reflectance for MODIS setup, given
-- `config` Configurations of spac model
-- `spac` `BulkSPAC` type SPAC
-
-"""
-function MODIS_NIR end;
-
-MODIS_NIR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS_NIR(spac.canopy, config.SPECTRA);
-
-MODIS_NIR(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6)
 );
 
 
@@ -171,22 +175,4 @@ MODIS_NIRvR(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT}
     nir_rad = read_spectrum(spectra.Λ, can.sensor_geometry.auxil.e_sensor, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6);
 
     return MODIS_NDVI(can, spectra) * nir_rad
-);
-
-
-"""
-
-    MODIS_RED(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-
-Return red band reflectance for MODIS setup, given
-- `config` Configurations of spac model
-- `spac` `BulkSPAC` type SPAC
-
-"""
-function MODIS_RED end;
-
-MODIS_RED(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = MODIS_RED(spac.canopy, config.SPECTRA);
-
-MODIS_RED(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    return read_spectrum(spectra.Λ, can.sensor_geometry.auxil.reflectance, FT(MODIS_BAND_1[1]), FT(MODIS_BAND_1[2]); steps=6)
 );

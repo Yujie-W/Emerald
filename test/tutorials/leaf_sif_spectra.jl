@@ -33,6 +33,27 @@ using Test;
     sif_f_b = bio.auxil.mat_f * rad_b;
     sif_b_r = bio.auxil.mat_b * rad_r;
     sif_f_r = bio.auxil.mat_f * rad_r;
+    #=
+    using Emerald;
+    using DataFrames;
+    FT = Float64;
+    config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.LAND_2021_1NM);
+    config.Φ_SIF_CUTOFF = 2;
+    bio = EmeraldLand.Namespace.LeafBio(config);
+    bio.trait.cab = 15;
+    bio.trait.car = 3;
+    EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
+    rad_b = zeros(FT, length(config.SPECTRA.IΛ_SIFE));
+    rad_r = zeros(FT, length(config.SPECTRA.IΛ_SIFE));
+    rad_b[450 .<= config.SPECTRA.Λ_SIFE .<= 480] .= 1;
+    rad_r[620 .<= config.SPECTRA.Λ_SIFE .<= 650] .= 1;
+    sif_b_b = bio.auxil.mat_b * rad_b;
+    sif_f_b = bio.auxil.mat_f * rad_b;
+    sif_b_r = bio.auxil.mat_b * rad_r;
+    sif_f_r = bio.auxil.mat_f * rad_r;
+    df = DataFrame(WL = config.SPECTRA.Λ_SIF, SIF_BW_B = sif_b_b, SIF_FW_B = sif_f_b, SIF_BW_R = sif_b_r, SIF_FW_R = sif_f_r);
+    EmeraldIO.Text.save_csv!("sif-shapes.csv", df);
+    =#
     @test true;
 
     # If you change leaf biophysical traits such as chlorophyll content, you can change them in the state field of the bio

@@ -32,34 +32,34 @@ product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {
 
 product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
 
-product_limited_rate!(pst::Union{C3CytoTrait{FT}, C3VJPTrait{FT}}, pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::Union{C3CytoTrait{FT}, C3VJPTrait{FT}}, pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
 
     return nothing
 );
 
-product_limited_rate!(pst::C4CLMTrait{FT}, pss::C4VJPState{FT}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psa.a_p = β * psa.k_pep * pst.v_cmax25 * p_i;
+product_limited_rate!(pst::C4CLMTrait{FT}, pss::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+    psa.a_p = β * psa.k_pep_clm * pst.v_cmax25 * p_i;
 
     return nothing
 );
 
-product_limited_rate!(pst::C4VJPTrait{FT}, pss::C4VJPState{FT}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::C4VJPTrait{FT}, pss::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_pmax * p_i / (p_i + psa.k_pep);
 
     return nothing
 );
 
-product_limited_rate!(pst::Union{C3CytoTrait{FT}, C3VJPTrait{FT}}, pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::Union{C3CytoTrait{FT}, C3VJPTrait{FT}}, pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
 
     return nothing
 );
 
-product_limited_rate!(pst::C4CLMTrait{FT}, pss::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::C4CLMTrait{FT}, pss::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     a = air.state.p_air;
     g = FT(1e6) * g_lc;
-    k = β * psa.k_pep * pst.v_cmax25;
+    k = β * psa.k_pep_clm * pst.v_cmax25;
     p = air.s_aux.ps[2];
     r = β * psa.r_d;
 
@@ -69,7 +69,7 @@ product_limited_rate!(pst::C4CLMTrait{FT}, pss::C4VJPState{FT}, psa::PSMAuxil{FT
     return nothing
 );
 
-product_limited_rate!(pst::C4VJPTrait{FT}, pss::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::C4VJPTrait{FT}, pss::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     a = β * psa.v_pmax;
     d = psa.k_pep;
     f = air.state.p_air / g_lc * FT(1e-6);

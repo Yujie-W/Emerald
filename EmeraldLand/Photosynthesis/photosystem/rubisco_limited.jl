@@ -33,15 +33,15 @@ rubisco_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {
 
 rubisco_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
 
-rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.a_c = β * psa.v_cmax * (p_i - psa.γ_star) / (p_i + psa.k_m);
 
     return nothing
 );
 
-rubisco_limited_rate!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
+rubisco_limited_rate!(pss::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
 
-rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     a = β * psa.v_cmax;
     b = β * psa.v_cmax * psa.γ_star;
     d = psa.k_m;
@@ -63,4 +63,4 @@ rubisco_limited_rate!(pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::PSMAuxil
     return nothing
 );
 
-rubisco_limited_rate!(pss::C4VJPState{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
+rubisco_limited_rate!(pss::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);

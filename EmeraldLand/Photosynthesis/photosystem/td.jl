@@ -100,7 +100,7 @@ function photosystem_temperature_dependence! end;
 
 photosystem_temperature_dependence!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, t::FT) where {FT} = photosystem_temperature_dependence!(psm.trait, psm.auxil, air, t);
 
-photosystem_temperature_dependence!(pst::C3CytoTrait{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(pst::C3CytoTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
     psa.k_q    = temperature_corrected_value(pst.TD_KQ, t);
@@ -117,7 +117,7 @@ photosystem_temperature_dependence!(pst::C3CytoTrait{FT}, psa::PSMAuxil{FT}, air
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::C3VJPTrait{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(pst::C3VJPTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
     psa.γ_star = temperature_corrected_value(pst.TD_Γ , t);
@@ -133,10 +133,10 @@ photosystem_temperature_dependence!(pst::C3VJPTrait{FT}, psa::PSMAuxil{FT}, air:
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
-    psa.k_pep  = temperature_corrected_value(pst.TD_KPEP, t);
-    psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
-    psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
+photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+    psa.k_pep_clm = temperature_corrected_value(pst.TD_KPEP, t);
+    psa.r_d       = pst.r_d25    * temperature_correction(pst.TD_R, t);
+    psa.v_cmax    = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
 
     # TODO: add a TD_KD in the model in the future like psd.TD_KC
     psa.k_d = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);
@@ -145,7 +145,7 @@ photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::PSMAuxil{FT}, air:
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::C4VJPTrait{FT}, psa::PSMAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(pst::C4VJPTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_pep  = temperature_corrected_value(pst.TD_KPEP, t);
     psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
     psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);

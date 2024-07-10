@@ -331,7 +331,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add PSMAuxil struct
+#     2023-Oct-03: add LeafPhotosystemAuxil struct
 #     2023-Oct-24: add fields ϕ_f1 and ϕ_f2; remove fields ϵ_1 and ϵ_2 (computed in the LeafOptics module)
 #
 #######################################################################################################################################################################################################
@@ -346,7 +346,7 @@ Struct that contains the auxiliary variables for leaf photosynthesis
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct PSMAuxil{FT}
+Base.@kwdef mutable struct LeafPhotosystemAuxil{FT}
     # photosynthetic rates
     "RubisCO limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
     a_c::FT = 0
@@ -382,6 +382,8 @@ Base.@kwdef mutable struct PSMAuxil{FT}
     k_o::FT = 0
     "PEP coefficient Kpep `[Pa]`"
     k_pep::FT = 0
+    "PEP coefficient Kpep fro CLM (different algorithm) `[Pa]`"
+    k_pep_clm::FT = 0
     "Maximal turnover rate of Cytochrome b₆f `[e⁻ s⁻¹]`"
     k_q::FT = 0
     "CO₂ compensation point with the absence of Rd `[Pa]`"
@@ -477,5 +479,5 @@ Base.@kwdef mutable struct LeafPhotosystem{FT}
     "State variables"
     state::Union{C3CytoState{FT}, C3VJPState{FT}, C4VJPState{FT}} = C3VJPState{FT}()
     "Auxilary variables"
-    auxil::PSMAuxil{FT} = PSMAuxil{FT}()
+    auxil::LeafPhotosystemAuxil{FT} = LeafPhotosystemAuxil{FT}()
 end;

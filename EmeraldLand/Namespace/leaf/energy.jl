@@ -44,7 +44,7 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafEnergySDAuxil{FT}
-    "Combined heat capacity of root and water `[J K⁻¹]`"
+    "Combined heat capacity of leaf and water `[J K⁻¹]`"
     cp::FT = 0
     "Temperature `[K]`"
     t::FT = T₂₅()
