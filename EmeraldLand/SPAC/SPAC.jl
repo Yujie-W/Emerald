@@ -9,7 +9,7 @@ using ..CanopyOptics: canopy_structure!, canopy_structure_aux!, longwave_radiati
 using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geometry!, sensor_geometry_aux!
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
-using ..Namespace: ReferenceSpectra
+using ..Namespace: ReferenceSpectra, ShortwaveRadiation
 using ..Namespace: C3CytoState, C3VJPState, C4VJPState
 using ..Namespace: GCO₂Mode
 using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
