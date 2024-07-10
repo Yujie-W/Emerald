@@ -31,7 +31,7 @@ Return band reflectance for MODIS setup, given
 function MODIS_BAND_REFL end;
 
 MODIS_BAND_REFL(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, i::Int; steps::Int = 4, weighted::Bool = false) where {FT} =
-    MODIS_BAND_REFL(spac.canopy, config.SPECTRA, i; steps = steps, weighted = weighted);
+    MODIS_BAND_REFL(spac.canopy, config.SPECTRA, spac.meteo.rad_sw, i; steps = steps, weighted = weighted);
 
 MODIS_BAND_REFL(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}, radiation::ShortwaveRadiation{FT}, i::Int; steps::Int = 4, weighted::Bool = false) where {FT} = (
     if weighted
