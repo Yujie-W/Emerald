@@ -41,9 +41,11 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Message level (0 for no, 1 for progress bar, and 2 for ind)"
     MESSAGE_LEVEL::Int = 0
 
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String
+    # Data name of the JLD2 file
+    "JLD2 file name"
+    JLD2_FILE::String = LAND_ARTIFACT
+    "Data name of the JLD2 file"
+    DATASET::String = OLD_PHI_2021
 
     # Reference spectra
     "Reference Spetra"
@@ -140,7 +142,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     ENABLE_DROUGHT_LEGACY::Bool = false
 end;
 
-SPACConfiguration(FT::DataType; dataset::String = LAND_2021, wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) = SPACConfiguration{FT}(
-            DATASET = dataset,
-            SPECTRA = ReferenceSpectra{FT}(dataset; wl_par = wl_par, wl_par_700 = wl_par_700),
+SPACConfiguration(FT::DataType; dataset::String = OLD_PHI_2021, jld2_file::String = LAND_ARTIFACT, wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) = SPACConfiguration{FT}(
+            JLD2_FILE = jld2_file,
+            DATASET   = dataset,
+            SPECTRA   = ReferenceSpectra{FT}(jld2_file, dataset; wl_par = wl_par, wl_par_700 = wl_par_700),
 );

@@ -9,19 +9,24 @@ module Namespace
 using LazyArtifacts
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
-using NetcdfIO: read_nc
 
+using ..EmeraldIO.Jld2: read_jld2
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
 using ..EmeraldUtility.StructEqual: sync_struct!
 
 
 # Please do not use V1/V2/V3 files here as they do not contain the Phi_PSI and Phi_PSII variables
-const LAND_2017     = artifact"land_model_spectrum_V6" * "/clima_land_spectra_2017.nc";
-const LAND_2021     = artifact"land_model_spectrum_V6" * "/clima_land_spectra_2021.nc";
-const LAND_2017_1NM = artifact"land_model_spectrum_V6" * "/clima_land_spectra_1nm_2017.nc";
-const LAND_2021_1NM = artifact"land_model_spectrum_V6" * "/clima_land_spectra_1nm_2021.nc";
-const SOIL_TEXT     = read_csv("$(@__DIR__)/../../data/SOIL-TEXTURE.csv");
+const LAND_ARTIFACT    = artifact"land_model_spectrum_V8" * "/land_model_spectrum_V8.jld2";
+const OLD_PHI_2017     = "oldphi_2017";
+const OLD_PHI_2021     = "oldphi_2021";
+const NEW_PHI_2017     = "newphi_2017";
+const NEW_PHI_2021     = "newphi_2021";
+const OLD_PHI_2017_1NM = "oldphi_2017_1nm";
+const OLD_PHI_2021_1NM = "oldphi_2021_1nm";
+const NEW_PHI_2017_1NM = "newphi_2017_1nm";
+const NEW_PHI_2021_1NM = "newphi_2021_1nm";
+const SOIL_TEXT        = read_csv("$(@__DIR__)/../../data/SOIL-TEXTURE.csv");
 
 
 # General instructions to run SPAC (dependent on config)

@@ -28,6 +28,6 @@ mutable struct ShortwaveRadiation{FT<:AbstractFloat}
     e_dir::Vector{FT}
 end;
 
-ShortwaveRadiation(config::SPACConfiguration{FT}) where {FT} = ShortwaveRadiation{FT}(read_nc(config.DATASET, "E_DIFF"), read_nc(config.DATASET, "E_DIR"));
+ShortwaveRadiation(config::SPACConfiguration{FT}) where {FT} = ShortwaveRadiation{FT}(config.SPECTRA.SOLAR_RAD[:,2], config.SPECTRA.SOLAR_RAD[:,1])
 
 broadband_radiation(FT) = ShortwaveRadiation{FT}(zeros(FT,2), zeros(FT,2));

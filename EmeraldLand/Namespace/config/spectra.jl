@@ -125,27 +125,31 @@ Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
 end;
 
-ReferenceSpectra{FT}(dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) where {FT} = ReferenceSpectra{FT}(
-            Λ          = read_nc(dataset, "WL"),
-            Λ_LOWER    = read_nc(dataset, "WL_LOWER"),
-            Λ_UPPER    = read_nc(dataset, "WL_UPPER"),
-            K_ANT      = read_nc(dataset, "K_ANT"),
-            K_BROWN    = read_nc(dataset, "K_BROWN"),
-            K_CAB      = read_nc(dataset, "K_CAB"),
-            K_CAR_V    = read_nc(dataset, "K_CAR_V"),
-            K_CAR_Z    = read_nc(dataset, "K_CAR_Z"),
-            K_CBC      = read_nc(dataset, "K_CBC"),
-            K_H₂O      = read_nc(dataset, "K_H₂O"),
-            K_LMA      = read_nc(dataset, "K_LMA"),
-            K_PRO      = read_nc(dataset, "K_PRO"),
-            NR         = read_nc(dataset, "NR"),
-            Φ_PS       = read_nc(dataset, "K_PS"),
-            Φ_PSI      = read_nc(dataset, "K_PS1"),
-            Φ_PSII     = read_nc(dataset, "K_PS2"),
-            MAT_SOIL   = FT[read_nc(dataset, "GSV_1") read_nc(dataset, "GSV_2") read_nc(dataset, "GSV_3") read_nc(dataset, "GSV_4")],
-            SOLAR_RAD  = [read_nc(dataset, "E_DIR") read_nc(dataset, "E_DIFF")],
+ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) where {FT} = (
+    df = read_jld2(jld2_file, dataset);
+
+    return ReferenceSpectra{FT}(
+            Λ          = df.WL,
+            Λ_LOWER    = df.WL_LOWER,
+            Λ_UPPER    = df.WL_UPPER,
+            K_ANT      = df.K_ANT,
+            K_BROWN    = df.K_BROWN,
+            K_CAB      = df.K_CAB,
+            K_CAR_V    = df.K_CAR_V,
+            K_CAR_Z    = df.K_CAR_Z,
+            K_CBC      = df.K_CBC,
+            K_H₂O      = df.K_H₂O,
+            K_LMA      = df.K_LMA,
+            K_PRO      = df.K_PRO,
+            NR         = df.NR,
+            Φ_PS       = df.K_PS,
+            Φ_PSI      = df.K_PS1,
+            Φ_PSII     = df.K_PS2,
+            MAT_SOIL   = FT[df.GSV_1 df.GSV_2; df.GSV_3 df.GSV_4],
+            SOLAR_RAD  = FT[df.E_DIR df.E_DIFF],
             WL_PAR     = wl_par,
             WL_PAR_700 = wl_par_700,
+    )
 );
 
 """
