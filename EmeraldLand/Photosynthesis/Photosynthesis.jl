@@ -3,6 +3,8 @@ module Photosynthesis
 using DataFrames: DataFrame
 
 using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
+using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
+using ..EmeraldMath.Stats: rmse
 using ..EmeraldPhysics.Constant: F_O₂, GAS_R
 
 using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterVcmax
