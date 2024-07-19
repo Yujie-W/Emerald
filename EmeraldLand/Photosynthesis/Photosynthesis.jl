@@ -1,5 +1,7 @@
 module Photosynthesis
 
+using DataFrames: DataFrame
+
 using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
 using ..EmeraldPhysics.Constant: F_O₂, GAS_R
 
@@ -24,6 +26,7 @@ include("photosystem/light_limited.jl");
 include("photosystem/product_limited.jl");
 include("photosystem/colimit.jl");
 include("photosystem/fluorescence.jl");
+include("photosystem/photosystem.jl");
 
 # functions to use with stomatal models
 include("stomata/derivative.jl");
@@ -32,6 +35,9 @@ include("stomata/photo_only.jl");
 # functions to use with SPAC
 include("plant/leaf.jl");
 include("plant/plant.jl");
+
+# function to fit the traits
+include("fitting/aci.jl");
 
 
 end; # module
