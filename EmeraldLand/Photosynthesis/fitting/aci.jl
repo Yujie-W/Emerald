@@ -138,7 +138,7 @@ aci_fit(ps::LeafPhotosystem{FT}, pst::C3CytoTrait{FT}, air::AirLayer, df::DataFr
         x_inis = [50, 0.8, 1],
         Δ_inis = [10, 0.1, 1],
     );
-    stol = SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50);
+    stol = SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50);
     func(x) = -aci_rmse(ps, pst, air, df, x);
     sol = find_peak(func, mthd, stol);
 
