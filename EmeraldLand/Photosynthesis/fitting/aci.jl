@@ -49,7 +49,7 @@ function aci_curve end;
 
 aci_curve(ps::LeafPhotosystem, air::AirLayer, pis::Vector, ppars::Vector, ts::Vector) = aci_an.((ps,), (air,), pis, ppars, ts);
 
-aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_an.(ps, air, df.P_I, df.PPAR, df.T_LEAF);
+aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air, df.P_I, df.PPAR, df.T_LEAF);
 
 
 #######################################################################################################################################################################################################
@@ -129,7 +129,7 @@ Fit the A-Ci curve, given
 """
 function aci_fit end;
 
-aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = nothing;
+aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_fit(ps, ps.trait, air, df);
 
 aci_fit(ps::LeafPhotosystem{FT}, pst::C3CytoTrait{FT}, air::AirLayer, df::DataFrame) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
@@ -198,3 +198,112 @@ aci_fit(ps::LeafPhotosystem{FT}, pst::C4VJPTrait{FT}, air::AirLayer, df::DataFra
 
     return sol, best_rmse, aci
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Jul-20: add functions to fit A-Ci curve with removing outliers
+#
+#######################################################################################################################################################################################################
+"""
+
+    aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df::DataFrame; min_count::Int = 9, rmse_threshold::Number = 2) where {FT}
+
+Fit the A-Ci curve by removing outliers, given
+- `ps` `LeafPhotosystem` struct
+- `air` `AirLayer` struct
+- `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
+- `min_count` Minimum number of data points to fit an A-Ci curve
+- `rmse_threshold` Threshold of RMSE to stop removing outliers
+
+"""
+function aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df::DataFrame; min_count::Int = 9, rmse_threshold::Number = 2) where {FT}
+    # remove outliers using thresholds when necessary
+    df[!,"A_NET_BAK"] .= df.A_NET;
+    last_rmse = 1000;
+    last_sol = nothing;
+    last_df = deepcopy(df);
+    crnt_df = deepcopy(df);
+    while true
+        sol, best_rmse, aci = aci_fit(ps, air, crnt_df);
+        if last_rmse - best_rmse < rmse_threshold
+            break
+        else
+            last_df = deepcopy(crnt_df);
+            last_sol = sol;
+            last_rmse = best_rmse;
+            remove_i = max_diff_index(crnt_df.A_NET, aci);
+            if sum(.!isnan.(crnt_df.A_NET)) > min_count
+                crnt_df[remove_i, "A_NET"] = NaN;
+            end;
+        end;
+    end;
+
+    # change the df and traits
+    df.A_NET .= last_df.A_NET;
+    best_rmse = aci_rmse(ps, air, df, last_sol);
+    aci = aci_curve(ps, air, df);
+
+    return last_sol, best_rmse, aci
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Jul-20: add alias function to fit A-Ci curve
+#
+#######################################################################################################################################################################################################
+"""
+
+    aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outlier::Bool = false, rmse_threshold::Number = 2)
+
+Fit the A-Ci curve, given
+- `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
+- `model` Photosynthesis model string (C3Cyto, C3VJP, C4CLM, C4VJP)
+- `min_count` Minimum number of data points to fit an A-Ci curve
+- `remove_outlier` Remove outliers or not
+- `rmse_threshold` Threshold of RMSE to stop removing outliers
+
+"""
+function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outlier::Bool = false, rmse_threshold::Number = 2)
+    # first of all, make sure the DataFrame has the required columns
+    @assert all(["P_I", "PPAR", "T_LEAF", "A_NET"] .∈ names(df)) "The DataFrame should have columns P_I, PPAR, T_LEAF, and A_NET!";
+    @assert nanmin(df.T_LEAF) > 253.15 "The leaf temperature should be in Kelvin!";
+
+    # create a leaf photosystem based on the model string
+    ps = if model == "C3Cyto"
+        LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3CytoState{Float64}())
+    elseif model == "C3VJP"
+        LeafPhotosystem{Float64}(trait = C3VJPTrait{Float64}(), state = C3VJPState{Float64}())
+    elseif model == "C4CLM"
+        LeafPhotosystem{Float64}(trait = C4CLMTrait{Float64}(), state = C4VJPState{Float64}())
+    elseif model == "C4VJP"
+        LeafPhotosystem{Float64}(trait = C4VJPTrait{Float64}(), state = C4VJPState{Float64}())
+    else
+        throw(ArgumentError("The model should be one of C3Cyto, C3VJP, C4CLM, and C4VJP!"))
+    end;
+
+    # fit the A-Ci curve with or without removing outliers
+    if remove_outlier
+        return aci_fit_exclude_outliter(ps, AirLayer{Float64}(), df, min_count = min_count, rmse_threshold = rmse_threshold)
+    else
+        return aci_fit(ps, AirLayer{Float64}(), df)
+    end;
+end;
+
+
+
+
+
+
+# TODO: move this function to EmeraldMath (not sure where yet)
+function max_diff_index(y::Vector, p_pred::Vector)
+    abs_diff = abs.(y .- p_pred);
+    abs_diff[isnan.(abs_diff)] .= 0;
+
+    return findmax(abs_diff)[2]
+end;
