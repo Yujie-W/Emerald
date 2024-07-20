@@ -271,7 +271,7 @@ Fit the A-Ci curve, given
 """
 function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outlier::Bool = false, rmse_threshold::Number = 2)
     # first of all, make sure the DataFrame has the required columns
-    @assert all(["P_I", "PPAR", "T_LEAF", "A_NET"] .∈ names(df)) "The DataFrame should have columns P_I, PPAR, T_LEAF, and A_NET!";
+    @assert all([n in names(df) for n in ["P_I", "PPAR", "T_LEAF", "A_NET"]]) "The DataFrame should have columns P_I, PPAR, T_LEAF, and A_NET!";
     @assert nanmin(df.T_LEAF) > 253.15 "The leaf temperature should be in Kelvin!";
 
     # create a leaf photosystem based on the model string
