@@ -292,7 +292,7 @@ function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outli
     elseif model == "C4VJP"
         LeafPhotosystem{Float64}(trait = C4VJPTrait{Float64}(), state = C4State{Float64}())
     else
-        throw(ArgumentError("The model should be one of C3Cyto, C3VJP, C4CLM, and C4VJP!"))
+        throw(ArgumentError("The model should be one of C3Cyto, C3CLM, C3FvCB, C3JB, C3VJP, C4CLM, and C4VJP!"))
     end;
 
     # fit the A-Ci curve with or without removing outliers
