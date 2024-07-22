@@ -57,6 +57,7 @@ aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air
 # Changes to this function
 # General
 #     2024-Jul-19: add functions to obtain RMSE of A-Ci curve
+#     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
 #
 #######################################################################################################################################################################################################
 """
@@ -83,7 +84,7 @@ aci_rmse(ps::LeafPhotosystem, pst::C3CytoTrait, air::AirLayer, df::DataFrame, pa
     return rmse(aci_curve(ps, air, df), df.A_NET)
 );
 
-aci_rmse(ps::LeafPhotosystem, pst::C3VJPTrait, air::AirLayer, df::DataFrame, params::Vector) = (
+aci_rmse(ps::LeafPhotosystem, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}, air::AirLayer, df::DataFrame, params::Vector) = (
     @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, Jmax25, Rd25!";
     pst.v_cmax25 = params[1];
     pst.j_max25 = params[2];
@@ -115,6 +116,7 @@ aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, par
 # Changes to this function
 # General
 #     2024-Jul-19: add functions to fit A-Ci curve
+#     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
 #
 #######################################################################################################################################################################################################
 """
@@ -148,7 +150,7 @@ aci_fit(ps::LeafPhotosystem{FT}, pst::C3CytoTrait{FT}, air::AirLayer, df::DataFr
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::C3VJPTrait{FT}, air::AirLayer, df::DataFrame) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, air::AirLayer, df::DataFrame) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = [1, 1, 0.1],
         x_maxs = [300, 600, 10],
@@ -277,6 +279,10 @@ function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outli
     # create a leaf photosystem based on the model string
     ps = if model == "C3Cyto"
         LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3CytoState{Float64}())
+    elseif model == "C3CLM"
+        LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3VJPState{Float64}())
+    elseif model == "C3FvCB"
+        LeafPhotosystem{Float64}(trait = C3FvCBTrait{Float64}(), state = C3VJPState{Float64}())
     elseif model == "C3VJP"
         LeafPhotosystem{Float64}(trait = C3VJPTrait{Float64}(), state = C3VJPState{Float64}())
     elseif model == "C4CLM"

@@ -34,7 +34,7 @@ photosystem_electron_transport!(pst::C3CytoTrait{FT}, pss::C3CytoState{FT}, psa:
     return nothing
 );
 
-photosystem_electron_transport!(pst::C3VJPTrait{FT}, pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
+photosystem_electron_transport!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
     psa.j_pot = psa.f_psii * psa.ϕ_psii_max * ppar;
     psa.j     = colimited_rate(psa.j_pot, β * psa.j_max, pst.COLIMIT_J);

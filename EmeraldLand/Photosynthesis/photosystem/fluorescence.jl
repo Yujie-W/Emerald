@@ -103,11 +103,16 @@ photosystem_coefficients!(pst::C3CytoTrait{FT}, pss::C3CytoState{FT}, psa::LeafP
     =#
 );
 
-photosystem_coefficients!(pst::Union{C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}}, pss::Union{C3VJPState{FT}, C4VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} =
+photosystem_coefficients!(
+            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
+            pss::Union{C3VJPState{FT}, C4VJPState{FT}},
+            psa::LeafPhotosystemAuxil{FT},
+            ppar::FT;
+            β::FT = FT(1)) where {FT} =
     photosystem_coefficients!(pst, pss, pst.FLM, psa, ppar; β = β);
 
 photosystem_coefficients!(
-            pst::Union{C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
+            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::Union{C3VJPState{FT}, C4VJPState{FT}},
             flm::KNFluoscenceModel{FT},
             psa::LeafPhotosystemAuxil{FT},
@@ -158,7 +163,7 @@ photosystem_coefficients!(
 );
 
 photosystem_coefficients!(
-            pst::Union{C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
+            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::Union{C3VJPState{FT}, C4VJPState{FT}},
             flm::QLFluoscenceModel{FT},
             psa::LeafPhotosystemAuxil{FT},

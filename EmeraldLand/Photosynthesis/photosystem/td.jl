@@ -117,7 +117,7 @@ photosystem_temperature_dependence!(pst::C3CytoTrait{FT}, psa::LeafPhotosystemAu
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::C3VJPTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
     psa.γ_star = temperature_corrected_value(pst.TD_Γ , t);

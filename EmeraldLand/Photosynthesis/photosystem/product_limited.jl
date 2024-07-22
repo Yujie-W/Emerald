@@ -9,6 +9,7 @@
 #     2022-Feb-28: add C3CytochromeModel support
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2024-Apr-15: add support to C4CLMTrait model using CLM settings
+#     2024-Jul-22: add support to C3FvCBTrait model (infinity a_p)
 # Bug fixes
 #     2023-Sep-21: if g_lc is 0, set a_p to r
 #
@@ -32,8 +33,20 @@ product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {
 
 product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
 
-product_limited_rate!(pst::Union{C3CytoTrait{FT}, C3VJPTrait{FT}}, pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::C3CytoTrait{FT}, pss::C3CytoState{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
+
+    return nothing
+);
+
+product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3VJPTrait{FT}}, pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+    psa.a_p = β * psa.v_cmax / 2;
+
+    return nothing
+);
+
+product_limited_rate!(pst::C3FvCBTrait{FT}, pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+    psa.a_p = FT(Inf);
 
     return nothing
 );
@@ -50,8 +63,20 @@ product_limited_rate!(pst::C4VJPTrait{FT}, pss::C4VJPState{FT}, psa::LeafPhotosy
     return nothing
 );
 
-product_limited_rate!(pst::Union{C3CytoTrait{FT}, C3VJPTrait{FT}}, pss::Union{C3CytoState{FT}, C3VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::C3CytoTrait{FT}, pss::C3CytoState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
+
+    return nothing
+);
+
+product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3VJPTrait{FT}}, pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+    psa.a_p = β * psa.v_cmax / 2;
+
+    return nothing
+);
+
+product_limited_rate!(pst::C3FvCBTrait{FT}, pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+    psa.a_p = FT(Inf);
 
     return nothing
 );

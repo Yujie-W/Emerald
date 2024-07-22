@@ -8,8 +8,7 @@ using Test;
     FT = Float64;
 
     # The default spectra using the old phi settings
-    oldphi = artifact"land_model_spectrum_V6" * "/clima_land_spectra_1nm_2021.nc";
-    config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = oldphi);
+    config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
     config.Φ_SIF_WL = false;
     spac = EmeraldLand.Namespace.BulkSPAC(config);
     EmeraldLand.SPAC.initialize_spac!(config, spac);
@@ -17,8 +16,7 @@ using Test;
     @test true;
 
     # Use the spectra used by Yinon Bar-On
-    newphi = artifact"land_model_spectrum_V7" * "/clima_land_spectra_1nm_2021.nc";
-    config_new = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = newphi);
+    config_new = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.NEW_PHI_2021_1NM);
     config_new.Φ_SIF_WL = false;
     spac_new = EmeraldLand.Namespace.BulkSPAC(config_new);
     EmeraldLand.SPAC.initialize_spac!(config_new, spac_new);
@@ -26,7 +24,7 @@ using Test;
     @test true;
 
     # Use my WL-dependent spectra
-    config_def = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = newphi);
+    config_def = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
     config_def.Φ_SIF_WL = true;
     spac_def = EmeraldLand.Namespace.BulkSPAC(config_def);
     EmeraldLand.SPAC.initialize_spac!(config_def, spac_def);

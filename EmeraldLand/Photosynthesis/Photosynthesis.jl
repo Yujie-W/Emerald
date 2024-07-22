@@ -13,8 +13,10 @@ using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
 using ..Namespace: GCO₂Mode, PCO₂Mode
 using ..Namespace: KNFluoscenceModel, QLFluoscenceModel
-using ..Namespace: C3CytoState, C3CytoTrait, C3VJPState, C3VJPTrait, C4CLMTrait, C4VJPState, C4VJPTrait, LeafPhotosystemAuxil
-using ..Namespace: LeafPhotosystem
+using ..Namespace: C3CytoTrait, C3CytoState
+using ..Namespace: C3CLMTrait, C3FvCBTrait, C3VJPTrait, C3VJPState
+using ..Namespace: C4CLMTrait, C4VJPTrait, C4VJPState
+using ..Namespace: LeafPhotosystem, LeafPhotosystemAuxil
 using ..Namespace: Leaf
 using ..Namespace: AirLayer
 using ..Namespace: BulkSPAC

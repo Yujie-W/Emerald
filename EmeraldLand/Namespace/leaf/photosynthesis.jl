@@ -121,6 +121,132 @@ Base.@kwdef mutable struct C3VJPTrait{FT}
     "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
     COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
     "[`AbstractColimit`](@ref) type colimitation method for J"
+    COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitJCLM(FT)
+
+    # Temperature dependency structures
+    "[`AbstractTemperatureDependency`](@ref) type Jmax temperature dependency"
+    TD_JMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = JmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Kc temperature dependency"
+    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KcTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
+    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KoTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
+    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
+
+    # Constant coefficients
+    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
+    K_D::FT = 0.85
+    "Rate constant for fluorescence"
+    K_F::FT = 0.05
+    "Maximal rate constant for PSII photochemistry"
+    K_PSII::FT = 4
+
+    # Embedded structures
+    "Fluorescence model"
+    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
+
+    # Prognostic variables
+    "Maximal electron transport rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    j_max25::FT = 83.5
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-22: add C3CLMTrait struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C3 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C3CLMTrait{FT}
+    # Colimitation methods
+    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
+    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitCJCLMC3(FT)
+    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
+    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitIPCLM(FT)
+    "[`AbstractColimit`](@ref) type colimitation method for J"
+    COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitJCLM(FT)
+
+    # Temperature dependency structures
+    "[`AbstractTemperatureDependency`](@ref) type Jmax temperature dependency"
+    TD_JMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = JmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Kc temperature dependency"
+    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KcTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
+    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KoTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
+    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
+
+    # Constant coefficients
+    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
+    K_D::FT = 0.85
+    "Rate constant for fluorescence"
+    K_F::FT = 0.05
+    "Maximal rate constant for PSII photochemistry"
+    K_PSII::FT = 4
+
+    # Embedded structures
+    "Fluorescence model"
+    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
+
+    # Prognostic variables
+    "Maximal electron transport rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    j_max25::FT = 83.5
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-22: add C3FvCBTrait struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C3 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C3FvCBTrait{FT}
+    # Colimitation methods
+    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
+    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
+    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for J"
     COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = QuadraticColimit{FT}(CURVATURE = 0.7)
 
     # Temperature dependency structures
@@ -475,7 +601,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3CytoState{FT}, C3VJPState{FT}, C4VJPState{FT}} = C3VJPState{FT}()
     "Auxilary variables"
