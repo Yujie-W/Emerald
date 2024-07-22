@@ -73,26 +73,68 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add C3CytoState struct
+#     2024-Jul-22: add C3JBTrait struct
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the state variables for C3 photosynthesis (Cytochrome model)
+Struct that contains the trait variables for C3 photosynthesis (Cytochrome model)
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3CytoState{FT}
-    # General model information
-    "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
-    EFF_1::FT = 4
-    "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
-    EFF_2::FT = 8
+Base.@kwdef mutable struct C3JBTrait{FT}
+    # Colimitation methods
+    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
+    COLIMIT_CJ::MinimumColimit{FT} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
+    COLIMIT_IP::MinimumColimit{FT} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for J"
+    COLIMIT_J::SerialColimit{FT} = SerialColimit{FT}()
+
+    # Temperature dependency structures
+    "[`AbstractTemperatureDependency`](@ref) type Kc temperature dependency"
+    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KcTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
+    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KoTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Kq temperature dependency"
+    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KqTDJohnson(FT)
+    "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
+    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
+    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDJohnson(FT)
+    "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
+    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)
+
+    # Constant coefficients
+    "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
+    K_D::FT = 0.55
+    "Rate constant of fluorescence `[ns⁻¹]`"
+    K_F::FT = 0.05
+    "Rate constant of photochemistry for PS I `[ns⁻¹]`"
+    K_PSI::FT = 14.5
+    "Rate constant of photochemistry for PS II `[ns⁻¹]`"
+    K_PSII::FT = 4.5
+    "Rate constant of excitation sharing for PS II `[ns⁻¹]`"
+    K_U::FT = 2
+    "Rate constant of regulated heat loss via oxidized PS I center `[s⁻¹]`"
+    K_X::FT = 14.5
+
+    # Prognostic variables
+    "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
+    b₆f::FT = 350 / 300
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
 end;
 
 
@@ -164,6 +206,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Jul-22: add C3CLMTrait struct
+#     2024-Jul-22: CLM colimitations are all quadratic
 #
 #######################################################################################################################################################################################################
 """
@@ -180,11 +223,11 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct C3CLMTrait{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
-    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitCJCLMC3(FT)
+    COLIMIT_CJ::QuadraticColimit{FT} = ColimitCJCLMC3(FT)
     "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
-    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitIPCLM(FT)
+    COLIMIT_IP::QuadraticColimit{FT} = ColimitIPCLM(FT)
     "[`AbstractColimit`](@ref) type colimitation method for J"
-    COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitJCLM(FT)
+    COLIMIT_J::QuadraticColimit{FT} = ColimitJCLM(FT)
 
     # Temperature dependency structures
     "[`AbstractTemperatureDependency`](@ref) type Jmax temperature dependency"
@@ -227,6 +270,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Jul-22: add C3FvCBTrait struct
+#     2024-Jul-22: FvCB colimitations are all minimum and quadratic (TODO: new algorithm required)
 #
 #######################################################################################################################################################################################################
 """
@@ -243,11 +287,11 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct C3FvCBTrait{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
-    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    COLIMIT_CJ::MinimumColimit{FT} = MinimumColimit{FT}()
     "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
-    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    COLIMIT_IP::MinimumColimit{FT} = MinimumColimit{FT}()
     "[`AbstractColimit`](@ref) type colimitation method for J"
-    COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = QuadraticColimit{FT}(CURVATURE = 0.7)
+    COLIMIT_J::QuadraticColimit{FT} = QuadraticColimit{FT}(CURVATURE = 0.7)
 
     # Temperature dependency structures
     "[`AbstractTemperatureDependency`](@ref) type Jmax temperature dependency"
@@ -289,8 +333,9 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add C3VJPState struct
+#     2023-Oct-03: add C3State struct
 #     2023-Oct-28: add support to QLFluoscenceModel
+#     2024-Jul-22: support all C3 models
 #
 #######################################################################################################################################################################################################
 """
@@ -304,14 +349,14 @@ Struct that contains the state variables for C3 photosynthesis (VJP model)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3VJPState{FT}
+Base.@kwdef mutable struct C3State{FT}
     # General model information
     "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
     EFF_1::FT = 4
     "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
     EFF_2::FT = 8
 
-    # Prognostic variables
+    # Prognostic variables (for VJP model)
     "Sustained NPQ rate constant (for seasonal changes, default is zero)"
     k_npq_sus::FT = 0
 end;
@@ -431,7 +476,7 @@ end;
 #
 # Changes to this struct
 # General
-#     2023-Oct-03: add C4VJPState struct
+#     2023-Oct-03: add C4State struct
 #     2023-Oct-28: add support to QLFluoscenceModel
 #
 #######################################################################################################################################################################################################
@@ -446,7 +491,7 @@ Struct that contains the state variables for C4 photosynthesis (VJP model)
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C4VJPState{FT}
+Base.@kwdef mutable struct C4State{FT}
     # Prognostic variables
     "Sustained NPQ rate constant (for seasonal changes, default is zero)"
     k_npq_sus::FT = 0
@@ -601,9 +646,9 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
     "State variables"
-    state::Union{C3CytoState{FT}, C3VJPState{FT}, C4VJPState{FT}} = C3VJPState{FT}()
+    state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
     "Auxilary variables"
     auxil::LeafPhotosystemAuxil{FT} = LeafPhotosystemAuxil{FT}()
 end;

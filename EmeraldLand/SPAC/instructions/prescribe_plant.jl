@@ -14,7 +14,7 @@
 #     2023-Oct-18: recalculate canopy structural parameters when LAI, cab, car, ci is updated
 #     2024-Jan-11: add option to prescribe sai
 #     2024-Feb-08: fix the issue in Vcmax profiles (was opposite)
-#     2024-Feb-08: add support to C3CytoState and C3VJPState
+#     2024-Feb-08: add support to C3State
 #     2024-Feb-27: run dull_aux! when any of the canopy structural parameters or leaf pigments is updated
 #     2024-Feb-28: set minimum LAI to 0 if a negative value is prescribed
 #
@@ -176,16 +176,16 @@ function prescribe_traits!(
             ilf = n_layer - irt + 1;
             ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.trait.δlai[1:irt-1]));
             leaf = leaves[ilf];
-            if leaf.photosystem.state isa C3VJPState
-                leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
-                leaf.photosystem.trait.j_max25 = leaves[end].photosystem.trait.v_cmax25 * 1.67 * ratio;
-                leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.v_cmax25 * 0.015 * ratio;
-            elseif leaf.photosystem.state isa C3CytoState
+            if typeof(leaf.photosystem.trait) isa C3CytoTrait
                 leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
                 leaf.photosystem.trait.b₆f = leaves[end].photosystem.trait.v_cmax25 * 7 / 300 * ratio;
                 leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.v_cmax25 * 0.015 * ratio;
+            elseif leaf.photosystem.trait isa C3VJPTrait
+                leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
+                leaf.photosystem.trait.j_max25 = leaves[end].photosystem.trait.v_cmax25 * 1.67 * ratio;
+                leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.v_cmax25 * 0.015 * ratio;
             else
-                error("Vcmax profile is only available for C3VJPState and C3CytoState.");
+                error("Vcmax profile is only available for C3CytoTrait and C3VJPTrait.");
             end;
         end;
     end;

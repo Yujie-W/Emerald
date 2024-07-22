@@ -81,7 +81,7 @@ mutable struct LeafStates{FT<:AbstractFloat}
     "Leaf flux state"
     flux::LeafFluxState{FT}
     "Photosynthesis system state"
-    photosystem::Union{C3CytoState{FT}, C3VJPState{FT}, C4VJPState{FT}}
+    photosystem::Union{C3State{FT}, C4State{FT}}
     "Leaf xylem hydraulics state"
     xylem::XylemHydraulicsState{FT}
 end;

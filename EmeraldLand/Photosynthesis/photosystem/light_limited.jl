@@ -27,15 +27,15 @@ Update the electron transport limited photosynthetic rate (none for PCO₂Mode a
 """
 function light_limited_rate! end;
 
-light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT} = light_limited_rate!(psm.state, psm.auxil);
+# PCO₂Mode
+light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT} = light_limited_rate!(psm.auxil);
 
-light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = light_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
+light_limited_rate!(psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);
 
-light_limited_rate!(pss::Union{C3CytoState{FT}, C4VJPState{FT}}, psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);
+# GCO₂Mode
+light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = light_limited_rate!(psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
 
-light_limited_rate!(pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);
-
-light_limited_rate!(pss::C3CytoState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+light_limited_rate!(pst::Union{C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     if psa.j_psi == 0
         psa.a_j = 0;
 
@@ -69,7 +69,7 @@ light_limited_rate!(pss::C3CytoState{FT}, psa::LeafPhotosystemAuxil{FT}, air::Ai
     return nothing
 );
 
-light_limited_rate!(pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+light_limited_rate!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     if psa.j == 0
         psa.a_j = 0;
 
@@ -98,4 +98,5 @@ light_limited_rate!(pss::C3VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::Air
     return nothing
 );
 
-light_limited_rate!(psm::C4VJPState{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_j = psa.j_pot * psa.e2c; return nothing);
+light_limited_rate!(pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}}, pss::C4State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} =
+    (psa.a_j = psa.j * psa.e2c; return nothing);

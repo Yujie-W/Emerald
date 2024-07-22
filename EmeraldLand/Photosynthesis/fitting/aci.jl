@@ -75,7 +75,7 @@ function aci_rmse end;
 
 aci_rmse(ps::LeafPhotosystem, air::AirLayer, df::DataFrame, params::Vector) = aci_rmse(ps, ps.trait, air, df, params);
 
-aci_rmse(ps::LeafPhotosystem, pst::C3CytoTrait, air::AirLayer, df::DataFrame, params::Vector) = (
+aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoTrait, C3JBTrait}, air::AirLayer, df::DataFrame, params::Vector) = (
     @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, b₆f, Rd25!";
     pst.v_cmax25 = params[1];
     pst.b₆f = params[2];
@@ -133,7 +133,7 @@ function aci_fit end;
 
 aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_fit(ps, ps.trait, air, df);
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::C3CytoTrait{FT}, air::AirLayer, df::DataFrame) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = [1, 0.01, 0.1],
         x_maxs = [300, 3, 10],
@@ -278,17 +278,19 @@ function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outli
 
     # create a leaf photosystem based on the model string
     ps = if model == "C3Cyto"
-        LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3CytoState{Float64}())
+        LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3State{Float64}())
     elseif model == "C3CLM"
-        LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3VJPState{Float64}())
+        LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3State{Float64}())
     elseif model == "C3FvCB"
-        LeafPhotosystem{Float64}(trait = C3FvCBTrait{Float64}(), state = C3VJPState{Float64}())
+        LeafPhotosystem{Float64}(trait = C3FvCBTrait{Float64}(), state = C3State{Float64}())
+    elseif model == "C3JB"
+        LeafPhotosystem{Float64}(trait = C3JBTrait{Float64}(), state = C3State{Float64}())
     elseif model == "C3VJP"
-        LeafPhotosystem{Float64}(trait = C3VJPTrait{Float64}(), state = C3VJPState{Float64}())
+        LeafPhotosystem{Float64}(trait = C3VJPTrait{Float64}(), state = C3State{Float64}())
     elseif model == "C4CLM"
-        LeafPhotosystem{Float64}(trait = C4CLMTrait{Float64}(), state = C4VJPState{Float64}())
+        LeafPhotosystem{Float64}(trait = C4CLMTrait{Float64}(), state = C4State{Float64}())
     elseif model == "C4VJP"
-        LeafPhotosystem{Float64}(trait = C4VJPTrait{Float64}(), state = C4VJPState{Float64}())
+        LeafPhotosystem{Float64}(trait = C4VJPTrait{Float64}(), state = C4State{Float64}())
     else
         throw(ArgumentError("The model should be one of C3Cyto, C3VJP, C4CLM, and C4VJP!"))
     end;
