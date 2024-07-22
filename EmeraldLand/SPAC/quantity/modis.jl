@@ -158,7 +158,7 @@ Return NIRv radiance for MODIS setup, given
 
 """
 function MODIS_NIRvR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}; weighted::Bool = false) where {FT}
-    nir_rad = read_spectrum(spac.canopy.spectra.Λ, spac.canopy.sensor_geometry.auxil.e_sensor, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6);
+    nir_rad = read_spectrum(config.SPECTRA.Λ, spac.canopy.sensor_geometry.auxil.e_sensor, FT(MODIS_BAND_2[1]), FT(MODIS_BAND_2[2]); steps=6);
 
     return MODIS_NDVI(config, spac; weighted = weighted) * nir_rad
 end;
