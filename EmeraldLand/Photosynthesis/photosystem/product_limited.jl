@@ -10,7 +10,6 @@
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2024-Apr-15: add support to C4CLMTrait model using CLM settings
 #     2024-Jul-22: add support to C3FvCBTrait and C3JBTrait model (infinity a_p)
-#     2024-Jul-22: add support to C3CytoMaxEtaTrait model (infinity a_p)
 # Bug fixes
 #     2023-Sep-21: if g_lc is 0, set a_p to r
 #
@@ -30,23 +29,16 @@ Update the product limited photosynthetic rate (p_i for PCO₂Mode, g_lc for GCO
 """
 function product_limited_rate! end;
 
+# PCO₂Mode
 product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, p_i; β = β);
 
-product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, air, g_lc; β = β);
-
-product_limited_rate!(pst::C3CytoTrait{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3CytoMinEtaTrait{FT}, C3VJPTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
 
     return nothing
 );
 
-product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3VJPTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psa.a_p = β * psa.v_cmax / 2;
-
-    return nothing
-);
-
-product_limited_rate!(pst::Union{C3CytoMaxEtaTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::Union{C3FvCBTrait{FT}, C3JBTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = FT(Inf);
 
     return nothing
@@ -64,13 +56,16 @@ product_limited_rate!(pst::C4VJPTrait{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::F
     return nothing
 );
 
+# GCO₂Mode
+product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, air, g_lc; β = β);
+
 product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
 
     return nothing
 );
 
-product_limited_rate!(pst::Union{C3CytoMaxEtaTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::Union{C3CytoMinEtaTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = FT(Inf);
 
     return nothing

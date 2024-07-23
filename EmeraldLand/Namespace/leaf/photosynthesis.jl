@@ -4,7 +4,7 @@
 #
 # Changes to this struct
 # General
-#     2024-Jul-23: add C3CytoMaxEtaTrait struct
+#     2024-Jul-23: add C3CytoMinEtaTrait struct
 #
 #######################################################################################################################################################################################################
 """
@@ -18,7 +18,7 @@ Struct that contains the trait variables for C3 photosynthesis (Cytochrome model
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3CytoMaxEtaTrait{FT}
+Base.@kwdef mutable struct C3CytoMinEtaTrait{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
     COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
@@ -66,8 +66,8 @@ Base.@kwdef mutable struct C3CytoMaxEtaTrait{FT}
     r_d25::FT = 0.75
     "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     v_cmax25::FT = 50
-    "Maximal eta"
-    η_max::FT = 1.05
+    "Minimum eta"
+    η_min::FT = 1.05
 end;
 
 
@@ -717,7 +717,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoMaxEtaTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
     "Auxilary variables"

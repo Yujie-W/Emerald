@@ -35,7 +35,7 @@ light_limited_rate!(psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j
 # GCO₂Mode
 light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = light_limited_rate!(psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
 
-light_limited_rate!(pst::Union{C3CytoMaxEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+light_limited_rate!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     if psa.j_psi == 0
         psa.a_j = 0;
 

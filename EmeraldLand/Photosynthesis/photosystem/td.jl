@@ -100,7 +100,7 @@ function photosystem_temperature_dependence! end;
 
 photosystem_temperature_dependence!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, t::FT) where {FT} = photosystem_temperature_dependence!(psm.trait, psm.auxil, air, t);
 
-photosystem_temperature_dependence!(pst::Union{C3CytoMaxEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
     psa.k_q    = temperature_corrected_value(pst.TD_KQ, t);
