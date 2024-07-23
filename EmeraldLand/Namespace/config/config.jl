@@ -23,6 +23,7 @@
 #     2024-Feb-27: add field HOT_SPOT and SOIL_ALBEDO
 #     2024-Feb-27: add constructor function to create the configuration using customized settings
 #     2024-Feb-28: add field VERTICAL_BIO
+#     2024-Jul-22: add field ENABLE_CHEMICAL_ENERGY
 #
 #######################################################################################################################################################################################################
 """
@@ -94,6 +95,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     STEADY_STATE_FLOW::Bool = true
 
     # Settings related to photosynthesis
+    "Enable the chemical energy related to photosynthesis and respiration"
+    ENABLE_CHEMICAL_ENERGY::Bool = true
     "Whether to acclimate leaf Vcmax and Jmax TD"
     T_CLM::Bool = true
 

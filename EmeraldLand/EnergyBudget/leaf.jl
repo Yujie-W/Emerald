@@ -7,20 +7,24 @@
 #     2023-Sep-30: add function to calculate the energy flow of the leaf
 #     2023-Nov-03: save latent and sensible heat fluxes in leaf energy auxil
 #     2024-Feb-28: add LAI <= 0 control
+#     2024-Jul-22: add option to enable chemical energy from photosynthesis or respiration
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
+    leaf_energy_flows!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the leaf, given
+- `config` `SPACConfiguration` type configuration
 - `spac` `BulkSPAC` type SPAC
 
 """
-function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
+function leaf_energy_flows!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
+
+    (; ENABLE_CHEMICAL_ENERGY) = config;
 
     # run the energy budget for each leaf layer only if LAI > 0
     airs = spac.airs;
@@ -69,6 +73,13 @@ function leaf_energy_flows!(spac::BulkSPAC{FT}) where {FT}
 
         # add the net radiation energy to the leaf (to total leaf area)
         leaf.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_leaf[irt] + canopy.structure.auxil.r_net_lw_leaf[irt]) * sbulk.trait.area;
+
+        # remove the chemical energy from the leaf
+        if ENABLE_CHEMICAL_ENERGY
+            f_sunlit = canopy.sun_geometry.s_aux.p_sunlit[irt];
+            an_layer = (f_sunlit * mean(leaves[ilf].flux.auxil.a_n_sunlit) + (1 - f_sunlit) * leaves[ilf].flux.auxil.a_n_shaded) * leaf.xylem.trait.area;
+            leaf.energy.auxil.∂e∂t -= an_layer * FT(1e-6) / 6 * GLUCOSE(FT);
+        end;
     end;
 
     return nothing

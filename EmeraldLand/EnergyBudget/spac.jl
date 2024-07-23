@@ -10,18 +10,19 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_energy_flow!(spac::BulkSPAC{FT}) where {FT}
+    spac_energy_flow!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the plant, given
+- `config` `SPACConfiguration` type configuration
 - `spac` `BulkSPAC` type SPAC
 
 """
-function spac_energy_flow!(spac::BulkSPAC{FT}) where {FT}
+function spac_energy_flow!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     soil_energy_flow!(spac);
     root_energy_flows!(spac);
     junction_energy_flows!(spac);
     stem_energy_flows!(spac);
-    leaf_energy_flows!(spac);
+    leaf_energy_flows!(config, spac);
 
     return nothing
 end;

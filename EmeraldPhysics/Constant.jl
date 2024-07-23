@@ -12,6 +12,7 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 #     2022-Jul-20: add fields F_O₂, CP_D, CP_I
 #     2022-Jul-20: rename field LH_V0 to LH_V₀, T_0 to T₀
 #     2022-Sep-09: move constants from ClimaCache.jl to EmeraldConstants.jl
+#     2024-Jul-22: add field GLUCOSE
 #
 #######################################################################################################################################################################################################
 """
@@ -42,6 +43,8 @@ Base.@kwdef mutable struct UniversalConstants
     F_O₂::Float64 = 0.2095
     "Universal gas constant `[J mol⁻¹ K⁻¹]`"
     GAS_R::Float64 = 8.3144598
+    "Glucose chemical potential `[J mol⁻¹]`"
+    GLUCOSE::Float64 = 2.8025e6
     "Gravity of the Earth `[m s⁻²]`"
     GRAVITY::Float64 = 9.81
     "Planck constant `[m² kg s⁻¹]`"
@@ -126,6 +129,9 @@ F_O₂(FT=Float64) = FT(UNIVERSAL_CONSTANTS.F_O₂);
 
 """ Universal gas constant `[J mol⁻¹ K⁻¹]` """
 GAS_R(FT=Float64) = FT(UNIVERSAL_CONSTANTS.GAS_R);
+
+""" Glucose chemical potential `[J mol⁻¹]` """
+GLUCOSE(FT=Float64) = FT(UNIVERSAL_CONSTANTS.GLUCOSE);
 
 """ Gravity of the Earth `[m s⁻²]` """
 GRAVITY(FT=Float64) = FT(UNIVERSAL_CONSTANTS.GRAVITY);

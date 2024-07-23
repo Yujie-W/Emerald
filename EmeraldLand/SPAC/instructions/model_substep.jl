@@ -26,7 +26,7 @@ function substep_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
     β_factor!(spac);
     plant_photosynthesis!(spac, GCO₂Mode());
     stomatal_conductance_profile!(spac);
-    spac_energy_flow!(spac);
+    spac_energy_flow!(config, spac);
 
     return nothing
 end;
