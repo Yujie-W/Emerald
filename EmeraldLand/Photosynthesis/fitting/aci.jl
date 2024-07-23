@@ -136,9 +136,9 @@ aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_fit(ps, ps.trai
 aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = [1, 0.01, 0.1],
-        x_maxs = [300, 3, 10],
-        x_inis = [50, 0.8, 1],
-        Δ_inis = [10, 0.1, 1],
+        x_maxs = [300, 10, 10],
+        x_inis = [50, 2.1, 1],
+        Δ_inis = [10, 1, 1],
     );
     stol = SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50);
     func(x) = -aci_rmse(ps, pst, air, df, x);
