@@ -33,7 +33,7 @@ product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {
 
 product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, air, g_lc; β = β);
 
-product_limited_rate!(pst::C3CytoTrait{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::Union{C3CytoMaxEtaTrait{FT}, C3CytoTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
 
     return nothing
@@ -63,7 +63,7 @@ product_limited_rate!(pst::C4VJPTrait{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::F
     return nothing
 );
 
-product_limited_rate!(pst::C3CytoTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(pst::Union{C3CytoMaxEtaTrait{FT}, C3CytoTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
     psa.a_p = β * psa.v_cmax / 2;
 
     return nothing

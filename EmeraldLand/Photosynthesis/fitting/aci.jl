@@ -58,6 +58,7 @@ aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air
 # General
 #     2024-Jul-19: add functions to obtain RMSE of A-Ci curve
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
+#     2024-Jul-23: add support to C3CytoMaxEtaTrait
 #
 #######################################################################################################################################################################################################
 """
@@ -75,7 +76,7 @@ function aci_rmse end;
 
 aci_rmse(ps::LeafPhotosystem, air::AirLayer, df::DataFrame, params::Vector) = aci_rmse(ps, ps.trait, air, df, params);
 
-aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoTrait, C3JBTrait}, air::AirLayer, df::DataFrame, params::Vector) = (
+aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoMaxEtaTrait, C3CytoTrait, C3JBTrait}, air::AirLayer, df::DataFrame, params::Vector) = (
     @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, b₆f, Rd25!";
     pst.v_cmax25 = params[1];
     pst.b₆f = params[2];
@@ -117,6 +118,7 @@ aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, par
 # General
 #     2024-Jul-19: add functions to fit A-Ci curve
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
+#     2024-Jul-23: add support to C3CytoMaxEtaTrait
 #
 #######################################################################################################################################################################################################
 """
@@ -133,7 +135,7 @@ function aci_fit end;
 
 aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_fit(ps, ps.trait, air, df);
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoMaxEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = [1, 0.01, 0.1],
         x_maxs = [300, 10, 10],
@@ -257,6 +259,7 @@ end;
 # Changes to this function
 # General
 #     2024-Jul-20: add alias function to fit A-Ci curve
+#     2024-Jul-23: add support to C3CytoMaxEtaTrait
 #
 #######################################################################################################################################################################################################
 """
@@ -279,6 +282,8 @@ function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outli
     # create a leaf photosystem based on the model string
     ps = if model == "C3Cyto"
         LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3State{Float64}())
+    elseif model == "C3CytoMaxEta"
+        LeafPhotosystem{Float64}(trait = C3CytoMaxEtaTrait{Float64}(), state = C3State{Float64}())
     elseif model == "C3CLM"
         LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3State{Float64}())
     elseif model == "C3FvCB"

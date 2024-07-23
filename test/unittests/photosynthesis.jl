@@ -21,8 +21,8 @@ import Emerald.EmeraldLand.SPAC
     @testset "Electron transport" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
-        psts = [NS.C3VJPTrait{Float64}(), NS.C4CLMTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}()];
-        psss = [NS.C3State{Float64}(), NS.C4State{Float64}(), NS.C4State{Float64}(), NS.C3State{Float64}()];
+        psts = [NS.C3VJPTrait{Float64}(), NS.C4CLMTrait{Float64}(), NS.C4VJPTrait{Float64}(), NS.C3CytoTrait{Float64}(), NS.C3CytoMaxEtaTrait{Float64}()];
+        psss = [NS.C3State{Float64}(), NS.C4State{Float64}(), NS.C4State{Float64}(), NS.C3State{Float64}(), NS.C3State{Float64}()];
         for i in 1:4
             ps.trait = psts[i];
             ps.state = psss[i];
