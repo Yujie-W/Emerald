@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2024-Feb-26: add struct JunctionCapacitorTrait
+#     2024-Jul-24: use ExponentialPVCurve only for pv (hard coded in adjusted_time function given the residual water content)
 #
 #######################################################################################################################################################################################################
 """
@@ -20,7 +21,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct JunctionCapacitorTrait{FT}
     "Pressure volume curve of the capacitor"
-    pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = ExponentialPVCurve{FT}()
+    pv::ExponentialPVCurve{FT} = ExponentialPVCurve{FT}()
     "Capacitor maximum volume per basal area or per leaf area `[mol]`"
     v_max::FT = 5000
 end;

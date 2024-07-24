@@ -14,6 +14,7 @@
 #     2023-Sep-30: add time controller of junction water
 #     2023-Oct-18: add time controller of junction temperature
 #     2024-Feb-29: add methods for soil and plant time controllers (for cleaner reading experience, may need to add air in the future)
+#     2024-Jul-24: make sure the water content of the junction does not exceed the minimum water content
 #
 #######################################################################################################################################################################################################
 """
@@ -97,6 +98,13 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT) where {FT} = (
     new_δt = min(10 / abs(plant.junction.auxil.∂w∂t), new_δt);
     if isnan(new_δt) || new_δt < 0.001 <= δt
         @error "NaN or very small δt detected when adjusting δt based on junction water" plant.junction.auxil.∂w∂t;
+        return error("NaN detected in adjusted_time")
+    end;
+
+    # make sure the water content of the junction does not exceed the minimum water content (half through here)
+    new_δt = min((plant.junction.state.v_storage - plant.junction.trait.v_max * plant.junction.trait.pv.residual) / abs(plant.junction.auxil.∂w∂t) / 2, new_δt);
+    if isnan(new_δt) || new_δt < 0.001 <= δt
+        @error "NaN or very small δt detected when adjusting δt based on junction water storage" plant.junction.state.v_storage plant.junction.auxil.∂w∂t;
         return error("NaN detected in adjusted_time")
     end;
 
