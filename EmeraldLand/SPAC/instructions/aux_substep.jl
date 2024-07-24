@@ -10,6 +10,7 @@
 #     2023-Oct-07: add soil bulk auxiliary variable calculations
 #     2023-Oct-16: add leaf stomatal conductance variables calculations
 #     2023-Oct-17: rename the function to substep_aux! to be consistent with the other function names such as t_aux!, s_aux!, dull_aux!, and step_aux!
+#     2024-Jul-24: add leaf shedded flag
 #
 #######################################################################################################################################################################################################
 """
@@ -54,8 +55,10 @@ substep_aux!(spac::BulkSPAC{FT}) where {FT} = (
     end;
 
     # update the leaf auxiliary variables
-    for leaf in leaves
-        substep_aux!(leaf);
+    if !spac.plant._leaf_shedded
+        for leaf in leaves
+            substep_aux!(leaf);
+        end;
     end;
 
     return nothing

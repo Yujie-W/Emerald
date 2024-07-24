@@ -12,6 +12,7 @@
 #     2024-Feb-27: add s_aux! method for Stem
 #     2024-Feb-27: add s_aux! method for Leaf
 #     2024-Feb-27: add s_aux! method for BulkSPAC
+#     2024-Jul-24: add leaf shedded flag
 #
 #######################################################################################################################################################################################################
 """
@@ -66,8 +67,10 @@ s_aux!(plant::Plant{FT}) where {FT} = (
     for stem in plant.branches
         s_aux!(stem);
     end;
-    for leaf in plant.leaves
-        s_aux!(leaf);
+    if !plant._leaf_shedded
+        for leaf in plant.leaves
+            s_aux!(leaf);
+        end;
     end;
 
     return nothing
@@ -101,8 +104,10 @@ s_aux!(stem::Stem{FT}) where {FT} = (
 );
 
 s_aux!(leaf::Leaf{FT}) where {FT} = (
-    leaf.energy.s_aux.cp = heat_capacitance(leaf);
-    leaf.energy.s_aux.t = leaf.energy.state.Σe / leaf.energy.s_aux.cp;
+    if leaf.xylem.trait.area > 0
+        leaf.energy.s_aux.cp = heat_capacitance(leaf);
+        leaf.energy.s_aux.t = leaf.energy.state.Σe / leaf.energy.s_aux.cp;
+    end;
 
     return nothing
 );

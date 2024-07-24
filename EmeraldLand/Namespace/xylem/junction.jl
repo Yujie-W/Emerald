@@ -6,6 +6,7 @@
 # General
 #     2024-Feb-26: add struct JunctionCapacitorTrait
 #     2024-Jul-24: use ExponentialPVCurve only for pv (hard coded in adjusted_time function given the residual water content)
+#     2024-Jul-24: set the default value of v_max to 500
 #
 #######################################################################################################################################################################################################
 """
@@ -23,7 +24,7 @@ Base.@kwdef mutable struct JunctionCapacitorTrait{FT}
     "Pressure volume curve of the capacitor"
     pv::ExponentialPVCurve{FT} = ExponentialPVCurve{FT}()
     "Capacitor maximum volume per basal area or per leaf area `[mol]`"
-    v_max::FT = 5000
+    v_max::FT = 500
 end;
 
 
@@ -32,6 +33,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Sep-26: define the struct to store the state variables used in junction capacitor
+#     2024-Jul-24: set the default value of v_storage to 500
 #
 #######################################################################################################################################################################################################
 """
@@ -47,9 +49,9 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct JunctionCapacitorState{FT}
     "Total energy storage of the capacitor `[J]`"
-    Σe::FT = 5000 * CP_L_MOL() * T₂₅()
+    Σe::FT = 500 * CP_L_MOL() * T₂₅()
     "Current volume of the capacitor `[mol]`"
-    v_storage::FT = 5000
+    v_storage::FT = 500
 end;
 
 

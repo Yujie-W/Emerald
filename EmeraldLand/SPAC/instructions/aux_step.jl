@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-30: add update_step_auxils! function
 #     2024-Jan-24: update leaf boundary layer conductance based on wind speed and leaf width
+#     2024-Jul-24: add leaf shedded flag
 #
 #######################################################################################################################################################################################################
 """
@@ -19,6 +20,10 @@ Update the auxiliary variables at big time step, given
 function step_aux! end;
 
 step_aux!(spac::BulkSPAC{FT}) where {FT} = (
+    if spac.plant._leaf_shedded
+        return nothing
+    end;
+
     airs = spac.airs;
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;

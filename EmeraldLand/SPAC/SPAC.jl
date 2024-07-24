@@ -20,7 +20,7 @@ using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLa
 using ..Namespace: BulkSPAC, BulkSPACStates, SPACConfiguration, sync_state!
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!
+using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, xylem_pressure
 using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25
 using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductance!, stomatal_conductance_profile!, β_factor!
 
@@ -37,6 +37,7 @@ include("instructions/model_substep.jl");
 include("instructions/prescribe_air.jl");
 include("instructions/prescribe_plant.jl");
 include("instructions/prescribe_soil.jl");
+include("instructions/shed_leaves.jl");
 
 
 # time stepper

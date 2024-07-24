@@ -17,6 +17,7 @@
 #     2024-Feb-08: add support to C3State
 #     2024-Feb-27: run dull_aux! when any of the canopy structural parameters or leaf pigments is updated
 #     2024-Feb-28: set minimum LAI to 0 if a negative value is prescribed
+#     2024-Jul-24: add leaf shedded flag
 #
 #######################################################################################################################################################################################################
 """
@@ -76,7 +77,6 @@ function prescribe_traits!(
             vertical_expo::Union{Number,Nothing} = nothing,
             vpmax::Union{Number,Nothing} = nothing,
 ) where {FT}
-    (; T_CLM) = config;
     branches = spac.plant.branches;
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
@@ -88,21 +88,21 @@ function prescribe_traits!(
     #
     # plant traits
     #
-    # update chlorophyll and carotenoid contents
-    if !isnothing(cab)
+    # update chlorophyll and carotenoid contents (if leaf shedding flag is not true)
+    if !isnothing(cab) && !spac.plant._leaf_shedded
         for leaf in leaves
             leaf.bio.trait.cab = cab;
         end;
     end;
 
-    if !isnothing(car)
+    if !isnothing(car) && !spac.plant._leaf_shedded
         for leaf in leaves
             leaf.bio.trait.car = car;
         end;
     end;
 
-    # update kmax
-    if !isnothing(kmax)
+    # update kmax (if leaf shedding flag is not true)
+    if !isnothing(kmax) && !spac.plant._leaf_shedded
         # set up the kmax assuming 50% resistance in root, 25% in stem, and 25% in leaves
         ks = if kmax isa Number
             trunk_percent = trunk.xylem.trait.Δh / (trunk.xylem.trait.Δh + branches[end].xylem.trait.Δh);
@@ -127,16 +127,18 @@ function prescribe_traits!(
         end;
     end;
 
-    # update Vcmax and Jmax TD
-    for leaf in leaves
-        prescribe_ps_td!(config, leaf.photosystem.trait; t_clm = t_clm);
+    # update Vcmax and Jmax TD if leaf shedding flag is not true
+    if !spac.plant._leaf_shedded
+        for leaf in leaves
+            prescribe_ps_td!(config, leaf.photosystem.trait; t_clm = t_clm);
+        end;
     end;
 
     #
     # canopy structure
     #
-    # update LAI and leaf area
-    if !isnothing(lai)
+    # update LAI and leaf area if leaf shedding flag is not true
+    if !isnothing(lai) && !spac.plant._leaf_shedded
         epslai = max(0, lai);
         can_str.trait.lai = epslai;
         can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
@@ -160,19 +162,21 @@ function prescribe_traits!(
     #
     # leaf temperature
     #
-    # prescribe leaf temperature
-    if !isnothing(t_leaf)
+    # prescribe leaf temperature if leaf shedding flag is not true
+    if !isnothing(t_leaf) && !spac.plant._leaf_shedded
         for leaf in leaves
             leaf.energy.s_aux.t = t_leaf;
         end;
     end;
 
-    # update vcmax25 at the top layer (last element of leaves array because leaves are ordered from bottom to top)
-    prescribe_ps_traits!(leaves[end]; b6f = b6f, jmax = jmax, rd = rd, vcmax = vcmax, vpmax = vpmax);
-    prescribe_ps_traits!(spac; vertical_expo = vertical_expo);
+    # update vcmax25 at the top layer (last element of leaves array because leaves are ordered from bottom to top) if leaf shedding flag is not true
+    if !spac.plant._leaf_shedded
+        prescribe_ps_traits!(leaves[end]; b6f = b6f, jmax = jmax, rd = rd, vcmax = vcmax, vpmax = vpmax);
+        prescribe_ps_traits!(spac; vertical_expo = vertical_expo);
+    end;
 
-    # re-initialize leaf energy if LAI or t_leaf is updated
-    if !isnothing(lai) || !isnothing(t_leaf)
+    # re-initialize leaf energy if LAI or t_leaf is updated (if leaf shedding flag is not true)
+    if (!isnothing(lai) || !isnothing(t_leaf)) && !spac.plant._leaf_shedded
         for leaf in leaves
             initialize_energy_states!(leaf);
         end;

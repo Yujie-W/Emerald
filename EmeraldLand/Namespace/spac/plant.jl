@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2023-Oct-17: add struct Plant
+#     2024-Jul-24: add leaf shedded flag cache
 #
 #######################################################################################################################################################################################################
 """
@@ -40,6 +41,8 @@ Base.@kwdef mutable struct Plant{FT}
     memory::PlantMemory{FT} = PlantMemory{FT}()
 
     # Cache variables
+    "Whether leaves are shedded"
+    _leaf_shedded::Bool = false
     "Whether there is any root connected to soil"
     _root_connection::Bool = true
 end;

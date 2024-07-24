@@ -87,6 +87,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     # features related to plant hydraulics
     "Allow leaf condensation"
     ALLOW_LEAF_CONDENSATION::Bool = false
+    "Allow leaf shedding in prescibe LAI mode to avoid numerical issues"
+    ALLOW_LEAF_SHEDDING::Bool = true
     "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
     DIM_XYLEM::Int = 5
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"
@@ -139,8 +141,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     SUNLIT_FRACTION::Bool = true
 
     # Features to add
-    "Allow leaf shedding"
-    ALLOW_LEAF_SHEDDING::Bool = false
     "Enable drought legacy effect"
     ENABLE_DROUGHT_LEGACY::Bool = false
 end;
