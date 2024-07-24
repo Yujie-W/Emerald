@@ -1,7 +1,7 @@
 name = "Emerald"
 uuid = "56ca4449-d59c-41e3-9ae8-0f89b45aadb6"
 authors = ["Yujie Wang <jesiner@gmail.com>"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

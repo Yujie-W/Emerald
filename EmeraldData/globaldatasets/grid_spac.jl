@@ -112,7 +112,7 @@ function prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
     ci = query_griddingmachine_data(gm_dict["CLUMPING"], gm_dict["YEAR"], iday);
     lai = query_griddingmachine_data(gm_dict["LAI"], gm_dict["YEAR"], iday);
     vcm = query_griddingmachine_data(gm_dict["VCMAX25"], gm_dict["YEAR"], iday);
-    prescribe_traits!(config, spac; cab = chl, car = chl / 7, ci = ci, lai = lai, vcmax = vcm, vcmax_expo = 0.3);
+    prescribe_traits!(config, spac; cab = chl, car = chl / 7, ci = ci, lai = lai, vcmax = vcm, vertical_expo = 0.3);
 
     # if ss_dict is not nothing, update soil water content and leaf temperature
     if !isnothing(ss_dict)

@@ -57,12 +57,12 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     end;
 
     if trigger_vcm
-        prescribe_traits!(config, spac; vcmax = df_vcm, vcmax_expo = 0.3);
+        prescribe_traits!(config, spac; vcmax = df_vcm, vertical_expo = 0.3);
         spac.plant.memory.vcmax25 = df_vcm;
     end;
 
     if trigger_lai
-        prescribe_traits!(config, spac; lai = df_lai, vcmax_expo = 0.3);
+        prescribe_traits!(config, spac; lai = df_lai, vertical_expo = 0.3);
         spac.plant.memory.lai = df_lai;
     end;
 

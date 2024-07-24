@@ -128,13 +128,8 @@ function prescribe_traits!(
     end;
 
     # update Vcmax and Jmax TD
-    if !isnothing(t_clm)
-        for leaf in leaves
-            if T_CLM
-                leaf.photosystem.trait.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-                leaf.photosystem.trait.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
-            end;
-        end;
+    for leaf in leaves
+        prescribe_ps_td!(config, leaf.photosystem.trait; t_clm = t_clm);
     end;
 
     #
@@ -428,6 +423,54 @@ prescribe_ps_traits!(spac::BulkSPAC, pst::C4VJPTrait; vertical_expo::Union{Nothi
         leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
         leaf.photosystem.trait.v_pmax25 = leaves[end].photosystem.trait.v_pmax25 * ratio;
         leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.r_d25 * ratio;
+    end;
+
+    return nothing
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this method
+# General
+#     2024-Jul-23: add method to prescribe Vcmax25 and Jmax25 TD temperature dependent
+#
+#######################################################################################################################################################################################################
+"""
+
+    prescribe_ps_td!(
+                config::SPACConfiguration{FT},
+                pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}};
+                t_clm::Union{Nothing, Number}) where {FT}
+
+Prescribe the photosystem temperature dependence, given
+- `config` Configuration for SPAC
+- `pst` Photosystem trait type
+- `t_clm` Moving average temperature to update Vcmax and Jmax temperature dependencies
+
+"""
+function prescribe_ps_td! end;
+
+prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}; t_clm::Union{Nothing, Number}) where {FT} = (
+    (; T_CLM) = config;
+
+    if !isnothing(t_clm)
+        if T_CLM
+            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+            pst.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+        end;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}}; t_clm::Union{Nothing, Number}) where {FT} = (
+    (; T_CLM) = config;
+
+    if !isnothing(t_clm)
+        if T_CLM
+            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+        end;
     end;
 
     return nothing
