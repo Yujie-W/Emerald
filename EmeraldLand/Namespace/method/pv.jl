@@ -25,6 +25,7 @@ abstract type AbstractPVCurve{FT<:AbstractFloat} end;
 # Changes to this struct
 # General
 #     2023-Sep-22: add exponential PV curve
+#     2024-Jul-24: add field residual to avoid numerical issue in junction temperature
 #
 #######################################################################################################################################################################################################
 """
@@ -42,6 +43,8 @@ Base.@kwdef mutable struct ExponentialPVCurve{FT<:AbstractFloat} <: AbstractPVCu
     # General model information
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
     k_refill::FT = 1e-4
+    "Residual water content relative to maximum water volume"
+    residual::FT = 0.2
     "Slope of the linear PV curve (relative to maximum) `[MPa⁻¹]`"
     slope::FT = 0.2
 end;
