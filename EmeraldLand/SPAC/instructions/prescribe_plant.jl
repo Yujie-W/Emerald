@@ -24,47 +24,57 @@
     prescribe_traits!(
                 config::SPACConfiguration{FT},
                 spac::BulkSPAC{FT};
+                b6f::Union{Number,Nothing} = nothing,
                 cab::Union{Number,Nothing} = nothing,
                 car::Union{Number,Nothing} = nothing,
                 ci::Union{Number,Nothing} = nothing,
+                jmax::Union{Number,Nothing} = nothing,
                 kmax::Union{Number,Tuple,Nothing} = nothing,
                 lai::Union{Number,Nothing} = nothing,
+                rd::Union{Number,Nothing} = nothing,
                 sai::Union{Number,Nothing} = nothing,
-                swcs::Union{Tuple,Nothing} = nothing,
                 t_clm::Union{Number,Nothing} = nothing,
                 t_leaf::Union{Number,Nothing} = nothing,
-                t_soils::Union{Tuple,Nothing} = nothing,
                 vcmax::Union{Number,Nothing} = nothing,
-                vcmax_expo::Union{Number,Nothing} = nothing) where {FT}
+                vertical_expo::Union{Number,Nothing} = nothing,
+                vpmax::Union{Number,Nothing} = nothing) where {FT}
 
 Update the physiological parameters of the SPAC, given
-- `spac` Soil plant air continuum
 - `config` Configuration for `BulkSPAC`
+- `spac` Soil plant air continuum
+- `b6f` b6f content for C3Cyto model at the top of canopy. Optional, default is nothing
 - `cab` Chlorophyll content. Optional, default is nothing
 - `car` Carotenoid content. Optional, default is nothing
 - `ci` Clumping index. Optional, default is nothing
+- `jmax` Jmax25 at the top of canopy. Optional, default is nothing
 - `kmax` Maximum hydraulic conductance. Optional, default is nothing
 - `lai` Leaf area index. Optional, default is nothing
+- `rd` Dark respiration rate at the top of canopy. Optional, default is nothing
 - `sai` Stem area index. Optional, default is nothing
 - `t_clm` Moving average temperature to update Vcmax and Jmax temperature dependencies. Optional, default is nothing
 - `t_leaf` Leaf temperature. Optional, default is nothing
 - `vcmax` Vcmax25 at the top of canopy. Optional, default is nothing
-- `vcmax_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
+- `vertical_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
+- `vpmax` Vpmax25 at the top of canopy. Optional, default is nothing
 
 """
 function prescribe_traits!(
             config::SPACConfiguration{FT},
             spac::BulkSPAC{FT};
+            b6f::Union{Number,Nothing} = nothing,
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
             ci::Union{Number,Nothing} = nothing,
+            jmax::Union{Number,Nothing} = nothing,
             kmax::Union{Number,Tuple,Nothing} = nothing,
             lai::Union{Number,Nothing} = nothing,
+            rd::Union{Number,Nothing} = nothing,
             sai::Union{Number,Nothing} = nothing,
             t_clm::Union{Number,Nothing} = nothing,
             t_leaf::Union{Number,Nothing} = nothing,
             vcmax::Union{Number,Nothing} = nothing,
-            vcmax_expo::Union{Number,Nothing} = nothing
+            vertical_expo::Union{Number,Nothing} = nothing,
+            vpmax::Union{Number,Nothing} = nothing,
 ) where {FT}
     (; T_CLM) = config;
     branches = spac.plant.branches;
@@ -127,11 +137,6 @@ function prescribe_traits!(
         end;
     end;
 
-    # update vcmax25 at the top layer (last element of leaves array because leaves are ordered from bottom to top)
-    if !isnothing(vcmax)
-        leaves[end].photosystem.trait.v_cmax25 = vcmax;
-    end;
-
     #
     # canopy structure
     #
@@ -167,28 +172,9 @@ function prescribe_traits!(
         end;
     end;
 
-    #
-    # parameters related to changes in any of multiple traits
-    #
-    # update vertical vcmax profile
-    if !isnothing(vcmax) || !isnothing(lai)
-        for irt in 1:n_layer
-            ilf = n_layer - irt + 1;
-            ratio = isnothing(vcmax_expo) ? 1 : exp(-vcmax_expo * sum(can_str.trait.δlai[1:irt-1]));
-            leaf = leaves[ilf];
-            if typeof(leaf.photosystem.trait) isa C3CytoTrait
-                leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
-                leaf.photosystem.trait.b₆f = leaves[end].photosystem.trait.v_cmax25 * 7 / 300 * ratio;
-                leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.v_cmax25 * 0.015 * ratio;
-            elseif leaf.photosystem.trait isa C3VJPTrait
-                leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
-                leaf.photosystem.trait.j_max25 = leaves[end].photosystem.trait.v_cmax25 * 1.67 * ratio;
-                leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.v_cmax25 * 0.015 * ratio;
-            else
-                error("Vcmax profile is only available for C3CytoTrait and C3VJPTrait.");
-            end;
-        end;
-    end;
+    # update vcmax25 at the top layer (last element of leaves array because leaves are ordered from bottom to top)
+    prescribe_ps_traits!(leaves[end]; b6f = b6f, jmax = jmax, rd = rd, vcmax = vcmax, vpmax = vpmax);
+    prescribe_ps_traits!(spac; vertical_expo = vertical_expo);
 
     # re-initialize leaf energy if LAI or t_leaf is updated
     if !isnothing(lai) || !isnothing(t_leaf)
@@ -199,3 +185,250 @@ function prescribe_traits!(
 
     return nothing
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this method
+# General
+#     2024-Jul-23: add method to prescribe Vcmax, Jmax, b6f, and Rd for C3 models (C4 models pending)
+#
+#######################################################################################################################################################################################################
+"""
+
+    prescribe_ps_traits!(
+                leaf::Leaf;
+                b6f::Union{Nothing, Number} = nothing,
+                jmax::Union{Nothing, Number} = nothing,
+                rd::Union{Nothing, Number} = nothing,
+                vcmax::Union{Nothing, Number} = nothing,
+                vpmax::Union{Nothing, Number} = nothing)
+    prescribe_ps_traits!(spac::BulkSPAC; vertical_expo::Union{Nothing, Number} = nothing)
+
+Prescribe the photosynthetic traits for a single leaf, given
+- `leaf` Leaf object
+- `b6f` b6f content. Optional, default is nothing
+- `jmax` Jmax25. Optional, default is nothing
+- `rd` Dark respiration rate. Optional, default is nothing
+- `vcmax` Vcmax25. Optional, default is nothing
+- `vpmax` Vpmax25. Optional, default is nothing
+- `spac` BulkSPAC object
+- `vertical_expo` Exponential tuning factor to adjust Vcmax25. Optional, default is nothing
+
+"""
+function prescribe_ps_traits! end;
+
+# Prescribe the variables for single leaf, suggest to do this only for top canopy
+prescribe_ps_traits!(
+            leaf::Leaf;
+            b6f::Union{Nothing, Number} = nothing,
+            jmax::Union{Nothing, Number} = nothing,
+            rd::Union{Nothing, Number} = nothing,
+            vcmax::Union{Nothing, Number} = nothing,
+            vpmax::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(leaf.photosystem.trait; b6f=b6f, jmax=jmax, rd=rd, vcmax=vcmax, vpmax=vpmax);
+
+prescribe_ps_traits!(
+            pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait};
+            b6f::Union{Nothing, Number} = nothing,
+            jmax::Union{Nothing, Number} = nothing,
+            rd::Union{Nothing, Number} = nothing,
+            vcmax::Union{Nothing, Number} = nothing,
+            vpmax::Union{Nothing, Number} = nothing) = (
+    if !isnothing(vcmax)
+        pst.v_cmax25 = vcmax;
+
+        # if jmax is not nothing
+        if !isnothing(jmax)
+            pst.j_max25 = jmax;
+        else
+            pst.j_max25 = vcmax * 1.6;
+        end;
+
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        else
+            pst.r_d25 = vcmax * 0.015;
+        end;
+    else
+        # if jmax is not nothing
+        if !isnothing(jmax)
+            pst.j_max25 = jmax;
+        end;
+
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        end;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_traits!(
+            pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait};
+            b6f::Union{Nothing, Number} = nothing,
+            jmax::Union{Nothing, Number} = nothing,
+            rd::Union{Nothing, Number} = nothing,
+            vcmax::Union{Nothing, Number} = nothing,
+            vpmax::Union{Nothing, Number} = nothing) = (
+    if !isnothing(vcmax)
+        pst.v_cmax25 = vcmax;
+
+        # if b6f is not nothing
+        if !isnothing(b6f)
+            pst.b₆f = b6f;
+        else
+            pst.b₆f = vcmax * 0.0062;
+        end;
+
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        else
+            pst.r_d25 = vcmax * 0.015;
+        end;
+    else
+        # if b6f is not nothing
+        if !isnothing(b6f)
+            pst.b₆f = b6f;
+        end;
+
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        end;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_traits!(
+            pst::C4CLMTrait;
+            b6f::Union{Nothing, Number} = nothing,
+            jmax::Union{Nothing, Number} = nothing,
+            rd::Union{Nothing, Number} = nothing,
+            vcmax::Union{Nothing, Number} = nothing,
+            vpmax::Union{Nothing, Number} = nothing) = (
+    if !isnothing(vcmax)
+        pst.v_cmax25 = vcmax;
+
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        else
+            pst.r_d25 = vcmax * 0.015;
+        end;
+    else
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        end;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_traits!(
+            pst::C4VJPTrait;
+            b6f::Union{Nothing, Number} = nothing,
+            jmax::Union{Nothing, Number} = nothing,
+            rd::Union{Nothing, Number} = nothing,
+            vcmax::Union{Nothing, Number} = nothing,
+            vpmax::Union{Nothing, Number} = nothing) = (
+    if !isnothing(vcmax)
+        pst.v_cmax25 = vcmax;
+    end;
+
+    if !isnothing(vpmax)
+        pst.v_pmax25 = vpmax;
+
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        else
+            pst.r_d25 = vpmax * 0.015;
+        end;
+    else
+        # if rd is not nothing
+        if !isnothing(rd)
+            pst.r_d25 = rd;
+        end;
+    end;
+
+    return nothing
+);
+
+# Method to apply the exponential tuning factor to Vcmax25...
+prescribe_ps_traits!(spac::BulkSPAC; vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, spac.plant.leaves[end].photosystem.trait; vertical_expo=vertical_expo);
+
+prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}; vertical_expo::Union{Nothing, Number} = nothing) = (
+    can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    # update vertical profiles
+    for irt in 1:n_layer
+        ilf = n_layer - irt + 1;
+        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(can_str.trait.δlai[1:irt-1]));
+        leaf = leaves[ilf];
+        leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
+        leaf.photosystem.trait.j_max25 = leaves[end].photosystem.trait.j_max25 * ratio;
+        leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.r_d25 * ratio;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait}; vertical_expo::Union{Nothing, Number} = nothing) = (
+    can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    # update vertical profiles
+    for irt in 1:n_layer
+        ilf = n_layer - irt + 1;
+        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(can_str.trait.δlai[1:irt-1]));
+        leaf = leaves[ilf];
+        leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
+        leaf.photosystem.trait.b₆f = leaves[end].photosystem.trait.b₆f * ratio;
+        leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.r_d25 * ratio;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_traits!(spac::BulkSPAC, pst::C4CLMTrait; vertical_expo::Union{Nothing, Number} = nothing) = (
+    can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    # update vertical profiles
+    for irt in 1:n_layer
+        ilf = n_layer - irt + 1;
+        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(can_str.trait.δlai[1:irt-1]));
+        leaf = leaves[ilf];
+        leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
+        leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.r_d25 * ratio;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_traits!(spac::BulkSPAC, pst::C4VJPTrait; vertical_expo::Union{Nothing, Number} = nothing) = (
+    can_str = spac.canopy.structure;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    # update vertical profiles
+    for irt in 1:n_layer
+        ilf = n_layer - irt + 1;
+        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(can_str.trait.δlai[1:irt-1]));
+        leaf = leaves[ilf];
+        leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
+        leaf.photosystem.trait.v_pmax25 = leaves[end].photosystem.trait.v_pmax25 * ratio;
+        leaf.photosystem.trait.r_d25 = leaves[end].photosystem.trait.r_d25 * ratio;
+    end;
+
+    return nothing
+);
