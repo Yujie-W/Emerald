@@ -9,6 +9,7 @@
 #     2023-Aug-25: make soil and leaf temperature and soil moisture optional
 #     2024-Feb-22: remove state and auxil from spac struct
 #     2024-Apr-17: update solar azimuth angle as well
+#     2024-Jul-24: remove lai, ci, vcmax, and cab from memory (use traits instead)
 # Bug fixes
 #     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88.999
 #
@@ -46,29 +47,25 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
     spac.meteo.t_precip = df_tar;
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
-    trigger_lai::Bool = !isnan(df_lai) && (df_lai != spac.plant.memory.lai);
-    trigger_vcm::Bool = !isnan(df_vcm) && (df_vcm != spac.plant.memory.vcmax25);
-    trigger_chl::Bool = !isnan(df_chl) && (df_chl != spac.plant.memory.chl);
-    trigger_cli::Bool = !isnan(df_cli) && (df_cli != spac.plant.memory.ci);
+    trigger_lai::Bool = !isnan(df_lai) && (df_lai != spac.canopy.structure.trait.lai);
+    trigger_vcm::Bool = !isnan(df_vcm) && (df_vcm != spac.plant.leaves[end].photosystem.trait.v_cmax25);
+    trigger_chl::Bool = !isnan(df_chl) && (df_chl != spac.plant.leaves[end].bio.trait.cab);
+    trigger_cli::Bool = !isnan(df_cli) && (df_cli != spac.canopy.structure.trait.ci);
 
     if trigger_chl
         prescribe_traits!(config, spac; cab = df_chl, car = df_chl / 7);
-        spac.plant.memory.chl = df_chl;
     end;
 
     if trigger_vcm
         prescribe_traits!(config, spac; vcmax = df_vcm, vertical_expo = 0.3);
-        spac.plant.memory.vcmax25 = df_vcm;
     end;
 
     if trigger_lai
         prescribe_traits!(config, spac; lai = df_lai, vertical_expo = 0.3);
-        spac.plant.memory.lai = df_lai;
     end;
 
     if trigger_cli
         prescribe_traits!(config, spac; ci = df_cli);
-        spac.plant.memory.ci = df_cli;
     end;
 
     # prescribe soil water contents and leaf temperature and initialize the spac (for first time step only)
