@@ -82,8 +82,8 @@ function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     if !VERTICAL_BIO
         topleaf = spac.plant.leaves[end];
         leaf_spectra!(config, topleaf.bio, topleaf.capacitor.state.v_storage);
-        for leaf in spac.plant.leaves[1:end-1]
-            sync_struct!(topleaf.bio, leaf.bio);
+        for i in 1:length(spac.plant.leaves)-1
+            sync_struct!(topleaf.bio, spac.plant.leaves[i].bio);
         end;
 
         return nothing

@@ -60,6 +60,7 @@ LeafFluxState(config::SPACConfiguration{FT}) where {FT} = LeafFluxState{FT}(g_H�
 # General
 #     2023-Oct-03: add sturct LeafFluxAuxil
 #     2023-Oct-24: add fields ϕ_f1_* and ϕ_f2_*
+#     2024-Jul-24: add field ∂A∂E_sunlit and ∂Θ∂E_sunlit to compute the dgdt using matrix calculation (much faster)
 #
 #######################################################################################################################################################################################################
 """
@@ -85,6 +86,10 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     ∂g∂t_shaded::FT = 0
     "Marginal increase of conductance per timefor sunlit leaves `[mol m⁻² s⁻²]`"
     ∂g∂t_sunlit::Matrix{FT}
+    "Marginal increase in A per increase in transpiration rate"
+    ∂A∂E_sunlit::Matrix{FT}
+    "Marginal increase in Θ per increase in transpiration rate"
+    ∂Θ∂E_sunlit::Matrix{FT}
 
     # CO₂ pressures
     "Leaf internal CO₂ partial pressure for shaded leaves `[Pa]`"
@@ -162,6 +167,8 @@ end;
 LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
             g_CO₂_sunlit   = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ∂g∂t_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ∂A∂E_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ∂Θ∂E_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             p_CO₂_i_sunlit = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             p_CO₂_s_sunlit = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             a_g_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),

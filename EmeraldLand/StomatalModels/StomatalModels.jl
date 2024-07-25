@@ -8,7 +8,7 @@ using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterKleaf, BetaParame
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
 using ..Namespace: Leaf, Root
 using ..Namespace: AirLayer, SoilLayer
-using ..Namespace: BulkSPAC
+using ..Namespace: BulkSPAC, SPACCache
 
 using ..Photosynthesis: photosynthesis_only!, ∂R∂T
 using ..PhysicalChemistry: latent_heat_vapor, relative_diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure

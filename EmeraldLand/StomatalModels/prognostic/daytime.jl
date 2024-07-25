@@ -73,3 +73,39 @@ function ∂g∂t end;
 
     return max(-0.001, min(0.001, (gsw - leaf.flux.state.g_H₂O_s_sunlit[ind]) / sm.τ))
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Jul-24: add function to update the ∂g∂t for sunlit leaves (matrix version)
+#
+#######################################################################################################################################################################################################
+"""
+
+    ∂g∂t!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
+
+Update the ∂g∂t for sunlit leaves, given
+- `cache` `SPACCache` type cache
+- `leaf` `Leaf` type leaf
+- `air` `AirLayer` type air
+
+"""
+function ∂g∂t! end;
+
+∂g∂t!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = ∂g∂t!(cache, leaf.flux.trait.stomatal_model, leaf, air; δe = δe);
+
+∂g∂t!(cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+    ∂A∂E!(cache, leaf, air);
+    ∂Θ∂E!(cache, sm, leaf, air; δe = δe);
+
+    leaf.flux.auxil.∂g∂t_sunlit .= sm.K .* (leaf.flux.auxil.∂A∂E_sunlit .- leaf.flux.auxil.∂Θ∂E_sunlit);
+
+    # set the max and min values
+    for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
+        leaf.flux.auxil.∂g∂t_sunlit[i] = max(-0.001, min(0.001, leaf.flux.auxil.∂g∂t_sunlit[i]));
+    end;
+
+    return nothing
+);

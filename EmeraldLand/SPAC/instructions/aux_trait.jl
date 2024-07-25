@@ -8,6 +8,7 @@
 #     2024-Feb-25: add t_aux! method for the combined MultiLayerCanopy
 #     2024-Feb-27: add t_aux! method for the bulk SPAC system
 #     2024-Feb-28: set x_bnds to 0 if LAI <= 0
+#     2024-Jul-24: use cache struct to minimize the memory allocation
 #
 #######################################################################################################################################################################################################
 """
@@ -34,7 +35,7 @@ t_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     end;
 
     # the canopy auxiliary variables
-    t_aux!(config, spac.canopy);
+    t_aux!(config, spac.canopy, spac.cache);
 
     return nothing
 );
@@ -46,13 +47,18 @@ t_aux!(soil::SoilLayer{FT}) where {FT} = (
     return nothing
 );
 
-t_aux!(config::SPACConfiguration{FT}, canopy::MultiLayerCanopy{FT}) where {FT} = t_aux!(config, canopy.structure);
+t_aux!(config::SPACConfiguration{FT}, canopy::MultiLayerCanopy{FT}, cache::SPACCache{FT}) where {FT} = t_aux!(config, canopy.structure, cache);
 
-t_aux!(config::SPACConfiguration{FT}, canstr::CanopyStructure{FT}) where {FT} = (
+t_aux!(config::SPACConfiguration{FT}, canstr::CanopyStructure{FT}, cache::SPACCache{FT}) where {FT} = (
     if canstr.trait.lai <= 0 && canstr.trait.sai <= 0
         canstr.t_aux.x_bnds .= 0;
     else
-        canstr.t_aux.x_bnds .= [0; [sum(canstr.trait.δlai[1:i]) + sum(canstr.trait.δsai[1:i]) for i in eachindex(canstr.trait.δlai)]] ./ -(canstr.trait.lai + canstr.trait.sai);
+        canstr.t_aux.x_bnds[1] = 0;
+        sum_pai = cache.cache_layer_1;
+        for i in eachindex(sum_pai)
+            sum_pai[i] = sum(view(canstr.trait.δlai,1:i)) + sum(view(canstr.trait.δsai,1:i));
+        end;
+        canstr.t_aux.x_bnds[2:end] .= sum_pai ./ -(canstr.trait.lai + canstr.trait.sai);
     end;
     canopy_structure_aux!(config, canstr.trait, canstr.t_aux);
 

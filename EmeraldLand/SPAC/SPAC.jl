@@ -17,7 +17,7 @@ using ..Namespace: JunctionCapacitor, Leaf, Plant, Root, Stem
 using ..Namespace: CanopyStructure, CanopyStructureTrait, CanopyStructureTDAuxil, MultiLayerCanopy
 using ..Namespace: AirLayer, AirLayerState, AirLayerSDAuxil, AirLayerTDAuxil
 using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLayerTrait, SoilLayerTDAuxil
-using ..Namespace: BulkSPAC, BulkSPACStates, SPACConfiguration, sync_state!
+using ..Namespace: BulkSPAC, BulkSPACStates, SPACCache, SPACConfiguration, sync_state!
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, xylem_pressure

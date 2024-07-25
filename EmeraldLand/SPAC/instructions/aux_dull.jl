@@ -26,6 +26,7 @@ function dull_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
         return nothing
     end;
 
+    # allocation due to sync_struct!
     plant_leaf_spectra!(config, spac);
 
     return nothing

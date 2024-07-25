@@ -40,9 +40,8 @@ function ∂A∂E end;
     gs2 = gs1 + FT(0.0001);
     gh2 = 1 / (1 / gs2 + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc2 = 1 / (FT(1.6) / gs2 + 1 / leaf.flux.auxil.g_CO₂_b);
-    photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_shaded, leaf.energy.s_aux.t);
-    e2 = gh2 * d / air.state.p_air;
-    a2 = leaf.photosystem.auxil.a_n;
+    e2  = gh2 * d / air.state.p_air;
+    a2  = photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_shaded);
 
     return (a2 - a1) / (e2 - e1)
 );
@@ -61,9 +60,57 @@ function ∂A∂E end;
     gs2 = gs1 + FT(0.0001);
     gh2 = 1 / (1 / gs2 + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc2 = 1 / (FT(1.6) / gs2 + 1 / leaf.flux.auxil.g_CO₂_b);
-    photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_sunlit[ind], leaf.energy.s_aux.t);
     e2 = gh2 * d / air.state.p_air;
-    a2 = leaf.photosystem.auxil.a_n;
+    a2 = photosynthesis_only!(leaf.photosystem, air, gc2, leaf.flux.auxil.ppar_sunlit[ind]);
 
     return (a2 - a1) / (e2 - e1)
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Jul-24: add function to update the ∂A∂E for sunlit leaves (matrix version)
+#
+#######################################################################################################################################################################################################
+"""
+
+    ∂A∂E!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
+
+Update the ∂A∂E for sunlit leaves, given
+- `cache` `SPACCache` type cache
+- `leaf` `Leaf` type leaf
+- `air` `AirLayer` type environmental conditions
+
+"""
+function ∂A∂E! end;
+
+∂A∂E!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
+    d = max(1, p_s - air.s_aux.ps[3]);
+
+    # compute the A and E at the current setting
+    gs1  = leaf.flux.state.g_H₂O_s_sunlit;
+    gh1  = cache.cache_incl_azi_1;
+    e1   = cache.cache_incl_azi_2;
+    gh1 .= 1 ./ (1 ./ gs1 .+ 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
+    e1  .= gh1 .* (d / air.state.p_air);
+    a1   = leaf.flux.auxil.a_n_sunlit;
+
+    # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
+    gs2  = cache.cache_incl_azi_3;
+    gh2  = cache.cache_incl_azi_4;
+    gc2  = cache.cache_incl_azi_5;
+    e2   = cache.cache_incl_azi_6;
+    a2   = cache.cache_incl_azi_7;
+    gs2 .= gs1 .+ FT(0.0001);
+    gh2 .= 1 ./ (1 ./ gs2 .+ 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
+    gc2 .= 1 ./ (FT(1.6) ./ gs2 .+ 1 ./ leaf.flux.auxil.g_CO₂_b);
+    e2  .= gh2 .* (d / air.state.p_air);
+    a2  .= photosynthesis_only!.((leaf.photosystem,), (air,), gc2, leaf.flux.auxil.ppar_sunlit); # need to run the shaded leaves first to update temperature dependent variables
+
+    leaf.flux.auxil.∂A∂E_sunlit .= (a2 .- a1) ./ (e2 .- e1);
+
+    return nothing
 );

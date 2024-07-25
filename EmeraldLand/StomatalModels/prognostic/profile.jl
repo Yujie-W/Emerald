@@ -6,6 +6,7 @@
 # General
 #     2023-Mar-13: add function to update stomatal conductance profile based on gs and gb
 #     2023-Oct-25: run nighttime stomatal conductance model if PPAR <= 1
+#     2024-Jul-24: add method for matrix calculation to speed up
 #
 #######################################################################################################################################################################################################
 """
@@ -33,7 +34,8 @@ stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
 
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        stomatal_conductance_profile!(leaves[ilf], airs[lindex[ilf]], can_str.auxil.ϵ_lw_layer[irt]);
+        # stomatal_conductance_profile!(leaves[ilf], airs[lindex[ilf]], can_str.auxil.ϵ_lw_layer[irt]);
+        stomatal_conductance_profile!(spac.cache, leaves[ilf], airs[lindex[ilf]], can_str.auxil.ϵ_lw_layer[irt]);
     end;
 
     return nothing
@@ -45,6 +47,19 @@ stomatal_conductance_profile!(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) whe
         for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
             leaf.flux.auxil.∂g∂t_sunlit[i] = ∂g∂t(leaf, air, i);
         end;
+    else
+        dgndt = ∂gₙ∂t(leaf, air, eff_ϵ);
+        leaf.flux.auxil.∂g∂t_shaded = dgndt;
+        leaf.flux.auxil.∂g∂t_sunlit .= dgndt;
+    end;
+
+    return nothing
+);
+
+stomatal_conductance_profile!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
+    if leaf.flux.auxil.ppar_shaded > 1
+        leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air);
+        ∂g∂t!(cache, leaf, air);
     else
         dgndt = ∂gₙ∂t(leaf, air, eff_ϵ);
         leaf.flux.auxil.∂g∂t_shaded = dgndt;

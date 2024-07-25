@@ -113,7 +113,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         return mean(sun_geo.auxil._vec_azi)
     );
-    _COS²_Θ_INCL_AZI = spac.cache.cache_incl_azi;
+    _COS²_Θ_INCL_AZI = spac.cache.cache_incl_azi_1;
     _COS²_Θ_INCL_AZI .= (cosd.(config.Θ_INCL) .^ 2);
 
     for irt in 1:n_layer

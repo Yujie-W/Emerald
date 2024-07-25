@@ -43,7 +43,19 @@ Base.@kwdef struct SPACCache{FT}
 
     # Matrix with dims of INCL and AZI
     "Cache matrix with the dims of INCL and AZI"
-    cache_incl_azi::Matrix{FT}
+    cache_incl_azi_1::Matrix{FT}
+    "Cache matrix with the dims of INCL and AZI"
+    cache_incl_azi_2::Matrix{FT}
+    "Cache matrix with the dims of INCL and AZI"
+    cache_incl_azi_3::Matrix{FT}
+    "Cache matrix with the dims of INCL and AZI"
+    cache_incl_azi_4::Matrix{FT}
+    "Cache matrix with the dims of INCL and AZI"
+    cache_incl_azi_5::Matrix{FT}
+    "Cache matrix with the dims of INCL and AZI"
+    cache_incl_azi_6::Matrix{FT}
+    "Cache matrix with the dims of INCL and AZI"
+    cache_incl_azi_7::Matrix{FT}
 
     # solvers and tolerances
     "NewtonBisectionMethod solver"
@@ -65,7 +77,13 @@ SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_sif::Int, dim_sif
     cache_wl_4 = zeros(FT, dim_wl),
     cache_wl_5 = zeros(FT, dim_wl),
 
-    cache_incl_azi = zeros(FT, dim_incl, dim_azi),
+    cache_incl_azi_1 = zeros(FT, dim_incl, dim_azi),
+    cache_incl_azi_2 = zeros(FT, dim_incl, dim_azi),
+    cache_incl_azi_3 = zeros(FT, dim_incl, dim_azi),
+    cache_incl_azi_4 = zeros(FT, dim_incl, dim_azi),
+    cache_incl_azi_5 = zeros(FT, dim_incl, dim_azi),
+    cache_incl_azi_6 = zeros(FT, dim_incl, dim_azi),
+    cache_incl_azi_7 = zeros(FT, dim_incl, dim_azi),
 
     solver_nb = NewtonBisectionMethod{FT}(),
     stol_nb   = SolutionTolerance{FT}(eps(FT)*100, 50),

@@ -30,8 +30,7 @@
         gsm = FT(Inf);
         gcm = leaf.flux.auxil.g_CO₂_b;
     end;
-    photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_shaded, leaf.energy.s_aux.t);
-    am = leaf.photosystem.auxil.a_n;
+    am = photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_shaded, leaf.energy.s_aux.t);
 
     return dKdE * am / dEdP_m
 );
@@ -59,8 +58,7 @@
         gsm = FT(Inf);
         gcm = leaf.flux.auxil.g_CO₂_b;
     end;
-    photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_sunlit[ind], leaf.energy.s_aux.t);
-    am = leaf.photosystem.auxil.a_n;
+    am = photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_sunlit[ind], leaf.energy.s_aux.t);
 
     return dKdE * am / dEdP_m
 );

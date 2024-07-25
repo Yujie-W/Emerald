@@ -113,6 +113,7 @@ Sync the fields from `struct_from` to `struct_to`.
 function sync_struct!(struct_from::ST, struct_to::ST) where ST
     for fn in fieldnames(ST)
         fntype = fieldtype(ST, fn);
+        # TODO: memory allocation when sync numbers and bools
         if fntype <: Union{Number, String, Bool}
             setfield!(struct_to, fn, getfield(struct_from, fn));
         elseif fntype <:AbstractArray && eltype(fntype) <: Union{Number, String, Bool}

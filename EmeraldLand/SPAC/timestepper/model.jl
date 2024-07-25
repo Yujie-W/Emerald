@@ -49,6 +49,7 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
     step_preparations!(config, spac);
 
     # 2. use time stepper to run the functions that need to be run at sub time step
+    #    this function takes almost all the time, go deep to see what make it so slow
     time_stepper!(config, spac, δt);
 
     # 3. run canopy reflectance and fluorescence to use with remote sensing

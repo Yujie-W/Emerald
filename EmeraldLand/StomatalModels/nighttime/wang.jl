@@ -6,6 +6,7 @@
 # General
 #     2022-Jul-11: add method for WangSM model on Leaf for nocturnal transpiration
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
+#     2024-Jul-24: use remove unnecessary TD for A_net calculation
 #
 #######################################################################################################################################################################################################
 """
@@ -32,8 +33,7 @@ function ∂Θₙ∂E end;
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc = 1 / (FT(1.6) / gs + 1 / leaf.flux.auxil.g_CO₂_b);
     e  = gh * d / air.state.p_air;
-    photosynthesis_only!(leaf.photosystem, air, gc, leaf.flux.auxil.ppar_mem, leaf.energy.s_aux.t);
-    a  = leaf.photosystem.auxil.a_n;
+    a  = photosynthesis_only!(leaf.photosystem, air, gc, leaf.flux.auxil.ppar_mem, leaf.energy.s_aux.t);
 
     return a / max(eps(FT), (leaf.xylem.auxil.e_crit - e)) * F_FITNESS
 );
