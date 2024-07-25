@@ -58,9 +58,7 @@ function ∂g∂t end;
     return max(-0.001, min(0.001, sm.K * (dade - dtde)))
 );
 
-∂g∂t(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    return ∂g∂t(sm, leaf, air, sm.β.PARAM_Y, ind)
-);
+∂g∂t(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = ∂g∂t(sm, leaf, air, sm.β.PARAM_Y, ind);
 
 ∂g∂t(sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterG1, ind::Int) where {FT} = (
     gsw = empirical_equation(sm, leaf, air, ind; β = leaf.flux.auxil.β);
@@ -80,6 +78,7 @@ function ∂g∂t end;
 # Changes to this function
 # General
 #     2024-Jul-24: add function to update the ∂g∂t for sunlit leaves (matrix version)
+#     2024-Jul-25: add support to empirical models
 #
 #######################################################################################################################################################################################################
 """
@@ -105,6 +104,27 @@ function ∂g∂t! end;
     # set the max and min values
     for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
         leaf.flux.auxil.∂g∂t_sunlit[i] = max(-0.001, min(0.001, leaf.flux.auxil.∂g∂t_sunlit[i]));
+    end;
+
+    return nothing
+);
+
+∂g∂t!(cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} =
+    ∂g∂t!(cache, sm, leaf, air, sm.β.PARAM_Y);
+
+∂g∂t!(cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterG1) where {FT} = (
+    for ind in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
+        gsw = empirical_equation(sm, leaf, air, ind; β = leaf.flux.auxil.β);
+        leaf.flux.auxil.∂g∂t_sunlit[ind] = max(-0.001, min(0.001, (gsw - leaf.flux.state.g_H₂O_s_sunlit[ind]) / sm.τ));
+    end;
+
+    return nothing
+);
+
+∂g∂t!(cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterVcmax) where {FT} = (
+    for ind in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
+        gsw = empirical_equation(sm, leaf, air, ind; β = FT(1));
+        leaf.flux.auxil.∂g∂t_sunlit[ind] = max(-0.001, min(0.001, (gsw - leaf.flux.state.g_H₂O_s_sunlit[ind]) / sm.τ));
     end;
 
     return nothing

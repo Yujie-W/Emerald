@@ -187,6 +187,7 @@ import Emerald.EmeraldLand.SPAC
             leaf.flux.state.g_H₂O_s_sunlit .= 0;
             SM.limit_stomatal_conductance!(leaf);
         end;
+        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         SM.stomatal_conductance_profile!(spac);
 
         for leaf in spac.plant.leaves
@@ -210,6 +211,7 @@ import Emerald.EmeraldLand.SPAC
             push!(g_shaded, deepcopy(leaf.flux.state.g_H₂O_s_shaded));
             push!(g_sunlit, deepcopy(leaf.flux.state.g_H₂O_s_sunlit));
         end;
+        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
         SM.stomatal_conductance_profile!(spac);
         SM.stomatal_conductance!(spac, 1.0);
 

@@ -142,6 +142,7 @@ import Emerald.EmeraldLand.SPAC
             leaf.flux.state.g_H₂O_s_shaded = 0.1;
         end;
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
 
@@ -173,6 +174,7 @@ import Emerald.EmeraldLand.SPAC
             leaf.flux.state.g_H₂O_s_shaded = 0.1;
         end;
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
 
@@ -187,6 +189,7 @@ import Emerald.EmeraldLand.SPAC
         fis = [PH.flow_in(leaf) for leaf in spac.plant.leaves];
         fos = [PH.flow_out(leaf) for leaf in spac.plant.leaves];
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2s = [leaf.capacitor.state.v_storage * leaf.xylem.trait.area for leaf in spac.plant.leaves];
@@ -197,6 +200,7 @@ import Emerald.EmeraldLand.SPAC
         fis = [PH.flow_in(branch) for branch in spac.plant.branches];
         fos = [PH.flow_out(branch) for branch in spac.plant.branches];
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2s = [sum(branch.xylem.state.v_storage) for branch in spac.plant.branches];
@@ -207,6 +211,7 @@ import Emerald.EmeraldLand.SPAC
         f_junc = PH.flow_in(spac.plant.trunk);
         f_stem = PH.flow_out(spac.plant.trunk);
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2_trunk = sum(spac.plant.trunk.xylem.state.v_storage);
@@ -217,6 +222,7 @@ import Emerald.EmeraldLand.SPAC
         Σf_root = sum([PH.flow_out(root) for root in spac.plant.roots]);
         Σf_stem = PH.flow_in(spac.plant.trunk);
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2_junc = spac.plant.junction.state.v_storage;
@@ -227,6 +233,7 @@ import Emerald.EmeraldLand.SPAC
         fis = [PH.flow_in(root) for root in spac.plant.roots];
         fos = [PH.flow_out(root) for root in spac.plant.roots];
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2s = [sum(root.xylem.state.v_storage) for root in spac.plant.roots];
