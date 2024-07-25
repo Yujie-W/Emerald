@@ -23,7 +23,7 @@ Update the leaf pressure profile, given
 - `p_dos` pressure at the dosing point `[MPa]`
 
 """
-function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Leaf{FT}, cache::SPACCache{FT}, p_dos::FT) where {FT}
+function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, cache::SPACCache{FT}, p_dos::FT) where {FT}
     if leaf.xylem.trait.area <= 0
         return nothing
     end;

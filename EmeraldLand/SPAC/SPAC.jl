@@ -13,7 +13,7 @@ using ..Namespace: ReferenceSpectra, ShortwaveRadiation
 using ..Namespace: C3CLMTrait, C3CytoMinEtaTrait, C3CytoTrait, C3FvCBTrait, C3JBTrait, C3VJPTrait, C4CLMTrait, C4VJPTrait
 using ..Namespace: GCO₂Mode
 using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
-using ..Namespace: JunctionCapacitor, Leaf, Plant, Root, Stem
+using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Plant, Root, Stem
 using ..Namespace: CanopyStructure, CanopyStructureTrait, CanopyStructureTDAuxil, MultiLayerCanopy
 using ..Namespace: AirLayer, AirLayerState, AirLayerSDAuxil, AirLayerTDAuxil
 using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLayerTrait, SoilLayerTDAuxil

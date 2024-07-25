@@ -6,7 +6,7 @@ using ..Namespace: AbstractSoilVC
 using ..Namespace: AbstractXylemVC
 using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterVcmax, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
-using ..Namespace: Leaf, Root
+using ..Namespace: CanopyLayer, Leaf, Root
 using ..Namespace: AirLayer, SoilLayer
 using ..Namespace: BulkSPAC, SPACCache
 

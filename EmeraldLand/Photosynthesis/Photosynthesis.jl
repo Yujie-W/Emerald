@@ -16,8 +16,8 @@ using ..Namespace: GCO₂Mode, PCO₂Mode
 using ..Namespace: KNFluoscenceModel, QLFluoscenceModel
 using ..Namespace: C3CLMTrait, C3CytoMinEtaTrait, C3CytoTrait, C3FvCBTrait, C3JBTrait, C3VJPTrait, C3State
 using ..Namespace: C4CLMTrait, C4VJPTrait, C4State
-using ..Namespace: LeafPhotosystem, LeafPhotosystemAuxil
-using ..Namespace: Leaf
+using ..Namespace: CanopyLayerPhotosystem, LeafPhotosystem, LeafPhotosystemAuxil
+using ..Namespace: CanopyLayer, Leaf
 using ..Namespace: AirLayer
 using ..Namespace: BulkSPAC
 
@@ -37,6 +37,7 @@ include("stomata/derivative.jl");
 include("stomata/photo_only.jl");
 
 # functions to use with SPAC
+include("plant/layer.jl");
 include("plant/leaf.jl");
 include("plant/plant.jl");
 

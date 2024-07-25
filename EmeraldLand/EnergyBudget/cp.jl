@@ -51,7 +51,7 @@ heat_capacitance(capst::ExtraXylemCapacitorState{FT}, xyltr::XylemHydraulicsTrai
     return (capst.v_storage * CP_L_MOL(FT) + xyltr.cp * biotr.lma * 10) * xyltr.area
 );
 
-heat_capacitance(leaf::Leaf{FT}) where {FT} = heat_capacitance(leaf.capacitor.state, leaf.xylem.trait, leaf.bio.trait);
+heat_capacitance(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = heat_capacitance(leaf.capacitor.state, leaf.xylem.trait, leaf.bio.trait);
 
 # air
 heat_capacitance(airst::AirLayerState{FT}) where {FT} = (airst.ns[1] + airst.ns[2] + airst.ns[4] + airst.ns[5]) * CP_D_MOL(FT) + airst.ns[3] * CP_V_MOL(FT);

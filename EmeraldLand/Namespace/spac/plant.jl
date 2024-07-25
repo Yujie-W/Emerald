@@ -34,7 +34,7 @@ Base.@kwdef mutable struct Plant{FT}
     "Branch hydraulic system"
     branches::Vector{Stem{FT}}
     "Leaf per layer"
-    leaves::Vector{Leaf{FT}}
+    leaves::Vector{CanopyLayer{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
     "Memory cache"
@@ -79,8 +79,8 @@ mutable struct PlantStates{FT<:AbstractFloat}
     trunk::StemStates{FT}
     "Branch hydraulic system"
     branches::Vector{StemStates{FT}}
-    "Leaf per layer"
-    leaves::Vector{LeafStates{FT}}
+    "CanopyLayer per layer"
+    leaves::Vector{CanopyLayerStates{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
     "Memory cache"
@@ -94,7 +94,7 @@ PlantStates(plant::Plant{FT}) where {FT} = PlantStates{FT}(
             plant.junction.state,
             StemStates(plant.trunk),
             [StemStates(branch) for branch in plant.branches],
-            [LeafStates(leaf) for leaf in plant.leaves],
+            [CanopyLayerStates(l) for l in plant.leaves],
             plant.leaves_index,
             plant.memory
 );

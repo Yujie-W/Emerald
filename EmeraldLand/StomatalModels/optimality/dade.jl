@@ -15,8 +15,8 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
-    ∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int) where {FT}
+    ∂A∂E(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}) where {FT}
+    ∂A∂E(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, ind::Int) where {FT}
 
 Return the partial derivative of A per E, given
 - `leaf` `Leaf` type leaf
@@ -26,7 +26,7 @@ Return the partial derivative of A per E, given
 """
 function ∂A∂E end;
 
-∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+∂A∂E(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}) where {FT} = (
     p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
@@ -46,7 +46,7 @@ function ∂A∂E end;
     return (a2 - a1) / (e2 - e1)
 );
 
-∂A∂E(leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int) where {FT} = (
+∂A∂E(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, ind::Int) where {FT} = (
     p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
@@ -76,7 +76,7 @@ function ∂A∂E end;
 #######################################################################################################################################################################################################
 """
 
-    ∂A∂E!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
+    ∂A∂E!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}) where {FT}
 
 Update the ∂A∂E for sunlit leaves, given
 - `cache` `SPACCache` type cache
@@ -86,7 +86,7 @@ Update the ∂A∂E for sunlit leaves, given
 """
 function ∂A∂E! end;
 
-∂A∂E!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+∂A∂E!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}) where {FT} = (
     p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 

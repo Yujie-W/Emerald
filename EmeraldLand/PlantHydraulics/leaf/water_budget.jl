@@ -10,8 +10,8 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT}
-    leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT}
+    leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT}
+    leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT}
 
 Set the flow profile of the leaf, given
 - `leaf` `Leaf` type struct
@@ -21,7 +21,7 @@ Set the flow profile of the leaf, given
 """
 function leaf_water_budget! end;
 
-leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
+leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
     # make sure the buffer rate does not drain or overflow the capacictance
     # TODO: add this to time_stepper! function, otherwise the water budget will not be consvered
     if leaf.capacitor.auxil.flow > 0 && leaf.capacitor.state.v_storage * leaf.xylem.trait.area <= leaf.capacitor.auxil.flow * δt
@@ -38,7 +38,7 @@ leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) 
     return nothing
 );
 
-leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT} = (
+leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT} = (
     leaf.flux.auxil.∫∂w∂t_out += flow_out(leaf) * δt;
 
     return nothing

@@ -19,7 +19,7 @@ Update the extraxylary pressure profile, given
 """
 function extraxylary_pressure_profile! end;
 
-extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT} =
+extraxylary_pressure_profile!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} =
     extraxylary_pressure_profile!(leaf.xylem.trait, leaf.xylem.auxil, leaf.capacitor.trait, leaf.capacitor.state, leaf.capacitor.auxil, leaf.energy.s_aux.t);
 
 extraxylary_pressure_profile!(

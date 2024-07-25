@@ -131,7 +131,7 @@ substep_aux!(stem::Stem{FT}) where {FT} = (
     return nothing
 );
 
-substep_aux!(leaf::Leaf{FT}) where {FT} = (
+substep_aux!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = (
     # update the leaf buffer pressure and flow
     x_aux = leaf.xylem.auxil;
     c_aux = leaf.capacitor.auxil;

@@ -114,7 +114,7 @@ BulkSPAC(config::SPACConfiguration{FT};
     spac_canopy = MultiLayerCanopy(config, n_layer);
 
     # set up the leaves
-    leaves = Leaf{FT}[Leaf(config) for i in 1:n_layer];
+    leaves = CanopyLayer{FT}[CanopyLayer(config) for i in 1:n_layer];
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaves[ilf].xylem.trait.area = spac_sbulk.trait.area * spac_canopy.structure.trait.δlai[irt];

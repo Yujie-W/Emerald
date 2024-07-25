@@ -699,6 +699,159 @@ end;
 #
 # Changes to this struct
 # General
+#     2024-Jul-25: define CanopyLayerPhotosystemAuxil struct to store 1D leaf photosynthesis variables (for canopy layer; Leaf will be repurposed back to elementwise)
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the auxiliary variables for leaf photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
+    # photosynthetic rates
+    "RubisCO limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_c::Vector{FT}
+    "Gross photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_g::Vector{FT}
+    "Light limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_j::Vector{FT}
+    "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_n::Vector{FT}
+    "Product limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_p::Vector{FT}
+
+    # electron transport rates
+    "Electron to CO₂ coefficient"
+    e2c::Vector{FT}
+    "Fraction of absorbed light used by PSII ETR"
+    f_psii::FT = 0.5
+    "Electron transport `[μmol m⁻² s⁻¹]`"
+    j::Vector{FT}
+    "Maximal electron transport rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    j_max::FT = 0
+    "Potential Electron Transport Rate `[μmol m⁻² s⁻¹]`"
+    j_pot::Vector{FT}
+    "PSI electron transport rate after colimitation"
+    j_psi::Vector{FT}
+
+    # photosynthesis rate coefficients
+    "RubisCO coefficient Kc `[Pa]`"
+    k_c::FT = 0
+    "Michaelis-Menten's coefficient `[Pa]`"
+    k_m::FT = 0
+    "RubisCO coefficient Ko `[Pa]`"
+    k_o::FT = 0
+    "PEP coefficient Kpep `[Pa]`"
+    k_pep::FT = 0
+    "PEP coefficient Kpep fro CLM (different algorithm) `[Pa]`"
+    k_pep_clm::FT = 0
+    "Maximal turnover rate of Cytochrome b₆f `[e⁻ s⁻¹]`"
+    k_q::FT = 0
+    "CO₂ compensation point with the absence of Rd `[Pa]`"
+    γ_star::FT = 0
+
+    # respiration and carboxylation
+    "Respiration rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    r_d::FT = 0
+    "Maximal carboxylation rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    v_cmax::FT = 0
+    "Maximal PEP carboxylation rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    v_pmax::FT = 0
+    "Maximal Cytochrome b₆f activity `[μmol e⁻ m⁻² s⁻¹]`"
+    v_qmax::FT = 0
+
+    # C3 Cytochrome model variables
+    "ratio between J_P700 and J_P680"
+    η::FT = 0
+    "Coupling efficiency of cyclic electron flow `[mol ATP mol⁻¹ e⁻]`"
+    η_c::FT = 0
+    "Coupling efficiency of linear electron flow `[mol ATP mol⁻¹ e⁻]`"
+    η_l::FT = 0
+
+    # yield variables
+    "Heat dissipation yield"
+    ϕ_d::Vector{FT}
+    "Fluorescence yield"
+    ϕ_f::Vector{FT}
+    "Non-photochemical quenching yeild"
+    ϕ_n::Vector{FT}
+    "Photochemical yield"
+    ϕ_p::Vector{FT}
+
+    # fluorescence yeolds of two photosystems
+    "Fluorescence yield of PSI"
+    ϕ_f1::Vector{FT}
+    "Fluorescence yield of PSII"
+    ϕ_f2::Vector{FT}
+
+    # fluorescence variables
+    "Dark adapted yield (`Kp=0`)"
+    f_m::Vector{FT}
+    "Light adapted yield (`Kp=0`)"
+    f_m′::Vector{FT}
+    "Dark-adapted fluorescence yield (`Kp=max`)"
+    f_o::Vector{FT}
+    "Light-adapted fluorescence yield in the dark (`Kp=max`)"
+    f_o′::Vector{FT}
+    "Non-Photochemical quenching "
+    npq::Vector{FT}
+    "Energy quenching"
+    q_e::Vector{FT}
+    "Photochemical quenching"
+    q_p::Vector{FT}
+
+    # fluorescence rate coefficients
+    "Rate constant for thermal dissipation"
+    k_d::Vector{FT}
+    "Reversible NPQ rate constant (initially zero)"
+    k_n::Vector{FT}
+    "Rate constant for photochemistry"
+    k_p::Vector{FT}
+    "Maximal PS I photochemical yield"
+    ϕ_psi_max::FT = 0
+    "max PSII yield (_k_npq_rev = 0, all RC open)"
+    ϕ_psii_max::FT = 0
+end;
+
+CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLayerPhotosystemAuxil{FT}(
+    a_c   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    a_g   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    a_j   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    a_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    a_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    e2c   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    j     = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    j_pot = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    j_psi = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    ϕ_d   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    ϕ_f   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    ϕ_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    ϕ_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    ϕ_f1  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    ϕ_f2  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    f_m   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    f_m′  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    f_o   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    f_o′  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    npq   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    q_e   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    q_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    k_d   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    k_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    k_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1)
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Oct-03: add C3VJP, C3Cyto, and C4VJP structs
 #     2023-Oct-36: combine C3Cyto, C3VJP, and C4VJP into LeafPhotosystem
 #     2024-Feb-26: add field trait
@@ -723,3 +876,33 @@ Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Auxilary variables"
     auxil::LeafPhotosystemAuxil{FT} = LeafPhotosystemAuxil{FT}()
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-25: add CanopyLayerPhotosystem
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the fields for C3 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct CanopyLayerPhotosystem{FT}
+    "Trait variables"
+    trait::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    "State variables"
+    state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
+    "Auxilary variables"
+    auxil::CanopyLayerPhotosystemAuxil{FT}
+end;
+
+CanopyLayerPhotosystem(config::SPACConfiguration{FT}) where {FT} = CanopyLayerPhotosystem{FT}(auxil = CanopyLayerPhotosystemAuxil(config));

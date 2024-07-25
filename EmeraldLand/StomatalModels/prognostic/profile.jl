@@ -41,7 +41,7 @@ stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
     return nothing
 );
 
-stomatal_conductance_profile!(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
+stomatal_conductance_profile!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
     if leaf.flux.auxil.ppar_shaded > 1
         leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air);
         for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
@@ -56,7 +56,7 @@ stomatal_conductance_profile!(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) whe
     return nothing
 );
 
-stomatal_conductance_profile!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
+stomatal_conductance_profile!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
     if leaf.flux.auxil.ppar_shaded > 1
         leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air);
         ∂g∂t!(cache, leaf, air);

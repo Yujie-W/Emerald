@@ -85,6 +85,7 @@ include("leaf/flux.jl");
 
 include("leaf/photosynthesis.jl");
 
+include("leaf/layer.jl");
 include("leaf/leaf.jl");
 
 
