@@ -9,6 +9,7 @@
 #     2023-Oct-16: make e_crit of leaf to be per leaf area (to use with stomatal optimization models)
 #     2024-Feb-28: add LAI <= 0 control
 #     2024-Jul-24: use spac cache
+#     2024-Jul-25: remove initial e_crit guess to make sure states are consistent
 #
 #######################################################################################################################################################################################################
 """
@@ -29,7 +30,7 @@ function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Leaf{FT}, c
 
     # run the pressure profile calculation only if xylem area > 0
     leaf.xylem.auxil.pressure[1] = p_dos;
-    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, cache, leaf.energy.s_aux.t, leaf.xylem.auxil.e_crit) / leaf.xylem.trait.area;
+    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, cache, leaf.energy.s_aux.t) / leaf.xylem.trait.area;
     xylem_pressure_profile!(leaf.xylem, leaf.energy.s_aux.t);
     extraxylary_pressure_profile!(leaf);
 

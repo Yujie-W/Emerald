@@ -37,6 +37,7 @@ using Test;
             EmeraldLand.SPAC.spac!(config, spac_2, FT(3600));
             EmeraldLand.Namespace.sync_state!(spac_1, state_1);
             EmeraldLand.Namespace.sync_state!(spac_2, state_2);
+            EmeraldUtility.StructEqual.compare_struct!(spac_1, spac_2; approximation = false, show_diff_msg = true);
             @test EmeraldUtility.StructEqual.compare_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
         end;
     end;

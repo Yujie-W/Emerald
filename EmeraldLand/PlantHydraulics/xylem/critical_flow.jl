@@ -95,7 +95,7 @@ function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}
     ms.x_min = fl;
     ms.x_max = fh;
     ms.x_ini = min((fh + fl) / 2, ini);
-    st = SolutionTolerance{FT}(eps(FT)*100, 50);
+    st = cache.stol_nb;
 
     # define the target function
     @inline f(x) = xylem_end_pressure(xylem, x, t) - p_crt;
