@@ -14,6 +14,7 @@ using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil, SensorGeometryS
 using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoHyperspectralCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoPrescribe
 using ..Namespace: SoilLayer, SoilBulk
 using ..Namespace: MultiLayerCanopy
+using ..Namespace: CanopyLayer, Leaf
 using ..Namespace: BulkSPAC, SPACConfiguration
 
 

@@ -131,7 +131,34 @@ substep_aux!(stem::Stem{FT}) where {FT} = (
     return nothing
 );
 
-substep_aux!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = (
+substep_aux!(leaf::CanopyLayer{FT}) where {FT} = (
+    # update the leaf buffer pressure and flow
+    x_aux = leaf.xylem.auxil;
+    c_aux = leaf.capacitor.auxil;
+    if x_aux isa XylemHydraulicsAuxilNSS
+        x_tra = leaf.xylem.trait;
+        c_tra = leaf.capacitor.trait;
+        c_sta = leaf.capacitor.state;
+        f_vis = relative_viscosity(leaf.energy.s_aux.t);
+        c_aux.p = capacitance_pressure(c_tra.pv, c_sta.v_storage / c_tra.v_max, leaf.energy.s_aux.t);
+        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_tra.pv.k_refill / f_vis * c_sta.v_storage * x_tra.area;
+    else
+        c_aux.flow = 0;
+    end;
+
+    # update the stomatal conductance
+    leaf.flux.auxil.g_CO₂ .= 1 ./ (1 ./ leaf.flux.auxil.g_CO₂_b .+ FT(1.6) ./ leaf.flux.state.g_H₂O_s);
+
+    # clear the partial derivatives
+    leaf.energy.auxil.∂e∂t = 0;
+    leaf.energy.auxil.∂e∂t_le = 0;
+    leaf.energy.auxil.∂e∂t_sh = 0;
+    leaf.flux.auxil.∂g∂t .= 0;
+
+    return nothing
+);
+
+substep_aux!(leaf::Leaf{FT}) where {FT} = (
     # update the leaf buffer pressure and flow
     x_aux = leaf.xylem.auxil;
     c_aux = leaf.capacitor.auxil;

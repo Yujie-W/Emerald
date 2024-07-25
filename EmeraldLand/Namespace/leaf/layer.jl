@@ -26,7 +26,7 @@ Base.@kwdef mutable struct CanopyLayer{FT}
     "CanopyLayer energy struct"
     energy::LeafEnergy{FT} = LeafEnergy{FT}()
     "CanopyLayer flux struct"
-    flux::LeafFlux{FT}
+    flux::CanopyLayerFlux{FT}
     "Photosynthesis system struct"
     photosystem::CanopyLayerPhotosystem{FT}
     "CanopyLayer xylem hydraulics struct"
@@ -43,7 +43,7 @@ Return the CanopyLayer struct with initialized energy states, given
 
 """
 CanopyLayer(config::SPACConfiguration{FT}) where {FT} = (
-    clayer = CanopyLayer{FT}(bio = LeafBio(config), flux = LeafFlux(config), photosystem = CanopyLayerPhotosystem(config), xylem = XylemHydraulics(config));
+    clayer = CanopyLayer{FT}(bio = LeafBio(config), flux = CanopyLayerFlux(config), photosystem = CanopyLayerPhotosystem(config), xylem = XylemHydraulics(config));
     clayer.xylem.trait.cp = 1780;
     clayer.xylem.trait.k_max = 0.04;
 

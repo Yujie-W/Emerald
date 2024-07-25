@@ -32,31 +32,57 @@ function rubisco_limited_rate! end;
 # For CanopyLayer
 
 # PCO₂Mode
-rubisco_limited_rate!(psm::CanopyLayerPhotosystem{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, p_i; β = β);
+rubisco_limited_rate!(
+            psm::CanopyLayerPhotosystem{FT},
+            p_i::Vector{FT};
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, p_i; β = β);
 
-rubisco_limited_rate!(pss::C3State{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = (
-    psa.a_c .= β .* psa.v_cmax .* (p_i .- psa.γ_star) ./ (p_i .+ psa.k_m);
+rubisco_limited_rate!(
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            p_i::Vector{FT};
+            β::FT = FT(1)) where {FT} = (psa.a_c .= β .* psa.v_cmax .* (p_i .- psa.γ_star) ./ (p_i .+ psa.k_m); return nothing);
 
-    return nothing
-);
-
-rubisco_limited_rate!(pss::C4State{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = (psa.a_c .= β .* psa.v_cmax; return nothing);
+rubisco_limited_rate!(
+            pss::C4State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            p_i::Vector{FT};
+            β::FT = FT(1)) where {FT} = (psa.a_c .= β .* psa.v_cmax; return nothing);
 
 # GCO₂Mode
-rubisco_limited_rate!(psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
+rubisco_limited_rate!(
+            cache::SPACCache{FT},
+            psm::CanopyLayerPhotosystem{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(cache, psm.state, psm.auxil, air, g_lc; β = β);
 
-rubisco_limited_rate!(pss::C3State{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
-    a = β * psa.v_cmax;
-    b = β * psa.v_cmax * psa.γ_star;
-    d = psa.k_m;
-    f = air.state.p_air ./ g_lc .* FT(1e-6);
-    p = air.s_aux.ps[2];
-    r = β * psa.r_d;
+rubisco_limited_rate!(
+            cache::SPACCache{FT},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = (
 
-    qa = f;
-    qb = f .* r .- p .- d .- a .* f;
-    qc = a .* p .- b .- r .* (p .+ d);
-    an = lower_quadratic.(qa, qb, qc);
+    # unpack the cache variables
+    b  = cache.cache_incl_azi_2_1;
+    f  = cache.cache_incl_azi_2_2;
+    qb = cache.cache_incl_azi_2_4;
+    qc = cache.cache_incl_azi_2_5;
+    an = cache.cache_incl_azi_2_6;
+
+    a  = β * psa.v_cmax;
+    b .= β .* psa.v_cmax .* psa.γ_star;
+    d  = psa.k_m;
+    f .= air.state.p_air ./ g_lc .* FT(1e-6);
+    p  = air.s_aux.ps[2];
+    r  = β * psa.r_d;
+
+    qa  = f;
+    qb .= f .* r .- p .- d .- a .* f;
+    qc .= a .* p .- b .- r .* (p .+ d);
+    an .= lower_quadratic.(qa, qb, qc);
 
     if g_lc[1] == 0 && g_lc[end] == 0
         psa.a_c .= r;
@@ -67,24 +93,48 @@ rubisco_limited_rate!(pss::C3State{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, ai
     return nothing
 );
 
-rubisco_limited_rate!(pss::C4State{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (psa.a_c .= β .* psa.v_cmax; return nothing);
+rubisco_limited_rate!(
+            cache::SPACCache{FT},
+            pss::C4State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = (psa.a_c .= β .* psa.v_cmax; return nothing);
 
 # For Leaf
 # PCO₂Mode
-rubisco_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, p_i; β = β);
+rubisco_limited_rate!(
+            psm::LeafPhotosystem{FT},
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, p_i; β = β);
 
-rubisco_limited_rate!(pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psa.a_c = β * psa.v_cmax * (p_i - psa.γ_star) / (p_i + psa.k_m);
+rubisco_limited_rate!(
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax * (p_i - psa.γ_star) / (p_i + psa.k_m); return nothing);
 
-    return nothing
-);
-
-rubisco_limited_rate!(pss::C4State{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
+rubisco_limited_rate!(
+            pss::C4State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
 
 # GCO₂Mode
-rubisco_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = rubisco_limited_rate!(psm.state, psm.auxil, air, g_lc; β = β);
+rubisco_limited_rate!(
+            cache::SPACCache{FT},
+            psm::LeafPhotosystem{FT},
+            air::AirLayer{FT},
+            g_lc::FT;
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(cache, psm.state, psm.auxil, air, g_lc; β = β);
 
-rubisco_limited_rate!(pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+rubisco_limited_rate!(
+            cache::SPACCache{FT},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::FT;
+            β::FT = FT(1)) where {FT} = (
     a = β * psa.v_cmax;
     b = β * psa.v_cmax * psa.γ_star;
     d = psa.k_m;
@@ -106,4 +156,10 @@ rubisco_limited_rate!(pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirL
     return nothing
 );
 
-rubisco_limited_rate!(pss::C4State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
+rubisco_limited_rate!(
+            cache::SPACCache{FT},
+            pss::C4State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::FT;
+            β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);

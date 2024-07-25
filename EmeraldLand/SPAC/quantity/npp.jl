@@ -25,7 +25,7 @@ CNPP(spac::BulkSPAC{FT}) where {FT} = (
     cnpp::FT = 0;
     for irt in eachindex(leaves)
         ilf = n_layer + 1 - irt;
-        cnpp += leaves[ilf].flux.auxil.a_n * canopy.structure.trait.δlai[irt];
+        cnpp += leaves[ilf].flux.auxil.a_n_mean * canopy.structure.trait.δlai[irt];
     end;
 
     return cnpp

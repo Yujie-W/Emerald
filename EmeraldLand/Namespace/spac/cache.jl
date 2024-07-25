@@ -41,6 +41,33 @@ Base.@kwdef struct SPACCache{FT}
     "Cache vector with the length of wavelength"
     cache_wl_5::Vector{FT}
 
+    # Cache vectors with the length of INCL * AZI + 1
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_1_1::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_1_2::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_1_3::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_1_4::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_1_5::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_1_6::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_2_1::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_2_2::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_2_3::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_2_4::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_2_5::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1"
+    cache_incl_azi_2_6::Vector{FT}
+
+
     # Matrix with dims of INCL and AZI
     "Cache matrix with the dims of INCL and AZI"
     cache_incl_azi_1::Matrix{FT}
@@ -76,6 +103,19 @@ SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_sif::Int, dim_sif
     cache_wl_3 = zeros(FT, dim_wl),
     cache_wl_4 = zeros(FT, dim_wl),
     cache_wl_5 = zeros(FT, dim_wl),
+
+    cache_incl_azi_1_1 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_1_2 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_1_3 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_1_4 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_1_5 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_1_6 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_2_1 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_2_2 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_2_3 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_2_4 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_2_5 = zeros(FT, dim_incl*dim_azi+1),
+    cache_incl_azi_2_6 = zeros(FT, dim_incl*dim_azi+1),
 
     cache_incl_azi_1 = zeros(FT, dim_incl, dim_azi),
     cache_incl_azi_2 = zeros(FT, dim_incl, dim_azi),

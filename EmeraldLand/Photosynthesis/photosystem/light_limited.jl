@@ -34,9 +34,15 @@ light_limited_rate!(psm::CanopyLayerPhotosystem{FT}) where {FT} = light_limited_
 light_limited_rate!(psa::CanopyLayerPhotosystemAuxil{FT}) where {FT} = (psa.a_j .= psa.j .* psa.e2c; return nothing);
 
 # GCO₂Mode
-light_limited_rate!(psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = light_limited_rate!(psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
+light_limited_rate!(
+            cache::SPACCache{FT},
+            psm::CanopyLayerPhotosystem{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = light_limited_rate!(cache, psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
 
 light_limited_rate!(
+            cache::SPACCache{FT},
             pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
             pss::C3State{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},
@@ -54,18 +60,26 @@ light_limited_rate!(
     eff_1 = eff_a * pss.EFF_1 + 3 * eff_b;
     eff_2 = eff_a * pss.EFF_2 + 7 * eff_b;
 
-    a = psa.j_psi;
-    b = psa.j_psi * psa.γ_star;
-    c = eff_1;
-    d = eff_2 * psa.γ_star;
-    f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.s_aux.ps[2];
-    r = β * psa.r_d;
+    # unpack the cache variables
+    b  = cache.cache_incl_azi_2_1;
+    f  = cache.cache_incl_azi_2_2;
+    qa = cache.cache_incl_azi_2_3;
+    qb = cache.cache_incl_azi_2_4;
+    qc = cache.cache_incl_azi_2_5;
+    an = cache.cache_incl_azi_2_6;
 
-    qa = c * f;
-    qb = c * f * r - c * p - d - a * f;
-    qc = a * p - b - r * (c * p + d);
-    an = lower_quadratic.(qa, qb, qc);
+    a  = psa.j_psi;
+    b .= psa.j_psi .* psa.γ_star;
+    c  = eff_1;
+    d  = eff_2 * psa.γ_star;
+    f .= air.state.p_air ./ g_lc .* FT(1e-6);
+    p  = air.s_aux.ps[2];
+    r  = β * psa.r_d;
+
+    qa .= c .* f;
+    qb .= c .* f .* r .- c .* p .- d .- a .* f;
+    qc .= a .* p .- b .- r .* (c .* p .+ d);
+    an .= lower_quadratic.(qa, qb, qc);
 
     if g_lc[1] == 0 && g_lc[end] == 0
         psa.a_j .= r;
@@ -77,6 +91,7 @@ light_limited_rate!(
 );
 
 light_limited_rate!(
+            cache::SPACCache{FT},
             pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
             pss::C3State{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},
@@ -89,18 +104,26 @@ light_limited_rate!(
         return nothing
     end;
 
-    a = psa.j;
-    b = psa.j * psa.γ_star;
-    c = pss.EFF_1;
-    d = pss.EFF_2 * psa.γ_star;
-    f = air.state.p_air ./ g_lc .* FT(1e-6);
-    p = air.s_aux.ps[2];
-    r = β * psa.r_d;
+    # unpack the cache variables
+    b  = cache.cache_incl_azi_2_1;
+    f  = cache.cache_incl_azi_2_2;
+    qa = cache.cache_incl_azi_2_3;
+    qb = cache.cache_incl_azi_2_4;
+    qc = cache.cache_incl_azi_2_5;
+    an = cache.cache_incl_azi_2_6;
 
-    qa = c .* f;
-    qb = c .* f .* r .- c .* p .- d .- a .* f;
-    qc = a .* p .-  b .- r .* (c .* p .+ d);
-    an = lower_quadratic.(qa, qb, qc);
+    a  = psa.j;
+    b .= psa.j .* psa.γ_star;
+    c  = pss.EFF_1;
+    d  = pss.EFF_2 * psa.γ_star;
+    f .= air.state.p_air ./ g_lc .* FT(1e-6);
+    p  = air.s_aux.ps[2];
+    r  = β * psa.r_d;
+
+    qa .= c .* f;
+    qb .= c .* f .* r .- c .* p .- d .- a .* f;
+    qc .= a .* p .-  b .- r .* (c .* p .+ d);
+    an .= lower_quadratic.(qa, qb, qc);
 
     if g_lc[1] == 0 && g_lc[end] == 0
         psa.a_j .= r;
@@ -111,8 +134,14 @@ light_limited_rate!(
     return nothing
 );
 
-light_limited_rate!(pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}}, pss::C4State{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} =
-    (psa.a_j .= psa.j .* psa.e2c; return nothing);
+light_limited_rate!(
+            cache::SPACCache{FT},
+            pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}},
+            pss::C4State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = (psa.a_j .= psa.j .* psa.e2c; return nothing);
 
 
 # For Leaf
@@ -122,9 +151,21 @@ light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT} = light_limited_rate!(p
 light_limited_rate!(psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);
 
 # GCO₂Mode
-light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = light_limited_rate!(psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
+light_limited_rate!(
+            cache::SPACCache{FT},
+            psm::LeafPhotosystem{FT},
+            air::AirLayer{FT},
+            g_lc::FT;
+            β::FT = FT(1)) where {FT} = light_limited_rate!(cache, psm.trait, psm.state, psm.auxil, air, g_lc; β = β);
 
-light_limited_rate!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+light_limited_rate!(
+            cache::SPACCache{FT},
+            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::FT;
+            β::FT = FT(1)) where {FT} = (
     if psa.j_psi == 0
         psa.a_j = 0;
 
@@ -158,7 +199,14 @@ light_limited_rate!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait
     return nothing
 );
 
-light_limited_rate!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (
+light_limited_rate!(
+            cache::SPACCache{FT},
+            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::FT;
+            β::FT = FT(1)) where {FT} = (
     if psa.j == 0
         psa.a_j = 0;
 
@@ -187,5 +235,11 @@ light_limited_rate!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
     return nothing
 );
 
-light_limited_rate!(pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}}, pss::C4State{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} =
-    (psa.a_j = psa.j * psa.e2c; return nothing);
+light_limited_rate!(
+            cache::SPACCache{FT},
+            pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}},
+            pss::C4State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::FT;
+            β::FT = FT(1)) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);

@@ -22,20 +22,20 @@ Updates leaf photosynthetic rates based on leaf diffusive conductance (for Stoma
 """
 function photosynthesis_only! end;
 
-photosynthesis_only!(psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}, ppar::Vector{FT}) where {FT} = (
-    photosystem_electron_transport!(psm, ppar, FT(20); β = FT(1));
-    rubisco_limited_rate!(psm, air, g_lc; β = FT(1));
-    light_limited_rate!(psm, air, g_lc; β = FT(1));
+photosynthesis_only!(cache::SPACCache{FT}, psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}, ppar::Vector{FT}) where {FT} = (
+    photosystem_electron_transport!(cache, psm, ppar, FT(20); β = FT(1));
+    rubisco_limited_rate!(cache, psm, air, g_lc; β = FT(1));
+    light_limited_rate!(cache, psm, air, g_lc; β = FT(1));
     product_limited_rate!(psm, air, g_lc; β = FT(1));
     colimit_photosynthesis!(psm; β = FT(1));
 
     return psm.auxil.a_n
 );
 
-photosynthesis_only!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT) where {FT} = (
+photosynthesis_only!(cache::SPACCache{FT}, psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT) where {FT} = (
     photosystem_electron_transport!(psm, ppar, FT(20); β = FT(1));
-    rubisco_limited_rate!(psm, air, g_lc; β = FT(1));
-    light_limited_rate!(psm, air, g_lc; β = FT(1));
+    rubisco_limited_rate!(cache, psm, air, g_lc; β = FT(1));
+    light_limited_rate!(cache, psm, air, g_lc; β = FT(1));
     product_limited_rate!(psm, air, g_lc; β = FT(1));
     colimit_photosynthesis!(psm; β = FT(1));
 

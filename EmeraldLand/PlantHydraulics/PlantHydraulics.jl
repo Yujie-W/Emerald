@@ -1,5 +1,7 @@
 module PlantHydraulics
 
+using Statistics: mean
+
 using ..EmeraldMath.Math: upper_quadratic
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
 using ..EmeraldPhysics.Constant: GAS_R, ρg_MPa

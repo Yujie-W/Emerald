@@ -82,6 +82,7 @@ include("leaf/biophysics.jl");
 include("leaf/energy.jl");
 include("leaf/extraxylem.jl");
 include("leaf/flux.jl");
+include("leaf/layerflux.jl");
 
 include("leaf/photosynthesis.jl");
 

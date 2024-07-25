@@ -23,7 +23,47 @@ Set the flow out from each leaf, given
 - `spac` `BulkSPAC` type struct
 
 """
-function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+function leaf_flow_profiles! end;
+
+leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = leaf_flow_profiles!(config, spac, spac.plant.leaves[1]);
+
+leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # run the flow profile calculation for each leaf layer only if LAI > 0
+    # compute the flow rate exiting the leaf based on sunlit and shaded fractions and update it to the leaf of a BulkSPAC
+    #     leaves index is from lower to upper, and thus the sunlit leaves fraction is n_layer + 1 - i
+    #     airs index is also from lower to upper, but there are some layers are used by trunk so that it need to be indexed through LEAVES_INDEX
+
+    (; ALLOW_LEAF_CONDENSATION) = config;
+    airs = spac.airs;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+    lindex = spac.plant.leaves_index;
+    n_layer = length(leaves);
+
+    for i in eachindex(leaves)
+        leaf = leaves[i];
+        f_sl = canopy.sun_geometry.s_aux.p_sunlit[n_layer + 1 - i];
+
+        g_ss = 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (FT(1.35) .* leaf.flux.auxil.g_CO₂_b));
+        g_sh = g_ss[end];
+        g_sl = mean(view(g_ss,1:length(g_ss)-1));
+        g    = g_sh * (1 - f_sl) + g_sl * f_sl;
+        d    = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000) - airs[lindex[i]].s_aux.ps[3];
+        ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
+        f = g * d / airs[lindex[i]].state.p_air;
+
+        # set_flow_out!
+        set_flow_profile!(leaf.xylem, f - leaf.capacitor.auxil.flow);
+    end;
+
+    return nothing
+);
+
+leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) where {FT} = (
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
@@ -61,4 +101,4 @@ function leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     end;
 
     return nothing
-end;
+);

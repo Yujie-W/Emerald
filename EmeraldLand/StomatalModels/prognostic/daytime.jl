@@ -95,7 +95,19 @@ function ∂g∂t! end;
 
 ∂g∂t!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = ∂g∂t!(cache, leaf.flux.trait.stomatal_model, leaf, air; δe = δe);
 
-∂g∂t!(cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂g∂t!(cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::CanopyLayer{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+    ∂A∂E!(cache, leaf, air);
+    ∂Θ∂E!(sm, leaf);
+
+    leaf.flux.auxil.∂g∂t .= sm.K .* (leaf.flux.auxil.∂A∂E .- leaf.flux.auxil.∂Θ∂E);
+
+    # set the max and min values
+    leaf.flux.auxil.∂g∂t .= max.(-0.001, min.(0.001, leaf.flux.auxil.∂g∂t));
+
+    return nothing
+);
+
+∂g∂t!(cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     ∂A∂E!(cache, leaf, air);
     ∂Θ∂E!(sm, leaf);
 
@@ -103,7 +115,7 @@ function ∂g∂t! end;
     leaf.flux.auxil.∂g∂t_sunlit .= sm.K .* (leaf.flux.auxil.∂A∂E_sunlit .- leaf.flux.auxil.∂Θ∂E);
 
     # set the max and min values
-    leaf.flux.auxil.∂g∂t_sunlit = max.(-0.001, min.(0.001, leaf.flux.auxil.∂g∂t_sunlit));
+    leaf.flux.auxil.∂g∂t_shaded = max(-0.001, min(0.001, leaf.flux.auxil.∂g∂t_shaded));
     for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
         leaf.flux.auxil.∂g∂t_sunlit[i] = max(-0.001, min(0.001, leaf.flux.auxil.∂g∂t_sunlit[i]));
     end;

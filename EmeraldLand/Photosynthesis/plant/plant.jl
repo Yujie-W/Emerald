@@ -20,7 +20,11 @@ Updates leaf photosynthetic rates for SPAC, given
 - `mode` `GCO₂Mode` or `PCO₂Mode`
 
 """
-function plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT}
+function plant_photosynthesis! end;
+
+plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}) where {FT} = plant_photosynthesis!(spac, mode, spac.plant.leaves[1]);
+
+plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}, ::CanopyLayer{FT}) where {FT} = (
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
@@ -36,7 +40,35 @@ function plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO�
         irt = n_layer + 1 - ilf;
         leaf = leaves[ilf];
         air = airs[lindex[ilf]];
-        leaf_photosynthesis!(leaf, air, mode; rd_only = rd_only);
+        leaf_photosynthesis!(spac.cache, leaf, air, mode; rd_only = rd_only);
+
+        # update the average photosynthesis rates (a_g and a_net)
+        f_sunlit = canopy.sun_geometry.s_aux.p_sunlit[irt];
+        f_shaded = 1 - f_sunlit;
+        leaf.flux.auxil.a_g_mean = f_sunlit * mean(view(leaf.flux.auxil.a_g,1:length(leaf.flux.auxil.a_g))) + f_shaded * leaf.flux.auxil.a_g[end];
+        leaf.flux.auxil.a_n_mean = f_sunlit * mean(view(leaf.flux.auxil.a_n,1:length(leaf.flux.auxil.a_n))) + f_shaded * leaf.flux.auxil.a_n[end];
+    end;
+
+    return nothing
+);
+
+plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}, ::Leaf{FT}) where {FT} = (
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    airs = spac.airs;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+    lindex = spac.plant.leaves_index;
+    n_layer = length(leaves);
+
+    rd_only = spac.canopy.sun_geometry.state.sza > 89;
+    for ilf in eachindex(leaves)
+        irt = n_layer + 1 - ilf;
+        leaf = leaves[ilf];
+        air = airs[lindex[ilf]];
+        leaf_photosynthesis!(spac.cache, leaf, air, mode; rd_only = rd_only);
 
         # update the average photosynthesis rates (a_g and a_net)
         f_sunlit = canopy.sun_geometry.s_aux.p_sunlit[irt];
@@ -46,4 +78,4 @@ function plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO�
     end;
 
     return nothing
-end;
+);

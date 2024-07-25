@@ -73,7 +73,91 @@ adjusted_time(soil::SoilLayer{FT}, δt::FT) where {FT} = (
     return new_δt
 );
 
-adjusted_time(plant::Plant{FT}, lai::FT, δt::FT) where {FT} = (
+adjusted_time(plant::Plant{FT}, lai::FT, δt::FT) where {FT} = adjusted_time(plant, lai, δt, plant.leaves[1]);
+
+adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} = (
+    new_δt::FT = δt;
+
+    # make sure root temperature does not change more than 1 K per time step
+    for root in plant.roots
+        ∂T∂t = root.energy.auxil.∂e∂t / root.energy.s_aux.cp;
+        new_δt = min(1 / abs(∂T∂t), new_δt);
+        if isnan(new_δt) || new_δt < 0.001 <= δt
+            @error "NaN or very small δt detected when adjusting δt based on root temperature" root.energy.auxil.∂e∂t root.energy.s_aux.cp ∂T∂t;
+            return error("NaN detected in adjusted_time")
+        end;
+    end;
+
+    # make sure junction temperature does not change more than 1 K per time step
+    ∂T∂t = plant.junction.auxil.∂e∂t / plant.junction.s_aux.cp;
+    new_δt = min(1 / abs(∂T∂t), new_δt);
+    if isnan(new_δt) || new_δt < 0.001 <= δt
+        @error "NaN or very small δt detected when adjusting δt based on junction temperature" plant.junction.auxil.∂e∂t plant.junction.s_aux.cp ∂T∂t;
+        return error("NaN detected in adjusted_time")
+    end;
+
+    # make sure junction water does not change more than 10 mol per time step
+    new_δt = min(10 / abs(plant.junction.auxil.∂w∂t), new_δt);
+    if isnan(new_δt) || new_δt < 0.001 <= δt
+        @error "NaN or very small δt detected when adjusting δt based on junction water" plant.junction.auxil.∂w∂t;
+        return error("NaN detected in adjusted_time")
+    end;
+
+    # make sure the water content of the junction does not exceed the minimum water content (half through here)
+    new_δt = min((plant.junction.state.v_storage - plant.junction.trait.v_max * plant.junction.trait.pv.residual) / abs(plant.junction.auxil.∂w∂t) / 2, new_δt);
+    if isnan(new_δt) || new_δt < 0.001 <= δt
+        @error "NaN or very small δt detected when adjusting δt based on junction water storage" plant.junction.state.v_storage plant.junction.auxil.∂w∂t;
+        return error("NaN detected in adjusted_time")
+    end;
+
+    # trunk, branches, and leaves adjustments are required only when LAI > 0
+    if lai <= 0
+        return new_δt
+    end;
+
+    # make sure trunk temperature does not change more than 1 K per time step
+    ∂T∂t = plant.trunk.energy.auxil.∂e∂t / plant.trunk.energy.s_aux.cp;
+    new_δt = min(1 / abs(∂T∂t), new_δt);
+    if isnan(new_δt) || new_δt < 0.001 <= δt
+        @error "NaN or very small δt detected when adjusting δt based on trunk temperature" plant.trunk.energy.auxil.∂e∂t plant.trunk.energy.s_aux.cp ∂T∂t;
+        return error("NaN detected in adjusted_time")
+    end;
+
+    # make sure each branch temperature does not change more than 1 K per time step
+    for stem in plant.branches
+        ∂T∂t = stem.energy.auxil.∂e∂t / stem.energy.s_aux.cp;
+        new_δt = min(1 / abs(∂T∂t), new_δt);
+        if isnan(new_δt) || new_δt < 0.001 <= δt
+            @error "NaN or very small δt detected when adjusting δt based on branch temperature" stem.energy.auxil.∂e∂t stem.energy.s_aux.cp ∂T∂t;
+            return error("NaN detected in adjusted_time")
+        end;
+    end;
+
+    # make sure each leaf temperature does not change more than 1 K per time step
+    for leaf in plant.leaves
+        ∂T∂t = leaf.energy.auxil.∂e∂t / leaf.energy.s_aux.cp;
+        new_δt = min(1 / abs(∂T∂t), new_δt);
+        if isnan(new_δt) || new_δt < 0.001 <= δt
+            @error "NaN or very small δt detected when adjusting δt based on leaf temperature" leaf.energy.auxil.∂e∂t leaf.energy.s_aux.cp ∂T∂t;
+            return error("NaN detected in adjusted_time")
+        end;
+    end;
+
+    # make sure each leaf stomatal conductances do not change more than 0.01 mol m⁻² s⁻¹
+    for leaf in plant.leaves
+        for ∂g∂t in leaf.flux.auxil.∂g∂t
+            new_δt = min(FT(0.01) / abs(∂g∂t), new_δt);
+            if isnan(new_δt) || new_δt < 0.001 <= δt
+                @error "NaN or very small δt detected when adjusting δt based on leaf stomatal conductance dYdt" ∂g∂t;
+                return error("NaN detected in adjusted_time")
+            end;
+        end;
+    end;
+
+    return new_δt
+);
+
+adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::Leaf{FT}) where {FT} = (
     new_δt::FT = δt;
 
     # make sure root temperature does not change more than 1 K per time step

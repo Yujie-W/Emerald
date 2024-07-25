@@ -22,47 +22,57 @@
 #
 #######################################################################################################################################################################################################
 # This method takes out stomtal model out and use it to determine whether to apply beta to Vcmax, Jmax, and Rd
-leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT} =
-    leaf_photosynthesis!(leaf, air, mode, leaf.flux.trait.stomatal_model; rd_only = rd_only);
+leaf_photosynthesis!(
+            cache::SPACCache{FT},
+            leaf::Leaf{FT},
+            air::AirLayer{FT},
+            mode::Union{GCO₂Mode, PCO₂Mode};
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, mode, leaf.flux.trait.stomatal_model; rd_only = rd_only);
 
 # if stomtal model is not empirical model, then use the default β = 1
 leaf_photosynthesis!(
+            cache::SPACCache{FT},
             leaf::Leaf{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             sm::AbstractStomataModel{FT};
-            rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(leaf, air, mode, FT(1); rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, mode, FT(1); rd_only = rd_only);
 
 # if stomtal model is empirical model, then determine the β based on the parameter Y (if Vcmax, scale Vcmax, Jmax, and Rd)
 leaf_photosynthesis!(
+            cache::SPACCache{FT},
             leaf::Leaf{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}};
-            rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(leaf, air, mode, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, mode, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
 
 leaf_photosynthesis!(
+            cache::SPACCache{FT},
             leaf::Leaf{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             β::BetaFunction{FT},
             param_y::BetaParameterG1;
-            rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(leaf, air, mode, FT(1); rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, mode, FT(1); rd_only = rd_only);
 
 leaf_photosynthesis!(
+            cache::SPACCache{FT},
             leaf::Leaf{FT},
             air::AirLayer{FT},
             mode::Union{GCO₂Mode, PCO₂Mode},
             β::BetaFunction{FT},
             param_y::BetaParameterVcmax;
-            rd_only::Bool = false
-) where {FT} = leaf_photosynthesis!(leaf, air, mode, leaf.flux.auxil.β; rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, mode, leaf.flux.auxil.β; rd_only = rd_only);
 
 # This method computes and save the photosynthetic rates into leaf flux struct for GCO₂Mode
-leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(
+            cache::SPACCache{FT},
+            leaf::Leaf{FT},
+            air::AirLayer{FT},
+            mode::GCO₂Mode,
+            β::FT;
+            rd_only::Bool = false) where {FT} = (
     if rd_only
         leaf.photosystem.auxil.r_d   = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
@@ -87,8 +97,8 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
     # loop through sunlit leaf
     for i in eachindex(leaf.flux.auxil.ppar_sunlit)
         photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i], leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
-        rubisco_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
-        light_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
+        rubisco_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
+        light_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
         product_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_sunlit[i]; β = β);
         colimit_photosynthesis!(leaf.photosystem; β = β);
 
@@ -116,8 +126,8 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
 
     # run the model for shaded leaf
     photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_shaded, leaf.flux.auxil.p_CO₂_i_shaded; β = β);
-    rubisco_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_shaded; β = β);
-    light_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_shaded; β = β);
+    rubisco_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂_shaded; β = β);
+    light_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂_shaded; β = β);
     product_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂_shaded; β = β);
     colimit_photosynthesis!(leaf.photosystem; β = β);
 
@@ -144,7 +154,13 @@ leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT
 );
 
 # This method computes and save the photosynthetic rates into leaf flux struct for PCO₂Mode
-leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(
+            cache::SPACCache{FT},
+            leaf::Leaf{FT},
+            air::AirLayer{FT},
+            mode::PCO₂Mode,
+            β::FT;
+            rd_only::Bool = false) where {FT} = (
     if rd_only
         leaf.photosystem.auxil.r_d   = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;

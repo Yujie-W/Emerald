@@ -19,7 +19,7 @@ using ..Namespace: C4CLMTrait, C4VJPTrait, C4State
 using ..Namespace: CanopyLayerPhotosystem, CanopyLayerPhotosystemAuxil, LeafPhotosystem, LeafPhotosystemAuxil
 using ..Namespace: CanopyLayer, Leaf
 using ..Namespace: AirLayer
-using ..Namespace: BulkSPAC
+using ..Namespace: BulkSPAC, SPACCache
 
 
 # photosystem level model (order by the step in photosynthesis model)
