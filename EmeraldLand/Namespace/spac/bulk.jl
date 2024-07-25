@@ -7,6 +7,7 @@
 #     2023-Oct-17: add struct BulkSPAC
 #     2023-Oct-17: add step to customize soil albedo algorithm from spac settings
 #     2024-Feb-27: customize leaf area from leaf area index per layer in the constructor function
+#     2024-Jul-24: add field cache to store cache information for speeding up the model
 #
 #######################################################################################################################################################################################################
 """
@@ -38,6 +39,10 @@ Base.@kwdef mutable struct BulkSPAC{FT}
     plant::Plant{FT}
     "Canopy used for radiation calculations"
     canopy::MultiLayerCanopy{FT}
+
+    # Cache structure
+    "Cache structure for the SPAC model"
+    cache::SPACCache{FT}
 end;
 
 BulkSPAC(config::SPACConfiguration{FT};
@@ -125,6 +130,15 @@ BulkSPAC(config::SPACConfiguration{FT};
                 leaves       = leaves,
                 leaves_index = ind_layer);
 
+    # set up the cache
+    cache = SPACCache{FT}(
+                config.DIM_AZI,
+                config.DIM_INCL,
+                n_layer,
+                length(config.SPECTRA.Λ_SIF),
+                length(config.SPECTRA.Λ_SIFE),
+                length(config.SPECTRA.Λ));
+
     return BulkSPAC{FT}(
                 info      = spac_info,
                 soil_bulk = spac_sbulk,
@@ -132,7 +146,8 @@ BulkSPAC(config::SPACConfiguration{FT};
                 airs      = air_layers,
                 meteo     = spac_meteo,
                 plant     = plant,
-                canopy    = spac_canopy
+                canopy    = spac_canopy,
+                cache     = cache
     )
 );
 

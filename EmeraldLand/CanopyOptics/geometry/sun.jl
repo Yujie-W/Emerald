@@ -23,11 +23,8 @@ function sun_geometry_aux! end;
 
 sun_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = sun_geometry_aux!(config, spac.canopy);
 
-sun_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
+sun_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} =
     sun_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux);
-
-    return nothing
-);
 
 sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}, t_aux::CanopyStructureTDAuxil{FT}, sunst::SunGeometryState{FT}, sunsa::SunGeometrySDAuxil{FT}) where {FT} = (
     # if sza > 89 or both LAI and SAI are zero, do nothing
@@ -76,7 +73,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
     sunsa.fs_abs .= abs.(sunsa.fs);
     mul!(sunsa.fs_abs_mean, sunsa.fs_abs', t_aux.p_incl);
     for i in eachindex(Θ_INCL)
-        view(sunsa.fs_cos²_incl,i,:) .= view(sunsa.fs,i,:) * cosd(Θ_INCL[i]) ^ 2;
+        view(sunsa.fs_cos²_incl,i,:) .= view(sunsa.fs,i,:) .* (cosd(Θ_INCL[i]) ^ 2);
     end;
 
     return nothing
@@ -122,10 +119,10 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb * leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdf * leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf * leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdb * leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.s_aux.sdb * SPECTRA.ρ_STEM;
-        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.s_aux.sdf * SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdf .* leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdb .* leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.s_aux.sdb .* SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.s_aux.sdf .* SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -139,13 +136,15 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     #     sun_geo.auxil.ρ_sd_layer = ∫_0^iCIPAI (sdb_leaf * δLAI + sbd_stem * δSAI) / δPAI * ks * exp(-ks * x) * dx = (sdb_leaf * δLAI + sbd_stem * δSAI) / δPAI * (1 - exp(-ks * iCIPAI))
     #     sun_geo.auxil.τ_sd_layer = ∫_0^iCIPAI (sdf_leaf * δLAI + sdf_stem * δSAI) / δPAI * ks * exp(-ks * x) * dx = (sdf_leaf * δLAI + sdf_stem * δSAI) / δPAI * (1 - exp(-ks * iCIPAI))
     # Similarly, we used the same logic for sensor geometry and canopy structure.
+    kt_sd_x = spac.cache.cache_wl_1;
+    kr_sd_x = spac.cache.cache_wl_2;
     for i in 1:n_layer
         δlai = can_str.trait.δlai[i];
         δsai = can_str.trait.δsai[i];
         δpai = δlai + δsai;
-        kt_ss_x = sun_geo.s_aux.ks .* δpai .* can_str.trait.ci;
-        kt_sd_x = (sun_geo.auxil.sdf_leaf[:,i] .* δlai .+ sun_geo.auxil.sdf_stem[:,i] .* δsai) ./ δpai;
-        kr_sd_x = (sun_geo.auxil.sdb_leaf[:,i] .* δlai .+ sun_geo.auxil.sdb_stem[:,i] .* δsai) ./ δpai;
+        kt_ss_x = sun_geo.s_aux.ks * δpai * can_str.trait.ci;
+        kt_sd_x .= (view(sun_geo.auxil.sdf_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdf_stem,:,i) .* δsai) ./ δpai;
+        kr_sd_x .= (view(sun_geo.auxil.sdb_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdb_stem,:,i) .* δsai) ./ δpai;
         sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);
         sun_geo.auxil.τ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kt_sd_x;
         sun_geo.auxil.ρ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kr_sd_x;

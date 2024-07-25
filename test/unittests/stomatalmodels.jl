@@ -84,6 +84,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "∂Θ∂E" begin
         config = NS.SPACConfiguration(Float64);
+        spac = NS.BulkSPAC(config);
         leaf = NS.Leaf(config);
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar_sunlit .= 100.0;
@@ -92,7 +93,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.state.g_H₂O_s_sunlit .= 0.2;
         SPAC.substep_aux!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
-        PH.leaf_pressure_profile!(config, leaf, -1.0);
+        PH.leaf_pressure_profile!(config, leaf, spac.cache, -1.0);
 
         for sm in [NS.AndereggSM{Float64}(), NS.EllerSM{Float64}(), NS.SperrySM{Float64}(), NS.WangSM{Float64}(), NS.Wang2SM{Float64}()]
             @test SM.∂Θ∂E(sm, leaf, air) > 0;
@@ -102,6 +103,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Nighttime model" begin
         config = NS.SPACConfiguration(Float64);
+        spac = NS.BulkSPAC(config);
         leaf = NS.Leaf(config);
         air = NS.AirLayer{Float64}();
         leaf.flux.state.g_H₂O_s_shaded = 0.02;
@@ -110,7 +112,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_shaded = 0;
         SPAC.substep_aux!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
-        PH.leaf_pressure_profile!(config, leaf, 0.0);
+        PH.leaf_pressure_profile!(config, leaf, spac.cache, 0.0);
 
         @test SM.∂R∂E(leaf, air, 1.0) > 0;
         @test SM.∂Θₙ∂E(leaf, air) > 0;
@@ -118,6 +120,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "∂g∂t & ∂gₙ∂t" begin
         config = NS.SPACConfiguration(Float64);
+        spac = NS.BulkSPAC(config);
         leaf = NS.Leaf(config);
         air = NS.AirLayer{Float64}();
         leaf.flux.state.g_H₂O_s_shaded = 0.001;
@@ -126,7 +129,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_shaded = 100;
         SPAC.substep_aux!(leaf);
         PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
-        PH.leaf_pressure_profile!(config, leaf, 0.0);
+        PH.leaf_pressure_profile!(config, leaf, spac.cache, 0.0);
 
         for sm in [NS.AndereggSM{Float64}(), NS.EllerSM{Float64}(), NS.SperrySM{Float64}(), NS.WangSM{Float64}(), NS.Wang2SM{Float64}()]
             @test SM.∂g∂t(sm, leaf, air) > 0;

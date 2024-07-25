@@ -89,6 +89,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Root flow and pressure profiles" begin
         config = NS.SPACConfiguration(Float64);
+        spac = NS.BulkSPAC(config);
         root = NS.Root(config);
         soil = NS.SoilLayer{Float64}();
         junc = NS.JunctionCapacitor{Float64}();
@@ -98,7 +99,7 @@ import Emerald.EmeraldLand.SPAC
 
         p_target = root.xylem.auxil.pressure[end];
         junc.s_aux.pressure = p_target;
-        PH.root_flow_profile!(config, root, soil, junc);
+        PH.root_flow_profile!(config, root, soil, junc, spac.cache);
         f_target = PH.flow_out(root);
         PH.root_pressure_profile!(soil, root, junc);
 
@@ -121,10 +122,12 @@ import Emerald.EmeraldLand.SPAC
         config1 = NS.SPACConfiguration(Float64);
         config2 = NS.SPACConfiguration(Float64);
         config2.STEADY_STATE_FLOW = false;
+        spac1 = NS.BulkSPAC(config1);
+        spac2 = NS.BulkSPAC(config2);
         leaf1 = NS.Leaf(config1);
         leaf2 = NS.Leaf(config2);
-        PH.leaf_pressure_profile!(config1, leaf1, -0.1);
-        PH.leaf_pressure_profile!(config2, leaf2, -0.1);
+        PH.leaf_pressure_profile!(config1, leaf1, spac1.cache, -0.1);
+        PH.leaf_pressure_profile!(config2, leaf2, spac2.cache, -0.1);
 
         @test all(leaf1.xylem.auxil.pressure .<= -0.1);
         @test all(leaf2.xylem.auxil.pressure .<= -0.1);

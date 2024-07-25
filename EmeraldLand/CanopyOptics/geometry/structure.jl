@@ -92,10 +92,10 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
-        can_str.auxil.ddb_leaf[:,irt] .= can_str.t_aux.ddb * leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddf * leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddf_leaf[:,irt] .= can_str.t_aux.ddf * leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddb * leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddb_stem[:,irt] .= can_str.t_aux.ddb * SPECTRA.ρ_STEM;
-        can_str.auxil.ddf_stem[:,irt] .= can_str.t_aux.ddf * SPECTRA.ρ_STEM;
+        can_str.auxil.ddb_leaf[:,irt] .= can_str.t_aux.ddb .* leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddf .* leaf.bio.auxil.τ_leaf;
+        can_str.auxil.ddf_leaf[:,irt] .= can_str.t_aux.ddf .* leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddb .* leaf.bio.auxil.τ_leaf;
+        can_str.auxil.ddb_stem[:,irt] .= can_str.t_aux.ddb .* SPECTRA.ρ_STEM;
+        can_str.auxil.ddf_stem[:,irt] .= can_str.t_aux.ddf .* SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -107,13 +107,15 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     #     can_str.auxil.ρ_dd_layer = ∫_0^iCIPAI (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
     #     can_str.auxil.τ_dd_layer = ∫_0^iCIPAI (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
     # Then, the total transmitted radiation need to plus the radiation that has not passed though any leaf, namely τ_dd_solar.
+    k_τ_x = spac.cache.cache_wl_1;
+    k_ρ_x = spac.cache.cache_wl_2;
     for i in 1:n_layer
         δlai = can_str.trait.δlai[i];
         δsai = can_str.trait.δsai[i];
         δpai = δlai + δsai;
-        kt_dd_x = can_str.t_aux.kd .* δpai .* can_str.trait.ci;
-        k_τ_x = (can_str.auxil.ddf_leaf[:,i] .* δlai .+ can_str.auxil.ddf_stem[:,i] .* δsai) ./ δpai;
-        k_ρ_x = (can_str.auxil.ddb_leaf[:,i] .* δlai .+ can_str.auxil.ddb_stem[:,i] .* δsai) ./ δpai;
+        kt_dd_x = can_str.t_aux.kd * δpai * can_str.trait.ci;
+        k_τ_x .= (view(can_str.auxil.ddf_leaf,:,i) .* δlai .+ view(can_str.auxil.ddf_stem,:,i) .* δsai) ./ δpai;
+        k_ρ_x .= (view(can_str.auxil.ddb_leaf,:,i) .* δlai .+ view(can_str.auxil.ddb_stem,:,i) .* δsai) ./ δpai;
         τ_dd_solar = exp(-kt_dd_x);
         can_str.auxil.τ_dd_layer[:,i] .= (1 - τ_dd_solar) .* k_τ_x .+ τ_dd_solar;
         can_str.auxil.ρ_dd_layer[:,i] .= (1 - τ_dd_solar) .* k_ρ_x;

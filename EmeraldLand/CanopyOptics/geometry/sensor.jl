@@ -23,11 +23,8 @@ function sensor_geometry_aux! end;
 
 sensor_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = sensor_geometry_aux!(config, spac.canopy);
 
-sensor_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} = (
+sensor_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} =
     sensor_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux, can.sensor_geometry.state, can.sensor_geometry.s_aux);
-
-    return nothing
-);
 
 sensor_geometry_aux!(
             config::SPACConfiguration{FT},
@@ -111,7 +108,7 @@ sensor_geometry_aux!(
     sensa.fo ./= cosd(senst.vza);
     sensa.fo_abs .= abs.(sensa.fo);
     for i in eachindex(Θ_INCL)
-        view(sensa.fo_cos²_incl,i,:) .= view(sensa.fo,i,:) * cosd(Θ_INCL[i]) ^ 2; # TODO: is this related to the bf calculation in SCOPE?
+        view(sensa.fo_cos²_incl,i,:) .= view(sensa.fo,i,:) .* cosd(Θ_INCL[i]) ^ 2; # TODO: is this related to the bf calculation in SCOPE?
     end;
     sensa.fo_fs .= sunsa.fs .* sensa.fo;
     sensa.fo_fs_abs .= abs.(sensa.fo_fs);
@@ -181,12 +178,12 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob * leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dof * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof * leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dob * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob * leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.sof * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.s_aux.dob * SPECTRA.ρ_STEM;
-        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.s_aux.dof * SPECTRA.ρ_STEM;
-        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.s_aux.sob * SPECTRA.ρ_STEM;
+        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dof .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dob .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.sof .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.s_aux.dob .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.s_aux.dof .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.s_aux.sob .* SPECTRA.ρ_STEM;
     end;
 
     return nothing

@@ -55,20 +55,22 @@ end;
 # General
 #     2023-Sep-27: add function to compute xylem critical pressure at steady state (no water exchange through the capacitor along the xylem)
 #     2024-Feb-28: add LAI <= 0 control
+#     2024_Jul-24: use spac cache
 #
 #######################################################################################################################################################################################################
 """
 
-    critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}, t::FT, ini::FT = FT(0.5)) where {FT}
+    critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}, cache::SPACCache{FT}, t::FT, ini::FT = FT(0.5)) where {FT}
 
 Return the critical flow rate that triggers a given amount of loss of hydraulic conductance, given
 - `config` `SPACConfiguration` type struct
 - `xylem` `XylemHydraulics` type struct
+- `cache` `SPACCache` type struct
 - `t` Xylem water temperature `[K]`
 - `ini` Initial guess
 
 """
-function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}, t::FT, ini::FT = FT(0.5)) where {FT}
+function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}, cache::SPACCache{FT}, t::FT, ini::FT = FT(0.5)) where {FT}
     if xylem.trait.area <= 0
         return FT(0)
     end;
@@ -89,7 +91,10 @@ function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}
     # set up method to calculate critical flow
     fh = (xylem.auxil.pressure[1] - p_crt) * xylem.trait.k_max * xylem.trait.area / f_vis;
     fl = FT(0);
-    ms = NewtonBisectionMethod{FT}(x_min = fl, x_max = fh, x_ini = min((fh+fl)/2, ini));
+    ms = cache.solver_nb;
+    ms.x_min = fl;
+    ms.x_max = fh;
+    ms.x_ini = min((fh + fl) / 2, ini);
     st = SolutionTolerance{FT}(eps(FT)*100, 50);
 
     # define the target function

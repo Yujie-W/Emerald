@@ -10,20 +10,22 @@ flow_out(root::Root{FT}) where {FT} = flow_out(root.xylem);
 # Changes to this function
 # General
 #     2023-Sep-23: add function root_flow_profile!
+#     2024-Jul-24: use spac cache
 #
 #######################################################################################################################################################################################################
 """
 
-    root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, p_target::FT) where {FT}
+    root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, p_target::FT, cache::SPACCache{FT}) where {FT}
 
 Use solver to determine the root flow rate, given
 - `config` `SPACConfiguration` type struct
 - `root` `Root` type struct
 - `soil` `SoilLayer` type struct
 - `p_target` Target pressure at the end; of root xylem
+- `cache` `SPACCache` type struct
 
 """
-function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, junction::JunctionCapacitor{FT}) where {FT}
+function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, junction::JunctionCapacitor{FT}, cache::SPACCache{FT}) where {FT}
     # if the root is not connected to the soil, set the flow to be the sum from the buffer system
     # else, use a solver to find the root flow rate
     if soil.s_aux.ψ <= xylem_pressure(root.xylem.trait.vc, config.KR_THRESHOLD)
@@ -31,7 +33,7 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
 
         # if at non-steady state, set the flow rate to be the sum of the buffer system so that flow from the soil is zero
         if root.xylem.auxil isa XylemHydraulicsAuxilNSS
-            sol =  sum(root.xylem.auxil.flow_buffer);
+            sol = sum(root.xylem.auxil.flow_buffer);
         else
             sol = FT(0);
         end;
@@ -53,8 +55,11 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
         );
 
         # 3. define method and solve for the root flow rate
-        ms = NewtonBisectionMethod{FT}(x_min=f_min, x_max=f_max, x_ini=(f_min+f_max)/2);
-        stol = SolutionTolerance{FT}(eps(FT)*100, 50);
+        ms = cache.solver_nb;
+        ms.x_min = f_min;
+        ms.x_max = f_max;
+        ms.x_ini = (f_min + f_max) / 2;
+        stol = cache.stol_nb;
 
         # 4. solve for the target flow rate
         sol = find_zero(root_pressure_diff, ms, stol);
@@ -91,7 +96,7 @@ function root_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     soils = spac.soils;
 
     for i in eachindex(roots)
-        root_flow_profile!(config, roots[i], soils[rindex[i]], junction);
+        root_flow_profile!(config, roots[i], soils[rindex[i]], junction, spac.cache);
         junction.auxil.∂w∂t += flow_out(roots[i]);
     end;
 

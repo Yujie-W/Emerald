@@ -62,13 +62,15 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     #
     #
     # 0. compute chloroplast SIF emissions for different layers
+    a_leaf = spac.cache.cache_sife_1;
+    a_stem = spac.cache.cache_sife_2;
+    f_leaf = spac.cache.cache_sife_3;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.trait.δlai[irt];
-        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.trait.δsai[irt];
-        f_leaf = a_leaf ./ (a_leaf .+ a_stem);
-
+        a_leaf .= view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE) .* can_str.trait.δlai[irt];
+        a_stem .= (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.trait.δsai[irt];
+        f_leaf .= a_leaf ./ (a_leaf .+ a_stem);
         # integrate the energy absorbed by chl (and car) in each wave length bins
         f_sife = view(leaf.bio.auxil.f_sife, SPECTRA.IΛ_SIFE);
         sun_geo.auxil._e_dif_sife .= view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_SIFE,irt) .* f_leaf .* SPECTRA.ΔΛ_SIFE .* f_sife;
@@ -111,14 +113,15 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         return mean(sun_geo.auxil._vec_azi)
     );
-    _COS²_Θ_INCL_AZI = (cosd.(config.Θ_INCL) .^ 2) * ones(FT, 1, DIM_AZI);
+    _COS²_Θ_INCL_AZI = spac.cache.cache_incl_azi;
+    _COS²_Θ_INCL_AZI .= (cosd.(config.Θ_INCL) .^ 2);
 
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        a_leaf = view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE).* can_str.trait.δlai[irt];
-        a_stem = (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.trait.δsai[irt];
-        f_leaf = a_leaf ./ (a_leaf .+ a_stem);
+        a_leaf .= view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE) .* can_str.trait.δlai[irt];
+        a_stem .= (1 .- view(SPECTRA.ρ_STEM,SPECTRA.IΛ_SIFE)) .* can_str.trait.δsai[irt];
+        f_leaf .= a_leaf ./ (a_leaf .+ a_stem);
 
         # compute the energy used for SIF excitation
         sun_geo.auxil._e_dirꜜ_sife .= view(sun_geo.auxil.e_dirꜜ,SPECTRA.IΛ_SIFE,irt) .* f_leaf .* SPECTRA.ΔΛ_SIFE;
@@ -238,7 +241,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
                                    view(sen_geo.auxil.dof_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜛ,:,1:n_layer);
 
     # 4. compute SIF from the observer direction (CI is accounted for in the p_sensor and p_sun_sensor already, so do NOT use CI here)
-    vec_layer = ones(FT, n_layer);
+    vec_layer = spac.cache.cache_layer_1;
     vec_layer .= sen_geo.s_aux.p_sun_sensor .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_sunlit, sen_geo.auxil.sif_sunlit, vec_layer);
 

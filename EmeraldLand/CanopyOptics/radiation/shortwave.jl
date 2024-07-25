@@ -116,7 +116,7 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     end;
     sun_geo.auxil.e_difꜛ[:,end] .= view(sun_geo.auxil.e_dirꜜ,:,n_layer+1) .* view(sun_geo.auxil.ρ_sd,:,n_layer+1) .+
                                    view(sun_geo.auxil.e_difꜜ,:,n_layer+1) .* view(can_str.auxil.ρ_dd,:,n_layer+1);
-    sun_geo.auxil.e_difꜛ_layer[:,end] .= sun_geo.auxil.e_difꜛ[:,end];
+    sun_geo.auxil.e_difꜛ_layer[:,end] .= view(sun_geo.auxil.e_difꜛ,:,size(sun_geo.auxil.e_difꜛ,2));
     sun_geo.auxil.albedo .= view(sun_geo.auxil.e_difꜛ,:,1) ./ (rad_sw.e_dir .+ rad_sw.e_dif);
 
     # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
@@ -141,18 +141,27 @@ function shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     # 3. compute net absorption for leaves and soil
     # 4. compute leaf level PAR, APAR, and PPAR per ground area
     normi = 1 / mean(sun_geo.s_aux.fs_abs_mean);
+    a_leaf = spac.cache.cache_wl_1;
+    a_stem = spac.cache.cache_wl_2;
+    f_leaf = spac.cache.cache_wl_3;
+    f_stem = spac.cache.cache_wl_4;
+    temp_p = spac.cache.cache_wl_5;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        a_leaf = leaf.bio.auxil.α_leaf .* can_str.trait.δlai[irt];
-        a_stem = (1 .- SPECTRA.ρ_STEM) .* can_str.trait.δsai[irt];
-        f_leaf = a_leaf ./ (a_leaf .+ a_stem);
-        f_stem = 1 .- f_leaf;
+        a_leaf .= leaf.bio.auxil.α_leaf .* can_str.trait.δlai[irt];
+        a_stem .= (1 .- SPECTRA.ρ_STEM) .* can_str.trait.δsai[irt];
+        f_leaf .= a_leaf ./ (a_leaf .+ a_stem);
+        f_stem .= 1 .- f_leaf;
 
-        Σ_shaded_leaf = (view(sun_geo.auxil.e_net_dif,:,irt) .* f_leaf)' * SPECTRA.ΔΛ / 1000;
-        Σ_sunlit_leaf = (view(sun_geo.auxil.e_net_dir,:,irt) .* f_leaf)' * SPECTRA.ΔΛ / 1000;
-        Σ_shaded_stem = (view(sun_geo.auxil.e_net_dif,:,irt) .* f_stem)' * SPECTRA.ΔΛ / 1000;
-        Σ_sunlit_stem = (view(sun_geo.auxil.e_net_dir,:,irt) .* f_stem)' * SPECTRA.ΔΛ / 1000;
+        temp_p .= view(sun_geo.auxil.e_net_dif,:,irt) .* f_leaf;
+        Σ_shaded_leaf = temp_p' * SPECTRA.ΔΛ / 1000;
+        temp_p .= view(sun_geo.auxil.e_net_dir,:,irt) .* f_leaf;
+        Σ_sunlit_leaf = temp_p' * SPECTRA.ΔΛ / 1000;
+        temp_p .= view(sun_geo.auxil.e_net_dif,:,irt) .* f_stem;
+        Σ_shaded_stem = temp_p' * SPECTRA.ΔΛ / 1000;
+        temp_p .= view(sun_geo.auxil.e_net_dir,:,irt) .* f_stem;
+        Σ_sunlit_stem = temp_p' * SPECTRA.ΔΛ / 1000;
 
         # partition the net radiation to leaves and stem
         sun_geo.auxil.r_net_sw_leaf[irt] = Σ_shaded_leaf + Σ_sunlit_leaf;

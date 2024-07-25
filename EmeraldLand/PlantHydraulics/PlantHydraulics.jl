@@ -10,7 +10,7 @@ using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapa
 using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState, XylemHydraulicsTrait
 using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
 using ..Namespace: SoilLayer
-using ..Namespace: BulkSPAC, SPACConfiguration
+using ..Namespace: BulkSPAC, SPACCache, SPACConfiguration
 
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..SoilHydraulics: relative_soil_k
