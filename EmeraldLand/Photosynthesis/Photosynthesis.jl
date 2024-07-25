@@ -1,6 +1,7 @@
 module Photosynthesis
 
 using DataFrames: DataFrame
+using Statistics: mean
 
 using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak

@@ -8,6 +8,7 @@
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2023-Mar-11: only compute respiration rate if solar zenith angle >= 89
 #     2023-Mar-11: do nothing if LAI == 0
+#     2024-Jul-25: save average a_g and a_n (to use later)
 #
 #######################################################################################################################################################################################################
 """
@@ -25,12 +26,23 @@ function plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO�
     end;
 
     airs = spac.airs;
+    canopy = spac.canopy;
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;
+    n_layer = length(leaves);
 
     rd_only = spac.canopy.sun_geometry.state.sza > 89;
-    for i in eachindex(leaves)
-        leaf_photosynthesis!(leaves[i], airs[lindex[i]], mode; rd_only = rd_only);
+    for ilf in eachindex(leaves)
+        irt = n_layer + 1 - ilf;
+        leaf = leaves[ilf];
+        air = airs[lindex[ilf]];
+        leaf_photosynthesis!(leaf, air, mode; rd_only = rd_only);
+
+        # update the average photosynthesis rates (a_g and a_net)
+        f_sunlit = canopy.sun_geometry.s_aux.p_sunlit[irt];
+        f_shaded = 1 - f_sunlit;
+        leaf.flux.auxil.a_g = f_sunlit * mean(leaf.flux.auxil.a_g_sunlit) + f_shaded * leaf.flux.auxil.a_g_shaded;
+        leaf.flux.auxil.a_n = f_sunlit * mean(leaf.flux.auxil.a_n_sunlit) + f_shaded * leaf.flux.auxil.a_n_shaded;
     end;
 
     return nothing

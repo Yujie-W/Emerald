@@ -12,7 +12,7 @@ using ..Namespace: BulkSPAC, SPACCache
 
 using ..Photosynthesis: photosynthesis_only!, ∂R∂T
 using ..PhysicalChemistry: latent_heat_vapor, relative_diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure
-using ..PlantHydraulics: flow_in, relative_xylem_k, xylem_end_pressure
+using ..PlantHydraulics: flow_in, flow_out, relative_xylem_k, xylem_end_pressure
 
 
 # include functions related to beta factor

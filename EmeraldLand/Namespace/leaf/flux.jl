@@ -60,7 +60,7 @@ LeafFluxState(config::SPACConfiguration{FT}) where {FT} = LeafFluxState{FT}(g_H�
 # General
 #     2023-Oct-03: add sturct LeafFluxAuxil
 #     2023-Oct-24: add fields ϕ_f1_* and ϕ_f2_*
-#     2024-Jul-24: add field ∂A∂E_sunlit and ∂Θ∂E_sunlit to compute the dgdt using matrix calculation (much faster)
+#     2024-Jul-24: add field ∂A∂E_sunlit and ∂Θ∂E to compute the dgdt using matrix calculation (much faster)
 #
 #######################################################################################################################################################################################################
 """
@@ -89,7 +89,7 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     "Marginal increase in A per increase in transpiration rate"
     ∂A∂E_sunlit::Matrix{FT}
     "Marginal increase in Θ per increase in transpiration rate"
-    ∂Θ∂E_sunlit::Matrix{FT}
+    ∂Θ∂E::FT = 0
 
     # CO₂ pressures
     "Leaf internal CO₂ partial pressure for shaded leaves `[Pa]`"
@@ -102,10 +102,14 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     p_CO₂_s_sunlit::Matrix{FT}
 
     # Photosynthesis
+    "Average gross photosynthetic rate [μmol m⁻² s⁻¹]"
+    a_g::FT = 0
     "Gross photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_g_shaded::FT = 0
     "Gross photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
     a_g_sunlit::Matrix{FT}
+    "Average net photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_n::FT = 0
     "Net photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_n_shaded::FT = 0
     "Net photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
@@ -168,7 +172,6 @@ LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
             g_CO₂_sunlit   = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ∂g∂t_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ∂A∂E_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            ∂Θ∂E_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             p_CO₂_i_sunlit = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             p_CO₂_s_sunlit = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             a_g_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),

@@ -25,8 +25,7 @@ GPP(spac::BulkSPAC{FT}) where {FT} = (
     gpp::FT = 0;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        gpp += (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.a_g_sunlit) +
-               (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaves[ilf].flux.auxil.a_g_shaded) * canopy.structure.trait.δlai[irt];
+        gpp += leaves[ilf].flux.auxil.a_g * canopy.structure.trait.δlai[irt];
     end;
 
     return gpp
@@ -59,8 +58,7 @@ GPP_LAYER(spac::BulkSPAC{FT}) where {FT} = (
     gpps::Vector{FT} = zeros(FT, n_layer);
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        gpps[irt] = (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.a_g_sunlit) +
-                    (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaves[ilf].flux.auxil.a_g_shaded) * canopy.structure.trait.δlai[irt];
+        gpps[irt] = leaves[ilf].flux.auxil.a_g * canopy.structure.trait.δlai[irt];
     end;
 
     return gpps

@@ -97,9 +97,9 @@ function ∂g∂t! end;
 
 ∂g∂t!(cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     ∂A∂E!(cache, leaf, air);
-    ∂Θ∂E!(cache, sm, leaf, air; δe = δe);
+    ∂Θ∂E!(sm, leaf);
 
-    leaf.flux.auxil.∂g∂t_sunlit .= sm.K .* (leaf.flux.auxil.∂A∂E_sunlit .- leaf.flux.auxil.∂Θ∂E_sunlit);
+    leaf.flux.auxil.∂g∂t_sunlit .= sm.K .* (leaf.flux.auxil.∂A∂E_sunlit .- leaf.flux.auxil.∂Θ∂E);
 
     # set the max and min values
     for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
