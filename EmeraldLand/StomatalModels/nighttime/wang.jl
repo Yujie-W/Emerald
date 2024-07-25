@@ -33,7 +33,7 @@ function ∂Θₙ∂E end;
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc = 1 / (FT(1.6) / gs + 1 / leaf.flux.auxil.g_CO₂_b);
     e  = gh * d / air.state.p_air;
-    a  = photosynthesis_only!(leaf.photosystem, air, gc, leaf.flux.auxil.ppar_mem, leaf.energy.s_aux.t);
+    a  = photosynthesis_only!(leaf.photosystem, air, gc, leaf.flux.auxil.ppar_mem);
 
     return a / max(eps(FT), (leaf.xylem.auxil.e_crit - e)) * F_FITNESS
 );

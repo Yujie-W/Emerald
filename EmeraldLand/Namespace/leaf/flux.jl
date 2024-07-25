@@ -86,7 +86,9 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     ∂g∂t_shaded::FT = 0
     "Marginal increase of conductance per timefor sunlit leaves `[mol m⁻² s⁻²]`"
     ∂g∂t_sunlit::Matrix{FT}
-    "Marginal increase in A per increase in transpiration rate"
+    "Marginal increase in A per increase in transpiration rate for shaded leaves"
+    ∂A∂E_shaded::FT = 0
+    "Marginal increase in A per increase in transpiration rate for sunlit leaves"
     ∂A∂E_sunlit::Matrix{FT}
     "Marginal increase in Θ per increase in transpiration rate"
     ∂Θ∂E::FT = 0

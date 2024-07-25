@@ -58,7 +58,6 @@ stomatal_conductance_profile!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLa
 
 stomatal_conductance_profile!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
     if leaf.flux.auxil.ppar_shaded > 1
-        leaf.flux.auxil.∂g∂t_shaded = ∂g∂t(leaf, air);
         ∂g∂t!(cache, leaf, air);
     else
         dgndt = ∂gₙ∂t(leaf, air, eff_ϵ);

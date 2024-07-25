@@ -86,21 +86,24 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    photosystem_temperature_dependence!(psm::C3Cyto{FT}, air::AirLayer{FT}, t::FT) where {FT}
-    photosystem_temperature_dependence!(psm::C3VJP{FT}, air::AirLayer{FT}, t::FT) where {FT}
-    photosystem_temperature_dependence!(psm::C4VJP{FT}, air::AirLayer{FT}, t::FT) where {FT}
+    photosystem_temperature_dependence!(psm::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}}, air::AirLayer{FT}, t::FT) where {FT}
 
 Update the temperature dependencies of C3 photosynthesis model, given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis model
+- `psm` `LeafPhotosystem` or `CanopyLayerPhotosystem` structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `t` Target temperature in `K`
 
 """
 function photosystem_temperature_dependence! end;
 
-photosystem_temperature_dependence!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, t::FT) where {FT} = photosystem_temperature_dependence!(psm.trait, psm.auxil, air, t);
+photosystem_temperature_dependence!(psm::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}}, air::AirLayer{FT}, t::FT) where {FT} =
+    photosystem_temperature_dependence!(psm.trait, psm.auxil, air, t);
 
-photosystem_temperature_dependence!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(
+            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            air::AirLayer{FT},
+            t::FT) where {FT} = (
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
     psa.k_q    = temperature_corrected_value(pst.TD_KQ, t);
@@ -117,7 +120,11 @@ photosystem_temperature_dependence!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrai
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(
+            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
+            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            air::AirLayer{FT},
+            t::FT) where {FT} = (
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
     psa.γ_star = temperature_corrected_value(pst.TD_Γ , t);
@@ -133,7 +140,7 @@ photosystem_temperature_dependence!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, 
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_pep_clm = temperature_corrected_value(pst.TD_KPEP, t);
     psa.r_d       = pst.r_d25    * temperature_correction(pst.TD_R, t);
     psa.v_cmax    = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
@@ -145,7 +152,7 @@ photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::LeafPhotosystemAux
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::C4VJPTrait{FT}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(pst::C4VJPTrait{FT}, psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_pep  = temperature_corrected_value(pst.TD_KPEP, t);
     psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
     psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);

@@ -25,6 +25,70 @@ Update the electron transport rates, given
 """
 function photosystem_electron_transport! end;
 
+# For CanopyLayer
+photosystem_electron_transport!(psm::CanopyLayerPhotosystem{FT}, ppar::Vector{FT}, p_i::Union{FT, Vector{FT}}; β::FT = FT(1)) where {FT} =
+    photosystem_electron_transport!(psm.trait, psm.state, psm.auxil, ppar, p_i; β = β);
+
+photosystem_electron_transport!(
+            pst::Union{C3CytoTrait{FT}, C3JBTrait{FT}},
+            pss::C3State{FT}, psa::CanopyLayerPhotosystemAuxil{FT},
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = (
+    psa.e2c   .= (p_i .- psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star);
+    psa.j_psi .= colimited_rate.(β * psa.v_qmax, ppar .* (1 - psa.f_psii) .* psa.ϕ_psi_max, (pst.COLIMIT_J,));
+    psa.η     .= 1 .- psa.η_l ./ psa.η_c .+ (3 .* p_i .+ 7 .* psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star) ./ psa.η_c;
+    psa.j_pot .= psa.j_psi ./ psa.η;
+    psa.j     .= psa.j_pot;
+
+    return nothing
+);
+
+photosystem_electron_transport!(
+            pst::C3CytoMinEtaTrait{FT},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = (
+    psa.e2c   .= (p_i .- psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star);
+    psa.j_psi .= colimited_rate.(β * psa.v_qmax, ppar .* (1 - psa.f_psii) .* psa.ϕ_psi_max, (pst.COLIMIT_J,));
+    psa.η     .= min.(pst.η_min, 1 .- psa.η_l ./ psa.η_c .+ (3 .* p_i .+ .7 .* psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star) ./ psa.η_c);
+    psa.j_pot .= psa.j_psi ./ psa.η;
+    psa.j     .= psa.j_pot;
+
+    return nothing
+);
+
+photosystem_electron_transport!(
+            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = (
+    psa.e2c   .= (p_i .- psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star);
+    psa.j_pot .= psa.f_psii .* psa.ϕ_psii_max .* ppar;
+    psa.j     .= colimited_rate.(psa.j_pot, β * psa.j_max, (pst.COLIMIT_J,));
+
+    return nothing
+);
+
+photosystem_electron_transport!(
+            pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}},
+            pss::C4State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = (
+    psa.e2c   .= 1 / 6;
+    psa.j_pot .= psa.f_psii .* psa.ϕ_psii_max .* ppar;
+    psa.j     .= psa.j_pot;
+
+    return nothing
+);
+
+# For Leaf
 photosystem_electron_transport!(psm::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = photosystem_electron_transport!(psm.trait, psm.state, psm.auxil, ppar, p_i; β = β);
 
 photosystem_electron_transport!(pst::Union{C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (

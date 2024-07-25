@@ -99,9 +99,11 @@ function ∂g∂t! end;
     ∂A∂E!(cache, leaf, air);
     ∂Θ∂E!(sm, leaf);
 
+    leaf.flux.auxil.∂g∂t_shaded = sm.K .* (leaf.flux.auxil.∂A∂E_shaded .- leaf.flux.auxil.∂Θ∂E);
     leaf.flux.auxil.∂g∂t_sunlit .= sm.K .* (leaf.flux.auxil.∂A∂E_sunlit .- leaf.flux.auxil.∂Θ∂E);
 
     # set the max and min values
+    leaf.flux.auxil.∂g∂t_sunlit = max.(-0.001, min.(0.001, leaf.flux.auxil.∂g∂t_sunlit));
     for i in eachindex(leaf.flux.auxil.∂g∂t_sunlit)
         leaf.flux.auxil.∂g∂t_sunlit[i] = max(-0.001, min(0.001, leaf.flux.auxil.∂g∂t_sunlit[i]));
     end;

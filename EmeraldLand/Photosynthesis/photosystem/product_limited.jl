@@ -30,6 +30,84 @@ Update the product limited photosynthetic rate (p_i for PCO₂Mode, g_lc for GCO
 """
 function product_limited_rate! end;
 
+# For CanopyLayer
+# PCO₂Mode
+product_limited_rate!(psm::CanopyLayerPhotosystem{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, p_i; β = β);
+
+product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    psa.a_p .= β .* psa.v_cmax ./ 2;
+
+    return nothing
+);
+
+product_limited_rate!(pst::Union{C3CytoMinEtaTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    psa.a_p .= FT(Inf);
+
+    return nothing
+);
+
+product_limited_rate!(pst::C4CLMTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    psa.a_p .= β .* psa.k_pep_clm .* pst.v_cmax25 .* p_i;
+
+    return nothing
+);
+
+product_limited_rate!(pst::C4VJPTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    psa.a_p .= β .* psa.v_pmax .* p_i ./ (p_i .+ psa.k_pep);
+
+    return nothing
+);
+
+# GCO₂Mode
+product_limited_rate!(psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, air, g_lc; β = β);
+
+product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    psa.a_p .= β .* psa.v_cmax ./ 2;
+
+    return nothing
+);
+
+product_limited_rate!(pst::Union{C3CytoMinEtaTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    psa.a_p .= FT(Inf);
+
+    return nothing
+);
+
+product_limited_rate!(pst::C4CLMTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    a = air.state.p_air;
+    g = FT(1e6) * g_lc;
+    k = β * psa.k_pep_clm * pst.v_cmax25;
+    p = air.s_aux.ps[2];
+    r = β * psa.r_d;
+
+    p_i = (g * p + a * r) / (a * k + g);
+    psa.a_p .= k .* p_i;
+
+    return nothing
+);
+
+product_limited_rate!(pst::C4VJPTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
+    a = β * psa.v_pmax;
+    d = psa.k_pep;
+    f = air.state.p_air / g_lc * FT(1e-6);
+    p = air.s_aux.ps[2];
+    r = β * psa.r_d;
+
+    qa = f;
+    qb = f * r - p - d - a * f;
+    qc = a * p - r * (p + d);
+    an = lower_quadratic.(qa, qb, qc);
+
+    if g_lc[0] == 0 && g_lc[end] == 0
+        psa.a_p .= r;
+    else
+        psa.a_p .= an .+ r;
+    end;
+
+    return nothing
+);
+
+# For Leaf
 # PCO₂Mode
 product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, p_i; β = β);
 

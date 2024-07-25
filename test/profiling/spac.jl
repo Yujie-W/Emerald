@@ -7,9 +7,14 @@ FT = Float64;
 
 config = EmeraldLand.Namespace.SPACConfiguration(FT);
 
-spac = EmeraldLand.Namespace.BulkSPAC(config);
-EmeraldLand.SPAC.initialize_spac!(config, spac);
-EmeraldLand.SPAC.spac!(config, spac, FT(1));
+
+spac_c = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = false);
+spac_l = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = true);
+EmeraldLand.SPAC.initialize_spac!(config, spac_c);
+EmeraldLand.SPAC.initialize_spac!(config, spac_l);
+EmeraldLand.SPAC.spac!(config, spac_c, FT(3600));
+EmeraldLand.SPAC.spac!(config, spac_l, FT(3600));
+@info "GPP" EmeraldLand.SPAC.GPP(spac_c) EmeraldLand.SPAC.GPP(spac_l)
 
 
 spac = EmeraldLand.Namespace.BulkSPAC(config);

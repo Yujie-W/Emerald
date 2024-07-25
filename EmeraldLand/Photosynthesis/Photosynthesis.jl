@@ -16,7 +16,7 @@ using ..Namespace: GCO₂Mode, PCO₂Mode
 using ..Namespace: KNFluoscenceModel, QLFluoscenceModel
 using ..Namespace: C3CLMTrait, C3CytoMinEtaTrait, C3CytoTrait, C3FvCBTrait, C3JBTrait, C3VJPTrait, C3State
 using ..Namespace: C4CLMTrait, C4VJPTrait, C4State
-using ..Namespace: CanopyLayerPhotosystem, LeafPhotosystem, LeafPhotosystemAuxil
+using ..Namespace: CanopyLayerPhotosystem, CanopyLayerPhotosystemAuxil, LeafPhotosystem, LeafPhotosystemAuxil
 using ..Namespace: CanopyLayer, Leaf
 using ..Namespace: AirLayer
 using ..Namespace: BulkSPAC

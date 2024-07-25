@@ -54,10 +54,20 @@ Colimit the photosynthesis by rubisco-, light-, and product-limited photosynthet
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd (default is 1)
 
 """
-function colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT}
+function colimit_photosynthesis! end;
+
+colimit_photosynthesis!(psm::CanopyLayerPhotosystem{FT}; β::FT = FT(1)) where {FT} = (
+    psm.auxil.a_i .= colimited_rate.(psm.auxil.a_c, psm.auxil.a_j, (psm.trait.COLIMIT_CJ,));
+    psm.auxil.a_g .= colimited_rate.(psm.auxil.a_p, psm.auxil.a_i, (psm.trait.COLIMIT_IP,));
+    psm.auxil.a_n .= psm.auxil.a_g .- β * psm.auxil.r_d;
+
+    return nothing
+);
+
+colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT} = (
     a_i = colimited_rate(psm.auxil.a_c, psm.auxil.a_j, psm.trait.COLIMIT_CJ);
     psm.auxil.a_g = colimited_rate(psm.auxil.a_p, a_i, psm.trait.COLIMIT_IP);
     psm.auxil.a_n = psm.auxil.a_g - β * psm.auxil.r_d;
 
     return nothing
-end;
+);

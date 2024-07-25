@@ -21,19 +21,6 @@
 #     2023-Oct-24: save ϕ_f1 and ϕ_f2
 #
 #######################################################################################################################################################################################################
-"""
-
-    leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT}
-
-Updates leaf photosynthetic rates for the leaf based on leaf stomtal model, given
-- `leaf` `Leaf` type structure
-- `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
-- `mode` `GCO₂Mode` or `PCO₂Mode` to determine whether to use CO₂ partial pressure or concentration to compute photosynthetic rates
-- `rd_only` Whether to compute respiration rate only
-
-"""
-function leaf_photosynthesis! end;
-
 # This method takes out stomtal model out and use it to determine whether to apply beta to Vcmax, Jmax, and Rd
 leaf_photosynthesis!(leaf::Leaf{FT}, air::AirLayer{FT}, mode::Union{GCO₂Mode, PCO₂Mode}; rd_only::Bool = false) where {FT} =
     leaf_photosynthesis!(leaf, air, mode, leaf.flux.trait.stomatal_model; rd_only = rd_only);

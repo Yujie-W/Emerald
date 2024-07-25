@@ -719,6 +719,8 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
     a_c::Vector{FT}
     "Gross photosynthetic rate `[μmol m⁻² s⁻¹]`"
     a_g::Vector{FT}
+    "Intermediate photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_i::Vector{FT}
     "Light limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
     a_j::Vector{FT}
     "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
@@ -768,7 +770,7 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
 
     # C3 Cytochrome model variables
     "ratio between J_P700 and J_P680"
-    η::FT = 0
+    η::Vector{FT}
     "Coupling efficiency of cyclic electron flow `[mol ATP mol⁻¹ e⁻]`"
     η_c::FT = 0
     "Coupling efficiency of linear electron flow `[mol ATP mol⁻¹ e⁻]`"
@@ -808,7 +810,7 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
 
     # fluorescence rate coefficients
     "Rate constant for thermal dissipation"
-    k_d::Vector{FT}
+    k_d::FT = 0
     "Reversible NPQ rate constant (initially zero)"
     k_n::Vector{FT}
     "Rate constant for photochemistry"
@@ -822,6 +824,7 @@ end;
 CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLayerPhotosystemAuxil{FT}(
     a_c   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     a_g   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    a_i   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     a_j   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     a_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     a_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
@@ -829,6 +832,7 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLa
     j     = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     j_pot = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     j_psi = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
+    η     = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     ϕ_d   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     ϕ_f   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     ϕ_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
@@ -842,7 +846,6 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLa
     npq   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     q_e   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     q_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    k_d   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     k_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
     k_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1)
 );

@@ -53,7 +53,8 @@ BulkSPAC(config::SPACConfiguration{FT};
          latitude::Number = 33.173,
          longitude::Number = 115.4494,
          soil_bounds::Vector{<:Number} = [0,-0.1,-0.25,-0.5,-1,-3],
-         plant_zs::Vector{<:Number} = [-1,6,12]
+         plant_zs::Vector{<:Number} = [-1,6,12],
+         use_leaf::Bool = false,
 ) where {FT} = (
     # set up the general information
     spac_info = SPACInfo{FT}(
@@ -114,7 +115,7 @@ BulkSPAC(config::SPACConfiguration{FT};
     spac_canopy = MultiLayerCanopy(config, n_layer);
 
     # set up the leaves
-    leaves = CanopyLayer{FT}[CanopyLayer(config) for i in 1:n_layer];
+    leaves = use_leaf ? Leaf{FT}[Leaf(config) for i in 1:n_layer] : CanopyLayer{FT}[CanopyLayer(config) for i in 1:n_layer];
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaves[ilf].xylem.trait.area = spac_sbulk.trait.area * spac_canopy.structure.trait.δlai[irt];
