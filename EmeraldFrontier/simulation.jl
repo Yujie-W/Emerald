@@ -111,7 +111,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
 
     # run the t_aux! and dull_aux! functions if any of the LAI, CHL, or CI changes and initialize_state is false
     if (trigger_chl || trigger_lai || trigger_cli) && !initialize_state
-        t_aux!(config, spac.canopy);
+        t_aux!(config, spac.canopy, spac.cache);
         dull_aux!(config, spac);
     end;
 

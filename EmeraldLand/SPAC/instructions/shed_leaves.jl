@@ -31,7 +31,7 @@ function shed_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {
     end;
 
     # update the canopy structure auxilary variables
-    t_aux!(config, spac.canopy);
+    t_aux!(config, spac.canopy, spac.cache);
 
     return nothing
 end;
