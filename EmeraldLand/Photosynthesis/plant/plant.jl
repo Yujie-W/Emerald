@@ -40,7 +40,7 @@ plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}, :
         irt = n_layer + 1 - ilf;
         leaf = leaves[ilf];
         air = airs[lindex[ilf]];
-        leaf_photosynthesis!(spac.cache, leaf, air, mode; rd_only = rd_only);
+        leaf_photosynthesis!(spac.cache, leaf, air, mode; rd_only = rd_only);  # some allocation due to broadcasting 1D to 2D array
 
         # update the average photosynthesis rates (a_g and a_net)
         f_sunlit = canopy.sun_geometry.s_aux.p_sunlit[irt];

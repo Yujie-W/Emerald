@@ -65,7 +65,13 @@ leaf_photosynthesis!(
             rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, mode, leaf.flux.auxil.β; rd_only = rd_only);
 
 # This method computes and save the photosynthetic rates into leaf flux struct for GCO₂Mode
-leaf_photosynthesis!(cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}, mode::GCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(
+            cache::SPACCache{FT},
+            leaf::CanopyLayer{FT},
+            air::AirLayer{FT},
+            mode::GCO₂Mode,
+            β::FT;
+            rd_only::Bool = false) where {FT} = (
     if rd_only
         leaf.photosystem.auxil.r_d  = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n        .= -leaf.photosystem.auxil.r_d;
@@ -94,7 +100,7 @@ leaf_photosynthesis!(cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{
     photosystem_electron_transport!(cache, leaf.photosystem, leaf.flux.auxil.ppar, leaf.flux.auxil.p_CO₂_i; β = β);
 
     # update the fluorescence related parameters
-    photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar; β = β);
+    photosystem_coefficients!(cache, leaf.photosystem, leaf.flux.auxil.ppar; β = β);
 
     # save the rates and to leaf (copy here because the photosystem auxil valuse would change when updating stomatal conductance)
     leaf.flux.auxil.a_n .= leaf.photosystem.auxil.a_n;
@@ -108,7 +114,13 @@ leaf_photosynthesis!(cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{
 );
 
 # This method computes and save the photosynthetic rates into leaf flux struct for PCO₂Mode
-leaf_photosynthesis!(cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}, mode::PCO₂Mode, β::FT; rd_only::Bool = false) where {FT} = (
+leaf_photosynthesis!(
+            cache::SPACCache{FT},
+            leaf::CanopyLayer{FT},
+            air::AirLayer{FT},
+            mode::PCO₂Mode,
+            β::FT;
+            rd_only::Bool = false) where {FT} = (
     if rd_only
         leaf.photosystem.auxil.r_d   = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;

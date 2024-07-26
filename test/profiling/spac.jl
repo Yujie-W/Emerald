@@ -13,8 +13,11 @@ spac_c = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = false);
 EmeraldLand.SPAC.initialize_spac!(config, spac_l);
 EmeraldLand.SPAC.initialize_spac!(config, spac_c);
 
-@time EmeraldLand.SPAC.spac!(config, spac_l, FT(3600));
-@time EmeraldLand.SPAC.spac!(config, spac_c, FT(3600));
+for _ in 1:10
+    @time EmeraldLand.SPAC.spac!(config, spac_l, FT(3600));
+    @time EmeraldLand.SPAC.spac!(config, spac_c, FT(3600));
+    println()
+end;
 
 @info "GPP" EmeraldLand.SPAC.GPP(spac_c) EmeraldLand.SPAC.GPP(spac_l);
 

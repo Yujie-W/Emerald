@@ -39,9 +39,17 @@ Update the rate constants and coefficients in reaction center, given
 """
 function photosystem_coefficients! end;
 
-photosystem_coefficients!(psm::LeafPhotosystem{FT}, ppar::FT; β::FT = FT(1)) where {FT} = photosystem_coefficients!(psm.trait, psm.state, psm.auxil, ppar; β = β);
+photosystem_coefficients!(
+            psm::LeafPhotosystem{FT},
+            ppar::FT;
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(psm.trait, psm.state, psm.auxil, ppar; β = β);
 
-photosystem_coefficients!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, ppar::FT; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(
+            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            ppar::FT;
+            β::FT = FT(1)) where {FT} = (
     if ppar == 0
         psa.ϕ_f = 0;
         psa.ϕ_p = 0;
@@ -85,8 +93,7 @@ photosystem_coefficients!(
             pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
             ppar::FT;
-            β::FT = FT(1)) where {FT} =
-    photosystem_coefficients!(pst, pss, pst.FLM, psa, ppar; β = β);
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(pst, pss, pst.FLM, psa, ppar; β = β);
 
 photosystem_coefficients!(
             pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
@@ -184,9 +191,19 @@ photosystem_coefficients!(
 );
 
 # For CanopyLayer
-photosystem_coefficients!(psm::CanopyLayerPhotosystem{FT}, ppar::Vector{FT}; β::FT = FT(1)) where {FT} = photosystem_coefficients!(psm.trait, psm.state, psm.auxil, ppar; β = β);
+photosystem_coefficients!(
+            cache::SPACCache{FT},
+            psm::CanopyLayerPhotosystem{FT},
+            ppar::Vector{FT};
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(cache, psm.trait, psm.state, psm.auxil, ppar; β = β);
 
-photosystem_coefficients!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, ppar::Vector{FT}; β::FT = FT(1)) where {FT} = (
+photosystem_coefficients!(
+            cache::SPACCache{FT},
+            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ppar::Vector{FT};
+            β::FT = FT(1)) where {FT} = (
     if ppar[1] == 0 && ppar[end] == 0
         psa.ϕ_f .= 0;
         psa.ϕ_p .= 0;
@@ -226,14 +243,15 @@ photosystem_coefficients!(pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3J
 );
 
 photosystem_coefficients!(
+            cache::SPACCache{FT},
             pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
             ppar::Vector{FT};
-            β::FT = FT(1)) where {FT} =
-    photosystem_coefficients!(pst, pss, pst.FLM, psa, ppar; β = β);
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(cache, pst, pss, pst.FLM, psa, ppar; β = β);
 
 photosystem_coefficients!(
+            cache::SPACCache{FT},
             pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::Union{C3State{FT}, C4State{FT}},
             flm::KNFluoscenceModel{FT},
@@ -250,11 +268,15 @@ photosystem_coefficients!(
     # calculate photochemical yield
     psa.ϕ_p .= psa.a_g ./ (psa.e2c .* psa.f_psii .* ppar);
 
+    # unpack the cache
+    x = cache.cache_incl_azi_2_1;
+    xᵅ = cache.cache_incl_azi_2_2;
+
     # calculate rate constants
-    x  = max.(0, 1 .- psa.ϕ_p ./ psa.ϕ_psii_max);
-    xᵅ = x .^ flm.K_A;
-    psa.k_n = flm.K_0 .* (1 + flm.K_B) .* xᵅ ./ (flm.K_B .+ xᵅ);
-    psa.k_p = max.(0, psa.ϕ_p .* (pst.K_F .+ psa.k_d .+ psa.k_n .+ pss.k_npq_sus) ./ (1 .- psa.ϕ_p) );
+    @. x  = max(0, 1 - psa.ϕ_p / psa.ϕ_psii_max);
+    @. xᵅ = x ^ flm.K_A;
+    @. psa.k_n = flm.K_0 .* (1 + flm.K_B) .* xᵅ ./ (flm.K_B .+ xᵅ);
+    @. psa.k_p = max.(0, psa.ϕ_p .* (pst.K_F .+ psa.k_d .+ psa.k_n .+ pss.k_npq_sus) ./ (1 .- psa.ϕ_p) );
 
     # TODO: whether to consider sustained K_N in the calculations of f_o and f_m
     # rc._f_o  = K_F / (K_F + K_PSII + rc._k_d + rc.k_npq_sus);
@@ -285,6 +307,7 @@ photosystem_coefficients!(
 );
 
 photosystem_coefficients!(
+            cache::SPACCache{FT},
             pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::Union{C3State{FT}, C4State{FT}},
             flm::QLFluoscenceModel{FT},
