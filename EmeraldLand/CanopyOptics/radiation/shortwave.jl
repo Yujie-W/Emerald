@@ -59,7 +59,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
     end;
 
     # if LAI <= 0, run soil albedo only
-    (; SPECTRA) = config;
+    (; DIM_AZI, DIM_INCL, SPECTRA) = config;
     rad_sw = spac.meteo.rad_sw;
     if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         # 1. update upward and downward direct and diffuse radiation profiles
@@ -181,7 +181,11 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
             Σ_apar_dif = sun_geo.auxil._apar_shaded' * SPECTRA.ΔΛ_PAR;
             Σ_apar_dir = sun_geo.auxil._apar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
             leaf.flux.auxil.apar[end] = Σ_apar_dif;
-            leaf.flux.auxil.apar[1:end-1] .= vec(sun_geo.s_aux.fs_abs) .* Σ_apar_dir .+ Σ_apar_dif;     # memory alloc here because of the vec function (same for view)
+            # leaf.flux.auxil.apar[1:end-1] .= vec(sun_geo.s_aux.fs_abs) .* Σ_apar_dir .+ Σ_apar_dif;
+            for j in 1:DIM_AZI
+                leaf.flux.auxil.apar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_apar_dir .+ Σ_apar_dif;
+                #@. @view leaf.flux.auxil.apar[(j-1)*DIM_INCL+1:j*DIM_INCL] = sun_geo.s_aux.fs_abs[:,j] * Σ_apar_dir + Σ_apar_dif;
+            end;
 
             # PPAR for leaves (set PPAR to be the minimum of 2PPAR_700 and PPAR_750)
             Σ_ppar_dif_700 = view(sun_geo.auxil._ppar_shaded, SPECTRA.IΛ_PAR_700)' * SPECTRA.ΔΛ_PAR_700;
@@ -191,7 +195,10 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
             Σ_ppar_dif = min(2Σ_ppar_dif_700, Σ_ppar_dif_750);
             Σ_ppar_dir = min(2Σ_ppar_dir_700, Σ_ppar_dir_750);
             leaf.flux.auxil.ppar[end] = Σ_ppar_dif;
-            leaf.flux.auxil.ppar[1:end-1] .= vec(sun_geo.s_aux.fs_abs) .* Σ_ppar_dir .+ Σ_ppar_dif;     # memory alloc here because of the vec function (same for view)
+            #leaf.flux.auxil.ppar[1:end-1] .= vec(sun_geo.s_aux.fs_abs) .* Σ_ppar_dir .+ Σ_ppar_dif;
+            for j in 1:DIM_AZI
+                leaf.flux.auxil.ppar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_ppar_dir .+ Σ_ppar_dif;
+            end;
         else
             leaf.flux.auxil.apar .= 0;
             leaf.flux.auxil.ppar .= 0;

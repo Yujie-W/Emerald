@@ -28,7 +28,7 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
     count = 0;
     δt_remain::FT = δt;
     while δt_remain > 0
-        substep_preparations!(config, spac);        # mem alloc due to mix-broadcasting 1D and 2D arrays
+        substep_preparations!(config, spac);
         δt_step = adjusted_time(spac, δt_remain);
         substep_budgets!(config, spac, δt_step);
         δt_remain -= δt_step;

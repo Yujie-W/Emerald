@@ -107,8 +107,12 @@ leaf_photosynthesis!(
     leaf.flux.auxil.a_g .= leaf.photosystem.auxil.a_g;
     leaf.flux.auxil.etr .= leaf.photosystem.auxil.a_g ./ leaf.photosystem.auxil.e2c;
     leaf.flux.auxil.ϕ_p .= leaf.photosystem.auxil.ϕ_p;
-    leaf.flux.auxil.ϕ_f_sunlit[:] .= view(leaf.photosystem.auxil.ϕ_f, 1:length(leaf.photosystem.auxil.ϕ_f)-1);
     leaf.flux.auxil.ϕ_f_shaded = leaf.photosystem.auxil.ϕ_f[end];
+    # leaf.flux.auxil.ϕ_f_sunlit[:] .= view(leaf.photosystem.auxil.ϕ_f, 1:length(leaf.photosystem.auxil.ϕ_f)-1);
+    nrow = size(leaf.flux.auxil.ϕ_f_sunlit, 1);
+    for j in axes(leaf.flux.auxil.ϕ_f_sunlit, 2)
+        leaf.flux.auxil.ϕ_f_sunlit[:,j] .= view(leaf.photosystem.auxil.ϕ_f, ((j-1)*nrow+1):(j*nrow));
+    end;
 
     return nothing
 );
