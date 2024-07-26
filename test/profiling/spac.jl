@@ -19,6 +19,6 @@ EmeraldLand.SPAC.initialize_spac!(config, spac_c);
 @info "GPP" EmeraldLand.SPAC.GPP(spac_c) EmeraldLand.SPAC.GPP(spac_l);
 
 
-spac = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = true);
+spac = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = false);
 @time EmeraldLand.SPAC.initialize_spac!(config, spac);  # allocations because of setfield! for numbers
 @time EmeraldLand.SPAC.spac!(config, spac, FT(3600));   # 1 allocation of 16 bytes (in the adjust_time function), ignored here

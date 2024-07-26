@@ -44,15 +44,17 @@ leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::CanopyL
     lindex = spac.plant.leaves_index;
     n_layer = length(leaves);
 
+    g_ss = spac.cache.cache_incl_azi_1_1;
+
     for i in eachindex(leaves)
         leaf = leaves[i];
         f_sl = canopy.sun_geometry.s_aux.p_sunlit[n_layer + 1 - i];
 
-        g_ss = 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (FT(1.35) .* leaf.flux.auxil.g_CO₂_b));
-        g_sh = g_ss[end];
-        g_sl = mean(view(g_ss,1:length(g_ss)-1));
-        g    = g_sh * (1 - f_sl) + g_sl * f_sl;
-        d    = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000) - airs[lindex[i]].s_aux.ps[3];
+        g_ss .= 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (FT(1.35) .* leaf.flux.auxil.g_CO₂_b));
+        g_sh  = g_ss[end];
+        g_sl  = mean(view(g_ss,1:length(g_ss)-1));
+        g     = g_sh * (1 - f_sl) + g_sl * f_sl;
+        d     = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000) - airs[lindex[i]].s_aux.ps[3];
         ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
         f = g * d / airs[lindex[i]].state.p_air;
 

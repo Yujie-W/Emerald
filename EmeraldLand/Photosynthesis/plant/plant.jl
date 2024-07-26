@@ -73,8 +73,8 @@ plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}, :
         # update the average photosynthesis rates (a_g and a_net)
         f_sunlit = canopy.sun_geometry.s_aux.p_sunlit[irt];
         f_shaded = 1 - f_sunlit;
-        leaf.flux.auxil.a_g = f_sunlit * mean(leaf.flux.auxil.a_g_sunlit) + f_shaded * leaf.flux.auxil.a_g_shaded;
-        leaf.flux.auxil.a_n = f_sunlit * mean(leaf.flux.auxil.a_n_sunlit) + f_shaded * leaf.flux.auxil.a_n_shaded;
+        leaf.flux.auxil.a_g_mean = f_sunlit * mean(leaf.flux.auxil.a_g_sunlit) + f_shaded * leaf.flux.auxil.a_g_shaded;
+        leaf.flux.auxil.a_n_mean = f_sunlit * mean(leaf.flux.auxil.a_n_sunlit) + f_shaded * leaf.flux.auxil.a_n_shaded;
     end;
 
     return nothing

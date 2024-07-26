@@ -105,13 +105,13 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
 
     # Photosynthesis
     "Average gross photosynthetic rate [μmol m⁻² s⁻¹]"
-    a_g::FT = 0
+    a_g_mean::FT = 0
     "Gross photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_g_shaded::FT = 0
     "Gross photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
     a_g_sunlit::Matrix{FT}
     "Average net photosynthetic rate `[μmol m⁻² s⁻¹]`"
-    a_n::FT = 0
+    a_n_mean::FT = 0
     "Net photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_n_shaded::FT = 0
     "Net photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"

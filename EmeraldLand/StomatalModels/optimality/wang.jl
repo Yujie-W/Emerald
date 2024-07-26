@@ -44,14 +44,8 @@ Update the ∂Θ∂E for sunlit leaves, given
 """
 function ∂Θ∂E! end;
 
-∂Θ∂E!(sm::WangSM{FT}, leaf::CanopyLayer{FT}) where {FT} = (
+∂Θ∂E!(sm::WangSM{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = (
     leaf.flux.auxil.∂Θ∂E = leaf.flux.auxil.a_n_mean / max(eps(FT), (leaf.xylem.auxil.e_crit - flow_out(leaf)));
-
-    return nothing
-);
-
-∂Θ∂E!(sm::WangSM{FT}, leaf::Leaf{FT}) where {FT} = (
-    leaf.flux.auxil.∂Θ∂E = leaf.flux.auxil.a_n / max(eps(FT), (leaf.xylem.auxil.e_crit - flow_out(leaf)));
 
     return nothing
 );

@@ -34,7 +34,7 @@ stomatal_conductance!(spac::BulkSPAC{FT}, δt::FT) where {FT} = (
 );
 
 stomatal_conductance!(leaf::CanopyLayer{FT}, δt::FT) where {FT} = (
-    leaf.flux.state.g_H₂O_s += leaf.flux.auxil.∂g∂t * δt;
+    leaf.flux.state.g_H₂O_s .+= leaf.flux.auxil.∂g∂t .* δt;
     limit_stomatal_conductance!(leaf);
 
     return nothing

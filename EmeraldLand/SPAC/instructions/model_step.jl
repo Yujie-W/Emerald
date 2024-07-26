@@ -23,8 +23,7 @@ function step_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) w
     canopy_structure!(config, spac);
     sun_geometry_aux!(config, spac);
     sun_geometry!(config, spac);
-    shortwave_radiation!(config, spac);
-
+    shortwave_radiation!(config, spac);     # memory allocation due to broadcasting 2D to 1D
     return nothing
 end;
 
