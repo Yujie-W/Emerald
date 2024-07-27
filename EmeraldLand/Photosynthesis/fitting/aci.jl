@@ -169,7 +169,7 @@ aci_fit(ps::LeafPhotosystem{FT},
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, 1, 0.1] : [1, 1, 1],
         x_maxs = fit_rd ? [300, 600, 10, 10] : [300, 600, 10],
-        x_inis = fit_rd ? [50, 100, 4, 1] : [50, 100, 4],
+        x_inis = fit_rd ? initial_guess : initial_guess[1:3],
         Δ_inis = fit_rd ? [10, 10, 1, 1] : [10, 10, 1],
     );
     stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50);
@@ -236,7 +236,14 @@ Fit the A-Ci curve by removing outliers, given
 - `rmse_threshold` Threshold of RMSE to stop removing outliers
 
 """
-function aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df::DataFrame; fit_rd::Bool = false, min_count::Int = 9, rmse_threshold::Number = 2) where {FT}
+function aci_fit_exclude_outliter(
+            ps::LeafPhotosystem{FT},
+            air::AirLayer{FT},
+            df::DataFrame;
+            fit_rd::Bool = false,
+            initial_guess::Vector = [50, 100, 4, 1],
+            min_count::Int = 9,
+            rmse_threshold::Number = 2) where {FT}
     # remove outliers using thresholds when necessary
     df[!,"A_NET_BAK"] .= df.A_NET;
     last_rmse = 1000;
@@ -244,7 +251,7 @@ function aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df
     last_df = deepcopy(df);
     crnt_df = deepcopy(df);
     while true
-        sol, best_rmse, aci = aci_fit(ps, air, crnt_df; fit_rd = fit_rd);
+        sol, best_rmse, aci = aci_fit(ps, air, crnt_df; fit_rd = fit_rd, initial_guess = initial_guess);
         if last_rmse - best_rmse < rmse_threshold
             break
         else
@@ -287,37 +294,51 @@ Fit the A-Ci curve, given
 - `rmse_threshold` Threshold of RMSE to stop removing outliers
 
 """
-function aci_fit!(df::DataFrame, model::String; fit_rd::Bool = false, min_count::Int = 9, remove_outlier::Bool = false, rmse_threshold::Number = 2)
+function aci_fit!(df::DataFrame, model::String; fit_rd::Bool = false, initial_guess = nothing, min_count::Int = 9, remove_outlier::Bool = false, rmse_threshold::Number = 2)
     # first of all, make sure the DataFrame has the required columns
     @assert all([n in names(df) for n in ["P_I", "PPAR", "T_LEAF", "A_NET"]]) "The DataFrame should have columns P_I, PPAR, T_LEAF, and A_NET!";
     @assert nanmin(df.T_LEAF) > 253.15 "The leaf temperature should be in Kelvin!";
 
     # create a leaf photosystem based on the model string
-    ps = if model == "C3Cyto"
-        LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3State{Float64}())
+    if model == "C3Cyto"
+        ps = LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3State{Float64}());
+        new_guess = [50, 2.1, 4, 1];
     elseif model == "C3CytoMinEta"
-        LeafPhotosystem{Float64}(trait = C3CytoMinEtaTrait{Float64}(), state = C3State{Float64}())
+        ps = LeafPhotosystem{Float64}(trait = C3CytoMinEtaTrait{Float64}(), state = C3State{Float64}());
+        new_guess = [50, 2.1, 4, 1];
     elseif model == "C3CLM"
-        LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3State{Float64}())
+        ps = LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3State{Float64}());
+        new_guess = [50, 100, 4, 1];
     elseif model == "C3FvCB"
-        LeafPhotosystem{Float64}(trait = C3FvCBTrait{Float64}(), state = C3State{Float64}())
+        ps = LeafPhotosystem{Float64}(trait = C3FvCBTrait{Float64}(), state = C3State{Float64}());
+        new_guess = [50, 100, 4, 1];
     elseif model == "C3JB"
-        LeafPhotosystem{Float64}(trait = C3JBTrait{Float64}(), state = C3State{Float64}())
+        ps = LeafPhotosystem{Float64}(trait = C3JBTrait{Float64}(), state = C3State{Float64}());
+        new_guess = [50, 2.1, 4, 1];
     elseif model == "C3VJP"
-        LeafPhotosystem{Float64}(trait = C3VJPTrait{Float64}(), state = C3State{Float64}())
+        ps = LeafPhotosystem{Float64}(trait = C3VJPTrait{Float64}(), state = C3State{Float64}());
+        new_guess = [50, 100, 4, 1];
     elseif model == "C4CLM"
-        LeafPhotosystem{Float64}(trait = C4CLMTrait{Float64}(), state = C4State{Float64}())
+        ps = LeafPhotosystem{Float64}(trait = C4CLMTrait{Float64}(), state = C4State{Float64}());
+        new_guess = [50, 100, 4, 1];
     elseif model == "C4VJP"
-        LeafPhotosystem{Float64}(trait = C4VJPTrait{Float64}(), state = C4State{Float64}())
+        ps = LeafPhotosystem{Float64}(trait = C4VJPTrait{Float64}(), state = C4State{Float64}());
+        new_guess = [50, 100, 4, 1];
     else
         throw(ArgumentError("The model should be one of C3Cyto, C3CytoMinEta, C3CLM, C3FvCB, C3JB, C3VJP, C4CLM, and C4VJP!"))
     end;
 
     # fit the A-Ci curve with or without removing outliers
     if remove_outlier
-        return aci_fit_exclude_outliter(ps, AirLayer{Float64}(), df; fit_rd = fit_rd, min_count = min_count, rmse_threshold = rmse_threshold)
+        return aci_fit_exclude_outliter(
+                    ps, AirLayer{Float64}(),
+                    df;
+                    fit_rd = fit_rd,
+                    initial_guess = (isnothing(initial_guess) ? new_guess : initial_guess),
+                    min_count = min_count,
+                    rmse_threshold = rmse_threshold)
     else
-        return aci_fit(ps, AirLayer{Float64}(), df; fit_rd = fit_rd)
+        return aci_fit(ps, AirLayer{Float64}(), df; fit_rd = fit_rd, initial_guess = (isnothing(initial_guess) ? new_guess : initial_guess))
     end;
 end;
 
