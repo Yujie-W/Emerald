@@ -57,6 +57,7 @@ end;
 #     2023-Oct-03: add field width
 #     2024-Jan-20: set ϕ_car_ppar to 0 by default
 #     2024-Feb-26: move the traits to a separate struct
+#     2024-Jan-20: set ϕ_car and ϕ_car_ppar to 1 by default
 #
 #######################################################################################################################################################################################################
 """
@@ -74,9 +75,9 @@ Base.@kwdef mutable struct LeafBioState{FT<:AbstractFloat}
     "Zeaxanthin fraction in Carotenoid (1=all Zeaxanthin, 0=all Violaxanthin) `[-]`"
     f_zeax::FT = 0
     "Fraction of carotenoid aborption into SIF `[-]`"
-    ϕ_car::FT = 0
+    ϕ_car::FT = 1
     "Fraction of carotenoid aborption into PPAR `[-]`"
-    ϕ_car_ppar::FT = 0
+    ϕ_car_ppar::FT = 1
 end;
 
 
