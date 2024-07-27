@@ -60,6 +60,7 @@ aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
 #     2024-Jul-23: add support to C3CytoMinEtaTrait
 #     2024-Jul-27: add option to turn on/off Rd fitting
+#     2024-Jul-27: fit Γ_star as well for C3 models
 #
 #######################################################################################################################################################################################################
 """
@@ -80,7 +81,8 @@ aci_rmse(ps::LeafPhotosystem, air::AirLayer, df::DataFrame, params::Vector; fit_
 aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait}, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
     pst.v_cmax25 = params[1];
     pst.b₆f = params[2];
-    pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
+    pst.TD_Γ.VAL_REF = params[3];
+    pst.r_d25 = fit_rd ? params[4] : params[1] * 0.015;
 
     return rmse(aci_curve(ps, air, df), df.A_NET)
 );
@@ -88,7 +90,8 @@ aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTra
 aci_rmse(ps::LeafPhotosystem, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
     pst.v_cmax25 = params[1];
     pst.j_max25 = params[2];
-    pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
+    pst.TD_Γ.VAL_REF = params[3];
+    pst.r_d25 = fit_rd ? params[4] : params[1] * 0.015;
 
     return rmse(aci_curve(ps, air, df), df.A_NET)
 );
@@ -116,6 +119,7 @@ aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, par
 #     2024-Jul-19: add functions to fit A-Ci curve
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
 #     2024-Jul-23: add support to C3CytoMinEtaTrait
+#     2024-Jul-27: fit Γ_star as well for C3 models
 #
 #######################################################################################################################################################################################################
 """
@@ -134,12 +138,12 @@ aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame; fit_rd::Bool = false)
 
 aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
-        x_mins = fit_rd ? [1, 0.01, 0.1] : [1, 0.01],
-        x_maxs = fit_rd ? [300, 10, 10] : [300, 10],
-        x_inis = fit_rd ? [50, 2.1, 1] : [50, 2.1],
-        Δ_inis = fit_rd ? [10, 1, 1] : [10, 1],
+        x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
+        x_maxs = fit_rd ? [300, 10, 10, 10] : [300, 10, 1],
+        x_inis = fit_rd ? [50, 2.1, 4, 1] : [50, 2.1, 1],
+        Δ_inis = fit_rd ? [10, 1, 1, 1] : [10, 1, 1],
     );
-    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.01], 50);
+    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50);
     func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd);
     sol = find_peak(func, mthd, stol);
 
@@ -151,12 +155,12 @@ aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{F
 
 aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
-        x_mins = fit_rd ? [1, 1, 0.1] : [1, 1],
-        x_maxs = fit_rd ? [300, 600, 10] : [300, 600],
-        x_inis = fit_rd ? [50, 100, 1] : [50, 100],
-        Δ_inis = fit_rd ? [10, 10, 1] : [10, 10],
+        x_mins = fit_rd ? [1, 1, 1, 0.1] : [1, 1, 1],
+        x_maxs = fit_rd ? [300, 600, 10, 10] : [300, 600, 10],
+        x_inis = fit_rd ? [50, 100, 4, 1] : [50, 100, 4],
+        Δ_inis = fit_rd ? [10, 10, 1, 1] : [10, 10, 1],
     );
-    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1], 50);
+    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50);
     func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd);
     sol = find_peak(func, mthd, stol);
 
