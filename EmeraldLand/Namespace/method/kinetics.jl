@@ -202,8 +202,8 @@ VcmaxTDLeuning(FT)                = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_R
 VpmaxTDBoyd(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 94800.0, ΔHD = 73300.0 , ΔSV = 250.0 );
 ηCTDJohnson(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 220000.0, ΔSV = 710.0 );
 ηLTDJohnson(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 220000.0, ΔSV = 710.0 );
-ηCTDWang(FT)                      = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 226000.0, ΔSV = 710.0 );
-ηLTDWang(FT)                      = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 226000.0, ΔSV = 710.0 );
+ηCTDWang(FT)                      = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
+ηLTDWang(FT)                      = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
 
 Q10TDAngiosperm(FT) = Q10{FT}(Q_10 = 1.4, T_REF = T₂₅(FT), VAL_REF = 0.0140/8760);
 Q10TDGymnosperm(FT) = Q10{FT}(Q_10 = 1.7, T_REF = T₂₅(FT), VAL_REF = 0.0425/8760);

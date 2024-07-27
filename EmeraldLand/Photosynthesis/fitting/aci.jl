@@ -351,7 +351,7 @@ function aci_fit!(
     if model == "C3Cyto"
         ps = LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3State{Float64}());
         new_guess = [50, 2.1, 4, 1];
-    elseif model == "C3CytoMinEta"
+    elseif model == "C3CytoInfAp"
         ps = LeafPhotosystem{Float64}(trait = C3CytoInfApTrait{Float64}(), state = C3State{Float64}());
         new_guess = [50, 2.1, 4, 1];
     elseif model == "C3CLM"
