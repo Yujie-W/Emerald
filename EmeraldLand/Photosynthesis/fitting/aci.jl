@@ -58,7 +58,7 @@ aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air
 # General
 #     2024-Jul-19: add functions to obtain RMSE of A-Ci curve
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
-#     2024-Jul-23: add support to C3CytoMinEtaTrait
+#     2024-Jul-23: add support to C3CytoInfApTrait
 #     2024-Jul-27: add option to turn on/off Rd fitting
 #     2024-Jul-27: fit Γ_star as well for C3 models
 #
@@ -84,7 +84,7 @@ aci_rmse(ps::LeafPhotosystem,
          fitted_γ::Union{Nothing, Number} = nothing) = aci_rmse(ps, ps.trait, air, df, params; fit_rd = fit_rd, fitted_γ = fitted_γ);
 
 aci_rmse(ps::LeafPhotosystem,
-         pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait},
+         pst::Union{C3CytoInfApTrait, C3CytoTrait, C3JBTrait},
          air::AirLayer,
          df::DataFrame,
          params::Vector;
@@ -143,7 +143,7 @@ aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, par
 # General
 #     2024-Jul-19: add functions to fit A-Ci curve
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
-#     2024-Jul-23: add support to C3CytoMinEtaTrait
+#     2024-Jul-23: add support to C3CytoInfApTrait
 #     2024-Jul-27: fit Γ_star as well for C3 models
 #     2024-Jul-27: add initial guess to option
 #
@@ -164,7 +164,7 @@ aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame; fit_rd::Bool = false,
     aci_fit(ps, ps.trait, air, df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
 
 aci_fit(ps::LeafPhotosystem{FT},
-        pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+        pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
         air::AirLayer,
         df::DataFrame;
         fit_rd::Bool = false,
@@ -319,7 +319,7 @@ end;
 # Changes to this function
 # General
 #     2024-Jul-20: add alias function to fit A-Ci curve
-#     2024-Jul-23: add support to C3CytoMinEtaTrait
+#     2024-Jul-23: add support to C3CytoInfApTrait
 #
 #######################################################################################################################################################################################################
 """
@@ -352,7 +352,7 @@ function aci_fit!(
         ps = LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3State{Float64}());
         new_guess = [50, 2.1, 4, 1];
     elseif model == "C3CytoMinEta"
-        ps = LeafPhotosystem{Float64}(trait = C3CytoMinEtaTrait{Float64}(), state = C3State{Float64}());
+        ps = LeafPhotosystem{Float64}(trait = C3CytoInfApTrait{Float64}(), state = C3State{Float64}());
         new_guess = [50, 2.1, 4, 1];
     elseif model == "C3CLM"
         ps = LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3State{Float64}());

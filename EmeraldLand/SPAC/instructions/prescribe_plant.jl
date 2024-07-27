@@ -265,7 +265,7 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait};
+            pst::Union{C3CytoInfApTrait, C3CytoTrait, C3JBTrait};
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
@@ -379,7 +379,7 @@ prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTr
     return nothing
 );
 
-prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait}; vertical_expo::Union{Nothing, Number} = nothing) = (
+prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CytoInfApTrait, C3CytoTrait, C3JBTrait}; vertical_expo::Union{Nothing, Number} = nothing) = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
@@ -444,7 +444,7 @@ prescribe_ps_traits!(spac::BulkSPAC, pst::C4VJPTrait; vertical_expo::Union{Nothi
 
     prescribe_ps_td!(
                 config::SPACConfiguration{FT},
-                pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}};
+                pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}};
                 t_clm::Union{Nothing, Number}) where {FT}
 
 Prescribe the photosystem temperature dependence, given
@@ -468,7 +468,7 @@ prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CLMTrait{FT}, C3FvC
     return nothing
 );
 
-prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}}; t_clm::Union{Nothing, Number}) where {FT} = (
+prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}}; t_clm::Union{Nothing, Number}) where {FT} = (
     (; T_CLM) = config;
 
     if !isnothing(t_clm)

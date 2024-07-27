@@ -17,7 +17,7 @@
 #     2023-Oct-24: save PSI and PSII ϕ_f in the C3Cyto model
 #     2023-Oct-28: add method for QLFluoscenceModel
 #     2023-Oct-30: compute q_l using exp(-flm.K_B * ppar) (omitting K_A)
-#     2024-Jul-23: add support to C3CytoMinEtaTrait
+#     2024-Jul-23: add support to C3CytoInfApTrait
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
@@ -45,7 +45,7 @@ photosystem_coefficients!(
             β::FT = FT(1)) where {FT} = photosystem_coefficients!(psm.trait, psm.state, psm.auxil, ppar; β = β);
 
 photosystem_coefficients!(
-            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
             pss::C3State{FT},
             psa::LeafPhotosystemAuxil{FT},
             ppar::FT;
@@ -199,7 +199,7 @@ photosystem_coefficients!(
 
 photosystem_coefficients!(
             cache::SPACCache{FT},
-            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
             pss::C3State{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},
             ppar::Vector{FT};

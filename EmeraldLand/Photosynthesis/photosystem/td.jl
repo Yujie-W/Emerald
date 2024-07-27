@@ -101,7 +101,7 @@ photosystem_temperature_dependence!(psm::Union{CanopyLayerPhotosystem{FT}, LeafP
     photosystem_temperature_dependence!(psm.trait, psm.auxil, air, t);
 
 photosystem_temperature_dependence!(
-            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}},
+            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             air::AirLayer{FT},
             t::FT) where {FT} = (

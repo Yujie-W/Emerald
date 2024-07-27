@@ -43,7 +43,7 @@ light_limited_rate!(
 
 light_limited_rate!(
             cache::SPACCache{FT},
-            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
             pss::C3State{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},
             air::AirLayer{FT},
@@ -160,7 +160,7 @@ light_limited_rate!(
 
 light_limited_rate!(
             cache::SPACCache{FT},
-            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
             pss::C3State{FT},
             psa::LeafPhotosystemAuxil{FT},
             air::AirLayer{FT},

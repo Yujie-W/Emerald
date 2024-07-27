@@ -4,7 +4,7 @@
 #
 # Changes to this struct
 # General
-#     2024-Jul-23: add C3CytoMinEtaTrait struct
+#     2024-Jul-23: add C3CytoInfApTrait struct
 #     2024-Jul-27: use modified TD for η_C and η_L
 #
 #######################################################################################################################################################################################################
@@ -19,7 +19,7 @@ Struct that contains the trait variables for C3 photosynthesis (Cytochrome model
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct C3CytoMinEtaTrait{FT}
+Base.@kwdef mutable struct C3CytoInfApTrait{FT}
     # Colimitation methods
     "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
     COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
@@ -67,8 +67,6 @@ Base.@kwdef mutable struct C3CytoMinEtaTrait{FT}
     r_d25::FT = 0.75
     "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
     v_cmax25::FT = 50
-    "Minimum eta"
-    η_min::FT = 1.05
 end;
 
 
@@ -875,7 +873,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
     "Auxilary variables"
@@ -903,7 +901,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct CanopyLayerPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
     "Auxilary variables"
