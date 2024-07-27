@@ -170,11 +170,8 @@ aci_fit(ps::LeafPhotosystem{FT},
         fit_rd::Bool = false,
         fitted_γ::Union{Nothing, Number} = nothing,
         initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
-    # set γ_star to the lowest Ci if rd is lower than -2
-    γ_min = minimum(df.A_NET) < -3 ? minimum(df.P_I) : 1;
-
     mthd = ReduceStepMethodND{FT}(
-        x_mins = fit_rd ? [1, 0.01, γ_min, 0.1] : [1, 0.01, γ_min],
+        x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
         x_maxs = fit_rd ? [999, 99, 10, 10] : [999, 99, 1],
         x_inis = fit_rd ? initial_guess[:] : initial_guess[1:3],
         Δ_inis = fit_rd ? [10, 1, 1, 1] : [10, 1, 1],
@@ -196,11 +193,8 @@ aci_fit(ps::LeafPhotosystem{FT},
         fit_rd::Bool = false,
         fitted_γ::Union{Nothing, Number} = nothing,
         initial_guess::Vector = [50, 100, 4, 1]) where {FT} = (
-    # set γ_star to the lowest Ci if rd is lower than -2
-    γ_min = minimum(df.A_NET) < -3 ? minimum(df.P_I) : 1;
-
     mthd = ReduceStepMethodND{FT}(
-        x_mins = fit_rd ? [1, 1, γ_min, 0.1] : [1, 1, γ_min],
+        x_mins = fit_rd ? [1, 1, 1, 0.1] : [1, 1, 1],
         x_maxs = fit_rd ? [999, 999, 10, 10] : [999, 999, 10],
         x_inis = fit_rd ? initial_guess : initial_guess[1:3],
         Δ_inis = fit_rd ? [10, 10, 1, 1] : [10, 10, 1],
