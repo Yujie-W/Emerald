@@ -78,7 +78,6 @@ function aci_rmse end;
 aci_rmse(ps::LeafPhotosystem, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = aci_rmse(ps, ps.trait, air, df, params; fit_rd = fit_rd);
 
 aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait}, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
-    @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, b₆f, Rd25!";
     pst.v_cmax25 = params[1];
     pst.b₆f = params[2];
     pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
@@ -87,7 +86,6 @@ aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTra
 );
 
 aci_rmse(ps::LeafPhotosystem, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
-    @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, Jmax25, Rd25!";
     pst.v_cmax25 = params[1];
     pst.j_max25 = params[2];
     pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
@@ -96,7 +94,6 @@ aci_rmse(ps::LeafPhotosystem, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}, a
 );
 
 aci_rmse(ps::LeafPhotosystem, pst::C4CLMTrait, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
-    @assert length(params) == 2 "The number of parameters should be 2: Vcmax25, Rd25!";
     pst.v_cmax25 = params[1];
     pst.r_d25 = fit_rd ? params[2] : params[1] * 0.015;
 
@@ -104,7 +101,6 @@ aci_rmse(ps::LeafPhotosystem, pst::C4CLMTrait, air::AirLayer, df::DataFrame, par
 );
 
 aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
-    @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, Vpmax25, Rd25!";
     pst.v_cmax25 = params[1];
     pst.v_pmax25 = params[2];
     pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
