@@ -171,7 +171,7 @@ aci_fit(ps::LeafPhotosystem{FT},
         fitted_γ::Union{Nothing, Number} = nothing,
         initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
     # set γ_star to the lowest Ci if rd is lower than -2
-    γ_min = df.A_NET < -3 ? minimum(df.P_I) : 1;
+    γ_min = minimum(df.A_NET) < -3 ? minimum(df.P_I) : 1;
 
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.01, γ_min, 0.1] : [1, 0.01, γ_min],
@@ -197,7 +197,7 @@ aci_fit(ps::LeafPhotosystem{FT},
         fitted_γ::Union{Nothing, Number} = nothing,
         initial_guess::Vector = [50, 100, 4, 1]) where {FT} = (
     # set γ_star to the lowest Ci if rd is lower than -2
-    γ_min = df.A_NET < -3 ? minimum(df.P_I) : 1;
+    γ_min = minimum(df.A_NET) < -3 ? minimum(df.P_I) : 1;
 
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, γ_min, 0.1] : [1, 1, γ_min],
