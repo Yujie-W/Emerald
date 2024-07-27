@@ -93,9 +93,9 @@ aci_rmse(ps::LeafPhotosystem,
     pst.v_cmax25 = params[1];
     pst.b₆f = params[2];
     if isnothing(fitted_γ)
-        pst.γ_star = params[3];
+        pst.TD_Γ.VAL_REF = params[3];
     else
-        pst.γ_star = fitted_γ;
+        pst.TD_Γ.VAL_REF = fitted_γ;
     end;
     pst.r_d25 = fit_rd ? params[4] : params[1] * 0.015;
 
