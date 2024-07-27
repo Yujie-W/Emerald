@@ -240,7 +240,7 @@ prescribe_ps_traits!(
         if !isnothing(jmax)
             pst.j_max25 = jmax;
         else
-            pst.j_max25 = vcmax * 1.6;
+            pst.j_max25 = vcmax * 1.64;
         end;
 
         # if rd is not nothing
@@ -278,7 +278,7 @@ prescribe_ps_traits!(
         if !isnothing(b6f)
             pst.b₆f = b6f;
         else
-            pst.b₆f = vcmax * 0.0062;
+            pst.b₆f = vcmax * 0.0066;
         end;
 
         # if rd is not nothing
