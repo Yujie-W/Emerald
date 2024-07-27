@@ -82,6 +82,7 @@ end;
 #     2022-Feb-07: add v_qmax without temperature dependency
 #     2022-Mar-01: add temperature dependencies for k_q, v_qmax, η_c, and η_l
 #     2024-Apr-15: add support for C4CLMTrait model
+#     2024-Jul-27: set η_c and η_l to min(η_c, η_l) to avoid negative values of η
 #
 #######################################################################################################################################################################################################
 """
@@ -100,7 +101,28 @@ photosystem_temperature_dependence!(psm::Union{CanopyLayerPhotosystem{FT}, LeafP
     photosystem_temperature_dependence!(psm.trait, psm.auxil, air, t);
 
 photosystem_temperature_dependence!(
-            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}},
+            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            air::AirLayer{FT},
+            t::FT) where {FT} = (
+    psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
+    psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
+    psa.k_q    = temperature_corrected_value(pst.TD_KQ, t);
+    psa.γ_star = temperature_corrected_value(pst.TD_Γ , t);
+    psa.η_c    = min(pst.TD_ηC.VAL_REF, temperature_corrected_value(pst.TD_ηC, t));
+    psa.η_l    = min(pst.TD_ηL.VAL_REF, temperature_corrected_value(pst.TD_ηL, t));
+    psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
+    psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
+    psa.k_m    = psa.k_c * (1 + air.state.p_air * F_O₂(FT) / psa.k_o);
+    psa.v_qmax = pst.b₆f * psa.k_q;
+
+    psa.ϕ_psi_max = pst.K_PSI / (pst.K_D + pst.K_F + pst.K_PSI);
+
+    return nothing
+);
+
+photosystem_temperature_dependence!(
+            pst::C3JBTrait{FT},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             air::AirLayer{FT},
             t::FT) where {FT} = (

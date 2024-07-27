@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2024-Jul-23: add C3CytoMinEtaTrait struct
+#     2024-Jul-27: use modified TD for η_C and η_L
 #
 #######################################################################################################################################################################################################
 """
@@ -41,9 +42,9 @@ Base.@kwdef mutable struct C3CytoMinEtaTrait{FT}
     "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
     TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
-    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDJohnson(FT)
+    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDWang(FT)
     "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
-    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)
+    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDWang(FT)
 
     # Constant coefficients
     "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
@@ -76,6 +77,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Feb-26: add C3CytoTrait struct
+#     2024-Jul-27: use modified TD for η_C and η_L
 #
 #######################################################################################################################################################################################################
 """
@@ -112,9 +114,9 @@ Base.@kwdef mutable struct C3CytoTrait{FT}
     "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
     TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
-    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDJohnson(FT)
+    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDWang(FT)
     "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
-    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDJohnson(FT)
+    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDWang(FT)
 
     # Constant coefficients
     "Rate constant of consititutive heat loss from the antennae `[ns⁻¹]`"
