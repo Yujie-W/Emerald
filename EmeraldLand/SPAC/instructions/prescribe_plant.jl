@@ -196,7 +196,7 @@ end;
 """
 
     prescribe_ps_traits!(
-                leaf::Leaf;
+                leaf::Union{CanopyLayer, Leaf};
                 b6f::Union{Nothing, Number} = nothing,
                 jmax::Union{Nothing, Number} = nothing,
                 rd::Union{Nothing, Number} = nothing,
@@ -219,7 +219,7 @@ function prescribe_ps_traits! end;
 
 # Prescribe the variables for single leaf, suggest to do this only for top canopy
 prescribe_ps_traits!(
-            leaf::Leaf;
+            leaf::Union{CanopyLayer, Leaf};
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,

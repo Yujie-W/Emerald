@@ -59,6 +59,7 @@ aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air
 #     2024-Jul-19: add functions to obtain RMSE of A-Ci curve
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
 #     2024-Jul-23: add support to C3CytoMinEtaTrait
+#     2024-Jul-27: add option to turn on/off Rd fitting
 #
 #######################################################################################################################################################################################################
 """
@@ -74,39 +75,39 @@ Compute the RMSE of A-Ci curve, given
 """
 function aci_rmse end;
 
-aci_rmse(ps::LeafPhotosystem, air::AirLayer, df::DataFrame, params::Vector) = aci_rmse(ps, ps.trait, air, df, params);
+aci_rmse(ps::LeafPhotosystem, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = aci_rmse(ps, ps.trait, air, df, params; fit_rd = fit_rd);
 
-aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait}, air::AirLayer, df::DataFrame, params::Vector) = (
+aci_rmse(ps::LeafPhotosystem, pst::Union{C3CytoMinEtaTrait, C3CytoTrait, C3JBTrait}, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
     @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, b₆f, Rd25!";
     pst.v_cmax25 = params[1];
     pst.b₆f = params[2];
-    pst.r_d25 = params[3];
+    pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
 
     return rmse(aci_curve(ps, air, df), df.A_NET)
 );
 
-aci_rmse(ps::LeafPhotosystem, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}, air::AirLayer, df::DataFrame, params::Vector) = (
+aci_rmse(ps::LeafPhotosystem, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
     @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, Jmax25, Rd25!";
     pst.v_cmax25 = params[1];
     pst.j_max25 = params[2];
-    pst.r_d25 = params[3];
+    pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
 
     return rmse(aci_curve(ps, air, df), df.A_NET)
 );
 
-aci_rmse(ps::LeafPhotosystem, pst::C4CLMTrait, air::AirLayer, df::DataFrame, params::Vector) = (
+aci_rmse(ps::LeafPhotosystem, pst::C4CLMTrait, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
     @assert length(params) == 2 "The number of parameters should be 2: Vcmax25, Rd25!";
     pst.v_cmax25 = params[1];
-    pst.r_d25 = params[2];
+    pst.r_d25 = fit_rd ? params[2] : params[1] * 0.015;
 
     return rmse(aci_curve(ps, air, df), df.A_NET)
 );
 
-aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, params::Vector) = (
+aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false) = (
     @assert length(params) == 3 "The number of parameters should be 3: Vcmax25, Vpmax25, Rd25!";
     pst.v_cmax25 = params[1];
     pst.v_pmax25 = params[2];
-    pst.r_d25 = params[3];
+    pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
 
     return rmse(aci_curve(ps, air, df), df.A_NET)
 );
@@ -133,71 +134,71 @@ Fit the A-Ci curve, given
 """
 function aci_fit end;
 
-aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_fit(ps, ps.trait, air, df);
+aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame; fit_rd::Bool = false) = aci_fit(ps, ps.trait, air, df; fit_rd = fit_rd);
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
-        x_mins = [1, 0.01, 0.1],
-        x_maxs = [300, 10, 10],
-        x_inis = [50, 2.1, 1],
-        Δ_inis = [10, 1, 1],
+        x_mins = fit_rd ? [1, 0.01, 0.1] : [1, 0.01],
+        x_maxs = fit_rd ? [300, 10, 10] : [300, 10],
+        x_inis = fit_rd ? [50, 2.1, 1] : [50, 2.1],
+        Δ_inis = fit_rd ? [10, 1, 1] : [10, 1],
     );
-    stol = SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x);
+    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.01], 50);
+    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol);
+    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd);
     aci = aci_curve(ps, air, df);
 
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, air::AirLayer, df::DataFrame) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
-        x_mins = [1, 1, 0.1],
-        x_maxs = [300, 600, 10],
-        x_inis = [50, 100, 1],
-        Δ_inis = [10, 10, 1],
+        x_mins = fit_rd ? [1, 1, 0.1] : [1, 1],
+        x_maxs = fit_rd ? [300, 600, 10] : [300, 600],
+        x_inis = fit_rd ? [50, 100, 1] : [50, 100],
+        Δ_inis = fit_rd ? [10, 10, 1] : [10, 10],
     );
-    stol = SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x);
+    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1], 50);
+    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol);
+    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd);
     aci = aci_curve(ps, air, df);
 
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::C4CLMTrait{FT}, air::AirLayer, df::DataFrame) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::C4CLMTrait{FT}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
-        x_mins = [1, 0.1],
-        x_maxs = [200, 10],
-        x_inis = [100, 1],
-        Δ_inis = [10, 1],
+        x_mins = fit_rd ? [1, 0.1] : [1],
+        x_maxs = fit_rd ? [200, 10] : [200],
+        x_inis = fit_rd ? [100, 1] : [100],
+        Δ_inis = fit_rd ? [10, 1] : [10],
     );
-    stol = SolutionToleranceND{FT}([0.1, 0.01], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x);
+    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1], 50);
+    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol);
+    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd);
     aci = aci_curve(ps, air, df);
 
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::C4VJPTrait{FT}, air::AirLayer, df::DataFrame) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::C4VJPTrait{FT}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
-        x_mins = [1, 1, 0.1],
-        x_maxs = [200, 200, 10],
-        x_inis = [100, 100, 1],
-        Δ_inis = [10, 10, 1],
+        x_mins = fit_rd ? [1, 1, 0.1] : [1, 1],
+        x_maxs = fit_rd ? [200, 200, 10] : [200, 200],
+        x_inis = fit_rd ? [100, 100, 1] : [100, 100],
+        Δ_inis = fit_rd ? [10, 10, 1] : [10, 10],
     );
-    stol = SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x);
+    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1], 50);
+    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol);
+    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd);
     aci = aci_curve(ps, air, df);
 
     return sol, best_rmse, aci
@@ -223,7 +224,7 @@ Fit the A-Ci curve by removing outliers, given
 - `rmse_threshold` Threshold of RMSE to stop removing outliers
 
 """
-function aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df::DataFrame; min_count::Int = 9, rmse_threshold::Number = 2) where {FT}
+function aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df::DataFrame; fit_rd::Bool = false, min_count::Int = 9, rmse_threshold::Number = 2) where {FT}
     # remove outliers using thresholds when necessary
     df[!,"A_NET_BAK"] .= df.A_NET;
     last_rmse = 1000;
@@ -231,7 +232,7 @@ function aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df
     last_df = deepcopy(df);
     crnt_df = deepcopy(df);
     while true
-        sol, best_rmse, aci = aci_fit(ps, air, crnt_df);
+        sol, best_rmse, aci = aci_fit(ps, air, crnt_df; fit_rd = fit_rd);
         if last_rmse - best_rmse < rmse_threshold
             break
         else
@@ -247,7 +248,7 @@ function aci_fit_exclude_outliter(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, df
 
     # change the df and traits
     df.A_NET .= last_df.A_NET;
-    best_rmse = aci_rmse(ps, air, df, last_sol);
+    best_rmse = aci_rmse(ps, air, df, last_sol; fit_rd = fit_rd);
     aci = aci_curve(ps, air, df);
 
     return last_sol, best_rmse, aci
@@ -274,7 +275,7 @@ Fit the A-Ci curve, given
 - `rmse_threshold` Threshold of RMSE to stop removing outliers
 
 """
-function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outlier::Bool = false, rmse_threshold::Number = 2)
+function aci_fit!(df::DataFrame, model::String; fit_rd::Bool = false, min_count::Int = 9, remove_outlier::Bool = false, rmse_threshold::Number = 2)
     # first of all, make sure the DataFrame has the required columns
     @assert all([n in names(df) for n in ["P_I", "PPAR", "T_LEAF", "A_NET"]]) "The DataFrame should have columns P_I, PPAR, T_LEAF, and A_NET!";
     @assert nanmin(df.T_LEAF) > 253.15 "The leaf temperature should be in Kelvin!";
@@ -302,9 +303,9 @@ function aci_fit!(df::DataFrame, model::String; min_count::Int = 9, remove_outli
 
     # fit the A-Ci curve with or without removing outliers
     if remove_outlier
-        return aci_fit_exclude_outliter(ps, AirLayer{Float64}(), df, min_count = min_count, rmse_threshold = rmse_threshold)
+        return aci_fit_exclude_outliter(ps, AirLayer{Float64}(), df; fit_rd = fit_rd, min_count = min_count, rmse_threshold = rmse_threshold)
     else
-        return aci_fit(ps, AirLayer{Float64}(), df)
+        return aci_fit(ps, AirLayer{Float64}(), df; fit_rd = fit_rd)
     end;
 end;
 

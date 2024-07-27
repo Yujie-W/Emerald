@@ -11,7 +11,7 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂gₙ∂t(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT}
+    ∂gₙ∂t(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT}
 
 Return the marginal increase of stomatal conductance, given
 - `leaf` `Leaf` type struct
@@ -21,13 +21,15 @@ Return the marginal increase of stomatal conductance, given
 """
 function ∂gₙ∂t end;
 
-∂gₙ∂t(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = ∂gₙ∂t(leaf.flux.trait.stomatal_model, leaf, air, eff_ϵ);
+∂gₙ∂t(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = ∂gₙ∂t(leaf.flux.trait.stomatal_model, leaf, air, eff_ϵ);
 
-∂gₙ∂t(sm::AbstractStomataModel{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = FT(-0.001);
+∂gₙ∂t(sm::AbstractStomataModel{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = FT(-0.001);
 
+#=
 ∂gₙ∂t(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
     drde = ∂R∂E(leaf, air, eff_ϵ);
     dθde = ∂Θₙ∂E(leaf, air);
 
     return max(-0.001, min(0.001, sm.K * (drde - dθde)))
 );
+=#

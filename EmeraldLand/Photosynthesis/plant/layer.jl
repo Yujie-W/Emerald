@@ -77,7 +77,8 @@ leaf_photosynthesis!(
         leaf.flux.auxil.a_n        .= -leaf.photosystem.auxil.r_d;
         leaf.flux.auxil.a_g        .= 0;
         leaf.flux.auxil.etr        .= 0;
-        leaf.flux.auxil.ϕ_f        .= 0;
+        leaf.flux.auxil.ϕ_f_shaded  = 0;
+        leaf.flux.auxil.ϕ_f_sunlit .= 0;
         leaf.flux.auxil.ϕ_f1       .= 0;
         leaf.flux.auxil.ϕ_f2       .= 0;
         leaf.flux.auxil.ϕ_p        .= 0;

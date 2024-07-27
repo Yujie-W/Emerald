@@ -19,14 +19,15 @@ function ΣSIF end;
     canopy = spac.canopy;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
+    n_sunlit = length(leaves[1].flux.auxil.ppar) - 1;
 
     # compute SIF in photons unit
     Σsif::FT = 0;
     N = length(leaves);
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        Σsif += (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.ppar_sunlit .* leaves[ilf].flux.auxil.ϕ_f_sunlit) +
-                (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaves[ilf].flux.auxil.ppar_shaded * leaves[ilf].flux.auxil.ϕ_f_shaded) * canopy.structure.trait.δlai[irt];
+        Σsif += (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.ppar[1:end-1] .* leaves[ilf].flux.auxil.ϕ_f_sunlit[:]) +
+                (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaves[ilf].flux.auxil.ppar[end] * leaves[ilf].flux.auxil.ϕ_f_shaded) * canopy.structure.trait.δlai[irt];
     end;
 
     return Σsif

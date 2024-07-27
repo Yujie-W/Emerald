@@ -53,8 +53,8 @@ PPAR(spac::BulkSPAC{FT}) where {FT} = (
     ppar::FT = 0;
     for irt in eachindex(leaves)
         ilf = n_layer + 1 - irt;
-        ppar += (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.ppar_sunlit) +
-                (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaves[ilf].flux.auxil.ppar_shaded) * canopy.structure.trait.δlai[irt];
+        ppar += (canopy.sun_geometry.s_aux.p_sunlit[irt] * mean(leaves[ilf].flux.auxil.ppar[1:end-1]) +
+                (1 - canopy.sun_geometry.s_aux.p_sunlit[irt]) * leaves[ilf].flux.auxil.ppar[end]) * canopy.structure.trait.δlai[irt];
     end;
 
     return ppar
