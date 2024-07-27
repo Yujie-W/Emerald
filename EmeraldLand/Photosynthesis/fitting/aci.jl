@@ -120,6 +120,7 @@ aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, par
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
 #     2024-Jul-23: add support to C3CytoMinEtaTrait
 #     2024-Jul-27: fit Γ_star as well for C3 models
+#     2024-Jul-27: add initial guess to option
 #
 #######################################################################################################################################################################################################
 """
@@ -134,13 +135,19 @@ Fit the A-Ci curve, given
 """
 function aci_fit end;
 
-aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame; fit_rd::Bool = false) = aci_fit(ps, ps.trait, air, df; fit_rd = fit_rd);
+aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame; fit_rd::Bool = false, initial_guess::Vector = [50, 2.1, 4, 1]) =
+    aci_fit(ps, ps.trait, air, df; fit_rd = fit_rd, initial_guess = initial_guess);
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT},
+        pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+        air::AirLayer,
+        df::DataFrame;
+        fit_rd::Bool = false,
+        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
         x_maxs = fit_rd ? [300, 10, 10, 10] : [300, 10, 1],
-        x_inis = fit_rd ? [50, 2.1, 4, 1] : [50, 2.1, 1],
+        x_inis = fit_rd ? initial_guess[:] : initial_guess[1:3],
         Δ_inis = fit_rd ? [10, 1, 1, 1] : [10, 1, 1],
     );
     stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50);
@@ -153,7 +160,12 @@ aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CytoMinEtaTrait{FT}, C3CytoTrait{F
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT},
+        pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
+        air::AirLayer,
+        df::DataFrame;
+        fit_rd::Bool = false,
+        initial_guess::Vector = [50, 100, 4, 1]) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, 1, 0.1] : [1, 1, 1],
         x_maxs = fit_rd ? [300, 600, 10, 10] : [300, 600, 10],
@@ -170,7 +182,7 @@ aci_fit(ps::LeafPhotosystem{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3V
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::C4CLMTrait{FT}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::C4CLMTrait{FT}, air::AirLayer, df::DataFrame; fit_rd::Bool = false, initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.1] : [1],
         x_maxs = fit_rd ? [200, 10] : [200],
@@ -187,7 +199,7 @@ aci_fit(ps::LeafPhotosystem{FT}, pst::C4CLMTrait{FT}, air::AirLayer, df::DataFra
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT}, pst::C4VJPTrait{FT}, air::AirLayer, df::DataFrame; fit_rd::Bool = false) where {FT} = (
+aci_fit(ps::LeafPhotosystem{FT}, pst::C4VJPTrait{FT}, air::AirLayer, df::DataFrame; fit_rd::Bool = false, initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, 0.1] : [1, 1],
         x_maxs = fit_rd ? [200, 200, 10] : [200, 200],
