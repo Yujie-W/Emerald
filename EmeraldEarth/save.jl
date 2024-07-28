@@ -29,7 +29,6 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing}}, doy
     );
     _mat_beta = get_value.(states, :beta);
     _mat_csif = get_value.(states, :csif);
-    _mat_etr = get_value.(states, :etr);
     _mat_gpp = get_value.(states, :gpp);
     _mat_evi = get_value.(states, :modis_evi);
     _mat_ndvi = get_value.(states, :modis_ndvi);
@@ -63,7 +62,6 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing}}, doy
         _3d_tran = ones(Float32, size(_mat_gpp,1), size(_mat_gpp,2), 1);
         _3d_beta[:,:,1] .= _mat_beta;
         _3d_csif[:,:,1] .= _mat_csif;
-        _3d_etr[:,:,1] .= _mat_etr;
         _3d_gpp[:,:,1] .= _mat_gpp;
         _3d_evi[:,:,1] .= _mat_evi;
         _3d_ndvi[:,:,1] .= _mat_ndvi;
@@ -101,7 +99,6 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing}}, doy
     grow_nc!(filename, "DOY", Float32(doy), true);
     grow_nc!(filename, "BETA", _mat_beta, false);
     grow_nc!(filename, "CSIF", _mat_csif, false);
-    grow_nc!(filename, "ETR", _mat_etr, false);
     grow_nc!(filename, "GPP", _mat_gpp, false);
     grow_nc!(filename, "EVI", _mat_evi, false);
     grow_nc!(filename, "NDVI", _mat_ndvi, false);

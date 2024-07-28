@@ -76,12 +76,6 @@ leaf_photosynthesis!(
         leaf.photosystem.auxil.r_d  = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
         leaf.flux.auxil.a_n        .= -leaf.photosystem.auxil.r_d;
         leaf.flux.auxil.a_g        .= 0;
-        leaf.flux.auxil.etr        .= 0;
-        leaf.flux.auxil.ϕ_f_shaded  = 0;
-        leaf.flux.auxil.ϕ_f_sunlit .= 0;
-        leaf.flux.auxil.ϕ_f1       .= 0;
-        leaf.flux.auxil.ϕ_f2       .= 0;
-        leaf.flux.auxil.ϕ_p        .= 0;
 
         return nothing
     end;
@@ -106,88 +100,6 @@ leaf_photosynthesis!(
     # save the rates and to leaf (copy here because the photosystem auxil valuse would change when updating stomatal conductance)
     leaf.flux.auxil.a_n .= leaf.photosystem.auxil.a_n;
     leaf.flux.auxil.a_g .= leaf.photosystem.auxil.a_g;
-    leaf.flux.auxil.etr .= leaf.photosystem.auxil.a_g ./ leaf.photosystem.auxil.e2c;
-    leaf.flux.auxil.ϕ_p .= leaf.photosystem.auxil.ϕ_p;
-    leaf.flux.auxil.ϕ_f_shaded = leaf.photosystem.auxil.ϕ_f[end];
-    # leaf.flux.auxil.ϕ_f_sunlit[:] .= view(leaf.photosystem.auxil.ϕ_f, 1:length(leaf.photosystem.auxil.ϕ_f)-1);
-    nrow = size(leaf.flux.auxil.ϕ_f_sunlit, 1);
-    for j in axes(leaf.flux.auxil.ϕ_f_sunlit, 2)
-        leaf.flux.auxil.ϕ_f_sunlit[:,j] .= view(leaf.photosystem.auxil.ϕ_f, ((j-1)*nrow+1):(j*nrow));
-    end;
-
-    return nothing
-);
-
-# This method computes and save the photosynthetic rates into leaf flux struct for PCO₂Mode
-leaf_photosynthesis!(
-            cache::SPACCache{FT},
-            leaf::CanopyLayer{FT},
-            air::AirLayer{FT},
-            mode::PCO₂Mode,
-            β::FT;
-            rd_only::Bool = false) where {FT} = (
-    if rd_only
-        leaf.photosystem.auxil.r_d   = leaf.photosystem.trait.r_d25 * temperature_correction(leaf.photosystem.trait.TD_R, leaf.energy.s_aux.t);
-        leaf.flux.auxil.a_n_sunlit  .= -leaf.photosystem.auxil.r_d;
-        leaf.flux.auxil.a_g_sunlit  .= 0;
-        leaf.flux.auxil.etr_sunlit  .= 0;
-        leaf.flux.auxil.ϕ_f_sunlit  .= 0;
-        leaf.flux.auxil.ϕ_f1_sunlit .= 0;
-        leaf.flux.auxil.ϕ_f2_sunlit .= 0;
-        leaf.flux.auxil.a_n_shaded   = -leaf.photosystem.auxil.r_d;
-        leaf.flux.auxil.a_g_shaded   = 0;
-        leaf.flux.auxil.etr_shaded   = 0;
-        leaf.flux.auxil.ϕ_f_shaded   = 0;
-        leaf.flux.auxil.ϕ_f1_shaded  = 0;
-        leaf.flux.auxil.ϕ_f2_shaded  = 0;
-
-        return nothing
-    end;
-
-    photosystem_temperature_dependence!(leaf.photosystem, air, leaf.energy.s_aux.t);
-
-    # loop through the ppars for sunlit leaf
-    for i in eachindex(leaf.flux.auxil.ppar_sunlit)
-        # calculate the photosynthetic rates
-        photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i], leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
-        rubisco_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
-        light_limited_rate!(leaf.photosystem);
-        product_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_sunlit[i]; β = β);
-        colimit_photosynthesis!(leaf.photosystem; β = β);
-
-        # update the fluorescence related parameters
-        photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_sunlit[i]; β = β);
-
-        # save the rates and to leaf
-        leaf.flux.auxil.a_n_sunlit[i]  = leaf.photosystem.auxil.a_n;
-        leaf.flux.auxil.a_g_sunlit[i]  = leaf.photosystem.auxil.a_g;
-        leaf.flux.auxil.etr_sunlit[i]  = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-        leaf.flux.auxil.ϕ_d_sunlit[i]  = leaf.photosystem.auxil.ϕ_d;
-        leaf.flux.auxil.ϕ_f_sunlit[i]  = leaf.photosystem.auxil.ϕ_f;
-        leaf.flux.auxil.ϕ_n_sunlit[i]  = leaf.photosystem.auxil.ϕ_n;
-        leaf.flux.auxil.ϕ_p_sunlit[i]  = leaf.photosystem.auxil.ϕ_p;
-        leaf.flux.auxil.ϕ_f1_sunlit[i] = leaf.photosystem.auxil.ϕ_f1;
-        leaf.flux.auxil.ϕ_f2_sunlit[i] = leaf.photosystem.auxil.ϕ_f2;
-    end;
-
-    # run the model for shaded leaf
-    photosystem_electron_transport!(leaf.photosystem, leaf.flux.auxil.ppar_shaded, leaf.flux.auxil.p_CO₂_i_shaded; β = β);
-    rubisco_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_shaded; β = β);
-    light_limited_rate!(leaf.photosystem);
-    product_limited_rate!(leaf.photosystem, leaf.flux.auxil.p_CO₂_i_shaded; β = β);
-    colimit_photosynthesis!(leaf.photosystem; β = β);
-
-    # update the fluorescence related parameters
-    photosystem_coefficients!(leaf.photosystem, leaf.flux.auxil.ppar_shaded; β = β);
-
-    # save the rates and to leaf
-    leaf.flux.auxil.a_n_shaded = leaf.photosystem.auxil.a_n;
-    leaf.flux.auxil.a_g_shaded = leaf.photosystem.auxil.a_g;
-    leaf.flux.auxil.etr_shaded = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-    leaf.flux.auxil.ϕ_d_shaded = leaf.photosystem.auxil.ϕ_d;
-    leaf.flux.auxil.ϕ_f_shaded = leaf.photosystem.auxil.ϕ_f;
-    leaf.flux.auxil.ϕ_n_shaded = leaf.photosystem.auxil.ϕ_n;
-    leaf.flux.auxil.ϕ_p_shaded = leaf.photosystem.auxil.ϕ_p;
 
     return nothing
 );

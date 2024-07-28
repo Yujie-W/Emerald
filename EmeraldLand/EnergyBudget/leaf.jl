@@ -145,8 +145,7 @@ leaf_energy_flows!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}
 
         # remove the chemical energy from the leaf
         if ENABLE_CHEMICAL_ENERGY
-            f_sunlit = canopy.sun_geometry.s_aux.p_sunlit[irt];
-            an_layer = (f_sunlit * mean(leaves[ilf].flux.auxil.a_n_sunlit) + (1 - f_sunlit) * leaves[ilf].flux.auxil.a_n_shaded) * leaf.xylem.trait.area;
+            an_layer = (leaves[ilf].flux.auxil.a_n_sunlit)' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt) * leaf.xylem.trait.area;
             leaf.energy.auxil.∂e∂t -= an_layer * FT(1e-6) / 6 * GLUCOSE(FT);
         end;
     end;

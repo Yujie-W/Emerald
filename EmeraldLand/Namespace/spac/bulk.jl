@@ -136,6 +136,7 @@ BulkSPAC(config::SPACConfiguration{FT};
                 config.DIM_AZI,
                 config.DIM_INCL,
                 n_layer,
+                config.DIM_PPAR_BINS,
                 length(config.SPECTRA.Λ_SIF),
                 length(config.SPECTRA.Λ_SIFE),
                 length(config.SPECTRA.Λ));

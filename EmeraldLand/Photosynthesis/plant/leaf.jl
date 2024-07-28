@@ -16,8 +16,7 @@
 #     2022-Jul-12: use β as a must have option (and thus this function becomes a core function of the one above)
 #     2022-Jul-28: move temperature control to function photosystem_temperature_dependence!
 #     2023-Mar-11: add option to compute respiration rate only
-#     2023-Jun-13: save actual etr as well
-#     2023-Sep-09: save ϕ_d, ϕ_n, and ϕ_p to Leaf
+#     2023-Sep-09: save ϕ_p to Leaf
 #     2023-Oct-24: save ϕ_f1 and ϕ_f2
 #
 #######################################################################################################################################################################################################
@@ -116,9 +115,7 @@ leaf_photosynthesis!(
         leaf.flux.auxil.a_n_sunlit[i]  = leaf.photosystem.auxil.a_n;
         leaf.flux.auxil.a_g_sunlit[i]  = leaf.photosystem.auxil.a_g;
         leaf.flux.auxil.etr_sunlit[i]  = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-        leaf.flux.auxil.ϕ_d_sunlit[i]  = leaf.photosystem.auxil.ϕ_d;
         leaf.flux.auxil.ϕ_f_sunlit[i]  = leaf.photosystem.auxil.ϕ_f;
-        leaf.flux.auxil.ϕ_n_sunlit[i]  = leaf.photosystem.auxil.ϕ_n;
         leaf.flux.auxil.ϕ_p_sunlit[i]  = leaf.photosystem.auxil.ϕ_p;
         leaf.flux.auxil.ϕ_f1_sunlit[i] = leaf.photosystem.auxil.ϕ_f1;
         leaf.flux.auxil.ϕ_f2_sunlit[i] = leaf.photosystem.auxil.ϕ_f2;
@@ -145,9 +142,7 @@ leaf_photosynthesis!(
     leaf.flux.auxil.a_n_shaded = leaf.photosystem.auxil.a_n;
     leaf.flux.auxil.a_g_shaded = leaf.photosystem.auxil.a_g;
     leaf.flux.auxil.etr_shaded = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-    leaf.flux.auxil.ϕ_d_shaded = leaf.photosystem.auxil.ϕ_d;
     leaf.flux.auxil.ϕ_f_shaded = leaf.photosystem.auxil.ϕ_f;
-    leaf.flux.auxil.ϕ_n_shaded = leaf.photosystem.auxil.ϕ_n;
     leaf.flux.auxil.ϕ_p_shaded = leaf.photosystem.auxil.ϕ_p;
 
     return nothing
@@ -197,9 +192,7 @@ leaf_photosynthesis!(
         leaf.flux.auxil.a_n_sunlit[i]  = leaf.photosystem.auxil.a_n;
         leaf.flux.auxil.a_g_sunlit[i]  = leaf.photosystem.auxil.a_g;
         leaf.flux.auxil.etr_sunlit[i]  = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-        leaf.flux.auxil.ϕ_d_sunlit[i]  = leaf.photosystem.auxil.ϕ_d;
         leaf.flux.auxil.ϕ_f_sunlit[i]  = leaf.photosystem.auxil.ϕ_f;
-        leaf.flux.auxil.ϕ_n_sunlit[i]  = leaf.photosystem.auxil.ϕ_n;
         leaf.flux.auxil.ϕ_p_sunlit[i]  = leaf.photosystem.auxil.ϕ_p;
         leaf.flux.auxil.ϕ_f1_sunlit[i] = leaf.photosystem.auxil.ϕ_f1;
         leaf.flux.auxil.ϕ_f2_sunlit[i] = leaf.photosystem.auxil.ϕ_f2;
@@ -219,9 +212,7 @@ leaf_photosynthesis!(
     leaf.flux.auxil.a_n_shaded = leaf.photosystem.auxil.a_n;
     leaf.flux.auxil.a_g_shaded = leaf.photosystem.auxil.a_g;
     leaf.flux.auxil.etr_shaded = leaf.photosystem.auxil.a_g / leaf.photosystem.auxil.e2c;
-    leaf.flux.auxil.ϕ_d_shaded = leaf.photosystem.auxil.ϕ_d;
     leaf.flux.auxil.ϕ_f_shaded = leaf.photosystem.auxil.ϕ_f;
-    leaf.flux.auxil.ϕ_n_shaded = leaf.photosystem.auxil.ϕ_n;
     leaf.flux.auxil.ϕ_p_shaded = leaf.photosystem.auxil.ϕ_p;
 
     return nothing

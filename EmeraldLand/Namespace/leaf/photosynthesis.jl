@@ -650,12 +650,8 @@ Base.@kwdef mutable struct LeafPhotosystemAuxil{FT}
     η_l::FT = 0
 
     # yield variables
-    "Heat dissipation yield"
-    ϕ_d::FT = 0
     "Fluorescence yield"
     ϕ_f::FT = 0
-    "Non-photochemical quenching yeild"
-    ϕ_n::FT = 0
     "Photochemical yield"
     ϕ_p::FT = 0
 
@@ -777,12 +773,8 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
     η_l::FT = 0
 
     # yield variables
-    "Heat dissipation yield"
-    ϕ_d::Vector{FT}
     "Fluorescence yield"
     ϕ_f::Vector{FT}
-    "Non-photochemical quenching yeild"
-    ϕ_n::Vector{FT}
     "Photochemical yield"
     ϕ_p::Vector{FT}
 
@@ -822,32 +814,30 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
 end;
 
 CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLayerPhotosystemAuxil{FT}(
-    a_c   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    a_g   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    a_i   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    a_j   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    a_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    a_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    e2c   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    j     = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    j_pot = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    j_psi = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    η     = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    ϕ_d   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    ϕ_f   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    ϕ_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    ϕ_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    ϕ_f1  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    ϕ_f2  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    f_m   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    f_m′  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    f_o   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    f_o′  = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    npq   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    q_e   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    q_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    k_n   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1),
-    k_p   = zeros(FT, config.DIM_INCL * config.DIM_AZI + 1)
+    a_c   = zeros(FT, config.DIM_PPAR_BINS+1),
+    a_g   = zeros(FT, config.DIM_PPAR_BINS+1),
+    a_i   = zeros(FT, config.DIM_PPAR_BINS+1),
+    a_j   = zeros(FT, config.DIM_PPAR_BINS+1),
+    a_n   = zeros(FT, config.DIM_PPAR_BINS+1),
+    a_p   = zeros(FT, config.DIM_PPAR_BINS+1),
+    e2c   = zeros(FT, config.DIM_PPAR_BINS+1),
+    j     = zeros(FT, config.DIM_PPAR_BINS+1),
+    j_pot = zeros(FT, config.DIM_PPAR_BINS+1),
+    j_psi = zeros(FT, config.DIM_PPAR_BINS+1),
+    η     = zeros(FT, config.DIM_PPAR_BINS+1),
+    ϕ_f   = zeros(FT, config.DIM_PPAR_BINS+1),
+    ϕ_p   = zeros(FT, config.DIM_PPAR_BINS+1),
+    ϕ_f1  = zeros(FT, config.DIM_PPAR_BINS+1),
+    ϕ_f2  = zeros(FT, config.DIM_PPAR_BINS+1),
+    f_m   = zeros(FT, config.DIM_PPAR_BINS+1),
+    f_m′  = zeros(FT, config.DIM_PPAR_BINS+1),
+    f_o   = zeros(FT, config.DIM_PPAR_BINS+1),
+    f_o′  = zeros(FT, config.DIM_PPAR_BINS+1),
+    npq   = zeros(FT, config.DIM_PPAR_BINS+1),
+    q_e   = zeros(FT, config.DIM_PPAR_BINS+1),
+    q_p   = zeros(FT, config.DIM_PPAR_BINS+1),
+    k_n   = zeros(FT, config.DIM_PPAR_BINS+1),
+    k_p   = zeros(FT, config.DIM_PPAR_BINS+1)
 );
 
 

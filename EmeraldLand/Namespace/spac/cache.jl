@@ -91,7 +91,7 @@ Base.@kwdef struct SPACCache{FT}
     stol_nb::SolutionTolerance{FT}
 end;
 
-SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_sif::Int, dim_sife::Int, dim_wl::Int) where {FT} = SPACCache{FT}(
+SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_ppar::Int, dim_sif::Int, dim_sife::Int, dim_wl::Int) where {FT} = SPACCache{FT}(
     cache_layer_1 = zeros(FT, dim_layer),
 
     cache_sife_1 = zeros(FT, dim_sife),
@@ -104,18 +104,19 @@ SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_sif::Int, dim_sif
     cache_wl_4 = zeros(FT, dim_wl),
     cache_wl_5 = zeros(FT, dim_wl),
 
-    cache_incl_azi_1_1 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_1_2 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_1_3 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_1_4 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_1_5 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_1_6 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_2_1 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_2_2 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_2_3 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_2_4 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_2_5 = zeros(FT, dim_incl*dim_azi+1),
-    cache_incl_azi_2_6 = zeros(FT, dim_incl*dim_azi+1),
+    # to used to speed up the computation (PPAR bins)
+    cache_incl_azi_1_1 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_1_2 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_1_3 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_1_4 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_1_5 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_1_6 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_2_1 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_2_2 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_2_3 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_2_4 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_2_5 = zeros(FT, dim_ppar+1),
+    cache_incl_azi_2_6 = zeros(FT, dim_ppar+1),
 
     cache_incl_azi_1 = zeros(FT, dim_incl, dim_azi),
     cache_incl_azi_2 = zeros(FT, dim_incl, dim_azi),

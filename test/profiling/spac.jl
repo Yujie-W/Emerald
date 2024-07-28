@@ -6,22 +6,13 @@ using Revise
 FT = Float64;
 
 config = EmeraldLand.Namespace.SPACConfiguration(FT);
-
-
-spac_l = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = true);
 spac_c = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = false);
-
-spac_l.canopy.sun_geometry.state.sza = 50;
-spac_c.canopy.sun_geometry.state.sza = 50;
-
-EmeraldLand.SPAC.initialize_spac!(config, spac_l);
 EmeraldLand.SPAC.initialize_spac!(config, spac_c);
+EmeraldLand.SPAC.spac!(config, spac_c, FT(1));
 
-@time EmeraldLand.SPAC.spac!(config, spac_l, FT(3600));
 @time EmeraldLand.SPAC.spac!(config, spac_c, FT(3600));
 
-@info "GPP" EmeraldLand.SPAC.GPP(spac_c) EmeraldLand.SPAC.GPP(spac_l);
-@info "SIF 740" EmeraldLand.SPAC.TROPOMI_SIF740(config, spac_c) EmeraldLand.SPAC.TROPOMI_SIF740(config, spac_l);
+@info "GPP and SIF" EmeraldLand.SPAC.GPP(spac_c) EmeraldLand.SPAC.TROPOMI_SIF740(config, spac_c);
 
 
 spac = EmeraldLand.Namespace.BulkSPAC(config; use_leaf = false);

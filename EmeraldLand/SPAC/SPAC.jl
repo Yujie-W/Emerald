@@ -49,7 +49,6 @@ include("timestepper/timer.jl");
 # quantities of SPAC
 include("quantity/beta.jl");
 include("quantity/et.jl");
-include("quantity/etr.jl");
 include("quantity/gpp.jl");
 include("quantity/goes.jl");
 include("quantity/npp.jl");

@@ -13,7 +13,6 @@
 #     2022-Mar-04: use the weighted yield for photosynthesis
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2023-Jun-15: set ϕ_f and ϕ_p to 0 when ppar is 0
-#     2023-Sep-09: compute ϕ_d and ϕ_n in the VJPReactionCenter
 #     2023-Oct-24: save PSI and PSII ϕ_f in the C3Cyto model
 #     2023-Oct-28: add method for QLFluoscenceModel
 #     2023-Oct-30: compute q_l using exp(-flm.K_B * ppar) (omitting K_A)
@@ -130,8 +129,6 @@ photosystem_coefficients!(
     psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
     psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
-    psa.ϕ_d  = psa.k_d / pst.K_F * psa.ϕ_f;
-    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pst.K_F * psa.ϕ_f;
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
 
@@ -174,8 +171,6 @@ photosystem_coefficients!(
     psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
     psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
-    psa.ϕ_d  = psa.k_d / pst.K_F * psa.ϕ_f;
-    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pst.K_F * psa.ϕ_f;
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
 
@@ -292,8 +287,6 @@ photosystem_coefficients!(
     @. psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
     @. psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
-    @. psa.ϕ_d  = psa.k_d / pst.K_F * psa.ϕ_f;
-    @. psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pst.K_F * psa.ϕ_f;
     @. psa.ϕ_f1 = psa.ϕ_f;
     @. psa.ϕ_f2 = psa.ϕ_f;
 
@@ -337,8 +330,6 @@ photosystem_coefficients!(
     psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
     psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
-    psa.ϕ_d  = psa.k_d / pst.K_F * psa.ϕ_f;
-    psa.ϕ_n  = (psa.k_n + pss.k_npq_sus) / pst.K_F * psa.ϕ_f;
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
 

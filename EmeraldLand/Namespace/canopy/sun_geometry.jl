@@ -98,6 +98,7 @@ SunGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = Sun
 #     2023-Oct-09: add struct SunGeometryAuxil
 #     2023-Oct-13: add field albedo
 #     2023-Oct-18: add fields sdb_stem, sdf_stem, r_net_lw_leaf, r_net_lw_stem
+#     2024-Jul-27: use bined PPAR to speed up
 #
 #######################################################################################################################################################################################################
 """
@@ -187,6 +188,24 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     _ppar_shaded::Vector{FT}
     "APAR for sunlit leaves for photosynthesis per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
     _ppar_sunlit::Vector{FT}
+    "Shaded APAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    apar_shaded::Vector{FT}
+    "Sunlit APAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    apar_sunlit::Array{FT,3}
+    "Shaded PPAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    ppar_shaded::Vector{FT}
+    "Sunlit PPAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    ppar_sunlit::Array{FT,3}
+
+    # PPAR bins
+    "Sum of PPAR in each bin"
+    _ppar_sum::Vector{FT}
+    "Count of PPAR in each bin"
+    _ppar_count::Vector{FT}
+    "Weighted sunlit fraction"
+    ppar_fraction::Matrix{FT}
+    "PPAR bins map"
+    ppar_index::Array{Int,3}
 
     # Fluorescence related cache variables (related to chlorophyll level fluorescence)
     "Diffuse radiation that can excite SIF emission per wavelength"
@@ -270,6 +289,14 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGe
             _apar_sunlit     = zeros(FT, length(config.SPECTRA.IΛ_PAR)),
             _ppar_shaded     = zeros(FT, length(config.SPECTRA.IΛ_PAR)),
             _ppar_sunlit     = zeros(FT, length(config.SPECTRA.IΛ_PAR)),
+            apar_shaded      = zeros(FT, n_layer),
+            apar_sunlit      = zeros(FT, config.DIM_INCL, config.DIM_AZI, n_layer),
+            ppar_shaded      = zeros(FT, n_layer),
+            ppar_sunlit      = zeros(FT, config.DIM_INCL, config.DIM_AZI, n_layer),
+            _ppar_sum        = zeros(FT, config.DIM_PPAR_BINS),
+            _ppar_count      = zeros(FT, config.DIM_PPAR_BINS),
+            ppar_fraction    = zeros(FT, config.DIM_PPAR_BINS + 1, n_layer),
+            ppar_index       = zeros(Int, config.DIM_INCL, config.DIM_AZI, n_layer),
             _e_dif_sife      = zeros(FT, length(config.SPECTRA.IΛ_SIFE)),
             _e_dir_sife      = zeros(FT, length(config.SPECTRA.IΛ_SIFE)),
             _e_dif_sif       = zeros(FT, length(config.SPECTRA.IΛ_SIF)),

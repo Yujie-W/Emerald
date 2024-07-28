@@ -13,6 +13,7 @@
 #     2023-Oct-18: partition the energy between leaf and stem
 #     2024-Jan-23: set PPAR to be the minimum of 2PPAR_700 and PPAR_750
 #     2024-Jun-06: add step to compute e_difꜛ_layer (contribution from the layer only)
+#     2024-Jul-27: use bined PPAR to speed up
 #
 #######################################################################################################################################################################################################
 """
@@ -51,7 +52,6 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
         sbulk.auxil.e_net_dif .= 0;
         sbulk.auxil.r_net_sw = 0;
         for leaf in leaves
-            leaf.flux.auxil.apar .= 0;
             leaf.flux.auxil.ppar .= 0;
         end;
 
@@ -59,7 +59,7 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
     end;
 
     # if LAI <= 0, run soil albedo only
-    (; DIM_AZI, DIM_INCL, SPECTRA) = config;
+    (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS, SPECTRA) = config;
     rad_sw = spac.meteo.rad_sw;
     if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         # 1. update upward and downward direct and diffuse radiation profiles
@@ -82,7 +82,6 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
 
         # 4. compute leaf level PAR, APAR, and PPAR per ground area
         for leaf in leaves
-            leaf.flux.auxil.apar .= 0;
             leaf.flux.auxil.ppar .= 0;
         end;
 
@@ -180,12 +179,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
             # APAR for leaves
             Σ_apar_dif = sun_geo.auxil._apar_shaded' * SPECTRA.ΔΛ_PAR;
             Σ_apar_dir = sun_geo.auxil._apar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
-            leaf.flux.auxil.apar[end] = Σ_apar_dif;
-            # leaf.flux.auxil.apar[1:end-1] .= vec(sun_geo.s_aux.fs_abs) .* Σ_apar_dir .+ Σ_apar_dif;
-            for j in 1:DIM_AZI
-                leaf.flux.auxil.apar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_apar_dir .+ Σ_apar_dif;
-                #@. @view leaf.flux.auxil.apar[(j-1)*DIM_INCL+1:j*DIM_INCL] = sun_geo.s_aux.fs_abs[:,j] * Σ_apar_dir + Σ_apar_dif;
-            end;
+            sun_geo.auxil.apar_shaded[irt] = Σ_apar_dif;
+            sun_geo.auxil.apar_sunlit[:,:,irt] .= sun_geo.s_aux.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
 
             # PPAR for leaves (set PPAR to be the minimum of 2PPAR_700 and PPAR_750)
             Σ_ppar_dif_700 = view(sun_geo.auxil._ppar_shaded, SPECTRA.IΛ_PAR_700)' * SPECTRA.ΔΛ_PAR_700;
@@ -194,13 +189,37 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
             Σ_ppar_dir_750 = sun_geo.auxil._ppar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
             Σ_ppar_dif = min(2Σ_ppar_dif_700, Σ_ppar_dif_750);
             Σ_ppar_dir = min(2Σ_ppar_dir_700, Σ_ppar_dir_750);
-            leaf.flux.auxil.ppar[end] = Σ_ppar_dif;
-            #leaf.flux.auxil.ppar[1:end-1] .= vec(sun_geo.s_aux.fs_abs) .* Σ_ppar_dir .+ Σ_ppar_dif;
-            for j in 1:DIM_AZI
-                leaf.flux.auxil.ppar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_ppar_dir .+ Σ_ppar_dif;
+            sun_geo.auxil.ppar_shaded[irt] = Σ_ppar_dif;
+            sun_geo.auxil.ppar_sunlit[:,:,irt] .= sun_geo.s_aux.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
+
+            # bin the PPAR values based on their PPAR
+            min_ppar = minimum(view(sun_geo.auxil.ppar_sunlit, :, :, irt));
+            max_ppar = maximum(view(sun_geo.auxil.ppar_sunlit, :, :, irt));
+            δ_ppar = (max_ppar - min_ppar) / DIM_PPAR_BINS;
+            sun_geo.auxil._ppar_sum .= 0;
+            sun_geo.auxil._ppar_count .= 0;
+            if δ_ppar == 0
+                sun_geo.auxil._ppar_sum[1] += max_ppar * DIM_INCL * DIM_AZI;
+                sun_geo.auxil._ppar_count[1] += DIM_INCL * DIM_AZI;
+            else
+                for i in 1:DIM_INCL, j in 1:DIM_AZI
+                    ind = min(DIM_PPAR_BINS, Int((sun_geo.auxil.ppar_sunlit[i,j,irt] - min_ppar) ÷ δ_ppar + 1));
+                    sun_geo.auxil._ppar_sum[ind] += sun_geo.auxil.ppar_sunlit[i,j,irt];
+                    sun_geo.auxil._ppar_count[ind] += 1;
+                    sun_geo.auxil.ppar_index[i,j,irt] = ind;
+                end;
             end;
+            for i in 1:DIM_PPAR_BINS
+                if sun_geo.auxil._ppar_count[i] > 0
+                    leaf.flux.auxil.ppar[i] = sun_geo.auxil._ppar_sum[i] / sun_geo.auxil._ppar_count[i];
+                else
+                    leaf.flux.auxil.ppar[i] = 0;
+                end;
+            end;
+            sun_geo.auxil.ppar_fraction[1:DIM_PPAR_BINS,irt] .= sun_geo.auxil._ppar_count ./ ( DIM_INCL * DIM_AZI) .* sun_geo.s_aux.p_sunlit[irt];
+            sun_geo.auxil.ppar_fraction[end,irt] = 1 - sun_geo.s_aux.p_sunlit[irt];
+            leaf.flux.auxil.ppar[end] = Σ_ppar_dif;
         else
-            leaf.flux.auxil.apar .= 0;
             leaf.flux.auxil.ppar .= 0;
         end;
     end;

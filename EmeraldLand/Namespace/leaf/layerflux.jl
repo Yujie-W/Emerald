@@ -23,7 +23,7 @@ Base.@kwdef mutable struct CanopyLayerFluxState{FT}
     g_H₂O_s::Vector{FT}
 end;
 
-CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFluxState{FT}(0.01 .* ones(FT, config.DIM_INCL*config.DIM_AZI+1));
+CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFluxState{FT}(0.01 .* ones(FT, config.DIM_PPAR_BINS+1));
 
 
 #######################################################################################################################################################################################################
@@ -72,28 +72,12 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     a_n_mean::FT = 0
     "Net photosynthetic rate for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
     a_n::Vector{FT}
-    "Actual electron transport for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
-    etr::Vector{FT}
-    "Fluorescence quantum yield for sunlit leaves `[-]`"
-    ϕ_f_sunlit::Matrix{FT}
-    "Fluorescence quantum yield for shaded leaves `[-]`"
-    ϕ_f_shaded::FT = 0
-    "Photochemical quantum yield for sunlit and shaded (end element) leaves `[-]`"
-    ϕ_p::Vector{FT}
-
-    # Fluorescence yeilds of two photosystems
-    "PSI fluorescence quantum yield for sunlit and shaded (end element) leaves `[-]`"
-    ϕ_f1::Vector{FT}
-    "PSII fluorescence quantum yield for sunlit and shaded (end element) leaves `[-]`"
-    ϕ_f2::Vector{FT}
 
     # Integrators
     "Integrator for transpiration out"
     ∫∂w∂t_out::FT = 0
 
     # ppar from canopy radiation
-    "Absorbed photosynthetically active radiation for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
-    apar::Vector{FT}
     "Absorbed photosynthetically active radiation used for photosynthesis for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
     ppar::Vector{FT}
 
@@ -107,20 +91,14 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
 end;
 
 CanopyLayerFluxAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFluxAuxil{FT}(
-    g_CO₂      = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    ∂g∂t       = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    ∂A∂E       = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    p_CO₂_i    = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    p_CO₂_s    = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    a_g        = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    a_n        = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    etr        = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    ϕ_f_sunlit = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-    ϕ_p        = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    ϕ_f1       = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    ϕ_f2       = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    apar       = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
-    ppar       = zeros(FT, config.DIM_INCL*config.DIM_AZI+1),
+    g_CO₂   = zeros(FT, config.DIM_PPAR_BINS+1),
+    ∂g∂t    = zeros(FT, config.DIM_PPAR_BINS+1),
+    ∂A∂E    = zeros(FT, config.DIM_PPAR_BINS+1),
+    p_CO₂_i = zeros(FT, config.DIM_PPAR_BINS+1),
+    p_CO₂_s = zeros(FT, config.DIM_PPAR_BINS+1),
+    a_g     = zeros(FT, config.DIM_PPAR_BINS+1),
+    a_n     = zeros(FT, config.DIM_PPAR_BINS+1),
+    ppar    = zeros(FT, config.DIM_PPAR_BINS+1),
 );
 
 

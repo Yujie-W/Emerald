@@ -97,6 +97,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     STEADY_STATE_FLOW::Bool = true
 
     # Settings related to photosynthesis
+    "Number of sunlit PPAR bins for all the layers (to speed up the computation)"
+    DIM_PPAR_BINS::Int = 10
     "Enable the chemical energy related to photosynthesis and respiration"
     ENABLE_CHEMICAL_ENERGY::Bool = true
     "Whether to acclimate leaf Vcmax and Jmax TD"

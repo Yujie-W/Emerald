@@ -115,6 +115,7 @@ SensorGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = 
 # General
 #     2023-Oct-09: add struct SensorGeometryAuxil
 #     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
+#     2024-Jul-27: use bined PPAR to speed up (moved sif yield here from leaf)
 #
 #######################################################################################################################################################################################################
 """
@@ -168,6 +169,10 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     sif_obs_scattered::Vector{FT}
     "Total SIF at sensor direction"
     sif_obs::Vector{FT}
+    "Shaded SIF yield of all ther layers"
+    ϕ_f_shaded::Vector{FT}
+    "Sunlit SIF yield of all ther layers"
+    ϕ_f_sunlit::Vector{Matrix{FT}}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometryAuxil{FT}(
@@ -188,6 +193,8 @@ SensorGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = Se
             sif_obs_sunlit    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
             sif_obs_soil      = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
             sif_obs           = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            ϕ_f_shaded        = zeros(FT, n_layer),
+            ϕ_f_sunlit        = Matrix{FT}[ zeros(FT, config.DIM_INCL, config.DIM_AZI) for i in 1:n_layer],
 );
 
 

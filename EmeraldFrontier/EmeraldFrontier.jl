@@ -8,7 +8,7 @@ using NetcdfIO: read_nc, save_nc!
 using ..EmeraldData.GlobalDatasets: grid_spac
 using ..EmeraldData.WeatherDrivers: grid_weather_driver
 using ..EmeraldLand.Namespace: BulkSPAC, SPACConfiguration
-using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PAR, PPAR, T_VEG, ΦDFNP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF
+using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PAR, PPAR, T_VEG, ΦF_ΦP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF
 using ..EmeraldLand.SPAC: MODIS_BLUE, MODIS_EVI, MODIS_NDVI, MODIS_NIR, MODIS_NIRv, MODIS_NIRvR, MODIS_RED, OCO2_SIF759, OCO2_SIF770, TROPOMI_SIF683, TROPOMI_SIF740
 using ..EmeraldLand.SPAC: dull_aux!, initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!, t_aux!
 using ..EmeraldMath.Stats: nanmax, nanmean, nanmin

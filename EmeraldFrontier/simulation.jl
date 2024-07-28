@@ -244,7 +244,7 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
         dfr.ΣSIF      = ΣSIF(spac);
         dfr.ΣSIF_CHL  = ΣSIF_CHL(config, spac);
         dfr.ΣSIF_LEAF = ΣSIF_LEAF(config, spac);
-        dfr.ΦF, dfr.ΦP = ΦDFNP(spac);
+        dfr.ΦF,dfr.ΦP = ΦF_ΦP(spac);
     else
         dfr.BLUE   = NaN;
         dfr.EVI    = NaN;

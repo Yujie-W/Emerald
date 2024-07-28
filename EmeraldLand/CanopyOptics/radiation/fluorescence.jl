@@ -8,6 +8,7 @@
 #     2023-Oct-14: if LAI < = 0 or SZA > 89, set all fluxes to 0
 #     2023-Oct-18: SIF excitation is rescaled to leaf partitioning (accounting stem)
 #     2024-Jun-07: add step to compute e_sifꜛ_layer_sum (contribution to upward SIF from the layer after relection from the lower layers)
+#     2024-Jul-27: use bined PPAR to speed up
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
 #
@@ -53,7 +54,18 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     end;
 
     # run the fluorescence simulations only if fluorescence feature is enabled
-    (; DIM_AZI, SPECTRA, Φ_PHOTON) = config;
+    (; DIM_AZI, DIM_INCL, SPECTRA, Φ_PHOTON) = config;
+
+    # broadcast the phi_f from bined array to 3D array
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = leaves[ilf];
+
+        sen_geo.auxil.ϕ_f_shaded[irt] = leaf.photosystem.auxil.ϕ_f[end];
+        for i in 1:DIM_INCL, j in 1:DIM_AZI
+            sen_geo.auxil.ϕ_f_sunlit[irt][i,j] = leaf.photosystem.auxil.ϕ_f[ sun_geo.auxil.ppar_index[i,j,irt] ];
+        end;
+    end;
 
     #
     #
@@ -66,6 +78,9 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     a_stem = spac.cache.cache_sife_2;
     f_leaf = spac.cache.cache_sife_3;
     for irt in 1:n_layer
+        ϕ_sunlit = sen_geo.auxil.ϕ_f_sunlit[irt];
+        ϕ_shaded = sen_geo.auxil.ϕ_f_shaded[irt];
+
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
         a_leaf .= view(leaf.bio.auxil.α_leaf,SPECTRA.IΛ_SIFE) .* can_str.trait.δlai[irt];
@@ -99,9 +114,9 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         end;
 
         # add up the SIF from sunlit and shaded leaves for each layer through accounting for the SIF quantum yield
-        ϕ_sunlit_dif = lidf_weight(leaf.flux.auxil.ϕ_f_sunlit, can_str.t_aux.p_incl, sun_geo.auxil._vec_azi);
-        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, leaf.flux.auxil.ϕ_f_sunlit, sun_geo.s_aux.fs_abs, sun_geo.auxil._vec_azi, can_str.t_aux.p_incl);
-        sun_geo.auxil.e_sif_chl[:,irt] .= sun_geo.auxil._e_dif_shaded .* leaf.flux.auxil.ϕ_f_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
+        ϕ_sunlit_dif = lidf_weight(ϕ_sunlit, can_str.t_aux.p_incl, sun_geo.auxil._vec_azi);
+        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, ϕ_sunlit, sun_geo.s_aux.fs_abs, sun_geo.auxil._vec_azi, can_str.t_aux.p_incl);
+        sun_geo.auxil.e_sif_chl[:,irt] .= sun_geo.auxil._e_dif_shaded .* ϕ_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
     end;
 
     # 1. compute SIF emissions for different layers
@@ -160,8 +175,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         #
         #
         # add up the fluorescence at various wavelength bins for sunlit and (up- and down-ward) diffuse SIF
-        ϕ_sunlit = leaf.flux.auxil.ϕ_f_sunlit;
-        ϕ_shaded = leaf.flux.auxil.ϕ_f_shaded;
+        ϕ_sunlit = sen_geo.auxil.ϕ_f_sunlit[irt];
+        ϕ_shaded = sen_geo.auxil.ϕ_f_shaded[irt];
 
         # compute the weights
         sl_1_ = local_lidf_weight(ϕ_sunlit, 1);
