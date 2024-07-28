@@ -2,6 +2,7 @@ module EmeraldFrontier
 
 using DataFrames: DataFrame, DataFrameRow
 using ProgressMeter: @showprogress
+using Statistics: mean
 
 using NetcdfIO: read_nc, save_nc!
 

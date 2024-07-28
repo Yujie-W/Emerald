@@ -87,7 +87,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
         initialize_spac!(config, spac);
     else
         # adjust optimum t based on 10 day moving average skin temperature
-        prescribe_traits!(config, spac; t_clm = nanmean(spac.plant.memory.t_history));
+        prescribe_traits!(config, spac; t_clm = mean(spac.plant.memory.t_history));
     end;
 
     # update environmental conditions
@@ -198,7 +198,7 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; i
     elseif MESSAGE_LEVEL == 2
         for dfr in wdfr[selection]
             @show dfr.ind;
-            @time simulation!(config, spac, dfr);
+            simulation!(config, spac, dfr);
         end;
     else
         error("MESSAGE_LEVEL should be 0, 1, or 2");
@@ -222,7 +222,11 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
 
     # run the model
     soil_plant_air_continuum!(config, spac, δt);
-    mean_tleaf = nanmean([l.energy.s_aux.t for l in spac.plant.leaves]);
+    sum_tleaf = 0;
+    for leaf in spac.plant.leaves
+        sum_tleaf += leaf.energy.s_aux.t;
+    end;
+    mean_tleaf = sum_tleaf / length(spac.plant.leaves);
     push!(spac.plant.memory.t_history, mean_tleaf);
     if length(spac.plant.memory.t_history) > 240 deleteat!(spac.plant.memory.t_history,1) end;
 

@@ -35,8 +35,9 @@ function grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}) whe
     bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
     for i in eachindex(spac.plant.leaves)
         spac.plant.leaves[i].bio.trait.lma = gm_dict["LMA"];
-        spac.plant.leaves[i].flux.trait.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = bt);
-        spac.plant.leaves[i].flux.trait.stomatal_model.G1 = gm_dict["G1_MEDLYN_C3"];
+        #spac.plant.leaves[i].flux.trait.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = bt);
+        #spac.plant.leaves[i].flux.trait.stomatal_model.G1 = gm_dict["G1_MEDLYN_C3"];
+        spac.plant.leaves[i].flux.trait.stomatal_model = WangSM{FT}();
     end;
 
     # set up SAI
