@@ -31,6 +31,7 @@ CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFlux
 # Changes to this struct
 # General
 #     2024-Jul-25: add CanopyLayerFluxAuxil
+#     2024-Jul-30: add OCS to the trace gasses
 #
 #######################################################################################################################################################################################################
 """
@@ -50,6 +51,10 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     g_CO₂_b::FT = 3
     "Total leaf diffusive conductance to CO₂ for sunlit and shaded (end element) leaves `[mol m⁻² s⁻¹]`"
     g_CO₂::Vector{FT}
+    "Boundary leaf diffusive conductance to OCS `[mol m⁻² s⁻¹]`"
+    g_OCS_b::FT = 3 / 1.21
+    "Total leaf diffusive conductance to OCS for sunlit and shaded (end element) leaves `[mol m⁻² s⁻¹]`"
+    g_OCS::Vector{FT}
     "Marginal increase of conductance per time for sunlit and shaded (end element) leaves `[mol m⁻² s⁻²]`"
     ∂g∂t::Vector{FT}
     "Marginal increase in A per increase in transpiration rate for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
@@ -68,10 +73,14 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     a_g::Vector{FT}
     "Average gross photosynthetic rate [μmol m⁻² s⁻¹]"
     a_g_mean::FT = 0
-    "Average net photosynthetic rate `[μmol m⁻² s⁻¹]`"
-    a_n_mean::FT = 0
     "Net photosynthetic rate for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
     a_n::Vector{FT}
+    "Average net photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_n_mean::FT = 0
+    "Mean OCS flux `[μmol m⁻² s⁻¹]`"
+    f_ocs_mean::FT = 0
+    "OCS flux for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
+    f_ocs::Vector{FT}
 
     # Integrators
     "Integrator for transpiration out"
@@ -92,12 +101,14 @@ end;
 
 CanopyLayerFluxAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFluxAuxil{FT}(
     g_CO₂   = zeros(FT, config.DIM_PPAR_BINS+1),
+    g_OCS   = zeros(FT, config.DIM_PPAR_BINS+1),
     ∂g∂t    = zeros(FT, config.DIM_PPAR_BINS+1),
     ∂A∂E    = zeros(FT, config.DIM_PPAR_BINS+1),
     p_CO₂_i = zeros(FT, config.DIM_PPAR_BINS+1),
     p_CO₂_s = zeros(FT, config.DIM_PPAR_BINS+1),
     a_g     = zeros(FT, config.DIM_PPAR_BINS+1),
     a_n     = zeros(FT, config.DIM_PPAR_BINS+1),
+    f_ocs   = zeros(FT, config.DIM_PPAR_BINS+1),
     ppar    = zeros(FT, config.DIM_PPAR_BINS+1),
 );
 

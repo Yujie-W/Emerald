@@ -6,6 +6,7 @@
 # General
 #     2024-Jul-23: add C3CytoInfApTrait struct
 #     2024-Jul-27: use modified TD for η_C and η_L
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -60,6 +61,10 @@ Base.@kwdef mutable struct C3CytoInfApTrait{FT}
     "Rate constant of regulated heat loss via oxidized PS I center `[s⁻¹]`"
     K_X::FT = 14.5
 
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
+
     # Prognostic variables
     "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
     b₆f::FT = 350 / 300
@@ -76,6 +81,7 @@ end;
 # General
 #     2024-Feb-26: add C3CytoTrait struct
 #     2024-Jul-27: use modified TD for η_C and η_L
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -130,6 +136,10 @@ Base.@kwdef mutable struct C3CytoTrait{FT}
     "Rate constant of regulated heat loss via oxidized PS I center `[s⁻¹]`"
     K_X::FT = 14.5
 
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
+
     # Prognostic variables
     "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
     b₆f::FT = 350 / 300
@@ -145,6 +155,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Jul-22: add C3JBTrait struct
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -199,6 +210,10 @@ Base.@kwdef mutable struct C3JBTrait{FT}
     "Rate constant of regulated heat loss via oxidized PS I center `[s⁻¹]`"
     K_X::FT = 14.5
 
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
+
     # Prognostic variables
     "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
     b₆f::FT = 350 / 300
@@ -214,6 +229,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Feb-26: add C3VJPTrait struct
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -258,6 +274,10 @@ Base.@kwdef mutable struct C3VJPTrait{FT}
     "Maximal rate constant for PSII photochemistry"
     K_PSII::FT = 4
 
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
+
     # Embedded structures
     "Fluorescence model"
     FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
@@ -278,6 +298,7 @@ end;
 # General
 #     2024-Jul-22: add C3CLMTrait struct
 #     2024-Jul-22: CLM colimitations are all quadratic
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -322,6 +343,10 @@ Base.@kwdef mutable struct C3CLMTrait{FT}
     "Maximal rate constant for PSII photochemistry"
     K_PSII::FT = 4
 
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
+
     # Embedded structures
     "Fluorescence model"
     FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
@@ -342,6 +367,7 @@ end;
 # General
 #     2024-Jul-22: add C3FvCBTrait struct
 #     2024-Jul-22: FvCB colimitations are all minimum and quadratic (TODO: new algorithm required)
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -385,6 +411,10 @@ Base.@kwdef mutable struct C3FvCBTrait{FT}
     K_F::FT = 0.05
     "Maximal rate constant for PSII photochemistry"
     K_PSII::FT = 4
+
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
 
     # Embedded structures
     "Fluorescence model"
@@ -438,6 +468,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Apr-15: add C4CLMTrait struct
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -474,6 +505,10 @@ Base.@kwdef mutable struct C4CLMTrait{FT}
     "Maximal rate constant for PSII photochemistry"
     K_PSII::FT = 4
 
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 8862 * 1e-6
+
     # Embedded structures
     "Fluorescence model"
     FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
@@ -491,6 +526,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Feb-26: add C4VJPTrait struct
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #
 #######################################################################################################################################################################################################
 """
@@ -528,6 +564,10 @@ Base.@kwdef mutable struct C4VJPTrait{FT}
     K_F::FT = 0.05
     "Maximal rate constant for PSII photochemistry"
     K_PSII::FT = 4
+
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 8862 * 1e-6
 
     # Embedded structures
     "Fluorescence model"

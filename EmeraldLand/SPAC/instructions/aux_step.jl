@@ -7,6 +7,7 @@
 #     2023-Sep-30: add update_step_auxils! function
 #     2024-Jan-24: update leaf boundary layer conductance based on wind speed and leaf width
 #     2024-Jul-24: add leaf shedded flag
+#     2024-Jul-30: compute OCS boundary layer conductance as well
 #
 #######################################################################################################################################################################################################
 """
@@ -38,6 +39,7 @@ step_aux!(spac::BulkSPAC{FT}) where {FT} = (
         leaf = leaves[i];
         air = airs[lindex[i]];
         leaf.flux.auxil.g_CO₂_b = FT(0.14) * sqrt(air.auxil.wind / (FT(0.72) * leaf.bio.trait.width));
+        leaf.flux.auxil.g_OCS_b = leaf.flux.auxil.g_CO₂_b / FT(1.21);
     end;
 
     return nothing

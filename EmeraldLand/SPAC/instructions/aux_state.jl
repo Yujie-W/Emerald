@@ -13,6 +13,7 @@
 #     2024-Feb-27: add s_aux! method for Leaf
 #     2024-Feb-27: add s_aux! method for BulkSPAC
 #     2024-Jul-24: add leaf shedded flag
+#     2024-Jul-30: compute OCS fraction in the air layer
 #
 #######################################################################################################################################################################################################
 """
@@ -118,6 +119,7 @@ s_aux!(air::AirLayer{FT}) where {FT} = (
         air.s_aux.ps[i] = (air.state.ns[i] * GAS_R(FT) * air.s_aux.t) / air.t_aux.δz;
     end;
     air.s_aux.f_CO₂ = air.s_aux.ps[2] / air.state.p_air * 1e6;
+    air.s_aux.f_OCS = air.s_aux.ps[6] / air.state.p_air * 1e9;
 
     return nothing
 );

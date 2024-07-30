@@ -8,6 +8,7 @@
 #     2023-Oct-06: add method for SoilLayer
 #     2023-Oct-07: account for the runoff water in the heat capacitance of the top soil
 #     2023-Oct-09: add method for AirLayer
+#     2024-Jul-30: add OCS mole to air heat capacitance
 #
 #######################################################################################################################################################################################################
 """
@@ -54,6 +55,6 @@ heat_capacitance(capst::ExtraXylemCapacitorState{FT}, xyltr::XylemHydraulicsTrai
 heat_capacitance(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = heat_capacitance(leaf.capacitor.state, leaf.xylem.trait, leaf.bio.trait);
 
 # air
-heat_capacitance(airst::AirLayerState{FT}) where {FT} = (airst.ns[1] + airst.ns[2] + airst.ns[4] + airst.ns[5]) * CP_D_MOL(FT) + airst.ns[3] * CP_V_MOL(FT);
+heat_capacitance(airst::AirLayerState{FT}) where {FT} = (airst.ns[1] + airst.ns[2] + airst.ns[4] + airst.ns[5] + airst.ns[6]) * CP_D_MOL(FT) + airst.ns[3] * CP_V_MOL(FT);
 
 heat_capacitance(air::AirLayer{FT}) where {FT} = heat_capacitance(air.state);

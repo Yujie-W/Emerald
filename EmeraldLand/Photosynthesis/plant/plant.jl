@@ -9,6 +9,7 @@
 #     2023-Mar-11: only compute respiration rate if solar zenith angle >= 89
 #     2023-Mar-11: do nothing if LAI == 0
 #     2024-Jul-25: save average a_g and a_n (to use later)
+#     2024-Jul-30: compute OCS fluxes along with photosynthesis
 #
 #######################################################################################################################################################################################################
 """
@@ -42,9 +43,13 @@ plant_photosynthesis!(spac::BulkSPAC{FT}, mode::Union{GCO₂Mode, PCO₂Mode}, :
         air = airs[lindex[ilf]];
         leaf_photosynthesis!(spac.cache, leaf, air, mode; rd_only = rd_only);
 
-        # update the average photosynthesis rates (a_g and a_net)
-        leaf.flux.auxil.a_g_mean = leaf.flux.auxil.a_g' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
-        leaf.flux.auxil.a_n_mean = leaf.flux.auxil.a_n' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
+        # update the OCS flux
+        leaf.flux.auxil.f_ocs .= leaf.flux.auxil.g_OCS .* air.s_aux.ps[6] ./ air.state.p_air * FT(1e6);
+
+        # update the average rates
+        leaf.flux.auxil.a_g_mean   = leaf.flux.auxil.a_g'   * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
+        leaf.flux.auxil.a_n_mean   = leaf.flux.auxil.a_n'   * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
+        leaf.flux.auxil.f_ocs_mean = leaf.flux.auxil.f_ocs' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
     end;
 
     return nothing

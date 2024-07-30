@@ -11,6 +11,7 @@
 #     2023-Oct-16: add leaf stomatal conductance variables calculations
 #     2023-Oct-17: rename the function to substep_aux! to be consistent with the other function names such as t_aux!, s_aux!, dull_aux!, and step_aux!
 #     2024-Jul-24: add leaf shedded flag
+#     2024-Jul-30: compute OCS conductance along with CO₂ conductance
 #
 #######################################################################################################################################################################################################
 """
@@ -148,6 +149,7 @@ substep_aux!(leaf::CanopyLayer{FT}) where {FT} = (
 
     # update the stomatal conductance
     leaf.flux.auxil.g_CO₂ .= 1 ./ (1 ./ leaf.flux.auxil.g_CO₂_b .+ FT(1.6) ./ leaf.flux.state.g_H₂O_s);
+    leaf.flux.auxil.g_OCS .= 1 ./ (1 ./ leaf.flux.auxil.g_OCS_b .+ FT(1.934) ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (leaf.photosystem.trait.K_OCS .* leaf.photosystem.auxil.v_cmax));
 
     # clear the partial derivatives
     leaf.energy.auxil.∂e∂t = 0;

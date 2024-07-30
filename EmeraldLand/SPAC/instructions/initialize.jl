@@ -7,6 +7,7 @@
 #     2023-Oct-09: add function to initialize SPAC states
 #     2024-Feb-23: rename function to initialize_states! to be more consistent with its aim
 #     2024-Feb-27: rename function to initialize_energy_states! to be more consistent with its aim
+#     2024-Jul-30: add OCS to the trace gasses
 #
 #######################################################################################################################################################################################################
 """
@@ -56,8 +57,9 @@ initialize_energy_states!(air::AirLayer{FT}) where {FT} = (
     air.s_aux.ps[2] = air.s_aux.f_CO₂ * air.state.p_air * 1e-6;
     air.s_aux.ps[4] = F_N₂(FT) * air.state.p_air;
     air.s_aux.ps[5] = F_O₂(FT) * air.state.p_air;
+    air.s_aux.ps[6] = air.s_aux.f_OCS * air.state.p_air * 1e-9;
 
-    for i in 1:5
+    for i in 1:6
         air.state.ns[i] = air.s_aux.ps[i] * air.t_aux.δz / (GAS_R(FT) * air.s_aux.t);
     end;
 
