@@ -180,38 +180,30 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_shaded = 100.0;
 
         # respiration only
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = true);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = true);
         @test true;
-        PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(), 1.0; rd_only = true);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = true);
         @test true;
 
         # core model
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
-        @test true;
-        PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(), 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
         @test true;
 
         # optimality stomatal model
         leaf.flux.trait.stomatal_model = NS.WangSM{Float64}();
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(); rd_only = false);
-        @test true;
-        PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(); rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air; rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on G1)
         leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
         leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterG1();
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(); rd_only = false);
-        @test true;
-        PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(); rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air; rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on Vcmax)
         leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
         leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterVcmax();
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(); rd_only = false);
-        @test true;
-        PS.leaf_photosynthesis!(leaf, air, NS.PCO₂Mode(); rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air; rd_only = false);
         @test true;
     end;
 
@@ -220,25 +212,19 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
 
-        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
-        @test true;
-        PS.plant_photosynthesis!(spac, NS.PCO₂Mode());
+        PS.plant_photosynthesis!(spac);
         @test true;
 
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         spac.canopy.structure.trait.lai = 0.0;
-        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
-        @test true;
-        PS.plant_photosynthesis!(spac, NS.PCO₂Mode());
+        PS.plant_photosynthesis!(spac);
         @test true;
 
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         spac.canopy.sun_geometry.state.sza = 90;
-        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
-        @test true;
-        PS.plant_photosynthesis!(spac, NS.PCO₂Mode());
+        PS.plant_photosynthesis!(spac);
         @test true;
     end;
 end;

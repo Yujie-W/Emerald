@@ -18,7 +18,7 @@
     light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT}
     light_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
 
-Update the electron transport limited photosynthetic rate (none for PCO₂Mode and g_lc for GCO₂Mode), given
+Update the electron transport limited photosynthetic rate, given
 - `psm` `LeafPhotosystem` struct
 - `air` `AirLayer` struct for environmental conditions like O₂ partial pressure
 - `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
@@ -28,12 +28,12 @@ Update the electron transport limited photosynthetic rate (none for PCO₂Mode a
 function light_limited_rate! end;
 
 # For CanopyLayer
-# PCO₂Mode
+# Pressure mode
 light_limited_rate!(psm::CanopyLayerPhotosystem{FT}) where {FT} = light_limited_rate!(psm.auxil);
 
 light_limited_rate!(psa::CanopyLayerPhotosystemAuxil{FT}) where {FT} = (psa.a_j .= psa.j .* psa.e2c; return nothing);
 
-# GCO₂Mode
+# Conductance mode
 light_limited_rate!(
             cache::SPACCache{FT},
             psm::CanopyLayerPhotosystem{FT},
@@ -145,12 +145,12 @@ light_limited_rate!(
 
 
 # For Leaf
-# PCO₂Mode
+# Pressure mode
 light_limited_rate!(psm::LeafPhotosystem{FT}) where {FT} = light_limited_rate!(psm.auxil);
 
 light_limited_rate!(psa::LeafPhotosystemAuxil{FT}) where {FT} = (psa.a_j = psa.j * psa.e2c; return nothing);
 
-# GCO₂Mode
+# Conductance mode
 light_limited_rate!(
             cache::SPACCache{FT},
             psm::LeafPhotosystem{FT},

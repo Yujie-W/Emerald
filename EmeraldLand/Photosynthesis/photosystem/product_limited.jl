@@ -20,7 +20,7 @@
     product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT}
     product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
 
-Update the product limited photosynthetic rate (p_i for PCO₂Mode, g_lc for GCO₂Mode), given
+Update the product limited photosynthetic rate, given
 - `psm` `LeafPhotosystem` struct
 - `p_i` Internal CO₂ partial pressure in `Pa`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
@@ -31,7 +31,7 @@ Update the product limited photosynthetic rate (p_i for PCO₂Mode, g_lc for GCO
 function product_limited_rate! end;
 
 # For CanopyLayer
-# PCO₂Mode
+# Pressure mode
 product_limited_rate!(psm::CanopyLayerPhotosystem{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, p_i; β = β);
 
 product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, p_i::Vector{FT}; β::FT = FT(1)) where {FT} = (
@@ -58,7 +58,7 @@ product_limited_rate!(pst::C4VJPTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT},
     return nothing
 );
 
-# GCO₂Mode
+# Conductance mode
 product_limited_rate!(psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, air, g_lc; β = β);
 
 product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
@@ -108,7 +108,7 @@ product_limited_rate!(pst::C4VJPTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT},
 );
 
 # For Leaf
-# PCO₂Mode
+# Pressure mode
 product_limited_rate!(psm::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, p_i; β = β);
 
 product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, p_i::FT; β::FT = FT(1)) where {FT} = (
@@ -135,7 +135,7 @@ product_limited_rate!(pst::C4VJPTrait{FT}, psa::LeafPhotosystemAuxil{FT}, p_i::F
     return nothing
 );
 
-# GCO₂Mode
+# Conductance mode
 product_limited_rate!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, air, g_lc; β = β);
 
 product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::LeafPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT} = (

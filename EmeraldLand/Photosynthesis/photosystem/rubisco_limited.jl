@@ -19,7 +19,7 @@
     rubisco_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT}
     rubisco_limited_rate!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
 
-Update the RubisCO limited photosynthetic rate (p_i for PCO₂Mode and g_lc for GCO₂Mode), given
+Update the RubisCO limited photosynthetic rate, given
 - `psm` `C3Cyto`, `C3VJP`, or `C4VJP` struct
 - `p_i` Internal CO₂ partial pressure in `Pa`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
@@ -31,7 +31,7 @@ function rubisco_limited_rate! end;
 
 # For CanopyLayer
 
-# PCO₂Mode
+# Pressure mode
 rubisco_limited_rate!(
             psm::CanopyLayerPhotosystem{FT},
             p_i::Vector{FT};
@@ -49,7 +49,7 @@ rubisco_limited_rate!(
             p_i::Vector{FT};
             β::FT = FT(1)) where {FT} = (psa.a_c .= β .* psa.v_cmax; return nothing);
 
-# GCO₂Mode
+# Conductance mode
 rubisco_limited_rate!(
             cache::SPACCache{FT},
             psm::CanopyLayerPhotosystem{FT},
@@ -102,7 +102,7 @@ rubisco_limited_rate!(
             β::FT = FT(1)) where {FT} = (psa.a_c .= β .* psa.v_cmax; return nothing);
 
 # For Leaf
-# PCO₂Mode
+# Pressure mode
 rubisco_limited_rate!(
             psm::LeafPhotosystem{FT},
             p_i::FT;
@@ -120,7 +120,7 @@ rubisco_limited_rate!(
             p_i::FT;
             β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax; return nothing);
 
-# GCO₂Mode
+# Conductance mode
 rubisco_limited_rate!(
             cache::SPACCache{FT},
             psm::LeafPhotosystem{FT},

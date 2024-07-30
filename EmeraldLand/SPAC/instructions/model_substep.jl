@@ -24,7 +24,7 @@ function substep_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
     plant_pressure_profile!(config, spac);      # 3rd most time consuming function (about 19%)
     soil_profiles!(config, spac);
     β_factor!(spac);
-    plant_photosynthesis!(spac, GCO₂Mode());    # the most time consuming function (about 48%)
+    plant_photosynthesis!(spac);                # the most time consuming function (about 48%)
     stomatal_conductance_profile!(spac);        # 2nd most time consuming function (about 32%)
     spac_energy_flow!(config, spac);
 

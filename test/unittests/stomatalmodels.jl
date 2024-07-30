@@ -15,7 +15,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_shaded = 100.0;
         leaf.flux.auxil.g_CO₂_shaded = 0.02;
         leaf.flux.auxil.g_CO₂_sunlit .= 0.02;
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
 
         for sm in [NS.BallBerrySM{Float64}(), NS.GentineSM{Float64}(), NS.LeuningSM{Float64}(), NS.MedlynSM{Float64}()]
             leaf.flux.trait.stomatal_model = sm;
@@ -76,7 +76,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.state.g_H₂O_s_shaded = 0.02;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
         SPAC.substep_aux!(leaf);
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
 
         @test SM.∂A∂E(leaf, air) > 0;
         @test SM.∂A∂E(leaf, air, 1) > 0;
@@ -92,7 +92,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.state.g_H₂O_s_shaded = 0.2;
         leaf.flux.state.g_H₂O_s_sunlit .= 0.2;
         SPAC.substep_aux!(leaf);
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, spac.cache, -1.0);
 
         for sm in [NS.AndereggSM{Float64}(), NS.EllerSM{Float64}(), NS.SperrySM{Float64}(), NS.WangSM{Float64}(), NS.Wang2SM{Float64}()]
@@ -111,7 +111,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_sunlit .= 0;
         leaf.flux.auxil.ppar_shaded = 0;
         SPAC.substep_aux!(leaf);
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, spac.cache, 0.0);
 
         @test SM.∂R∂E(leaf, air, 1.0) > 0;
@@ -128,7 +128,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_sunlit .= 100;
         leaf.flux.auxil.ppar_shaded = 100;
         SPAC.substep_aux!(leaf);
-        PS.leaf_photosynthesis!(leaf, air, NS.GCO₂Mode(), 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, spac.cache, 0.0);
 
         for sm in [NS.AndereggSM{Float64}(), NS.EllerSM{Float64}(), NS.SperrySM{Float64}(), NS.WangSM{Float64}(), NS.Wang2SM{Float64}()]
@@ -187,7 +187,7 @@ import Emerald.EmeraldLand.SPAC
             leaf.flux.state.g_H₂O_s_sunlit .= 0;
             SM.limit_stomatal_conductance!(leaf);
         end;
-        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
+        PS.plant_photosynthesis!(spac);
         SM.stomatal_conductance_profile!(spac);
 
         for leaf in spac.plant.leaves
@@ -211,7 +211,7 @@ import Emerald.EmeraldLand.SPAC
             push!(g_shaded, deepcopy(leaf.flux.state.g_H₂O_s_shaded));
             push!(g_sunlit, deepcopy(leaf.flux.state.g_H₂O_s_sunlit));
         end;
-        PS.plant_photosynthesis!(spac, NS.GCO₂Mode());
+        PS.plant_photosynthesis!(spac);
         SM.stomatal_conductance_profile!(spac);
         SM.stomatal_conductance!(spac, 1.0);
 
