@@ -14,7 +14,7 @@
 """
 
     clear_legacy!(spac::BulkSPAC{FT}) where {FT}
-    clear_legacy!(organ::Union{Leaf{FT}, Root{FT}, Stem{FT}}) where {FT}
+    clear_legacy!(organ::Union{CanopyLayer{FT}, Leaf{FT}, Root{FT}, Stem{FT}}) where {FT}
 
 Clear the legacy for hydraulic organ or system, given
 - `spac` `BulkSPAC` type structure
@@ -45,6 +45,6 @@ clear_legacy!(spac::BulkSPAC{FT}) where {FT} = (
     return nothing
 );
 
-clear_legacy!(organ::Union{Leaf{FT}, Root{FT}, Stem{FT}}) where {FT} = clear_legacy!(organ.xylem);
+clear_legacy!(organ::Union{CanopyLayer{FT}, Leaf{FT}, Root{FT}, Stem{FT}}) where {FT} = clear_legacy!(organ.xylem);
 
 clear_legacy!(xylem::XylemHydraulics{FT}) where {FT} = (xylem.auxil.k_history .= 1; xylem.state.p_history .= 0; return nothing);

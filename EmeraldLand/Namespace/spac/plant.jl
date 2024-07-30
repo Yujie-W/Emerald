@@ -34,7 +34,7 @@ Base.@kwdef mutable struct Plant{FT}
     "Branch hydraulic system"
     branches::Vector{Stem{FT}}
     "Leaf per layer"
-    leaves::Union{Vector{CanopyLayer{FT}}, Vector{Leaf{FT}}}
+    leaves::Vector{CanopyLayer{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
     "Memory cache"
