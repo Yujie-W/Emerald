@@ -736,6 +736,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Jul-25: define CanopyLayerPhotosystemAuxil struct to store 1D leaf photosynthesis variables (for canopy layer; Leaf will be repurposed back to elementwise)
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #
 #######################################################################################################################################################################################################
 """
@@ -853,31 +854,35 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
     ϕ_psii_max::FT = 0
 end;
 
-CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLayerPhotosystemAuxil{FT}(
-    a_c   = zeros(FT, config.DIM_PPAR_BINS+1),
-    a_g   = zeros(FT, config.DIM_PPAR_BINS+1),
-    a_i   = zeros(FT, config.DIM_PPAR_BINS+1),
-    a_j   = zeros(FT, config.DIM_PPAR_BINS+1),
-    a_n   = zeros(FT, config.DIM_PPAR_BINS+1),
-    a_p   = zeros(FT, config.DIM_PPAR_BINS+1),
-    e2c   = zeros(FT, config.DIM_PPAR_BINS+1),
-    j     = zeros(FT, config.DIM_PPAR_BINS+1),
-    j_pot = zeros(FT, config.DIM_PPAR_BINS+1),
-    j_psi = zeros(FT, config.DIM_PPAR_BINS+1),
-    η     = zeros(FT, config.DIM_PPAR_BINS+1),
-    ϕ_f   = zeros(FT, config.DIM_PPAR_BINS+1),
-    ϕ_p   = zeros(FT, config.DIM_PPAR_BINS+1),
-    ϕ_f1  = zeros(FT, config.DIM_PPAR_BINS+1),
-    ϕ_f2  = zeros(FT, config.DIM_PPAR_BINS+1),
-    f_m   = zeros(FT, config.DIM_PPAR_BINS+1),
-    f_m′  = zeros(FT, config.DIM_PPAR_BINS+1),
-    f_o   = zeros(FT, config.DIM_PPAR_BINS+1),
-    f_o′  = zeros(FT, config.DIM_PPAR_BINS+1),
-    npq   = zeros(FT, config.DIM_PPAR_BINS+1),
-    q_e   = zeros(FT, config.DIM_PPAR_BINS+1),
-    q_p   = zeros(FT, config.DIM_PPAR_BINS+1),
-    k_n   = zeros(FT, config.DIM_PPAR_BINS+1),
-    k_p   = zeros(FT, config.DIM_PPAR_BINS+1)
+CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = (
+    cache_dim_ppar = isnothing(config.DIM_PPAR_BINS) ? config.DIM_INCL * config.DIM_AZI : config.DIM_PPAR_BINS;
+
+    return CanopyLayerPhotosystemAuxil{FT}(
+                a_c   = zeros(FT, cache_dim_ppar+1),
+                a_g   = zeros(FT, cache_dim_ppar+1),
+                a_i   = zeros(FT, cache_dim_ppar+1),
+                a_j   = zeros(FT, cache_dim_ppar+1),
+                a_n   = zeros(FT, cache_dim_ppar+1),
+                a_p   = zeros(FT, cache_dim_ppar+1),
+                e2c   = zeros(FT, cache_dim_ppar+1),
+                j     = zeros(FT, cache_dim_ppar+1),
+                j_pot = zeros(FT, cache_dim_ppar+1),
+                j_psi = zeros(FT, cache_dim_ppar+1),
+                η     = zeros(FT, cache_dim_ppar+1),
+                ϕ_f   = zeros(FT, cache_dim_ppar+1),
+                ϕ_p   = zeros(FT, cache_dim_ppar+1),
+                ϕ_f1  = zeros(FT, cache_dim_ppar+1),
+                ϕ_f2  = zeros(FT, cache_dim_ppar+1),
+                f_m   = zeros(FT, cache_dim_ppar+1),
+                f_m′  = zeros(FT, cache_dim_ppar+1),
+                f_o   = zeros(FT, cache_dim_ppar+1),
+                f_o′  = zeros(FT, cache_dim_ppar+1),
+                npq   = zeros(FT, cache_dim_ppar+1),
+                q_e   = zeros(FT, cache_dim_ppar+1),
+                q_p   = zeros(FT, cache_dim_ppar+1),
+                k_n   = zeros(FT, cache_dim_ppar+1),
+                k_p   = zeros(FT, cache_dim_ppar+1)
+    )
 );
 
 

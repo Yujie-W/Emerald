@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2024-Jul-25: add CanopyLayerFluxState
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #
 #######################################################################################################################################################################################################
 """
@@ -23,7 +24,11 @@ Base.@kwdef mutable struct CanopyLayerFluxState{FT}
     g_H₂O_s::Vector{FT}
 end;
 
-CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFluxState{FT}(0.01 .* ones(FT, config.DIM_PPAR_BINS+1));
+CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = (
+    cache_dim_ppar = isnothing(config.DIM_PPAR_BINS) ? config.DIM_INCL * config.DIM_AZI : config.DIM_PPAR_BINS;
+
+    return CanopyLayerFluxState{FT}(0.01 .* ones(FT, cache_dim_ppar+1))
+);
 
 
 #######################################################################################################################################################################################################
@@ -32,6 +37,7 @@ CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFlux
 # General
 #     2024-Jul-25: add CanopyLayerFluxAuxil
 #     2024-Jul-30: add OCS to the trace gasses
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #
 #######################################################################################################################################################################################################
 """
@@ -99,17 +105,21 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     β::FT = NaN
 end;
 
-CanopyLayerFluxAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyLayerFluxAuxil{FT}(
-    g_CO₂   = zeros(FT, config.DIM_PPAR_BINS+1),
-    g_OCS   = zeros(FT, config.DIM_PPAR_BINS+1),
-    ∂g∂t    = zeros(FT, config.DIM_PPAR_BINS+1),
-    ∂A∂E    = zeros(FT, config.DIM_PPAR_BINS+1),
-    p_CO₂_i = zeros(FT, config.DIM_PPAR_BINS+1),
-    p_CO₂_s = zeros(FT, config.DIM_PPAR_BINS+1),
-    a_g     = zeros(FT, config.DIM_PPAR_BINS+1),
-    a_n     = zeros(FT, config.DIM_PPAR_BINS+1),
-    f_ocs   = zeros(FT, config.DIM_PPAR_BINS+1),
-    ppar    = zeros(FT, config.DIM_PPAR_BINS+1),
+CanopyLayerFluxAuxil(config::SPACConfiguration{FT}) where {FT} = (
+    cache_dim_ppar = isnothing(config.DIM_PPAR_BINS) ? config.DIM_INCL * config.DIM_AZI : config.DIM_PPAR_BINS;
+
+    return CanopyLayerFluxAuxil{FT}(
+                g_CO₂   = zeros(FT, cache_dim_ppar+1),
+                g_OCS   = zeros(FT, cache_dim_ppar+1),
+                ∂g∂t    = zeros(FT, cache_dim_ppar+1),
+                ∂A∂E    = zeros(FT, cache_dim_ppar+1),
+                p_CO₂_i = zeros(FT, cache_dim_ppar+1),
+                p_CO₂_s = zeros(FT, cache_dim_ppar+1),
+                a_g     = zeros(FT, cache_dim_ppar+1),
+                a_n     = zeros(FT, cache_dim_ppar+1),
+                f_ocs   = zeros(FT, cache_dim_ppar+1),
+                ppar    = zeros(FT, cache_dim_ppar+1),
+    )
 );
 
 

@@ -9,6 +9,7 @@
 #     2023-Oct-18: SIF excitation is rescaled to leaf partitioning (accounting stem)
 #     2024-Jun-07: add step to compute e_sifꜛ_layer_sum (contribution to upward SIF from the layer after relection from the lower layers)
 #     2024-Jul-27: use bined PPAR to speed up
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
 #
@@ -54,7 +55,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     end;
 
     # run the fluorescence simulations only if fluorescence feature is enabled
-    (; DIM_AZI, DIM_INCL, SPECTRA, Φ_PHOTON) = config;
+    (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS, SPECTRA, Φ_PHOTON) = config;
 
     # broadcast the phi_f from bined array to 3D array
     for irt in 1:n_layer
@@ -62,8 +63,14 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         leaf = leaves[ilf];
 
         sen_geo.auxil.ϕ_f_shaded[irt] = leaf.photosystem.auxil.ϕ_f[end];
-        for i in 1:DIM_INCL, j in 1:DIM_AZI
-            sen_geo.auxil.ϕ_f_sunlit[irt][i,j] = leaf.photosystem.auxil.ϕ_f[ sun_geo.auxil.ppar_index[i,j,irt] ];
+        if isnothing(DIM_PPAR_BINS)
+            for i in 1:DIM_AZI
+                sen_geo.auxil.ϕ_f_sunlit[irt][:,i] .= leaf.photosystem.auxil.ϕ_f[(i-1)*DIM_INCL+1:i*DIM_INCL];
+            end;
+        else
+            for i in 1:DIM_INCL, j in 1:DIM_AZI
+                sen_geo.auxil.ϕ_f_sunlit[irt][i,j] = leaf.photosystem.auxil.ϕ_f[ sun_geo.auxil.ppar_index[i,j,irt] ];
+            end;
         end;
     end;
 

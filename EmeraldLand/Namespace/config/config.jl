@@ -24,6 +24,7 @@
 #     2024-Feb-27: add constructor function to create the configuration using customized settings
 #     2024-Feb-28: add field VERTICAL_BIO
 #     2024-Jul-22: add field ENABLE_CHEMICAL_ENERGY
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #
 #######################################################################################################################################################################################################
 """
@@ -98,7 +99,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
 
     # Settings related to photosynthesis
     "Number of sunlit PPAR bins for all the layers (to speed up the computation)"
-    DIM_PPAR_BINS::Int = 15
+    DIM_PPAR_BINS::Union{Int,Nothing} = nothing
     "Enable the chemical energy related to photosynthesis and respiration"
     ENABLE_CHEMICAL_ENERGY::Bool = true
     "Whether to acclimate leaf Vcmax and Jmax TD"
