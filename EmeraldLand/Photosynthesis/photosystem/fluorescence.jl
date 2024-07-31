@@ -282,9 +282,9 @@ photosystem_coefficients!(
     # rc._f_m′ = K_F / (K_F + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
 
     # calculate fluorescence quantum yield
-    @. psa.f_o  = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
+    psa.f_o = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
+    psa.f_m = pst.K_F / (pst.K_F + psa.k_d);
     @. psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
-    @. psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
     @. psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     @. psa.ϕ_f1 = psa.ϕ_f;
@@ -317,29 +317,30 @@ photosystem_coefficients!(
     end;
 
     # calculate photochemical yield
-    psa.ϕ_p = psa.a_g / (psa.e2c * psa.f_psii * ppar);
+    @. psa.ϕ_p = psa.a_g / (psa.e2c * psa.f_psii * ppar);
 
     # calculate the qL
-    q_l = exp.(-flm.K_B * ppar);
-    psa.k_p = pst.K_PSII * q_l;
-    psa.k_n = (psa.k_p - psa.ϕ_p * (pst.K_F + psa.k_d + psa.k_p)) / psa.ϕ_p;
+    q_l = cache.cache_incl_azi_2_1;
+    @. q_l = exp(-flm.K_B * ppar);
+    @. psa.k_p = pst.K_PSII * q_l;
+    @. psa.k_n = (psa.k_p - psa.ϕ_p * (pst.K_F + psa.k_d + psa.k_p)) / psa.ϕ_p;
 
     # calculate fluorescence quantum yield
     psa.f_o  = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
-    psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
-    psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
-    psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
-    psa.ϕ_f1 = psa.ϕ_f;
-    psa.ϕ_f2 = psa.ϕ_f;
+    @. psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
+    @. psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
+    @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
+    @. psa.ϕ_f1 = psa.ϕ_f;
+    @. psa.ϕ_f2 = psa.ϕ_f;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
 
     # calculate quenching rates
-    psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
-    psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
+    @. psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
+    @. psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
+    @. psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
 
     return nothing
 );

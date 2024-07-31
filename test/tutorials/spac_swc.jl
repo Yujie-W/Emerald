@@ -18,7 +18,7 @@ using Test;
     # Change SWC and the junction water content accordingly
     θ_min = spac.soils[1].trait.vc.Θ_RES;
     θ_max = spac.soils[1].trait.vc.Θ_SAT;
-    for θ in 0.09:-0.001:0.079
+    for θ in 0.09:-0.0001:0.085
         for s in spac.soils
             s.state.θ = θ;
         end;

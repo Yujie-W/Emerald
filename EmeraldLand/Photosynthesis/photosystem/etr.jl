@@ -36,7 +36,8 @@ photosystem_electron_transport!(
 photosystem_electron_transport!(
             cache::SPACCache{FT},
             pst::Union{C3CytoInfApTrait{FT},C3CytoTrait{FT}, C3JBTrait{FT}},
-            pss::C3State{FT}, psa::CanopyLayerPhotosystemAuxil{FT},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
             ppar::Vector{FT},
             p_i::Union{FT, Vector{FT}};
             β::FT = FT(1)) where {FT} = (
@@ -67,6 +68,7 @@ photosystem_electron_transport!(
 );
 
 photosystem_electron_transport!(
+            cache::SPACCache{FT},
             pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::C4State{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},

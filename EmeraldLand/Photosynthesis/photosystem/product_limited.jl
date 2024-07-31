@@ -59,46 +59,75 @@ product_limited_rate!(pst::C4VJPTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT},
 );
 
 # Conductance mode
-product_limited_rate!(psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = product_limited_rate!(psm.trait, psm.auxil, air, g_lc; β = β);
+product_limited_rate!(
+            cache::SPACCache{FT},
+            psm::CanopyLayerPhotosystem{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = product_limited_rate!(cache, psm.trait, psm.auxil, air, g_lc; β = β);
 
-product_limited_rate!(pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
-    psa.a_p .= β .* psa.v_cmax ./ 2;
+product_limited_rate!(
+            cache::SPACCache{FT},
+            pst::Union{C3CLMTrait{FT}, C3CytoTrait{FT}, C3VJPTrait{FT}},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            air::AirLayer{FT}, g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = (psa.a_p .= β .* psa.v_cmax ./ 2; return nothing);
 
-    return nothing
-);
+product_limited_rate!(
+            cache::SPACCache{FT},
+            pst::Union{C3CytoInfApTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = (psa.a_p .= FT(Inf); return nothing);
 
-product_limited_rate!(pst::Union{C3CytoInfApTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
-    psa.a_p .= FT(Inf);
+product_limited_rate!(
+            cache::SPACCache{FT},
+            pst::C4CLMTrait{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = (
+    # unpack variables from the cache
+    g = cache.cache_incl_azi_2_1;
+    p_i = cache.cache_incl_azi_2_2;
 
-    return nothing
-);
-
-product_limited_rate!(pst::C4CLMTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
     a = air.state.p_air;
-    g = FT(1e6) * g_lc;
+    @. g = FT(1e6) * g_lc;
     k = β * psa.k_pep_clm * pst.v_cmax25;
     p = air.s_aux.ps[2];
     r = β * psa.r_d;
 
-    p_i = (g * p + a * r) / (a * k + g);
+    @. p_i = (g * p + a * r) / (a * k + g);
     psa.a_p .= k .* p_i;
 
     return nothing
 );
 
-product_limited_rate!(pst::C4VJPTrait{FT}, psa::CanopyLayerPhotosystemAuxil{FT}, air::AirLayer{FT}, g_lc::Vector{FT}; β::FT = FT(1)) where {FT} = (
+product_limited_rate!(
+            cache::SPACCache{FT},
+            pst::C4VJPTrait{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            air::AirLayer{FT},
+            g_lc::Vector{FT};
+            β::FT = FT(1)) where {FT} = (
+    # unpack the variables from the cache
+    f = cache.cache_incl_azi_2_1;
+    qb = cache.cache_incl_azi_2_2;
+    an = cache.cache_incl_azi_2_3;
+
     a = β * psa.v_pmax;
     d = psa.k_pep;
-    f = air.state.p_air / g_lc * FT(1e-6);
+    @. f = air.state.p_air / g_lc * FT(1e-6);
     p = air.s_aux.ps[2];
     r = β * psa.r_d;
 
     qa = f;
-    qb = f * r - p - d - a * f;
+    @. qb = f * r - p - d - a * f;
     qc = a * p - r * (p + d);
-    an = lower_quadratic.(qa, qb, qc);
+    @. an = lower_quadratic(qa, qb, qc);
 
-    if g_lc[0] == 0 && g_lc[end] == 0
+    if g_lc[1] == 0 && g_lc[end] == 0
         psa.a_p .= r;
     else
         psa.a_p .= an .+ r;

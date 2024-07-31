@@ -77,7 +77,7 @@ leaf_photosynthesis!(
     photosystem_electron_transport!(cache, leaf.photosystem, leaf.flux.auxil.ppar, leaf.flux.auxil.p_CO₂_i; β = β);
     rubisco_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
     light_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
-    product_limited_rate!(leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
+    product_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
     colimit_photosynthesis!(leaf.photosystem; β = β);
 
     # update CO₂ partial pressures at the leaf surface and internal airspace (evaporative front)

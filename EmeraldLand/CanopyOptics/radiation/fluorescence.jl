@@ -65,7 +65,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         sen_geo.auxil.ϕ_f_shaded[irt] = leaf.photosystem.auxil.ϕ_f[end];
         if isnothing(DIM_PPAR_BINS)
             for i in 1:DIM_AZI
-                sen_geo.auxil.ϕ_f_sunlit[irt][:,i] .= leaf.photosystem.auxil.ϕ_f[(i-1)*DIM_INCL+1:i*DIM_INCL];
+                sen_geo.auxil.ϕ_f_sunlit[irt][:,i] .= view(leaf.photosystem.auxil.ϕ_f,(i-1)*DIM_INCL+1:i*DIM_INCL);
             end;
         else
             for i in 1:DIM_INCL, j in 1:DIM_AZI

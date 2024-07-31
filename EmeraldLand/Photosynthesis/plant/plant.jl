@@ -43,7 +43,7 @@ plant_photosynthesis!(spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
         leaf_photosynthesis!(spac.cache, leaf, air; rd_only = rd_only);
 
         # update the OCS flux
-        leaf.flux.auxil.f_ocs .= leaf.flux.auxil.g_OCS .* air.s_aux.ps[6] ./ air.state.p_air * FT(1e6);
+        leaf.flux.auxil.f_ocs .= leaf.flux.auxil.g_OCS .* air.s_aux.ps[6] ./ air.state.p_air .* FT(1e6);
 
         # update the average rates
         leaf.flux.auxil.a_g_mean   = leaf.flux.auxil.a_g'   * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);

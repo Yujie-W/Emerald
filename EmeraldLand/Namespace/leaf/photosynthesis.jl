@@ -827,11 +827,11 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
 
     # fluorescence variables
     "Dark adapted yield (`Kp=0`)"
-    f_m::Vector{FT}
+    f_m::FT = 0
     "Light adapted yield (`Kp=0`)"
     f_m′::Vector{FT}
     "Dark-adapted fluorescence yield (`Kp=max`)"
-    f_o::Vector{FT}
+    f_o::FT = 0
     "Light-adapted fluorescence yield in the dark (`Kp=max`)"
     f_o′::Vector{FT}
     "Non-Photochemical quenching "
@@ -873,9 +873,7 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 ϕ_p   = zeros(FT, cache_dim_ppar+1),
                 ϕ_f1  = zeros(FT, cache_dim_ppar+1),
                 ϕ_f2  = zeros(FT, cache_dim_ppar+1),
-                f_m   = zeros(FT, cache_dim_ppar+1),
                 f_m′  = zeros(FT, cache_dim_ppar+1),
-                f_o   = zeros(FT, cache_dim_ppar+1),
                 f_o′  = zeros(FT, cache_dim_ppar+1),
                 npq   = zeros(FT, cache_dim_ppar+1),
                 q_e   = zeros(FT, cache_dim_ppar+1),

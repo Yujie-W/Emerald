@@ -26,7 +26,7 @@ photosynthesis_only!(cache::SPACCache{FT}, psm::CanopyLayerPhotosystem{FT}, air:
     photosystem_electron_transport!(cache, psm, ppar, FT(20); β = FT(1));
     rubisco_limited_rate!(cache, psm, air, g_lc; β = FT(1));
     light_limited_rate!(cache, psm, air, g_lc; β = FT(1));
-    product_limited_rate!(psm, air, g_lc; β = FT(1));
+    product_limited_rate!(cache, psm, air, g_lc; β = FT(1));
     colimit_photosynthesis!(psm; β = FT(1));
 
     return psm.auxil.a_n
