@@ -17,7 +17,7 @@ using ..EmeraldIO.Text: read_csv
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration
 using ..EmeraldLand.Namespace: sync_state!
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
-using ..EmeraldLand.SPAC: GPP, PPAR, initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!
+using ..EmeraldLand.SPAC: GPP, PPAR, initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!, push_t_history!, soil_plant_air_continuum!
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Threading: dynamic_workers!

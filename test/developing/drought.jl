@@ -17,7 +17,7 @@ EmeraldLand.SPAC.spac!(config, spac, FT(0));
 
 while !spac.plant._leaf_shedded
 
-    EmeraldLand.SPAC.spac!(config, spac, FT(3600));
+    EmeraldLand.SPAC.spac!(config, spac, 3600);
     @info "Debugging" spac.plant.leaves[end].xylem.auxil.pressure[end] spac.plant.junction.state.v_storage spac.plant.junction.s_aux.pressure spac.plant.leaves[end].energy.s_aux.t;
     println();
 

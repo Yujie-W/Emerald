@@ -104,6 +104,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     ENABLE_CHEMICAL_ENERGY::Bool = true
     "Whether to acclimate leaf Vcmax and Jmax TD"
     T_CLM::Bool = true
+    "Number of temperature memory (hours for hourly simulation)"
+    T_CLM_N::Int = 240
 
     # Trace gas information
     "Trace gas air"

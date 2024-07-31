@@ -94,7 +94,8 @@ function ΣSIF_LEAF end;
     # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
     Σsif::FT = 0;
     for i in eachindex(leaves)
-        Σsif += (canopy.sun_geometry.auxil.e_sifꜜ_layer[:,i] .+ canopy.sun_geometry.auxil.e_sifꜛ_layer[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
+        Σsif += view(canopy.sun_geometry.auxil.e_sifꜜ_layer,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
+        Σsif += view(canopy.sun_geometry.auxil.e_sifꜛ_layer,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return Σsif

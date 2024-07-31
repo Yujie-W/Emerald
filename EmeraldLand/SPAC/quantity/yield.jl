@@ -19,14 +19,19 @@ function ΦF_ΦP(spac::BulkSPAC{FT}) where {FT}
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
 
+    ppar_phi_f = spac.cache.cache_incl_azi_2_1;
+    ppar_phi_p = spac.cache.cache_incl_azi_2_2;
+
     sum_ϕfa::FT = 0;
     sum_ϕpa::FT = 0;
     sum_par::FT = 0;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sum_ϕfa += (leaf.flux.auxil.ppar .* leaf.photosystem.auxil.ϕ_f)' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
-        sum_ϕpa += (leaf.flux.auxil.ppar .* leaf.photosystem.auxil.ϕ_p)' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
+        @. ppar_phi_f = leaf.flux.auxil.ppar * leaf.photosystem.auxil.ϕ_f;
+        @. ppar_phi_p = leaf.flux.auxil.ppar * leaf.photosystem.auxil.ϕ_p;
+        sum_ϕfa += ppar_phi_f' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
+        sum_ϕpa += ppar_phi_p' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
         sum_par += leaf.flux.auxil.ppar' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
     end;
 

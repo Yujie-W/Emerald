@@ -12,7 +12,7 @@ using Test;
     config = EmeraldLand.Namespace.SPACConfiguration(FT);
     spac = EmeraldLand.Namespace.BulkSPAC(config);
     EmeraldLand.SPAC.initialize_spac!(config, spac);
-    EmeraldLand.SPAC.spac!(config, spac, FT(3600));
+    EmeraldLand.SPAC.spac!(config, spac, 3600);
     @test true;
 
     # bin PPAR to 10 and 20 bins
@@ -24,8 +24,8 @@ using Test;
     spac_20 = EmeraldLand.Namespace.BulkSPAC(config_20);
     EmeraldLand.SPAC.initialize_spac!(config_10, spac_10);
     EmeraldLand.SPAC.initialize_spac!(config_20, spac_20);
-    EmeraldLand.SPAC.spac!(config_10, spac_10, FT(3600));
-    EmeraldLand.SPAC.spac!(config_20, spac_20, FT(3600));
+    EmeraldLand.SPAC.spac!(config_10, spac_10, 3600);
+    EmeraldLand.SPAC.spac!(config_20, spac_20, 3600);
     @test true;
 
     # @info "Check the results" EmeraldLand.SPAC.GPP(spac) EmeraldLand.SPAC.GPP(spac_10) EmeraldLand.SPAC.GPP(spac_20);

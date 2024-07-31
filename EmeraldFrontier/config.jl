@@ -16,6 +16,7 @@ Create a SPAC configuration struct, given
 function spac_config(gm_dict::Dict)
     config = SPACConfiguration(gm_dict["FT"]);
     config.MESSAGE_LEVEL = gm_dict["MESSAGE_LEVEL"];
+    config.DIM_PPAR_BINS = 10;
 
     return config
 end;

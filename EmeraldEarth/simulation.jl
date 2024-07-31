@@ -91,11 +91,7 @@ grid_simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::Bu
     prescribe_gm_wd_data!(CACHE_CONFIG, spac, gm_dict, wd_dict);
     initialize_spac!(CACHE_CONFIG, spac, state);
     soil_plant_air_continuum!(CACHE_CONFIG, spac, 3600);
-
-    # update the temperature history
-    mean_tleaf = nanmean([l.energy.s_aux.t for l in spac.plant.leaves]);
-    push!(spac.plant.memory.t_history, mean_tleaf);
-    if length(spac.plant.memory.t_history) > 240 deleteat!(spac.plant.memory.t_history,1) end;
+    push_t_history!(CACHE_CONFIG, spac);
 
     return BulkSPACStates(spac)
 );

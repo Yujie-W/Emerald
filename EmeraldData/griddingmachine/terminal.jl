@@ -1,3 +1,4 @@
+#=
 # Operation functions for terminal IO
 to_bool_or_uppercase(x) = (
     if uppercase(x) in ["Y", "YES"]
@@ -39,3 +40,4 @@ is_gm_mt(x::String) = has_no_space(x) && x[end:end] in ["H", "D", "M", "Y"];
 is_nothing_or_all_letters(x::Union{Nothing,String}) = isnothing(x) || has_no_space(x);
 
 is_nothing_or_vector(x) = isnothing(x) || x isa Vector;
+=#

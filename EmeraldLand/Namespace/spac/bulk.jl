@@ -128,7 +128,8 @@ BulkSPAC(config::SPACConfiguration{FT};
                 trunk        = trunk,
                 branches     = branches,
                 leaves       = leaves,
-                leaves_index = ind_layer);
+                leaves_index = ind_layer,
+                memory       = PlantMemory(config));
 
     # set up the cache
     cache = SPACCache{FT}(

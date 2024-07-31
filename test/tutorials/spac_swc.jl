@@ -25,7 +25,7 @@ using Test;
         psoil = EmeraldLand.SoilHydraulics.soil_ψ_25(spac.soils[1].trait.vc, θ) * EmeraldLand.PhysicalChemistry.relative_surface_tension(spac.soils[1].s_aux.t);
         spac.plant.junction.state.v_storage = EmeraldLand.PlantHydraulics.capacitance_volume(spac.plant.junction.trait.pv, psoil, spac.plant.junction.s_aux.t) * spac.plant.junction.trait.v_max;
         EmeraldLand.SPAC.initialize_spac!(config, spac);
-        EmeraldLand.SPAC.spac!(config, spac, FT(3600));
+        EmeraldLand.SPAC.spac!(config, spac, 3600);
         @show θ EmeraldLand.SPAC.GPP(spac);
     end;
 end;

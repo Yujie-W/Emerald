@@ -10,7 +10,6 @@ using ..EmeraldUtility
 
 include("fluxtower/FluxTower.jl");
 include("globaldatasets/GlobalDatasets.jl");
-include("griddingmachine/GriddingMachineData.jl");
 include("weatherdriver/WeatherDrivers.jl");
 
 

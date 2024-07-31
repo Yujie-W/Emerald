@@ -275,6 +275,58 @@ LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
     )
 );
 
+sync_struct!(bio_from::LeafBioAuxil{FT}, bio_to::LeafBioAuxil{FT}) where {FT} = (
+    bio_to.f_cab          .= bio_from.f_cab;
+    bio_to.f_car          .= bio_from.f_car;
+    bio_to.f_ppar         .= bio_from.f_ppar;
+    bio_to.f_psii         .= bio_from.f_psii;
+    bio_to.f_sife         .= bio_from.f_sife;
+    bio_to.ρ_interface_θ  .= bio_from.ρ_interface_θ;
+    bio_to.τ_interface_θ  .= bio_from.τ_interface_θ;
+    bio_to.ρ_interface_12 .= bio_from.ρ_interface_12;
+    bio_to.τ_interface_12 .= bio_from.τ_interface_12;
+    bio_to.ρ_interface_21 .= bio_from.ρ_interface_21;
+    bio_to.τ_interface_21 .= bio_from.τ_interface_21;
+    bio_to.τ_sub_1        .= bio_from.τ_sub_1;
+    bio_to.τ_sub_2        .= bio_from.τ_sub_2;
+    bio_to.τ_all_1        .= bio_from.τ_all_1;
+    bio_to.τ_all_2        .= bio_from.τ_all_2;
+    bio_to.ρ_layer_θ      .= bio_from.ρ_layer_θ;
+    bio_to.τ_layer_θ      .= bio_from.τ_layer_θ;
+    bio_to.ρ_layer_1      .= bio_from.ρ_layer_1;
+    bio_to.τ_layer_1      .= bio_from.τ_layer_1;
+    bio_to.ρ_layer_2      .= bio_from.ρ_layer_2;
+    bio_to.τ_layer_2      .= bio_from.τ_layer_2;
+    bio_to.ρ_leaf         .= bio_from.ρ_leaf;
+    bio_to.τ_leaf         .= bio_from.τ_leaf;
+    bio_to.α_leaf         .= bio_from.α_leaf;
+    bio_to.mat_b_1        .= bio_from.mat_b_1;
+    bio_to.mat_f_1        .= bio_from.mat_f_1;
+    bio_to.mat_b_2        .= bio_from.mat_b_2;
+    bio_to.mat_f_2        .= bio_from.mat_f_2;
+    bio_to.mat_b_1_out    .= bio_from.mat_b_1_out;
+    bio_to.mat_f_1_out    .= bio_from.mat_f_1_out;
+    bio_to.mat_b_2_out    .= bio_from.mat_b_2_out;
+    bio_to.mat_f_2_out    .= bio_from.mat_f_2_out;
+    bio_to.mat_b          .= bio_from.mat_b;
+    bio_to.mat_f          .= bio_from.mat_f;
+    bio_to.mat_mean       .= bio_from.mat_mean;
+    bio_to.mat_diff       .= bio_from.mat_diff;
+    bio_to.psi_mat_b      .= bio_from.psi_mat_b;
+    bio_to.psi_mat_f      .= bio_from.psi_mat_f;
+    bio_to.psi_mat_mean   .= bio_from.psi_mat_mean;
+    bio_to.psi_mat_diff   .= bio_from.psi_mat_diff;
+    bio_to.psii_mat_b     .= bio_from.psii_mat_b;
+    bio_to.psii_mat_f     .= bio_from.psii_mat_f;
+    bio_to.psii_mat_mean  .= bio_from.psii_mat_mean;
+    bio_to.psii_mat_diff  .= bio_from.psii_mat_diff;
+    bio_to._ϕ_sif         .= bio_from._ϕ_sif;
+    bio_to._ϕ1_sif        .= bio_from._ϕ1_sif;
+    bio_to._ϕ2_sif        .= bio_from._ϕ2_sif;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

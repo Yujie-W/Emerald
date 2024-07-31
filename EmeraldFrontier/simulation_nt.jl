@@ -16,31 +16,32 @@
 #######################################################################################################################################################################################################
 """
 
-    prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}
+    prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::NamedTuple, ind::Int; initialize_state::Bool = false) where {FT}
 
 Prescribe traits and environmental conditions, given
 - `config` `SPACConfiguration` type SPAC configuration
 - `spac` `BulkSPAC` type SPAC
-- `dfr` `DataFrameRow` type weather driver
+- `df` `NamedTuple` type weather driver
+- `ind` Index of the named tuple
 - `initialize_state` If true, initialize the energy state of spac
 
 """
-function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; initialize_state::Bool = false) where {FT}
+function prescribe_nt!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::NamedTuple, ind::Int; initialize_state::Bool = false) where {FT}
     # read the data out of dataframe row to reduce memory allocation
-    df_atm::FT = dfr.P_ATM;
-    df_chl::FT = dfr.CHL;
-    df_cli::FT = dfr.CI;
-    df_co2::FT = dfr.CO2;
-    df_dif::FT = dfr.RAD_DIF;
-    df_dir::FT = dfr.RAD_DIR;
-    df_doy::FT = dfr.FDOY;
-    df_lai::FT = dfr.LAI;
-    df_lwr::FT = dfr.RAD_LW;
-    df_pcp::FT = dfr.PRECIP;
-    df_tar::FT = dfr.T_AIR;
-    df_vcm::FT = dfr.VCMAX25;
-    df_vpd::FT = dfr.VPD;
-    df_wnd::FT = dfr.WIND;
+    df_atm::FT = df.P_ATM[ind];
+    df_chl::FT = df.CHL[ind];
+    df_cli::FT = df.CI[ind];
+    df_co2::FT = df.CO2[ind];
+    df_dif::FT = df.RAD_DIF[ind];
+    df_dir::FT = df.RAD_DIR[ind];
+    df_doy::FT = df.FDOY[ind];
+    df_lai::FT = df.LAI[ind];
+    df_lwr::FT = df.RAD_LW[ind];
+    df_pcp::FT = df.PRECIP[ind];
+    df_tar::FT = df.T_AIR[ind];
+    df_vcm::FT = df.VCMAX25[ind];
+    df_vpd::FT = df.VPD[ind];
+    df_wnd::FT = df.WIND[ind];
 
     # prescribe the precipitation related parameters
     spac.meteo.rain = df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
@@ -70,15 +71,15 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
 
     # prescribe soil water contents and leaf temperature and initialize the spac (for first time step only)
     if initialize_state
-        df_tlf::FT = dfr.T_LEAF;
-        df_ts1::FT = dfr.T_SOIL_1;
-        df_ts2::FT = dfr.T_SOIL_2;
-        df_ts3::FT = dfr.T_SOIL_3;
-        df_ts4::FT = dfr.T_SOIL_4;
-        df_sw1::FT = dfr.SWC_1;
-        df_sw2::FT = dfr.SWC_2;
-        df_sw3::FT = dfr.SWC_3;
-        df_sw4::FT = dfr.SWC_4;
+        df_tlf::FT = df.T_LEAF[ind];
+        df_ts1::FT = df.T_SOIL_1[ind];
+        df_ts2::FT = df.T_SOIL_2[ind];
+        df_ts3::FT = df.T_SOIL_3[ind];
+        df_ts4::FT = df.T_SOIL_4[ind];
+        df_sw1::FT = df.SWC_1[ind];
+        df_sw2::FT = df.SWC_2[ind];
+        df_sw3::FT = df.SWC_3[ind];
+        df_sw4::FT = df.SWC_4[ind];
 
         # adjust optimum t based on the first known temperature
         spac.plant.memory.t_history .= FT[max(df_tar, df_tlf)];
@@ -141,8 +142,8 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :)
-    simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT}
+    simulation_nt!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :)
+    simulation_nt!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT}
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
@@ -158,47 +159,48 @@ The second method can be used to run externally prepared config, spac, and weath
 - `wdf` Weather driver dataframe
 
 """
-function simulation! end;
+function simulation_nt! end;
 
-simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
+simulation_nt!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) = (
     config = spac_config(gm_dict);
     spac = grid_spac(config, gm_dict);
-    wdf = grid_weather_driver(wd_tag, gm_dict; appending = appending);
+    df = grid_weather_driver(wd_tag, gm_dict; appending = appending);
 
     # add the fields to store outputs
     for label in DF_VARIABLES
-        wdf[!,label] .= 0.0;
+        df[!,label] .= 0.0;
     end;
     for label in DF_SIMULATIONS
-        wdf[!,label] .= NaN;
+        df[!,label] .= NaN;
     end;
 
-    simulation!(config, spac, wdf; initialize_state = initialize_state, saving = saving, selection = selection);
+    # convert the DataFrame to NamedTuple
+    wdf = NamedTuple{Tuple(Symbol.(names(df)))}(Tuple([df[:,n] for n in names(df)]));
 
-    return isnothing(saving) ? wdf : nothing
+    simulation_nt!(config, spac, wdf; initialize_state = initialize_state, saving = saving, selection = selection);
+
+    return isnothing(saving) ? DataFrame(wdf) : nothing
 );
 
-simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT} = (
+simulation_nt!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::NamedTuple; initialize_state::Union{Nothing,Bool} = true, saving::Union{Nothing,String} = nothing, selection = :) where {FT} = (
     (; MESSAGE_LEVEL) = config;
 
-    wdfr = eachrow(wdf);
-
     # initialize spac based on initialize_state
-    prescribe!(config, spac, wdfr[1]; initialize_state = initialize_state);
+    prescribe_nt!(config, spac, wdf, 1; initialize_state = initialize_state);
 
     # iterate through the time steps
     if MESSAGE_LEVEL == 0
-        for dfr in wdfr[selection]
-            simulation!(config, spac, dfr);
+        for idx in eachindex(wdf.FDOY)[selection]
+            simulation_nt!(config, spac, wdf, idx);
         end;
     elseif MESSAGE_LEVEL == 1
-        @showprogress for dfr in wdfr[selection]
-            simulation!(config, spac, dfr);
+        @showprogress for idx in eachindex(wdf.FDOY)[selection]
+            simulation_nt!(config, spac, wdf, idx);
         end;
     elseif MESSAGE_LEVEL == 2
-        for dfr in wdfr[selection]
-            @show dfr.ind;
-            simulation!(config, spac, dfr);
+        for idx in eachindex(wdf.FDOY)[selection]
+            @show wdf.ind[idx];
+            simulation_nt!(config, spac, wdf, idx);
         end;
     else
         error("MESSAGE_LEVEL should be 0, 1, or 2");
@@ -206,19 +208,20 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::DataFrame; i
 
     # save simulation results to hard drive
     if !isnothing(saving)
-        save_nc!(saving, wdf[selection,[n != "ind" for n in names(wdf)]]);
+        df = DataFrame(wdf);
+        save_nc!(saving, df[selection, [n != "ind" for n in names(df)]]);
     end;
 
     return nothing
 );
 
-simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow; δt::Number = 3600) where {FT} = (
+simulation_nt!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::NamedTuple, ind::Int; δt::Number = 3600) where {FT} = (
     # read the data out of dataframe row to reduce memory allocation
-    df_dif::FT = dfr.RAD_DIF;
-    df_dir::FT = dfr.RAD_DIR;
+    df_dif::FT = wdf.RAD_DIF[ind];
+    df_dir::FT = wdf.RAD_DIR[ind];
 
     # prescribe parameters
-    prescribe!(config, spac, dfr);
+    prescribe_nt!(config, spac, wdf, ind);
 
     # run the model
     soil_plant_air_continuum!(config, spac, δt);
@@ -226,49 +229,56 @@ simulation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::DataFrameRow
 
     # save the SIF and reflectance if there is sunlight
     if df_dir + df_dif >= 10
-        dfr.EVI       = MODIS_EVI(config, spac);
-        dfr.NDVI      = MODIS_NDVI(config, spac);
-        dfr.NIRvI     = MODIS_NIRv(config, spac);
-        dfr.NIRvR     = MODIS_NIRvR(config, spac);
-        dfr.PAR       = PAR(config, spac);
-        dfr.PPAR      = PPAR(spac);
-        dfr.SIF683    = TROPOMI_SIF683(config, spac);
-        dfr.SIF740    = TROPOMI_SIF740(config, spac);
-        dfr.SIF757    = OCO2_SIF759(config, spac);
-        dfr.SIF771    = OCO2_SIF770(config, spac);
-        dfr.ΣSIF      = ΣSIF(spac);
-        dfr.ΣSIF_CHL  = ΣSIF_CHL(config, spac);
-        dfr.ΣSIF_LEAF = ΣSIF_LEAF(config, spac);
-        dfr.ΦF,dfr.ΦP = ΦF_ΦP(spac);
+        wdf.EVI[ind]            = MODIS_EVI(config, spac);
+        wdf.NDVI[ind]           = MODIS_NDVI(config, spac);
+        wdf.NIRvI[ind]          = MODIS_NIRv(config, spac);
+        wdf.NIRvR[ind]          = MODIS_NIRvR(config, spac);
+        wdf.PAR[ind]            = PAR(config, spac);
+        wdf.PPAR[ind]           = PPAR(spac);
+        wdf.SIF683[ind]         = TROPOMI_SIF683(config, spac);
+        wdf.SIF740[ind]         = TROPOMI_SIF740(config, spac);
+        wdf.SIF757[ind]         = OCO2_SIF759(config, spac);
+        wdf.SIF771[ind]         = OCO2_SIF770(config, spac);
+        wdf.ΣSIF[ind]           = ΣSIF(spac);
+        wdf.ΣSIF_CHL[ind]       = ΣSIF_CHL(config, spac);
+        wdf.ΣSIF_LEAF[ind]      = ΣSIF_LEAF(config, spac);
+        wdf.ΦF[ind],wdf.ΦP[ind] = ΦF_ΦP(spac);
     else
-        dfr.EVI    = NaN;
-        dfr.NDVI   = NaN;
-        dfr.NIRvI  = NaN;
-        dfr.NIRvR  = NaN;
-        dfr.ΦF     = NaN;
-        dfr.ΦP     = NaN;
+        wdf.EVI[ind]    = NaN;
+        wdf.NDVI[ind]   = NaN;
+        wdf.NIRvI[ind]  = NaN;
+        wdf.NIRvR[ind]  = NaN;
+        wdf.ΦF[ind]     = NaN;
+        wdf.ΦP[ind]     = NaN;
     end;
 
     # save water contents and temperatures based on t_on and θ_on
-    dfr.MOD_SWC_1 = spac.soils[1].state.θ;
-    dfr.MOD_SWC_2 = spac.soils[2].state.θ;
-    dfr.MOD_SWC_3 = spac.soils[3].state.θ;
-    dfr.MOD_SWC_4 = spac.soils[4].state.θ;
+    wdf.MOD_SWC_1[ind] = spac.soils[1].state.θ;
+    wdf.MOD_SWC_2[ind] = spac.soils[2].state.θ;
+    wdf.MOD_SWC_3[ind] = spac.soils[3].state.θ;
+    wdf.MOD_SWC_4[ind] = spac.soils[4].state.θ;
 
-    tleaf = [leaf.energy.s_aux.t for leaf in spac.plant.leaves];
-    dfr.MOD_T_L_MAX  = nanmax(tleaf);
-    dfr.MOD_T_L_MEAN = nanmean(tleaf);
-    dfr.MOD_T_L_MIN  = nanmin(tleaf);
-    dfr.MOD_T_S_1    = spac.soils[1].s_aux.t;
-    dfr.MOD_T_S_2    = spac.soils[2].s_aux.t;
-    dfr.MOD_T_S_3    = spac.soils[3].s_aux.t;
-    dfr.MOD_T_S_4    = spac.soils[4].s_aux.t;
+    sum_t::FT = 0;
+    min_t::FT = 999;
+    max_t::FT = 0;
+    for l in spac.plant.leaves
+        sum_t += l.energy.s_aux.t;
+        min_t = min(min_t, l.energy.s_aux.t);
+        max_t = max(max_t, l.energy.s_aux.t);
+    end;
+    wdf.MOD_T_L_MAX[ind]  = max_t;
+    wdf.MOD_T_L_MEAN[ind] = sum_t / length(spac.plant.leaves);
+    wdf.MOD_T_L_MIN[ind]  = min_t;
+    wdf.MOD_T_S_1[ind]    = spac.soils[1].s_aux.t;
+    wdf.MOD_T_S_2[ind]    = spac.soils[2].s_aux.t;
+    wdf.MOD_T_S_3[ind]    = spac.soils[3].s_aux.t;
+    wdf.MOD_T_S_4[ind]    = spac.soils[4].s_aux.t;
 
     # save the total flux into the DataFrame
-    dfr.BETA  = BETA(spac);
-    dfr.F_CO2 = CNPP(spac);
-    dfr.F_GPP = GPP(spac);
-    dfr.F_H2O = T_VEG(spac);
+    wdf.BETA[ind]  = BETA(spac);
+    wdf.F_CO2[ind] = CNPP(spac);
+    wdf.F_GPP[ind] = GPP(spac);
+    wdf.F_H2O[ind] = T_VEG(spac);
 
     return nothing
 );

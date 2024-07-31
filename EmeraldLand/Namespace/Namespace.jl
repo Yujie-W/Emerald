@@ -14,7 +14,8 @@ using ..EmeraldIO.Jld2: read_jld2
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
 using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
-using ..EmeraldUtility.StructEqual: sync_struct!
+
+import ..EmeraldUtility.StructEqual: sync_struct!
 
 
 # Please do not use V1/V2/V3 files here as they do not contain the Phi_PSI and Phi_PSII variables

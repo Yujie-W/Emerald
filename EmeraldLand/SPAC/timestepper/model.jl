@@ -57,7 +57,7 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
 
     # 4. determine whether to shed leaves
     bottom_leaf = spac.plant.leaves[1];
-    p_crt = xylem_pressure(bottom_leaf.xylem.trait.vc, FT(KR_THRESHOLD)) * relative_surface_tension(bottom_leaf.energy.s_aux.t);
+    p_crt = xylem_pressure(bottom_leaf.xylem.trait.vc, KR_THRESHOLD) * relative_surface_tension(bottom_leaf.energy.s_aux.t);
     if !spac.plant._leaf_shedded && bottom_leaf.xylem.auxil.pressure[end] < p_crt
         @warn "Leaf shedding is triggered";
         shed_leaves!(config, spac);

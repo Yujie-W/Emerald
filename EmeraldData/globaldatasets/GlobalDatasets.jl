@@ -3,6 +3,7 @@ module GlobalDatasets
 using DataFrames: DataFrame
 using Dates: isleapyear
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
+using Statistics: mean
 
 using GriddingMachine.Blender: regrid
 using GriddingMachine.Collector: query_collection

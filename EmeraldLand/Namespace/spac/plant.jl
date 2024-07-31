@@ -38,7 +38,7 @@ Base.@kwdef mutable struct Plant{FT}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
     "Memory cache"
-    memory::PlantMemory{FT} = PlantMemory{FT}()
+    memory::PlantMemory{FT}
 
     # Cache variables
     "Whether leaves are shedded"

@@ -22,11 +22,16 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct PlantMemory{FT}
     "Memory about the historical temperature"
-    t_history::Vector{FT} = FT[298]
+    t_history::Vector{FT}
+    "Index of the current time step"
+    i_history::Int = 1
 end;
 
+PlantMemory(config::SPACConfiguration{FT}) where {FT} = PlantMemory{FT}(t_history = ones(FT, config.T_CLM_N) .* T₂₅());
+
 sync_state!(state_from::PlantMemory{FT}, state_to::PlantMemory{FT}) where {FT} = (
-    state_to.t_history = deepcopy(state_from.t_history);
+    state_to.t_history .= state_from.t_history;
+    state_to.i_history = state_from.i_history;
 
     return nothing
 );
