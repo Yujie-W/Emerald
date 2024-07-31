@@ -7,6 +7,9 @@ using Test
         include("tutorials/frontier.jl");
     end;
 
+    # change the configurations
+    include("tutorials/config/turn_off_refl_sif.jl");
+
     include("tutorials/leaf_quantum_yields.jl");
     include("tutorials/leaf_spectra.jl");
     include("tutorials/leaf_sif_spectra.jl");

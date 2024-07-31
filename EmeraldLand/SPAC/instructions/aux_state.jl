@@ -115,7 +115,7 @@ s_aux!(leaf::CanopyLayer{FT}) where {FT} = (
 
 s_aux!(air::AirLayer{FT}) where {FT} = (
     air.s_aux.t = air.state.Σe / heat_capacitance(air);
-    for i in 1:5
+    for i in 1:6
         air.s_aux.ps[i] = (air.state.ns[i] * GAS_R(FT) * air.s_aux.t) / air.t_aux.δz;
     end;
     air.s_aux.f_CO₂ = air.s_aux.ps[2] / air.state.p_air * 1e6;

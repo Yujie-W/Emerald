@@ -5,6 +5,9 @@ import Emerald.EmeraldLand.SPAC
 
 
 @testset verbose = true "Photosynthesis.jl" begin
+    config = NS.SPACConfiguration(Float64);
+    spac = NS.BulkSPAC(config);
+
     @testset "Temperature dependencies" begin
         air = NS.AirLayer{Float64}();
         ps = NS.LeafPhotosystem{Float64}();
@@ -47,7 +50,7 @@ import Emerald.EmeraldLand.SPAC
 
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
-            PS.rubisco_limited_rate!(ps, air, 0.2);
+            PS.rubisco_limited_rate!(spac.cache, ps, air, 0.2);
             @test true;
         end;
     end;
@@ -67,7 +70,7 @@ import Emerald.EmeraldLand.SPAC
 
             PS.photosystem_temperature_dependence!(ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
-            PS.light_limited_rate!(ps, air, 0.2);
+            PS.light_limited_rate!(spac.cache, ps, air, 0.2);
             @test true;
         end;
     end;
@@ -152,7 +155,7 @@ import Emerald.EmeraldLand.SPAC
         for i in 1:4
             ps.trait = psts[i];
             ps.state = psss[i];
-            PS.photosynthesis_only!(ps, air, 0.2, 100.0, 298.15);
+            PS.photosynthesis_only!(spac.cache, ps, air, 0.2, 100.0);
             @test true;
         end;
     end;
@@ -180,30 +183,28 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar_shaded = 100.0;
 
         # respiration only
-        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = true);
-        @test true;
-        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = true);
+        PS.leaf_photosynthesis!(spac.cache, leaf, air, 1.0; rd_only = true);
         @test true;
 
         # core model
-        PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(spac.cache, leaf, air, 1.0; rd_only = false);
         @test true;
 
         # optimality stomatal model
         leaf.flux.trait.stomatal_model = NS.WangSM{Float64}();
-        PS.leaf_photosynthesis!(leaf, air; rd_only = false);
+        PS.leaf_photosynthesis!(spac.cache, leaf, air; rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on G1)
         leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
         leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterG1();
-        PS.leaf_photosynthesis!(leaf, air; rd_only = false);
+        PS.leaf_photosynthesis!(spac.cache, leaf, air; rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on Vcmax)
         leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
         leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterVcmax();
-        PS.leaf_photosynthesis!(leaf, air; rd_only = false);
+        PS.leaf_photosynthesis!(spac.cache, leaf, air; rd_only = false);
         @test true;
     end;
 

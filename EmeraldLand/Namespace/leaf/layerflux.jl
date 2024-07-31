@@ -66,7 +66,7 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     "Marginal increase in A per increase in transpiration rate for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
     ∂A∂E::Vector{FT}
     "Marginal increase in Θ per increase in transpiration rate"
-    ∂Θ∂E::FT = 0
+    ∂Θ∂E::Vector{FT}
 
     # CO₂ pressures
     "Leaf internal CO₂ partial pressure for sunlit and shaded (end element) leaves `[Pa]`"
@@ -113,6 +113,7 @@ CanopyLayerFluxAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 g_OCS   = zeros(FT, cache_dim_ppar+1),
                 ∂g∂t    = zeros(FT, cache_dim_ppar+1),
                 ∂A∂E    = zeros(FT, cache_dim_ppar+1),
+                ∂Θ∂E    = zeros(FT, cache_dim_ppar+1),
                 p_CO₂_i = zeros(FT, cache_dim_ppar+1),
                 p_CO₂_s = zeros(FT, cache_dim_ppar+1),
                 a_g     = zeros(FT, cache_dim_ppar+1),

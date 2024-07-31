@@ -35,5 +35,6 @@ function ∂Θₙ∂E end;
     e  = gh * d / air.state.p_air;
     a  = photosynthesis_only!(leaf.photosystem, air, gc, leaf.flux.auxil.ppar_mem);
 
+    # TODO: be careful with leaf level rate or area level rate
     return a / max(eps(FT), (leaf.xylem.auxil.e_crit - e)) * F_FITNESS
 );

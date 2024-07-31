@@ -77,16 +77,17 @@ mutable struct CanopyLayerStates{FT<:AbstractFloat}
     "CanopyLayer energy state"
     energy::LeafEnergyState{FT}
     "CanopyLayer flux state"
-    flux::LeafFluxState{FT}
+    flux::CanopyLayerFluxState{FT}
     "Photosynthesis system state"
     photosystem::Union{C3State{FT}, C4State{FT}}
     "CanopyLayer xylem hydraulics state"
     xylem::XylemHydraulicsState{FT}
 end;
 
-CanopyLayerStates(clayer::CanopyLayer{FT}) where {FT} = CanopyLayerStates{FT}(clayer.bio.state, clayer.capacitor.state, clayer.energy.state, clayer.flux.state, clayer.photosystem.state, clayer.xylem.state);
+CanopyLayerStates(clayer::CanopyLayer{FT}) where {FT} =
+    CanopyLayerStates{FT}(clayer.bio.state, clayer.capacitor.state, clayer.energy.state, clayer.flux.state, clayer.photosystem.state, clayer.xylem.state);
 
-CanopyLayerStates(clayer::CanopyLayer{FT}, states::CanopyLayerStates{FT}) where {FT} = (
+sync_state!(clayer::CanopyLayer{FT}, states::CanopyLayerStates{FT}) where {FT} = (
     sync_state!(clayer.bio.state, states.bio);
     sync_state!(clayer.capacitor.state, states.capacitor);
     sync_state!(clayer.energy.state, states.energy);

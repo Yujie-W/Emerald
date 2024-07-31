@@ -93,7 +93,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemHydraulicsAuxilNSS{FT}
     "Connected to the soil (for root only)"
     connected::Bool = true
-    "Critical flow rate `[mol s⁻¹ m⁻²]`"
+    "Critical flow rate `[mol s⁻¹]`"
     e_crit::FT = 0
     "Flow rates at each plane (N+1) `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"
     flow::Vector{FT}
@@ -138,7 +138,7 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemHydraulicsAuxilSS{FT}
     "Connected to the soil (for root only)"
     connected::Bool = true
-    "Critical flow rate `[mol s⁻¹ m⁻²]`"
+    "Critical flow rate `[mol s⁻¹]`"
     e_crit::FT = 0
     "Flow rates through the system `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"
     flow::FT = 0

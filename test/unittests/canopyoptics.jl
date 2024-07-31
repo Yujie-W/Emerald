@@ -143,10 +143,7 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .> 0);
-            @test all(leaf.flux.auxil.apar_sunlit .> 0);
-            @test all(leaf.flux.auxil.ppar_shaded .> 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .> 0);
+            @test all(leaf.flux.auxil.ppar .> 0);
         end;
     end;
 
@@ -190,10 +187,9 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         for leaf in spac.plant.leaves
-            leaf.flux.auxil.ϕ_f_shaded = 0.01;
-            leaf.flux.auxil.ϕ_f_sunlit .= 0.01;
-            leaf.flux.auxil.ϕ_f1_sunlit .= 0.01;
-            leaf.flux.auxil.ϕ_f2_sunlit .= 0.01;
+            leaf.photosystem.auxil.ϕ_f .= 0.01;
+            leaf.photosystem.auxil.ϕ_f1 .= 0.01;
+            leaf.photosystem.auxil.ϕ_f2 .= 0.01;
         end;
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
@@ -242,10 +238,7 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .> 0);
-            @test all(leaf.flux.auxil.apar_sunlit .> 0);
-            @test all(leaf.flux.auxil.ppar_shaded .> 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .> 0);
+            @test all(leaf.flux.auxil.ppar .> 0);
         end;
         @test all(spac.canopy.structure.auxil.lw_layer .> 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .> 0);
@@ -270,10 +263,7 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .== 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .== 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .== 0);
-            @test all(leaf.flux.auxil.apar_sunlit .== 0);
-            @test all(leaf.flux.auxil.ppar_shaded .== 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .== 0);
+            @test all(leaf.flux.auxil.ppar .== 0);
         end;
         @test all(spac.canopy.structure.auxil.lw_layer .> 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .> 0);
@@ -301,10 +291,7 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.soil_bulk.auxil.e_net_dif .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .== 0);
-            @test all(leaf.flux.auxil.apar_sunlit .== 0);
-            @test all(leaf.flux.auxil.ppar_shaded .== 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .== 0);
+            @test all(leaf.flux.auxil.ppar .== 0);
         end;
         @test all(spac.canopy.structure.auxil.lw_layer .== 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .== 0);

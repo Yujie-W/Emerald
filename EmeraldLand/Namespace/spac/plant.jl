@@ -80,7 +80,7 @@ mutable struct PlantStates{FT<:AbstractFloat}
     "Branch hydraulic system"
     branches::Vector{StemStates{FT}}
     "CanopyLayer or Leaf per layer"
-    leaves::Union{Vector{CanopyLayerStates{FT}}, Vector{LeafStates{FT}}}
+    leaves::Vector{CanopyLayerStates{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
     "Memory cache"

@@ -7,58 +7,31 @@
 #     2023-Oct-16: make sure maximum gsc does not exceed g_CO₂_b
 #
 #######################################################################################################################################################################################################
-∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
-    d = max(1, p_s - air.s_aux.ps[3]);
-
-    # compute the E at the current setting
-    gs = leaf.flux.state.g_H₂O_s_shaded;
-    gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air * leaf.xylem.trait.area;
-
-    dEdP_1 = ∂E∂P(leaf, e; δe = δe);
-    dEdP_2 = ∂E∂P(leaf, e; δe = -δe);
-    dEdP_m = ∂E∂P(leaf, FT(0); δe = δe);
-    dKdE   = (dEdP_2 - dEdP_1) / δe;
+∂Θ∂E!(cache::SPACCache{FT}, sm::SperrySM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
+    e = flow_out(leaf);
+    δe = e / 100;
+    dedp1 = ∂E∂P(leaf, e; δe = δe);
+    dedp2 = ∂E∂P(leaf, e; δe = -δe);
+    dedpm = ∂E∂P(leaf, FT(0); δe = δe);
+    dkde  = (dedp2 - dedp1) / δe;
 
     # compute maximum A
-    ghm = leaf.xylem.auxil.e_crit / d * air.state.p_air;
-    if ghm < FT(1.35) * leaf.flux.auxil.g_CO₂_b
-        gsm = 1 / (1 / ghm - 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-        gcm = 1 / (FT(1.6) / gsm + 1 / leaf.flux.auxil.g_CO₂_b);
-    else
-        gsm = FT(Inf);
-        gcm = leaf.flux.auxil.g_CO₂_b;
-    end;
-    am = photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_shaded);
+    f_dif = relative_diffusive_coefficient(leaf.energy.s_aux.t);
+    g_max = leaf.flux.trait.g_limits[2] * f_dif;
 
-    return dKdE * am / dEdP_m
-);
+    # use the cache vars
+    gh1 = cache.cache_incl_azi_1_1;
+    ghm = cache.cache_incl_azi_1_2;
+    gsm = cache.cache_incl_azi_1_3;
+    gcm = cache.cache_incl_azi_1_4;
+    gh1 .= 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
+    ghm .= gh1 .* leaf.xylem.auxil.e_crit / e;
+    gsm .= 1 ./ (1 ./ ghm .- 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
+    gsm .= min.(gsm, g_max);
+    gcm .= 1 ./ (FT(1.6) ./ gsm .+ 1 ./ leaf.flux.auxil.g_CO₂_b);
+    am = photosynthesis_only!(cache, leaf.photosystem, air, gcm, leaf.flux.auxil.ppar);
 
-∂Θ∂E(sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
-    d = max(1, p_s - air.s_aux.ps[3]);
+    leaf.flux.auxil.∂Θ∂E .= dkde .* am ./ dedpm;
 
-    # compute the E at the current setting
-    gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
-    gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air * leaf.xylem.trait.area;
-
-    dEdP_1 = ∂E∂P(leaf, e; δe = δe);
-    dEdP_2 = ∂E∂P(leaf, e; δe = -δe);
-    dEdP_m = ∂E∂P(leaf, FT(0); δe = δe);
-    dKdE   = (dEdP_2 - dEdP_1) / δe;
-
-    # compute maximum A
-    ghm = leaf.xylem.auxil.e_crit / d * air.state.p_air;
-    if ghm < FT(1.35) * leaf.flux.auxil.g_CO₂_b
-        gsm = 1 / (1 / ghm - 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-        gcm = 1 / (FT(1.6) / gsm + 1 / leaf.flux.auxil.g_CO₂_b);
-    else
-        gsm = FT(Inf);
-        gcm = leaf.flux.auxil.g_CO₂_b;
-    end;
-    am = photosynthesis_only!(leaf.photosystem, air, gcm, leaf.flux.auxil.ppar_sunlit[ind]);
-
-    return dKdE * am / dEdP_m
+    return nothing
 );

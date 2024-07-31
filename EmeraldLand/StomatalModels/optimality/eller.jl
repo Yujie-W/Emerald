@@ -1,33 +1,12 @@
 # This file contains function to compute the partial derivatives of Θ versus E for EllerSM optimality model
 
-∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
-    d = max(1, p_s - air.s_aux.ps[3]);
-
-    # compute the E at the current setting
-    gs = leaf.flux.state.g_H₂O_s_shaded;
-    gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air * leaf.xylem.trait.area;
-
+∂Θ∂E!(cache::SPACCache{FT}, sm::EllerSM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
+    e = flow_out(leaf);
+    δe = e / 100;
     dedp1 = ∂E∂P(leaf, e; δe = δe);
     dedp2 = ∂E∂P(leaf, e; δe = -δe);
     dkde  = (dedp2 - dedp1) / δe;
+    leaf.flux.auxil.∂Θ∂E .= dkde .* leaf.flux.auxil.a_n ./ dedp1;
 
-    return dkde * leaf.flux.auxil.a_n_shaded / dedp1
-);
-
-∂Θ∂E(sm::EllerSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; δe::FT = FT(1e-7)) where {FT} = (
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
-    d = max(1, p_s - air.s_aux.ps[3]);
-
-    # compute the E at the current setting
-    gs = leaf.flux.state.g_H₂O_s_sunlit[ind];
-    gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    e  = gh * d / air.state.p_air * leaf.xylem.trait.area;
-
-    dedp1 = ∂E∂P(leaf, e; δe = δe);
-    dedp2 = ∂E∂P(leaf, e; δe = -δe);
-    dkde  = (dedp2 - dedp1) / δe;
-
-    return dkde * leaf.flux.auxil.a_n_sunlit[ind] / dedp1
+    return nothing
 );

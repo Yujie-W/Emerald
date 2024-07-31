@@ -21,9 +21,9 @@ Return the marginal increase of stomatal conductance, given
 """
 function ∂gₙ∂t end;
 
-∂gₙ∂t(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = ∂gₙ∂t(leaf.flux.trait.stomatal_model, leaf, air, eff_ϵ);
+∂gₙ∂t(leaf::CanopyLayer{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = ∂gₙ∂t(leaf.flux.trait.stomatal_model, leaf, air, eff_ϵ);
 
-∂gₙ∂t(sm::AbstractStomataModel{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = FT(-0.001);
+∂gₙ∂t(sm::AbstractStomataModel{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = FT(-0.001);
 
 #=
 ∂gₙ∂t(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
