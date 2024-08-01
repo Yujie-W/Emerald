@@ -12,13 +12,16 @@ using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterVcmax
 using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, MedlynSM
 using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
-using ..Namespace: KNFluoscenceModel, QLFluoscenceModel
-using ..Namespace: C3CLMTrait, C3CytoInfApTrait, C3CytoTrait, C3FvCBTrait, C3JBTrait, C3VJPTrait, C3State
-using ..Namespace: C4CLMTrait, C4VJPTrait, C4State
+using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
+using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
+using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
+using ..Namespace: CytochromeFluoscenceModel, KNFluoscenceModel, QLFluoscenceModel
+using ..Namespace: C3CLMTrait, C3CytoInfApTrait, C3CytoTrait, C3FvCBTrait, C3JBTrait, C3VJPTrait, GeneralC3Trait, C3State
+using ..Namespace: C4CLMTrait, C4VJPTrait, GeneralC4Trait, C4State
 using ..Namespace: CanopyLayerPhotosystem, CanopyLayerPhotosystemAuxil, LeafPhotosystem, LeafPhotosystemAuxil
 using ..Namespace: CanopyLayer, Leaf
 using ..Namespace: AirLayer
-using ..Namespace: BulkSPAC, SPACCache
+using ..Namespace: BulkSPAC, SPACCache, SPACConfiguration
 
 
 # photosystem level model (order by the step in photosynthesis model)

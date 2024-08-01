@@ -118,7 +118,7 @@ Base.@kwdef mutable struct GeneralC4Trait{FT}
     "Aj method"
     AJM::AjMethodC4JPSII = AjMethodC4JPSII()
     "Ap method"
-    APM::Union{ApMethodC4Vcmax, ApMethodC4Vpmax} = ApMethodC4Vcmax()
+    APM::Union{ApMethodC4VcmaxPi, ApMethodC4VpmaxPi} = ApMethodC4VcmaxPi()
     "Fluorescence model"
     FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
 

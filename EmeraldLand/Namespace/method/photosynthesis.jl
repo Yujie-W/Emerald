@@ -7,7 +7,7 @@
 #     2024-Jul-31: add method structs for Ac, Aj, and Ap
 #                  AcMethodC3VcmaxPi, AcMethodC4Vcmax
 #                  AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
-#                  ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4Vcmax, ApMethodC4Vpmax
+#                  ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
 #
 #######################################################################################################################################################################################################
 """
@@ -73,7 +73,7 @@ Method to compute product-limited photosynthesis rate (Ap) from Vcmax:
     Ap = k * Vcmax * Pi
 
     """
-struct ApMethodC4Vcmax end;
+struct ApMethodC4VcmaxPi end;
 
 """
 Method to compute product-limited photosynthesis rate (Ap) from Vpmax:
@@ -81,4 +81,4 @@ Method to compute product-limited photosynthesis rate (Ap) from Vpmax:
     Ap = Vpmax * Pi / (Pi + Kpep)
 
 """
-struct ApMethodC4Vpmax end;
+struct ApMethodC4VpmaxPi end;

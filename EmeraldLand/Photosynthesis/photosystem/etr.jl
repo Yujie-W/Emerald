@@ -10,11 +10,12 @@
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2024-Jul-22: save j as j_pot fpr C4, C3Cyto models
 #     2024-Jul-23: add support to C3CytoInfApTrait
+#     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
 
-    photosystem_electron_transport!(psm::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
+    photosystem_electron_transport!(ps::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
 
 Update the electron transport rates, given
 - `psm` `LeafPhotosystem` type struct
@@ -25,67 +26,44 @@ Update the electron transport rates, given
 """
 function photosystem_electron_transport! end;
 
-# For CanopyLayer
-photosystem_electron_transport!(
-            cache::SPACCache{FT},
-            psm::CanopyLayerPhotosystem{FT},
-            ppar::Vector{FT},
-            p_i::Union{FT, Vector{FT}};
-            β::FT = FT(1)) where {FT} = photosystem_electron_transport!(cache, psm.trait, psm.state, psm.auxil, ppar, p_i; β = β);
-
-photosystem_electron_transport!(
-            cache::SPACCache{FT},
-            pst::Union{C3CytoInfApTrait{FT},C3CytoTrait{FT}, C3JBTrait{FT}},
-            pss::C3State{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
-            ppar::Vector{FT},
-            p_i::Union{FT, Vector{FT}};
-            β::FT = FT(1)) where {FT} = (
-    _j = cache.cache_incl_azi_2_1;
-    _j .= ppar .* (1 - psa.f_psii) .* psa.ϕ_psi_max;
-    colimited_rate(β * psa.v_qmax, _j, psa.j_psi, pst.COLIMIT_J);
-    psa.η     .= 1 .- psa.η_l ./ psa.η_c .+ (3 .* p_i .+ 7 .* psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star) ./ psa.η_c;
-    psa.j_pot .= psa.j_psi ./ psa.η;
-    psa.j     .= psa.j_pot;
-    psa.e2c   .= (p_i .- psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star);
-
-    return nothing
-);
-
-photosystem_electron_transport!(
-            cache::SPACCache{FT},
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
-            pss::C3State{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
-            ppar::Vector{FT},
-            p_i::Union{FT, Vector{FT}};
-            β::FT = FT(1)) where {FT} = (
-    psa.e2c   .= (p_i .- psa.γ_star) ./ (pss.EFF_1 .* p_i .+ pss.EFF_2 .* psa.γ_star);
-    psa.j_pot .= psa.f_psii .* psa.ϕ_psii_max .* ppar;
-    colimited_rate(β * psa.j_max, psa.j_pot, psa.j, pst.COLIMIT_J);
-
-    return nothing
-);
-
-photosystem_electron_transport!(
-            cache::SPACCache{FT},
-            pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}},
-            pss::C4State{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
-            ppar::Vector{FT},
-            p_i::Union{FT, Vector{FT}};
-            β::FT = FT(1)) where {FT} = (
-    psa.e2c   .= 1 / 6;
-    psa.j_pot .= psa.f_psii .* psa.ϕ_psii_max .* ppar;
-    psa.j     .= psa.j_pot;
-
-    return nothing
-);
-
 # For Leaf
-photosystem_electron_transport!(psm::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = photosystem_electron_transport!(psm.trait, psm.state, psm.auxil, ppar, p_i; β = β);
+photosystem_electron_transport!(
+            ps::LeafPhotosystem{FT},
+            ppar::FT,
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = photosystem_electron_transport!(ps.trait, ps.state, ps.auxil, ppar, p_i; β = β);
 
-photosystem_electron_transport!(pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
+photosystem_electron_transport!(
+            pst::GeneralC3Trait{FT},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            ppar::FT,
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = photosystem_electron_transport!(pst, pss, psa, pst.AJM, ppar, p_i; β = β);
+
+photosystem_electron_transport!(
+            pst::GeneralC3Trait{FT},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            ajm::AjMethodC3JmaxPi,
+            ppar::FT,
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = (
+    psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
+    psa.j_pot = psa.f_psii * psa.ϕ_psii_max * ppar;
+    psa.j     = colimited_rate(psa.j_pot, β * psa.j_max, pst.COLIMIT_J);
+
+    return nothing
+);
+
+photosystem_electron_transport!(
+            pst::GeneralC3Trait{FT},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            ajm::AjMethodC3VqmaxPi,
+            ppar::FT,
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = (
     psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
     psa.j_psi = colimited_rate(β * psa.v_qmax, ppar * (1 - psa.f_psii) * psa.ϕ_psi_max, pst.COLIMIT_J);
     psa.η     = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
@@ -95,18 +73,78 @@ photosystem_electron_transport!(pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}
     return nothing
 );
 
-photosystem_electron_transport!(pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}, pss::C3State{FT}, psa::LeafPhotosystemAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
+photosystem_electron_transport!(
+            pst::GeneralC4Trait{FT},
+            pss::C4State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            ajm::AjMethodC4JPSII,
+            ppar::FT,
+            p_i::FT;
+            β::FT = FT(1)) where {FT} = (
+    psa.e2c   = 1 / 6;
     psa.j_pot = psa.f_psii * psa.ϕ_psii_max * ppar;
-    psa.j     = colimited_rate(psa.j_pot, β * psa.j_max, pst.COLIMIT_J);
+    psa.j     = psa.j_pot;
 
     return nothing
 );
 
-photosystem_electron_transport!(pst::Union{C4CLMTrait{FT}, C4VJPTrait{FT}}, pss::C4State{FT}, psa::LeafPhotosystemAuxil{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT} = (
-    psa.e2c   = 1 / 6;
-    psa.j_pot = psa.f_psii * psa.ϕ_psii_max * ppar;
-    psa.j     = psa.j_pot;
+# For CanopyLayer
+photosystem_electron_transport!(
+            cache::SPACCache{FT},
+            ps::CanopyLayerPhotosystem{FT},
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = photosystem_electron_transport!(cache, ps.trait, ps.state, ps.auxil, ppar, p_i; β = β);
+
+photosystem_electron_transport!(
+            cache::SPACCache{FT},
+            pst::GeneralC3Trait{FT},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ajm::AjMethodC3JmaxPi,
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = (
+    @. psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
+    @. psa.j_pot = psa.f_psii * psa.ϕ_psii_max * ppar;
+    colimited_rate!(β * psa.j_max, psa.j_pot, psa.j, pst.COLIMIT_J);
+
+    return nothing
+);
+
+photosystem_electron_transport!(
+            cache::SPACCache{FT},
+            pst::GeneralC3Trait{FT},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ajm::AjMethodC3VqmaxPi,
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = (
+    _j = cache.cache_incl_azi_2_1;
+    @. _j = ppar * (1 - psa.f_psii) * psa.ϕ_psi_max;
+    colimited_rate!(β * psa.v_qmax, _j, psa.j_psi, pst.COLIMIT_J);
+
+    @. psa.η     = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
+    @. psa.j_pot = psa.j_psi / psa.η;
+    @. psa.j     = psa.j_pot;
+    @. psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
+
+    return nothing
+);
+
+photosystem_electron_transport!(
+            cache::SPACCache{FT},
+            pst::GeneralC4Trait{FT},
+            pss::C4State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ajm::AjMethodC4JPSII,
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = (
+    @. psa.e2c   = 1 / 6;
+    @. psa.j_pot = psa.f_psii * psa.ϕ_psii_max * ppar;
+    @. psa.j     = psa.j_pot;
 
     return nothing
 );

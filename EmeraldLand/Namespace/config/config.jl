@@ -26,6 +26,7 @@
 #     2024-Jul-22: add field ENABLE_CHEMICAL_ENERGY
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Jul-31: add rate constants fields (constants for PSI, PSII, and combined)
+#     2024-Aug-01: add field ENABLE_KD_TD and FIX_ETA_TD
 #
 #######################################################################################################################################################################################################
 """
@@ -103,6 +104,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_PPAR_BINS::Union{Int,Nothing} = nothing
     "Enable the chemical energy related to photosynthesis and respiration"
     ENABLE_CHEMICAL_ENERGY::Bool = true
+    "Enable K_D rate constant temperature dependency"
+    ENABLE_KD_TD::Bool = true
+    "Fix the TD of η for Johnson-Berry model"
+    FIX_ETA_TD::Bool = true
     "Rate constants for PSI and PSII combined (most for PSII?)"
     PS_RATE_CONSTANTS::PhotosystemsRateConstants{FT} = PhotosystemsRateConstants{FT}()
     "Rate constants for PSI"

@@ -108,6 +108,6 @@ Base.@kwdef mutable struct QLFluoscenceModelHan{FT<:AbstractFloat}
     K_B::FT = 0.95e-3
 end;
 
-QLFluoscenceModelOriginal(FT) = QLFluoscenceModelOriginal{FT}(K_A = 0.8, K_B = 0.95e-3);
+QLFluoscenceModelHanC3(FT) = QLFluoscenceModelHan{FT}(K_A = 0.8, K_B = 0.95e-3);
 
-QLFluoscenceModelOriginal(FT) = QLFluoscenceModelOriginal{FT}(K_A = 0.83, K_B = 0.63e-3);
+QLFluoscenceModelHanC4(FT) = QLFluoscenceModelHan{FT}(K_A = 0.83, K_B = 0.63e-3);

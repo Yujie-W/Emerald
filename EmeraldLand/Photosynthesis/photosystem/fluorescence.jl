@@ -17,9 +17,10 @@
 #     2023-Oct-28: add method for QLFluoscenceModel
 #     2023-Oct-30: compute q_l using exp(-flm.K_B * ppar) (omitting K_A)
 #     2024-Jul-23: add support to C3CytoInfApTrait
+#     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
-#     2022-Feb-28: psm.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this psm.e_to_c used to be calculated as psm.a_j / psm.j (a_j here is not p_CO₂_i based)
+#     2022-Feb-28: ps.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this ps.e_to_c used to be calculated as ps.a_j / ps.j (a_j here is not p_CO₂_i based)
 #                  note here that in CliMA v0.1, this e_to_c is not updated properly.
 #     2024-Feb-26: use k_d from auxil rather than from trait (because k_d is updated in the auxil to account for its TD)
 # To do
@@ -28,25 +29,36 @@
 #######################################################################################################################################################################################################
 """
 
-    photosystem_coefficients!(psm::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, ppar::FT; β::FT = FT(1)) where {FT}
+    photosystem_coefficients!(ps::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, ppar::FT; β::FT = FT(1)) where {FT}
 
 Update the rate constants and coefficients in reaction center, given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis system
+- `ps` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis system
 - `ppar` Absorbed photosynthetically active radiation in `μmol m⁻² s⁻¹`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """
 function photosystem_coefficients! end;
 
+# Leaf
 photosystem_coefficients!(
-            psm::LeafPhotosystem{FT},
+            config::SPACConfiguration{FT},
+            ps::LeafPhotosystem{FT},
             ppar::FT;
-            β::FT = FT(1)) where {FT} = photosystem_coefficients!(psm.trait, psm.state, psm.auxil, ppar; β = β);
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, ps.trait, ps.state, ps.auxil, ppar; β = β);
 
 photosystem_coefficients!(
-            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            config::SPACConfiguration{FT},
+            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
             pss::C3State{FT},
             psa::LeafPhotosystemAuxil{FT},
+            ppar::FT;
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, pss, psa, pst.FLM, ppar; β = β);
+
+photosystem_coefficients!(
+            config::SPACConfiguration{FT},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            flm::CytochromeFluoscenceModel{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -56,6 +68,8 @@ photosystem_coefficients!(
         return nothing
     end;
 
+    (; PSI_RATE_CONSTANTS, PSII_RATE_CONSTANTS) = config;
+
     # adapted from https://github.com/jenjohnson/johnson-berry-2021-pres/blob/main/scripts/model_fun.m
     ϕ_P1_a = psa.a_g * psa.η / (psa.e2c * ppar * (1 - psa.f_psii));
     ϕ_P2_a = psa.a_g / (psa.e2c * ppar * psa.f_psii);
@@ -64,19 +78,19 @@ photosystem_coefficients!(
 
     # solve PSII K_N
     k_sum_na = ϕ_P2_a;
-    k_sum_nb = -1 * (pst.K_U * ϕ_P2_a + pst.K_PSII * (q2 - ϕ_P2_a));
-    k_sum_nc = -1 * (ϕ_P2_a * (1 - q2) * pst.K_U * pst.K_PSII);
+    k_sum_nb = -1 * (PSII_RATE_CONSTANTS.K_U * ϕ_P2_a + PSII_RATE_CONSTANTS.K_P * (q2 - ϕ_P2_a));
+    k_sum_nc = -1 * (ϕ_P2_a * (1 - q2) * PSII_RATE_CONSTANTS.K_U * PSII_RATE_CONSTANTS.K_P);
     k_sum    = upper_quadratic(k_sum_na, k_sum_nb, k_sum_nc);
-    k_n      = k_sum - pst.K_F - pst.K_U - pst.K_D;
+    k_n      = k_sum - PSII_RATE_CONSTANTS.K_F - PSII_RATE_CONSTANTS.K_U - PSII_RATE_CONSTANTS.K_D;
 
     # compute PSII and PSI yeilds
-    k_sum_1 = pst.K_D + pst.K_F + pst.K_U + k_n;
-    k_sum_2 = pst.K_D + pst.K_F + pst.K_U + k_n + pst.K_PSII;
-    k_sum_3 = pst.K_D + pst.K_F + pst.K_PSI;
-    k_sum_4 = pst.K_D + pst.K_F + pst.K_X;
-    ϕ_U2_a  =  q2 * pst.K_U / k_sum_2 + (1 - q2) * pst.K_U / k_sum_1;
-    ϕ_F2_a  = (q2 * pst.K_F / k_sum_2 + (1 - q2) * pst.K_F / k_sum_1) / (1 - ϕ_U2_a);
-    ϕ_F1_a  = pst.K_F / k_sum_3 * q1 + pst.K_F / k_sum_4 * (1 - q1);
+    k_sum_1 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n;
+    k_sum_2 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n + PSII_RATE_CONSTANTS.K_P;
+    k_sum_3 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P;
+    k_sum_4 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_X;
+    ϕ_U2_a  = (q2 * PSII_RATE_CONSTANTS.K_U / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_U / k_sum_1);
+    ϕ_F2_a  = (q2 * PSII_RATE_CONSTANTS.K_F / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_F / k_sum_1) / (1 - ϕ_U2_a);
+    ϕ_F1_a  = PSI_RATE_CONSTANTS.K_F / k_sum_3 * q1 + PSI_RATE_CONSTANTS.K_F / k_sum_4 * (1 - q1);
 
     # save the weighted fluorescence and photosynthesis yields in reaction center
     psa.ϕ_f1 = ϕ_F1_a;
@@ -88,17 +102,10 @@ photosystem_coefficients!(
 );
 
 photosystem_coefficients!(
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
+            config::SPACConfiguration{FT},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
-            ppar::FT;
-            β::FT = FT(1)) where {FT} = photosystem_coefficients!(pst, pss, pst.FLM, psa, ppar; β = β);
-
-photosystem_coefficients!(
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
-            pss::Union{C3State{FT}, C4State{FT}},
             flm::KNFluoscenceModel{FT},
-            psa::LeafPhotosystemAuxil{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -107,6 +114,8 @@ photosystem_coefficients!(
 
         return nothing
     end;
+
+    (; PS_RATE_CONSTANTS) = config;
 
     # calculate photochemical yield
     psa.ϕ_p = psa.a_g / (psa.e2c * psa.f_psii * ppar);
@@ -115,7 +124,7 @@ photosystem_coefficients!(
     x  = max(0, 1 - psa.ϕ_p / psa.ϕ_psii_max);
     xᵅ = x ^ flm.K_A;
     psa.k_n = flm.K_0 * (1 + flm.K_B) * xᵅ / (flm.K_B + xᵅ);
-    psa.k_p = max(0, psa.ϕ_p * (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus) / (1 - psa.ϕ_p) );
+    psa.k_p = max(0, psa.ϕ_p * (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_n + pss.k_npq_sus) / (1 - psa.ϕ_p) );
 
     # TODO: whether to consider sustained K_N in the calculations of f_o and f_m
     # rc._f_o  = K_F / (K_F + K_PSII + rc._k_d + rc.k_npq_sus);
@@ -124,10 +133,10 @@ photosystem_coefficients!(
     # rc._f_m′ = K_F / (K_F + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
 
     # calculate fluorescence quantum yield
-    psa.f_o  = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
-    psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
-    psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
-    psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_o  = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + PS_RATE_CONSTANTS.K_P + psa.k_d);
+    psa.f_o′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + PS_RATE_CONSTANTS.K_P + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_m  = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d);
+    psa.f_m′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
@@ -138,16 +147,16 @@ photosystem_coefficients!(
     # calculate quenching rates
     psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
     psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
+    psa.npq = (psa.k_n + pss.k_npq_sus) / (PS_RATE_CONSTANTS.K_F + psa.k_d);
 
     return nothing
 );
 
 photosystem_coefficients!(
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
+            config::SPACConfiguration{FT},
             pss::Union{C3State{FT}, C4State{FT}},
-            flm::QLFluoscenceModel{FT},
             psa::LeafPhotosystemAuxil{FT},
+            flm::QLFluoscenceModel{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -157,19 +166,21 @@ photosystem_coefficients!(
         return nothing
     end;
 
+    (; PS_RATE_CONSTANTS) = config;
+
     # calculate photochemical yield
     psa.ϕ_p = psa.a_g / (psa.e2c * psa.f_psii * ppar);
 
     # calculate the qL
     q_l = exp(-flm.K_B * ppar);
-    psa.k_p = pst.K_PSII * q_l;
-    psa.k_n = (psa.k_p - psa.ϕ_p * (pst.K_F + psa.k_d + psa.k_p)) / psa.ϕ_p;
+    psa.k_p = PS_RATE_CONSTANTS.K_P * q_l;
+    psa.k_n = (psa.k_p - psa.ϕ_p * (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_p)) / psa.ϕ_p;
 
     # calculate fluorescence quantum yield
-    psa.f_o  = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
-    psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
-    psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
-    psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_o  = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + PS_RATE_CONSTANTS.K_P + psa.k_d);
+    psa.f_o′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + PS_RATE_CONSTANTS.K_P + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_m  = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d);
+    psa.f_m′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
@@ -180,23 +191,34 @@ photosystem_coefficients!(
     # calculate quenching rates
     psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
     psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
+    psa.npq = (psa.k_n + pss.k_npq_sus) / (PS_RATE_CONSTANTS.K_F + psa.k_d);
 
     return nothing
 );
 
 # For CanopyLayer
 photosystem_coefficients!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
-            psm::CanopyLayerPhotosystem{FT},
+            ps::CanopyLayerPhotosystem{FT},
             ppar::Vector{FT};
-            β::FT = FT(1)) where {FT} = photosystem_coefficients!(cache, psm.trait, psm.state, psm.auxil, ppar; β = β);
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, cache, ps.trait, ps.state, ps.auxil, ppar; β = β);
 
 photosystem_coefficients!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
-            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
             pss::C3State{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},
+            ppar::Vector{FT};
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, cache, pss, psa, pst.FLM, ppar; β = β);
+
+photosystem_coefficients!(
+            config::SPACConfiguration{FT},
+            cache::SPACCache{FT},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            flm::CytochromeFluoscenceModel{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = (
     if ppar[1] == 0 && ppar[end] == 0
@@ -206,7 +228,7 @@ photosystem_coefficients!(
         return nothing
     end;
 
-    # TODO: speed up this through reduce the memory allocation
+    (; PSI_RATE_CONSTANTS, PSII_RATE_CONSTANTS) = config;
 
     # adapted from https://github.com/jenjohnson/johnson-berry-2021-pres/blob/main/scripts/model_fun.m
     ϕ_P1_a = @. psa.a_g * psa.η / (psa.e2c * ppar * (1 - psa.f_psii));
@@ -216,19 +238,19 @@ photosystem_coefficients!(
 
     # solve PSII K_N
     k_sum_na = ϕ_P2_a;
-    k_sum_nb = -1 * (pst.K_U * ϕ_P2_a + pst.K_PSII * (q2 - ϕ_P2_a));
-    k_sum_nc = @. -1 * (ϕ_P2_a * (1 - q2) * pst.K_U * pst.K_PSII);
+    k_sum_nb = -1 * (PSII_RATE_CONSTANTS.K_U * ϕ_P2_a + PSII_RATE_CONSTANTS.K_P * (q2 - ϕ_P2_a));
+    k_sum_nc = @. -1 * (ϕ_P2_a * (1 - q2) * PSII_RATE_CONSTANTS.K_U * PSII_RATE_CONSTANTS.K_P);
     k_sum    = @. upper_quadratic(k_sum_na, k_sum_nb, k_sum_nc);
-    k_n      = @. k_sum - pst.K_F - pst.K_U - pst.K_D;
+    k_n      = @. k_sum - PSII_RATE_CONSTANTS.K_F - PSII_RATE_CONSTANTS.K_U - PSII_RATE_CONSTANTS.K_D;
 
     # compute PSII and PSI yeilds
-    k_sum_1 = @. pst.K_D + pst.K_F + pst.K_U + k_n;
-    k_sum_2 = @. pst.K_D + pst.K_F + pst.K_U + k_n + pst.K_PSII;
-    k_sum_3 = pst.K_D + pst.K_F + pst.K_PSI;
-    k_sum_4 = pst.K_D + pst.K_F + pst.K_X;
-    ϕ_U2_a  = @.  q2 * pst.K_U / k_sum_2 + (1 - q2) * pst.K_U / k_sum_1;
-    ϕ_F2_a  = @. (q2 * pst.K_F / k_sum_2 + (1 - q2) * pst.K_F / k_sum_1) / (1 - ϕ_U2_a);
-    ϕ_F1_a  = @. pst.K_F / k_sum_3 * q1 + pst.K_F / k_sum_4 * (1 - q1);
+    k_sum_1 = @. PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n;
+    k_sum_2 = @. PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n + PSII_RATE_CONSTANTS.K_P;
+    k_sum_3 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P;
+    k_sum_4 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_X;
+    ϕ_U2_a  = @.  q2 * PSII_RATE_CONSTANTS.K_U / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_U / k_sum_1;
+    ϕ_F2_a  = @. (q2 * PSII_RATE_CONSTANTS.K_F / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_F / k_sum_1) / (1 - ϕ_U2_a);
+    ϕ_F1_a  = @. PSI_RATE_CONSTANTS.K_F / k_sum_3 * q1 + PSI_RATE_CONSTANTS.K_F / k_sum_4 * (1 - q1);
 
     # save the weighted fluorescence and photosynthesis yields in reaction center
     @. psa.ϕ_f1 = ϕ_F1_a;
@@ -240,19 +262,11 @@ photosystem_coefficients!(
 );
 
 photosystem_coefficients!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
-            ppar::Vector{FT};
-            β::FT = FT(1)) where {FT} = photosystem_coefficients!(cache, pst, pss, pst.FLM, psa, ppar; β = β);
-
-photosystem_coefficients!(
-            cache::SPACCache{FT},
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
-            pss::Union{C3State{FT}, C4State{FT}},
             flm::KNFluoscenceModel{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -261,6 +275,8 @@ photosystem_coefficients!(
 
         return nothing
     end;
+
+    (; PS_RATE_CONSTANTS) = config;
 
     # calculate photochemical yield
     psa.ϕ_p .= psa.a_g ./ (psa.e2c .* psa.f_psii .* ppar);
@@ -273,7 +289,7 @@ photosystem_coefficients!(
     @. x  = max(0, 1 - psa.ϕ_p / psa.ϕ_psii_max);
     @. xᵅ = x ^ flm.K_A;
     @. psa.k_n = flm.K_0 .* (1 + flm.K_B) .* xᵅ ./ (flm.K_B .+ xᵅ);
-    @. psa.k_p = max.(0, psa.ϕ_p .* (pst.K_F .+ psa.k_d .+ psa.k_n .+ pss.k_npq_sus) ./ (1 .- psa.ϕ_p) );
+    @. psa.k_p = max.(0, psa.ϕ_p .* (PS_RATE_CONSTANTS.K_F .+ psa.k_d .+ psa.k_n .+ pss.k_npq_sus) ./ (1 .- psa.ϕ_p) );
 
     # TODO: whether to consider sustained K_N in the calculations of f_o and f_m
     # rc._f_o  = K_F / (K_F + K_PSII + rc._k_d + rc.k_npq_sus);
@@ -282,10 +298,10 @@ photosystem_coefficients!(
     # rc._f_m′ = K_F / (K_F + rc._k_d + rc.k_npq_sus + rc._k_npq_rev);
 
     # calculate fluorescence quantum yield
-    psa.f_o = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
-    psa.f_m = pst.K_F / (pst.K_F + psa.k_d);
-    @. psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
-    @. psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_o = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + PS_RATE_CONSTANTS.K_P);
+    psa.f_m = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d);
+    @. psa.f_o′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_n + pss.k_npq_sus + PS_RATE_CONSTANTS.K_P);
+    @. psa.f_m′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     @. psa.ϕ_f1 = psa.ϕ_f;
     @. psa.ϕ_f2 = psa.ϕ_f;
@@ -296,17 +312,17 @@ photosystem_coefficients!(
     # calculate quenching rates
     @. psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
     @. psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    @. psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
+    @. psa.npq = (psa.k_n + pss.k_npq_sus) / (PS_RATE_CONSTANTS.K_F + psa.k_d);
 
     return nothing
 );
 
 photosystem_coefficients!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}},
             pss::Union{C3State{FT}, C4State{FT}},
-            flm::QLFluoscenceModel{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},
+            flm::QLFluoscenceModel{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -316,20 +332,22 @@ photosystem_coefficients!(
         return nothing
     end;
 
+    (; PS_RATE_CONSTANTS) = config;
+
     # calculate photochemical yield
     @. psa.ϕ_p = psa.a_g / (psa.e2c * psa.f_psii * ppar);
 
     # calculate the qL
     q_l = cache.cache_incl_azi_2_1;
     @. q_l = exp(-flm.K_B * ppar);
-    @. psa.k_p = pst.K_PSII * q_l;
-    @. psa.k_n = (psa.k_p - psa.ϕ_p * (pst.K_F + psa.k_d + psa.k_p)) / psa.ϕ_p;
+    @. psa.k_p = PS_RATE_CONSTANTS.K_P * q_l;
+    @. psa.k_n = (psa.k_p - psa.ϕ_p * (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_p)) / psa.ϕ_p;
 
     # calculate fluorescence quantum yield
-    psa.f_o  = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d);
-    psa.f_m  = pst.K_F / (pst.K_F + psa.k_d);
-    @. psa.f_o′ = pst.K_F / (pst.K_F + pst.K_PSII + psa.k_d + psa.k_n + pss.k_npq_sus);
-    @. psa.f_m′ = pst.K_F / (pst.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
+    psa.f_o  = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + PS_RATE_CONSTANTS.K_P);
+    psa.f_m  = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d);
+    @. psa.f_o′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_n + pss.k_npq_sus + PS_RATE_CONSTANTS.K_P);
+    @. psa.f_m′ = PS_RATE_CONSTANTS.K_F / (PS_RATE_CONSTANTS.K_F + psa.k_d + psa.k_n + pss.k_npq_sus);
     @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     @. psa.ϕ_f1 = psa.ϕ_f;
     @. psa.ϕ_f2 = psa.ϕ_f;
@@ -340,7 +358,7 @@ photosystem_coefficients!(
     # calculate quenching rates
     @. psa.q_e = 1 - (psa.f_m - psa.f_o′) / (psa.f_m′ - psa.f_o);
     @. psa.q_p = 1 - (psa.ϕ_f - psa.f_o′) / (psa.f_m - psa.f_o′);
-    @. psa.npq = (psa.k_n + pss.k_npq_sus) / (pst.K_F + psa.k_d);
+    @. psa.npq = (psa.k_n + pss.k_npq_sus) / (PS_RATE_CONSTANTS.K_F + psa.k_d);
 
     return nothing
 );

@@ -83,13 +83,15 @@ end;
 #     2022-Mar-01: add temperature dependencies for k_q, v_qmax, η_c, and η_l
 #     2024-Apr-15: add support for C4CLMTrait model
 #     2024-Jul-27: set η_c and η_l to min(η_c, η_l) to avoid negative values of η
+#     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
 
-    photosystem_temperature_dependence!(psm::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}}, air::AirLayer{FT}, t::FT) where {FT}
+    photosystem_temperature_dependence!(config::SPACConfiguration{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, t::FT) where {FT}
 
 Update the temperature dependencies of C3 photosynthesis model, given
+- `config` `SPACConfiguration` structure
 - `psm` `LeafPhotosystem` or `CanopyLayerPhotosystem` structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `t` Target temperature in `K`
@@ -97,92 +99,118 @@ Update the temperature dependencies of C3 photosynthesis model, given
 """
 function photosystem_temperature_dependence! end;
 
-photosystem_temperature_dependence!(psm::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}}, air::AirLayer{FT}, t::FT) where {FT} =
-    photosystem_temperature_dependence!(psm.trait, psm.auxil, air, t);
+photosystem_temperature_dependence!(
+            config::SPACConfiguration{FT},
+            ps::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}},
+            air::AirLayer{FT},
+            t::FT) where {FT} = photosystem_temperature_dependence!(config, ps.trait, ps.auxil, air, t);
 
 photosystem_temperature_dependence!(
-            pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}},
+            config::SPACConfiguration{FT},
+            pst::GeneralC3Trait{FT},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             air::AirLayer{FT},
+            t::FT) where {FT} = photosystem_temperature_dependence!(config, pst, psa, pst.ACM, pst.AJM, pst.APM, air, t);
+
+photosystem_temperature_dependence!(
+            config::SPACConfiguration{FT},
+            pst::GeneralC3Trait{FT},
+            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3JmaxPi,
+            apm::Union{ApMethodC3Inf, ApMethodC3Vcmax},
+            air::AirLayer{FT},
             t::FT) where {FT} = (
+    (; ENABLE_KD_TD, PS_RATE_CONSTANTS) = config;
+
+    psa.j_max  = pst.j_max25 * temperature_correction(pst.TD_JMAX, t);
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
-    psa.k_q    = temperature_corrected_value(pst.TD_KQ, t);
-    psa.γ_star = temperature_corrected_value(pst.TD_Γ , t);
-    psa.η_c    = min(pst.TD_ηC.VAL_REF, temperature_corrected_value(pst.TD_ηC, t));
-    psa.η_l    = min(pst.TD_ηL.VAL_REF, temperature_corrected_value(pst.TD_ηL, t));
-    psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
+    psa.r_d    = pst.r_d25 * temperature_correction(pst.TD_R, t);
     psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
+    psa.γ_star = temperature_corrected_value(pst.TD_Γ, t);
     psa.k_m    = psa.k_c * (1 + air.state.p_air * F_O₂(FT) / psa.k_o);
-    psa.v_qmax = pst.b₆f * psa.k_q;
 
-    psa.ϕ_psi_max = pst.K_PSI / (pst.K_D + pst.K_F + pst.K_PSI);
+    # TODO: make this a method?
+    psa.k_d = ENABLE_KD_TD ? max(0.8738, 0.0301 * (t - 273.15) + 0.0773) : PS_RATE_CONSTANTS.K_D;
+    psa.ϕ_psii_max = PS_RATE_CONSTANTS.K_P / (psa.k_d + PS_RATE_CONSTANTS.K_F + PS_RATE_CONSTANTS.K_P);
 
     return nothing
 );
 
 photosystem_temperature_dependence!(
-            pst::C3JBTrait{FT},
+            config::SPACConfiguration{FT},
+            pst::GeneralC3Trait{FT},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3VqmaxPi,
+            apm::Union{ApMethodC3Inf, ApMethodC3Vcmax},
             air::AirLayer{FT},
             t::FT) where {FT} = (
+    (; FIX_ETA_TD, PSI_RATE_CONSTANTS) = config;
+
     psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
     psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
     psa.k_q    = temperature_corrected_value(pst.TD_KQ, t);
-    psa.γ_star = temperature_corrected_value(pst.TD_Γ , t);
+    psa.r_d    = pst.r_d25 * temperature_correction(pst.TD_R, t);
+    psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
+    psa.γ_star = temperature_corrected_value(pst.TD_Γ, t);
     psa.η_c    = temperature_corrected_value(pst.TD_ηC, t);
     psa.η_l    = temperature_corrected_value(pst.TD_ηL, t);
-    psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
-    psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
     psa.k_m    = psa.k_c * (1 + air.state.p_air * F_O₂(FT) / psa.k_o);
     psa.v_qmax = pst.b₆f * psa.k_q;
 
-    psa.ϕ_psi_max = pst.K_PSI / (pst.K_D + pst.K_F + pst.K_PSI);
+    if FIX_ETA_TD
+        psa.η_c = min(pst.TD_ηC.VAL_REF, psa.η_c);
+        psa.η_l = min(pst.TD_ηL.VAL_REF, psa.η_c);
+    end;
+
+    psa.ϕ_psi_max = PSI_RATE_CONSTANTS.K_P / (PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P);
 
     return nothing
 );
 
 photosystem_temperature_dependence!(
-            pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
+            config::SPACConfiguration{FT},
+            pst::GeneralC3Trait{FT},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            acm::AcMethodC4Vcmax,
+            ajm::AjMethodC4JPSII,
+            apm::ApMethodC4VcmaxPi,
             air::AirLayer{FT},
             t::FT) where {FT} = (
-    psa.k_c    = temperature_corrected_value(pst.TD_KC, t);
-    psa.k_o    = temperature_corrected_value(pst.TD_KO, t);
-    psa.γ_star = temperature_corrected_value(pst.TD_Γ , t);
-    psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
-    psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
-    psa.j_max  = pst.j_max25  * temperature_correction(pst.TD_JMAX, t);
-    psa.k_m    = psa.k_c * (1 + air.state.p_air * F_O₂(FT) / psa.k_o);
+    (; ENABLE_KD_TD, PS_RATE_CONSTANTS) = config;
 
-    # TODO: add a TD_KD in the model in the future like psd.TD_KC
-    psa.k_d = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);
-    psa.ϕ_psii_max = pst.K_PSII / (psa.k_d + pst.K_F + pst.K_PSII);
-
-    return nothing
-);
-
-photosystem_temperature_dependence!(pst::C4CLMTrait{FT}, psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}}, air::AirLayer{FT}, t::FT) where {FT} = (
     psa.k_pep_clm = temperature_corrected_value(pst.TD_KPEP, t);
-    psa.r_d       = pst.r_d25    * temperature_correction(pst.TD_R, t);
+    psa.r_d       = pst.r_d25 * temperature_correction(pst.TD_R, t);
     psa.v_cmax    = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
 
-    # TODO: add a TD_KD in the model in the future like psd.TD_KC
-    psa.k_d = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);
-    psa.ϕ_psii_max = pst.K_PSII / (psa.k_d + pst.K_F + pst.K_PSII);
+    # TODO: make this a method?
+    psa.k_d = ENABLE_KD_TD ? max(0.8738, 0.0301 * (t - 273.15) + 0.0773) : PS_RATE_CONSTANTS.K_D;
+    psa.ϕ_psii_max = PS_RATE_CONSTANTS.K_P / (psa.k_d + PS_RATE_CONSTANTS.K_F + PS_RATE_CONSTANTS.K_P);
 
     return nothing
 );
 
-photosystem_temperature_dependence!(pst::C4VJPTrait{FT}, psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}}, air::AirLayer{FT}, t::FT) where {FT} = (
+photosystem_temperature_dependence!(
+            config::SPACConfiguration{FT},
+            pst::GeneralC3Trait{FT},
+            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            acm::AcMethodC4Vcmax,
+            ajm::AjMethodC4JPSII,
+            apm::ApMethodC4VpmaxPi,
+            air::AirLayer{FT},
+            t::FT) where {FT} = (
+    (; ENABLE_KD_TD, PS_RATE_CONSTANTS) = config;
+
     psa.k_pep  = temperature_corrected_value(pst.TD_KPEP, t);
-    psa.r_d    = pst.r_d25    * temperature_correction(pst.TD_R, t);
+    psa.r_d    = pst.r_d25 * temperature_correction(pst.TD_R, t);
     psa.v_cmax = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
     psa.v_pmax = pst.v_pmax25 * temperature_correction(pst.TD_VPMAX, t);
 
-    # TODO: add a TD_KD in the model in the future like psd.TD_KC
-    psa.k_d = max(0.8738, 0.0301 * (t - 273.15) + 0.0773);
-    psa.ϕ_psii_max = pst.K_PSII / (psa.k_d + pst.K_F + pst.K_PSII);
+    # TODO: make this a method?
+    psa.k_d = ENABLE_KD_TD ? max(0.8738, 0.0301 * (t - 273.15) + 0.0773) : PS_RATE_CONSTANTS.K_D;
+    psa.ϕ_psii_max = PS_RATE_CONSTANTS.K_P / (psa.k_d + PS_RATE_CONSTANTS.K_F + PS_RATE_CONSTANTS.K_P);
 
     return nothing
 );

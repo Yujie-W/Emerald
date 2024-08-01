@@ -17,14 +17,16 @@ Update the photosynthesis rate, given
 - `t` Leaf temperature in `K`
 
 """
-function photosynthesis!(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT}
-    photosystem_temperature_dependence!(ps, air, t);
+function photosynthesis! end;
+
+photosynthesis!(config::SPACConfiguration{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT} = (
+    photosystem_temperature_dependence!(config, ps, air, t);
     photosystem_electron_transport!(ps, ppar, p_i);
     rubisco_limited_rate!(ps, p_i);
     light_limited_rate!(ps);
     product_limited_rate!(ps, p_i);
     colimit_photosynthesis!(ps);
-    photosystem_coefficients!(ps, ppar);
+    photosystem_coefficients!(config, ps, ppar);
 
     return nothing
-end;
+);
