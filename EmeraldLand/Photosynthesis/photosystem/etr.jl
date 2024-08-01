@@ -33,8 +33,8 @@ photosystem_electron_transport!(
             β::FT = FT(1)) where {FT} = photosystem_electron_transport!(ps.trait, ps.state, ps.auxil, ppar, p_i; β = β);
 
 photosystem_electron_transport!(
-            pst::GeneralC3Trait{FT},
-            pss::C3State{FT},
+            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
+            pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
             ppar::FT,
             p_i::FT;
@@ -98,7 +98,7 @@ photosystem_electron_transport!(
 photosystem_electron_transport!(
             cache::SPACCache{FT},
             pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
-            pss::C3State{FT},
+            pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
             ppar::Vector{FT},
             p_i::Union{FT, Vector{FT}};

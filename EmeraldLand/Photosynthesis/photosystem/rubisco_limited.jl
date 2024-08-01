@@ -60,7 +60,7 @@ rubisco_limited_rate!(
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             g_lc::FT;
-            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(ps.state, ps.auxil, air, g_lc; β = β);
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(ps.trait, ps.auxil, air, g_lc; β = β);
 
 rubisco_limited_rate!(
             pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},

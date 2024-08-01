@@ -146,7 +146,7 @@ light_limited_rate!(
 light_limited_rate!(
             cache::SPACCache{FT},
             pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
-            pss::C3State{FT},
+            pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
             air::AirLayer{FT},
             g_lc::Vector{FT};

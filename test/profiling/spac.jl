@@ -38,7 +38,8 @@ spac = EmeraldLand.Namespace.BulkSPAC(config);
 # the case using Cytochrome C3 model
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 for l in spac.plant.leaves
-    l.photosystem.trait = EmeraldLand.Namespace.C3CytoTrait{FT}();
+    l.photosystem.trait.AJM = EmeraldLand.Namespace.AjMethodC3VqmaxPi();
+    l.photosystem.trait.FLM = EmeraldLand.Namespace.CytochromeFluoscenceModel{FT}();
 end;
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, 3600);
@@ -54,7 +55,7 @@ spac = EmeraldLand.Namespace.BulkSPAC(config);
 # the case using C4CLM model
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 for l in spac.plant.leaves
-    l.photosystem.trait = EmeraldLand.Namespace.C4CLMTrait{FT}();
+    l.photosystem.trait = EmeraldLand.Namespace.GeneralC4Trait{FT}();
     l.photosystem.state = EmeraldLand.Namespace.C4State{FT}();
 end;
 EmeraldLand.SPAC.initialize_spac!(config, spac);
@@ -71,7 +72,8 @@ spac = EmeraldLand.Namespace.BulkSPAC(config);
 # the case using C4VJP model
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 for l in spac.plant.leaves
-    l.photosystem.trait = EmeraldLand.Namespace.C4VJPTrait{FT}();
+    l.photosystem.trait = EmeraldLand.Namespace.GeneralC4Trait{FT}();
+    l.photosystem.trait.APM = EmeraldLand.Namespace.ApMethodC4VpmaxPi();
     l.photosystem.state = EmeraldLand.Namespace.C4State{FT}();
 end;
 EmeraldLand.SPAC.initialize_spac!(config, spac);

@@ -107,7 +107,7 @@ photosystem_temperature_dependence!(
 
 photosystem_temperature_dependence!(
             config::SPACConfiguration{FT},
-            pst::GeneralC3Trait{FT},
+            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             air::AirLayer{FT},
             t::FT) where {FT} = photosystem_temperature_dependence!(config, pst, psa, pst.ACM, pst.AJM, pst.APM, air, t);
@@ -172,7 +172,7 @@ photosystem_temperature_dependence!(
 
 photosystem_temperature_dependence!(
             config::SPACConfiguration{FT},
-            pst::GeneralC3Trait{FT},
+            pst::GeneralC4Trait{FT},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
@@ -194,7 +194,7 @@ photosystem_temperature_dependence!(
 
 photosystem_temperature_dependence!(
             config::SPACConfiguration{FT},
-            pst::GeneralC3Trait{FT},
+            pst::GeneralC4Trait{FT},
             psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,

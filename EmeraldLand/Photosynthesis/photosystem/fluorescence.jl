@@ -48,7 +48,7 @@ photosystem_coefficients!(
 photosystem_coefficients!(
             config::SPACConfiguration{FT},
             pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
-            pss::C3State{FT},
+            pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, pss, psa, pst.FLM, ppar; β = β);
@@ -207,7 +207,7 @@ photosystem_coefficients!(
             config::SPACConfiguration{FT},
             cache::SPACCache{FT},
             pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
-            pss::C3State{FT},
+            pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, cache, pss, psa, pst.FLM, ppar; β = β);
@@ -247,7 +247,7 @@ photosystem_coefficients!(
     k_sum_2 = @. PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n + PSII_RATE_CONSTANTS.K_P;
     k_sum_3 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P;
     k_sum_4 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_X;
-    ϕ_U2_a  = @.  q2 * PSII_RATE_CONSTANTS.K_U / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_U / k_sum_1;
+    ϕ_U2_a  = @. (q2 * PSII_RATE_CONSTANTS.K_U / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_U / k_sum_1);
     ϕ_F2_a  = @. (q2 * PSII_RATE_CONSTANTS.K_F / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_F / k_sum_1) / (1 - ϕ_U2_a);
     ϕ_F1_a  = @. PSI_RATE_CONSTANTS.K_F / k_sum_3 * q1 + PSI_RATE_CONSTANTS.K_F / k_sum_4 * (1 - q1);
 

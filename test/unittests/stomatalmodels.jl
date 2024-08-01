@@ -16,7 +16,7 @@ import Emerald.EmeraldLand.SPAC
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar .= 100.0;
         leaf.flux.auxil.g_CO₂ .= 0.02;
-        PS.leaf_photosynthesis!(spac.cache, leaf, air, 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(config, spac.cache, leaf, air, 1.0; rd_only = false);
 
         for sm in [NS.BallBerrySM{Float64}(), NS.GentineSM{Float64}(), NS.LeuningSM{Float64}(), NS.MedlynSM{Float64}()]
             leaf.flux.trait.stomatal_model = sm;
@@ -73,7 +73,7 @@ import Emerald.EmeraldLand.SPAC
         leaf.flux.auxil.ppar .= 100.0;
         leaf.flux.state.g_H₂O_s .= 0.02;
         SPAC.substep_aux!(leaf);
-        PS.leaf_photosynthesis!(spac.cache, leaf, air, 1.0; rd_only = false);
+        PS.leaf_photosynthesis!(config, spac.cache, leaf, air, 1.0; rd_only = false);
         SM.∂A∂E!(spac.cache, leaf, air);
 
         @test all(leaf.flux.auxil.∂A∂E .> 0);
@@ -164,7 +164,7 @@ import Emerald.EmeraldLand.SPAC
             leaf.flux.state.g_H₂O_s .= 0;
             SM.limit_stomatal_conductance!(leaf);
         end;
-        PS.plant_photosynthesis!(spac);
+        PS.plant_photosynthesis!(config, spac);
         SM.stomatal_conductance_profile!(spac);
 
         for leaf in spac.plant.leaves
@@ -183,7 +183,7 @@ import Emerald.EmeraldLand.SPAC
             SM.limit_stomatal_conductance!(leaf);
             push!(gss, deepcopy(leaf.flux.state.g_H₂O_s));
         end;
-        PS.plant_photosynthesis!(spac);
+        PS.plant_photosynthesis!(config, spac);
         SM.stomatal_conductance_profile!(spac);
         SM.stomatal_conductance!(spac, 1.0);
 

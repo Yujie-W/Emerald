@@ -382,16 +382,15 @@ prescribe_ps_traits!(
 # Method to apply the exponential tuning factor to Vcmax25...
 prescribe_ps_traits!(
             spac::BulkSPAC;
-            vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, spac.plant.leaves[end].photosystem; vertical_expo = vertical_expo);
+            vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, spac.plant.leaves[end].photosystem.trait; vertical_expo = vertical_expo);
 
 prescribe_ps_traits!(
             spac::BulkSPAC,
             pst::Union{GeneralC3Trait, GeneralC4Trait};
-            vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, pst, pst.ACM, pst.AJM, pst.APM; vertical_expo = vertical_expo);
+            vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, pst.ACM, pst.AJM, pst.APM; vertical_expo = vertical_expo);
 
 prescribe_ps_traits!(
             spac::BulkSPAC,
-            pst::GeneralC3Trait,
             acm::AcMethodC3VcmaxPi,
             ajm::AjMethodC3JmaxPi,
             apm::Union{ApMethodC3Inf, ApMethodC3Vcmax};
@@ -415,7 +414,6 @@ prescribe_ps_traits!(
 
 prescribe_ps_traits!(
             spac::BulkSPAC,
-            pst::GeneralC3Trait,
             acm::AcMethodC3VcmaxPi,
             ajm::AjMethodC3VqmaxPi,
             apm::Union{ApMethodC3Inf, ApMethodC3Vcmax};
@@ -439,7 +437,6 @@ prescribe_ps_traits!(
 
 prescribe_ps_traits!(
             spac::BulkSPAC,
-            pst::GeneralC4Trait,
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VcmaxPi;
@@ -462,7 +459,6 @@ prescribe_ps_traits!(
 
 prescribe_ps_traits!(
             spac::BulkSPAC,
-            pst::GeneralC4Trait,
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VpmaxPi;
