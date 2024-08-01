@@ -10,7 +10,10 @@ using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geome
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
 using ..Namespace: ReferenceSpectra, ShortwaveRadiation
-using ..Namespace: C3CLMTrait, C3CytoInfApTrait, C3CytoTrait, C3FvCBTrait, C3JBTrait, C3VJPTrait, C4CLMTrait, C4VJPTrait
+using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
+using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
+using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
+using ..Namespace: GeneralC3Trait, GeneralC4Trait
 using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
 using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Plant, Root, Stem
 using ..Namespace: CanopyStructure, CanopyStructureTrait, CanopyStructureTDAuxil, MultiLayerCanopy

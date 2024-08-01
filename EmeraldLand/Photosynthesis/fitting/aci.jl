@@ -17,8 +17,8 @@ Compute the net photosynthetic rate, given
 - `t` Leaf temperature in `K`
 
 """
-function aci_an(ps::LeafPhotosystem, air::AirLayer, p_i::Number, ppar::Number, t::Number)
-    photosynthesis!(ps, air, p_i, ppar, t);
+function aci_an(config::SPACConfiguration, ps::LeafPhotosystem, air::AirLayer, p_i::Number, ppar::Number, t::Number)
+    photosynthesis!(config, ps, air, p_i, ppar, t);
 
     return ps.auxil.a_n
 end;
@@ -47,9 +47,9 @@ Compute the net photosynthetic rates, given
 """
 function aci_curve end;
 
-aci_curve(ps::LeafPhotosystem, air::AirLayer, pis::Vector, ppars::Vector, ts::Vector) = aci_an.((ps,), (air,), pis, ppars, ts);
+aci_curve(config::SPACConfiguration, ps::LeafPhotosystem, air::AirLayer, pis::Vector, ppars::Vector, ts::Vector) = aci_an.((config,), (ps,), (air,), pis, ppars, ts);
 
-aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air, df.P_I, df.PPAR, df.T_LEAF);
+aci_curve(config::SPACConfiguration, ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(config, ps, air, df.P_I, df.PPAR, df.T_LEAF);
 
 
 #######################################################################################################################################################################################################
@@ -58,9 +58,9 @@ aci_curve(ps::LeafPhotosystem, air::AirLayer, df::DataFrame) = aci_curve(ps, air
 # General
 #     2024-Jul-19: add functions to obtain RMSE of A-Ci curve
 #     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
-#     2024-Jul-23: add support to C3CytoInfApTrait
 #     2024-Jul-27: add option to turn on/off Rd fitting
 #     2024-Jul-27: fit Γ_star as well for C3 models
+#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
@@ -76,34 +76,29 @@ Compute the RMSE of A-Ci curve, given
 """
 function aci_rmse end;
 
-aci_rmse(ps::LeafPhotosystem,
+aci_rmse(config::SPACConfiguration,
+         ps::LeafPhotosystem,
          air::AirLayer,
          df::DataFrame,
          params::Vector;
          fit_rd::Bool = false,
-         fitted_γ::Union{Nothing, Number} = nothing) = aci_rmse(ps, ps.trait, air, df, params; fit_rd = fit_rd, fitted_γ = fitted_γ);
+         fitted_γ::Union{Nothing, Number} = nothing) = aci_rmse(config, ps, ps.trait, air, df, params; fit_rd = fit_rd, fitted_γ = fitted_γ);
 
-aci_rmse(ps::LeafPhotosystem,
-         pst::Union{C3CytoInfApTrait, C3CytoTrait, C3JBTrait},
+aci_rmse(config::SPACConfiguration,
+         ps::LeafPhotosystem,
+         pst::Union{GeneralC3Trait, GeneralC4Trait},
          air::AirLayer,
          df::DataFrame,
          params::Vector;
          fit_rd::Bool = false,
-         fitted_γ::Union{Nothing, Number} = nothing) = (
-    pst.v_cmax25 = params[1];
-    pst.b₆f = params[2];
-    if isnothing(fitted_γ)
-        pst.TD_Γ.VAL_REF = params[3];
-    else
-        pst.TD_Γ.VAL_REF = fitted_γ;
-    end;
-    pst.r_d25 = fit_rd ? params[4] : params[1] * 0.015;
+         fitted_γ::Union{Nothing, Number} = nothing) = aci_rmse(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df, params; fit_rd = fit_rd, fitted_γ = fitted_γ);
 
-    return rmse(aci_curve(ps, air, df), df.A_NET)
-);
-
-aci_rmse(ps::LeafPhotosystem,
-         pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait},
+aci_rmse(config::SPACConfiguration,
+         ps::LeafPhotosystem,
+         pst::GeneralC3Trait,
+         acm::AcMethodC3VcmaxPi,
+         ajm::AjMethodC3JmaxPi,
+         apm::ApMethodC3Vcmax,
          air::AirLayer,
          df::DataFrame,
          params::Vector;
@@ -118,22 +113,65 @@ aci_rmse(ps::LeafPhotosystem,
     end;
     pst.r_d25 = fit_rd ? params[4] : params[1] * 0.015;
 
-    return rmse(aci_curve(ps, air, df), df.A_NET)
+    return rmse(aci_curve(config, ps, air, df), df.A_NET)
 );
 
-aci_rmse(ps::LeafPhotosystem, pst::C4CLMTrait, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false, fitted_γ::Nothing = nothing) = (
+aci_rmse(config::SPACConfiguration,
+         ps::LeafPhotosystem,
+         pst::GeneralC3Trait,
+         acm::AcMethodC3VcmaxPi,
+         ajm::AjMethodC3VqmaxPi,
+         apm::ApMethodC3Vcmax,
+         air::AirLayer,
+         df::DataFrame,
+         params::Vector;
+         fit_rd::Bool = false,
+         fitted_γ::Union{Nothing, Number} = nothing) = (
+    pst.v_cmax25 = params[1];
+    pst.b₆f = params[2];
+    if isnothing(fitted_γ)
+        pst.TD_Γ.VAL_REF = params[3];
+    else
+        pst.TD_Γ.VAL_REF = fitted_γ;
+    end;
+    pst.r_d25 = fit_rd ? params[4] : params[1] * 0.015;
+
+    return rmse(aci_curve(config, ps, air, df), df.A_NET)
+);
+
+aci_rmse(config::SPACConfiguration,
+         ps::LeafPhotosystem,
+         pst::GeneralC4Trait,
+         acm::AcMethodC4Vcmax,
+         ajm::AjMethodC4JPSII,
+         apm::ApMethodC4VcmaxPi,
+         air::AirLayer,
+         df::DataFrame,
+         params::Vector;
+         fit_rd::Bool = false,
+         fitted_γ::Nothing = nothing) = (
     pst.v_cmax25 = params[1];
     pst.r_d25 = fit_rd ? params[2] : params[1] * 0.015;
 
-    return rmse(aci_curve(ps, air, df), df.A_NET)
+    return rmse(aci_curve(config, ps, air, df), df.A_NET)
 );
 
-aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, params::Vector; fit_rd::Bool = false, fitted_γ::Nothing = nothing) = (
+aci_rmse(config::SPACConfiguration,
+         ps::LeafPhotosystem,
+         pst::GeneralC4Trait,
+         acm::AcMethodC4Vcmax,
+         ajm::AjMethodC4JPSII,
+         apm::ApMethodC4VpmaxPi,
+         air::AirLayer,
+         df::DataFrame,
+         params::Vector;
+         fit_rd::Bool = false,
+         fitted_γ::Nothing = nothing) = (
     pst.v_cmax25 = params[1];
     pst.v_pmax25 = params[2];
     pst.r_d25 = fit_rd ? params[3] : params[1] * 0.015;
 
-    return rmse(aci_curve(ps, air, df), df.A_NET)
+    return rmse(aci_curve(config, ps, air, df), df.A_NET)
 );
 
 
@@ -146,6 +184,7 @@ aci_rmse(ps::LeafPhotosystem, pst::C4VJPTrait, air::AirLayer, df::DataFrame, par
 #     2024-Jul-23: add support to C3CytoInfApTrait
 #     2024-Jul-27: fit Γ_star as well for C3 models
 #     2024-Jul-27: add initial guess to option
+#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
@@ -160,34 +199,29 @@ Fit the A-Ci curve, given
 """
 function aci_fit end;
 
-aci_fit(ps::LeafPhotosystem, air::AirLayer, df::DataFrame; fit_rd::Bool = false, fitted_γ::Union{Nothing, Number} = nothing, initial_guess::Vector = [50, 2.1, 4, 1]) =
-    aci_fit(ps, ps.trait, air, df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
+aci_fit(config::SPACConfiguration{FT},
+        ps::LeafPhotosystem{FT},
+        air::AirLayer{FT},
+        df::DataFrame;
+        fit_rd::Bool = false,
+        fitted_γ::Union{Nothing, Number} = nothing,
+        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = aci_fit(config, ps, ps.trait, air, df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
 
-aci_fit(ps::LeafPhotosystem{FT},
-        pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}},
+aci_fit(config::SPACConfiguration{FT},
+        ps::LeafPhotosystem{FT},
+        pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
         air::AirLayer,
         df::DataFrame;
         fit_rd::Bool = false,
         fitted_γ::Union{Nothing, Number} = nothing,
-        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
-    mthd = ReduceStepMethodND{FT}(
-        x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
-        x_maxs = fit_rd ? [999, 99, 10, 10] : [999, 99, 1],
-        x_inis = fit_rd ? initial_guess[:] : initial_guess[1:3],
-        Δ_inis = fit_rd ? [10, 1, 1, 1] : [10, 1, 1],
-    );
-    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
-    sol = find_peak(func, mthd, stol);
+        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = aci_fit(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
-    aci = aci_curve(ps, air, df);
-
-    return sol, best_rmse, aci
-);
-
-aci_fit(ps::LeafPhotosystem{FT},
-        pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}},
+aci_fit(config::SPACConfiguration{FT},
+        ps::LeafPhotosystem{FT},
+        pst::GeneralC3Trait{FT},
+        acm::AcMethodC3VcmaxPi,
+        ajm::AjMethodC3JmaxPi,
+        apm::ApMethodC3Vcmax,
         air::AirLayer,
         df::DataFrame;
         fit_rd::Bool = false,
@@ -200,17 +234,48 @@ aci_fit(ps::LeafPhotosystem{FT},
         Δ_inis = fit_rd ? [10, 10, 1, 1] : [10, 10, 1],
     );
     stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    func(x) = -aci_rmse(config, ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
-    aci = aci_curve(ps, air, df);
+    best_rmse = aci_rmse(config, ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT},
-        pst::C4CLMTrait{FT},
+aci_fit(config::SPACConfiguration{FT},
+        ps::LeafPhotosystem{FT},
+        pst::GeneralC3Trait{FT},
+        acm::AcMethodC3VcmaxPi,
+        ajm::AjMethodC3VqmaxPi,
+        apm::ApMethodC3Vcmax,
+        air::AirLayer,
+        df::DataFrame;
+        fit_rd::Bool = false,
+        fitted_γ::Union{Nothing, Number} = nothing,
+        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
+    mthd = ReduceStepMethodND{FT}(
+        x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
+        x_maxs = fit_rd ? [999, 99, 10, 10] : [999, 99, 1],
+        x_inis = fit_rd ? initial_guess[:] : initial_guess[1:3],
+        Δ_inis = fit_rd ? [10, 1, 1, 1] : [10, 1, 1],
+    );
+    stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01, 0.01, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.01, 0.01], 50);
+    func(x) = -aci_rmse(config, ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    sol = find_peak(func, mthd, stol);
+
+    best_rmse = aci_rmse(config, ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    aci = aci_curve(config, ps, air, df);
+
+    return sol, best_rmse, aci
+);
+
+aci_fit(config::SPACConfiguration{FT},
+        ps::LeafPhotosystem{FT},
+        pst::GeneralC4Trait{FT},
+        acm::AcMethodC4Vcmax,
+        ajm::AjMethodC4JPSII,
+        apm::ApMethodC4VcmaxPi,
         air::AirLayer,
         df::DataFrame;
         fit_rd::Bool = false,
@@ -223,17 +288,21 @@ aci_fit(ps::LeafPhotosystem{FT},
         Δ_inis = fit_rd ? [10, 1] : [10],
     );
     stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    func(x) = -aci_rmse(config, ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
-    aci = aci_curve(ps, air, df);
+    best_rmse = aci_rmse(config, ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
 );
 
-aci_fit(ps::LeafPhotosystem{FT},
-        pst::C4VJPTrait{FT},
+aci_fit(config::SPACConfiguration{FT},
+        ps::LeafPhotosystem{FT},
+        pst::GeneralC4Trait{FT},
+        acm::AcMethodC4Vcmax,
+        ajm::AjMethodC4JPSII,
+        apm::ApMethodC4VpmaxPi,
         air::AirLayer,
         df::DataFrame;
         fit_rd::Bool = false,
@@ -246,11 +315,11 @@ aci_fit(ps::LeafPhotosystem{FT},
         Δ_inis = fit_rd ? [10, 10, 1] : [10, 10],
     );
     stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1], 50);
-    func(x) = -aci_rmse(ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    func(x) = -aci_rmse(config, ps, pst, air, df, x; fit_rd = fit_rd, fitted_γ = fitted_γ);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
-    aci = aci_curve(ps, air, df);
+    best_rmse = aci_rmse(config, ps, pst, air, df, sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
 );
@@ -261,6 +330,7 @@ aci_fit(ps::LeafPhotosystem{FT},
 # Changes to this function
 # General
 #     2024-Jul-20: add functions to fit A-Ci curve with removing outliers
+#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
@@ -276,6 +346,7 @@ Fit the A-Ci curve by removing outliers, given
 
 """
 function aci_fit_exclude_outliter(
+            config::SPACConfiguration{FT},
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             df::DataFrame;
@@ -291,7 +362,7 @@ function aci_fit_exclude_outliter(
     last_df = deepcopy(df);
     crnt_df = deepcopy(df);
     while true
-        sol, best_rmse, aci = aci_fit(ps, air, crnt_df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
+        sol, best_rmse, aci = aci_fit(config, ps, air, crnt_df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
         if last_rmse - best_rmse < rmse_threshold
             break
         else
@@ -307,8 +378,8 @@ function aci_fit_exclude_outliter(
 
     # change the df and traits
     df.A_NET .= last_df.A_NET;
-    best_rmse = aci_rmse(ps, air, df, last_sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
-    aci = aci_curve(ps, air, df);
+    best_rmse = aci_rmse(config, ps, air, df, last_sol; fit_rd = fit_rd, fitted_γ = fitted_γ);
+    aci = aci_curve(config, ps, air, df);
 
     return last_sol, best_rmse, aci
 end;
@@ -320,6 +391,7 @@ end;
 # General
 #     2024-Jul-20: add alias function to fit A-Ci curve
 #     2024-Jul-23: add support to C3CytoInfApTrait
+#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
@@ -335,6 +407,7 @@ Fit the A-Ci curve, given
 
 """
 function aci_fit!(
+            config::SPACConfiguration,
             df::DataFrame,
             model::String;
             fit_rd::Bool = false,
@@ -349,36 +422,89 @@ function aci_fit!(
 
     # create a leaf photosystem based on the model string
     if model == "C3Cyto"
-        ps = LeafPhotosystem{Float64}(trait = C3CytoTrait{Float64}(), state = C3State{Float64}());
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
         new_guess = [50, 2.1, 4, 1];
     elseif model == "C3CytoInfAp"
-        ps = LeafPhotosystem{Float64}(trait = C3CytoInfApTrait{Float64}(), state = C3State{Float64}());
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
         new_guess = [50, 2.1, 4, 1];
-    elseif model == "C3CLM"
-        ps = LeafPhotosystem{Float64}(trait = C3CLMTrait{Float64}(), state = C3State{Float64}());
-        new_guess = [50, 100, 4, 1];
-    elseif model == "C3FvCB"
-        ps = LeafPhotosystem{Float64}(trait = C3FvCBTrait{Float64}(), state = C3State{Float64}());
-        new_guess = [50, 100, 4, 1];
     elseif model == "C3JB"
-        ps = LeafPhotosystem{Float64}(trait = C3JBTrait{Float64}(), state = C3State{Float64}());
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.TD_ηC = ηCTDJohnson(Float64);
+        ps.trait.TD_ηL = ηLTDJohnson(Float64);
+        new_guess = [50, 2.1, 4, 1];
+    elseif model == "C3JBInfAp"
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.TD_ηC = ηCTDJohnson(Float64);
+        ps.trait.TD_ηL = ηLTDJohnson(Float64);
         new_guess = [50, 2.1, 4, 1];
     elseif model == "C3VJP"
-        ps = LeafPhotosystem{Float64}(trait = C3VJPTrait{Float64}(), state = C3State{Float64}());
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        new_guess = [50, 100, 4, 1];
+    elseif model == "C3VJPInfAp"
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        new_guess = [50, 100, 4, 1];
+    elseif model == "C3CLM"
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(Float64);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(Float64);
+        new_guess = [50, 100, 4, 1];
+    elseif model == "C3CLMInfAp"
+        ps = LeafPhotosystem{Float64}(trait = GeneralC3Trait{Float64}(), state = C3State{Float64}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(Float64);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(Float64);
         new_guess = [50, 100, 4, 1];
     elseif model == "C4CLM"
-        ps = LeafPhotosystem{Float64}(trait = C4CLMTrait{Float64}(), state = C4State{Float64}());
+        ps = LeafPhotosystem{Float64}(trait = GeneralC4Trait{Float64}(), state = C4State{Float64}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        new_guess = [50, 100, 4, 1];
+    elseif model == "C4CLMSmooth"
+        ps = LeafPhotosystem{Float64}(trait = GeneralC4Trait{Float64}(), state = C4State{Float64}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(Float64);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(Float64);
         new_guess = [50, 100, 4, 1];
     elseif model == "C4VJP"
-        ps = LeafPhotosystem{Float64}(trait = C4VJPTrait{Float64}(), state = C4State{Float64}());
+        ps = LeafPhotosystem{Float64}(trait = GeneralC4Trait{Float64}(), state = C4State{Float64}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VpmaxPi();
         new_guess = [50, 100, 4, 1];
     else
-        throw(ArgumentError("The model should be one of C3Cyto, C3CytoMinEta, C3CLM, C3FvCB, C3JB, C3VJP, C4CLM, and C4VJP!"))
+        throw(ArgumentError("The model $(model) is not supported!"));
     end;
 
     # fit the A-Ci curve with or without removing outliers
     if remove_outlier
         return aci_fit_exclude_outliter(
+                    config,
                     ps,
                     AirLayer{Float64}(),
                     df;
@@ -389,6 +515,7 @@ function aci_fit!(
                     rmse_threshold = rmse_threshold)
     else
         return aci_fit(
+                    config,
                     ps,
                     AirLayer{Float64}(),
                     df;

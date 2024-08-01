@@ -16,7 +16,6 @@
 #     2023-Oct-24: save PSI and PSII ϕ_f in the C3Cyto model
 #     2023-Oct-28: add method for QLFluoscenceModel
 #     2023-Oct-30: compute q_l using exp(-flm.K_B * ppar) (omitting K_A)
-#     2024-Jul-23: add support to C3CytoInfApTrait
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"

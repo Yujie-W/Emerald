@@ -16,12 +16,15 @@ using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
 using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
 using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
 using ..Namespace: CytochromeFluoscenceModel, KNFluoscenceModel, QLFluoscenceModel
-using ..Namespace: C3CLMTrait, C3CytoInfApTrait, C3CytoTrait, C3FvCBTrait, C3JBTrait, C3VJPTrait, GeneralC3Trait, C3State
-using ..Namespace: C4CLMTrait, C4VJPTrait, GeneralC4Trait, C4State
+using ..Namespace: GeneralC3Trait, C3State
+using ..Namespace: GeneralC4Trait, C4State
 using ..Namespace: CanopyLayerPhotosystem, CanopyLayerPhotosystemAuxil, LeafPhotosystem, LeafPhotosystemAuxil
 using ..Namespace: CanopyLayer, Leaf
 using ..Namespace: AirLayer
 using ..Namespace: BulkSPAC, SPACCache, SPACConfiguration
+
+# these are for the fitting of the A-Ci curve
+using ..Namespace: ColimitCJCLMC3, ColimitCJCLMC4, ColimitIPCLM, ColimitJCLM, ηCTDJohnson, ηLTDJohnson
 
 
 # photosystem level model (order by the step in photosynthesis model)

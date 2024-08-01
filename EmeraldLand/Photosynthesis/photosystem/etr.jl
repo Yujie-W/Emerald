@@ -9,7 +9,6 @@
 #     2022-Mar-01: save PSI J
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2024-Jul-22: save j as j_pot fpr C4, C3Cyto models
-#     2024-Jul-23: add support to C3CytoInfApTrait
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
@@ -95,6 +94,15 @@ photosystem_electron_transport!(
             ppar::Vector{FT},
             p_i::Union{FT, Vector{FT}};
             β::FT = FT(1)) where {FT} = photosystem_electron_transport!(cache, ps.trait, ps.state, ps.auxil, ppar, p_i; β = β);
+
+photosystem_electron_transport!(
+            cache::SPACCache{FT},
+            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
+            pss::C3State{FT},
+            psa::CanopyLayerPhotosystemAuxil{FT},
+            ppar::Vector{FT},
+            p_i::Union{FT, Vector{FT}};
+            β::FT = FT(1)) where {FT} = photosystem_electron_transport!(cache, pst, pss, psa, pst.AJM, ppar, p_i; β = β);
 
 photosystem_electron_transport!(
             cache::SPACCache{FT},

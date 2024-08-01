@@ -22,9 +22,9 @@ Updates leaf photosynthetic rates for SPAC, given
 """
 function plant_photosynthesis! end;
 
-plant_photosynthesis!(spac::BulkSPAC{FT}) where {FT} = plant_photosynthesis!(spac, spac.plant.leaves[1]);
+plant_photosynthesis!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = plant_photosynthesis!(config, spac, spac.plant.leaves[1]);
 
-plant_photosynthesis!(spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
+plant_photosynthesis!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
@@ -40,7 +40,7 @@ plant_photosynthesis!(spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
         irt = n_layer + 1 - ilf;
         leaf = leaves[ilf];
         air = airs[lindex[ilf]];
-        leaf_photosynthesis!(spac.cache, leaf, air; rd_only = rd_only);
+        leaf_photosynthesis!(config, spac.cache, leaf, air; rd_only = rd_only);
 
         # update the OCS flux
         leaf.flux.auxil.f_ocs .= leaf.flux.auxil.g_OCS .* air.s_aux.ps[6] ./ air.state.p_air .* FT(1e6);

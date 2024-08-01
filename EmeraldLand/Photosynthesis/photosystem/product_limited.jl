@@ -10,7 +10,6 @@
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2024-Apr-15: add support to C4CLMTrait model using CLM settings
 #     2024-Jul-22: add support to C3FvCBTrait and C3JBTrait model (infinity a_p)
-#     2024-Jul-23: add support to C3CytoInfApTrait model (infinity a_p)
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 # Bug fixes
 #     2023-Sep-21: if g_lc is 0, set a_p to r

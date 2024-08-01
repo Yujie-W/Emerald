@@ -21,45 +21,51 @@ function leaf_photosynthesis! end;
 
 # This method takes out stomtal model out and use it to determine whether to apply beta to Vcmax, Jmax, and Rd
 leaf_photosynthesis!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
             leaf::CanopyLayer{FT},
             air::AirLayer{FT};
-            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, leaf.flux.trait.stomatal_model; rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, leaf.flux.trait.stomatal_model; rd_only = rd_only);
 
 # if stomtal model is not empirical model, then use the default β = 1
 leaf_photosynthesis!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
             leaf::CanopyLayer{FT},
             air::AirLayer{FT},
             sm::AbstractStomataModel{FT};
-            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, FT(1); rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, FT(1); rd_only = rd_only);
 
 # if stomtal model is empirical model, then determine the β based on the parameter Y (if Vcmax, scale Vcmax, Jmax, and Rd)
 leaf_photosynthesis!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
             leaf::CanopyLayer{FT},
             air::AirLayer{FT},
             sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}};
-            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
 
 leaf_photosynthesis!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
             leaf::CanopyLayer{FT},
             air::AirLayer{FT},
             β::BetaFunction{FT},
             param_y::BetaParameterG1;
-            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, FT(1); rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, FT(1); rd_only = rd_only);
 
 leaf_photosynthesis!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
             leaf::CanopyLayer{FT},
             air::AirLayer{FT},
             β::BetaFunction{FT},
             param_y::BetaParameterVcmax;
-            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(cache, leaf, air, leaf.flux.auxil.β; rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, leaf.flux.auxil.β; rd_only = rd_only);
 
 # This method computes and save the photosynthetic rates into leaf flux struct for Conductance mode
 leaf_photosynthesis!(
+            config::SPACConfiguration{FT},
             cache::SPACCache{FT},
             leaf::CanopyLayer{FT},
             air::AirLayer{FT},
@@ -73,7 +79,7 @@ leaf_photosynthesis!(
         return nothing
     end;
 
-    photosystem_temperature_dependence!(leaf.photosystem, air, leaf.energy.s_aux.t);
+    photosystem_temperature_dependence!(config, leaf.photosystem, air, leaf.energy.s_aux.t);
     photosystem_electron_transport!(cache, leaf.photosystem, leaf.flux.auxil.ppar, leaf.flux.auxil.p_CO₂_i; β = β);
     rubisco_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
     light_limited_rate!(cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
@@ -88,7 +94,7 @@ leaf_photosynthesis!(
     photosystem_electron_transport!(cache, leaf.photosystem, leaf.flux.auxil.ppar, leaf.flux.auxil.p_CO₂_i; β = β);
 
     # update the fluorescence related parameters
-    photosystem_coefficients!(cache, leaf.photosystem, leaf.flux.auxil.ppar; β = β);
+    photosystem_coefficients!(config, cache, leaf.photosystem, leaf.flux.auxil.ppar; β = β);
 
     # save the rates and to leaf (copy here because the photosystem auxil valuse would change when updating stomatal conductance)
     leaf.flux.auxil.a_n .= leaf.photosystem.auxil.a_n;

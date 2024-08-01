@@ -191,6 +191,7 @@ end;
 # Changes to this method
 # General
 #     2024-Jul-23: add method to prescribe Vcmax, Jmax, b6f, and Rd for C3 models (C4 models pending)
+#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
@@ -224,10 +225,21 @@ prescribe_ps_traits!(
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
             vcmax::Union{Nothing, Number} = nothing,
-            vpmax::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(leaf.photosystem.trait; b6f=b6f, jmax=jmax, rd=rd, vcmax=vcmax, vpmax=vpmax);
+            vpmax::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(leaf.photosystem.trait; b6f = b6f, jmax = jmax, rd = rd, vcmax = vcmax, vpmax = vpmax);
 
 prescribe_ps_traits!(
-            pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait};
+            pst::GeneralC3Trait;
+            b6f::Union{Nothing, Number} = nothing,
+            jmax::Union{Nothing, Number} = nothing,
+            rd::Union{Nothing, Number} = nothing,
+            vcmax::Union{Nothing, Number} = nothing,
+            vpmax::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(pst, pst.ACM, pst.AJM, pst.APM; b6f = b6f, jmax = jmax, rd = rd, vcmax = vcmax, vpmax = vpmax);
+
+prescribe_ps_traits!(
+            pst::GeneralC3Trait,
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3JmaxPi,
+            apm::Union{ApMethodC3Inf, ApMethodC3Vcmax};
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
@@ -265,7 +277,10 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::Union{C3CytoInfApTrait, C3CytoTrait, C3JBTrait};
+            pst::GeneralC3Trait,
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3VqmaxPi,
+            apm::Union{ApMethodC3Inf, ApMethodC3Vcmax};
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
@@ -303,7 +318,10 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::C4CLMTrait;
+            pst::GeneralC3Trait,
+            acm::AcMethodC4Vcmax,
+            ajm::AjMethodC4JPSII,
+            apm::ApMethodC4VcmaxPi;
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
@@ -329,7 +347,10 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::C4VJPTrait;
+            pst::GeneralC3Trait,
+            acm::AcMethodC4Vcmax,
+            ajm::AjMethodC4JPSII,
+            apm::ApMethodC4VpmaxPi;
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
@@ -359,9 +380,22 @@ prescribe_ps_traits!(
 );
 
 # Method to apply the exponential tuning factor to Vcmax25...
-prescribe_ps_traits!(spac::BulkSPAC; vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, spac.plant.leaves[end].photosystem.trait; vertical_expo=vertical_expo);
+prescribe_ps_traits!(
+            spac::BulkSPAC;
+            vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, spac.plant.leaves[end].photosystem; vertical_expo = vertical_expo);
 
-prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTrait}; vertical_expo::Union{Nothing, Number} = nothing) = (
+prescribe_ps_traits!(
+            spac::BulkSPAC,
+            pst::Union{GeneralC3Trait, GeneralC4Trait};
+            vertical_expo::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(spac, pst, pst.ACM, pst.AJM, pst.APM; vertical_expo = vertical_expo);
+
+prescribe_ps_traits!(
+            spac::BulkSPAC,
+            pst::GeneralC3Trait,
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3JmaxPi,
+            apm::Union{ApMethodC3Inf, ApMethodC3Vcmax};
+            vertical_expo::Union{Nothing, Number} = nothing) = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
@@ -379,7 +413,13 @@ prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CLMTrait, C3FvCBTrait, C3VJPTr
     return nothing
 );
 
-prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CytoInfApTrait, C3CytoTrait, C3JBTrait}; vertical_expo::Union{Nothing, Number} = nothing) = (
+prescribe_ps_traits!(
+            spac::BulkSPAC,
+            pst::GeneralC3Trait,
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3VqmaxPi,
+            apm::Union{ApMethodC3Inf, ApMethodC3Vcmax};
+            vertical_expo::Union{Nothing, Number} = nothing) = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
@@ -397,7 +437,13 @@ prescribe_ps_traits!(spac::BulkSPAC, pst::Union{C3CytoInfApTrait, C3CytoTrait, C
     return nothing
 );
 
-prescribe_ps_traits!(spac::BulkSPAC, pst::C4CLMTrait; vertical_expo::Union{Nothing, Number} = nothing) = (
+prescribe_ps_traits!(
+            spac::BulkSPAC,
+            pst::GeneralC4Trait,
+            acm::AcMethodC4Vcmax,
+            ajm::AjMethodC4JPSII,
+            apm::ApMethodC4VcmaxPi;
+            vertical_expo::Union{Nothing, Number} = nothing) = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
@@ -414,7 +460,13 @@ prescribe_ps_traits!(spac::BulkSPAC, pst::C4CLMTrait; vertical_expo::Union{Nothi
     return nothing
 );
 
-prescribe_ps_traits!(spac::BulkSPAC, pst::C4VJPTrait; vertical_expo::Union{Nothing, Number} = nothing) = (
+prescribe_ps_traits!(
+            spac::BulkSPAC,
+            pst::GeneralC4Trait,
+            acm::AcMethodC4Vcmax,
+            ajm::AjMethodC4JPSII,
+            apm::ApMethodC4VpmaxPi;
+            vertical_expo::Union{Nothing, Number} = nothing) = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
@@ -438,13 +490,14 @@ prescribe_ps_traits!(spac::BulkSPAC, pst::C4VJPTrait; vertical_expo::Union{Nothi
 # Changes to this method
 # General
 #     2024-Jul-23: add method to prescribe Vcmax25 and Jmax25 TD temperature dependent
+#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
 
     prescribe_ps_td!(
                 config::SPACConfiguration{FT},
-                pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}, C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}};
+                pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}};
                 t_clm::Union{Nothing, Number}) where {FT}
 
 Prescribe the photosystem temperature dependence, given
@@ -455,7 +508,17 @@ Prescribe the photosystem temperature dependence, given
 """
 function prescribe_ps_td! end;
 
-prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CLMTrait{FT}, C3FvCBTrait{FT}, C3VJPTrait{FT}}; t_clm::Union{Nothing, Number}) where {FT} = (
+prescribe_ps_td!(
+            config::SPACConfiguration{FT},
+            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}};
+            t_clm::Union{Nothing, Number}) where {FT} = prescribe_ps_td!(config, pst, pst.ACM, pst.AJM; t_clm = t_clm);
+
+prescribe_ps_td!(
+            config::SPACConfiguration{FT},
+            pst::GeneralC3Trait{FT},
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3JmaxPi;
+            t_clm::Union{Nothing, Number}) where {FT} = (
     (; T_CLM) = config;
 
     if !isnothing(t_clm)
@@ -468,7 +531,29 @@ prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CLMTrait{FT}, C3FvC
     return nothing
 );
 
-prescribe_ps_td!(config::SPACConfiguration{FT}, pst::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3JBTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}}; t_clm::Union{Nothing, Number}) where {FT} = (
+prescribe_ps_td!(
+            config::SPACConfiguration{FT},
+            pst::GeneralC3Trait{FT},
+            acm::AcMethodC3VcmaxPi,
+            ajm::AjMethodC3VqmaxPi;
+            t_clm::Union{Nothing, Number}) where {FT} = (
+    (; T_CLM) = config;
+
+    if !isnothing(t_clm)
+        if T_CLM
+            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+        end;
+    end;
+
+    return nothing
+);
+
+prescribe_ps_td!(
+            config::SPACConfiguration{FT},
+            pst::GeneralC4Trait{FT},
+            acm::AcMethodC4Vcmax,
+            ajm::AjMethodC4JPSII;
+            t_clm::Union{Nothing, Number}) where {FT} = (
     (; T_CLM) = config;
 
     if !isnothing(t_clm)
