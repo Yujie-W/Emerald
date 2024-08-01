@@ -41,6 +41,7 @@ include("method/colimit.jl");
 include("method/fluorescence.jl");
 include("method/kinetics.jl");
 include("method/lidf.jl");
+include("method/photosynthesis.jl");
 include("method/pv.jl");
 include("method/soil.jl");
 include("method/soil_albedo.jl");

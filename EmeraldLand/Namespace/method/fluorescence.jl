@@ -1,4 +1,4 @@
-# This file contains the van der Tol et al. (2013) fluorescence model
+# This file contains the ad-hoc fluorescence models
 
 #######################################################################################################################################################################################################
 #
@@ -64,3 +64,35 @@ end;
 QLFluoscenceModelC3(FT) = QLFluoscenceModel{FT}(K_B = 0.95e-3);
 
 QLFluoscenceModelC4(FT) = QLFluoscenceModel{FT}(K_B = 0.63e-3);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General
+#     2023-Oct-27: add qL based model
+# Sources
+#     Han et al. (2022) The physiological basis for estimating photosynthesis from Chla fluorescence
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure that stores Han et al. (2022) fluorescence model parameters.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct QLFluoscenceModelHan{FT<:AbstractFloat}
+    "Fitting parameter α"
+    K_A::FT = 0.8
+    "Fitting parameter β"
+    K_B::FT = 0.95e-3
+end;
+
+QLFluoscenceModelOriginal(FT) = QLFluoscenceModelOriginal{FT}(K_A = 0.8, K_B = 0.95e-3);
+
+QLFluoscenceModelOriginal(FT) = QLFluoscenceModelOriginal{FT}(K_A = 0.83, K_B = 0.63e-3);
