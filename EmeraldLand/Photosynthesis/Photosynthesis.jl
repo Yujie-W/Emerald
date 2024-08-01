@@ -15,7 +15,7 @@ using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimi
 using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
 using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
 using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
-using ..Namespace: CytochromeFluoscenceModel, KNFluoscenceModel, QLFluoscenceModel
+using ..Namespace: CytochromeFluoscenceModel, KNFluoscenceModel, QLFluoscenceModel, QLFluoscenceModelHan
 using ..Namespace: GeneralC3Trait, C3State
 using ..Namespace: GeneralC4Trait, C4State
 using ..Namespace: CanopyLayerPhotosystem, CanopyLayerPhotosystemAuxil, LeafPhotosystem, LeafPhotosystemAuxil

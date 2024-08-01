@@ -67,6 +67,18 @@ Base.@kwdef struct SPACCache{FT}
     cache_incl_azi_2_5::Vector{FT}
     "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
     cache_incl_azi_2_6::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
+    cache_incl_azi_2_7::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
+    cache_incl_azi_2_8::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
+    cache_incl_azi_2_9::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
+    cache_incl_azi_3_1::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
+    cache_incl_azi_3_2::Vector{FT}
+    "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
+    cache_incl_azi_3_3::Vector{FT}
 
 
     # Matrix with dims of INCL and AZI
@@ -121,6 +133,12 @@ SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_ppar::Union{Int, 
                 cache_incl_azi_2_4 = zeros(FT, cache_dim_ppar+1),
                 cache_incl_azi_2_5 = zeros(FT, cache_dim_ppar+1),
                 cache_incl_azi_2_6 = zeros(FT, cache_dim_ppar+1),
+                cache_incl_azi_2_7 = zeros(FT, cache_dim_ppar+1),
+                cache_incl_azi_2_8 = zeros(FT, cache_dim_ppar+1),
+                cache_incl_azi_2_9 = zeros(FT, cache_dim_ppar+1),
+                cache_incl_azi_3_1 = zeros(FT, cache_dim_ppar+1),
+                cache_incl_azi_3_2 = zeros(FT, cache_dim_ppar+1),
+                cache_incl_azi_3_3 = zeros(FT, cache_dim_ppar+1),
 
                 cache_incl_azi_1 = zeros(FT, dim_incl, dim_azi),
                 cache_incl_azi_2 = zeros(FT, dim_incl, dim_azi),
