@@ -4,6 +4,21 @@
 #
 # Changes to the struct
 # General
+#     2024-Jul-31: add CytochromeFluoscenceModel (empty struct)
+#
+#######################################################################################################################################################################################################
+"""
+
+Structure for the C3 Cytochrome fluorescence model.
+
+"""
+struct CytochromeFluoscenceModel{FT<:AbstractFloat} end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General
 #     2022-Jan-14: add Kn based model
 # Sources
 #     van der Tol et al. (2013) Models of fluorescence and photosynthesis for interpreting measurements of solar-induced chlorophyll fluorescence

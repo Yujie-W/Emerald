@@ -4,6 +4,138 @@
 #
 # Changes to this struct
 # General
+#     2024-Jul-31: add new GeneralC3Trait struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C3 photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct GeneralC3Trait{FT}
+    # Colimitation methods
+    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
+    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
+    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for J"
+    COLIMIT_J::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = ColimitJCLM(FT)
+
+    # Temperature dependency structures
+    "[`AbstractTemperatureDependency`](@ref) type Jmax temperature dependency"
+    TD_JMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = JmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Kc temperature dependency"
+    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KcTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
+    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KoTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Kq temperature dependency"
+    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KqTDJohnson(FT)
+    "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
+    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
+    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDWang(FT)
+    "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
+    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDWang(FT)
+
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
+
+    # Embedded method structures
+    "Ac method"
+    ACM::AcMethodC3VcmaxPi = AcMethodC3VcmaxPi()
+    "Aj method"
+    AJM::Union{AjMethodC3JmaxPi, AjMethodC3VqmaxPi} = AjMethodC3JmaxPi()
+    "Ap method"
+    APM::Union{ApMethodC3Inf, ApMethodC3Vcmax} = ApMethodC3Vcmax()
+    "Fluorescence model"
+    FLM::Union{CytochromeFluoscenceModel{FT}, KNFluoscenceModel{FT}, QLFluoscenceModel{FT}, QLFluoscenceModelHan{FT}} = KNFluoscenceModel{FT}()
+
+    # Prognostic variables
+    "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
+    b₆f::FT = 350 / 300
+    "Maximal electron transport rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    j_max25::FT = 83.5
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-31: add new GeneralC4Trait struct
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C4 photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct GeneralC4Trait{FT}
+    # Colimitation methods
+    "[`AbstractColimit`](@ref) type colimitation method for Ac and Aj => Ai"
+    COLIMIT_CJ::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+    "[`AbstractColimit`](@ref) type colimitation method for Ai and Ap => Ag"
+    COLIMIT_IP::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}} = MinimumColimit{FT}()
+
+    # Temperature dependency structures
+    "[`AbstractTemperatureDependency`](@ref) type Kpep temperature dependency"
+    TD_KPEP::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KpepTDBoyd(FT)
+    "[`AbstractTemperatureDependency`](@ref) type  respiration temperature dependency"
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Vpmax temperature dependency"
+    TD_VPMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VpmaxTDBoyd(FT)
+
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 8862 * 1e-6
+
+    # Embedded structures
+    "Ac method"
+    ACM::AcMethodC4Vcmax = AcMethodC4Vcmax()
+    "Aj method"
+    AJM::AjMethodC4JPSII = AjMethodC4JPSII()
+    "Ap method"
+    APM::Union{ApMethodC4Vcmax, ApMethodC4Vpmax} = ApMethodC4Vcmax()
+    "Fluorescence model"
+    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
+
+    # Prognostic variables
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+    "Maximal PEP carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_pmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2024-Jul-23: add C3CytoInfApTrait struct
 #     2024-Jul-27: use modified TD for η_C and η_L
 #     2024-Jul-30: add K_OCS to compute internal conductance for OCS
@@ -906,7 +1038,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}, GeneralC3Trait{FT}, GeneralC4Trait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
     "Auxilary variables"
@@ -934,7 +1066,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct CanopyLayerPhotosystem{FT}
     "Trait variables"
-    trait::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}} = C3VJPTrait{FT}()
+    trait::Union{C3CytoInfApTrait{FT}, C3CytoTrait{FT}, C3CLMTrait{FT}, C3FvCBTrait{FT}, C3JBTrait{FT}, C3VJPTrait{FT}, C4CLMTrait{FT}, C4VJPTrait{FT}, GeneralC3Trait{FT}, GeneralC4Trait{FT}} = C3VJPTrait{FT}()
     "State variables"
     state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
     "Auxilary variables"

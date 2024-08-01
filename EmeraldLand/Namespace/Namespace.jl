@@ -50,6 +50,7 @@ include("method/xylem.jl");
 
 
 # The configuration of the SPAC system
+include("config/rate_constants.jl");
 include("config/spectra.jl");
 include("config/trace.jl");
 

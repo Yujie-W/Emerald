@@ -25,6 +25,7 @@
 #     2024-Feb-28: add field VERTICAL_BIO
 #     2024-Jul-22: add field ENABLE_CHEMICAL_ENERGY
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Jul-31: add rate constants fields (constants for PSI, PSII, and combined)
 #
 #######################################################################################################################################################################################################
 """
@@ -39,41 +40,37 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
+    #
     # Debug mode
+    #
     "Message level (0 for no, 1 for progress bar, and 2 for ind)"
     MESSAGE_LEVEL::Int = 0
 
-    # Data name of the JLD2 file
-    "JLD2 file name"
-    JLD2_FILE::String = LAND_ARTIFACT
+    #
+    # Dataset (to use the reference spectra and many others)
+    #
     "Data name of the JLD2 file"
     DATASET::String = OLD_PHI_2021
-
-    # Reference spectra
+    "JLD2 file name"
+    JLD2_FILE::String = LAND_ARTIFACT
     "Reference Spetra"
-    SPECTRA::ReferenceSpectra{FT}
+    SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(JLD2_FILE, DATASET)
 
-    # features related to the canopy optics and fluorescence
+    #
+    # Canopy optics
+    #
     "Whether to compute canopy reflectance"
     ENABLE_REF::Bool = true
-    "Whether to compute fluorescence"
-    ENABLE_SIF::Bool = true
     "Hot spot parameter"
     HOT_SPOT::FT = 0.05
     "Soil albedo method"
     SOIL_ALBEDO::Union{SoilAlbedoPrescribe, SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
     "Vertical distribution of leaf biophysical properties (if false, run leaf_spectra! only once)"
     VERTICAL_BIO::Bool = false
-    "Whether to convert energy to photons when computing fluorescence"
-    Φ_PHOTON::Bool = true
-    "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
-    Φ_SIF_CUTOFF::Int = 0
-    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
-    Φ_SIF_RESCALE::Bool = true
-    "Whether to partition the SIF PDF based the wavelength"
-    Φ_SIF_WL::Bool = true
 
-    # Settings related to the canopy geometry angles (inclination and azimuth settings)
+    #
+    # Canopy structure
+    #
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
     "Dimension of inclination angles"
@@ -85,7 +82,41 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Mean inclination angles `[°]`"
     Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
 
-    # features related to plant hydraulics
+    #
+    # Fluorescence
+    #
+    "Whether to compute fluorescence"
+    ENABLE_SIF::Bool = true
+    "Whether to convert energy to photons when computing fluorescence"
+    Φ_PHOTON::Bool = true
+    "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
+    Φ_SIF_CUTOFF::Int = 0
+    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
+    Φ_SIF_RESCALE::Bool = true
+    "Whether to partition the SIF PDF based the wavelength"
+    Φ_SIF_WL::Bool = true
+
+    #
+    # Photosynthesis
+    #
+    "Number of sunlit PPAR bins for all the layers (to speed up the computation)"
+    DIM_PPAR_BINS::Union{Int,Nothing} = nothing
+    "Enable the chemical energy related to photosynthesis and respiration"
+    ENABLE_CHEMICAL_ENERGY::Bool = true
+    "Rate constants for PSI and PSII combined (most for PSII?)"
+    PS_RATE_CONSTANTS::PhotosystemsRateConstants{FT} = PhotosystemsRateConstants{FT}()
+    "Rate constants for PSI"
+    PSI_RATE_CONSTANTS::PhotosystemIRateConstants{FT} = PhotosystemIRateConstants{FT}()
+    "Rate constants for PSII"
+    PSII_RATE_CONSTANTS::PhotosystemIIRateConstants{FT} = PhotosystemIIRateConstants{FT}()
+    "Whether to acclimate leaf Vcmax and Jmax TD"
+    T_CLM::Bool = true
+    "Number of temperature memory (hours for hourly simulation)"
+    T_CLM_N::Int = 240
+
+    #
+    # Plant hydraulics
+    #
     "Allow leaf condensation"
     ALLOW_LEAF_CONDENSATION::Bool = false
     "Allow leaf shedding in prescibe LAI mode to avoid numerical issues"
@@ -97,17 +128,9 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to run the model at steady state mode"
     STEADY_STATE_FLOW::Bool = true
 
-    # Settings related to photosynthesis
-    "Number of sunlit PPAR bins for all the layers (to speed up the computation)"
-    DIM_PPAR_BINS::Union{Int,Nothing} = nothing
-    "Enable the chemical energy related to photosynthesis and respiration"
-    ENABLE_CHEMICAL_ENERGY::Bool = true
-    "Whether to acclimate leaf Vcmax and Jmax TD"
-    T_CLM::Bool = true
-    "Number of temperature memory (hours for hourly simulation)"
-    T_CLM_N::Int = 240
-
-    # Trace gas information
+    #
+    # Trace gas
+    #
     "Trace gas air"
     TRACE_AIR::TraceGasAir{FT} = TraceGasAir{FT}()
     "Trace gas CH₄"
@@ -121,7 +144,9 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Trace gas O₂"
     TRACE_O₂::TraceGasO₂{FT} = TraceGasO₂{FT}()
 
+    #
     # Prescribe parameters
+    #
     "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
 
