@@ -128,7 +128,7 @@ Base.@kwdef mutable struct GeneralC4Trait{FT}
     "Ap method"
     APM::Union{ApMethodC4VcmaxPi, ApMethodC4VpmaxPi} = ApMethodC4VcmaxPi()
     "Fluorescence model"
-    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}} = KNFluoscenceModel{FT}()
+    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}, QLFluoscenceModelHan{FT}} = KNFluoscenceModel{FT}()
 
     # Prognostic variables
     "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
