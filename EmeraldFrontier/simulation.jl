@@ -81,7 +81,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, dfr::Data
         df_sw4::FT = dfr.SWC_4;
 
         # adjust optimum t based on the first known temperature
-        spac.plant.memory.t_history .= FT[max(df_tar, df_tlf)];
+        @. spac.plant.memory.t_history = max(df_tar, df_tlf);
         prescribe_traits!(config, spac; t_clm = max(df_tar, df_tlf), t_leaf = max(df_tar, df_tlf));
         prescribe_soil!(spac; swcs = (df_sw1, df_sw2, df_sw3, df_sw4), t_soils = (df_ts1, df_ts2, df_ts3, df_ts4));
         initialize_spac!(config, spac);
@@ -167,10 +167,10 @@ simulation!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false, 
 
     # add the fields to store outputs
     for label in DF_VARIABLES
-        wdf[!,label] .= 0.0;
+        @. wdf[!,label] = 0.0;
     end;
     for label in DF_SIMULATIONS
-        wdf[!,label] .= NaN;
+        @. wdf[!,label] = NaN;
     end;
 
     simulation!(config, spac, wdf; initialize_state = initialize_state, saving = saving, selection = selection);

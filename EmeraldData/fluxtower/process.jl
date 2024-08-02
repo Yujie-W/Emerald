@@ -109,9 +109,9 @@ function detect_data(df::DataFrame, data_label::String; displaying::Bool = false
         vec_data_pi_f = length(label_pi_f) >= 1 ? collect(Float64, data_pi_f[i,:]) : Float64[];
 
         # if the data == -9999, replace it with NaN
-        vec_data[vec_data .<= -9990] .= NaN;
-        vec_data_pi[vec_data_pi .<= -9990] .= NaN;
-        vec_data_pi_f[vec_data_pi_f .<= -9990] .= NaN;
+        @. vec_data[vec_data .<= -9990] = NaN;
+        @. vec_data_pi[vec_data_pi .<= -9990] = NaN;
+        @. vec_data_pi_f[vec_data_pi_f .<= -9990] = NaN;
 
         # take the nanmean of each vector
         mean_data = nanmean(vec_data);

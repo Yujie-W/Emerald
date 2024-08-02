@@ -82,7 +82,7 @@ function prescribe_nt!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::Na
         df_sw4::FT = df.SWC_4[ind];
 
         # adjust optimum t based on the first known temperature
-        spac.plant.memory.t_history .= FT[max(df_tar, df_tlf)];
+        @. spac.plant.memory.t_history = max(df_tar, df_tlf);
         prescribe_traits!(config, spac; t_clm = max(df_tar, df_tlf), t_leaf = max(df_tar, df_tlf));
         prescribe_soil!(spac; swcs = (df_sw1, df_sw2, df_sw3, df_sw4), t_soils = (df_ts1, df_ts2, df_ts3, df_ts4));
         initialize_spac!(config, spac);
@@ -168,10 +168,10 @@ simulation_nt!(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = fals
 
     # add the fields to store outputs
     for label in DF_VARIABLES
-        df[!,label] .= 0.0;
+        @. df[!,label] = 0.0;
     end;
     for label in DF_SIMULATIONS
-        df[!,label] .= NaN;
+        @. df[!,label] = NaN;
     end;
 
     # convert the DataFrame to NamedTuple

@@ -103,15 +103,15 @@ sensor_geometry_aux!(
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
         cos_azi_raa = cosd(Θ_AZI[i] .- (senst.vaa - sunst.saa));
-        view(sensa.fo,:,i) .= sensa.Co_incl .+ sensa.So_incl .* cos_azi_raa;
+        @. sensa.fo[:,i] = sensa.Co_incl + sensa.So_incl * cos_azi_raa;
     end;
-    sensa.fo ./= cosd(senst.vza);
-    sensa.fo_abs .= abs.(sensa.fo);
+    @. sensa.fo /= cosd(senst.vza);
+    @. sensa.fo_abs = abs(sensa.fo);
     for i in eachindex(Θ_INCL)
-        view(sensa.fo_cos²_incl,i,:) .= view(sensa.fo,i,:) .* cosd(Θ_INCL[i]) ^ 2; # TODO: is this related to the bf calculation in SCOPE?
+        @. sensa.fo_cos²_incl[i,:] = (@view sensa.fo[i,:]) * cosd(Θ_INCL[i]) ^ 2; # TODO: is this related to the bf calculation in SCOPE?
     end;
-    sensa.fo_fs .= sunsa.fs .* sensa.fo;
-    sensa.fo_fs_abs .= abs.(sensa.fo_fs);
+    @. sensa.fo_fs = sunsa.fs * sensa.fo;
+    @. sensa.fo_fs_abs = abs(sensa.fo_fs);
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)

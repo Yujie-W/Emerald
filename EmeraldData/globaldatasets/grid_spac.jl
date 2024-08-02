@@ -123,7 +123,7 @@ function prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
         prescribe_soil!(spac; swcs = Tuple(min(spac.soils[i].trait.vc.Θ_SAT - 0.001, ss_dict[swckeys[i]]) for i in 1:4), t_soils = Tuple(ss_dict[tslkeys[i]] for i in 1:4));
 
         # prescribe leaf temperature from skin temperature
-        spac.plant.memory.t_history .= FT[ss_dict["T_SKN"]];
+        @. spac.plant.memory.t_history = ss_dict["T_SKN"];
         prescribe_traits!(config, spac; t_leaf = ss_dict["T_SKN"], t_clm = mean(spac.plant.memory.t_history));
     end;
 
