@@ -105,6 +105,8 @@ Base.@kwdef mutable struct GeneralC4Trait{FT}
     # Temperature dependency structures
     "[`AbstractTemperatureDependency`](@ref) type Kpep temperature dependency"
     TD_KPEP::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KpepTDBoyd(FT)
+    "[`AbstractTemperatureDependency`](@ref) type Kpep temperature dependency to use with C4CLM method"
+    TD_KPEP_CLM::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = Q10TDKpepCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type  respiration temperature dependency"
     TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"

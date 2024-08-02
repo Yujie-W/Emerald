@@ -181,7 +181,7 @@ photosystem_temperature_dependence!(
             t::FT) where {FT} = (
     (; ENABLE_KD_TD, PS_RATE_CONSTANTS) = config;
 
-    psa.k_pep_clm = temperature_corrected_value(pst.TD_KPEP, t);
+    psa.k_pep_clm = temperature_corrected_value(pst.TD_KPEP_CLM, t);
     psa.r_d       = pst.r_d25 * temperature_correction(pst.TD_R, t);
     psa.v_cmax    = pst.v_cmax25 * temperature_correction(pst.TD_VCMAX, t);
 
