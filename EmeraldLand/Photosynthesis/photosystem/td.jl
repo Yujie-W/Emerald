@@ -7,6 +7,7 @@
 #     2022-Jan-13: use ClimaCache types, which uses ΔHA, ΔHD, and ΔSV directly
 #     2022-Jan-13: add optional input t_ref to allow for manually setting reference temperature
 #     2022-Jul-29: add support to Q10Peak
+#     2024-Aug-01: add support for Q10PeakHT and Q10PeakLTHT
 #
 #######################################################################################################################################################################################################
 """
@@ -44,6 +45,26 @@ temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} 
     # f_a: activation correction, f_b: de-activation correction
     f_a = td.Q_10 ^ ( (t - t_ref) / 10 );
     f_b = (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t_ref))) / (1 + exp(ΔSV / GAS_R(FT) - ΔHD / (GAS_R(FT) * t)));
+
+    return f_a * f_b
+);
+
+temperature_correction(td::Q10PeakHT{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = (
+    (; ΔT_REF, ΔT_SLOPE) = td;
+
+    # f_a: activation correction, f_b: de-activation correction
+    f_a = td.Q_10 ^ ( (t - t_ref) / 10 );
+    f_b = 1 / (1 + exp(ΔT_SLOPE * (t - ΔT_REF)));
+
+    return f_a * f_b
+);
+
+temperature_correction(td::Q10PeakLTHT{FT}, t::FT; t_ref::FT = td.T_REF) where {FT} = (
+    (; ΔHT_REF, ΔHT_SLOPE, ΔLT_REF, ΔLT_SLOPE) = td;
+
+    # f_a: activation correction, f_b: de-activation correction
+    f_a = td.Q_10 ^ ( (t - t_ref) / 10 );
+    f_b = 1 / (1 + exp(ΔHT_SLOPE * (t - ΔHT_REF))) / (1 + exp(ΔLT_SLOPE * (ΔLT_REF - t)));
 
     return f_a * f_b
 );

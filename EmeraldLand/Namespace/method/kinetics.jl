@@ -165,6 +165,86 @@ end;
 
 #######################################################################################################################################################################################################
 #
+# Changes to this struct
+# General
+#     2024-Aug-01: add struct Q10PeakHT
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+A `Q10PeakHT` type struct using
+```math
+Y_1 = Y_0 \\cdot Q_{10} ^ \\dfrac{T_1 - T_0}{10}
+          \\cdot \\dfrac{ 1 }
+                        { 1 + \\exp \\left( S_H * (T_1 - T_H) \\right) }
+```
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct Q10PeakHT{FT<:AbstractFloat} <: AbstractTemperatureDependency{FT}
+    # General model information
+    "Power of Q10 correction"
+    Q_10::FT
+    "Reference temperature `[K]`"
+    T_REF::FT
+    "Uncorrected vakye at reference temperature"
+    VAL_REF::FT
+    "Reference temperature to compute ΔT `[K]`"
+    ΔT_REF::FT
+    "Slope for ΔT `[K⁻¹]`"
+    ΔT_SLOPE::FT
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Aug-01: add struct Q10PeakLTHT
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+A `Q10PeakLTHT` type struct using
+```math
+Y_1 = Y_0 \\cdot Q_{10} ^ \\dfrac{T_1 - T_0}{10}
+          \\cdot \\dfrac{ 1 }{ 1 + \\exp \\left( S_H * (T_1 - T_H) \\right) }
+          \\cdot \\dfrac{ 1 }{ 1 + \\exp \\left( S_L * (T_L - T_1) \\right) }
+```
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct Q10PeakLTHT{FT<:AbstractFloat} <: AbstractTemperatureDependency{FT}
+    # General model information
+    "Power of Q10 correction"
+    Q_10::FT
+    "Reference temperature `[K]`"
+    T_REF::FT
+    "Uncorrected vakye at reference temperature"
+    VAL_REF::FT
+    "Reference high temperature to compute ΔT `[K]`"
+    ΔHT_REF::FT
+    "Slope for high ΔT `[K⁻¹]`"
+    ΔHT_SLOPE::FT
+    "Reference low temperature to compute ΔT `[K]`"
+    ΔLT_REF::FT
+    "Slope for low ΔT `[K⁻¹]`"
+    ΔLT_SLOPE::FT
+end;
+
+
+#######################################################################################################################################################################################################
+#
 # Changes to the constructors
 # General
 #     2022-Jan-14: migrate from Photosynthesis.jl
@@ -193,18 +273,22 @@ VomaxTDBernacchi(FT)       = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = NaN   
 ΓStarTDBernacchi(FT)       = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 4.33164375, ΔHA = 37830.0);
 ΓStarTDCLM(FT)             = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 4.275     , ΔHA = 37830.0);
 
-JmaxTDBernacchi(FT)               = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 57500.0, ΔHD = 439000.0, ΔSV = 1400.0);
-JmaxTDCLM(FT, t::Number = T₂₅())  = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 50000.0, ΔHD = 200000.0, ΔSV = 659.70 - 0.75 * (t - T₀(FT)) );
-JmaxTDLeuning(FT)                 = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 50300.0, ΔHD = 152044.0, ΔSV = 495.0 );
-RespirationTDCLM(FT)              = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 46390.0, ΔHD = 150650.0, ΔSV = 490.0 );
-VcmaxTDCLM(FT, t::Number = T₂₅()) = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 72000.0, ΔHD = 200000.0, ΔSV = 668.39 - 1.07 * (t - T₀(FT)) );
-VcmaxTDLeuning(FT)                = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 73637.0, ΔHD = 149252.0, ΔSV = 486.0 );
-VpmaxTDBoyd(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 94800.0, ΔHD = 73300.0 , ΔSV = 250.0 );
-ηCTDJohnson(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 220000.0, ΔSV = 710.0 );
-ηLTDJohnson(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 220000.0, ΔSV = 710.0 );
-ηCTDWang(FT)                      = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
-ηLTDWang(FT)                      = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
+JmaxTDBernacchi(FT)                 = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 57500.0, ΔHD = 439000.0, ΔSV = 1400.0);
+JmaxTDCLM(FT, t::Number = T₂₅())    = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 50000.0, ΔHD = 200000.0, ΔSV = 659.70 - 0.75 * (t - T₀(FT)) );
+JmaxTDLeuning(FT)                   = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 50300.0, ΔHD = 152044.0, ΔSV = 495.0 );
+RespirationTDCLMC3(FT)              = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 46390.0, ΔHD = 150650.0, ΔSV = 490.0 );
+VcmaxTDCLMC3(FT, t::Number = T₂₅()) = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 72000.0, ΔHD = 200000.0, ΔSV = 668.39 - 1.07 * (t - T₀(FT)) );
+VcmaxTDLeuning(FT)                  = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 73637.0, ΔHD = 149252.0, ΔSV = 486.0 );
+VpmaxTDBoyd(FT)                     = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN , ΔHA = 94800.0, ΔHD = 73300.0 , ΔSV = 250.0 );
+ηCTDJohnson(FT)                     = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 220000.0, ΔSV = 710.0 );
+ηLTDJohnson(FT)                     = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 220000.0, ΔSV = 710.0 );
+ηCTDWang(FT)                        = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
+ηLTDWang(FT)                        = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
 
 Q10TDAngiosperm(FT) = Q10{FT}(Q_10 = 1.4, T_REF = T₂₅(FT), VAL_REF = 0.0140/8760);
 Q10TDGymnosperm(FT) = Q10{FT}(Q_10 = 1.7, T_REF = T₂₅(FT), VAL_REF = 0.0425/8760);
 Q10TDKpepCLM(FT)    = Q10{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = 0.2);
+
+RespirationTDCLMC4(FT) = Q10PeakHT{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = NaN, ΔT_REF = 328.15, ΔT_SLOPE = 1.3);
+
+VcmaxTDCLMC4(FT) = Q10PeakLTHT{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = NaN, ΔHT_REF = 313.15, ΔHT_SLOPE = 0.3, ΔLT_REF = 288.15, ΔLT_SLOPE = 0.2);

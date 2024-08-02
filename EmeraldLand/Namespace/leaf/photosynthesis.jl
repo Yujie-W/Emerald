@@ -7,6 +7,7 @@
 #     2024-Jul-27: use modified TD for η_C and η_L
 #     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #     2024-Jul-31: add new GeneralC3Trait struct
+#     2024-Aug-01: add support to Q10Peak, Q10PeakHT, and Q10PeakLTHT
 #
 #######################################################################################################################################################################################################
 """
@@ -31,23 +32,23 @@ Base.@kwdef mutable struct GeneralC3Trait{FT}
 
     # Temperature dependency structures
     "[`AbstractTemperatureDependency`](@ref) type Jmax temperature dependency"
-    TD_JMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = JmaxTDCLM(FT)
+    TD_JMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = JmaxTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type Kc temperature dependency"
-    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KcTDCLM(FT)
+    TD_KC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KcTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
-    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KoTDCLM(FT)
+    TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KoTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type Kq temperature dependency"
-    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KqTDJohnson(FT)
+    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KqTDJohnson(FT)
     "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
-    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = RespirationTDCLMC3(FT)
     "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
-    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = VcmaxTDCLMC3(FT)
     "[`AbstractTemperatureDependency`](@ref) type Γ* temperature dependency"
-    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ΓStarTDCLM(FT)
+    TD_Γ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = ΓStarTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type η_C temperature dependency"
-    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηCTDWang(FT)
+    TD_ηC::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = ηCTDWang(FT)
     "[`AbstractTemperatureDependency`](@ref) type η_L temperature dependency"
-    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = ηLTDWang(FT)
+    TD_ηL::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = ηLTDWang(FT)
 
     # Related to OCS uptake
     "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
@@ -82,6 +83,7 @@ end;
 #     2024-Apr-15: add C4CLMTrait struct
 #     2024-Jul-30: add K_OCS to compute internal conductance for OCS
 #     2024-Jul-31: add new GeneralC4Trait struct
+#     2024-Aug-01: add support to Q10Peak, Q10PeakHT, and Q10PeakLTHT
 #
 #######################################################################################################################################################################################################
 """
@@ -104,15 +106,15 @@ Base.@kwdef mutable struct GeneralC4Trait{FT}
 
     # Temperature dependency structures
     "[`AbstractTemperatureDependency`](@ref) type Kpep temperature dependency"
-    TD_KPEP::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = KpepTDBoyd(FT)
+    TD_KPEP::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KpepTDBoyd(FT)
     "[`AbstractTemperatureDependency`](@ref) type Kpep temperature dependency to use with C4CLM method"
-    TD_KPEP_CLM::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = Q10TDKpepCLM(FT)
+    TD_KPEP_CLM::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = Q10TDKpepCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type  respiration temperature dependency"
-    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = RespirationTDCLM(FT)
+    TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = RespirationTDCLMC4(FT)
     "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
-    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VcmaxTDCLM(FT)
+    TD_VCMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = VcmaxTDCLMC4(FT)
     "[`AbstractTemperatureDependency`](@ref) type Vpmax temperature dependency"
-    TD_VPMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}} = VpmaxTDBoyd(FT)
+    TD_VPMAX::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = VpmaxTDBoyd(FT)
 
     # Related to OCS uptake
     "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
