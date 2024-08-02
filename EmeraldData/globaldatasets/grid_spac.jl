@@ -102,7 +102,7 @@ function prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
     saa = solar_azimuth_angle(spac.info.lat, FT(wd_dict["FDOY"]));
     sza = solar_zenith_angle(spac.info.lat, FT(wd_dict["FDOY"]));
     spac.canopy.sun_geometry.state.saa = saa;
-    spac.canopy.sun_geometry.state.sza = (wd_dict["RAD_DIR"] + wd_dict["RAD_DIF"] > 10) ? min(sza, 88.999) : sza;
+    spac.canopy.sun_geometry.state.sza = (wd_dict["RAD_DIR"] + wd_dict["RAD_DIF"] > 10) ? min(sza, 88) : sza;
 
     # update t_clm to make Vcmax25 and Jmax25 TD temperature dependent
     prescribe_traits!(config, spac; t_clm = mean(spac.plant.memory.t_history));

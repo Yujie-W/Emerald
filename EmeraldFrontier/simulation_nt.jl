@@ -11,7 +11,7 @@
 #     2024-Apr-17: update solar azimuth angle as well
 #     2024-Jul-24: remove lai, ci, vcmax, and cab from memory (use traits instead)
 # Bug fixes
-#     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88.999
+#     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88
 #
 #######################################################################################################################################################################################################
 """
@@ -108,7 +108,7 @@ function prescribe_nt!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::Na
     saa = solar_azimuth_angle(spac.info.lat, FT(df_doy));
     sza = solar_zenith_angle(spac.info.lat, FT(df_doy));
     spac.canopy.sun_geometry.state.saa = saa;
-    spac.canopy.sun_geometry.state.sza = (df_dir + df_dif > 10) ? min(sza, 88.999) : sza;
+    spac.canopy.sun_geometry.state.sza = (df_dir + df_dif > 10) ? min(sza, 88) : sza;
 
     # run the t_aux! and dull_aux! functions if any of the LAI, CHL, or CI changes and initialize_state is false
     if (trigger_chl || trigger_lai || trigger_cli) && !initialize_state
