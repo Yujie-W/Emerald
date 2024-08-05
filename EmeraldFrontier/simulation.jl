@@ -140,6 +140,7 @@ end;
 #     2024-Mar-07: add fields for saved parameters and simulations in the dataframe (as grid_weather_driver did not do it)
 #     2024-Aug-05: use saving_dict to determine which variables to save
 #     2024-Aug-05: save plant hydraulics health status
+#     2024-Aug-05: add method to use externally prepared config, spac, and weather driver (will process the dataframe to NamedTuple)
 #
 #######################################################################################################################################################################################################
 """
@@ -151,6 +152,13 @@ end;
                 saving::Union{Nothing,String} = nothing,
                 saving_dict::Dict{String,Any} = SAVING_DICT,
                 selection = :)
+    simulation!(config::SPACConfiguration{FT},
+                spac::BulkSPAC{FT},
+                df::DataFrame;
+                initialize_state::Union{Nothing,Bool} = true,
+                saving::Union{Nothing,String} = nothing,
+                saving_dict::Dict{String,Any} = SAVING_DICT,
+                selection = :) where {FT}
 
 Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
@@ -163,7 +171,7 @@ Run simulation on site level, given
 The second method can be used to run externally prepared config, spac, and weather driver, given
 - `config` SPAC configuration
 - `spac` SPAC
-- `wdf` Weather driver dataframe
+- `df` Weather driver dataframe
 
 """
 function simulation! end;
@@ -179,6 +187,16 @@ simulation!(wd_tag::String,
     spac = grid_spac(config, gm_dict);
     df = grid_weather_driver(wd_tag, gm_dict; appending = appending);
 
+    return simulation!(config, spac, df; initialize_state = initialize_state, saving = saving, saving_dict = saving_dict, selection = selection);
+);
+
+simulation!(config::SPACConfiguration{FT},
+            spac::BulkSPAC{FT},
+            df::DataFrame;
+            initialize_state::Union{Nothing,Bool} = true,
+            saving::Union{Nothing,String} = nothing,
+            saving_dict::Dict{String,Any} = SAVING_DICT,
+            selection = :) where {FT} = (
     # add the fields to store outputs
     new_df_cols = String[];
     if saving_dict["MOD_SWC"]
