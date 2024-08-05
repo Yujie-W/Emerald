@@ -7,6 +7,7 @@
 #     2022-May-24: add method for LinearPVCurve
 #     2022-May-24: add method for SegmentedPVCurve
 #     2023-Sep-22: add method for ExponentialPVCurve
+#     2024-Jul-24: add field residual in ExponentialPVCurve to avoid numerical issue in junction temperature
 #
 #######################################################################################################################################################################################################
 """
@@ -23,7 +24,7 @@ Return the xylem water pressure in MPa, given
 """
 function capacitance_pressure end;
 
-capacitance_pressure(pv::ExponentialPVCurve{FT}, rvol::FT, t::FT) where {FT} = log(rvol) / pv.slope;
+capacitance_pressure(pv::ExponentialPVCurve{FT}, rvol::FT, t::FT) where {FT} = log((rvol - pv.residual) / (1 - pv.residual)) / pv.slope;
 
 capacitance_pressure(pv::LinearPVCurve{FT}, rvol::FT, t::FT) where {FT} = (rvol - 1) / pv.slope;
 
@@ -43,6 +44,7 @@ capacitance_pressure(pv::SegmentedPVCurve{FT}, rvol::FT, t::FT) where {FT} = (
 # Changes to the function
 # General
 #     2023-Sep-23: add function to compute the PV volume from pressure
+#     2024-Jul-24: add field residual in ExponentialPVCurve to avoid numerical issue in junction temperature
 #
 #######################################################################################################################################################################################################
 """
@@ -59,7 +61,7 @@ Return the relative capaciatance volume, given
 """
 function capacitance_volume end;
 
-capacitance_volume(pv::ExponentialPVCurve{FT}, p::FT, t::FT) where {FT} = exp(p * pv.slope);
+capacitance_volume(pv::ExponentialPVCurve{FT}, p::FT, t::FT) where {FT} = (1 - pv.residual) * exp(p * pv.slope) + pv.residual;
 
 capacitance_volume(pv::LinearPVCurve{FT}, p::FT, t::FT) where {FT} = max(0, 1 + p * pv.slope);
 

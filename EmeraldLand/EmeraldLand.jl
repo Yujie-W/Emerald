@@ -3,6 +3,7 @@ module EmeraldLand
 using ..EmeraldIO
 using ..EmeraldMath
 using ..EmeraldPhysics
+using ..EmeraldUtility
 
 
 # no internal inter-dependencies

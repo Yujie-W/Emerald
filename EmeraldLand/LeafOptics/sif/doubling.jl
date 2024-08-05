@@ -16,7 +16,7 @@ Return the matrices for fluorescence calculation using doubling adding method, g
 
 """
 function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; NDUB = 10) where {FT}
-    (; DIM_SIF, DIM_SIFE, SPECTRA) = config;
+    (; SPECTRA) = config;
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
     auxil = bio.auxil;
 
@@ -63,8 +63,8 @@ function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; 
     τ_f     = 1 .- (k[IΛ_SIF] .+ s[IΛ_SIF]) .* ϵ;
 
     # Doubling adding routine
-    m_1_e = ones(FT, 1, DIM_SIFE);
-    m_f_1 = ones(FT, DIM_SIF, 1);
+    m_1_e = ones(FT, 1, length(IΛ_SIFE));
+    m_f_1 = ones(FT, length(IΛ_SIF), 1);
     for _ in 1:NDUB
         x_e     = τ_e ./ (1 .- ρ_e .^ 2);
         x_f     = τ_f ./ (1 .- ρ_f .^ 2);

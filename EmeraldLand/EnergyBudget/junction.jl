@@ -27,18 +27,18 @@ function junction_energy_flows!(spac::BulkSPAC{FT}) where {FT}
     for root in roots
         f_o = flow_out(root);
         if f_o >= 0
-            junction.auxil.∂e∂t += f_o * CP_L_MOL(FT) * root.energy.auxil.t;
+            junction.auxil.∂e∂t += f_o * CP_L_MOL(FT) * root.energy.s_aux.t;
         else
-            junction.auxil.∂e∂t += f_o * CP_L_MOL(FT) * junction.auxil.t;
+            junction.auxil.∂e∂t += f_o * CP_L_MOL(FT) * junction.s_aux.t;
         end;
     end;
 
     # if the flow into the trunk is positive, then the energy flow is negative
     f_i = flow_in(trunk);
     if f_i >= 0
-        junction.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * junction.auxil.t;
+        junction.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * junction.s_aux.t;
     else
-        junction.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * trunk.energy.auxil.t;
+        junction.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * trunk.energy.s_aux.t;
     end;
 
     return nothing

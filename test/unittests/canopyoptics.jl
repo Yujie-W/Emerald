@@ -17,39 +17,42 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Soil albedo" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
+
+        config.SOIL_ALBEDO = NS.SoilAlbedoHyperspectralCLM();
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
-
-        spac.soil_bulk.auxil._θ = -1;
-        config.α_CLM = true;
-        config.α_FITTING = false;
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
-        spac.soil_bulk.auxil._θ = -1;
-        config.α_CLM = false;
-        config.α_FITTING = false;
+        config.SOIL_ALBEDO = NS.SoilAlbedoBroadbandCLM();
+        spac = NS.BulkSPAC(config);
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
-        spac.soil_bulk.auxil._θ = -1;
-        config.α_CLM = false;
-        config.α_FITTING = true;
+        config.SOIL_ALBEDO = NS.SoilAlbedoHyperspectralCLIMA();
+        spac = NS.BulkSPAC(config);
+        SPAC.initialize_spac!(config, spac);
+        CO.soil_albedo!(config, spac);
+        @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
+
+        config.SOIL_ALBEDO = NS.SoilAlbedoBroadbandCLIMA();
+        spac = NS.BulkSPAC(config);
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
     end;
 
     @testset "Canopy structure" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
 
-        @test 0 <= spac.canopy.structure.auxil.bf <= 1;
-        @test spac.canopy.structure.auxil.ddb >= 0;
-        @test spac.canopy.structure.auxil.ddf >= 0;
+        @test spac.canopy.structure.t_aux.ddb >= 0;
+        @test spac.canopy.structure.t_aux.ddf >= 0;
         @test all(0 .< spac.canopy.structure.auxil.ρ_dd_layer .< 1);
         @test all(0 .< spac.canopy.structure.auxil.τ_dd_layer .< 1);
         @test all(0 .< spac.canopy.structure.auxil.ρ_dd .< 1);
@@ -62,18 +65,19 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Canopy sun geometry" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
 
-        @test spac.canopy.sun_geometry.auxil.ks >= 0;
-        @test spac.canopy.sun_geometry.auxil.sdb >= 0;
-        @test spac.canopy.sun_geometry.auxil.sdf >= 0;
-        @test 0 < spac.canopy.structure.auxil.ci <= 1;
-        @test all(0 .< spac.canopy.sun_geometry.auxil.p_sunlit .< 1);
+        @test spac.canopy.sun_geometry.s_aux.ks >= 0;
+        @test spac.canopy.sun_geometry.s_aux.sdb >= 0;
+        @test spac.canopy.sun_geometry.s_aux.sdf >= 0;
+        @test 0 < spac.canopy.structure.trait.ci <= 1;
+        @test all(0 .< spac.canopy.sun_geometry.s_aux.p_sunlit .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.ρ_sd_layer .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.τ_ss_layer .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.τ_sd_layer .< 1);
@@ -82,30 +86,49 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Canopy sensor geometry" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
+        CO.sensor_geometry_aux!(config, spac);
         CO.sensor_geometry!(config, spac);
 
-        @test spac.canopy.sensor_geometry.auxil.ko >= 0;
-        @test spac.canopy.sensor_geometry.auxil.dob >= 0;
-        @test spac.canopy.sensor_geometry.auxil.dof >= 0;
-        @test spac.canopy.sensor_geometry.auxil.sob >= 0;
-        @test spac.canopy.sensor_geometry.auxil.sof >= 0;
-        @test all(0 .< spac.canopy.sensor_geometry.auxil.p_sensor .< 1);
-        @test 0 < spac.canopy.sensor_geometry.auxil.p_sensor_soil < 1
-        @test all(0 .< spac.canopy.sensor_geometry.auxil.p_sun_sensor .< 1);
+        @test spac.canopy.sensor_geometry.s_aux.ko >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.dob >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.dof >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.sob >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.sof >= 0;
+        @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sensor .< 1);
+        @test 0 < spac.canopy.sensor_geometry.s_aux.p_sensor_soil < 1;
+        @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< 1);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< spac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< spac.canopy.sensor_geometry.s_aux.p_sensor);
+
+        config = NS.SPACConfiguration(Float64);
+        tpac = NS.BulkSPAC(config);
+        SPAC.prescribe_traits!(config, tpac; ci = 0.5);
+        SPAC.initialize_spac!(config, tpac);
+        CO.soil_albedo!(config, tpac);
+        CO.canopy_structure!(config, tpac);
+        CO.sun_geometry_aux!(config, tpac);
+        CO.sun_geometry!(config, tpac);
+        CO.sensor_geometry_aux!(config, tpac);
+        CO.sensor_geometry!(config, tpac);
+        @test all(0 .< tpac.canopy.sun_geometry.s_aux.p_sunlit .< 1);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .< tpac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .< tpac.canopy.sensor_geometry.s_aux.p_sensor);
     end;
 
     @testset "Shortwave radiation" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
         CO.shortwave_radiation!(config, spac);
 
@@ -120,19 +143,16 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .> 0);
-            @test all(leaf.flux.auxil.apar_sunlit .> 0);
-            @test all(leaf.flux.auxil.ppar_shaded .> 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .> 0);
+            @test all(leaf.flux.auxil.ppar .> 0);
         end;
     end;
 
     @testset "Longwave radiation" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         CO.canopy_structure!(config, spac);
-        CO.longwave_radiation!(config, spac);
+        CO.longwave_radiation!(spac);
 
         @test all(spac.canopy.structure.auxil.lw_layer .> 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .> 0);
@@ -145,13 +165,15 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Canopy reflection spectrum" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
         CO.shortwave_radiation!(config, spac);
+        CO.sensor_geometry_aux!(config, spac);
         CO.sensor_geometry!(config, spac);
         CO.reflection_spectrum!(config, spac);
 
@@ -161,17 +183,20 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Canopy fluorescence spectrum" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         for leaf in spac.plant.leaves
-            leaf.flux.auxil.ϕ_f_shaded = 0.01;
-            leaf.flux.auxil.ϕ_f_sunlit .= 0.01;
+            leaf.photosystem.auxil.ϕ_f .= 0.01;
+            leaf.photosystem.auxil.ϕ_f1 .= 0.01;
+            leaf.photosystem.auxil.ϕ_f2 .= 0.01;
         end;
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
+        CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
         CO.shortwave_radiation!(config, spac);
+        CO.sensor_geometry_aux!(config, spac);
         CO.sensor_geometry!(config, spac);
         CO.fluorescence_spectrum!(config, spac);
 
@@ -195,9 +220,9 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Canopy radiation" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
 
         # SZA < 90
         spac.canopy.sun_geometry.state.sza = 30;
@@ -213,10 +238,7 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .> 0);
-            @test all(leaf.flux.auxil.apar_sunlit .> 0);
-            @test all(leaf.flux.auxil.ppar_shaded .> 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .> 0);
+            @test all(leaf.flux.auxil.ppar .> 0);
         end;
         @test all(spac.canopy.structure.auxil.lw_layer .> 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .> 0);
@@ -241,10 +263,7 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.canopy.sun_geometry.auxil.r_net_sw_stem .== 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .== 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .== 0);
-            @test all(leaf.flux.auxil.apar_sunlit .== 0);
-            @test all(leaf.flux.auxil.ppar_shaded .== 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .== 0);
+            @test all(leaf.flux.auxil.ppar .== 0);
         end;
         @test all(spac.canopy.structure.auxil.lw_layer .> 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .> 0);
@@ -257,8 +276,8 @@ import Emerald.EmeraldLand.SPAC
 
         # LAI <= 0 and SAI <= 0
         spac.canopy.sun_geometry.state.sza = 30;
-        spac.canopy.structure.state.lai = 0;
-        spac.canopy.structure.state.sai = 0;
+        spac.canopy.structure.trait.lai = 0;
+        spac.canopy.structure.trait.sai = 0;
         CO.canopy_radiation!(config, spac);
         @test all(spac.canopy.sun_geometry.auxil.e_dirꜜ .> 0);
         @test all(spac.canopy.sun_geometry.auxil.e_difꜜ .> 0);
@@ -272,10 +291,7 @@ import Emerald.EmeraldLand.SPAC
         @test all(spac.soil_bulk.auxil.e_net_dif .> 0);
         @test all(spac.soil_bulk.auxil.r_net_sw .> 0);
         for leaf in spac.plant.leaves
-            @test all(leaf.flux.auxil.apar_shaded .== 0);
-            @test all(leaf.flux.auxil.apar_sunlit .== 0);
-            @test all(leaf.flux.auxil.ppar_shaded .== 0);
-            @test all(leaf.flux.auxil.ppar_sunlit .== 0);
+            @test all(leaf.flux.auxil.ppar .== 0);
         end;
         @test all(spac.canopy.structure.auxil.lw_layer .== 0);
         @test all(spac.canopy.structure.auxil.emitꜜ .== 0);

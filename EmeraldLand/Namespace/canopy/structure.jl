@@ -6,23 +6,22 @@
 # General
 #     2023-Oct-09: add struct CanopyStructureState
 #     2023-Oct-18: add fields sai and δsai
+#     2024-Feb-27: move hot_spot parameter to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Structure that stores canopy structural state variables.
+Structure that stores canopy structural trait variables.
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct CanopyStructureState{FT}
+Base.@kwdef mutable struct CanopyStructureTrait{FT}
     # canopy structure
-    "Hot spot parameter"
-    hot_spot::FT = 0.05
     "Leaf inclination angle distribution function algorithm"
     lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
 
@@ -38,12 +37,52 @@ Base.@kwdef mutable struct CanopyStructureState{FT}
     "Stem area index distribution"
     δsai::Vector{FT}
 
-    # Clumping index
-    "Clumping structure a"
-    Ω_A::FT = 1
-    "Clumping structure b"
-    Ω_B::FT = 0
+    # Clumping index of the canopy
+    "Clumping index"
+    ci::FT = 1
 end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Feb-25: add struct CanopyStructureTDAuxil
+#     2024-Mar-01: add field kd for diffuse radiation extinction coefficient (purely unabsorbed, not after reabsorption)
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Structure that stores canopy structural trait-dependent auxiliary variables.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
+    "Inclination angle distribution"
+    p_incl::Vector{FT}
+    "Canopy level boundary locations"
+    x_bnds::Vector{FT}
+
+    # diffuse radiation extinction coefficients
+    "Diffuse radiation extinction coefficient weight"
+    kd::FT = 0
+
+    # canopy scattering coefficients
+    "Backward diffuse->diffuse scatter weight"
+    ddb::FT = 0
+    "Forward diffuse->diffuse scatter weight"
+    ddf::FT = 0
+end;
+
+CanopyStructureTDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureTDAuxil{FT}(
+            p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL,
+            x_bnds = zeros(FT, n_layer + 1),
+);
 
 
 #######################################################################################################################################################################################################
@@ -66,21 +105,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureAuxil{FT}
-    "Clumping index"
-    ci::FT = 1
-    "Inclination angle distribution"
-    p_incl::Vector{FT}
-    "Canopy level boundary locations"
-    x_bnds::Vector{FT}
-
-    # canopy scattering coefficients
-    "Weighted sum of cos²(inclination)"
-    bf::FT = 0
-    "Backward diffuse->diffuse scatter weight"
-    ddb::FT = 0
-    "Forward diffuse->diffuse scatter weight"
-    ddf::FT = 0
-
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of leaf"
     ddb_leaf::Matrix{FT}
@@ -138,31 +162,29 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     r_net_lw_stem::Vector{FT}
 end;
 
-CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructureAuxil{FT}(
-            p_incl        = zeros(FT, config.DIM_INCL),
-            x_bnds        = zeros(FT, config.DIM_LAYER + 1),
-            ddb_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddf_leaf      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddb_stem      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ddf_stem      = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_dd_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            τ_dd_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_dd          = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            τ_dd          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ϵ_lw_layer    = zeros(FT, config.DIM_LAYER),
-            ρ_lw_layer    = zeros(FT, config.DIM_LAYER),
-            τ_lw_layer    = zeros(FT, config.DIM_LAYER),
-            ρ_lw          = zeros(FT, config.DIM_LAYER + 1),
-            τ_lw          = zeros(FT, config.DIM_LAYER),
-            lw_layer      = zeros(FT, config.DIM_LAYER),
-            lw_layer_leaf = zeros(FT, config.DIM_LAYER),
-            lw_layer_stem = zeros(FT, config.DIM_LAYER),
-            lwꜜ           = zeros(FT, config.DIM_LAYER + 1),
-            lwꜛ           = zeros(FT, config.DIM_LAYER + 1),
-            emitꜜ         = zeros(FT, config.DIM_LAYER),
-            emitꜛ         = zeros(FT, config.DIM_LAYER + 1),
-            r_net_lw_leaf = zeros(FT, config.DIM_LAYER),
-            r_net_lw_stem = zeros(FT, config.DIM_LAYER),
+CanopyStructureAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureAuxil{FT}(
+            ddb_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddf_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddb_stem      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddf_stem      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ρ_dd_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            τ_dd_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ρ_dd          = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+            τ_dd          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ϵ_lw_layer    = zeros(FT, n_layer),
+            ρ_lw_layer    = zeros(FT, n_layer),
+            τ_lw_layer    = zeros(FT, n_layer),
+            ρ_lw          = zeros(FT, n_layer + 1),
+            τ_lw          = zeros(FT, n_layer),
+            lw_layer      = zeros(FT, n_layer),
+            lw_layer_leaf = zeros(FT, n_layer),
+            lw_layer_stem = zeros(FT, n_layer),
+            lwꜜ           = zeros(FT, n_layer + 1),
+            lwꜛ           = zeros(FT, n_layer + 1),
+            emitꜜ         = zeros(FT, n_layer),
+            emitꜛ         = zeros(FT, n_layer + 1),
+            r_net_lw_leaf = zeros(FT, n_layer),
+            r_net_lw_stem = zeros(FT, n_layer),
 );
 
 
@@ -171,6 +193,7 @@ CanopyStructureAuxil(config::SPACConfiguration{FT}) where {FT} = CanopyStructure
 # Changes to this struct
 # General
 #     2023-Oct-09: add struct CanopyStructure
+#     2024-Feb-25: add field trait, t_aux (remove state)
 #
 #######################################################################################################################################################################################################
 """
@@ -185,24 +208,25 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructure{FT}
-    "State variables"
-    state::CanopyStructureState{FT}
+    "Trait variables that need to be presribed from GriddingMachine"
+    trait::CanopyStructureTrait{FT}
+    "Trait-dependent variables"
+    t_aux::CanopyStructureTDAuxil{FT}
     "Auxiliary variables"
     auxil::CanopyStructureAuxil{FT}
 end;
 
-CanopyStructure(config::SPACConfiguration{FT}) where {FT} = (
+CanopyStructure(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
     lai = 3;
-    δlai = 3 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
+    δlai = 3 .* ones(FT, n_layer) ./ n_layer;
     sai = 0.5;
-    δsai = 0.5 .* ones(FT, config.DIM_LAYER) ./ config.DIM_LAYER;
+    δsai = 0.5 .* ones(FT, n_layer) ./ n_layer;
 
-    cs_auxil = CanopyStructureAuxil(config);
-    cs_auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:config.DIM_LAYER]] ./ -(lai + sai));
-    cs_auxil.p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
+    trait = CanopyStructureTrait{FT}(lai = lai, δlai = δlai, sai = sai, δsai = δsai);
+    t_aux = CanopyStructureTDAuxil(config, n_layer);
+    auxil = CanopyStructureAuxil(config, n_layer);
+    t_aux.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
+    t_aux.p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
-    return CanopyStructure{FT}(
-                state = CanopyStructureState{FT}(lai = lai, δlai = δlai, sai = sai, δsai = δsai),
-                auxil = cs_auxil,
-    )
+    return CanopyStructure{FT}(trait = trait, t_aux = t_aux, auxil = auxil)
 );

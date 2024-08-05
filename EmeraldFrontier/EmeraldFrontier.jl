@@ -1,38 +1,62 @@
 module EmeraldFrontier
 
 using DataFrames: DataFrame, DataFrameRow
-using Dates: isleapyear
-using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
+using Statistics: mean
 
-using GriddingMachine.Collector: query_collection
-using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using NetcdfIO: read_nc, save_nc!
 
-using ..EmeraldData.ERA5: weather_driver_file
-using ..EmeraldIO.Text: read_csv
+using ..EmeraldData.GlobalDatasets: grid_spac
+using ..EmeraldData.WeatherDrivers: grid_weather_driver
 using ..EmeraldLand.Namespace: BulkSPAC, SPACConfiguration
-using ..EmeraldLand.SPAC: BETA, CNPP, GPP, PAR, PPAR, T_VEG, ΦDFNP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF
+using ..EmeraldLand.SPAC: BETA, CNPP, GPP, K_PLANT, T_VEG
+using ..EmeraldLand.SPAC: PAR, PPAR, ΦF_ΦP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF
 using ..EmeraldLand.SPAC: MODIS_BLUE, MODIS_EVI, MODIS_NDVI, MODIS_NIR, MODIS_NIRv, MODIS_NIRvR, MODIS_RED, OCO2_SIF759, OCO2_SIF770, TROPOMI_SIF683, TROPOMI_SIF740
-using ..EmeraldLand.SPAC: initialize!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!
-using ..EmeraldMath.Data: interpolate_data, interpolate_data!
+using ..EmeraldLand.SPAC: dull_aux!, initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!, push_t_history!, soil_plant_air_continuum!, t_aux!
 using ..EmeraldMath.Stats: nanmax, nanmean, nanmin
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
-using ..EmeraldPhysics.EarthGeometry: solar_zenith_angle
-using ..EmeraldUtility.Time: month_days
+using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 
 
 # Netcdf settings for output
-DF_SIMULATIONS = ["MOD_SWC_1", "MOD_SWC_2", "MOD_SWC_3", "MOD_SWC_4", "MOD_T_L_MAX", "MOD_T_L_MEAN", "MOD_T_L_MIN", "MOD_T_S_1", "MOD_T_S_2", "MOD_T_S_3", "MOD_T_S_4"];
-DF_VARIABLES   = ["F_H2O", "F_CO2", "F_GPP", "BETA", "SIF683", "SIF740", "SIF757", "SIF771", "RED", "BLUE", "NIR", "NDVI", "EVI", "NIRvI", "NIRvR", "PAR", "PPAR", "ΦD", "ΦF", "ΦN", "ΦP", "ΣSIF",
-                  "ΣSIF_CHL", "ΣSIF_LEAF"];
+SAVING_DICT = Dict{String, Any}(
+    # Modeled soil water content and temperature
+            "MOD_SWC"     => true,
+            "MOD_T_SOIL"  => true,
+    # Modeled leaf temperature
+            "MOD_T_LEAF"  => false,
+            "MOD_T_MMM"   => true,
+    # Modeled CO2 and H2O fluxes
+            "BETA"        => false,
+            "CNPP"        => true,
+            "GPP"         => true,
+            "ET_VEG"      => true,
+    # SIF (default is false)
+            "SIF683"      => false,
+            "SIF740"      => true,
+            "SIF757"      => false,
+            "SIF771"      => false,
+            "ΣSIF"        => false,
+            "ΣSIF_CHL"    => false,
+            "ΣSIF_LEAF"   => false,
+            "ΦFΦP"        => false,
+    # VI (default is false)
+            "NDVI"        => false,
+            "EVI"         => false,
+            "NIRvI"       => false,
+            "NIRvR"       => false,
+            "PAR"         => false,
+            "PPAR"        => false,
+    # Modeled plant health status
+            "K_PLANT"     => true,
+            "K_ROOT_STEM" => true,
+            "MOD_P_LEAF"  => false,
+            "MOD_P_MMM"   => true,
+);
 
 
 include("config.jl");
-include("driver.jl");
-include("griddingmachine.jl");
 include("simulation.jl");
-include("spac.jl");
 
 
 end; # EmeraldFrontier

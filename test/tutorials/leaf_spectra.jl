@@ -2,7 +2,7 @@ using Emerald;
 using Test;
 
 
-@testset "Run Leaf Level Spectra" begin
+@testset "Leaf Level Spectra" begin
     FT = Float64;
 
     # LeafOptics package can be used in stand-alone mode without loading unnecessary modules.
@@ -11,14 +11,14 @@ using Test;
     #     - Wavelength parameter set that define the wavelength bins
     #     - Hyperspectral absorption feature of leaf biophysical traits
     #     - Leaf water content in [mol m⁻²] (yes, as an input)
-    config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+    config = EmeraldLand.Namespace.SPACConfiguration(FT);
     bio = EmeraldLand.Namespace.LeafBio(config);
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 
     # Change the leaf biophysical parameters
-    bio.state.cab = 20;
-    bio.state.car = 5;
+    bio.trait.cab = 20;
+    bio.trait.car = 5;
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 end;

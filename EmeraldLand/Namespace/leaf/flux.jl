@@ -4,6 +4,32 @@
 #
 # Changes to this struct
 # General
+#     2024-Feb-26: add sturct LeafFluxTrait
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains leaf flux trait variables.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct LeafFluxTrait{FT}
+    "Stomtal model"
+    stomatal_model::Union{AndereggSM{FT}, BallBerrySM{FT}, EllerSM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}} = WangSM{FT}()
+    "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
+    g_limits::Vector{FT} = FT[1e-4, 0.3]
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2023-Oct-03: add sturct LeafFluxState
 #
 #######################################################################################################################################################################################################
@@ -19,12 +45,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafFluxState{FT}
-    "Stomtal model"
-    stomatal_model::Union{AndereggSM{FT}, BallBerrySM{FT}, EllerSM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}} = WangSM{FT}()
-    "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    g_limits::Vector{FT} = FT[1e-3, 0.3]
-
-    # Prognostic variables
     "Stomatal conductance to water vapor for shaded leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s_shaded::FT = 0.01
     "Stomatal conductance to water vapor for sunlit leaves `[mol m⁻² s⁻¹]`"
@@ -39,6 +59,8 @@ LeafFluxState(config::SPACConfiguration{FT}) where {FT} = LeafFluxState{FT}(g_H�
 # Changes to this struct
 # General
 #     2023-Oct-03: add sturct LeafFluxAuxil
+#     2023-Oct-24: add fields ϕ_f1_* and ϕ_f2_*
+#     2024-Jul-24: add field ∂A∂E_sunlit and ∂Θ∂E to compute the dgdt using matrix calculation (much faster)
 #
 #######################################################################################################################################################################################################
 """
@@ -64,6 +86,12 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     ∂g∂t_shaded::FT = 0
     "Marginal increase of conductance per timefor sunlit leaves `[mol m⁻² s⁻²]`"
     ∂g∂t_sunlit::Matrix{FT}
+    "Marginal increase in A per increase in transpiration rate for shaded leaves"
+    ∂A∂E_shaded::FT = 0
+    "Marginal increase in A per increase in transpiration rate for sunlit leaves"
+    ∂A∂E_sunlit::Matrix{FT}
+    "Marginal increase in Θ per increase in transpiration rate"
+    ∂Θ∂E::FT = 0
 
     # CO₂ pressures
     "Leaf internal CO₂ partial pressure for shaded leaves `[Pa]`"
@@ -76,10 +104,14 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     p_CO₂_s_sunlit::Matrix{FT}
 
     # Photosynthesis
+    "Average gross photosynthetic rate [μmol m⁻² s⁻¹]"
+    a_g_mean::FT = 0
     "Gross photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_g_shaded::FT = 0
     "Gross photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
     a_g_sunlit::Matrix{FT}
+    "Average net photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_n_mean::FT = 0
     "Net photosynthetic rate for shaded leaves `[μmol m⁻² s⁻¹]`"
     a_n_shaded::FT = 0
     "Net photosynthetic rate for sunlit leaves `[μmol m⁻² s⁻¹]`"
@@ -105,9 +137,19 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     "Photochemical quantum yield for sunlit leaves `[-]`"
     ϕ_p_sunlit::Matrix{FT}
 
+    # Fluorescence yeilds of two photosystems
+    "PSI fluorescence quantum yield for shaded leaves `[-]`"
+    ϕ_f1_shaded::FT = 0
+    "PSI fluorescence quantum yield for sunlit leaves `[-]`"
+    ϕ_f1_sunlit::Matrix{FT}
+    "PSII fluorescence quantum yield for shaded leaves `[-]`"
+    ϕ_f2_shaded::FT = 0
+    "PSII fluorescence quantum yield for sunlit leaves `[-]`"
+    ϕ_f2_sunlit::Matrix{FT}
+
     # Integrators
     "Integrator for transpiration out"
-    ∫∂w∂t_out = 0
+    ∫∂w∂t_out::FT = 0
 
     # ppar from canopy radiation
     "Absorbed photosynthetically active radiation for shaded leaves `[μmol m⁻² s⁻¹]`"
@@ -131,6 +173,7 @@ end;
 LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
             g_CO₂_sunlit   = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ∂g∂t_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ∂A∂E_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             p_CO₂_i_sunlit = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             p_CO₂_s_sunlit = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             a_g_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
@@ -140,6 +183,8 @@ LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
             ϕ_f_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ϕ_n_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ϕ_p_sunlit     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ϕ_f1_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            ϕ_f2_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             apar_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
             ppar_sunlit    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
 );
@@ -150,6 +195,7 @@ LeafFluxAuxil(config::SPACConfiguration{FT}) where {FT} = LeafFluxAuxil{FT}(
 # Changes to this struct
 # General
 #     2023-Oct-03: add sturct LeafFlux
+#     2024-Feb-26: add fiel trait
 #
 #######################################################################################################################################################################################################
 """
@@ -164,7 +210,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafFlux{FT}
-    # Embedded structures
+    "Trait variables"
+    trait::LeafFluxTrait{FT} = LeafFluxTrait{FT}()
     "Leaf flux state variables"
     state::LeafFluxState{FT}
     "Leaf flux auxiliary variables"

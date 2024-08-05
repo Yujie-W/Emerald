@@ -18,13 +18,13 @@ Update the canopy radiation related auxiliary variables, given
 """
 function canopy_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     # update the canopy structure
-    inclination_angles!(config, spac);
     canopy_structure!(config, spac);
     soil_albedo!(config, spac);
+    sun_geometry_aux!(config, spac);
     sun_geometry!(config, spac);
 
     # run longwave and shortwave radiation
-    longwave_radiation!(config, spac);
+    longwave_radiation!(spac);
     shortwave_radiation!(config, spac);
 
     return nothing

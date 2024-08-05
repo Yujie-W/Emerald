@@ -31,7 +31,6 @@ root_sink(x_aux::XylemHydraulicsAuxilSS{FT}) where {FT} = x_aux.flow;
 # Changes to the function
 # General
 #     2023-Jun-29: tease apart this function for better readability
-#     2023-Jul-06: add info into DEBUG code block
 #
 #######################################################################################################################################################################################################
 """
@@ -50,7 +49,7 @@ function root_source_sink!(spac::BulkSPAC{FT}) where {FT}
 
     # loop through the roots and compute the source/sink terms
     for i in eachindex(roots)
-        soils[rindx[i]].auxil.∂θ∂t -= root_sink(roots[i]) * M_H₂O(FT) / ρ_H₂O(FT) / sbulk.state.area / soils[rindx[i]].auxil.δz;
+        soils[rindx[i]].auxil.∂θ∂t -= root_sink(roots[i]) * M_H₂O(FT) / ρ_H₂O(FT) / sbulk.trait.area / soils[rindx[i]].t_aux.δz;
     end;
 
     return nothing

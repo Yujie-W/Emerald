@@ -6,13 +6,13 @@ using ..Namespace: AbstractSoilVC
 using ..Namespace: AbstractXylemVC
 using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterKleaf, BetaParameterKsoil, BetaParameterPleaf, BetaParameterPsoil, BetaParameterVcmax, BetaParameterΘ
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
-using ..Namespace: Leaf, Root
+using ..Namespace: CanopyLayer, Leaf, Root
 using ..Namespace: AirLayer, SoilLayer
-using ..Namespace: BulkSPAC
+using ..Namespace: BulkSPAC, SPACCache
 
 using ..Photosynthesis: photosynthesis_only!, ∂R∂T
 using ..PhysicalChemistry: latent_heat_vapor, relative_diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure
-using ..PlantHydraulics: flow_in, relative_xylem_k, xylem_end_pressure
+using ..PlantHydraulics: flow_in, flow_out, relative_xylem_k, xylem_end_pressure
 
 
 # include functions related to beta factor

@@ -30,9 +30,76 @@ end;
 #
 # Changes to the struct
 # General
+#     2024-Feb-25: add struct SunGeometrySDAuxil
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct to store the the state-dependent auxiliary variables of the sun geometry
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
+    # Scattering coefficients
+    "Backward direct->diffuse scatter weight"
+    sdb::FT = 0
+    "Forward direct->diffuse scatter weight"
+    sdf::FT = 0
+
+    # Extinction coefficient related (for different inclination angles)
+    "cos(inclination) * cos(sza) at different inclination angles"
+    Cs_incl::Vector{FT}
+    "sin(inclination) * sin(sza) at different inclination angles"
+    Ss_incl::Vector{FT}
+    "Cs >= Ss ? FT(π) : acos(-Cs/Ss)"
+    βs_incl::Vector{FT}
+    "Solar beam extinction coefficient weights at different inclination angles"
+    ks_incl::Vector{FT}
+
+    # Extinction coefficient related
+    "Solar direction beam extinction coefficient weight (direct)"
+    ks::FT = 0
+    "Probability of directly viewing a leaf in solar direction at different layers"
+    p_sunlit::Vector{FT}
+
+    # Matrix used for solar radiation
+    "Conversion factor fs for angles from solar at different inclination and azimuth angles"
+    fs::Matrix{FT}
+    "Absolute value of fs"
+    fs_abs::Matrix{FT}
+    "Mean fs_abs at different azimuth angles"
+    fs_abs_mean::Vector{FT}
+    "fs * cos Θ_INCL"
+    fs_cos²_incl::Matrix{FT}
+end;
+
+SunGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGeometrySDAuxil{FT}(
+            Cs_incl      = zeros(FT, config.DIM_INCL),
+            Ss_incl      = zeros(FT, config.DIM_INCL),
+            βs_incl      = zeros(FT, config.DIM_INCL),
+            ks_incl      = zeros(FT, config.DIM_INCL),
+            p_sunlit     = zeros(FT, n_layer),
+            fs           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fs_abs_mean  = zeros(FT, config.DIM_AZI),
+            fs_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General
 #     2023-Oct-09: add struct SunGeometryAuxil
 #     2023-Oct-13: add field albedo
 #     2023-Oct-18: add fields sdb_stem, sdf_stem, r_net_lw_leaf, r_net_lw_stem
+#     2024-Jul-27: use bined PPAR to speed up
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #
 #######################################################################################################################################################################################################
 """
@@ -47,38 +114,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometryAuxil{FT}
-    # Scattering coefficients
-    "Backward direct->diffuse scatter weight"
-    sdb::FT = 0
-    "Forward direct->diffuse scatter weight"
-    sdf::FT = 0
-
-    # Extinction coefficient related
-    "Solar direction beam extinction coefficient weight (direct)"
-    ks::FT = 0
-    "Probability of directly viewing a leaf in solar direction at different layers"
-    p_sunlit::Vector{FT}
-
-    # Extinction coefficient related (for different inclination angles)
-    "cos(inclination) * cos(sza) at different inclination angles"
-    Cs_incl::Vector{FT}
-    "sin(inclination) * sin(sza) at different inclination angles"
-    Ss_incl::Vector{FT}
-    "Solar beam extinction coefficient weights at different inclination angles"
-    ks_incl::Vector{FT}
-    "Cs >= Ss ? FT(π) : acos(-Cs/Ss)"
-    βs_incl::Vector{FT}
-
-    # Matrix used for solar radiation
-    "Conversion factor fs for angles from solar at different inclination and azimuth angles"
-    fs::Matrix{FT}
-    "Absolute value of fs"
-    fs_abs::Matrix{FT}
-    "Mean fs_abs at different azimuth angles"
-    fs_abs_mean::Vector{FT}
-    "fs * cos Θ_INCL"
-    fs_cos²_incl::Matrix{FT}
-
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
     sdb_leaf::Matrix{FT}
@@ -110,6 +145,8 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     e_difꜜ::Matrix{FT}
     "Upwelling diffuse short-wave radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
     e_difꜛ::Matrix{FT}
+    "Upwelling diffuse short-wave radiation at each canopy layer boundary (contribution from the layer only) `[mW m⁻² nm⁻¹]`"
+    e_difꜛ_layer::Matrix{FT}
     "Solar directly radiation at each canopy layer boundary `[mW m⁻² nm⁻¹]`"
     e_dirꜜ::Matrix{FT}
 
@@ -132,6 +169,8 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     e_sifꜜ_layer::Matrix{FT}
     "Upward SIF emitted per layer"
     e_sifꜛ_layer::Matrix{FT}
+    "Upward SIF emitted per layer after lower layers reabsorption"
+    e_sifꜛ_layer_sum::Matrix{FT}
     "Downward effective emitted SIF per layer"
     e_sifꜜ_emit::Matrix{FT}
     "Upward effective emitted SIF per layer"
@@ -150,6 +189,24 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     _ppar_shaded::Vector{FT}
     "APAR for sunlit leaves for photosynthesis per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
     _ppar_sunlit::Vector{FT}
+    "Shaded APAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    apar_shaded::Vector{FT}
+    "Sunlit APAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    apar_sunlit::Array{FT,3}
+    "Shaded PPAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    ppar_shaded::Vector{FT}
+    "Sunlit PPAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    ppar_sunlit::Array{FT,3}
+
+    # PPAR bins
+    "Sum of PPAR in each bin"
+    _ppar_sum::Vector{FT}
+    "Count of PPAR in each bin"
+    _ppar_count::Vector{FT}
+    "Weighted sunlit fraction"
+    ppar_fraction::Matrix{FT}
+    "PPAR bins map"
+    ppar_index::Array{Int,3}
 
     # Fluorescence related cache variables (related to chlorophyll level fluorescence)
     "Diffuse radiation that can excite SIF emission per wavelength"
@@ -202,66 +259,71 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     _vec_azi::Vector{FT}
 end;
 
-SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT}(
-            p_sunlit         = zeros(FT, config.DIM_LAYER),
-            Cs_incl          = zeros(FT, config.DIM_INCL),
-            Ss_incl          = zeros(FT, config.DIM_INCL),
-            ks_incl          = zeros(FT, config.DIM_INCL),
-            βs_incl          = zeros(FT, config.DIM_INCL),
-            fs               = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fs_abs           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fs_abs_mean      = zeros(FT, config.DIM_AZI),
-            fs_cos²_incl     = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            sdb_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            sdf_leaf         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            sdb_stem         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            sdf_stem         = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            ρ_sd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            τ_sd_layer       = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            τ_ss_layer       = zeros(FT, config.DIM_LAYER),
-            ρ_sd             = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            τ_sd             = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            albedo           = zeros(FT, config.DIM_WL),
-            e_difꜜ           = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            e_difꜛ           = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            e_dirꜜ           = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            e_net_dif        = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            e_net_dir        = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            r_net_sw_leaf    = zeros(FT, config.DIM_LAYER),
-            r_net_sw_stem    = zeros(FT, config.DIM_LAYER),
-            e_sif_chl        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            e_sifꜜ_layer     = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            e_sifꜛ_layer     = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            e_sifꜜ_emit      = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            e_sifꜛ_emit      = zeros(FT, config.DIM_SIF, config.DIM_LAYER + 1),
-            e_sifꜜ           = zeros(FT, config.DIM_SIF, config.DIM_LAYER + 1),
-            e_sifꜛ           = zeros(FT, config.DIM_SIF, config.DIM_LAYER + 1),
-            _apar_shaded     = zeros(FT, config.DIM_PAR),
-            _apar_sunlit     = zeros(FT, config.DIM_PAR),
-            _ppar_shaded     = zeros(FT, config.DIM_PAR),
-            _ppar_sunlit     = zeros(FT, config.DIM_PAR),
-            _e_dif_sife      = zeros(FT, config.DIM_SIFE),
-            _e_dir_sife      = zeros(FT, config.DIM_SIFE),
-            _e_dif_sif       = zeros(FT, config.DIM_SIF),
-            _e_dir_sif       = zeros(FT, config.DIM_SIF),
-            _e_dif_shaded    = zeros(FT, config.DIM_SIF),
-            _e_dif_sunlit    = zeros(FT, config.DIM_SIF),
-            _e_dir_sunlit    = zeros(FT, config.DIM_SIF),
-            _e_difꜜ_sife     = zeros(FT, config.DIM_SIFE),
-            _e_difꜛ_sife     = zeros(FT, config.DIM_SIFE),
-            _e_dirꜜ_sife     = zeros(FT, config.DIM_SIFE),
-            _e_difꜜ_sif_mean = zeros(FT, config.DIM_SIF),
-            _e_difꜜ_sif_diff = zeros(FT, config.DIM_SIF),
-            _e_difꜛ_sif_mean = zeros(FT, config.DIM_SIF),
-            _e_difꜛ_sif_diff = zeros(FT, config.DIM_SIF),
-            _e_dirꜜ_sif_mean = zeros(FT, config.DIM_SIF),
-            _e_dirꜜ_sif_diff = zeros(FT, config.DIM_SIF),
-            _sif_shadedꜜ     = zeros(FT, config.DIM_SIF),
-            _sif_shadedꜛ     = zeros(FT, config.DIM_SIF),
-            _sif_sunlitꜜ     = zeros(FT, config.DIM_SIF),
-            _sif_sunlitꜛ     = zeros(FT, config.DIM_SIF),
-            _mat_incl_azi    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            _vec_azi         = zeros(FT, config.DIM_AZI),
+SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
+    cache_dim_ppar = isnothing(config.DIM_PPAR_BINS) ? config.DIM_INCL * config.DIM_AZI : config.DIM_PPAR_BINS;
+
+    return SunGeometryAuxil{FT}(
+                sdb_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                sdf_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                sdb_stem         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                sdf_stem         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                ρ_sd_layer       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                τ_sd_layer       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                τ_ss_layer       = zeros(FT, n_layer),
+                ρ_sd             = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+                τ_sd             = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                albedo           = zeros(FT, length(config.SPECTRA.Λ)),
+                e_difꜜ           = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+                e_difꜛ           = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+                e_difꜛ_layer     = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+                e_dirꜜ           = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+                e_net_dif        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                e_net_dir        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                r_net_sw_leaf    = zeros(FT, n_layer),
+                r_net_sw_stem    = zeros(FT, n_layer),
+                e_sif_chl        = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+                e_sifꜜ_layer     = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+                e_sifꜛ_layer     = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+                e_sifꜛ_layer_sum = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+                e_sifꜜ_emit      = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+                e_sifꜛ_emit      = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer + 1),
+                e_sifꜜ           = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer + 1),
+                e_sifꜛ           = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer + 1),
+                _apar_shaded     = zeros(FT, length(config.SPECTRA.IΛ_PAR)),
+                _apar_sunlit     = zeros(FT, length(config.SPECTRA.IΛ_PAR)),
+                _ppar_shaded     = zeros(FT, length(config.SPECTRA.IΛ_PAR)),
+                _ppar_sunlit     = zeros(FT, length(config.SPECTRA.IΛ_PAR)),
+                apar_shaded      = zeros(FT, n_layer),
+                apar_sunlit      = zeros(FT, config.DIM_INCL, config.DIM_AZI, n_layer),
+                ppar_shaded      = zeros(FT, n_layer),
+                ppar_sunlit      = zeros(FT, config.DIM_INCL, config.DIM_AZI, n_layer),
+                _ppar_sum        = zeros(FT, cache_dim_ppar),
+                _ppar_count      = zeros(FT, cache_dim_ppar),
+                ppar_fraction    = zeros(FT, cache_dim_ppar + 1, n_layer),
+                ppar_index       = zeros(Int, config.DIM_INCL, config.DIM_AZI, n_layer),
+                _e_dif_sife      = zeros(FT, length(config.SPECTRA.IΛ_SIFE)),
+                _e_dir_sife      = zeros(FT, length(config.SPECTRA.IΛ_SIFE)),
+                _e_dif_sif       = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_dir_sif       = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_dif_shaded    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_dif_sunlit    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_dir_sunlit    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_difꜜ_sife     = zeros(FT, length(config.SPECTRA.IΛ_SIFE)),
+                _e_difꜛ_sife     = zeros(FT, length(config.SPECTRA.IΛ_SIFE)),
+                _e_dirꜜ_sife     = zeros(FT, length(config.SPECTRA.IΛ_SIFE)),
+                _e_difꜜ_sif_mean = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_difꜜ_sif_diff = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_difꜛ_sif_mean = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_difꜛ_sif_diff = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_dirꜜ_sif_mean = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _e_dirꜜ_sif_diff = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _sif_shadedꜜ     = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _sif_shadedꜛ     = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _sif_sunlitꜜ     = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _sif_sunlitꜛ     = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _mat_incl_azi    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+                _vec_azi         = zeros(FT, config.DIM_AZI),
+    )
 );
 
 
@@ -270,6 +332,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SunGeometryAuxil{FT
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SunGeometry
+#     2024-Feb-25: add field s_aux
 #
 #######################################################################################################################################################################################################
 """
@@ -286,8 +349,13 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct SunGeometry{FT}
     "State variables"
     state::SunGeometryState{FT} = SunGeometryState{FT}()
+    "State-dependent auxiliary variables"
+    s_aux::SunGeometrySDAuxil{FT} = SunGeometrySDAuxil{FT}()
     "Auxiliary variables"
     auxil::SunGeometryAuxil{FT}
 end;
 
-SunGeometry(config::SPACConfiguration{FT}) where {FT} = SunGeometry{FT}(auxil = SunGeometryAuxil(config));
+SunGeometry(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SunGeometry{FT}(
+            s_aux = SunGeometrySDAuxil(config, n_layer),
+            auxil = SunGeometryAuxil(config, n_layer)
+);

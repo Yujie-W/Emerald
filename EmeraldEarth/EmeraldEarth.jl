@@ -2,24 +2,23 @@ module EmeraldEarth
 
 using LazyArtifacts
 
+using DataFrames: DataFrame
 using Dates: isleapyear
 using Distributed: @everywhere, pmap
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
 
-using GriddingMachine.Blender: regrid
-using GriddingMachine.Collector: query_collection
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using NetcdfIO: append_nc!, create_nc!, grow_nc!, read_nc
 
-using ..EmeraldData.ERA5: ERA5_FOLDER, ERA5SingleLevelsDriver
+using ..EmeraldData.WeatherDrivers: ERA5SingleLevelsDriver, dict_contains_nan
+using ..EmeraldData.GlobalDatasets: LandDatasets, grid_dict, grid_spac, prescribe_gm_wd_data!, query_griddingmachine_data
 using ..EmeraldIO.Text: read_csv
-using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, SPACConfiguration, MultiLayerSPACState
+using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration
+using ..EmeraldLand.Namespace: sync_state!
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
-using ..EmeraldLand.SPAC: GPP, PPAR, initialize!, prescribe_air!, prescribe_soil!, prescribe_traits!, soil_plant_air_continuum!, spac_state!
-using ..EmeraldMath.Data: interpolate_data!
+using ..EmeraldLand.SPAC: GPP, PPAR, initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!, push_t_history!, soil_plant_air_continuum!
 using ..EmeraldMath.Stats: nanmax, nanmean
-using ..EmeraldPhysics.EarthGeometry: solar_zenith_angle
 using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Threading: dynamic_workers!
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
@@ -29,16 +28,16 @@ using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 RESULT_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/simulations";
 SETUP_FOLDER  = "/home/wyujie/DATASERVER/model/CLIMA/LAND/setups";
 CACHE_CONFIG  = nothing;
-CACHE_SPAC    = nothing;
-CACHE_STATE   = nothing;
 
-
-include("griddingmachine.jl");
-include("driver.jl");
-include("cache.jl");
-include("save.jl");
-include("simulation.jl");
+include("setup.jl");
 include("threads.jl");
+include("initialize.jl");
+include("simulation.jl");
+
+
+
+
+include("save.jl");
 
 
 end; # module

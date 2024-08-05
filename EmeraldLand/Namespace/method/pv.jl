@@ -1,5 +1,5 @@
 # The file contains the definitions of the pressure volume curve models
-# Because PV curve is a trait (a state), so there is no need to split the struct into state and auxilary parts.
+# Because PV curve is a trait (a state), so there is no need to split the struct into state and auxiliary parts.
 
 #######################################################################################################################################################################################################
 #
@@ -25,6 +25,7 @@ abstract type AbstractPVCurve{FT<:AbstractFloat} end;
 # Changes to this struct
 # General
 #     2023-Sep-22: add exponential PV curve
+#     2024-Jul-24: add field residual to avoid numerical issue in junction temperature
 #
 #######################################################################################################################################################################################################
 """
@@ -42,6 +43,8 @@ Base.@kwdef mutable struct ExponentialPVCurve{FT<:AbstractFloat} <: AbstractPVCu
     # General model information
     "Conductance for refilling (relative to maximum) `[MPa⁻¹ s⁻¹]`"
     k_refill::FT = 1e-4
+    "Residual water content relative to maximum water volume"
+    residual::FT = 0.2
     "Slope of the linear PV curve (relative to maximum) `[MPa⁻¹]`"
     slope::FT = 0.2
 end;

@@ -18,14 +18,15 @@ function ΣSIF end;
 ΣSIF(spac::BulkSPAC{FT}) where {FT} = (
     canopy = spac.canopy;
     leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+    n_sunlit = length(leaves[1].flux.auxil.ppar) - 1;
 
     # compute SIF in photons unit
     Σsif::FT = 0;
     N = length(leaves);
-    for i in eachindex(leaves)
-        j = N - i + 1;
-        Σsif += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.ppar_sunlit .* leaves[i].flux.auxil.ϕ_f_sunlit) +
-                (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.ppar_shaded * leaves[i].flux.auxil.ϕ_f_shaded) * canopy.structure.state.δlai[j];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        Σsif += leaves[ilf].flux.auxil.ppar' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt) * canopy.structure.trait.δlai[irt];
     end;
 
     return Σsif
@@ -93,7 +94,8 @@ function ΣSIF_LEAF end;
     # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
     Σsif::FT = 0;
     for i in eachindex(leaves)
-        Σsif += (canopy.sun_geometry.auxil.e_sifꜜ_layer[:,i] .+ canopy.sun_geometry.auxil.e_sifꜛ_layer[:,i])' * SPECTRA.ΔΛ_SIF / 1000;
+        Σsif += view(canopy.sun_geometry.auxil.e_sifꜜ_layer,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
+        Σsif += view(canopy.sun_geometry.auxil.e_sifꜛ_layer,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
     end;
 
     return Σsif

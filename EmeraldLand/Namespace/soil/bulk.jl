@@ -4,25 +4,29 @@
 #
 # Changes to this struct
 # General
-#     2023-Oct-05: add struct SoilBulkAuxil
+#     2023-Oct-05: add struct SoilBulkTrait
+#     2023-Oct-26: add field albedo for soil albedo algorithm
+#     2024-Feb-27: move albedo method to SPACConfiguration
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct for soil bulk state variables
+Struct for soil bulk trait variables
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SoilBulkState{FT}
+Base.@kwdef mutable struct SoilBulkTrait{FT}
     "Total area of the soil `[m²]`"
     area::FT = 500
     "Color class as in CLM"
     color::Int = 1
+    "Reflectance for longwave radiation"
+    ρ_lw::FT = 0.06
 end;
 
 
@@ -57,8 +61,6 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     r_net_sw::FT = 0
     "Weights of the four characteristic curves"
     weight::Vector{FT} = zeros(FT, 4)
-    "Reflectance for longwave radiation"
-    ρ_lw::FT = 0.06
     "Reflectance for shortwave radiation"
     ρ_sw::Vector{FT}
 
@@ -79,23 +81,19 @@ Base.@kwdef mutable struct SoilBulkAuxil{FT}
     δψ::Vector{FT}
     "Soil thermal conductance between layers per area `[W m⁻² K⁻¹]`"
     λ_layers::Vector{FT}
-
-    # cache variables
-    "Last soil moisture used to compute albedo"
-    _θ::FT = -1
 end;
 
-SoilBulkAuxil(config::SPACConfiguration{FT}) where {FT} = SoilBulkAuxil{FT}(
-            e_net_dif = zeros(FT, config.DIM_WL),
-            e_net_dir = zeros(FT, config.DIM_WL),
-            ρ_sw      = zeros(FT, config.DIM_WL),
-            dndt      = zeros(FT, config.DIM_SOIL, 5),
-            k         = zeros(FT, config.DIM_SOIL - 1),
-            q         = zeros(FT, config.DIM_SOIL - 1),
-            q_layers  = zeros(FT, config.DIM_SOIL - 1),
-            δt        = zeros(FT, config.DIM_SOIL - 1),
-            δψ        = zeros(FT, config.DIM_SOIL - 1),
-            λ_layers  = zeros(FT, config.DIM_SOIL - 1)
+SoilBulkAuxil(config::SPACConfiguration{FT}, n_soil::Int) where {FT} = SoilBulkAuxil{FT}(
+            e_net_dif = zeros(FT, length(config.SPECTRA.Λ)),
+            e_net_dir = zeros(FT, length(config.SPECTRA.Λ)),
+            ρ_sw      = zeros(FT, length(config.SPECTRA.Λ)),
+            dndt      = zeros(FT, n_soil, 5),
+            k         = zeros(FT, n_soil - 1),
+            q         = zeros(FT, n_soil - 1),
+            q_layers  = zeros(FT, n_soil - 1),
+            δt        = zeros(FT, n_soil - 1),
+            δψ        = zeros(FT, n_soil - 1),
+            λ_layers  = zeros(FT, n_soil - 1)
 );
 
 
@@ -118,10 +116,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SoilBulk{FT}
-    "State variables"
-    state::SoilBulkState{FT} = SoilBulkState{FT}()
+    "Trait variables"
+    trait::SoilBulkTrait{FT} = SoilBulkTrait{FT}()
     "Auxiliary variables"
     auxil::SoilBulkAuxil{FT}
 end;
 
-SoilBulk(config::SPACConfiguration{FT}) where {FT} = SoilBulk{FT}(auxil = SoilBulkAuxil(config));
+SoilBulk(config::SPACConfiguration{FT}, n_soil::Int) where {FT} = SoilBulk{FT}(auxil = SoilBulkAuxil(config, n_soil));

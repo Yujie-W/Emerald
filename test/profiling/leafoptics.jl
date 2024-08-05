@@ -3,7 +3,7 @@ import Emerald.EmeraldLand.Namespace as NS
 
 using Profile
 
-config = NS.SPACConfiguration{Float64}(DATASET = NS.LAND_2021_1NM);
+config = NS.SPACConfiguration(Float64; dataset = NS.OLD_PHI_2021_1NM);
 bio = NS.LeafBio(config);
 LO.leaf_spectra!(config, bio, 5.0, 40.0; N = 10);
 Profile.clear()

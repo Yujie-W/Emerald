@@ -22,8 +22,8 @@ Set up the pressure profile of the plant, given
 
 """
 function plant_pressure_profile!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    root_pressure_profiles!(spac);
-    stem_pressure_profiles!(spac);
+    root_pressure_profiles!(config, spac);
+    stem_pressure_profiles!(config, spac);
     leaf_pressure_profiles!(config, spac);
 
     return nothing

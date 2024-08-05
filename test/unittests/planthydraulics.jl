@@ -17,8 +17,15 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Vulnerability curves P(K)" begin
         for vc in [NS.ComplexVC{Float64}(), NS.LogisticVC{Float64}(), NS.PowerVC{Float64}(), NS.WeibullVC{Float64}()]
-            p1 = collect(Float64, 0:-0.1:-5);
-            ks = PH.relative_xylem_k.((vc,), p1);
+            p1 = Float64[];
+            ks = Float64[];
+            for p in 0:-0.1:-10
+                k = PH.relative_xylem_k(vc, p);
+                if k > 1e-6
+                    push!(p1, p);
+                    push!(ks, k);
+                end;
+            end;
             p2 = PH.xylem_pressure.((vc,), ks);
 
             @test all(p2 .≈ p1);
@@ -45,7 +52,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Read flow in/out of the xylem" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         xylem = NS.XylemHydraulics(config);
         nssflow = NS.XylemHydraulicsAuxilNSS(config);
         ssflow = NS.XylemHydraulicsAuxilSS(config);
@@ -62,7 +69,7 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Update pressure profile in xylem" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         xylem = NS.XylemHydraulics(config);
         nssflow = NS.XylemHydraulicsAuxilNSS(config);
         ssflow = NS.XylemHydraulicsAuxilSS(config);
@@ -70,9 +77,10 @@ import Emerald.EmeraldLand.SPAC
         PH.set_flow_profile!(nssflow, 1.0);
         PH.set_flow_profile!(ssflow, 1.0);
 
-        PH.xylem_pressure_profile!(xylem, 298.15);
-        PH.xylem_pressure_profile!(xylem.state, nssflow, 298.15);
-        PH.xylem_pressure_profile!(xylem.state, ssflow, 298.15);
+        # run this make sure the pressure history is updated to the minimum
+        PH.xylem_pressure_profile!(config, xylem, 298.15);
+        PH.xylem_pressure_profile!(config, xylem.trait, xylem.state, nssflow, 298.15);
+        PH.xylem_pressure_profile!(config, xylem.trait, xylem.state, ssflow, 298.15);
 
         @test xylem.auxil.pressure[end] == nssflow.pressure[end] == ssflow.pressure[end] < 0;
         @test all(xylem.auxil.pressure[2:end] .< 0);
@@ -81,58 +89,60 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Root flow and pressure profiles" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
+        spac = NS.BulkSPAC(config);
         root = NS.Root(config);
         soil = NS.SoilLayer{Float64}();
         junc = NS.JunctionCapacitor{Float64}();
         flow = 1.0;
         PH.set_flow_profile!(root.xylem, flow);
-        PH.root_pressure_profile!(soil, root, junc);
+        PH.root_pressure_profile!(config, soil, root, junc);
 
         p_target = root.xylem.auxil.pressure[end];
-        junc.auxil.pressure = p_target;
-        PH.root_flow_profile!(config, root, soil, junc);
+        junc.s_aux.pressure = p_target;
+        PH.root_flow_profile!(config, root, soil, junc, spac.cache);
         f_target = PH.flow_out(root);
-        PH.root_pressure_profile!(soil, root, junc);
+        PH.root_pressure_profile!(config, soil, root, junc);
 
         @test PH.flow_out(root) ≈ f_target;
         @test root.xylem.auxil.pressure[end] ≈ p_target;
     end;
 
     @testset "Stem flow and pressure profiles" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         stem = NS.Stem(config);
         flow = 1.0;
         PH.set_flow_profile!(stem.xylem, flow);
-        PH.stem_pressure_profile!(stem, -0.1);
+        PH.stem_pressure_profile!(config, stem, -0.1);
 
         @test PH.flow_out(stem) == flow;
         @test all(stem.xylem.auxil.pressure .<= -0.1);
     end;
 
     @testset "Leaf flow and pressure profile" begin
-        config1 = NS.SPACConfiguration{Float64}();
-        config2 = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
+        config1 = NS.SPACConfiguration(Float64);
+        config2 = NS.SPACConfiguration(Float64);
+        config2.STEADY_STATE_FLOW = false;
+        spac1 = NS.BulkSPAC(config1);
+        spac2 = NS.BulkSPAC(config2);
         leaf1 = NS.Leaf(config1);
         leaf2 = NS.Leaf(config2);
-        SPAC.initialize_struct!(leaf1);
-        SPAC.initialize_struct!(leaf2);
-        PH.leaf_pressure_profile!(config1, leaf1, -0.1);
-        PH.leaf_pressure_profile!(config2, leaf2, -0.1);
+        PH.leaf_pressure_profile!(config1, leaf1, spac1.cache, -0.1);
+        PH.leaf_pressure_profile!(config2, leaf2, spac2.cache, -0.1);
 
         @test all(leaf1.xylem.auxil.pressure .<= -0.1);
         @test all(leaf2.xylem.auxil.pressure .<= -0.1);
     end;
 
     @testset "Plant hydraulics (steady state)" begin
-        config = NS.SPACConfiguration{Float64}();
+        config = NS.SPACConfiguration(Float64);
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         for leaf in spac.plant.leaves
-            leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
-            leaf.flux.state.g_H₂O_s_shaded = 0.1;
+            leaf.flux.state.g_H₂O_s .= 0.1;
         end;
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
 
@@ -155,14 +165,15 @@ import Emerald.EmeraldLand.SPAC
     end;
 
     @testset "Plant hydraulics (non-steady state)" begin
-        config = NS.SPACConfiguration{Float64}(STEADY_STATE_FLOW = false);
+        config = NS.SPACConfiguration(Float64);
+        config.STEADY_STATE_FLOW = false;
         spac = NS.BulkSPAC(config);
-        SPAC.initialize!(config, spac);
+        SPAC.initialize_spac!(config, spac);
         for leaf in spac.plant.leaves
-            leaf.flux.state.g_H₂O_s_sunlit .= 0.1;
-            leaf.flux.state.g_H₂O_s_shaded = 0.1;
+            leaf.flux.state.g_H₂O_s .= 0.1;
         end;
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
 
@@ -173,13 +184,14 @@ import Emerald.EmeraldLand.SPAC
         @test PH.flow_out(spac.plant.trunk) == sum([PH.flow_in(branch) for branch in spac.plant.branches]);
 
         # make sure the water in the leaf capacitor changes with the total water in (from stem) and total water out (to air)
-        q1s = [leaf.capacitor.state.v_storage * leaf.xylem.state.area for leaf in spac.plant.leaves];
+        q1s = [leaf.capacitor.state.v_storage * leaf.xylem.trait.area for leaf in spac.plant.leaves];
         fis = [PH.flow_in(leaf) for leaf in spac.plant.leaves];
         fos = [PH.flow_out(leaf) for leaf in spac.plant.leaves];
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
-        q2s = [leaf.capacitor.state.v_storage * leaf.xylem.state.area for leaf in spac.plant.leaves];
+        q2s = [leaf.capacitor.state.v_storage * leaf.xylem.trait.area for leaf in spac.plant.leaves];
         @test all(q2s .- q1s .≈ fis .- fos);
 
         # make sure the water in the branch capacitor changes with the total water in (from trunk) and total water out (to leaf)
@@ -187,6 +199,7 @@ import Emerald.EmeraldLand.SPAC
         fis = [PH.flow_in(branch) for branch in spac.plant.branches];
         fos = [PH.flow_out(branch) for branch in spac.plant.branches];
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2s = [sum(branch.xylem.state.v_storage) for branch in spac.plant.branches];
@@ -197,6 +210,7 @@ import Emerald.EmeraldLand.SPAC
         f_junc = PH.flow_in(spac.plant.trunk);
         f_stem = PH.flow_out(spac.plant.trunk);
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2_trunk = sum(spac.plant.trunk.xylem.state.v_storage);
@@ -207,6 +221,7 @@ import Emerald.EmeraldLand.SPAC
         Σf_root = sum([PH.flow_out(root) for root in spac.plant.roots]);
         Σf_stem = PH.flow_in(spac.plant.trunk);
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2_junc = spac.plant.junction.state.v_storage;
@@ -217,6 +232,7 @@ import Emerald.EmeraldLand.SPAC
         fis = [PH.flow_in(root) for root in spac.plant.roots];
         fos = [PH.flow_out(root) for root in spac.plant.roots];
         PH.plant_water_budget!(spac, 1.0);
+        spac.plant.junction.auxil.∂w∂t = 0;
         PH.plant_flow_profile!(config, spac);
         PH.plant_pressure_profile!(config, spac);
         q2s = [sum(root.xylem.state.v_storage) for root in spac.plant.roots];

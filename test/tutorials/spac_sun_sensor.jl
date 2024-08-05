@@ -4,9 +4,9 @@ using Test;
 
 @testset "Modify Sun Sensor Geometry" begin
     FT = Float64;
-    config = EmeraldLand.Namespace.SPACConfiguration{FT}();
+    config = EmeraldLand.Namespace.SPACConfiguration(FT);
     spac = EmeraldLand.Namespace.BulkSPAC(config);
-    EmeraldLand.SPAC.initialize!(config, spac);
+    EmeraldLand.SPAC.initialize_spac!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, FT(1));
 
     # Sun-sensor geometry impacts the signal that can be detected remotely.

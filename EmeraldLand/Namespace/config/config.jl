@@ -13,13 +13,21 @@
 #     2023-Jul-06: add field PRESCRIBE_AIR
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, and T_CLM
-#     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD, ENABLE_ENERGY_BUDGET, ENABLE_PLANT_HYDRAULICS, and ENABLE_SOIL_WATER_BUDGET
+#     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD
 #     2023-Sep-18: add field Φ_SIF_WL
 #     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
 #     2023-Oct-02: add field MESSAGE_LEVEL
 #     2023-Oct-05: add field ENABLE_SIF
 #     2023-Oct-14: add field ENABLE_REF
+#     2024-Feb-27: add field HOT_SPOT and SOIL_ALBEDO
+#     2024-Feb-27: add constructor function to create the configuration using customized settings
+#     2024-Feb-28: add field VERTICAL_BIO
+#     2024-Jul-22: add field ENABLE_CHEMICAL_ENERGY
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Jul-31: add rate constants fields (constants for PSI, PSII, and combined)
+#     2024-Aug-01: add field ENABLE_KD_TD and FIX_ETA_TD
+#     2024-Aug-05: set ENABLE_DROUGHT_LEGACY to true by default (add corresponding functions in PlantHydraulics module)
 #
 #######################################################################################################################################################################################################
 """
@@ -34,52 +42,37 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SPACConfiguration{FT}
+    #
     # Debug mode
-    "Whether to print debug information"
-    DEBUG::Bool = false
+    #
     "Message level (0 for no, 1 for progress bar, and 2 for ind)"
     MESSAGE_LEVEL::Int = 0
 
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
-
-    # Reference spectra
+    #
+    # Dataset (to use the reference spectra and many others)
+    #
+    "Data name of the JLD2 file"
+    DATASET::String = OLD_PHI_2021
+    "JLD2 file name"
+    JLD2_FILE::String = LAND_ARTIFACT
     "Reference Spetra"
-    SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(DATASET = DATASET)
+    SPECTRA::ReferenceSpectra{FT} = ReferenceSpectra{FT}(JLD2_FILE, DATASET)
 
-    # features related to the leaf optics and fluorescence
+    #
+    # Canopy optics
+    #
     "Whether to compute canopy reflectance"
     ENABLE_REF::Bool = true
-    "Whether to compute fluorescence"
-    ENABLE_SIF::Bool = true
-    "Whether to convert energy to photons when computing fluorescence"
-    Φ_PHOTON::Bool = true
-    "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
-    Φ_SIF_CUTOFF::Int = 0
-    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
-    Φ_SIF_RESCALE::Bool = true
-    "Whether to partition the SIF PDF based the wavelength"
-    Φ_SIF_WL::Bool = true
+    "Hot spot parameter"
+    HOT_SPOT::FT = 0.05
+    "Soil albedo method"
+    SOIL_ALBEDO::Union{SoilAlbedoPrescribe, SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
+    "Vertical distribution of leaf biophysical properties (if false, run leaf_spectra! only once)"
+    VERTICAL_BIO::Bool = false
 
-    # features related to plant hydraulics
-    "Threshold of the critical pressure or flow that trigger a remainder of conductance"
-    KR_THRESHOLD::FT = 0.001
-    "Whether to run the model at steady state mode"
-    STEADY_STATE_FLOW::Bool = true
-
-    # features related to canopy photosynthesis
-    # Note
-    #     1. to use the hyperspectral mode, set both to true
-    #     2. to use the broadband mode with sunlit/shaded fractions, set SUNLIT_FRACTION to true and SUNLIT_ANGLES to false
-    #     3. to use the broadband mode with one leaf model, set both to false (ppar_sunlit and ppar_shaded will be set to be the same)
-    #     4. to use big leaf model, TODO item
-    "Whether to partition the sunlit fraction into different inclination and azimuth angles (if false, use float for sunlit fraction)"
-    SUNLIT_ANGLES::Bool = true
-    "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
-    SUNLIT_FRACTION::Bool = true
-
-    # Settings related to the canopy geometry angles (inclination and azimuth settings)
+    #
+    # Canopy structure
+    #
     "Dimension of azimuth angles"
     DIM_AZI::Int = 36
     "Dimension of inclination angles"
@@ -91,58 +84,61 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Mean inclination angles `[°]`"
     Θ_INCL::Vector{FT} = FT[ (Θ_INCL_BNDS[i,1] + Θ_INCL_BNDS[i,2]) / 2 for i in 1:DIM_INCL ]
 
+    #
+    # Fluorescence
+    #
+    "Whether to compute fluorescence"
+    ENABLE_SIF::Bool = true
+    "Whether to convert energy to photons when computing fluorescence"
+    Φ_PHOTON::Bool = true
+    "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
+    Φ_SIF_CUTOFF::Int = 0
+    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
+    Φ_SIF_RESCALE::Bool = true
+    "Whether to partition the SIF PDF based the wavelength"
+    Φ_SIF_WL::Bool = true
 
-
-
-
-
-    # Turn on/off features
-    "Allow leaf condensation"
-    ALLOW_LEAF_CONDENSATION::Bool = false
-    "Allow leaf shedding"
-    ALLOW_LEAF_SHEDDING::Bool = false
-    "Enable drought legacy effect"
-    ENABLE_DROUGHT_LEGACY::Bool = false
-    "Enable energy balance (t_on)"
-    ENABLE_ENERGY_BUDGET::Bool = true
-    "Enable plant hydraulics (p_on)"
-    ENABLE_PLANT_HYDRAULICS::Bool = true
-    "Enable soil water budget (θ_on)"
-    ENABLE_SOIL_WATER_BUDGET::Bool = true
+    #
+    # Photosynthesis
+    #
+    "Number of sunlit PPAR bins for all the layers (to speed up the computation)"
+    DIM_PPAR_BINS::Union{Int,Nothing} = nothing
+    "Enable the chemical energy related to photosynthesis and respiration"
+    ENABLE_CHEMICAL_ENERGY::Bool = true
+    "Enable K_D rate constant temperature dependency"
+    ENABLE_KD_TD::Bool = true
+    "Fix the TD of η for Johnson-Berry model"
+    FIX_ETA_TD::Bool = true
+    "Rate constants for PSI and PSII combined (most for PSII?)"
+    PS_RATE_CONSTANTS::PhotosystemsRateConstants{FT} = PhotosystemsRateConstants{FT}()
+    "Rate constants for PSI"
+    PSI_RATE_CONSTANTS::PhotosystemIRateConstants{FT} = PhotosystemIRateConstants{FT}()
+    "Rate constants for PSII"
+    PSII_RATE_CONSTANTS::PhotosystemIIRateConstants{FT} = PhotosystemIIRateConstants{FT}()
     "Whether to acclimate leaf Vcmax and Jmax TD"
     T_CLM::Bool = true
-    "Whether to use CLM soil albedo scheme"
-    α_CLM::Bool = false
-    "Whether to fit the data from broadband to hyperspectral"
-    α_FITTING::Bool = true
+    "Number of temperature memory (hours for hourly simulation)"
+    T_CLM_N::Int = 240
 
-    # Prescribe parameters
-    "Prescribe air layer information such as partial pressures"
-    PRESCRIBE_AIR::Bool = true
-
-    # Dimensions of the spac system
-    "Dimension of air layers"
-    DIM_AIR::Int = 20
-    "Dimension of canopy layers"
-    DIM_LAYER::Int = 12
-    "Number of wavelength bins for NIR"
-    DIM_NIR::Int = length(SPECTRA.IΛ_NIR)
-    "Dimension of root layers"
-    DIM_ROOT::Int = 5
-    "Number of wavelength bins for PAR"
-    DIM_PAR::Int = length(SPECTRA.IΛ_PAR)
-    "Dimension of SIF wave length bins"
-    DIM_SIF::Int = length(SPECTRA.IΛ_SIF)
-    "Dimension of SIF excitation wave length bins"
-    DIM_SIFE::Int = length(SPECTRA.IΛ_SIFE)
-    "Dimension of soil layers"
-    DIM_SOIL::Int = 4
-    "Dimension of short wave length bins"
-    DIM_WL::Int = length(SPECTRA.Λ)
+    #
+    # Plant hydraulics
+    #
+    "Allow leaf condensation"
+    ALLOW_LEAF_CONDENSATION::Bool = false
+    "Allow leaf shedding in prescibe LAI mode to avoid numerical issues"
+    ALLOW_LEAF_SHEDDING::Bool = true
     "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
     DIM_XYLEM::Int = 5
+    "Enable drought legacy effect"
+    ENABLE_DROUGHT_LEGACY::Bool = true
+    "Threshold of the critical pressure or flow that trigger a remainder of conductance"
+    KR_THRESHOLD::FT = 0.001
+    "Whether to run the model at steady state mode"
+    STEADY_STATE_FLOW::Bool = true
 
-    # Trace gas information
+    #
+    # Trace gas
+    #
     "Trace gas air"
     TRACE_AIR::TraceGasAir{FT} = TraceGasAir{FT}()
     "Trace gas CH₄"
@@ -155,4 +151,36 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     TRACE_N₂::TraceGasN₂{FT} = TraceGasN₂{FT}()
     "Trace gas O₂"
     TRACE_O₂::TraceGasO₂{FT} = TraceGasO₂{FT}()
+
+    #
+    # Prescribe parameters
+    #
+    "Prescribe air layer information such as partial pressures"
+    PRESCRIBE_AIR::Bool = true
+
+
+
+
+
+
+
+
+
+
+    # features related to canopy sunlit/shaded fractions
+    # Note
+    #     1. to use the hyperspectral mode, set both to true
+    #     2. to use the broadband mode with sunlit/shaded fractions, set SUNLIT_FRACTION to true and SUNLIT_ANGLES to false
+    #     3. to use the broadband mode with one leaf model, set both to false (ppar_sunlit and ppar_shaded will be set to be the same)
+    #     4. to use big leaf model, TODO item
+    "Whether to partition the sunlit fraction into different inclination and azimuth angles (if false, use float for sunlit fraction)"
+    SUNLIT_ANGLES::Bool = true
+    "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
+    SUNLIT_FRACTION::Bool = true
 end;
+
+SPACConfiguration(FT::DataType; dataset::String = OLD_PHI_2021, jld2_file::String = LAND_ARTIFACT, wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) = SPACConfiguration{FT}(
+            JLD2_FILE = jld2_file,
+            DATASET   = dataset,
+            SPECTRA   = ReferenceSpectra{FT}(jld2_file, dataset; wl_par = wl_par, wl_par_700 = wl_par_700),
+);

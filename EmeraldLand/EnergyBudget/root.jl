@@ -34,19 +34,19 @@ function root_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         # if the flow into the root is positive, then the energy flow is positive
         f_i = flow_in(root);
         if f_i >= 0
-            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.auxil.t;
-            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * soil.auxil.t / sbulk.state.area;
+            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * soil.s_aux.t;
+            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * soil.s_aux.t / sbulk.trait.area;
         else
-            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.energy.auxil.t;
-            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * root.energy.auxil.t / sbulk.state.area;
+            root.energy.auxil.∂e∂t += f_i * CP_L_MOL(FT) * root.energy.s_aux.t;
+            soil.auxil.∂e∂t -= f_i * CP_L_MOL(FT) * root.energy.s_aux.t / sbulk.trait.area;
         end;
 
         # if the flow into the junction is positive, then the energy flow is negative
         f_o = flow_out(root);
         if f_o >= 0
-            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * root.energy.auxil.t;
+            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * root.energy.s_aux.t;
         else
-            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * junction.auxil.t;
+            root.energy.auxil.∂e∂t -= f_o * CP_L_MOL(FT) * junction.s_aux.t;
         end;
     end;
 

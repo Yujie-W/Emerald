@@ -4,52 +4,60 @@
 #
 # Changes to this function
 # General
-#     2023-Oct-10: add function sensor_geometry! (run per viewing zenith angle)
-#     2023-Oct-11: compute canopy layer scattering
-#     2023-Oct-13: improve p_sun_sensor calculation accuracy
-#     2023-Oct-14: if none of REF or SIF is enabled, skip the sensor geometry calculation
-#     2023-Oct-18: account for SAI in the sensor geometry calculation
+#     2024-Feb-22: add function sensor_geometry_aux! to update the state-dependent auxiliary variables for sensor geometry (to call in step_remote_sensing!)
+#     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
+# Bug fixes
+#     2024-Mar-06: ci impact on fraction from viewer direction
 #
 #######################################################################################################################################################################################################
 """
 
-    sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    sensor_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update sensor geometry related auxiliary variables, given
 - `config` SPAC configuration
 - `spac` SPAC
 
 """
-function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    can_str = spac.canopy.structure;
+function sensor_geometry_aux! end;
 
-    if (!config.ENABLE_REF && !config.ENABLE_SIF) || (can_str.state.lai <= 0 && can_str.state.sai <= 0)
+sensor_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = sensor_geometry_aux!(config, spac.canopy);
+
+sensor_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} =
+    sensor_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux, can.sensor_geometry.state, can.sensor_geometry.s_aux);
+
+sensor_geometry_aux!(
+            config::SPACConfiguration{FT},
+            trait::CanopyStructureTrait{FT},
+            t_aux::CanopyStructureTDAuxil{FT},
+            sunst::SunGeometryState{FT},
+            sunsa::SunGeometrySDAuxil{FT},
+            senst::SensorGeometryState{FT},
+            sensa::SensorGeometrySDAuxil{FT}) where {FT} = (
+    # if none of REF or SIF is enabled, or sza > 89, or LAI+SAI <= 0, do nothing
+    if (!config.ENABLE_REF && !config.ENABLE_SIF) || sunst.sza > 89 || (trait.lai <= 0 && trait.sai <= 0)
         return nothing
     end;
 
-    # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI+SAI > 0
-    (; DIM_LAYER, SPECTRA, Θ_AZI, Θ_INCL) = config;
-    leaves = spac.plant.leaves;
-    sen_geo = spac.canopy.sensor_geometry;
-    sun_geo = spac.canopy.sun_geometry;
+    (; HOT_SPOT, Θ_AZI, Θ_INCL) = config;
 
     # extinction coefficients for the solar radiation
-    vza = sen_geo.state.vza;
-    sza = sun_geo.state.sza;
-    raa = sen_geo.state.vaa - sun_geo.state.saa;
+    vza = senst.vza;
+    sza = sunst.sza;
+    raa = senst.vaa - sunst.saa;
     for i in eachindex(Θ_INCL)
         Co = cosd(Θ_INCL[i]) * cosd(vza);
         So = sind(Θ_INCL[i]) * sind(vza);
         βo = (Co >= So ? FT(π) : acos(-Co/So));
-        sen_geo.auxil.Co_incl[i] = Co;
-        sen_geo.auxil.So_incl[i] = So;
-        sen_geo.auxil.βo_incl[i] = βo;
-        sen_geo.auxil.ko_incl[i] = 2 / FT(π) / cosd(FT(π)) * (Co * (βo - FT(π)/2) + So * sin(βo));
+        sensa.Co_incl[i] = Co;
+        sensa.So_incl[i] = So;
+        sensa.βo_incl[i] = βo;
+        sensa.ko_incl[i] = 2 / FT(π) / cosd(FT(π)) * (Co * (βo - FT(π)/2) + So * sin(βo));
 
         # compute the scattering coefficients
-        Cs = sun_geo.auxil.Cs_incl[i];
-        Ss = sun_geo.auxil.Ss_incl[i];
-        βs = sun_geo.auxil.βs_incl[i];
+        Cs = sunsa.Cs_incl[i];
+        Ss = sunsa.Ss_incl[i];
+        βs = sunsa.βs_incl[i];
 
         # 1 compute the Δ and β angles
         Δ₁ = abs(βs - βo);
@@ -74,60 +82,108 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
         F₂ = (-β₂ * T₁ + T₂) / abs(so);
 
         # 3 compute the area scattering coefficient fractions (sb for backward and sf for forward)
-        sen_geo.auxil.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
-        sen_geo.auxil.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
+        sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
+        sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
     end;
-    sen_geo.auxil.ko = can_str.auxil.p_incl' * sen_geo.auxil.ko_incl;
+    sensa.ko = t_aux.p_incl' * sensa.ko_incl;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    sen_geo.auxil.dob = (sen_geo.auxil.ko + can_str.auxil.bf) / 2;
-    sen_geo.auxil.dof = (sen_geo.auxil.ko - can_str.auxil.bf) / 2;
-    sen_geo.auxil.sob = can_str.auxil.p_incl' * sen_geo.auxil.sb_incl;
-    sen_geo.auxil.sof = can_str.auxil.p_incl' * sen_geo.auxil.sf_incl;
+    sensa.dob = 0;
+    sensa.dof = 0;
+    for i in eachindex(Θ_INCL)
+        f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
+        f_aba = 1 - f_ada;
+        f_inc = Θ_INCL[i] / 180;
+        sensa.dob += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl[i];
+        sensa.dof += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl[i];
+    end;
+    sensa.sob = t_aux.p_incl' * sensa.sb_incl;
+    sensa.sof = t_aux.p_incl' * sensa.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
-        cos_azi_raa = cosd(Θ_AZI[i] .- (sen_geo.state.vaa - sun_geo.state.saa));
-        view(sen_geo.auxil.fo,:,i) .= sen_geo.auxil.Co_incl .+ sen_geo.auxil.So_incl .* cos_azi_raa;
+        cos_azi_raa = cosd(Θ_AZI[i] .- (senst.vaa - sunst.saa));
+        @. sensa.fo[:,i] = sensa.Co_incl + sensa.So_incl * cos_azi_raa;
     end;
-    sen_geo.auxil.fo ./= cosd(sen_geo.state.vza);
-    sen_geo.auxil.fo_abs .= abs.(sen_geo.auxil.fo);
+    @. sensa.fo /= cosd(senst.vza);
+    @. sensa.fo_abs = abs(sensa.fo);
     for i in eachindex(Θ_INCL)
-        view(sen_geo.auxil.fo_cos²_incl,i,:) .= view(sen_geo.auxil.fo,i,:) * cosd(Θ_INCL[i]) ^ 2;
+        @. sensa.fo_cos²_incl[i,:] = (@view sensa.fo[i,:]) * cosd(Θ_INCL[i]) ^ 2; # TODO: is this related to the bf calculation in SCOPE?
     end;
-    sen_geo.auxil.fo_fs .= sun_geo.auxil.fs .* sen_geo.auxil.fo;
-    sen_geo.auxil.fo_fs_abs .= abs.(sen_geo.auxil.fo_fs);
+    @. sensa.fo_fs = sunsa.fs * sensa.fo;
+    @. sensa.fo_fs_abs = abs(sensa.fo_fs);
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
-    kocipai = sen_geo.auxil.ko * can_str.auxil.ci * (can_str.state.lai + can_str.state.sai);
-    for i in 1:DIM_LAYER
-        kociipai = sen_geo.auxil.ko * can_str.auxil.ci * (can_str.state.δlai[i] + can_str.state.δsai[i]);
-        sen_geo.auxil.p_sensor[i] = 1 / kociipai * (exp(kocipai * can_str.auxil.x_bnds[i]) - exp(kocipai * can_str.auxil.x_bnds[i+1]));
+    kocipai = sensa.ko * trait.ci * (trait.lai + trait.sai);
+    for i in eachindex(trait.δlai)
+        koipai = sensa.ko * (trait.δlai[i] + trait.δsai[i]);
+        sensa.p_sensor[i] = 1 / koipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
     end;
-    sen_geo.auxil.p_sensor_soil = exp(-kocipai);
+    sensa.p_sensor_soil = exp(-kocipai);
 
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
-    dso = sqrt( tand(sun_geo.state.sza) ^ 2 + tand(sen_geo.state.vza) ^ 2 - 2 * tand(sun_geo.state.sza) * tand(sen_geo.state.vza) * cosd(sen_geo.state.vaa - sun_geo.state.saa) );
-    Σk = sen_geo.auxil.ko + sun_geo.auxil.ks;
-    Πk = sen_geo.auxil.ko * sun_geo.auxil.ks;
-    cl = can_str.auxil.ci * (can_str.state.lai + can_str.state.sai);
-    α  = dso / can_str.state.hot_spot * 2 / Σk;
-    pso(x) = dso == 0 ? exp( (Σk - sqrt(Πk)) * cl * x ) : exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
+    dso = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
+    Σk = sensa.ko + sunsa.ks;
+    Πk = sensa.ko * sunsa.ks;
+    cl = trait.ci * (trait.lai + trait.sai);
+    α  = dso / HOT_SPOT * 2 / Σk;
+    pso(x) = dso == 0 ? trait.ci * exp( (Σk - sqrt(Πk)) * cl * x ) : trait.ci * exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
 
-    for i in 1:DIM_LAYER
-        sen_geo.auxil.p_sun_sensor[i] = quadgk(pso, can_str.auxil.x_bnds[i+1], can_str.auxil.x_bnds[i]; rtol = 1e-2)[1] / (can_str.auxil.x_bnds[i] - can_str.auxil.x_bnds[i+1]);
+    for i in eachindex(trait.δlai)
+        sensa.p_sun_sensor[i] = quadgk(pso, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-2)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
     end;
 
+    return nothing
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Oct-10: add function sensor_geometry! (run per viewing zenith angle)
+#     2023-Oct-11: compute canopy layer scattering
+#     2023-Oct-13: improve p_sun_sensor calculation accuracy
+#     2023-Oct-14: if none of REF or SIF is enabled, skip the sensor geometry calculation
+#     2023-Oct-18: account for SAI in the sensor geometry calculation
+#     2024-Feb-22: add solar zenith angle control
+#     2024-Feb-25: move the trait- and state-dependent calculations to the sensor_geometry_aux! function
+#
+#######################################################################################################################################################################################################
+"""
+
+    sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Update sensor geometry related auxiliary variables, given
+- `config` SPAC configuration
+- `spac` SPAC
+
+"""
+function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    can_str = spac.canopy.structure;
+    sun_geo = spac.canopy.sun_geometry;
+
+    if (!config.ENABLE_REF && !config.ENABLE_SIF) || sun_geo.state.sza > 89 || (can_str.trait.lai <= 0 && can_str.trait.sai <= 0)
+        return nothing
+    end;
+
+    # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI+SAI > 0
+    (; SPECTRA) = config;
+    leaves = spac.plant.leaves;
+    sen_geo = spac.canopy.sensor_geometry;
+    n_layer = length(leaves);
+
     # compute the scattering coefficients per leaf area
-    for i in 1:DIM_LAYER
-        leaf = leaves[DIM_LAYER + 1 - i];
-        sen_geo.auxil.dob_leaf[:,i] .= sen_geo.auxil.dob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dof * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dof_leaf[:,i] .= sen_geo.auxil.dof * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.dob * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.so_leaf[:,i]  .= sen_geo.auxil.sob * leaf.bio.auxil.ρ_leaf .+ sen_geo.auxil.sof * leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dob_stem[:,i] .= sen_geo.auxil.dob * SPECTRA.ρ_STEM;
-        sen_geo.auxil.dof_stem[:,i] .= sen_geo.auxil.dof * SPECTRA.ρ_STEM;
-        sen_geo.auxil.so_stem[:,i]  .= sen_geo.auxil.sob * SPECTRA.ρ_STEM;
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        leaf = leaves[ilf];
+        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dof .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dob .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.sof .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.s_aux.dob .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.s_aux.dof .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.s_aux.sob .* SPECTRA.ρ_STEM;
     end;
 
     return nothing

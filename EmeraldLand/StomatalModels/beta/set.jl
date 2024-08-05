@@ -11,6 +11,7 @@
 #     2022-Nov-18: use root K to weigh the beta among root layers
 #     2023-Mar-27: weigh the beta among root layers only if flow rate is positive (if all flows are negative, beta = 1)
 #     2023-Aug-27: add nan check for beta calculation of empirical models
+#     2024-Feb-29: add LAI = 0 controller
 # Bug fixes
 #     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaf, β, β.PARAM_X) as I forgot to write β_factor! before `()`
 #
@@ -29,41 +30,54 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 function β_factor! end;
 
 β_factor!(spac::BulkSPAC{FT}) where {FT} = (
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    # update the beta factor for the leaves only if the LAI is positive
     leaves = spac.plant.leaves;
     roots = spac.plant.roots;
     soils = spac.soils;
 
     for i in eachindex(leaves)
-        β_factor!(roots, soils, leaves[i], leaves[i].flux.state.stomatal_model);
+        β_factor!(roots, soils, leaves[i], leaves[i].flux.trait.stomatal_model);
     end;
 
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} =
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = (
+    if leaf.xylem.trait.area <= 0
+        return nothing
+    end;
+
+    # update the beta factor for the leaf only if the LAI is positive
     β_factor!(roots, soils, leaf, sm.β);
-
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
-
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
-    f_st = relative_surface_tension(leaf.energy.auxil.t);
-
-    leaf.flux.auxil.β = β_factor(β.FUNC, relative_xylem_k(leaf.xylem.state.vc, leaf.xylem.auxil.pressure[end] / f_st));
 
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
+
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
+    f_st = relative_surface_tension(leaf.energy.s_aux.t);
+
+    leaf.flux.auxil.β = β_factor(β.FUNC, relative_xylem_k(leaf.xylem.trait.vc, leaf.xylem.auxil.pressure[end] / f_st));
+
+    return nothing
+);
+
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].auxil.k);
+        beta = β_factor(β.FUNC, soils[i].s_aux.k);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
+        kmax = f_in > 0 ? roots[i].xylem.trait.area * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
@@ -82,21 +96,21 @@ function β_factor! end;
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
     leaf.flux.auxil.β = β_factor(β.FUNC, leaf.xylem.auxil.pressure[end]);
 
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].auxil.ψ);
+        beta = β_factor(β.FUNC, soils[i].s_aux.ψ);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
+        kmax = f_in > 0 ? roots[i].xylem.trait.area * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
@@ -115,7 +129,7 @@ function β_factor! end;
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
@@ -123,7 +137,7 @@ function β_factor! end;
     for i in eachindex(roots)
         beta = β_factor(β.FUNC, soils[i].state.θ);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].xylem.state.area * roots[i].xylem.state.k_max / roots[i].xylem.state.l : 0;
+        kmax = f_in > 0 ? roots[i].xylem.trait.area * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;

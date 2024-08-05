@@ -30,22 +30,21 @@ end;
 #
 # Changes to the struct
 # General
-#     2023-Oct-09: add struct SensorGeometryAuxil
-#     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
+#     2024-Feb-25: add struct SensorGeometrySDAuxil
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct to store the auxiliary variables of the sensor geometry.
+Struct to store the state-dependetn auxiliary variables of the sensor geometry
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SensorGeometryAuxil{FT}
+Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
     # Scattering coefficients
     "Backward diffuse->observer scatter weight"
     dob::FT = 0
@@ -55,16 +54,6 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     sob::FT = 0
     "Forward direct->observer scatter weight"
     sof::FT = 0
-
-    # Extinction coefficient related
-    "Observer direction beam extinction coefficient weight (diffuse)"
-    ko::FT = 0
-    "Probability of directly viewing a leaf in observer direction at different layer boundaries"
-    p_sensor::Vector{FT}
-    "Probability of directly viewing soil in observer direction at different layer boundaries"
-    p_sensor_soil::FT = 0
-    "Bi-directional probability of directly viewing a leaf at different layer boundaries (solar->canopy->observer)"
-    p_sun_sensor::Vector{FT}
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(vza) at different inclination angles"
@@ -80,6 +69,16 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     "Co >= So ? FT(π) : acos(-Co/So)"
     βo_incl::Vector{FT}
 
+    # Extinction coefficient related
+    "Observer direction beam extinction coefficient weight (diffuse)"
+    ko::FT = 0
+    "Probability of directly viewing a leaf in observer direction at different layer boundaries"
+    p_sensor::Vector{FT}
+    "Probability of directly viewing soil in observer direction at different layer boundaries"
+    p_sensor_soil::FT = 0
+    "Bi-directional probability of directly viewing a leaf at different layer boundaries (solar->canopy->observer)"
+    p_sun_sensor::Vector{FT}
+
     # Matrix used for radiation to sensor
     "Conversion factor fo for angle towards observer at different inclination and azimuth angles"
     fo::Matrix{FT}
@@ -91,7 +90,46 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     fo_fs::Matrix{FT}
     "Absolute value of fo * fs"
     fo_fs_abs::Matrix{FT}
+end;
 
+SensorGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometrySDAuxil{FT}(
+            Co_incl      = zeros(FT, config.DIM_INCL),
+            So_incl      = zeros(FT, config.DIM_INCL),
+            ko_incl      = zeros(FT, config.DIM_INCL),
+            sb_incl      = zeros(FT, config.DIM_INCL),
+            sf_incl      = zeros(FT, config.DIM_INCL),
+            βo_incl      = zeros(FT, config.DIM_INCL),
+            p_sensor     = zeros(FT, n_layer),
+            p_sun_sensor = zeros(FT, n_layer),
+            fo           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs        = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs_abs    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General
+#     2023-Oct-09: add struct SensorGeometryAuxil
+#     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
+#     2024-Jul-27: use bined PPAR to speed up (moved sif yield here from leaf)
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct to store the auxiliary variables of the sensor geometry.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     # Scattering coefficients per leaf area or stem area
     "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins of leaf"
     dob_leaf::Matrix{FT}
@@ -131,39 +169,32 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     sif_obs_scattered::Vector{FT}
     "Total SIF at sensor direction"
     sif_obs::Vector{FT}
+    "Shaded SIF yield of all ther layers"
+    ϕ_f_shaded::Vector{FT}
+    "Sunlit SIF yield of all ther layers"
+    ϕ_f_sunlit::Vector{Matrix{FT}}
 end;
 
-SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAuxil{FT}(
-            p_sensor          = zeros(FT, config.DIM_LAYER),
-            p_sun_sensor      = zeros(FT, config.DIM_LAYER),
-            Co_incl           = zeros(FT, config.DIM_INCL),
-            So_incl           = zeros(FT, config.DIM_INCL),
-            ko_incl           = zeros(FT, config.DIM_INCL),
-            sb_incl           = zeros(FT, config.DIM_INCL),
-            sf_incl           = zeros(FT, config.DIM_INCL),
-            βo_incl           = zeros(FT, config.DIM_INCL),
-            fo                = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_abs            = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_cos²_incl      = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs             = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs_abs         = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            dob_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dof_leaf          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            so_leaf           = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dob_stem          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            dof_stem          = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            so_stem           = zeros(FT, config.DIM_WL, config.DIM_LAYER),
-            e_sensor_layer    = zeros(FT, config.DIM_WL, config.DIM_LAYER + 1),
-            e_sensor          = zeros(FT, config.DIM_WL),
-            reflectance       = zeros(FT, config.DIM_WL),
-            sif_scattered     = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            sif_shaded        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            sif_sunlit        = zeros(FT, config.DIM_SIF, config.DIM_LAYER),
-            sif_obs_scattered = zeros(FT, config.DIM_SIF),
-            sif_obs_shaded    = zeros(FT, config.DIM_SIF),
-            sif_obs_sunlit    = zeros(FT, config.DIM_SIF),
-            sif_obs_soil      = zeros(FT, config.DIM_SIF),
-            sif_obs           = zeros(FT, config.DIM_SIF),
+SensorGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometryAuxil{FT}(
+            dob_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            dof_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            so_leaf           = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            dob_stem          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            dof_stem          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            so_stem           = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            e_sensor_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+            e_sensor          = zeros(FT, length(config.SPECTRA.Λ)),
+            reflectance       = zeros(FT, length(config.SPECTRA.Λ)),
+            sif_scattered     = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+            sif_shaded        = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+            sif_sunlit        = zeros(FT, length(config.SPECTRA.IΛ_SIF), n_layer),
+            sif_obs_scattered = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs_shaded    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs_sunlit    = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs_soil      = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            sif_obs           = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+            ϕ_f_shaded        = zeros(FT, n_layer),
+            ϕ_f_sunlit        = Matrix{FT}[ zeros(FT, config.DIM_INCL, config.DIM_AZI) for i in 1:n_layer],
 );
 
 
@@ -172,6 +203,7 @@ SensorGeometryAuxil(config::SPACConfiguration{FT}) where {FT} = SensorGeometryAu
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SensorGeometry
+#     2023-Oct-18: add field s_aux
 #
 #######################################################################################################################################################################################################
 """
@@ -186,10 +218,15 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometry{FT}
-    "State variables"
+    "State variables that may evolve with time"
     state::SensorGeometryState{FT} = SensorGeometryState{FT}()
+    "State-dependent variables"
+    s_aux::SensorGeometrySDAuxil{FT}
     "Auxiliary variables"
     auxil::SensorGeometryAuxil{FT}
 end;
 
-SensorGeometry(config::SPACConfiguration{FT}) where {FT} = SensorGeometry{FT}(auxil = SensorGeometryAuxil(config));
+SensorGeometry(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometry{FT}(
+            s_aux = SensorGeometrySDAuxil(config, n_layer),
+            auxil = SensorGeometryAuxil(config, n_layer)
+);

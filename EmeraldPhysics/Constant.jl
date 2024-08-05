@@ -12,6 +12,7 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 #     2022-Jul-20: add fields F_O₂, CP_D, CP_I
 #     2022-Jul-20: rename field LH_V0 to LH_V₀, T_0 to T₀
 #     2022-Sep-09: move constants from ClimaCache.jl to EmeraldConstants.jl
+#     2024-Jul-22: add field GLUCOSE
 #
 #######################################################################################################################################################################################################
 """
@@ -42,6 +43,8 @@ Base.@kwdef mutable struct UniversalConstants
     F_O₂::Float64 = 0.2095
     "Universal gas constant `[J mol⁻¹ K⁻¹]`"
     GAS_R::Float64 = 8.3144598
+    "Glucose chemical potential `[J mol⁻¹]`"
+    GLUCOSE::Float64 = 2.8025e6
     "Gravity of the Earth `[m s⁻²]`"
     GRAVITY::Float64 = 9.81
     "Planck constant `[m² kg s⁻¹]`"
@@ -64,6 +67,10 @@ Base.@kwdef mutable struct UniversalConstants
     P_ATM::Float64 = 1.01325e5
     "Water vapor pressure at triple temperature `[Pa]`"
     PRESS_TRIPLE::Float64 = 611.657
+    "Earth equatorial radius `[m]`"
+    R_EQUATOR::Float64 = 6378137
+    "Earth polar radius `[m]`"
+    R_POLAR::Float64 = 6356752
     "Freezing temperature of water `[K]`"
     T₀::Float64 = 273.15
     "Triple temperature of water `[K]`"
@@ -123,6 +130,9 @@ F_O₂(FT=Float64) = FT(UNIVERSAL_CONSTANTS.F_O₂);
 """ Universal gas constant `[J mol⁻¹ K⁻¹]` """
 GAS_R(FT=Float64) = FT(UNIVERSAL_CONSTANTS.GAS_R);
 
+""" Glucose chemical potential `[J mol⁻¹]` """
+GLUCOSE(FT=Float64) = FT(UNIVERSAL_CONSTANTS.GLUCOSE);
+
 """ Gravity of the Earth `[m s⁻²]` """
 GRAVITY(FT=Float64) = FT(UNIVERSAL_CONSTANTS.GRAVITY);
 
@@ -155,6 +165,14 @@ P_ATM(FT=Float64) = FT(UNIVERSAL_CONSTANTS.P_ATM);
 
 """ Water vapor pressure at triple temperature `[Pa]` """
 PRESS_TRIPLE(FT=Float64) = FT(UNIVERSAL_CONSTANTS.PRESS_TRIPLE);
+
+""" Earth equatorial radius `[m]` """
+R_EQUATOR(FT=Float64) = FT(UNIVERSAL_CONSTANTS.R_EQUATOR);
+
+""" Earth polar radius `[m]` """
+R_POLAR(FT=Float64) = FT(UNIVERSAL_CONSTANTS.R_POLAR);
+
+""" Gas constant dry air `[J kg⁻¹ K⁻¹]` """
 
 """ Gas constant water vapor `[J kg⁻¹ K⁻¹]` """
 R_V(FT=Float64) = GAS_R(FT) / M_H₂O(FT);

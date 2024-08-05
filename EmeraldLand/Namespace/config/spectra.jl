@@ -14,6 +14,10 @@
 #     2023-Sep-13: add fields Φ_PSI and Φ_PSII
 #     2023-Sep-19: add fields MAT_SOIL and SOLAR_RAD
 #     2023-Oct-17: add field ρ_STEM
+#     2024-Jan-23: change default minimum PAR to 300 nm
+#     2024-Jan-23: add field for PAR using the 300-700 nm definition
+#     2024-Jan-23: redefine IΛ_PAR_700 to be the index within IΛ_PAR so that we can simply subset the PPAR even though the definition of PAR is changed
+#     2024-Feb-27: remove field DATASET and create a new constructor function that specifies the dataset location
 #
 #######################################################################################################################################################################################################
 """
@@ -27,48 +31,44 @@ Immutable struct that contains leaf biophysical traits used to run leaf reflecti
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
-    # File path to the Netcdf dataset
-    "File path to the Netcdf dataset"
-    DATASET::String = LAND_2021
-
+Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
     # Wavelegnth bins and upper/lower boundaries
     "Wavelength (bins) `[nm]`"
-    Λ::Vector{FT} = read_nc(DATASET, "WL")
+    Λ::Vector{FT}
     "Lower boundary wavelength `[nm]`"
-    Λ_LOWER::Vector{FT} = read_nc(DATASET, "WL_LOWER")
+    Λ_LOWER::Vector{FT}
     "Upper boundary wavelength `[nm]`"
-    Λ_UPPER::Vector{FT} = read_nc(DATASET, "WL_UPPER")
+    Λ_UPPER::Vector{FT}
     "Differential wavelength `[nm]`"
     ΔΛ::Vector{FT} = Λ_UPPER .- Λ_LOWER
 
     # Constant features for the leaf
-    "Specific absorption coefficients of anthocynanin `[-]`"
-    K_ANT::Vector{FT} = read_nc(DATASET, "K_ANT")
+    "Specific absorption coefficients of anthocyanin `[-]`"
+    K_ANT::Vector{FT}
     "Specific absorption coefficients of senescent material (brown pigments) `[-]`"
-    K_BROWN::Vector{FT} = read_nc(DATASET, "K_BROWN")
+    K_BROWN::Vector{FT}
     "Specific absorption coefficients of chlorophyll a and b `[-]`"
-    K_CAB::Vector{FT} = read_nc(DATASET, "K_CAB")
+    K_CAB::Vector{FT}
     "Specific absorption coefficients of violaxanthin carotenoid `[-]`"
-    K_CAR_V::Vector{FT} = read_nc(DATASET, "K_CAR_V")
+    K_CAR_V::Vector{FT}
     "Specific absorption coefficients of zeaxanthin carotenoid `[-]`"
-    K_CAR_Z::Vector{FT} = read_nc(DATASET, "K_CAR_Z")
+    K_CAR_Z::Vector{FT}
     "Specific absorption coefficients of carbon-based constituents `[-]`"
-    K_CBC::Vector{FT} = read_nc(DATASET, "K_CBC")
+    K_CBC::Vector{FT}
     "Specific absorption coefficients of water `[-]`"
-    K_H₂O::Vector{FT} = read_nc(DATASET, "K_H₂O")
+    K_H₂O::Vector{FT}
     "Specific absorption coefficients of dry matter `[-]`"
-    K_LMA::Vector{FT} = read_nc(DATASET, "K_LMA")
+    K_LMA::Vector{FT}
     "Specific absorption coefficients of protein `[-]`"
-    K_PRO::Vector{FT} = read_nc(DATASET, "K_PRO")
+    K_PRO::Vector{FT}
     "Refractive index `[-]`"
-    NR::Vector{FT} = read_nc(DATASET, "NR")
+    NR::Vector{FT}
     "Fluorescence yield of PS I and II probability function `[nm⁻¹]`"
-    Φ_PS::Vector{FT} = read_nc(DATASET, "K_PS")
+    Φ_PS::Vector{FT}
     "Fluorescence yield of PS I probability function `[nm⁻¹]`"
-    Φ_PSI::Vector{FT} = read_nc(DATASET, "K_PS1")
+    Φ_PSI::Vector{FT}
     "Fluorescence yield of PS II probability function `[nm⁻¹]`"
-    Φ_PSII::Vector{FT} = read_nc(DATASET, "K_PS2")
+    Φ_PSII::Vector{FT}
 
     # Stem reflectance
     "Stem reflectance `[-]`"
@@ -76,27 +76,31 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
 
     # Variable features for the soil
     "A matrix of characteristic curves"
-    MAT_SOIL::Matrix{FT} = FT[read_nc(DATASET, "GSV_1") read_nc(DATASET, "GSV_2") read_nc(DATASET, "GSV_3") read_nc(DATASET, "GSV_4")]
+    MAT_SOIL::Matrix{FT}
 
     # Variable features for the radiation
     "Downwelling shortwave radiation reference spectrum"
-    SOLAR_RAD::Matrix{FT} = [read_nc(DATASET, "E_DIR") read_nc(DATASET, "E_DIFF")]
+    SOLAR_RAD::Matrix{FT}
 
     # Constants
     "Wavelength limits for NIR `[nm]`"
     WL_NIR::Vector{FT} = FT[700, 2500]
     "Wavelength limits for PAR `[nm]`"
-    WL_PAR::Vector{FT} = FT[400, 750]
+    WL_PAR::Vector{FT} = FT[300, 750]
+    "Wavelength limits for PAR using the 300-700 nm setup `[nm]`"
+    WL_PAR_700::Vector{FT} = FT[300, 700]
     "Wavelength limits for SIF emission `[nm]`"
     WL_SIF::Vector{FT} = FT[640, 850]
     "Wavelength limits for SIF excitation `[nm]`"
-    WL_SIFE::Vector{FT} = FT[400, 750]
+    WL_SIFE::Vector{FT} = FT[300, 750]
 
     # Indices
     "Indicies of Λ_NIR in Λ"
     IΛ_NIR::Vector{Int} = findall( WL_NIR[1] .<= Λ .<= WL_NIR[2] )
     "Indicies of Λ_PAR in Λ"
     IΛ_PAR::Vector{Int} = findall( WL_PAR[1] .<= Λ .<= WL_PAR[2] )
+    "Indicies of Λ_PAR_700 in Λ_PAR using the 300-700 nm definition"
+    IΛ_PAR_700::Vector{Int} = findall( WL_PAR_700[1] .<= Λ[IΛ_PAR] .<= WL_PAR_700[2] )
     "Indicies of Λ_SIF in Λ"
     IΛ_SIF::Vector{Int} = findall( WL_SIF[1] .<= Λ .<= WL_SIF[2] )
     "Indicies of Λ_SIFE in Λ"
@@ -105,18 +109,48 @@ Base.@kwdef struct ReferenceSpectra{FT<:AbstractFloat}
     # Constants based on the ones above
     "Differential wavelength for PAR `[nm]`"
     ΔΛ_PAR::Vector{FT} = ΔΛ[IΛ_PAR]
+    "Differential wavelength for PAR using 300-700 nm definition `[nm]`"
+    ΔΛ_PAR_700::Vector{FT} = ΔΛ_PAR[IΛ_PAR_700]
     "Differential wavelength for SIF `[nm]`"
     ΔΛ_SIF::Vector{FT} = ΔΛ[IΛ_SIF]
     "Differential wavelength for SIF excitation `[nm]`"
     ΔΛ_SIFE::Vector{FT} = ΔΛ[IΛ_SIFE]
     "Wavelength bins for PAR `[nm]`"
     Λ_PAR::Vector{FT} = Λ[IΛ_PAR]
+    "Wavelength bins for PAR using the 300-700 nm definition `[nm]`"
+    Λ_PAR_700::Vector{FT} = Λ_PAR[IΛ_PAR_700]
     "Wavelength bins for SIF `[nm]`"
     Λ_SIF::Vector{FT} = Λ[IΛ_SIF]
     "Wavelength bins for SIF excitation `[nm]`"
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
 end;
 
+ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) where {FT} = (
+    df = read_jld2(jld2_file, dataset);
+
+    return ReferenceSpectra{FT}(
+            Λ          = df.WL,
+            Λ_LOWER    = df.WL_LOWER,
+            Λ_UPPER    = df.WL_UPPER,
+            K_ANT      = df.K_ANT,
+            K_BROWN    = df.K_BROWN,
+            K_CAB      = df.K_CAB,
+            K_CAR_V    = df.K_CAR_V,
+            K_CAR_Z    = df.K_CAR_Z,
+            K_CBC      = df.K_CBC,
+            K_H₂O      = df.K_H₂O,
+            K_LMA      = df.K_LMA,
+            K_PRO      = df.K_PRO,
+            NR         = df.NR,
+            Φ_PS       = df.K_PS,
+            Φ_PSI      = df.K_PS1,
+            Φ_PSII     = df.K_PS2,
+            MAT_SOIL   = FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4],
+            SOLAR_RAD  = FT[df.E_DIR df.E_DIFF],
+            WL_PAR     = wl_par,
+            WL_PAR_700 = wl_par_700,
+    )
+);
 
 """
 
@@ -127,7 +161,6 @@ Return a ReferenceSpectra object with broadband spectra, given
 
 """
 broadband_spectra(FT) = ReferenceSpectra{FT}(
-            DATASET   = "Customized Broadband Spectra",
             Λ         = [550, 1600],
             Λ_LOWER   = [400, 700],
             Λ_UPPER   = [700, 2500],
@@ -146,7 +179,7 @@ broadband_spectra(FT) = ReferenceSpectra{FT}(
             Φ_PSI     = [0, 0],                             # will not be used
             Φ_PSII    = [0, 0],                             # will not be used
             ρ_STEM    = [0.16, 0.39],
-            MAT_SOIL  = [0 0; 0 0],                         # will not be used
+            MAT_SOIL  = [0 0 0 0],                          # will not be used
             SOLAR_RAD = [191.544 119.923; 277.752 55.076],
             WL_NIR    = [700, 2500],
             WL_PAR    = [400, 700],

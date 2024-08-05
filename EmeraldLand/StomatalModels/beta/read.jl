@@ -9,12 +9,12 @@
 #######################################################################################################################################################################################################
 """
 
-    read_β(leaf::Leaf{FT}) where {FT}
+    read_β(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT}
 
 Return the β factor, given
 - `leaf` Leaf type
 
 """
-function read_β(leaf::Leaf{FT}) where {FT}
+function read_β(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT}
     return leaf.flux.auxil.β
 end;

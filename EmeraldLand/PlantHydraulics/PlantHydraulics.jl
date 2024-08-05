@@ -1,22 +1,25 @@
 module PlantHydraulics
 
+using Statistics: mean
+
 using ..EmeraldMath.Math: upper_quadratic
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
 using ..EmeraldPhysics.Constant: GAS_R, ρg_MPa
 
 using ..Namespace: ComplexVC, LogisticVC, PowerVC, WeibullVC
 using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve
-using ..Namespace: ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState
-using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState
-using ..Namespace: JunctionCapacitor, Leaf, Root, Stem
+using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState, ExtraXylemCapacitorTrait
+using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState, XylemHydraulicsTrait
+using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Root, Stem
 using ..Namespace: SoilLayer
-using ..Namespace: BulkSPAC, SPACConfiguration
+using ..Namespace: BulkSPAC, SPACCache, SPACConfiguration
 
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..SoilHydraulics: relative_soil_k
 
 
 # xylem
+include("xylem/conductance.jl");
 include("xylem/critical_flow.jl");
 include("xylem/flow_profile.jl");
 include("xylem/pressure_profile.jl");

@@ -5,6 +5,8 @@
 # Changes to this struct
 # General
 #     2023-Oct-17: add struct PlantMemoryState
+#     2024-Feb-22: remove state and auxil from memory struct
+#     2024-Jul-24: remove lai, ci, vcmax, and cab from memory (use traits instead)
 #
 #######################################################################################################################################################################################################
 """
@@ -18,61 +20,18 @@ Struct to store the state and state variables of the SPAC memory
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct PlantMemoryState{FT}
-    "Memory about the historical temperature"
-    t_history::Vector{FT} = ones(FT,10) .* FT(NaN)
-end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2023-Oct-17: add struct PlantMemoryAuxil
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Struct to store the auxiliary and auxiliary variables of the SPAC memory
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct PlantMemoryAuxil{FT}
-    "Chlorophyll content used for last time step"
-    chl::FT = -1
-    "LAI used for last time step"
-    lai::FT = -1
-    "Vcmax25 used for last time step"
-    vcmax25::FT = -1
-end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2023-Oct-17: add struct BulkSPACMemory
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Struct to store the state and auxiliary variables of the SPAC memory
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
 Base.@kwdef mutable struct PlantMemory{FT}
-    "State variables"
-    state::PlantMemoryState{FT} = PlantMemoryState{FT}()
-    "Auxiliary variables"
-    auxil::PlantMemoryAuxil{FT} = PlantMemoryAuxil{FT}()
+    "Memory about the historical temperature"
+    t_history::Vector{FT}
+    "Index of the current time step"
+    i_history::Int = 1
 end;
+
+PlantMemory(config::SPACConfiguration{FT}) where {FT} = PlantMemory{FT}(t_history = ones(FT, config.T_CLM_N) .* T₂₅());
+
+sync_state!(state_from::PlantMemory{FT}, state_to::PlantMemory{FT}) where {FT} = (
+    state_to.t_history .= state_from.t_history;
+    state_to.i_history = state_from.i_history;
+
+    return nothing
+);

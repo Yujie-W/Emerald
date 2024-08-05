@@ -5,6 +5,7 @@
 # Changes to this method
 # General
 #     2022-Jul-07: add method to compute photosynthetic rates only
+#     2024-Jul-24: add new method with TD to speed up (need to call shaded part first to update TD)
 #
 #######################################################################################################################################################################################################
 """
@@ -19,13 +20,24 @@ Updates leaf photosynthetic rates based on leaf diffusive conductance (for Stoma
 - `t` Leaf temperature in `[K]`
 
 """
-function photosynthesis_only!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT}
-    photosystem_temperature_dependence!(psm, air, t);
+function photosynthesis_only! end;
+
+photosynthesis_only!(cache::SPACCache{FT}, psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}, ppar::Vector{FT}) where {FT} = (
+    photosystem_electron_transport!(cache, psm, ppar, FT(20); β = FT(1));
+    rubisco_limited_rate!(cache, psm, air, g_lc; β = FT(1));
+    light_limited_rate!(cache, psm, air, g_lc; β = FT(1));
+    product_limited_rate!(cache, psm, air, g_lc; β = FT(1));
+    colimit_photosynthesis!(psm; β = FT(1));
+
+    return psm.auxil.a_n
+);
+
+photosynthesis_only!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT) where {FT} = (
     photosystem_electron_transport!(psm, ppar, FT(20); β = FT(1));
     rubisco_limited_rate!(psm, air, g_lc; β = FT(1));
     light_limited_rate!(psm, air, g_lc; β = FT(1));
     product_limited_rate!(psm, air, g_lc; β = FT(1));
     colimit_photosynthesis!(psm; β = FT(1));
 
-    return nothing
-end;
+    return psm.auxil.a_n
+);

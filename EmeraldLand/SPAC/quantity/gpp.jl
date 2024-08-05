@@ -19,15 +19,47 @@ function GPP end;
 GPP(spac::BulkSPAC{FT}) where {FT} = (
     canopy = spac.canopy;
     leaves = spac.plant.leaves;
+    n_layer = length(leaves);
 
     # compute GPP
     gpp::FT = 0;
-    N = length(leaves);
-    for i in eachindex(leaves)
-        j = N - i + 1;
-        gpp += (canopy.sun_geometry.auxil.p_sunlit[j] * mean(leaves[i].flux.auxil.a_g_sunlit) +
-               (1 - canopy.sun_geometry.auxil.p_sunlit[j]) * leaves[i].flux.auxil.a_g_shaded) * canopy.structure.state.δlai[j];
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        gpp += leaves[ilf].flux.auxil.a_g_mean * canopy.structure.trait.δlai[irt];
     end;
 
     return gpp
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2024-Jun-06: add function to return GPP per layer for SPAC
+#
+#######################################################################################################################################################################################################
+"""
+
+    GPP_LAYER(spac::BulkSPAC{FT}) where {FT}
+
+Return the gross primary productivity per layer, given
+- `spac` `BulkSPAC` SPAC
+
+"""
+function GPP_LAYER end;
+
+GPP_LAYER(spac::BulkSPAC{FT}) where {FT} = (
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    # get the GPP per layer
+    gpps::Vector{FT} = zeros(FT, n_layer);
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        gpps[irt] = leaves[ilf].flux.auxil.a_g_mean * canopy.structure.trait.δlai[irt];
+    end;
+
+    return gpps
 );

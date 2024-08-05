@@ -1,5 +1,5 @@
 # This file contains the definitions of the vulnerability curve models
-# Because VC curve is a trait (a state), so there is no need to split the struct into state and auxilary parts.
+# Because VC curve is a trait (a state), so there is no need to split the struct into state and auxiliary parts.
 
 #######################################################################################################################################################################################################
 #
@@ -43,9 +43,9 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct LogisticVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     # General model information
     "Multiplier to exponential component"
-    a::FT = 1
+    A::FT = 1
     "Multiplier to pressure `[MPa⁻¹]`"
-    b::FT = 1
+    B::FT = 1
 end;
 
 
@@ -70,9 +70,9 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct PowerVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     # General model information
     "Multiplier to power component `[MPa⁻ᵇ]`"
-    a::FT = 1
+    A::FT = 1
     "Power to pressure"
-    b::FT = 1
+    B::FT = 1
 end;
 
 
@@ -97,9 +97,9 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct WeibullVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     # General model information
     "Numerator in the exponential component `[MPa]`"
-    b::FT = 2
+    B::FT = 2
     "Power to pressure component"
-    c::FT = 5
+    C::FT = 5
 end;
 
 
@@ -126,5 +126,5 @@ Base.@kwdef mutable struct ComplexVC{FT<:AbstractFloat} <: AbstractXylemVC{FT}
     "Percentages of each VC component"
     fs::Vector{FT} = FT[0.5, 0.5]
     "Vector of vulnerability curve components"
-    vcs::Union{Vector{LogisticVC{FT}}, Vector{PowerVC{FT}}, Vector{WeibullVC{FT}}, Vector{AbstractXylemVC{FT}}} = WeibullVC{FT}[WeibullVC{FT}(), WeibullVC{FT}(b = 3)]
+    vcs::Union{Vector{LogisticVC{FT}}, Vector{PowerVC{FT}}, Vector{WeibullVC{FT}}, Vector{AbstractXylemVC{FT}}} = WeibullVC{FT}[WeibullVC{FT}(), WeibullVC{FT}(B = 3)]
 end;

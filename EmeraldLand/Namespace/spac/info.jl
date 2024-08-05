@@ -32,4 +32,4 @@ Base.@kwdef mutable struct SPACInfo{FT}
     lat::FT
     "Longitude"
     lon::FT
-end
+end;

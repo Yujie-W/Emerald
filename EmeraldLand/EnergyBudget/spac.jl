@@ -10,18 +10,19 @@
 #######################################################################################################################################################################################################
 """
 
-    spac_energy_flow!(spac::BulkSPAC{FT}) where {FT}
+    spac_energy_flow!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Calculate the energy flows of the plant, given
+- `config` `SPACConfiguration` type configuration
 - `spac` `BulkSPAC` type SPAC
 
 """
-function spac_energy_flow!(spac::BulkSPAC{FT}) where {FT}
+function spac_energy_flow!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     soil_energy_flow!(spac);
     root_energy_flows!(spac);
     junction_energy_flows!(spac);
     stem_energy_flows!(spac);
-    leaf_energy_flows!(spac);
+    leaf_energy_flows!(config, spac);
 
     return nothing
 end;
@@ -55,18 +56,18 @@ function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     # update the temperature for soil
     for soil in soils
         # water mass and energy flow
-        soil.state.Σe += soil.auxil.∂e∂t * δt / soil.auxil.δz;
+        soil.state.Σe += soil.auxil.∂e∂t * δt / soil.t_aux.δz;
 
         # soil water condensation or evaporation
-        soil.state.Σe += soil.auxil.n_con * M_H₂O(FT) * latent_heat_vapor(soil.auxil.t) / soil.auxil.δz;
+        soil.state.Σe += soil.auxil.n_con * M_H₂O(FT) * latent_heat_vapor(soil.s_aux.t) / soil.t_aux.δz;
     end;
 
     # update the energy loss related to surface runoff
     top_soil = soils[1];
-    if top_soil.state.θ > top_soil.state.vc.Θ_SAT
+    if top_soil.state.θ > top_soil.trait.vc.Θ_SAT
         cp = heat_capacitance(top_soil; runoff = top_soil.auxil.runoff);
         t  = top_soil.state.Σe / cp;
-        top_soil.state.Σe -= top_soil.auxil.runoff / top_soil.auxil.δz * CP_L_MOL(FT) * t;
+        top_soil.state.Σe -= top_soil.auxil.runoff / top_soil.t_aux.δz * CP_L_MOL(FT) * t;
     end;
 
     # update the temperature for roots
