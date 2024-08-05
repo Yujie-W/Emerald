@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-27: add function to compute xylem end; pressure at steady state (no water exchange through the capacitor along the xylem)
 #     2024-Feb-28: add LAI <= 0 control
+#     2024-Aug-05: save the drought legacy
 #
 #######################################################################################################################################################################################################
 """
@@ -28,17 +29,15 @@ function xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
-    N = length(xylem.auxil.k_history);
+    N = length(xylem.state.p_history);
     p = xylem.auxil.pressure[1];
     for i in 1:N
         p_mem = xylem.state.p_history[i];
-        k_mem = xylem.auxil.k_history[i];
-
         p₂₅ = p / f_st;
         if p₂₅ < p_mem
             k = relative_xylem_k(xylem.trait.vc, p₂₅) / f_vis * k_max * N;
         else
-            k = k_mem / f_vis * k_max * N;
+            k = relative_xylem_k(xylem.trait.vc, p_mem) / f_vis * k_max * N;
         end;
 
         # flow rate is the mean of that at two planes (i and i+1)

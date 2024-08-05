@@ -7,6 +7,7 @@
 #     2023-Sep-23: add function to update the xylem pressure profile
 #     2023-Sep-30: add method to update the xylem pressure profile in the reverse order
 #     2024-Feb-28: add LAI <= 0 control
+#     2024-Aug-05: save the drought legacy
 #
 #######################################################################################################################################################################################################
 """
@@ -44,18 +45,17 @@ xylem_pressure_profile!(
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
-    N = length(x_aux.k_history);
+    N = length(x_state.p_history);
     for i in 1:N
         p_mem = x_state.p_history[i];
-        k_mem = x_aux.k_history[i];
-
         p₂₅ = x_aux.pressure[i] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
             if ENABLE_DROUGHT_LEGACY
                 x_state.p_history[i] = p₂₅;
-                x_aux.k_history[i] = k_mem;
             end;
+        else
+            k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;
         k = k_mem / f_vis * k_max * N;
 
@@ -83,18 +83,17 @@ xylem_pressure_profile!(
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
-    N = length(x_aux.k_history);
+    N = length(x_state.p_history);
     for i in 1:N
         p_mem = x_state.p_history[i];
-        k_mem = x_aux.k_history[i];
-
         p₂₅ = x_aux.pressure[i] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
             if ENABLE_DROUGHT_LEGACY
                 x_state.p_history[i] = p₂₅;
-                x_aux.k_history[i] = k_mem;
             end;
+        else
+            k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;
         k = k_mem / f_vis * k_max * N;
 
@@ -128,18 +127,17 @@ xylem_pressure_profile!(
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
-    N = length(x_aux.k_history);
+    N = length(x_state.p_history);
     for i in N:-1:1
         p_mem = x_state.p_history[i];
-        k_mem = x_aux.k_history[i];
-
         p₂₅ = x_aux.pressure[i+1] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
             if ENABLE_DROUGHT_LEGACY
                 x_state.p_history[i] = p₂₅;
-                x_aux.k_history[i] = k_mem;
             end;
+        else
+            k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;
         k = k_mem / f_vis * k_max * N;
 
@@ -168,18 +166,17 @@ xylem_pressure_profile!(
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
-    N = length(x_aux.k_history);
+    N = length(x_state.p_history);
     for i in N:-1:1
         p_mem = x_state.p_history[i];
-        k_mem = x_aux.k_history[i];
-
         p₂₅ = x_aux.pressure[i+1] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
             if ENABLE_DROUGHT_LEGACY
                 x_state.p_history[i] = p₂₅;
-                x_aux.k_history[i] = k_mem;
             end;
+        else
+            k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;
         k = k_mem / f_vis * k_max * N;
 

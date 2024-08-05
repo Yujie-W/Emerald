@@ -79,8 +79,6 @@ import Emerald.EmeraldLand.SPAC
 
         # run this make sure the pressure history is updated to the minimum
         PH.xylem_pressure_profile!(config, xylem, 298.15);
-        nssflow.k_history .= xylem.auxil.k_history;
-        ssflow.k_history .= xylem.auxil.k_history;
         PH.xylem_pressure_profile!(config, xylem.trait, xylem.state, nssflow, 298.15);
         PH.xylem_pressure_profile!(config, xylem.trait, xylem.state, ssflow, 298.15);
 

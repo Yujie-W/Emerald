@@ -18,13 +18,39 @@ using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 
 
 # Netcdf settings for output
-DF_SIMULATIONS = ["MOD_SWC_1", "MOD_SWC_2", "MOD_SWC_3", "MOD_SWC_4", "MOD_T_L_MAX", "MOD_T_L_MEAN", "MOD_T_L_MIN", "MOD_T_S_1", "MOD_T_S_2", "MOD_T_S_3", "MOD_T_S_4"];
-DF_VARIABLES   = ["F_H2O", "F_CO2", "F_GPP", "BETA", "SIF683", "SIF740", "SIF757", "SIF771", "NDVI", "EVI", "NIRvI", "NIRvR", "PAR", "PPAR", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"];
+SAVING_DICT = Dict{String, Any}(
+    # Modeled soil water content and temperature
+            "MOD_SWC"    => true,
+            "MOD_T_SOIL" => true,
+    # Modeled leaf temperature
+            "MOD_T_LEAF" => false,
+            "MOD_T_MMM"  => true,
+    # Modeled CO2 and H2O fluxes
+            "BETA"       => false,
+            "CNPP"       => true,
+            "GPP"        => true,
+            "ET_VEG"     => true,
+    # SIF (default is false)
+            "SIF683"     => false,
+            "SIF740"     => true,
+            "SIF757"     => false,
+            "SIF771"     => false,
+            "ΣSIF"       => false,
+            "ΣSIF_CHL"   => false,
+            "ΣSIF_LEAF"  => false,
+            "ΦFΦP"       => false,
+    # VI (default is false)
+            "NDVI"       => false,
+            "EVI"        => false,
+            "NIRvI"      => false,
+            "NIRvR"      => false,
+            "PAR"        => false,
+            "PPAR"       => false,
+);
 
 
 include("config.jl");
 include("simulation.jl");
-include("simulation_nt.jl");
 
 
 end; # EmeraldFrontier

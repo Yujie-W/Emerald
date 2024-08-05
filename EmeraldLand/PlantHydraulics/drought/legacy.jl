@@ -47,4 +47,4 @@ clear_legacy!(spac::BulkSPAC{FT}) where {FT} = (
 
 clear_legacy!(organ::Union{CanopyLayer{FT}, Leaf{FT}, Root{FT}, Stem{FT}}) where {FT} = clear_legacy!(organ.xylem);
 
-clear_legacy!(xylem::XylemHydraulics{FT}) where {FT} = (xylem.auxil.k_history .= 1; xylem.state.p_history .= 0; return nothing);
+clear_legacy!(xylem::XylemHydraulics{FT}) where {FT} = (xylem.state.p_history .= 0; return nothing);

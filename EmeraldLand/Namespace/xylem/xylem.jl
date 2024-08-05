@@ -77,6 +77,7 @@ XylemHydraulicsState(config::SPACConfiguration{FT}) where {FT} = XylemHydraulics
 # General
 #     2023-Sep-22: define the struct to store the non-steady state auxiliary variables used in xylem hydraulics
 #     2023-Sep-30: add field connected
+#     2024-Aug-05: remove k_history from auxil (computed on the fly)
 #
 #######################################################################################################################################################################################################
 """
@@ -99,8 +100,6 @@ Base.@kwdef mutable struct XylemHydraulicsAuxilNSS{FT}
     flow::Vector{FT}
     "Flow rates from the buffer system at each slice (N) `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"
     flow_buffer::Vector{FT}
-    "Vector of leaf kr history per element"
-    k_history::Vector{FT}
     "Pressure of storage per element"
     p_storage::Vector{FT}
     "Vector of xylem water pressure at each plance (N+1) `[MPa]`"
@@ -110,7 +109,6 @@ end;
 XylemHydraulicsAuxilNSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraulicsAuxilNSS{FT}(
             flow        = zeros(FT, config.DIM_XYLEM + 1),
             flow_buffer = zeros(FT, config.DIM_XYLEM),
-            k_history   = ones(FT, config.DIM_XYLEM),
             p_storage   = zeros(FT, config.DIM_XYLEM),
             pressure    = zeros(FT, config.DIM_XYLEM + 1)
 );
@@ -122,6 +120,7 @@ XylemHydraulicsAuxilNSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraul
 # General
 #     2023-Sep-22: define the struct to store the steady state auxiliary variables used in xylem hydraulics
 #     2023-Sep-30: add field connected
+#     2024-Aug-05: remove k_history from auxil (computed on the fly)
 #
 #######################################################################################################################################################################################################
 """
@@ -142,16 +141,11 @@ Base.@kwdef mutable struct XylemHydraulicsAuxilSS{FT}
     e_crit::FT = 0
     "Flow rates through the system `[mol s⁻¹]` for root and stem or `[mol m⁻² s⁻¹]` for leaf"
     flow::FT = 0
-    "Vector of leaf kr history per element"
-    k_history::Vector{FT}
     "Vector of xylem water pressure at each plance (N+1) `[MPa]`"
     pressure::Vector{FT}
 end;
 
-XylemHydraulicsAuxilSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraulicsAuxilSS{FT}(
-            k_history = ones(FT, config.DIM_XYLEM),
-            pressure  = zeros(FT, config.DIM_XYLEM + 1)
-);
+XylemHydraulicsAuxilSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraulicsAuxilSS{FT}(pressure  = zeros(FT, config.DIM_XYLEM + 1));
 
 
 #######################################################################################################################################################################################################
