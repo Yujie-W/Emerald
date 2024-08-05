@@ -27,6 +27,7 @@
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Jul-31: add rate constants fields (constants for PSI, PSII, and combined)
 #     2024-Aug-01: add field ENABLE_KD_TD and FIX_ETA_TD
+#     2024-Aug-05: set ENABLE_DROUGHT_LEGACY to true by default (add corresponding functions in PlantHydraulics module)
 #
 #######################################################################################################################################################################################################
 """
@@ -128,6 +129,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     ALLOW_LEAF_SHEDDING::Bool = true
     "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
     DIM_XYLEM::Int = 5
+    "Enable drought legacy effect"
+    ENABLE_DROUGHT_LEGACY::Bool = true
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"
     KR_THRESHOLD::FT = 0.001
     "Whether to run the model at steady state mode"
@@ -174,10 +177,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     SUNLIT_ANGLES::Bool = true
     "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
     SUNLIT_FRACTION::Bool = true
-
-    # Features to add
-    "Enable drought legacy effect"
-    ENABLE_DROUGHT_LEGACY::Bool = false
 end;
 
 SPACConfiguration(FT::DataType; dataset::String = OLD_PHI_2021, jld2_file::String = LAND_ARTIFACT, wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) = SPACConfiguration{FT}(

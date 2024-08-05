@@ -10,6 +10,7 @@
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2024-Jul-22: save j as j_pot fpr C4, C3Cyto models
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-05: make sure COLIMIT_J is SerialColimit for AjMethodC3VqmaxPi
 #
 #######################################################################################################################################################################################################
 """
@@ -63,6 +64,8 @@ photosystem_electron_transport!(
             ppar::FT,
             p_i::FT;
             β::FT = FT(1)) where {FT} = (
+    @assert pst.COLIMIT_J isa SerialColimit "J Limitation must be serial colimit";
+
     psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
     psa.j_psi = colimited_rate(β * psa.v_qmax, ppar * (1 - psa.f_psii) * psa.ϕ_psi_max, pst.COLIMIT_J);
     psa.η     = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
@@ -129,6 +132,8 @@ photosystem_electron_transport!(
             ppar::Vector{FT},
             p_i::Union{FT, Vector{FT}};
             β::FT = FT(1)) where {FT} = (
+    @assert pst.COLIMIT_J isa SerialColimit "J Limitation must be serial colimit";
+
     _j = cache.cache_incl_azi_2_1;
     @. _j = ppar * (1 - psa.f_psii) * psa.ϕ_psi_max;
     colimited_rate!(β * psa.v_qmax, _j, psa.j_psi, pst.COLIMIT_J);

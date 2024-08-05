@@ -32,7 +32,7 @@ function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Union{Canop
     # run the pressure profile calculation only if xylem area > 0
     leaf.xylem.auxil.pressure[1] = p_dos;
     leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, cache, leaf.energy.s_aux.t);
-    xylem_pressure_profile!(leaf.xylem, leaf.energy.s_aux.t);
+    xylem_pressure_profile!(config, leaf.xylem, leaf.energy.s_aux.t);
     extraxylary_pressure_profile!(leaf);
 
     return nothing

@@ -22,7 +22,7 @@ using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLa
 using ..Namespace: BulkSPAC, BulkSPACStates, SPACCache, SPACConfiguration, sync_state!
 using ..Photosynthesis: plant_photosynthesis!
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, xylem_pressure
+using ..PlantHydraulics: capacitance_pressure, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, xylem_conductance, xylem_pressure
 using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25
 using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductance!, stomatal_conductance_profile!, β_factor!
 
@@ -54,6 +54,7 @@ include("quantity/beta.jl");
 include("quantity/et.jl");
 include("quantity/gpp.jl");
 include("quantity/goes.jl");
+include("quantity/hydraulics.jl");
 include("quantity/npp.jl");
 include("quantity/par.jl");
 include("quantity/sif.jl");

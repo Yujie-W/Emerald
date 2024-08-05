@@ -19,6 +19,7 @@ using ..SoilHydraulics: relative_soil_k
 
 
 # xylem
+include("xylem/conductance.jl");
 include("xylem/critical_flow.jl");
 include("xylem/flow_profile.jl");
 include("xylem/pressure_profile.jl");

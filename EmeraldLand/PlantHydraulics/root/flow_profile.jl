@@ -49,7 +49,7 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
         # 2. set up a target function to find zero
         @inline root_pressure_diff(x::FT) where {FT} = (
             set_flow_profile!(root.xylem, x);
-            root_pressure_profile!(soil, root, junction);
+            root_pressure_profile!(config, soil, root, junction);
 
             return root.xylem.auxil.pressure[end] - junction.s_aux.pressure
         );

@@ -77,9 +77,12 @@ import Emerald.EmeraldLand.SPAC
         PH.set_flow_profile!(nssflow, 1.0);
         PH.set_flow_profile!(ssflow, 1.0);
 
-        PH.xylem_pressure_profile!(xylem, 298.15);
-        PH.xylem_pressure_profile!(xylem.trait, xylem.state, nssflow, 298.15);
-        PH.xylem_pressure_profile!(xylem.trait, xylem.state, ssflow, 298.15);
+        # run this make sure the pressure history is updated to the minimum
+        PH.xylem_pressure_profile!(config, xylem, 298.15);
+        nssflow.k_history .= xylem.auxil.k_history;
+        ssflow.k_history .= xylem.auxil.k_history;
+        PH.xylem_pressure_profile!(config, xylem.trait, xylem.state, nssflow, 298.15);
+        PH.xylem_pressure_profile!(config, xylem.trait, xylem.state, ssflow, 298.15);
 
         @test xylem.auxil.pressure[end] == nssflow.pressure[end] == ssflow.pressure[end] < 0;
         @test all(xylem.auxil.pressure[2:end] .< 0);
@@ -95,13 +98,13 @@ import Emerald.EmeraldLand.SPAC
         junc = NS.JunctionCapacitor{Float64}();
         flow = 1.0;
         PH.set_flow_profile!(root.xylem, flow);
-        PH.root_pressure_profile!(soil, root, junc);
+        PH.root_pressure_profile!(config, soil, root, junc);
 
         p_target = root.xylem.auxil.pressure[end];
         junc.s_aux.pressure = p_target;
         PH.root_flow_profile!(config, root, soil, junc, spac.cache);
         f_target = PH.flow_out(root);
-        PH.root_pressure_profile!(soil, root, junc);
+        PH.root_pressure_profile!(config, soil, root, junc);
 
         @test PH.flow_out(root) ≈ f_target;
         @test root.xylem.auxil.pressure[end] ≈ p_target;
@@ -112,7 +115,7 @@ import Emerald.EmeraldLand.SPAC
         stem = NS.Stem(config);
         flow = 1.0;
         PH.set_flow_profile!(stem.xylem, flow);
-        PH.stem_pressure_profile!(stem, -0.1);
+        PH.stem_pressure_profile!(config, stem, -0.1);
 
         @test PH.flow_out(stem) == flow;
         @test all(stem.xylem.auxil.pressure .<= -0.1);

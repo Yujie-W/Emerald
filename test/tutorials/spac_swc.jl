@@ -26,6 +26,6 @@ using Test;
         spac.plant.junction.state.v_storage = EmeraldLand.PlantHydraulics.capacitance_volume(spac.plant.junction.trait.pv, psoil, spac.plant.junction.s_aux.t) * spac.plant.junction.trait.v_max;
         EmeraldLand.SPAC.initialize_spac!(config, spac);
         EmeraldLand.SPAC.spac!(config, spac, 3600);
-        @show θ EmeraldLand.SPAC.GPP(spac);
+        @show θ EmeraldLand.SPAC.GPP(spac) EmeraldLand.SPAC.K_PLANT(spac) EmeraldLand.SPAC.K_PLANT(spac; include_leaf = false);
     end;
 end;
