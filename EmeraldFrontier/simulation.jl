@@ -139,6 +139,7 @@ end;
 #     2023-Sep-11: save the integrated SIF when saving the simulation results
 #     2024-Mar-07: add fields for saved parameters and simulations in the dataframe (as grid_weather_driver did not do it)
 #     2024-Aug-05: use saving_dict to determine which variables to save
+#     2024-Aug-05: save plant hydraulics health status
 #
 #######################################################################################################################################################################################################
 """
@@ -199,6 +200,16 @@ simulation!(wd_tag::String,
         push!(new_df_cols, "MOD_T_L_MAX");
         push!(new_df_cols, "MOD_T_L_MEAN");
         push!(new_df_cols, "MOD_T_L_MIN");
+    end;
+    if saving_dict["MOD_P_LEAF"]
+        for i in eachindex(spac.plant.leaves)
+            push!(new_df_cols, "MOD_P_LEAF_$i");
+        end;
+    end;
+    if saving_dict["MOD_P_MMM"]
+        push!(new_df_cols, "MOD_P_L_MAX");
+        push!(new_df_cols, "MOD_P_L_MEAN");
+        push!(new_df_cols, "MOD_P_L_MIN");
     end;
     if saving_dict["ΦFΦP"]
         push!(new_df_cols, "ΦF");
@@ -372,6 +383,32 @@ simulation!(config::SPACConfiguration{FT},
         if saving_dict["NIRvR"]
             wdf.NIRvR[ind] = MODIS_NIRvR(config, spac);
         end;
+    end;
+
+    # save the plant health status
+    if saving_dict["K_PLANT"]
+        wdf.K_PLANT[ind] = K_PLANT(spac);
+    end;
+    if saving_dict["K_ROOT_STEM"]
+        wdf.K_ROOT_STEM[ind] = K_PLANT(spac; include_leaf = false);
+    end;
+    if saving_dict["MOD_P_LEAF"]
+        for i in eachindex(spac.plant.leaves)
+            wdf[Symbol("MOD_P_LEAF_$i")][ind] = spac.plant.leaves[i].xylem.auxil.pressure[end];
+        end;
+    end;
+    if saving_dict["MOD_P_MMM"]
+        sum_p::FT = 0;
+        min_p::FT = 0;
+        max_p::FT = -999;
+        for l in spac.plant.leaves
+            sum_p += l.xylem.auxil.pressure[end];
+            min_p = min(min_p, l.xylem.auxil.pressure[end]);
+            max_p = max(max_p, l.xylem.auxil.pressure[end]);
+        end;
+        wdf.MOD_P_L_MAX[ind]  = max_p;
+        wdf.MOD_P_L_MEAN[ind] = sum_p / length(spac.plant.leaves);
+        wdf.MOD_P_L_MIN[ind]  = min_p;
     end;
 
     return nothing
