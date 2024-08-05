@@ -30,7 +30,7 @@ begin "QL Model"
     end;
     for l in spac_q.plant.leaves
         l.flux.trait.stomatal_model = NS.WangSM{gm_dict["FT"]}();
-        l.photosystem.trait.FLM = NS.QLFluoscenceModelHanC3(gm_dict["FT"]);
+        l.photosystem.trait.FLM = NS.QLFluorescenceModelHanC3(gm_dict["FT"]);
     end;
     SPAC.prescribe_traits!(config, spac_q; kmax = 0.4);
 

@@ -25,7 +25,7 @@ begin "Photosynthesis model with GeneralC3Trait + Cytochrome"
     ps = EmeraldLand.Namespace.LeafPhotosystem{FT}();
     ps.trait = EmeraldLand.Namespace.GeneralC3Trait{FT}();
     ps.trait.AJM = EmeraldLand.Namespace.AjMethodC3VqmaxPi();
-    ps.trait.FLM = EmeraldLand.Namespace.CytochromeFluoscenceModel{FT}();
+    ps.trait.FLM = EmeraldLand.Namespace.CytochromeFluorescenceModel{FT}();
     air = EmeraldLand.Namespace.AirLayer{FT}();
     p_i = FT(20);
     ppar = FT(1000);

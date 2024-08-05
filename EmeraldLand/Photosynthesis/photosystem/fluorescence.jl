@@ -14,10 +14,10 @@
 #     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
 #     2023-Jun-15: set ϕ_f and ϕ_p to 0 when ppar is 0
 #     2023-Oct-24: save PSI and PSII ϕ_f in the C3Cyto model
-#     2023-Oct-28: add method for QLFluoscenceModel
+#     2023-Oct-28: add method for QLFluorescenceModel
 #     2023-Oct-30: compute q_l using exp(-flm.K_B * ppar) (omitting K_A)
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
-#     2024-Aug-01: compute q_l using flm.K_A * exp(-flm.K_B * ppar) for QLFluoscenceModelHan model
+#     2024-Aug-01: compute q_l using flm.K_A * exp(-flm.K_B * ppar) for QLFluorescenceModelHan model
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: ps.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this ps.e_to_c used to be calculated as ps.a_j / ps.j (a_j here is not p_CO₂_i based)
@@ -58,7 +58,7 @@ photosystem_coefficients!(
             config::SPACConfiguration{FT},
             pss::C3State{FT},
             psa::LeafPhotosystemAuxil{FT},
-            flm::CytochromeFluoscenceModel{FT},
+            flm::CytochromeFluorescenceModel{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -105,7 +105,7 @@ photosystem_coefficients!(
             config::SPACConfiguration{FT},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
-            flm::KNFluoscenceModel{FT},
+            flm::KNFluorescenceModel{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -156,7 +156,7 @@ photosystem_coefficients!(
             config::SPACConfiguration{FT},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
-            flm::QLFluoscenceModel{FT},
+            flm::QLFluorescenceModel{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -200,7 +200,7 @@ photosystem_coefficients!(
             config::SPACConfiguration{FT},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
-            flm::QLFluoscenceModelHan{FT},
+            flm::QLFluorescenceModelHan{FT},
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -262,7 +262,7 @@ photosystem_coefficients!(
             cache::SPACCache{FT},
             pss::C3State{FT},
             psa::CanopyLayerPhotosystemAuxil{FT},
-            flm::CytochromeFluoscenceModel{FT},
+            flm::CytochromeFluorescenceModel{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = (
     if ppar[1] == 0 && ppar[end] == 0
@@ -321,7 +321,7 @@ photosystem_coefficients!(
             cache::SPACCache{FT},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
-            flm::KNFluoscenceModel{FT},
+            flm::KNFluorescenceModel{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -377,7 +377,7 @@ photosystem_coefficients!(
             cache::SPACCache{FT},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
-            flm::QLFluoscenceModel{FT},
+            flm::QLFluorescenceModel{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
@@ -423,7 +423,7 @@ photosystem_coefficients!(
             cache::SPACCache{FT},
             pss::Union{C3State{FT}, C4State{FT}},
             psa::CanopyLayerPhotosystemAuxil{FT},
-            flm::QLFluoscenceModelHan{FT},
+            flm::QLFluorescenceModelHan{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = (
     if ppar == 0

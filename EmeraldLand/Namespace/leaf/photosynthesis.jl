@@ -62,7 +62,7 @@ Base.@kwdef mutable struct GeneralC3Trait{FT}
     "Ap method"
     APM::Union{ApMethodC3Inf, ApMethodC3Vcmax} = ApMethodC3Vcmax()
     "Fluorescence model"
-    FLM::Union{CytochromeFluoscenceModel{FT}, KNFluoscenceModel{FT}, QLFluoscenceModel{FT}, QLFluoscenceModelHan{FT}} = KNFluoscenceModel{FT}()
+    FLM::Union{CytochromeFluorescenceModel{FT}, KNFluorescenceModel{FT}, QLFluorescenceModel{FT}, QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
 
     # Prognostic variables
     "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
@@ -128,7 +128,7 @@ Base.@kwdef mutable struct GeneralC4Trait{FT}
     "Ap method"
     APM::Union{ApMethodC4VcmaxPi, ApMethodC4VpmaxPi} = ApMethodC4VcmaxPi()
     "Fluorescence model"
-    FLM::Union{KNFluoscenceModel{FT}, QLFluoscenceModel{FT}, QLFluoscenceModelHan{FT}} = KNFluoscenceModel{FT}()
+    FLM::Union{KNFluorescenceModel{FT}, QLFluorescenceModel{FT}, QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
 
     # Prognostic variables
     "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
@@ -145,7 +145,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-03: add C3State struct
-#     2023-Oct-28: add support to QLFluoscenceModel
+#     2023-Oct-28: add support to QLFluorescenceModel
 #     2024-Jul-22: support all C3 models
 #
 #######################################################################################################################################################################################################
@@ -178,7 +178,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-03: add C4State struct
-#     2023-Oct-28: add support to QLFluoscenceModel
+#     2023-Oct-28: add support to QLFluorescenceModel
 #
 #######################################################################################################################################################################################################
 """

@@ -4,7 +4,7 @@
 #
 # Changes to the struct
 # General
-#     2024-Jul-31: add CytochromeFluoscenceModel (empty struct)
+#     2024-Jul-31: add CytochromeFluorescenceModel (empty struct)
 #
 #######################################################################################################################################################################################################
 """
@@ -12,7 +12,7 @@
 Structure for the C3 Cytochrome fluorescence model.
 
 """
-struct CytochromeFluoscenceModel{FT<:AbstractFloat} end;
+struct CytochromeFluorescenceModel{FT<:AbstractFloat} end;
 
 
 #######################################################################################################################################################################################################
@@ -35,7 +35,7 @@ Structure that stores van der Tol et al. (2013) fluorescence model parameters.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct KNFluoscenceModel{FT<:AbstractFloat}
+Base.@kwdef mutable struct KNFluorescenceModel{FT<:AbstractFloat}
     # General model information
     "Fitting parameter K_0"
     K_0::FT = 5.01
@@ -45,9 +45,9 @@ Base.@kwdef mutable struct KNFluoscenceModel{FT<:AbstractFloat}
     K_B::FT = 10
 end;
 
-KNFluoscenceModelAll(FT) = KNFluoscenceModel{FT}(K_0 = 2.48, K_A = 2.83, K_B = 0.114)
+KNFluorescenceModelAll(FT) = KNFluorescenceModel{FT}(K_0 = 2.48, K_A = 2.83, K_B = 0.114)
 
-KNFluoscenceModelDrought(FT) = KNFluoscenceModel{FT}(K_0 = 5.01, K_A = 1.93, K_B = 10);
+KNFluorescenceModelDrought(FT) = KNFluorescenceModel{FT}(K_0 = 5.01, K_A = 1.93, K_B = 10);
 
 
 #######################################################################################################################################################################################################
@@ -71,14 +71,14 @@ Structure that stores Han et al. (2022) fluorescence model parameters.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct QLFluoscenceModel{FT<:AbstractFloat}
+Base.@kwdef mutable struct QLFluorescenceModel{FT<:AbstractFloat}
     "Fitting parameter qb"
     K_B::FT = 0.95e-3
 end;
 
-QLFluoscenceModelC3(FT) = QLFluoscenceModel{FT}(K_B = 0.95e-3);
+QLFluorescenceModelC3(FT) = QLFluorescenceModel{FT}(K_B = 0.95e-3);
 
-QLFluoscenceModelC4(FT) = QLFluoscenceModel{FT}(K_B = 0.63e-3);
+QLFluorescenceModelC4(FT) = QLFluorescenceModel{FT}(K_B = 0.63e-3);
 
 
 #######################################################################################################################################################################################################
@@ -101,13 +101,13 @@ Structure that stores Han et al. (2022) fluorescence model parameters.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct QLFluoscenceModelHan{FT<:AbstractFloat}
+Base.@kwdef mutable struct QLFluorescenceModelHan{FT<:AbstractFloat}
     "Fitting parameter α"
     K_A::FT = 0.8
     "Fitting parameter β"
     K_B::FT = 0.95e-3
 end;
 
-QLFluoscenceModelHanC3(FT) = QLFluoscenceModelHan{FT}(K_A = 0.8, K_B = 0.95e-3);
+QLFluorescenceModelHanC3(FT) = QLFluorescenceModelHan{FT}(K_A = 0.8, K_B = 0.95e-3);
 
-QLFluoscenceModelHanC4(FT) = QLFluoscenceModelHan{FT}(K_A = 0.83, K_B = 0.63e-3);
+QLFluorescenceModelHanC4(FT) = QLFluorescenceModelHan{FT}(K_A = 0.83, K_B = 0.63e-3);

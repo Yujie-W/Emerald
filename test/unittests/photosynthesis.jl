@@ -135,7 +135,7 @@ import Emerald.EmeraldLand.SPAC
         for i in 1:2
             ps.trait = psts[i];
             ps.state = psss[i];
-            ps.trait.FLM = NS.QLFluoscenceModel{Float64}();
+            ps.trait.FLM = NS.QLFluorescenceModel{Float64}();
             PS.photosystem_temperature_dependence!(config, ps, air, 298.15);
             PS.photosystem_electron_transport!(ps, 100.0, 20.0);
             PS.rubisco_limited_rate!(ps, 20.0);

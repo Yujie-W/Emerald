@@ -25,7 +25,7 @@ EmeraldLand.SPAC.spac!(config, spac, 3600);
 # the case using qL based fluorescence model
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 for l in spac.plant.leaves
-    l.photosystem.trait.FLM = EmeraldLand.Namespace.QLFluoscenceModelC3(FT);
+    l.photosystem.trait.FLM = EmeraldLand.Namespace.QLFluorescenceModelC3(FT);
 end;
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, 3600);
@@ -40,7 +40,7 @@ EmeraldLand.SPAC.spac!(config, spac, 3600);
 # the case using qL based fluorescence model Han
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 for l in spac.plant.leaves
-    l.photosystem.trait.FLM = EmeraldLand.Namespace.QLFluoscenceModelHanC3(FT);
+    l.photosystem.trait.FLM = EmeraldLand.Namespace.QLFluorescenceModelHanC3(FT);
 end;
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, 3600);
@@ -56,7 +56,7 @@ EmeraldLand.SPAC.spac!(config, spac, 3600);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 for l in spac.plant.leaves
     l.photosystem.trait.AJM = EmeraldLand.Namespace.AjMethodC3VqmaxPi();
-    l.photosystem.trait.FLM = EmeraldLand.Namespace.CytochromeFluoscenceModel{FT}();
+    l.photosystem.trait.FLM = EmeraldLand.Namespace.CytochromeFluorescenceModel{FT}();
 end;
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, 3600);
