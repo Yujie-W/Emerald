@@ -28,6 +28,7 @@
 #     2024-Jul-31: add rate constants fields (constants for PSI, PSII, and combined)
 #     2024-Aug-01: add field ENABLE_KD_TD and FIX_ETA_TD
 #     2024-Aug-05: set ENABLE_DROUGHT_LEGACY to true by default (add corresponding functions in PlantHydraulics module)
+#     2024-Aug-05: set root disconnection threshold to 0.5 loss of root conductance (to avoid numerical issues)
 #
 #######################################################################################################################################################################################################
 """
@@ -131,6 +132,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     DIM_XYLEM::Int = 5
     "Enable drought legacy effect"
     ENABLE_DROUGHT_LEGACY::Bool = true
+    "Threshold of the critical pressure or flow that trigger root disconnection"
+    KR_ROOT_DISCONNECTION::FT = 0.5
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"
     KR_THRESHOLD::FT = 0.001
     "Whether to run the model at steady state mode"

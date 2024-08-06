@@ -28,7 +28,7 @@ Use solver to determine the root flow rate, given
 function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil::SoilLayer{FT}, junction::JunctionCapacitor{FT}, cache::SPACCache{FT}) where {FT}
     # if the root is not connected to the soil, set the flow to be the sum from the buffer system
     # else, use a solver to find the root flow rate
-    if soil.s_aux.ψ <= xylem_pressure(root.xylem.trait.vc, config.KR_THRESHOLD)
+    if soil.s_aux.ψ <= xylem_pressure(root.xylem.trait.vc, config.KR_ROOT_DISCONNECTION)
         root.xylem.auxil.connected = false;
 
         # if at non-steady state, set the flow rate to be the sum of the buffer system so that flow from the soil is zero
