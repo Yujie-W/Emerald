@@ -22,7 +22,6 @@ begin "QL Model"
     wdf_q = deepcopy(wdf);
 
     config = EF.spac_config(gm_dict);
-    config.DIM_PPAR_BINS = nothing;
     spac_q = GD.grid_spac(config, gm_dict);
     for r in [spac_q.plant.roots; spac_q.plant.trunk; spac_q.plant.branches; spac_q.plant.leaves]
         r.xylem.trait.vc.B = 5.703;

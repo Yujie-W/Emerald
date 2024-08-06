@@ -28,6 +28,14 @@ using Test;
     EmeraldLand.SPAC.spac!(config_20, spac_20, 3600);
     @test true;
 
+    # bin PPAR to 0 bins (one leaf model, no sunlit and shaded fraction)
+    config_0 = EmeraldLand.Namespace.SPACConfiguration(FT);
+    config_0.DIM_PPAR_BINS = 0;
+    spac_0 = EmeraldLand.Namespace.BulkSPAC(config_0);
+    EmeraldLand.SPAC.initialize_spac!(config_0, spac_0);
+    EmeraldLand.SPAC.spac!(config_0, spac_0, 3600);
+    @test true;
+
     # @info "Check the results" EmeraldLand.SPAC.GPP(spac) EmeraldLand.SPAC.GPP(spac_10) EmeraldLand.SPAC.GPP(spac_20);
     # @info "Check the results" EmeraldLand.SPAC.TROPOMI_SIF740(config, spac) EmeraldLand.SPAC.TROPOMI_SIF740(config_10, spac_10) EmeraldLand.SPAC.TROPOMI_SIF740(config_20, spac_20);
 end;

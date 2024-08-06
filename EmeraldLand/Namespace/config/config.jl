@@ -101,7 +101,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     #
     # Photosynthesis
     #
-    "Number of sunlit PPAR bins for all the layers (to speed up the computation)"
+    "Number of sunlit PPAR bins for all the layers (to speed up the computation; 0 for one leaf model)"
     DIM_PPAR_BINS::Union{Int,Nothing} = nothing
     "Enable the chemical energy related to photosynthesis and respiration"
     ENABLE_CHEMICAL_ENERGY::Bool = true
@@ -157,26 +157,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     #
     "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
-
-
-
-
-
-
-
-
-
-
-    # features related to canopy sunlit/shaded fractions
-    # Note
-    #     1. to use the hyperspectral mode, set both to true
-    #     2. to use the broadband mode with sunlit/shaded fractions, set SUNLIT_FRACTION to true and SUNLIT_ANGLES to false
-    #     3. to use the broadband mode with one leaf model, set both to false (ppar_sunlit and ppar_shaded will be set to be the same)
-    #     4. to use big leaf model, TODO item
-    "Whether to partition the sunlit fraction into different inclination and azimuth angles (if false, use float for sunlit fraction)"
-    SUNLIT_ANGLES::Bool = true
-    "Whether to partition the canopy into sunlit and shaded fractions (if false, use one leaf model)"
-    SUNLIT_FRACTION::Bool = true
 end;
 
 SPACConfiguration(FT::DataType; dataset::String = OLD_PHI_2021, jld2_file::String = LAND_ARTIFACT, wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) = SPACConfiguration{FT}(

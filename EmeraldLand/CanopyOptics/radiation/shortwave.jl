@@ -15,6 +15,7 @@
 #     2024-Jun-06: add step to compute e_difꜛ_layer (contribution from the layer only)
 #     2024-Jul-27: use bined PPAR to speed up
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Aug-05: add a special case when DIM_PPAR_BINS is 0 (one leaf model, no sunlit and shaded fraction)
 #
 #######################################################################################################################################################################################################
 """
@@ -199,6 +200,11 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
                     leaf.flux.auxil.ppar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_ppar_dir .+ Σ_ppar_dif;
                 end;
                 sun_geo.auxil.ppar_fraction[1:end-1,irt] .= 1 ./ ( DIM_INCL * DIM_AZI) .* sun_geo.s_aux.p_sunlit[irt];
+            elseif DIM_PPAR_BINS == 0
+                # mean_ppar_sunlit = mean(view(sun_geo.auxil.ppar_sunlit,:,:,irt));
+                # leaf.flux.auxil.ppar[1] = mean_ppar_sunlit * sun_geo.s_aux.p_sunlit[irt] + Σ_ppar_dif * (1 - sun_geo.s_aux.p_sunlit[irt]);
+                leaf.flux.auxil.ppar[1] = Σ_ppar_dir / normi * sun_geo.s_aux.p_sunlit[irt] + Σ_ppar_dif;
+                sun_geo.auxil.ppar_index .= 1;
             else
                 min_ppar = minimum(view(sun_geo.auxil.ppar_sunlit, :, :, irt));
                 max_ppar = maximum(view(sun_geo.auxil.ppar_sunlit, :, :, irt));
