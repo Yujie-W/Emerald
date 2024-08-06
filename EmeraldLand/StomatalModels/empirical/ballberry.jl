@@ -9,15 +9,13 @@
 #######################################################################################################################################################################################################
 """
 
-    empirical_equation(sm, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
-    empirical_equation(sm, leaf::Leaf{FT}, air::AirLayer{FT}, ind::Int; β::FT = FT(1)) where {FT}
+    empirical_equation(sm::BallBerrySM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT}
 
 Return the stomatal conductance computed from empirical model formulation for the shaded leaf of `Leaf`, given
 - `sm` `BallBerrySM`, `GentineSM`, `LeuningSM`, or `MedlynSM` type empirical stomatal model
-- `leaf` `Leaf` type struct
+- `leaf` `CanopyLayer` type leaf structure
 - `air` `AirLayer` type environmental conditions
 - `β` Tuning factor for G1 (must be 1 if tuning factor is not based on G1)
-- `ind` Sunlit leaf index within the leaf angular distribution
 
 """
 function empirical_equation end;

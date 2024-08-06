@@ -41,10 +41,7 @@ stomatal_conductance!(leaf::CanopyLayer{FT}, δt::FT) where {FT} = (
 );
 
 stomatal_conductance!(leaf::Leaf{FT}, δt::FT) where {FT} = (
-    leaf.flux.state.g_H₂O_s_shaded += leaf.flux.auxil.∂g∂t_shaded * δt;
-    for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
-        leaf.flux.state.g_H₂O_s_sunlit[i] += leaf.flux.auxil.∂g∂t_sunlit[i] * δt;
-    end;
+    leaf.flux.state.g_H₂O_s += leaf.flux.auxil.∂g∂t * δt;
     limit_stomatal_conductance!(leaf);
 
     return nothing

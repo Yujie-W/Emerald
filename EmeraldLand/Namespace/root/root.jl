@@ -8,6 +8,7 @@
 #     2023-Sep-23: add Root struct with energy and xylem fields
 #     2023-Sep-23: add constructor for Root struct and initialize the energy state of the root
 #     2023-Sep-23: add field rhizosphere
+#     2024-Sug-05: set the default B to 3 (more resistant than leaves now)
 #
 #######################################################################################################################################################################################################
 """
@@ -30,7 +31,12 @@ Base.@kwdef mutable struct Root{FT}
     xylem::XylemHydraulics{FT}
 end;
 
-Root(config::SPACConfiguration{FT}) where {FT} = Root{FT}(xylem = XylemHydraulics(config));
+Root(config::SPACConfiguration{FT}) where {FT} = (
+    xylem = XylemHydraulics(config);
+    xylem.trait.vc.B = 3;
+
+    return Root{FT}(xylem = xylem)
+);
 
 
 #######################################################################################################################################################################################################

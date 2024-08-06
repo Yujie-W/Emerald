@@ -23,7 +23,7 @@ limit_stomatal_conductance!(leaf::CanopyLayer{FT}) where {FT} = (
     g_min = leaf.flux.trait.g_limits[1] * f_dif;
     g_max = leaf.flux.trait.g_limits[2] * f_dif;
 
-    leaf.flux.state.g_H₂O_s .= max.(g_min, min.(g_max, leaf.flux.state.g_H₂O_s));
+    @. leaf.flux.state.g_H₂O_s = max(g_min, min(g_max, leaf.flux.state.g_H₂O_s));
 
     return nothing
 );
@@ -33,23 +33,7 @@ limit_stomatal_conductance!(leaf::Leaf{FT}) where {FT} = (
     g_min = leaf.flux.trait.g_limits[1] * f_dif;
     g_max = leaf.flux.trait.g_limits[2] * f_dif;
 
-    # for sunlit leaf
-    for i in eachindex(leaf.flux.state.g_H₂O_s_sunlit)
-        if leaf.flux.state.g_H₂O_s_sunlit[i] < g_min
-            leaf.flux.state.g_H₂O_s_sunlit[i] = g_min;
-        end;
-        if leaf.flux.state.g_H₂O_s_sunlit[i] > g_max
-            leaf.flux.state.g_H₂O_s_sunlit[i] = g_max;
-        end;
-    end;
-
-    # for shaded leaf
-    if leaf.flux.state.g_H₂O_s_shaded < g_min
-        leaf.flux.state.g_H₂O_s_shaded = g_min;
-    end;
-    if leaf.flux.state.g_H₂O_s_shaded > g_max
-        leaf.flux.state.g_H₂O_s_shaded = g_max;
-    end;
+    leaf.flux.state.g_H₂O_s = max(g_min, min(g_max, leaf.flux.state.g_H₂O_s));
 
     return nothing
 );

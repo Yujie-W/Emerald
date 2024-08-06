@@ -15,11 +15,11 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Leaf{FT}, cache::SPACCache{FT}, p_dos::FT) where {FT}
+    leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, cache::SPACCache{FT}, p_dos::FT) where {FT}
 
 Update the leaf pressure profile, given
 - `config` `SPACConfiguration` type struct
-- `leaf` `Leaf` type struct
+- `leaf` `CanopyLayer` or `Leaf` type struct
 - `cache` `SPACCache` type struct
 - `p_dos` pressure at the dosing point `[MPa]`
 

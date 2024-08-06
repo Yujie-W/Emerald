@@ -29,7 +29,7 @@ function ∂Θₙ∂E end;
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the A and E at the current setting
-    gs = leaf.flux.state.g_H₂O_s_shaded;
+    gs = leaf.flux.state.g_H₂O_s;
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc = 1 / (FT(1.6) / gs + 1 / leaf.flux.auxil.g_CO₂_b);
     e  = gh * d / air.state.p_air;

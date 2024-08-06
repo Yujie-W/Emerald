@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2023-Sep-25: add new Stem struct
+#     2024-Sug-05: set the default B to 3 (more resistant than leaves now)
 #
 #######################################################################################################################################################################################################
 """
@@ -25,7 +26,12 @@ Base.@kwdef mutable struct Stem{FT}
     xylem::XylemHydraulics{FT}
 end;
 
-Stem(config::SPACConfiguration{FT}) where {FT} = Stem{FT}(xylem = XylemHydraulics(config));
+Stem(config::SPACConfiguration{FT}) where {FT} = (
+    xylem = XylemHydraulics(config);
+    xylem.trait.vc.B = 3;
+
+    return Stem{FT}(xylem = xylem)
+);
 
 
 #######################################################################################################################################################################################################
