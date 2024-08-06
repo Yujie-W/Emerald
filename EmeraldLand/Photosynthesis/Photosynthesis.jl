@@ -47,6 +47,10 @@ include("plant/leaf.jl");
 include("plant/plant.jl");
 
 # function to fit the traits
+include("fitting/aci-an.jl");
+include("fitting/aci-curve.jl");
+include("fitting/aci-rmse.jl");
+include("fitting/aci-fit.jl");
 include("fitting/aci.jl");
 
 

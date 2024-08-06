@@ -10,14 +10,15 @@
 #######################################################################################################################################################################################################
 """
 
-    photosynthesis_only!(psm::Union{C3Cyto{FT}, C3VJP{FT}, C4VJP{FT}}, air::AirLayer{FT}, g_lc::FT, ppar::FT, t::FT) where {FT}
+    photosynthesis_only!(cache::SPACCache{FT}, psm::CanopyLayerPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}, ppar::Vector{FT}) where {FT}
+    photosynthesis_only!(psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT, ppar::FT) where {FT}
 
 Updates leaf photosynthetic rates based on leaf diffusive conductance (for StomataModels.jl temporary use), given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis system
+- `cache` `SPACCache` type structure
+- `psm` `CanopyLayerPhotosystem` or `LeafPhotosystem` type structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
 - `ppar` PPAR used for photosynthesis
-- `t` Leaf temperature in `[K]`
 
 """
 function photosynthesis_only! end;

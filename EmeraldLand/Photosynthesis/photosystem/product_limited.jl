@@ -17,15 +17,29 @@
 #######################################################################################################################################################################################################
 """
 
-    product_limited_rate!(ps::LeafPhotosystem{FT}, p_i::FT; β::FT = FT(1)) where {FT}
-    product_limited_rate!(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
+    product_limited_rate!(
+                cache::SPACCache{FT},
+                ps::CanopyLayerPhotosystem{FT},
+                air::AirLayer{FT},
+                g_lc::Vector{FT};
+                β::FT = FT(1)) where {FT}
+    product_limited_rate!(
+                ps::LeafPhotosystem{FT},
+                p_i::FT;
+                β::FT = FT(1)) where {FT}
+    product_limited_rate!(
+                ps::LeafPhotosystem{FT},
+                air::AirLayer{FT},
+                g_lc::FT;
+                β::FT = FT(1)) where {FT}
 
 Update the product limited photosynthetic rate, given
-- `ps` `LeafPhotosystem` struct
-- `p_i` Internal CO₂ partial pressure in `Pa`
+- `cache` `SPACCache` struct
+- `ps` `CanopyLayerPhotosystem` or `LeafPhotosystem` struct
+- `air` `AirLayer` struct for environmental conditions like O₂ partial pressure
+- `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
-- `air` `AirLayer` struct
-- `g_lc` Leaf conductance in `mol m⁻² s⁻¹`
+- `p_i` Internal CO₂ partial pressure in `Pa`
 
 """
 function product_limited_rate! end;

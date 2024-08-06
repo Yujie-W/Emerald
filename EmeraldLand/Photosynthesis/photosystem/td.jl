@@ -12,13 +12,10 @@
 #######################################################################################################################################################################################################
 """
 
-    temperature_correction(td::Arrhenius{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
-    temperature_correction(td::ArrheniusPeak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
-    temperature_correction(td::Q10{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
-    temperature_correction(td::Q10Peak{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
+    temperature_correction(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, Q10PeakHT{FT}, Q10PeakLTHT{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
 
 Return the correction ratio for a temperature dependent variable, given
-- `td` `Arrhenius`, `ArrheniusPeak`, `Q10`, or `Q10Peak` type temperature dependency struture
+- `td` `Arrhenius`, `ArrheniusPeak`, `Q10`, `Q10Peak`, `Q10PeakHT`, or `Q10PeakLTHT` type temperature dependency struture
 - `t` Target temperature in `K`
 - `t_ref` Reference temperature in `K`, default is `td.T_REF` (298.15 K)
 
@@ -81,15 +78,15 @@ temperature_correction(td::Q10PeakLTHT{FT}, t::FT; t_ref::FT = td.T_REF) where {
 #######################################################################################################################################################################################################
 """
 
-    temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
+    temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
 
 Return the temperature corrected value, given
-- `td` `Arrhenius`, `ArrheniusPeak`, `Q10`, or `Q10Peak` type temperature dependency struture
+- `td` `Arrhenius`, `ArrheniusPeak`, `Q10`, `Q10Peak`, `Q10PeakHT`, or `Q10PeakLTHT` type temperature dependency struture
 - `t` Target temperature in `K`
 - `t_ref` Reference temperature in `K`, default is `td.T_REF` (298.15 K)
 
 """
-function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
+function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
     return td.VAL_REF * temperature_correction(td, t; t_ref=t_ref)
 end;
 
@@ -109,11 +106,15 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    photosystem_temperature_dependence!(config::SPACConfiguration{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, t::FT) where {FT}
+    photosystem_temperature_dependence!(
+                config::SPACConfiguration{FT},
+                ps::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}},
+                air::AirLayer{FT},
+                t::FT) where {FT}
 
 Update the temperature dependencies of C3 photosynthesis model, given
 - `config` `SPACConfiguration` structure
-- `psm` `LeafPhotosystem` or `CanopyLayerPhotosystem` structure
+- `ps` `LeafPhotosystem` or `CanopyLayerPhotosystem` structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `t` Target temperature in `K`
 

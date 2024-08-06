@@ -14,9 +14,10 @@
 #######################################################################################################################################################################################################
 """
 
-    plant_photosynthesis!(spac::BulkSPAC{FT}) where {FT}
+    plant_photosynthesis!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Updates leaf photosynthetic rates for SPAC, given
+- `config` `SPACConfiguration` type SPAC configuration
 - `spac` `BulkSPAC` type SPAC
 
 """

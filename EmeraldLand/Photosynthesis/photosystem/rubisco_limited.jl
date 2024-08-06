@@ -17,15 +17,29 @@
 #######################################################################################################################################################################################################
 """
 
-    rubisco_limited_rate!(ps::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, p_i::FT; β::FT = FT(1)) where {FT}
-    rubisco_limited_rate!(ps::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, air::AirLayer{FT}, g_lc::FT; β::FT = FT(1)) where {FT}
+    rubisco_limited_rate!(
+                cache::SPACCache{FT},
+                ps::CanopyLayerPhotosystem{FT},
+                air::AirLayer{FT},
+                g_lc::Vector{FT};
+                β::FT = FT(1)) where {FT}
+    rubisco_limited_rate!(
+                ps::LeafPhotosystem{FT},
+                p_i::FT;
+                β::FT = FT(1)) where {FT}
+    rubisco_limited_rate!(
+                ps::LeafPhotosystem{FT},
+                air::AirLayer{FT},
+                g_lc::FT;
+                β::FT = FT(1)) where {FT}
 
 Update the RubisCO limited photosynthetic rate, given
-- `psm` `C3Cyto`, `C3VJP`, or `C4VJP` struct
-- `p_i` Internal CO₂ partial pressure in `Pa`
-- `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
-- `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
+- `cache` `SPACCache` struct
+- `ps` `CanopyLayerPhotosystem` or `LeafPhotosystem` struct
+- `air` `AirLayer` struct for environmental conditions like O₂ partial pressure
 - `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
+- `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
+- `p_i` Internal CO₂ partial pressure in `Pa`
 
 """
 function rubisco_limited_rate! end;

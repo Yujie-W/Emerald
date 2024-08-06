@@ -15,10 +15,21 @@
 #######################################################################################################################################################################################################
 """
 
-    photosystem_electron_transport!(ps::LeafPhotosystem{FT}, ppar::FT, p_i::FT; β::FT = FT(1)) where {FT}
+    photosystem_electron_transport!(
+                cache::SPACCache{FT},
+                ps::CanopyLayerPhotosystem{FT},
+                ppar::Vector{FT},
+                p_i::Union{FT, Vector{FT}};
+                β::FT = FT(1)) where {FT}
+    photosystem_electron_transport!(
+                ps::LeafPhotosystem{FT},
+                ppar::FT,
+                p_i::FT;
+                β::FT = FT(1)) where {FT}
 
 Update the electron transport rates, given
-- `psm` `LeafPhotosystem` type struct
+- `cache` `SPACCache` type struct
+- `ps` `CanopyLayerPhotosystem` or `LeafPhotosystem` type struct
 - `ppar` Absorbed photosynthetically active radiation in `μmol m⁻² s⁻¹`
 - `p_i` Internal CO₂ partial pressure in `Pa`, used to compute e_to_c
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd

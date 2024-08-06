@@ -29,10 +29,22 @@
 #######################################################################################################################################################################################################
 """
 
-    photosystem_coefficients!(ps::Union{C3Cyto{FT},C3VJP{FT},C4VJP{FT}}, ppar::FT; β::FT = FT(1)) where {FT}
+    photosystem_coefficients!(
+                config::SPACConfiguration{FT},
+                cache::SPACCache{FT},
+                ps::CanopyLayerPhotosystem{FT},
+                ppar::Vector{FT};
+                β::FT = FT(1)) where {FT}
+    photosystem_coefficients!(
+                config::SPACConfiguration{FT},
+                ps::LeafPhotosystem{FT},
+                ppar::FT;
+                β::FT = FT(1)) where {FT}
 
 Update the rate constants and coefficients in reaction center, given
-- `ps` `C3Cyto`, `C3VJP`, or `C4VJP` type photosynthesis system
+- `config` `SPACConfiguration` type struct
+- `cache` `SPACCache` type struct
+- `ps` `CanopyLayerPhotosystem` or `LeafPhotosystem` type struct
 - `ppar` Absorbed photosynthetically active radiation in `μmol m⁻² s⁻¹`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
