@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-17: add struct Plant
 #     2024-Jul-24: add leaf shedded flag cache
+#     2024-Aug-05: add field z_beta to store the root distribution beta
 #
 #######################################################################################################################################################################################################
 """
@@ -22,6 +23,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct Plant{FT}
     "Plant root depth and height information `[m]`"
     zs::Vector{FT}
+    "Plant root distribution beta"
+    z_beta::FT
 
     "Root hydraulic system"
     roots::Vector{Root{FT}}

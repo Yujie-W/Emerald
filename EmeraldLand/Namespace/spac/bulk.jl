@@ -8,6 +8,7 @@
 #     2023-Oct-17: add step to customize soil albedo algorithm from spac settings
 #     2024-Feb-27: customize leaf area from leaf area index per layer in the constructor function
 #     2024-Jul-24: add field cache to store cache information for speeding up the model
+#     2024-Aug-05: add Y = 1 - beta ^ (100 * -z) to calculate the root area distribution
 #
 #######################################################################################################################################################################################################
 """
@@ -52,6 +53,7 @@ BulkSPAC(config::SPACConfiguration{FT};
          ground_area::Number = 500,
          latitude::Number = 33.173,
          longitude::Number = 115.4494,
+         root_beta::Number = 0.961,
          soil_bounds::Vector{<:Number} = [0,-0.1,-0.25,-0.5,-1,-3],
          plant_zs::Vector{<:Number} = [-1,6,12],
 ) where {FT} = (
@@ -90,8 +92,9 @@ BulkSPAC(config::SPACConfiguration{FT};
     n_root = length(mask_soil) + 1;
     ind_root = n_root > 1 ? [findfirst(plant_zs[1] .< soil_bounds .< 0) - 1; mask_soil] : mask_soil;
     roots = Root{FT}[Root(config) for _ in 1:n_root];
+    normi = 1 - root_beta ^ (100 * -soil_bounds[n_root+1]);
     for i in eachindex(roots)
-        roots[i].xylem.trait.area = basal_area / n_root;
+        roots[i].xylem.trait.area = basal_area * (root_beta ^ (100 * -soil_bounds[ind_root[i]]) - root_beta ^ (100 * -soil_bounds[ind_root[i]+1])) / normi;
         roots[i].xylem.trait.Δh = 0 - max(plant_zs[1], soil_bounds[ind_root[i]+1]);
     end;
 
@@ -123,6 +126,7 @@ BulkSPAC(config::SPACConfiguration{FT};
     # set up the plant
     plant = Plant{FT}(
                 zs           = plant_zs,
+                z_beta       = root_beta,
                 roots        = roots,
                 roots_index  = ind_root,
                 trunk        = trunk,
