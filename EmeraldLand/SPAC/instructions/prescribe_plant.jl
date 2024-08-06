@@ -17,7 +17,8 @@
 #     2024-Feb-08: add support to C3State
 #     2024-Feb-27: run dull_aux! when any of the canopy structural parameters or leaf pigments is updated
 #     2024-Feb-28: set minimum LAI to 0 if a negative value is prescribed
-#     2024-Jul-24: add leaf shedded flag
+#     2024-Jul-24: add leaf shedded flag to LAI prescription
+#     2024-Aug-06: add leaf regrow flag to LAI prescription
 #
 #######################################################################################################################################################################################################
 """
@@ -137,14 +138,24 @@ function prescribe_traits!(
     #
     # canopy structure
     #
-    # update LAI and leaf area if leaf shedding flag is not true
-    if !isnothing(lai) && !spac.plant._leaf_shedded
-        epslai = max(0, lai);
-        can_str.trait.lai = epslai;
-        can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
-        for irt in 1:n_layer
-            ilf = n_layer - irt + 1;
-            leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
+    # update LAI and leaf area if leaf shedding flag is not true or regrow flag is true
+    # clear the legacy of leaves if regrow flag is true
+    if !isnothing(lai)
+        if !spac.plant._leaf_shedded || spac.plant._leaf_regrow
+            epslai = max(0, lai);
+            can_str.trait.lai = epslai;
+            can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
+            for irt in 1:n_layer
+                ilf = n_layer - irt + 1;
+                leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
+            end;
+        end;
+        if spac.plant._leaf_regrow
+            spac.plant._leaf_regrow = false;
+            spac.plant._leaf_shedded = false;
+            for l in leaves
+                clear_legacy!(l);
+            end;
         end;
     end;
 

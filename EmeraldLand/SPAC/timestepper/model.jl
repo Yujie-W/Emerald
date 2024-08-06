@@ -18,6 +18,7 @@
 #     2024-Jul-24: add leaf shedded flag
 #     2024-Jul-24: set regrow threshold to 50% of the critical pressure
 #     2024-Aug-06: move leaf shedding condition into the substep_aux! function
+#     2024-Aug-06: set regrow threshold to when junction pressure is higher than -0.1 MPa
 # To do
 #     TODO: add top soil evaporation
 #
@@ -55,11 +56,9 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
     step_remote_sensing!(config, spac);
 
     # 4. determine whether to regrow the leaves in the next round of LAI update
-    bottom_leaf = spac.plant.leaves[1];
-    p_50 = xylem_pressure(bottom_leaf.xylem.trait.vc, FT(0.5)) * relative_surface_tension(bottom_leaf.energy.s_aux.t);
-    if (spac.plant.junction.s_aux.pressure > p_50) && spac.plant._leaf_shedded
+    if (spac.plant.junction.s_aux.pressure > -0.1) && spac.plant._leaf_shedded
         @warn "Leaf regrowth is triggered, LAI prescribe enabled in the next round";
-        spac.plant._leaf_shedded = false;
+        spac.plant._leaf_regrow = true;
     end;
 
     return nothing

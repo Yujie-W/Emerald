@@ -44,10 +44,10 @@ Base.@kwdef mutable struct Plant{FT}
     memory::PlantMemory{FT}
 
     # Cache variables
+    "Whether to regrow the leaves"
+    _leaf_regrow::Bool = false
     "Whether leaves are shedded"
     _leaf_shedded::Bool = false
-    "Whether there is any root connected to soil"
-    _root_connection::Bool = true
 end;
 
 

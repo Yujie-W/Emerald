@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2024-Aug-06: isolate the function to save the fields to the NamedTuple
+#     2024-Aug-06: output the junction pressure
 #
 #######################################################################################################################################################################################################
 """
@@ -146,6 +147,9 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
         wdf.MOD_P_L_MAX[ind]  = max_p;
         wdf.MOD_P_L_MEAN[ind] = sum_p / length(spac.plant.leaves);
         wdf.MOD_P_L_MIN[ind]  = min_p;
+    end;
+    if saving_dict["P_JUNCTION"]
+        wdf.P_JUNCTION[ind] = spac.plant.junction.s_aux.pressure;
     end;
 
     return nothing
