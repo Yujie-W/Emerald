@@ -22,6 +22,7 @@ using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 SAVING_DICT = Dict{String, Any}(
     # Modeled soil water content and temperature
             "MOD_SWC"     => true,
+            "MOD_P_SOIL"  => true,
             "MOD_T_SOIL"  => true,
     # Modeled leaf temperature
             "MOD_T_LEAF"  => false,

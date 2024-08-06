@@ -141,6 +141,7 @@ end;
 #     2024-Aug-05: use saving_dict to determine which variables to save
 #     2024-Aug-05: save plant hydraulics health status
 #     2024-Aug-05: add method to use externally prepared config, spac, and weather driver (will process the dataframe to NamedTuple)
+#     2024-Aug-05: add option to save soil water potential
 #
 #######################################################################################################################################################################################################
 """
@@ -202,6 +203,11 @@ simulation!(config::SPACConfiguration{FT},
     if saving_dict["MOD_SWC"]
         for i in eachindex(spac.soils)
             push!(new_df_cols, "MOD_SWC_$i");
+        end;
+    end;
+    if saving_dict["MOD_P_SOIL"]
+        for i in eachindex(spac.soils)
+            push!(new_df_cols, "MOD_P_SOIL_$i");
         end;
     end;
     if saving_dict["MOD_T_SOIL"]
@@ -312,6 +318,11 @@ simulation!(config::SPACConfiguration{FT},
     if saving_dict["MOD_SWC"]
         for i in eachindex(spac.soils)
             wdf[Symbol("MOD_SWC_$i")][ind] = spac.soils[i].state.θ;
+        end;
+    end;
+    if saving_dict["MOD_P_SOIL"]
+        for i in eachindex(spac.soils)
+            wdf[Symbol("MOD_P_SOIL_$i")][ind] = spac.soils[i].s_aux.ψ;
         end;
     end;
     if saving_dict["MOD_T_SOIL"]
