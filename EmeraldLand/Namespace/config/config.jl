@@ -28,7 +28,7 @@
 #     2024-Jul-31: add rate constants fields (constants for PSI, PSII, and combined)
 #     2024-Aug-01: add field ENABLE_KD_TD and FIX_ETA_TD
 #     2024-Aug-05: set ENABLE_DROUGHT_LEGACY to true by default (add corresponding functions in PlantHydraulics module)
-#     2024-Aug-05: set root disconnection threshold to 0.5 loss of root conductance (to avoid numerical issues)
+#     2024-Aug-06: set root disconnection threshold to 0.5 loss of root conductance (to avoid numerical issues)
 #
 #######################################################################################################################################################################################################
 """
