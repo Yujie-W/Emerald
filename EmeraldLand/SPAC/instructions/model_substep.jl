@@ -18,7 +18,7 @@ Run the steps to compute partial deriative of the state variables, given
 
 """
 function substep_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    substep_aux!(config, spac);
+    substep_aux!(spac);
     longwave_radiation!(spac);
     plant_flow_profile!(config, spac);
     plant_pressure_profile!(config, spac);      # 3rd most time consuming function (about 19%)

@@ -43,7 +43,7 @@ import Emerald.EmeraldLand.SPAC
         spac.soils[5].state.ns[4] = spac.airs[1].state.p_air * (spac.soils[5].trait.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].t_aux.δz / (CS.GAS_R() * spac.soils[5].s_aux.t);
         spac.soils[5].state.ns[5] = spac.airs[1].state.p_air * (spac.soils[5].trait.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].t_aux.δz / (CS.GAS_R() * spac.soils[5].s_aux.t);
         SH.volume_balance!(config, spac);
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.trace_gas_diffusion!(config, spac);
 
         # total mole into the layer should be the same as the derivative of the total mole of all layers
@@ -53,7 +53,7 @@ import Emerald.EmeraldLand.SPAC
 
         # set one soil layer to be oversaturated
         spac.soils[3].state.θ = spac.soils[3].trait.vc.Θ_SAT;
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.trace_gas_diffusion!(config, spac);
 
         # total mole into the layer should be the same as the derivative of the total mole of all layers
@@ -69,7 +69,7 @@ import Emerald.EmeraldLand.SPAC
         for j in 1:5
             spac.soils[j].state.θ = spac.soils[j].trait.vc.Θ_SAT;
         end;
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.trace_gas_diffusion!(config, spac);
 
         # there is no dry air diffusion up to and from each layer
@@ -85,7 +85,7 @@ import Emerald.EmeraldLand.SPAC
 
         # set the soil to be not saturated
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.soil_water_infiltration!(spac);
 
         # total water mole change by infiltration should be 0 (no water is lost or gained)
@@ -93,7 +93,7 @@ import Emerald.EmeraldLand.SPAC
 
         # set the soil to be almost saturated (controlled by the soil water content)
         SPAC.prescribe_soil!(spac; swcs = (0.5, 0.5, 0.5, 0.5, 0.5));
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.soil_water_infiltration!(spac);
 
         # total water mole change by infiltration should be 0 (no water is lost or gained)
@@ -105,7 +105,7 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
 
         # now the lowest layer to be short of dry air
         SH.trace_gas_diffusion!(config, spac);
@@ -146,21 +146,21 @@ import Emerald.EmeraldLand.SPAC
 
         # set every layer to be unsaturated
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.soil_water_runoff!(spac);
         @test spac.soil_bulk.auxil.runoff == 0;
 
         # set the second layer to be oversaturated (but not enough to cause runoff)
         SPAC.prescribe_soil!(spac; swcs = (0.3, spac.soils[2].trait.vc.Θ_SAT + 0.01, 0.3, 0.3, 0.3));
         spac.soils[2].state.θ = spac.soils[2].trait.vc.Θ_SAT + 0.01;
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.soil_water_runoff!(spac);
         @test spac.soil_bulk.auxil.runoff == 0;
 
         # set the second layer to be oversaturated (enough to cause runoff)
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.7, 0.3, 0.3, 0.3));
         spac.soils[2].state.θ = 0.7;
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.soil_water_runoff!(spac);
         runoffs = ((0.7 - spac.soils[2].trait.vc.Θ_SAT) * spac.soils[2].t_aux.δz + (0.3 - spac.soils[1].trait.vc.Θ_SAT) * spac.soils[1].t_aux.δz) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64);
         @test spac.soil_bulk.auxil.runoff ≈ runoffs > 0;
@@ -172,7 +172,7 @@ import Emerald.EmeraldLand.SPAC
         spac.soils[3].state.θ = 0.7;
         spac.soils[4].state.θ = 0.7;
         spac.soils[5].state.θ = 0.7;
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         SH.soil_water_runoff!(spac);
         runoffs = sum([(0.7 - spac.soils[i].trait.vc.Θ_SAT) * spac.soils[i].t_aux.δz for i in 1:5]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64);
         @test spac.soil_bulk.auxil.runoff ≈ runoffs > 0;
@@ -185,7 +185,7 @@ import Emerald.EmeraldLand.SPAC
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
 
         # the case of no root water uptake
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         water_ini = sum([soil.state.θ * soil.t_aux.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
         for root in spac.plant.roots
             if typeof(root.xylem.auxil.flow) <: AbstractFloat
@@ -200,7 +200,7 @@ import Emerald.EmeraldLand.SPAC
         @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 ≈ water_ini;
 
         # the case with root water uptake
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         water_ini = sum([soil.state.θ * soil.t_aux.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
         for root in spac.plant.roots
             if typeof(root.xylem.auxil.flow) <: AbstractFloat
@@ -216,7 +216,7 @@ import Emerald.EmeraldLand.SPAC
 
         # the case with root water uptake and surface runoff (water flow already defined above)
         spac.soils[1].state.θ = 0.7;
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         water_ini = sum([soil.state.θ * soil.t_aux.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
         SH.soil_profiles!(config, spac);
         SH.soil_budgets!(config, spac, 10.0);
@@ -224,7 +224,7 @@ import Emerald.EmeraldLand.SPAC
         @test water_end + spac.soil_bulk.auxil.dndt[1,3] * 10 + length(spac.plant.roots) * 1 * 10 / spac.soil_bulk.trait.area + spac.soil_bulk.auxil.runoff ≈ water_ini;
 
         # the case with precipitation (water flow already defined above)
-        SPAC.substep_aux!(config, spac);
+        SPAC.substep_aux!(spac);
         spac.meteo.rain = 1;
         water_ini = sum([soil.state.θ * soil.t_aux.δz for soil in spac.soils]) * CS.ρ_H₂O(Float64) / CS.M_H₂O(Float64) + sum([soil.state.ns[3] for soil in spac.soils]);
         SH.soil_profiles!(config, spac);

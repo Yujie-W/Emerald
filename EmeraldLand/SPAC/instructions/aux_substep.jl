@@ -12,7 +12,6 @@
 #     2023-Oct-17: rename the function to substep_aux! to be consistent with the other function names such as t_aux!, s_aux!, dull_aux!, and step_aux!
 #     2024-Jul-24: add leaf shedded flag
 #     2024-Jul-30: compute OCS conductance along with CO₂ conductance
-#     2024-Aug-06: move leaf shedding condition into the substep_aux! function
 #
 #######################################################################################################################################################################################################
 """
@@ -25,7 +24,7 @@ Update the auxiliary variables at sub time step within a big time step, given
 """
 function substep_aux! end;
 
-substep_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
+substep_aux!(spac::BulkSPAC{FT}) where {FT} = (
     soils = spac.soils;
     sbulk = spac.soil_bulk;
     roots = spac.plant.roots;
@@ -61,15 +60,6 @@ substep_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
         for leaf in leaves
             substep_aux!(leaf);
         end;
-    end;
-
-    # determine whether to shed leaves
-    bottom_leaf = spac.plant.leaves[1];
-    p_crt = xylem_pressure(bottom_leaf.xylem.trait.vc, config.KR_THRESHOLD) * relative_surface_tension(bottom_leaf.energy.s_aux.t);
-    if !spac.plant._leaf_shedded && bottom_leaf.xylem.auxil.pressure[end] < p_crt
-        @warn "Leaf shedding is triggered";
-        shed_leaves!(config, spac);
-        spac.plant._leaf_shedded = true;
     end;
 
     return nothing
