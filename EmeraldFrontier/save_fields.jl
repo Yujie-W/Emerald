@@ -4,6 +4,7 @@
 # General
 #     2024-Aug-06: isolate the function to save the fields to the NamedTuple
 #     2024-Aug-06: output the junction pressure
+#     2024-Aug-06: read leaf water potential only if the leaf is not shedded; otherwise, set it to NaN
 #
 #######################################################################################################################################################################################################
 """
@@ -132,21 +133,27 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     end;
     if saving_dict["MOD_P_LEAF"]
         for i in eachindex(spac.plant.leaves)
-            wdf[Symbol("MOD_P_LEAF_$i")][ind] = spac.plant.leaves[i].xylem.auxil.pressure[end];
+            wdf[Symbol("MOD_P_LEAF_$i")][ind] = spac.plant._leaf_shedded ? NaN : spac.plant.leaves[i].xylem.auxil.pressure[end];
         end;
     end;
     if saving_dict["MOD_P_MMM"]
-        sum_p::FT = 0;
-        min_p::FT = 0;
-        max_p::FT = -999;
-        for l in spac.plant.leaves
-            sum_p += l.xylem.auxil.pressure[end];
-            min_p = min(min_p, l.xylem.auxil.pressure[end]);
-            max_p = max(max_p, l.xylem.auxil.pressure[end]);
+        if spac.plant._leaf_shedded
+            wdf.MOD_P_L_MAX[ind]  = NaN;
+            wdf.MOD_P_L_MEAN[ind] = NaN;
+            wdf.MOD_P_L_MIN[ind]  = NaN;
+        else
+            sum_p::FT = 0;
+            min_p::FT = 0;
+            max_p::FT = -999;
+            for l in spac.plant.leaves
+                sum_p += l.xylem.auxil.pressure[end];
+                min_p = min(min_p, l.xylem.auxil.pressure[end]);
+                max_p = max(max_p, l.xylem.auxil.pressure[end]);
+            end;
+            wdf.MOD_P_L_MAX[ind]  = max_p;
+            wdf.MOD_P_L_MEAN[ind] = sum_p / length(spac.plant.leaves);
+            wdf.MOD_P_L_MIN[ind]  = min_p;
         end;
-        wdf.MOD_P_L_MAX[ind]  = max_p;
-        wdf.MOD_P_L_MEAN[ind] = sum_p / length(spac.plant.leaves);
-        wdf.MOD_P_L_MIN[ind]  = min_p;
     end;
     if saving_dict["P_JUNCTION"]
         wdf.P_JUNCTION[ind] = spac.plant.junction.s_aux.pressure;
