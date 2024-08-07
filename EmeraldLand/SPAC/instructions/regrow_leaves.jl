@@ -24,7 +24,7 @@ function regrow_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where
     one_root = spac.plant.roots[1];
     p_50 = xylem_pressure(one_root.xylem.trait.vc, FT(0.5)) * relative_surface_tension(one_root.energy.s_aux.t);
     for s in spac.soils
-        if s.auxil.s_aux.ψ < p_50
+        if s.s_aux.ψ < p_50
             flag = false;
             break;
         end;
