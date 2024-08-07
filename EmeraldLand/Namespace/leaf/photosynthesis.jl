@@ -481,6 +481,7 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = (
 #     2023-Oct-03: add C3VJP, C3Cyto, and C4VJP structs
 #     2023-Oct-36: combine C3Cyto, C3VJP, and C4VJP into LeafPhotosystem
 #     2024-Feb-26: add field trait
+#     2024-Aug-06: add constructor for different models
 #
 #######################################################################################################################################################################################################
 """
@@ -503,6 +504,83 @@ Base.@kwdef mutable struct LeafPhotosystem{FT}
     auxil::LeafPhotosystemAuxil{FT} = LeafPhotosystemAuxil{FT}()
 end;
 
+LeafPhotosystem{FT}(model::String) where {FT} = (
+    if model == "C3Cyto"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3CytoInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3JB"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3JBInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3VJP"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+    elseif model == "C3VJPInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+    elseif model == "C3CLM"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C3CLMInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C4CLM"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+    elseif model == "C4CLMSmooth"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C4VJP"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VpmaxPi();
+    else
+        return error("Unknown model: $model")
+    end;
+
+    return ps
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -515,7 +593,7 @@ end;
 
 $(TYPEDEF)
 
-Struct that contains the fields for C3 photosynthesis (VJP model)
+Struct that contains the fields for C3 photosynthesis
 
 # Fields
 

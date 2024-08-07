@@ -8,6 +8,7 @@
 #     2024-Jul-27: fit Γ_star as well for C3 models
 #     2024-Jul-27: add initial guess to option
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-06: make initial_guess mandatory
 #
 #######################################################################################################################################################################################################
 """
@@ -15,19 +16,19 @@
     aci_fit(config::SPACConfiguration{FT},
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
-            df::DataFrame;
+            df::DataFrame,
+            initial_guess::Vector;
             fit_rd::Bool = false,
-            fitted_γ::Union{Nothing, Number} = nothing,
-            initial_guess::Vector = [50, 2.1, 4, 1]) where {FT}
+            fitted_γ::Union{Nothing, Number} = nothing) where {FT}
 
 Fit the A-Ci curve (will be abstractized based on the trait and methods embedded), given
 - `config` `SPACConfiguration` struct
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
+- `initial_guess` Initial guess of fitting parameters
 - `fit_rd` Fit Rd or not (last fitting parameter; default: false)
 - `fitted_γ` Fitted Γ* value, will be prescribed if given (default: nothing)
-- `initial_guess` Initial guess of fitting parameters
 
 """
 function aci_fit end;
@@ -35,19 +36,19 @@ function aci_fit end;
 aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
         air::AirLayer{FT},
-        df::DataFrame;
+        df::DataFrame,
+        initial_guess::Vector;
         fit_rd::Bool = false,
-        fitted_γ::Union{Nothing, Number} = nothing,
-        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = aci_fit(config, ps, ps.trait, air, df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
+        fitted_γ::Union{Nothing, Number} = nothing) where {FT} = aci_fit(config, ps, ps.trait, air, df, initial_guess; fit_rd = fit_rd, fitted_γ = fitted_γ);
 
 aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
         pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
         air::AirLayer{FT},
-        df::DataFrame;
+        df::DataFrame,
+        initial_guess::Vector;
         fit_rd::Bool = false,
-        fitted_γ::Union{Nothing, Number} = nothing,
-        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = aci_fit(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
+        fitted_γ::Union{Nothing, Number} = nothing) where {FT} = aci_fit(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df, initial_guess; fit_rd = fit_rd, fitted_γ = fitted_γ);
 
 aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
@@ -56,10 +57,10 @@ aci_fit(config::SPACConfiguration{FT},
         ajm::AjMethodC3JmaxPi,
         apm::ApMethodC3Vcmax,
         air::AirLayer{FT},
-        df::DataFrame;
+        df::DataFrame,
+        initial_guess::Vector;
         fit_rd::Bool = false,
-        fitted_γ::Union{Nothing, Number} = nothing,
-        initial_guess::Vector = [50, 100, 4, 1]) where {FT} = (
+        fitted_γ::Union{Nothing, Number} = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, 1, 0.1] : [1, 1, 1],
         x_maxs = fit_rd ? [999, 999, 10, 10] : [999, 999, 10],
@@ -83,10 +84,10 @@ aci_fit(config::SPACConfiguration{FT},
         ajm::AjMethodC3VqmaxPi,
         apm::ApMethodC3Vcmax,
         air::AirLayer{FT},
-        df::DataFrame;
+        df::DataFrame,
+        initial_guess::Vector;
         fit_rd::Bool = false,
-        fitted_γ::Union{Nothing, Number} = nothing,
-        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
+        fitted_γ::Union{Nothing, Number} = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
         x_maxs = fit_rd ? [999, 99, 10, 10] : [999, 99, 1],
@@ -110,14 +111,14 @@ aci_fit(config::SPACConfiguration{FT},
         ajm::AjMethodC4JPSII,
         apm::ApMethodC4VcmaxPi,
         air::AirLayer{FT},
-        df::DataFrame;
+        df::DataFrame,
+        initial_guess::Vector;
         fit_rd::Bool = false,
-        fitted_γ::Nothing = nothing,
-        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
+        fitted_γ::Nothing = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.1] : [1],
         x_maxs = fit_rd ? [999, 10] : [999],
-        x_inis = fit_rd ? [100, 1] : [100],
+        x_inis = fit_rd ? initial_guess : initial_guess[1:1],
         Δ_inis = fit_rd ? [10, 1] : [10],
     );
     stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1], 50);
@@ -137,14 +138,14 @@ aci_fit(config::SPACConfiguration{FT},
         ajm::AjMethodC4JPSII,
         apm::ApMethodC4VpmaxPi,
         air::AirLayer{FT},
-        df::DataFrame;
+        df::DataFrame,
+        initial_guess::Vector;
         fit_rd::Bool = false,
-        fitted_γ::Nothing = nothing,
-        initial_guess::Vector = [50, 2.1, 4, 1]) where {FT} = (
+        fitted_γ::Nothing = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, 0.1] : [1, 1],
         x_maxs = fit_rd ? [999, 999, 10] : [999, 999],
-        x_inis = fit_rd ? [100, 100, 1] : [100, 100],
+        x_inis = fit_rd ? initial_guess : initial_guess[1:2],
         Δ_inis = fit_rd ? [10, 10, 1] : [10, 10],
     );
     stol = fit_rd ? SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50) : SolutionToleranceND{FT}([0.1, 0.1], 50);
@@ -164,6 +165,7 @@ aci_fit(config::SPACConfiguration{FT},
 # General
 #     2024-Jul-20: add functions to fit A-Ci curve with removing outliers
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-06: make initial_guess mandatory
 #
 #######################################################################################################################################################################################################
 """
@@ -172,10 +174,10 @@ aci_fit(config::SPACConfiguration{FT},
                 config::SPACConfiguration{FT},
                 ps::LeafPhotosystem{FT},
                 air::AirLayer{FT},
-                df::DataFrame;
+                df::DataFrame,
+                initial_guess::Vector;
                 fit_rd::Bool = false,
                 fitted_γ::Union{Nothing, Number} = nothing,
-                initial_guess::Vector = [50, 100, 4, 1],
                 min_count::Int = 9,
                 rmse_threshold::Number = 2) where {FT}
 
@@ -184,9 +186,9 @@ Fit the A-Ci curve by removing outliers, given
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
+- `initial_guess` Initial guess of fitting parameters
 - `fit_rd` Fit Rd or not (last fitting parameter; default: false)
 - `fitted_γ` Fitted Γ* value, will be prescribed if given (default: nothing)
-- `initial_guess` Initial guess of fitting parameters
 - `min_count` Minimum number of data points to fit an A-Ci curve
 - `rmse_threshold` Threshold of RMSE to stop removing outliers
 
@@ -195,10 +197,10 @@ function aci_fit_exclude_outliter(
             config::SPACConfiguration{FT},
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
-            df::DataFrame;
+            df::DataFrame,
+            initial_guess::Vector;
             fit_rd::Bool = false,
             fitted_γ::Union{Nothing, Number} = nothing,
-            initial_guess::Vector = [50, 100, 4, 1],
             min_count::Int = 9,
             rmse_threshold::Number = 2) where {FT}
     # remove outliers using thresholds when necessary
@@ -208,7 +210,7 @@ function aci_fit_exclude_outliter(
     last_df = deepcopy(df);
     crnt_df = deepcopy(df);
     while true
-        sol, best_rmse, aci = aci_fit(config, ps, air, crnt_df; fit_rd = fit_rd, fitted_γ = fitted_γ, initial_guess = initial_guess);
+        sol, best_rmse, aci = aci_fit(config, ps, air, crnt_df, initial_guess; fit_rd = fit_rd, fitted_γ = fitted_γ);
         if last_rmse - best_rmse < rmse_threshold
             break
         else

@@ -5,6 +5,7 @@
 #     2024-Jul-20: add alias function to fit A-Ci curve
 #     2024-Jul-23: add support to C3CytoInfApTrait
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-06: move constructor to Namespace
 #
 #######################################################################################################################################################################################################
 """
@@ -14,7 +15,7 @@
              model::String;
              fit_rd::Bool = false,
              fitted_γ::Union{Nothing, Number} = nothing,
-             initial_guess = nothing,
+             initial_guess::Union{Nothing, Vector} = nothing,
              min_count::Int = 9,
              remove_outlier::Bool = false,
              rmse_threshold::Number = 2) where {FT}
@@ -37,7 +38,7 @@ function aci_fit!(
             model::String;
             fit_rd::Bool = false,
             fitted_γ::Union{Nothing, Number} = nothing,
-            initial_guess = nothing,
+            initial_guess::Union{Nothing, Vector} = nothing,
             min_count::Int = 9,
             remove_outlier::Bool = false,
             rmse_threshold::Number = 2) where {FT}
@@ -46,85 +47,33 @@ function aci_fit!(
     @assert nanmin(df.T_LEAF) > 253.15 "The leaf temperature should be in Kelvin!";
 
     # create a leaf photosystem based on the model string
-    if model == "C3Cyto"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-        new_guess = [50, 2.1, 4, 1];
-    elseif model == "C3CytoInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-        new_guess = [50, 2.1, 4, 1];
-    elseif model == "C3JB"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.TD_ηC = ηCTDJohnson(FT);
-        ps.trait.TD_ηL = ηLTDJohnson(FT);
-        new_guess = [50, 2.1, 4, 1];
-    elseif model == "C3JBInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-        ps.trait.TD_ηC = ηCTDJohnson(FT);
-        ps.trait.TD_ηL = ηLTDJohnson(FT);
-        new_guess = [50, 2.1, 4, 1];
-    elseif model == "C3VJP"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3JmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-        new_guess = [50, 100, 4, 1];
-    elseif model == "C3VJPInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3JmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-        new_guess = [50, 100, 4, 1];
-    elseif model == "C3CLM"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3JmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
-        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
-        new_guess = [50, 100, 4, 1];
-    elseif model == "C3CLMInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3JmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
-        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
-        new_guess = [50, 100, 4, 1];
-    elseif model == "C4CLM"
-        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
-        ps.trait.ACM = AcMethodC4Vcmax();
-        ps.trait.AJM = AjMethodC4JPSII();
-        ps.trait.APM = ApMethodC4VcmaxPi();
-        new_guess = [50, 100, 4, 1];
-    elseif model == "C4CLMSmooth"
-        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
-        ps.trait.ACM = AcMethodC4Vcmax();
-        ps.trait.AJM = AjMethodC4JPSII();
-        ps.trait.APM = ApMethodC4VcmaxPi();
-        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(FT);
-        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
-        new_guess = [50, 100, 4, 1];
-    elseif model == "C4VJP"
-        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
-        ps.trait.ACM = AcMethodC4Vcmax();
-        ps.trait.AJM = AjMethodC4JPSII();
-        ps.trait.APM = ApMethodC4VpmaxPi();
-        new_guess = [50, 100, 4, 1];
-    else
-        throw(ArgumentError("The model $(model) is not supported!"));
-    end;
+    ps = LeafPhotosystem{FT}(model);
+    new_guess =
+        if model == "C3Cyto"
+            [50, 2.1, 4, 1]             # Vcmax,  B6F, Gamma, Rd
+        elseif model == "C3CytoInfAp"
+            [50, 2.1, 4, 1]             # Vcmax,  B6F, Gamma, Rd
+        elseif model == "C3JB"
+            [50, 2.1, 4, 1]             # Vcmax,  B6F, Gamma, Rd
+        elseif model == "C3JBInfAp"
+            [50, 2.1, 4, 1]             # Vcmax,  B6F, Gamma, Rd
+        elseif model == "C3VJP"
+            [50, 100, 4, 1]             # Vcmax, Jmax, Gamma, Rd
+        elseif model == "C3VJPInfAp"
+            [50, 100, 4, 1]             # Vcmax, Jmax, Gamma, Rd
+        elseif model == "C3CLM"
+            [50, 100, 4, 1]             # Vcmax, Jmax, Gamma, Rd
+        elseif model == "C3CLMInfAp"
+            [50, 100, 4, 1]             # Vcmax, Jmax, Gamma, Rd
+        elseif model == "C4CLM"
+            [50, 1]                     # Vcmax, Rd
+        elseif model == "C4CLMSmooth"
+            [50, 1]                     # Vcmax, Rd
+        elseif model == "C4VJP"
+            [50, 50, 1]                 # Vcmax, Vpmax, Rd
+        else
+            error("The model $(model) is not supported!")
+        end;
 
     # fit the A-Ci curve with or without removing outliers
     if remove_outlier
@@ -132,10 +81,10 @@ function aci_fit!(
                     config,
                     ps,
                     AirLayer{FT}(),
-                    df;
+                    df,
+                    (isnothing(initial_guess) ? new_guess : initial_guess);
                     fit_rd = fit_rd,
                     fitted_γ = fitted_γ,
-                    initial_guess = (isnothing(initial_guess) ? new_guess : initial_guess),
                     min_count = min_count,
                     rmse_threshold = rmse_threshold)
     else
@@ -143,9 +92,9 @@ function aci_fit!(
                     config,
                     ps,
                     AirLayer{FT}(),
-                    df;
+                    df,
+                    (isnothing(initial_guess) ? new_guess : initial_guess);
                     fit_rd = fit_rd,
-                    fitted_γ = fitted_γ,
-                    initial_guess = (isnothing(initial_guess) ? new_guess : initial_guess))
+                    fitted_γ = fitted_γ)
     end;
 end;
