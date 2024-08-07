@@ -40,6 +40,7 @@ include("instructions/prescribe_air.jl");
 include("instructions/prescribe_plant.jl");
 include("instructions/prescribe_soil.jl");
 include("instructions/push_t_history.jl");
+include("instructions/regrow_leaves.jl");
 include("instructions/shed_leaves.jl");
 
 

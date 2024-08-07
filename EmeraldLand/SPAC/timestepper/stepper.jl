@@ -38,7 +38,9 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
         bottom_leaf = spac.plant.leaves[1];
         p_crt = xylem_pressure(bottom_leaf.xylem.trait.vc, config.KR_THRESHOLD) * relative_surface_tension(bottom_leaf.energy.s_aux.t);
         if !spac.plant._leaf_shedded && bottom_leaf.xylem.auxil.pressure[end] < p_crt
-            @warn "Leaf shedding is triggered";
+            if config.MESSAGE_LEVEL == 2
+                @warn "Leaf shedding is triggered";
+            end;
             shed_leaves!(config, spac);
             spac.plant._leaf_shedded = true;
         end;

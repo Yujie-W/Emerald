@@ -163,7 +163,6 @@ VanGenuchten{FT}(name::String) where {FT} = (
     elseif name=="Clay"
         _p = [  81.6328, 1.09, 0.38, 0.068, exp(-0.86) * 0.0254 / 3600];    # K from Light clay in Cosby et al. (1984)
     else
-        @warn "Soil type $(name) not recognized, use Loam instead.";
         name = "Loam";
     end;
     =#

@@ -56,10 +56,7 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
     step_remote_sensing!(config, spac);
 
     # 4. determine whether to regrow the leaves in the next round of LAI update
-    if (spac.plant.junction.s_aux.pressure > -0.1) && spac.plant._leaf_shedded
-        @warn "Leaf regrowth is triggered, LAI prescribe enabled in the next round";
-        spac.plant._leaf_regrow = true;
-    end;
+    regrow_leaves!(config, spac);
 
     return nothing
 end;

@@ -15,6 +15,7 @@
 #     2023-Oct-18: add time controller of junction temperature
 #     2024-Feb-29: add methods for soil and plant time controllers (for cleaner reading experience, may need to add air in the future)
 #     2024-Jul-24: make sure the water content of the junction does not exceed the minimum water content
+#     2024-Aug-06: add junction pressure change controller (not change more than 0.1 MPa per time step)
 #
 #######################################################################################################################################################################################################
 """
@@ -100,6 +101,17 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} 
     new_δt = min(10 / abs(plant.junction.auxil.∂w∂t), new_δt);
     if isnan(new_δt) || new_δt < 0.001 <= δt
         @error "NaN or very small δt detected when adjusting δt based on junction water" plant.junction.auxil.∂w∂t;
+        return error("NaN detected in adjusted_time")
+    end;
+
+    # make sure that the junction pressure does not change more than 0.1 MPa per time step
+    new_v = plant.junction.state.v_storage + plant.junction.auxil.∂w∂t * new_δt;
+    new_p = capacitance_pressure(plant.junction.trait.pv, new_v / plant.junction.trait.v_max, plant.junction.s_aux.t);
+    if abs(new_p - plant.junction.s_aux.pressure) > 0.1
+        new_δt *= FT(0.1) / abs(new_p - plant.junction.s_aux.pressure);
+    end;
+    if isnan(new_δt) || new_δt < 0.001 <= δt
+        @error "NaN or very small δt detected when adjusting δt based on junction pressure change" plant.junction.s_aux.pressure new_p;
         return error("NaN detected in adjusted_time")
     end;
 
