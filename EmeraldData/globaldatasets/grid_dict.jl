@@ -9,6 +9,7 @@
 #     2024-Feb-23: use 0 for the plant-related fields for non-vegetated land
 #     2024-Feb-23: set SAI to be 1/10 of the maximum LAI
 #     2024-Feb-29: veritfy the GriddingMachine data dictionary before returning
+#     2024-Aug-08: fix two typos in the land mask determination and the SOIL_α value (was SOIL_N)
 #
 #######################################################################################################################################################################################################
 """
@@ -159,7 +160,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
 );
 
 grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64, ccs::DataFrame = CCS) = (
-    lmsk = read_LUT(query_collection(dtl.tag_t_ele), lat, lon)[1];
+    lmsk = read_LUT(query_collection(dtl.tag_t_lm), lat, lon)[1];
     if !(lmsk > 0)
         return error("The target grid does not contain land!");
     end;
@@ -171,7 +172,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
 
     co2 = ccs.MEAN[findfirst(ccs.YEAR .== dtl.year)];
     scolor = min(20, max(1, Int(floor(read_LUT(query_collection(dtl.tag_s_cc), lat, lon)[1]))));
-    s_α = read_LUT(query_collection(dtl.tag_s_n), lat, lon)[1];
+    s_α = read_LUT(query_collection(dtl.tag_s_α), lat, lon)[1];
     s_n = read_LUT(query_collection(dtl.tag_s_n), lat, lon)[1];
     s_Θr = read_LUT(query_collection(dtl.tag_s_Θr), lat, lon)[1];
     s_Θs = read_LUT(query_collection(dtl.tag_s_Θs), lat, lon)[1];
