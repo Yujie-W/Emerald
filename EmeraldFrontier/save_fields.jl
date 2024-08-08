@@ -5,6 +5,7 @@
 #     2024-Aug-06: isolate the function to save the fields to the NamedTuple
 #     2024-Aug-06: output the junction pressure
 #     2024-Aug-06: read leaf water potential only if the leaf is not shedded; otherwise, set it to NaN
+#     2024-Aug-08: save OCS flux if requested
 #
 #######################################################################################################################################################################################################
 """
@@ -68,11 +69,14 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     if saving_dict["CNPP"]
         wdf.CNPP[ind] = CNPP(spac);
     end;
+    if saving_dict["ET_VEG"]
+        wdf.ET_VEG[ind] = T_VEG(spac);
+    end;
     if saving_dict["GPP"]
         wdf.GPP[ind] = GPP(spac);
     end;
-    if saving_dict["ET_VEG"]
-        wdf.ET_VEG[ind] = T_VEG(spac);
+    if saving_dict["OCS"]
+        wdf.OCS[ind] = OCS(spac);
     end;
 
     # save the SIF (PAR and PPAR) if there is sunlight (0 otherwise)

@@ -7,11 +7,12 @@ SAVING_DICT = Dict{String, Any}(
     # Modeled leaf temperature
             "MOD_T_LEAF"  => false,
             "MOD_T_MMM"   => true,
-    # Modeled CO2 and H2O fluxes
+    # Modeled CO2, H2O, and OCS fluxes
             "BETA"        => false,
             "CNPP"        => true,
-            "GPP"         => true,
             "ET_VEG"      => true,
+            "GPP"         => true,
+            "OCS"         => true,
     # SIF (default is false)
             "SIF683"      => false,
             "SIF740"      => true,
