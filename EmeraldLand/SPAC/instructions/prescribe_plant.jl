@@ -203,6 +203,7 @@ end;
 # General
 #     2024-Jul-23: add method to prescribe Vcmax, Jmax, b6f, and Rd for C3 models (C4 models pending)
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-09: typo fix for GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
@@ -239,7 +240,7 @@ prescribe_ps_traits!(
             vpmax::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(leaf.photosystem.trait; b6f = b6f, jmax = jmax, rd = rd, vcmax = vcmax, vpmax = vpmax);
 
 prescribe_ps_traits!(
-            pst::GeneralC3Trait;
+            pst::Union{GeneralC3Trait, GeneralC4Trait};
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
@@ -329,7 +330,7 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::GeneralC3Trait,
+            pst::GeneralC4Trait,
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VcmaxPi;
@@ -358,7 +359,7 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::GeneralC3Trait,
+            pst::GeneralC4Trait,
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VpmaxPi;

@@ -20,8 +20,9 @@ using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 
 include("config.jl");
 include("prepare_df.jl");
-include("save_fields.jl");
+include("prescribe.jl");
 include("simulation.jl");
+include("save_fields.jl");
 
 
 end; # EmeraldFrontier
