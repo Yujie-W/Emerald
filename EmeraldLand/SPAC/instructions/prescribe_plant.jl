@@ -499,6 +499,7 @@ prescribe_ps_traits!(
 # General
 #     2024-Jul-23: add method to prescribe Vcmax25 and Jmax25 TD temperature dependent
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-01: fix the dispatching issue with GeneralC4Trait models
 #
 #######################################################################################################################################################################################################
 """
@@ -518,21 +519,23 @@ function prescribe_ps_td! end;
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}};
-            t_clm::Union{Nothing, Number}) where {FT} = prescribe_ps_td!(config, pst, pst.ACM, pst.AJM; t_clm = t_clm);
+            pst::GeneralC3Trait{FT};
+            t_clm::Union{Nothing, Number}) where {FT} = prescribe_ps_td!(config, pst.TD_VCMAX, pst.TD_JMAX; t_clm = t_clm);
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::GeneralC3Trait{FT},
-            acm::AcMethodC3VcmaxPi,
-            ajm::AjMethodC3JmaxPi;
+            vtd::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}},
+            jtd::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}};
             t_clm::Union{Nothing, Number}) where {FT} = (
     (; T_CLM) = config;
 
-    if !isnothing(t_clm)
-        if T_CLM
-            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-            pst.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+    # TODO: double check if there is memory allocation in this method
+    if !isnothing(t_clm) && T_CLM
+        if vtd isa ArrheniusPeak || vtd isa Q10Peak
+            vtd.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+        end;
+        if jtd isa ArrheniusPeak || jtd isa Q10Peak
+            jtd.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
         end;
     end;
 
@@ -541,32 +544,18 @@ prescribe_ps_td!(
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::GeneralC3Trait{FT},
-            acm::AcMethodC3VcmaxPi,
-            ajm::AjMethodC3VqmaxPi;
-            t_clm::Union{Nothing, Number}) where {FT} = (
-    (; T_CLM) = config;
-
-    if !isnothing(t_clm)
-        if T_CLM
-            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-        end;
-    end;
-
-    return nothing
-);
+            pst::GeneralC4Trait{FT};
+            t_clm::Union{Nothing, Number}) where {FT} = prescribe_ps_td!(config, pst.TD_VCMAX; t_clm = t_clm);
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::GeneralC4Trait{FT},
-            acm::AcMethodC4Vcmax,
-            ajm::AjMethodC4JPSII;
+            vtd::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}};
             t_clm::Union{Nothing, Number}) where {FT} = (
     (; T_CLM) = config;
 
-    if !isnothing(t_clm)
-        if T_CLM
-            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+    if !isnothing(t_clm) && T_CLM
+        if vtd isa ArrheniusPeak || vtd isa Q10Peak
+            vtd.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
         end;
     end;
 

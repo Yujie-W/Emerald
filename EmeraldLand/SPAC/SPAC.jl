@@ -13,6 +13,7 @@ using ..Namespace: ReferenceSpectra, ShortwaveRadiation
 using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
 using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
 using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
+using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
 using ..Namespace: GeneralC3Trait, GeneralC4Trait
 using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
 using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Plant, Root, Stem
