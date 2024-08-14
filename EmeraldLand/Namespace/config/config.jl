@@ -14,7 +14,6 @@
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, and T_CLM
 #     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD
-#     2023-Sep-18: add field Φ_SIF_WL
 #     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
 #     2023-Oct-02: add field MESSAGE_LEVEL
@@ -96,8 +95,6 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     Φ_SIF_CUTOFF::Int = 0
     "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
     Φ_SIF_RESCALE::Bool = true
-    "Whether to partition the SIF PDF based the wavelength"
-    Φ_SIF_WL::Bool = true
 
     #
     # Photosynthesis

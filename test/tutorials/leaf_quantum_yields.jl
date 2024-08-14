@@ -10,7 +10,7 @@ using Test;
     #     - Photosystem (C3VJP, C4VJP, or C3Cyto)
     #     - Air layer
     config = EmeraldLand.Namespace.SPACConfiguration(FT);
-    ps = EmeraldLand.Namespace.LeafPhotosystem{FT}();
+    ps = EmeraldLand.Namespace.LeafPhotosystem{FT}("C3VJP");
     air = EmeraldLand.Namespace.AirLayer{FT}();
 
     # Then run the following steps to compute quantum yields

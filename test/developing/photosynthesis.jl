@@ -10,8 +10,7 @@ FT = Float64;
 # C3 models
 begin "Photosynthesis model with GeneralC3Trait"
     config = EmeraldLand.Namespace.SPACConfiguration(FT);
-    ps = EmeraldLand.Namespace.LeafPhotosystem{FT}();
-    ps.trait = EmeraldLand.Namespace.GeneralC3Trait{FT}();
+    ps = EmeraldLand.Namespace.LeafPhotosystem{FT}("C3VJP");
     air = EmeraldLand.Namespace.AirLayer{FT}();
     p_i = FT(20);
     ppar = FT(1000);
@@ -22,10 +21,7 @@ end;
 
 begin "Photosynthesis model with GeneralC3Trait + Cytochrome"
     config = EmeraldLand.Namespace.SPACConfiguration(FT);
-    ps = EmeraldLand.Namespace.LeafPhotosystem{FT}();
-    ps.trait = EmeraldLand.Namespace.GeneralC3Trait{FT}();
-    ps.trait.AJM = EmeraldLand.Namespace.AjMethodC3VqmaxPi();
-    ps.trait.FLM = EmeraldLand.Namespace.CytochromeFluorescenceModel{FT}();
+    ps = EmeraldLand.Namespace.LeafPhotosystem{FT}("C3Cyto");
     air = EmeraldLand.Namespace.AirLayer{FT}();
     p_i = FT(20);
     ppar = FT(1000);
