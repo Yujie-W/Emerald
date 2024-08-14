@@ -25,24 +25,25 @@ include("sif/fluorescence.jl");
 # General
 #     2023-Sep-15: add function to run all the step within one function all
 #     2023-Sep-16: compute SIF conversion matrices within this function
+#     2024-Aug-13: add option to compute SIF matrices using N = nothing (default) for integral method (super fast and accurate) or N = Int for numerical method
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+    leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Union{Nothing, Int} = nothing) where {FT}
 
 Update the interface, sublayer, layer, and leaf level reflectance and transmittance within `bio`, given
 - `config` SPAC configuration
 - `bio` LeafBio struct
 - `lwc` Leaf water content
 - `θ` Incoming radiation angle
-- `N` Number of sublayers
+- `N` If not nthing: number of sublayers
 
 """
-function leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+function leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Union{Nothing, Int} = nothing) where {FT}
     leaf_interface_ρ_τ!(config, bio, θ);
     leaf_sublayer_f_τ!(config, bio, lwc, N);
-    leaf_layer_ρ_τ!(bio, N);
+    leaf_layer_ρ_τ!(bio);
     leaf_ρ_τ!(bio);
 
     if config.ENABLE_SIF

@@ -17,7 +17,6 @@ using Test;
     #                               1: sharp cut off
     #                               2: sigmoid used in SCOPE
     #     Φ_SIF_RESCALE     Bool    whether to rescale the SIF emission PDF after cut off (default true)
-    #     Φ_SIF_WL          Bool    whether to partition the SIF emission PDF based on the excitation wavelength (default true)
     config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
     bio = EmeraldLand.Namespace.LeafBio(config);
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));

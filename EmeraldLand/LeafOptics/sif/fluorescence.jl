@@ -5,6 +5,7 @@
 #     2023-Sep-16: add function to update the SIF conversion matrix of the first layer
 #     2023-Sep-16: clear vec_b and vec_f before the calculation (for the case of recalculating the SIF conversion matrix)
 #     2023-Oct-24: remove Φ_PS from the calculation so as to use with separate PSI and PSII SIF spectra
+#     2024-Aug-13: add alternative function to compute SIF matrices using k_e and k_f analytically
 #
 #######################################################################################################################################################################################################
 """
@@ -26,7 +27,9 @@ Update the SIF conversion matrix of the first layer, given
 - `N` number of sublayers of each layer
 
 """
-function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, N::Int) where {FT}
+function layer_1_sif_vec! end;
+
+layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, N::Int) where {FT} = (
     # parameters required for the calculation that can be derived from the input parameters
     ρ_i_21 = 1 - τ_i_21;
     α_sub = 1 - τ_sub;
@@ -88,7 +91,32 @@ function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, τ_sub::FT, τ_
     vec_f ./= denom;
 
     return nothing
-end;
+);
+
+layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, k_e::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, f_sife::FT, k_f::SubArray, vec_b::SubArray, vec_f::SubArray) where {FT} = (
+    # parameters required for the calculation that can be derived from the input parameters
+    ρ_i_21 = 1 - τ_i_21;
+    τ_all = exp(-k_e);
+    denom = 1 - τ_all * ρ_i_21 * τ_all * ρ_i_21;
+
+    # computing e_up and e_down
+    e_1ꜜ = τ_i_θ / denom;
+    e_1ꜛ = e_1ꜜ * τ_all * ρ_i_21;
+    e_2ꜛ = τ_θ * ρ_2 / (1 - ρ_1 * ρ_2) * τ_i_12 / denom;
+    e_2ꜜ = e_2ꜛ * τ_all * ρ_i_21;
+    eꜜ = e_1ꜜ + e_2ꜛ;
+    eꜛ = e_1ꜛ + e_2ꜜ;
+
+    # compute the SIF emission spectrum  with integrated equation
+    @. vec_f = eꜜ * k_e * f_sife / 2 * exp(-k_f) * int_exp_kf_minus_ke_x(k_f, k_e) + eꜛ * exp(-k_e) * k_e * f_sife / 2 * exp(-k_f) * int_exp_kf_plus_ke_x(k_f, k_e);
+    @. vec_b = eꜜ * k_e * f_sife / 2 * int_exp_kf_plus_ke_x(-k_f, -k_e) + eꜛ * exp(-k_e) * k_e * f_sife / 2 * int_exp_kf_minus_ke_x(k_e, k_f);
+
+    return nothing
+);
+
+int_exp_kf_minus_ke_x(kf::FT, ke::FT) where {FT} = (kf == ke) ? FT(1) : (exp(kf - ke) - 1) / (kf - ke);
+
+int_exp_kf_plus_ke_x(kf::FT, ke::FT) where {FT} = (exp(kf + ke) - 1) / (kf + ke);
 
 
 #######################################################################################################################################################################################################
@@ -97,6 +125,7 @@ end;
 # General
 #     2023-Sep-16: add function to update the SIF conversion matrix of the n-1 layer
 #     2023-Oct-24: remove Φ_PS from the calculation so as to use with separate PSI and PSII SIF spectra
+#     2024-Aug-13: add alternative function to compute SIF matrices using k_e and k_f analytically
 #
 #######################################################################################################################################################################################################
 """
@@ -116,7 +145,9 @@ Update the SIF conversion matrix of the n-1 layer, given
 - `N` number of sublayers of each layer
 
 """
-function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, N::Int) where {FT}
+function layer_2_sif_vec! end;
+
+layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, τ_sub_sif::SubArray, vec_b::SubArray, vec_f::SubArray, N::Int) where {FT} = (
     # parameters required for the calculation
     α_sub = 1 - τ_sub;
     τ_all = τ_sub ^ N;
@@ -161,7 +192,29 @@ function layer_2_sif_vec!(τ_sub::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f
     vec_f ./= denom;
 
     return nothing
-end;
+);
+
+layer_2_sif_vec!(k_e::FT, τ_θ::FT, ρ_1::FT, ρ_2::FT, τ_2::FT, f_sife::FT, k_f::SubArray, vec_b::SubArray, vec_f::SubArray) where {FT} = (
+    # parameters required for the calculation
+    τ_all = exp(-k_e);
+
+    # 1. here we consider the n-1 layers as one single layer, and the SIF transmission within this effective layer is same as the computed τ_sub_2
+    #    then we need to rescale the interface ρ and τ for the effective layer so that the computed layer level ρ and τ are same as computed
+    ρ_i_12 = effective_ρ_12(ρ_2, τ_2, τ_all);
+    ρ_i_21 = effective_ρ_21(ρ_2, τ_2, τ_all);
+    τ_i_12 = 1 - ρ_i_12;
+    denom = 1 - τ_all * ρ_i_21 * τ_all * ρ_i_21;
+
+    # computing e_up and e_down
+    eꜜ = τ_θ / (1 - ρ_1 * ρ_2) * τ_i_12 / denom;
+    eꜛ = eꜜ * τ_all * ρ_i_21;
+
+    # compute the SIF emission spectrum  with integrated equation
+    @. vec_f = eꜜ * k_e * f_sife / 2 * exp(-k_f) * int_exp_kf_minus_ke_x(k_f, k_e) + eꜛ * exp(-k_e) * k_e * f_sife / 2 * exp(-k_f) * int_exp_kf_plus_ke_x(k_f, k_e);
+    @. vec_b = eꜜ * k_e * f_sife / 2 * int_exp_kf_plus_ke_x(-k_f, -k_e) + eꜛ * exp(-k_e) * k_e * f_sife / 2 * int_exp_kf_minus_ke_x(k_e, k_f);
+
+    return nothing
+);
 
 
 #######################################################################################################################################################################################################
@@ -258,11 +311,11 @@ end;
 # General
 #     2023-Sep-16: add function to update the SIF conversion matrix of the leaf
 #     2023-Sep-18: add an intermediate step to compute SIF out of each layer before rescaling it to the leaf level SIF
-#     2023-Sep-18: partition the SIF emission from PSI and PSII if Φ_SIF_WL is true
 #     2023-Sep-19: add option to cut off SIF emission to make sure its wavelength is within the range of the SIF excitation wavelengths
 #     2023-Sep-19: add option to rescale the SIF emission PDF because of the cut off
 #     2023-Oct-14: compute mat_mean and mat_diff
 #     2023-Oct-24: save the matrices for PSI and PSII as well as PS combined
+#     2024-Aug-13: add alternative function to compute SIF matrices using k_e and k_f analytically when N is nothing (integral method)
 #
 #######################################################################################################################################################################################################
 """
@@ -275,9 +328,11 @@ Update the SIF conversion matrix of the leaf, given
 - `N` number of sublayers of each layer
 
 """
-function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::Int) where {FT}
-    (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE, Φ_SIF_WL) = config;
-    (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS, Φ_PSI, Φ_PSII) = SPECTRA;
+function leaf_sif_matrices! end;
+
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::Int) where {FT} = (
+    (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
+    (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 
     # update the SIF emission vector per excitation wavelength
     ρ_21_sif    = view(bio.auxil.ρ_interface_21, IΛ_SIF);
@@ -290,20 +345,11 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
     τ_all_sif_1 = view(bio.auxil.τ_all_1, IΛ_SIF);
     τ_all_sif_2 = view(bio.auxil.τ_all_2, IΛ_SIF);
     ϕ           = bio.auxil._ϕ_sif;
-    ϕ1          = bio.auxil._ϕ1_sif;
-    ϕ2          = bio.auxil._ϕ2_sif;
     for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
 
-        # compute ϕ if Φ_SIF_WL is true, otherwise use the default Φ_PS
-        f_psii = bio.auxil.f_psii[ii];
-        if Φ_SIF_WL
-            ϕ .= view(Φ_PSII, IΛ_SIF) .* f_psii .+ view(Φ_PSI, IΛ_SIF) .* (1 - f_psii);
-            ϕ1 .= view(Φ_PSI, IΛ_SIF);
-            ϕ2 .= view(Φ_PSII, IΛ_SIF);
-        else
-            ϕ .= view(Φ_PS, IΛ_SIF);
-        end;
+        # read the SIF emission spectrum
+        ϕ .= view(Φ_PS, IΛ_SIF);
 
         #  tune SIF emission PDF based on the SIF excitation wavelength
         #     0: not cut off
@@ -313,24 +359,16 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         if Φ_SIF_CUTOFF == 1
             if ii > IΛ_SIF[1]
                 ϕ[1:ii-IΛ_SIF[1]] .= 0;
-                ϕ1[1:ii-IΛ_SIF[1]] .= 0;
-                ϕ2[1:ii-IΛ_SIF[1]] .= 0;
             end;
         elseif Φ_SIF_CUTOFF == 2
             factor = 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp(Λ_SIFE[ii] / 10));
             ϕ .*= factor;
-            ϕ1 .*= factor;
-            ϕ2 .*= factor;
         end;
 
         # rescale ϕ if Φ_SIF_RESCALE is true
         if Φ_SIF_RESCALE && Φ_SIF_CUTOFF > 0
             ϕ ./= ΔΛ_SIF' * ϕ;
-            ϕ1 ./= ΔΛ_SIF' * ϕ1;
-            ϕ2 ./= ΔΛ_SIF' * ϕ2;
         end;
-        ϕ1 .*= 1 - f_psii;
-        ϕ2 .*= f_psii;
 
         # read in the values from the auxiliary variables
         vec_b_1     = view(bio.auxil.mat_b_1, :, i);
@@ -344,10 +382,6 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
 
         vec_b       = view(bio.auxil.mat_b, :, i);
         vec_f       = view(bio.auxil.mat_f, :, i);
-        vec_b1      = view(bio.auxil.psi_mat_b, :, i);
-        vec_f1      = view(bio.auxil.psi_mat_f, :, i);
-        vec_b2      = view(bio.auxil.psii_mat_b, :, i);
-        vec_f2      = view(bio.auxil.psii_mat_f, :, i);
 
         τ_i_θ       = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
         τ_i_12      = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
@@ -375,10 +409,6 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
         vec_f .= leaf_sif_f.(vec_f_1_out, vec_b_2_out, vec_f_2_out, ρ_1_sif, ρ_2_sif, τ_2_sif);
 
         # scale the matrices based on the Φ_PS*
-        vec_b1 .= vec_b .* ϕ1;
-        vec_f1 .= vec_f .* ϕ1;
-        vec_b2 .= vec_b .* ϕ2;
-        vec_f2 .= vec_f .* ϕ2;
         vec_b .*= ϕ;
         vec_f .*= ϕ;
     end;
@@ -392,4 +422,98 @@ function leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::
     bio.auxil.psii_mat_diff .= (bio.auxil.psii_mat_b .- bio.auxil.psii_mat_f) ./ 2;
 
     return nothing
-end;
+);
+
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::Nothing) where {FT} = (
+    (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
+    (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
+
+    # update the SIF emission vector per excitation wavelength
+    ρ_21_sif    = view(bio.auxil.ρ_interface_21, IΛ_SIF);
+    ρ_1_sif     = view(bio.auxil.ρ_layer_1, IΛ_SIF);
+    τ_1_sif     = view(bio.auxil.τ_layer_1, IΛ_SIF);
+    ρ_2_sif     = view(bio.auxil.ρ_layer_2, IΛ_SIF);
+    τ_2_sif     = view(bio.auxil.τ_layer_2, IΛ_SIF);
+    τ_all_sif_1 = view(bio.auxil.τ_all_1, IΛ_SIF);
+    τ_all_sif_2 = view(bio.auxil.τ_all_2, IΛ_SIF);
+    k_all_sif_1 = view(bio.auxil.k_all_1, IΛ_SIF);
+    k_all_sif_2 = view(bio.auxil.k_all_2, IΛ_SIF);
+    ϕ           = bio.auxil._ϕ_sif;
+    for i in eachindex(IΛ_SIFE)
+        ii = IΛ_SIFE[i];
+
+        # read the SIF emission spectrum
+        ϕ .= view(Φ_PS, IΛ_SIF);
+
+        #  tune SIF emission PDF based on the SIF excitation wavelength
+        #     0: not cut off
+        #     1: sharp cut off
+        #     2: sigmoid cut off used in SCOPE
+        #     x: add more functions if you wish
+        if Φ_SIF_CUTOFF == 1
+            if ii > IΛ_SIF[1]
+                ϕ[1:ii-IΛ_SIF[1]] .= 0;
+            end;
+        elseif Φ_SIF_CUTOFF == 2
+            factor = 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp(Λ_SIFE[ii] / 10));
+            ϕ .*= factor;
+        end;
+
+        # rescale ϕ if Φ_SIF_RESCALE is true
+        if Φ_SIF_RESCALE && Φ_SIF_CUTOFF > 0
+            ϕ ./= ΔΛ_SIF' * ϕ;
+        end;
+
+        # read in the values from the auxiliary variables
+        vec_b_1     = view(bio.auxil.mat_b_1, :, i);
+        vec_f_1     = view(bio.auxil.mat_f_1, :, i);
+        vec_b_2     = view(bio.auxil.mat_b_2, :, i);
+        vec_f_2     = view(bio.auxil.mat_f_2, :, i);
+        vec_b_1_out = view(bio.auxil.mat_b_1_out, :, i);
+        vec_f_1_out = view(bio.auxil.mat_f_1_out, :, i);
+        vec_b_2_out = view(bio.auxil.mat_b_2_out, :, i);
+        vec_f_2_out = view(bio.auxil.mat_f_2_out, :, i);
+
+        vec_b       = view(bio.auxil.mat_b, :, i);
+        vec_f       = view(bio.auxil.mat_f, :, i);
+
+        τ_i_θ       = bio.auxil.τ_interface_θ[ii];      # the transmittance of the incoming radiation at the air-water interface
+        τ_i_12      = bio.auxil.τ_interface_12[ii];     # the transmittance of the isotropic radiation at the air-water interface
+        τ_i_21      = bio.auxil.τ_interface_21[ii];     # the transmittance of the isotropic radiation at the water-air interface
+        k_all_1     = bio.auxil.k_all_1[ii];            # the extinction coefficient within a sublayer of layer 1
+        k_all_2     = bio.auxil.k_all_2[ii];            # the extinction coefficient within a sublayer of layer 2 (n-1)
+        τ_l_θ       = bio.auxil.τ_layer_θ[ii];          # the transmittance of the incoming radiation across the leaf layer 1
+        ρ_l_1       = bio.auxil.ρ_layer_1[ii];          # the reflectance of isotropic radiation across layer 1
+        ρ_l_2       = bio.auxil.ρ_layer_2[ii];          # the reflectance of isotropic radiation across layer 2 (n-1)
+        τ_l_2       = bio.auxil.τ_layer_2[ii];          # the transmittance of isotropic radiation across layer 2 (n-1)
+        f_sife      = bio.auxil.f_sife[ii];
+
+        # update the SIF conversion matrix of the two layers (SIF that reachs the internal the water-air interface)
+        layer_1_sif_vec!(τ_i_θ, τ_i_12, τ_i_21, k_all_1, τ_l_θ, ρ_l_1, ρ_l_2, f_sife, k_all_sif_1, vec_b_1, vec_f_1);
+        layer_2_sif_vec!(k_all_2, τ_l_θ, ρ_l_1, ρ_l_2, τ_l_2, f_sife, k_all_sif_2, vec_b_2, vec_f_2);
+
+        # update the SIF conversion matrix of the two layers (SIF that reachs the external the water-air interface)
+        vec_b_1_out .= layer_sif_out.(vec_b_1, vec_f_1, ρ_21_sif, τ_all_sif_1);
+        vec_f_1_out .= layer_sif_out.(vec_f_1, vec_b_1, ρ_21_sif, τ_all_sif_1);
+        vec_b_2_out .= layer_sif_out.(vec_b_2, vec_f_2, ρ_21_sif, τ_all_sif_2);
+        vec_f_2_out .= layer_sif_out.(vec_f_2, vec_b_2, ρ_21_sif, τ_all_sif_2);
+
+        # compute the SIF emission vector backward and forward
+        vec_b .= leaf_sif_b.(vec_b_1_out, vec_f_1_out, vec_b_2_out, ρ_1_sif, τ_1_sif, ρ_2_sif);
+        vec_f .= leaf_sif_f.(vec_f_1_out, vec_b_2_out, vec_f_2_out, ρ_1_sif, ρ_2_sif, τ_2_sif);
+
+        # scale the matrices based on the Φ_PS*
+        vec_b .*= ϕ;
+        vec_f .*= ϕ;
+    end;
+
+    # compute the mean and mean diff of mat_b and mat_f
+    bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
+    bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
+    bio.auxil.psi_mat_mean .= (bio.auxil.psi_mat_b .+ bio.auxil.psi_mat_f) ./ 2;
+    bio.auxil.psi_mat_diff .= (bio.auxil.psi_mat_b .- bio.auxil.psi_mat_f) ./ 2;
+    bio.auxil.psii_mat_mean .= (bio.auxil.psii_mat_b .+ bio.auxil.psii_mat_f) ./ 2;
+    bio.auxil.psii_mat_diff .= (bio.auxil.psii_mat_b .- bio.auxil.psii_mat_f) ./ 2;
+
+    return nothing
+);

@@ -10,7 +10,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Temperature dependencies" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2
@@ -23,7 +23,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Electron transport" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2
@@ -37,7 +37,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "RubisCO limited rate" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2
@@ -57,7 +57,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Light limited rate" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2
@@ -77,7 +77,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Product limited rate" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2
@@ -97,7 +97,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Photosynthesis colimitation" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2
@@ -115,7 +115,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Fluorescence coefficients" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2
@@ -149,7 +149,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Photosynthesis only (for stomatal models)" begin
         air = NS.AirLayer{Float64}();
-        ps = NS.LeafPhotosystem{Float64}();
+        ps = NS.LeafPhotosystem{Float64}("C3VJP");
         psts = [NS.GeneralC3Trait{Float64}(), NS.GeneralC4Trait{Float64}()];
         psss = [NS.C3State{Float64}(), NS.C4State{Float64}()];
         for i in 1:2

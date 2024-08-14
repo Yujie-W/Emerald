@@ -93,6 +93,7 @@ end;
 #     2023-Sep-22: add field f_psii
 #     2023-Oct-14: add fields mat_mean, and mat_diff
 #     2023-Oct-24: add fields psi_mat_* and psii_mat_*
+#     2024-Aug-13: add fields k_all_1 and k_all_2 for distinction coefficient
 #
 #######################################################################################################################################################################################################
 """
@@ -143,6 +144,10 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     τ_all_1::Vector{FT}
     "Second layer total transmittance of all sublayers `[-]`"
     τ_all_2::Vector{FT}
+    "First layer total distinction coefficient of all sublayers `[-]`"
+    k_all_1::Vector{FT}
+    "Second layer total distinction coefficient of all sublayers `[-]`"
+    k_all_2::Vector{FT}
 
     # reflectance and transmittance of a single layer
     "First layer reflectance with an average angle `[-]`"
@@ -240,6 +245,8 @@ LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 τ_sub_2          = zeros(FT, length(config.SPECTRA.Λ)),
                 τ_all_1          = zeros(FT, length(config.SPECTRA.Λ)),
                 τ_all_2          = zeros(FT, length(config.SPECTRA.Λ)),
+                k_all_1          = zeros(FT, length(config.SPECTRA.Λ)),
+                k_all_2          = zeros(FT, length(config.SPECTRA.Λ)),
                 ρ_layer_θ        = zeros(FT, length(config.SPECTRA.Λ)),
                 τ_layer_θ        = zeros(FT, length(config.SPECTRA.Λ)),
                 ρ_layer_1        = zeros(FT, length(config.SPECTRA.Λ)),
