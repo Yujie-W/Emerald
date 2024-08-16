@@ -113,3 +113,23 @@ end;
 QLFluorescenceModelHanC3(FT) = QLFluorescenceModelHan{FT}(K_A = 0.8, K_B = 0.95e-3 / 0.85);
 
 QLFluorescenceModelHanC4(FT) = QLFluorescenceModelHan{FT}(K_A = 0.83, K_B = 0.63e-3 / 0.85);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General
+#     2024-Aug-16: add SIFMatrixDoublingMethod (N_DUB)
+#     2024-Aug-16: add SIFMatrixExcitationEmissionMethod (only a N)
+#
+#######################################################################################################################################################################################################
+""" Method to compute SIF matrices using the doubling method """
+Base.@kwdef struct SIFMatrixDoublingMethod
+    N::Int = 10
+end;
+
+
+""" Method to compute SIF matrices using the excitation-emission method """
+Base.@kwdef struct SIFMatrixExcitationEmissionMethod
+    N::Union{Int, Nothing} = nothing
+end;

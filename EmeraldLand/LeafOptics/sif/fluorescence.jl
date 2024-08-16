@@ -316,6 +316,7 @@ end;
 #     2023-Oct-14: compute mat_mean and mat_diff
 #     2023-Oct-24: save the matrices for PSI and PSII as well as PS combined
 #     2024-Aug-13: add alternative function to compute SIF matrices using k_e and k_f analytically when N is nothing (integral method)
+#     2024-Aug-16: abstractize the function to allow for different methods of computing SIF matrices
 #
 #######################################################################################################################################################################################################
 """
@@ -330,7 +331,11 @@ Update the SIF conversion matrix of the leaf, given
 """
 function leaf_sif_matrices! end;
 
-leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::Int) where {FT} = (
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}) where {FT} = leaf_sif_matrices!(config, bio, bio.trait.SIF_METHOD);
+
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixExcitationEmissionMethod) where {FT} = leaf_sif_matrices!(config, bio, mtd, mtd.N);
+
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixExcitationEmissionMethod, N::Int) where {FT} = (
     (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 
@@ -424,7 +429,7 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, N::Int) wher
     return nothing
 );
 
-leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::Nothing) where {FT} = (
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::SIFMatrixExcitationEmissionMethod, ::Nothing) where {FT} = (
     (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 

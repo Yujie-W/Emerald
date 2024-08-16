@@ -5,6 +5,7 @@ using SpecialFunctions: expint
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
 using ..EmeraldUtility.StructEqual: sync_struct!
 
+using ..Namespace: SIFMatrixDoublingMethod, SIFMatrixExcitationEmissionMethod
 using ..Namespace: LeafBio, LeafBioState, LeafBioTrait
 using ..Namespace: BulkSPAC, SPACConfiguration
 
@@ -14,9 +15,10 @@ include("prospect/sublayer.jl");
 include("prospect/layer.jl");
 include("prospect/leaf.jl");
 
-include("sif/doubling.jl");
 include("sif/effective.jl");
 include("sif/fluorescence.jl");
+
+include("fluspect/doubling.jl");
 
 
 #######################################################################################################################################################################################################
@@ -30,24 +32,23 @@ include("sif/fluorescence.jl");
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Union{Nothing, Int} = nothing) where {FT}
+    leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40)) where {FT}
 
 Update the interface, sublayer, layer, and leaf level reflectance and transmittance within `bio`, given
 - `config` SPAC configuration
 - `bio` LeafBio struct
 - `lwc` Leaf water content
 - `θ` Incoming radiation angle
-- `N` If not nthing: number of sublayers
 
 """
-function leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Union{Nothing, Int} = nothing) where {FT}
+function leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40)) where {FT}
     leaf_interface_ρ_τ!(config, bio, θ);
-    leaf_sublayer_f_τ!(config, bio, lwc, N);
+    leaf_sublayer_f_τ!(config, bio, lwc);
     leaf_layer_ρ_τ!(bio);
     leaf_ρ_τ!(bio);
 
     if config.ENABLE_SIF
-        leaf_sif_matrices!(config, bio, N);
+        leaf_sif_matrices!(config, bio);
     end;
 
     return nothing

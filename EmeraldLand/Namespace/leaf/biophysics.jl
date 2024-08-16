@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2024-Feb-26: add struct LeafBioTrait
+#     2024-Aug-16: add field SIF_METHOD
 #
 #######################################################################################################################################################################################################
 """
@@ -19,6 +20,9 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafBioTrait{FT<:AbstractFloat}
+    "SIF matrix method"
+    SIF_METHOD::Union{SIFMatrixDoublingMethod, SIFMatrixExcitationEmissionMethod} = SIFMatrixExcitationEmissionMethod()
+
     "Anthocyanin content `[μg cm⁻²]`"
     ant::FT = 0
     "Senescent material (brown pigments) fraction `[-]`"

@@ -3,21 +3,13 @@
 # Changes to this function
 # General
 #     2023-Sep-21: add function to compute the matrices using doubling adding method
+#     2024-Aug-16: refactor the function to use SIFMatrixDoublingMethod (N_DUB)
 #
 #######################################################################################################################################################################################################
-"""
-
-    doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; NDUB = 10) where {FT}
-
-Return the matrices for fluorescence calculation using doubling adding method, given
-- `config` `SPACConfiguration` type struct
-- `bio` `LeafBio` type struct
-- `NDUB` Number of doubling adding steps
-
-"""
-function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; NDUB = 10) where {FT}
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixDoublingMethod) where {FT} = (
     (; SPECTRA) = config;
     (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
+    (; N) = mtd;
     auxil = bio.auxil;
 
     # Doubling method used to calculate fluoresence is now only applied to the part of the leaf where absorption takes place, that is, the part exclusive of the leaf-air interfaces.
@@ -53,19 +45,19 @@ function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; 
     k_chl = auxil.f_sife .* k;
 
     # indices of WLE and WLF within wlp
-    ϵ = FT(2) ^ -NDUB;
+    ϵ = FT(2) ^ -N;
     ρ_e     = s[IΛ_SIFE] .* ϵ;
     ρ_f     = s[IΛ_SIF] .* ϵ;
     sigmoid = 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp.(Λ_SIFE' ./ 10));
-    mat_f   = Φ_PS[IΛ_SIF] .* ϵ ./ 2 .* k_chl[IΛ_SIFE]' .* sigmoid;
-    mat_b   = Φ_PS[IΛ_SIF] .* ϵ ./ 2 .* k_chl[IΛ_SIFE]' .* sigmoid;
+    mat_f_  = Φ_PS[IΛ_SIF] .* ϵ ./ 2 .* k_chl[IΛ_SIFE]' .* sigmoid;
+    mat_b_   = Φ_PS[IΛ_SIF] .* ϵ ./ 2 .* k_chl[IΛ_SIFE]' .* sigmoid;
     τ_e     = 1 .- (k[IΛ_SIFE] .+ s[IΛ_SIFE]) .* ϵ;
     τ_f     = 1 .- (k[IΛ_SIF] .+ s[IΛ_SIF]) .* ϵ;
 
     # Doubling adding routine
     m_1_e = ones(FT, 1, length(IΛ_SIFE));
     m_f_1 = ones(FT, length(IΛ_SIF), 1);
-    for _ in 1:NDUB
+    for _ in 1:N
         x_e     = τ_e ./ (1 .- ρ_e .^ 2);
         x_f     = τ_f ./ (1 .- ρ_f .^ 2);
         τ_e_n   = τ_e .* x_e;
@@ -78,14 +70,14 @@ function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; 
         z_e     = x_e .* ρ_e;
         z_f     = x_f .* ρ_f;
         a₂₂     = z_f .* m_1_e .+ m_f_1 .* z_e';
-        mat_f_n = mat_f .* a₁₁ .+ mat_b .* a₁₂;
-        mat_b_n = mat_b .* a₂₁ .+ mat_f .* a₂₂;
+        mat_f_n = mat_f_ .* a₁₁ .+ mat_b_ .* a₁₂;
+        mat_b_n = mat_b_ .* a₂₁ .+ mat_f_ .* a₂₂;
         τ_e     = τ_e_n;
         ρ_e     = ρ_e_n;
         τ_f     = τ_f_n;
         ρ_f     = ρ_f_n;
-        mat_f   = mat_f_n;
-        mat_b   = mat_b_n;
+        mat_f_  = mat_f_n;
+        mat_b_  = mat_b_n;
     end;
 
     # This reduced red SIF quite a bit in backscatter, not sure why.
@@ -99,8 +91,16 @@ function doubling_sif_matrices(config::SPACConfiguration{FT}, bio::LeafBio{FT}; 
     ma   = m_xe .* (1 .+ m_ye .* m_yf) .* m_xf;
     mb   = m_xe .* (m_ye .+ m_yf) .* m_xf;
 
-    leaf_mat_b = ma .* mat_b .+ mb .* mat_f;
-    leaf_mat_f = ma .* mat_f .+ mb .* mat_b;
+    bio.auxil.mat_b .= ma .* mat_b_ .+ mb .* mat_f_;
+    bio.auxil.mat_f .= ma .* mat_f_ .+ mb .* mat_b_;
 
-    return leaf_mat_b, leaf_mat_f
-end;
+    # compute the mean and mean diff of mat_b and mat_f
+    bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
+    bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
+    bio.auxil.psi_mat_mean .= (bio.auxil.psi_mat_b .+ bio.auxil.psi_mat_f) ./ 2;
+    bio.auxil.psi_mat_diff .= (bio.auxil.psi_mat_b .- bio.auxil.psi_mat_f) ./ 2;
+    bio.auxil.psii_mat_mean .= (bio.auxil.psii_mat_b .+ bio.auxil.psii_mat_f) ./ 2;
+    bio.auxil.psii_mat_diff .= (bio.auxil.psii_mat_b .- bio.auxil.psii_mat_f) ./ 2;
+
+    return nothing
+);
