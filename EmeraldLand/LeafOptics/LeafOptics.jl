@@ -15,8 +15,8 @@ include("prospect/sublayer.jl");
 include("prospect/layer.jl");
 include("prospect/leaf.jl");
 
-include("sif/effective.jl");
-include("sif/fluorescence.jl");
+include("newspect/effective.jl");
+include("newspect/fluorescence.jl");
 
 include("fluspect/doubling.jl");
 
