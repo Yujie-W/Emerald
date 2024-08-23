@@ -96,7 +96,6 @@ end;
 #     2023-Sep-19: add field f_ppar
 #     2023-Sep-22: add field f_psii
 #     2023-Oct-14: add fields mat_mean, and mat_diff
-#     2023-Oct-24: add fields psi_mat_* and psii_mat_*
 #     2024-Aug-13: add fields k_all_1 and k_all_2 for distinction coefficient
 #
 #######################################################################################################################################################################################################
@@ -203,26 +202,6 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
     mat_diff::Matrix{FT}
 
-    # SIF excitation to emittance matrix for PSI
-    "SIF matrix backwards `[-]`"
-    psi_mat_b::Matrix{FT}
-    "SIF matrix forwards `[-]`"
-    psi_mat_f::Matrix{FT}
-    "Mean SIF matrix of the backward and forward SIF matrices `[-]`"
-    psi_mat_mean::Matrix{FT}
-    "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
-    psi_mat_diff::Matrix{FT}
-
-    # SIF excitation to emittance matrix for PSII
-    "SIF matrix backwards `[-]`"
-    psii_mat_b::Matrix{FT}
-    "SIF matrix forwards `[-]`"
-    psii_mat_f::Matrix{FT}
-    "Mean SIF matrix of the backward and forward SIF matrices `[-]`"
-    psii_mat_mean::Matrix{FT}
-    "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
-    psii_mat_diff::Matrix{FT}
-
     # cache variables
     "SIF PDF based on the wavelength of excitation `[-]`"
     _ϕ_sif::Vector{FT}
@@ -272,14 +251,6 @@ LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 mat_f            = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
                 mat_mean         = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
                 mat_diff         = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psi_mat_b        = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psi_mat_f        = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psi_mat_mean     = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psi_mat_diff     = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psii_mat_b       = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psii_mat_f       = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psii_mat_mean    = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                psii_mat_diff    = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
                 _ϕ_sif           = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
                 _ϕ1_sif          = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
                 _ϕ2_sif          = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
@@ -323,14 +294,6 @@ sync_struct!(bio_from::LeafBioAuxil{FT}, bio_to::LeafBioAuxil{FT}) where {FT} = 
     bio_to.mat_f          .= bio_from.mat_f;
     bio_to.mat_mean       .= bio_from.mat_mean;
     bio_to.mat_diff       .= bio_from.mat_diff;
-    bio_to.psi_mat_b      .= bio_from.psi_mat_b;
-    bio_to.psi_mat_f      .= bio_from.psi_mat_f;
-    bio_to.psi_mat_mean   .= bio_from.psi_mat_mean;
-    bio_to.psi_mat_diff   .= bio_from.psi_mat_diff;
-    bio_to.psii_mat_b     .= bio_from.psii_mat_b;
-    bio_to.psii_mat_f     .= bio_from.psii_mat_f;
-    bio_to.psii_mat_mean  .= bio_from.psii_mat_mean;
-    bio_to.psii_mat_diff  .= bio_from.psii_mat_diff;
     bio_to._ϕ_sif         .= bio_from._ϕ_sif;
     bio_to._ϕ1_sif        .= bio_from._ϕ1_sif;
     bio_to._ϕ2_sif        .= bio_from._ϕ2_sif;

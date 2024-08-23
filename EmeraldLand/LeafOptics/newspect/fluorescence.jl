@@ -421,10 +421,6 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatr
     # compute the mean and mean diff of mat_b and mat_f
     bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
     bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
-    bio.auxil.psi_mat_mean .= (bio.auxil.psi_mat_b .+ bio.auxil.psi_mat_f) ./ 2;
-    bio.auxil.psi_mat_diff .= (bio.auxil.psi_mat_b .- bio.auxil.psi_mat_f) ./ 2;
-    bio.auxil.psii_mat_mean .= (bio.auxil.psii_mat_b .+ bio.auxil.psii_mat_f) ./ 2;
-    bio.auxil.psii_mat_diff .= (bio.auxil.psii_mat_b .- bio.auxil.psii_mat_f) ./ 2;
 
     return nothing
 );
@@ -515,10 +511,6 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::SIFMatrixE
     # compute the mean and mean diff of mat_b and mat_f
     bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
     bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
-    bio.auxil.psi_mat_mean .= (bio.auxil.psi_mat_b .+ bio.auxil.psi_mat_f) ./ 2;
-    bio.auxil.psi_mat_diff .= (bio.auxil.psi_mat_b .- bio.auxil.psi_mat_f) ./ 2;
-    bio.auxil.psii_mat_mean .= (bio.auxil.psii_mat_b .+ bio.auxil.psii_mat_f) ./ 2;
-    bio.auxil.psii_mat_diff .= (bio.auxil.psii_mat_b .- bio.auxil.psii_mat_f) ./ 2;
 
     return nothing
 );
