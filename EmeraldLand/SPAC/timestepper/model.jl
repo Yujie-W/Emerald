@@ -55,8 +55,8 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
     # 3. run canopy reflectance and fluorescence to use with remote sensing
     step_remote_sensing!(config, spac);
 
-    # 4. determine whether to regrow the leaves in the next round of LAI update
-    regrow_leaves!(config, spac);
+    # 4. determine whether to regrow the leaves in the next round of LAI update (set flag only)
+    regrow_leaves_flag!(config, spac);
 
     return nothing
 end;

@@ -140,11 +140,11 @@ function prescribe_traits!(
     #
     # update LAI and leaf area if leaf shedding flag is not true or regrow flag is true
     # clear the legacy of leaves if regrow flag is true
+    # TODO: use shed_leaves! and grow_leaves! functions in the future
     if !isnothing(lai)
         if !spac.plant._leaf_shedded || spac.plant._leaf_regrow
-            epslai = max(0, lai);
-            can_str.trait.lai = epslai;
-            can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
+            can_str.trait.lai = lai;
+            can_str.trait.δlai = lai .* ones(FT, n_layer) ./ n_layer;
             for irt in 1:n_layer
                 ilf = n_layer - irt + 1;
                 leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];

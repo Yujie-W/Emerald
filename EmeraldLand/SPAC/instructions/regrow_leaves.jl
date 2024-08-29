@@ -2,19 +2,19 @@
 #
 # Changes to the function
 # General
-#     2024-Aug-06: add function to regrow leaves
+#     2024-Aug-06: add function to regrow leaves (flag only)
 #
 #######################################################################################################################################################################################################
 """
 
-    regrow_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    regrow_leaves_flag!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Regrow leaves if the following conditions are met, given
 - `config` `SPACConfiguration` type configuration
 - `spac` `BulkSPAC` SPAC
 
 """
-function regrow_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+function regrow_leaves_flag!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
     if !config.ALLOW_LEAF_SHEDDING || !spac.plant._leaf_shedded
         return nothing
     end;
@@ -37,3 +37,29 @@ function regrow_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where
 
     return nothing
 end;
+
+#=
+function grow_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, lai_diff::FT) where {FT}
+    @assert lai_diff > 0 "lai_diff should be positive when regrowing leaves";
+
+    can_str = spac.canopy.structure;
+    junc = spac.plant.junction;
+    leaves = spac.plant.leaves;
+    sbulk = spac.bulk;
+    n_layer = length(leaves);
+
+    can_str.trait.lai += lai_diff;
+    can_str.trait.δlai = can_str.trait.lai .* ones(FT, n_layer) ./ n_layer;
+    for irt in 1:n_layer
+        ilf = n_layer - irt + 1;
+        leaf = leaves[ilf];
+        leaf.xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
+        delta_w = sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage;
+        delta_e = sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage * CP_L_MOL(FT) * junc.energy.s_aux.t;
+        junc.state.v_storage -= delta_w;
+        junc.state.Σe -= delta_e;
+    end;
+
+    return nothing
+end;
+=#

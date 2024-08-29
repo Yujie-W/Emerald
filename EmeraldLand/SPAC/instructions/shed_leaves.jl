@@ -15,7 +15,9 @@ Shed leaves from the plant if ALLOW_LEAF_SHEDDING is true, given
 - `spac` `BulkSPAC` SPAC
 
 """
-function shed_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+function shed_leaves! end;
+
+shed_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     if !config.ALLOW_LEAF_SHEDDING || spac.plant._leaf_shedded
         return nothing
     end;
@@ -37,4 +39,36 @@ function shed_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {
     t_aux!(config, spac.canopy, spac.cache);
 
     return nothing
-end;
+);
+
+#=
+shed_leaves!(spac::BulkSPAC{FT}, lai_diff::FT) where {FT} = (
+    @assert lai_diff < 0 "lai_diff should be negative when partially shedding leaves";
+
+    can_str = spac.canopy.structure;
+    junc = spac.plant.junction;
+    leaves = spac.plant.leaves;
+    sbulk = spac.bulk;
+    n_layer = length(leaves);
+
+    w_to_junc = 0;
+    e_to_junc = 0;
+    can_str.trait.lai += lai_diff;
+    can_str.trait.δlai = can_str.trait.lai .* ones(FT, n_layer) ./ n_layer;
+    for irt in 1:n_layer
+        ilf = n_layer - irt + 1;
+        leaf = leaves[ilf];
+        leaf.xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
+        w_to_junc -= sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage;
+        e_to_junc -= sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage * CP_L_MOL(FT) * leaf.energy.s_aux.t;
+    end;
+
+    # update the junction state variables
+    junc.state.v_storage += w_to_junc;
+    junc.state.Σe += e_to_junc;
+
+    # TODO: add the LMA to top soil
+
+    return nothing
+);
+=#
