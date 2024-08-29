@@ -9,8 +9,19 @@ spac = EmeraldLand.Namespace.BulkSPAC(config);
 
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, FT(0));
+for i in 1:10
+    EmeraldLand.SPAC.spac!(config, spac, FT(3600));
+    @info "debugging" i spac.plant.pool.c_pool;
+end;
 
-for i in 1:500
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);
+for i in 1:10
+    EmeraldLand.SPAC.spac!(config, spac, FT(3600));
+    @info "debugging" i spac.plant.pool.c_pool;
+end;
+
+EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 5);
+for i in 1:10
     EmeraldLand.SPAC.spac!(config, spac, FT(3600));
     @info "debugging" i spac.plant.pool.c_pool;
 end;
