@@ -24,12 +24,10 @@ Update the xylem pressure profile, given
 function xylem_pressure_profile! end;
 
 xylem_pressure_profile!(
-            config::SPACConfiguration{FT},
             xylem::XylemHydraulics{FT},
-            t::FT) where {FT} = xylem_pressure_profile!(config, xylem.trait, xylem.state, xylem.auxil, t);
+            t::FT) where {FT} = xylem_pressure_profile!(xylem.trait, xylem.state, xylem.auxil, t);
 
 xylem_pressure_profile!(
-            config::SPACConfiguration{FT},
             x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilNSS{FT},
@@ -37,8 +35,6 @@ xylem_pressure_profile!(
     if x_trait.area <= 0
         return nothing
     end;
-
-    (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
     k_max = x_state.asap * x_trait.k_max / x_trait.l;
@@ -51,9 +47,6 @@ xylem_pressure_profile!(
         p₂₅ = x_aux.pressure[i] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
-            if ENABLE_DROUGHT_LEGACY
-                x_state.p_history[i] = p₂₅;
-            end;
         else
             k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;
@@ -67,7 +60,6 @@ xylem_pressure_profile!(
 );
 
 xylem_pressure_profile!(
-            config::SPACConfiguration{FT},
             x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilSS{FT},
@@ -75,8 +67,6 @@ xylem_pressure_profile!(
     if x_trait.area <= 0
         return nothing
     end;
-
-    (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
     k_max = x_state.asap * x_trait.k_max / x_trait.l;
@@ -89,9 +79,6 @@ xylem_pressure_profile!(
         p₂₅ = x_aux.pressure[i] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
-            if ENABLE_DROUGHT_LEGACY
-                x_state.p_history[i] = p₂₅;
-            end;
         else
             k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;
@@ -104,13 +91,11 @@ xylem_pressure_profile!(
 );
 
 xylem_pressure_profile!(
-            config::SPACConfiguration{FT},
             xylem::XylemHydraulics{FT},
             t::FT,
-            rev::Bool) where {FT} = xylem_pressure_profile!(config, xylem.trait, xylem.state, xylem.auxil, t, rev);
+            rev::Bool) where {FT} = xylem_pressure_profile!(xylem.trait, xylem.state, xylem.auxil, t, rev);
 
 xylem_pressure_profile!(
-            config::SPACConfiguration{FT},
             x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilNSS{FT},
@@ -119,8 +104,6 @@ xylem_pressure_profile!(
     if x_trait.area <= 0
         return nothing
     end;
-
-    (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
     k_max = x_state.asap * x_trait.k_max / x_trait.l;
@@ -133,9 +116,6 @@ xylem_pressure_profile!(
         p₂₅ = x_aux.pressure[i+1] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
-            if ENABLE_DROUGHT_LEGACY
-                x_state.p_history[i] = p₂₅;
-            end;
         else
             k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;
@@ -149,7 +129,6 @@ xylem_pressure_profile!(
 );
 
 xylem_pressure_profile!(
-            config::SPACConfiguration{FT},
             x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilSS{FT},
@@ -158,8 +137,6 @@ xylem_pressure_profile!(
     if x_trait.area <= 0
         return nothing
     end;
-
-    (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
     k_max = x_state.asap * x_trait.k_max / x_trait.l;
@@ -172,9 +149,6 @@ xylem_pressure_profile!(
         p₂₅ = x_aux.pressure[i+1] / f_st;
         if p₂₅ < p_mem
             k_mem = relative_xylem_k(x_trait.vc, p₂₅);
-            if ENABLE_DROUGHT_LEGACY
-                x_state.p_history[i] = p₂₅;
-            end;
         else
             k_mem = relative_xylem_k(x_trait.vc, p_mem);
         end;

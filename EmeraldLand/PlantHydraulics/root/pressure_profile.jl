@@ -18,16 +18,16 @@ Update the rhizosphere and root xylem pressure profile, given
 - `junction` `JunctionCapacitor` type struct
 
 """
-function root_pressure_profile!(config::SPACConfiguration{FT}, soil::SoilLayer{FT}, root::Root{FT}, junction::JunctionCapacitor{FT}) where {FT}
+function root_pressure_profile!(soil::SoilLayer{FT}, root::Root{FT}, junction::JunctionCapacitor{FT}) where {FT}
     # if root is connected, update pressure from soil to rhizosphere and root xylem
     # else, update pressure from junction to root xylem (excluding rhizosphere)
     if root.xylem.auxil.connected
         rhizosphere_pressure_profile!(root, soil);
         root.xylem.auxil.pressure[1] = root.rhizosphere.auxil.p_rhizo;
-        xylem_pressure_profile!(config, root.xylem, root.energy.s_aux.t);
+        xylem_pressure_profile!(root.xylem, root.energy.s_aux.t);
     else
         root.xylem.auxil.pressure[end] = junction.s_aux.pressure;
-        xylem_pressure_profile!(config, root.xylem, root.energy.s_aux.t, true);
+        xylem_pressure_profile!(root.xylem, root.energy.s_aux.t, true);
     end;
 
     return nothing
@@ -49,14 +49,14 @@ Set up root pressure profile for each root, given
 - `spac` `BulkSPAC` type struct
 
 """
-function root_pressure_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+function root_pressure_profiles!(spac::BulkSPAC{FT}) where {FT}
     soils = spac.soils;
     roots = spac.plant.roots;
     rindx = spac.plant.roots_index;
     junction = spac.plant.junction;
 
     for i in eachindex(roots)
-        root_pressure_profile!(config, soils[rindx[i]], roots[i], junction);
+        root_pressure_profile!(soils[rindx[i]], roots[i], junction);
     end;
 
     return nothing
