@@ -59,7 +59,9 @@ mutable struct StemStates{FT<:AbstractFloat}
     xylem::XylemHydraulicsState{FT}
 end;
 
-StemStates(stem::Stem{FT}) where {FT} = StemStates{FT}(stem.energy.state, stem.xylem.state);
+StemStates(stem::Stem{FT}) where {FT} = StemStates{FT}(
+            deepcopy(stem.energy.state),
+            deepcopy(stem.xylem.state));
 
 sync_state!(stem::Stem{FT}, states::StemStates{FT}) where {FT} = (
     sync_state!(stem.energy.state, states.energy);

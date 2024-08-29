@@ -62,7 +62,9 @@ mutable struct MultiLayerCanopyStates{FT<:AbstractFloat}
     sun_geometry::SunGeometryState{FT}
 end;
 
-MultiLayerCanopyStates(canopy::MultiLayerCanopy{FT}) where {FT} = MultiLayerCanopyStates{FT}(canopy.sensor_geometry.state, canopy.sun_geometry.state);
+MultiLayerCanopyStates(canopy::MultiLayerCanopy{FT}) where {FT} = MultiLayerCanopyStates{FT}(
+            deepcopy(canopy.sensor_geometry.state),
+            deepcopy(canopy.sun_geometry.state));
 
 sync_state!(canopy::MultiLayerCanopy{FT}, states::MultiLayerCanopyStates{FT}) where {FT} = (
     sync_state!(canopy.sensor_geometry.state, states.sensor_geometry);

@@ -59,6 +59,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemHydraulicsState{FT}
+    "Sap wood area"
+    asap::FT = 1
     "Vector of xylem water pressure history (normalized to 298.15 K) `[MPa]`"
     p_history::Vector{FT}
     "Storage per element `[mol]`"
@@ -92,6 +94,8 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemHydraulicsAuxilNSS{FT}
+    "Sap wood area"
+    asap::FT = 1
     "Connected to the soil (for root only)"
     connected::Bool = true
     "Critical flow rate `[mol s⁻¹]`"

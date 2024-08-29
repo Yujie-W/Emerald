@@ -15,10 +15,10 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatr
     # Doubling method used to calculate fluoresence is now only applied to the part of the leaf where absorption takes place, that is, the part exclusive of the leaf-air interfaces.
     # The reflectance (rho) and transmittance (tau) of this part of the leaf are now determined by "subtracting" the interfaces.
     # CF Note: All of the below takes about 10 times more time than the RT above. Need to rething speed and accuracy. (10nm is bringing it down a lot!)
-    ρ_b = (auxil.ρ_leaf .- auxil.ρ_interface_θ) ./ (auxil.τ_interface_θ .* auxil.τ_interface_21 .+ (auxil.ρ_leaf - auxil.ρ_interface_θ) .* auxil.ρ_interface_21);
-    z   = auxil.τ_leaf .* (1 .- ρ_b .* auxil.ρ_interface_21) ./ (auxil.τ_interface_θ .* auxil.τ_interface_21);
-    ρ   = max.(0, (ρ_b .- auxil.ρ_interface_21 .* z .^ 2) ./ (1 .- (auxil.ρ_interface_21.* z) .^ 2));
-    τ   = (1 .- ρ_b .* auxil.ρ_interface_21) ./ (1 .- (auxil.ρ_interface_21.* z) .^ 2) .* z;
+    ρ_b = @. (auxil.ρ_leaf - auxil.ρ_interface_θ) / (auxil.τ_interface_θ * auxil.τ_interface_21 + (auxil.ρ_leaf - auxil.ρ_interface_θ) * auxil.ρ_interface_21);
+    z = @. auxil.τ_leaf * (1 - ρ_b * auxil.ρ_interface_21) / (auxil.τ_interface_θ * auxil.τ_interface_21);
+    ρ = @. max(0, (ρ_b - auxil.ρ_interface_21 * z ^ 2) / (1 - (auxil.ρ_interface_21 * z) ^ 2));
+    τ = @. (1 - ρ_b * auxil.ρ_interface_21) / (1 - (auxil.ρ_interface_21.* z) ^ 2) * z;
 
     # Derive Kubelka-Munk s and k
     a = similar(ρ);

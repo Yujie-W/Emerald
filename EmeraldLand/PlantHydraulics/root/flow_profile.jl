@@ -42,7 +42,7 @@ function root_flow_profile!(config::SPACConfiguration{FT}, root::Root{FT}, soil:
 
         # 1. set a max and min flow rate to use a bisection method to find the root flow rate
         p = abs(soil.s_aux.ψ - junction.s_aux.pressure - ρg_MPa(FT) * root.xylem.trait.Δh);
-        k = 1 / (1 / (root.rhizosphere.state.k_max * root.xylem.trait.area) + 1 / (root.xylem.trait.k_max * root.xylem.trait.area / root.xylem.trait.l));
+        k = 1 / (1 / (root.rhizosphere.state.k_max * root.xylem.trait.area) + 1 / (root.xylem.trait.k_max * root.xylem.state.asap / root.xylem.trait.l));
         f_max = k * p;
         f_min = -f_max;
 

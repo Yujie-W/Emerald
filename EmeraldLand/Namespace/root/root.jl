@@ -66,7 +66,10 @@ mutable struct RootStates{FT<:AbstractFloat}
     xylem::XylemHydraulicsState{FT}
 end;
 
-RootStates(root::Root{FT}) where {FT} = RootStates{FT}(root.energy.state, root.rhizosphere.state, root.xylem.state);
+RootStates(root::Root{FT}) where {FT} = RootStates{FT}(
+            deepcopy(root.energy.state),
+            deepcopy(root.rhizosphere.state),
+            deepcopy(root.xylem.state));
 
 sync_state!(root::Root{FT}, states::RootStates{FT}) where {FT} = (
     sync_state!(root.energy.state, states.energy);

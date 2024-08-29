@@ -112,6 +112,7 @@ include("environment/meteorology.jl");
 include("spac/cache.jl");
 include("spac/info.jl");
 include("spac/memory.jl");
+include("spac/pool.jl");
 
 include("spac/plant.jl");
 

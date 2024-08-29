@@ -41,7 +41,7 @@ xylem_pressure_profile!(
     (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
-    k_max = x_trait.area * x_trait.k_max / x_trait.l;
+    k_max = x_state.asap * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -79,7 +79,7 @@ xylem_pressure_profile!(
     (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
-    k_max = x_trait.area * x_trait.k_max / x_trait.l;
+    k_max = x_state.asap * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -123,7 +123,7 @@ xylem_pressure_profile!(
     (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
-    k_max = x_trait.area * x_trait.k_max / x_trait.l;
+    k_max = x_state.asap * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -162,7 +162,7 @@ xylem_pressure_profile!(
     (; ENABLE_DROUGHT_LEGACY) = config;
 
     # update the pressure profile calculation only if xylem area > 0
-    k_max = x_trait.area * x_trait.k_max / x_trait.l;
+    k_max = x_state.asap * x_trait.k_max / x_trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 

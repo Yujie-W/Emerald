@@ -95,12 +95,14 @@ BulkSPAC(config::SPACConfiguration{FT};
     normi = 1 - root_beta ^ (100 * -soil_bounds[n_root+1]);
     for i in eachindex(roots)
         roots[i].xylem.trait.area = basal_area * (root_beta ^ (100 * -soil_bounds[ind_root[i]]) - root_beta ^ (100 * -soil_bounds[ind_root[i]+1])) / normi;
+        roots[i].xylem.state.asap = roots[i].xylem.trait.area;
         roots[i].xylem.trait.Δh = 0 - max(plant_zs[1], soil_bounds[ind_root[i]+1]);
     end;
 
     # set up the trunk
     trunk = Stem(config);
     trunk.xylem.trait.area = basal_area;
+    trunk.xylem.state.asap = trunk.xylem.trait.area;
     trunk.xylem.trait.Δh = plant_zs[2];
 
     # set up the branches
@@ -110,6 +112,7 @@ BulkSPAC(config::SPACConfiguration{FT};
     branches = Stem{FT}[Stem(config) for _ in 1:n_layer];
     for i in eachindex(branches)
         branches[i].xylem.trait.area = basal_area / n_layer;
+        branches[i].xylem.state.asap = branches[i].xylem.trait.area;
         branches[i].xylem.trait.Δh = (min(plant_zs[3], air_bounds[ind_layer[i]+1]) - plant_zs[2]);
     end;
 
@@ -121,6 +124,7 @@ BulkSPAC(config::SPACConfiguration{FT};
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaves[ilf].xylem.trait.area = spac_sbulk.trait.area * spac_canopy.structure.trait.δlai[irt];
+        leaves[ilf].xylem.state.asap = leaves[ilf].xylem.trait.area;
     end;
 
     # set up the plant
@@ -190,8 +194,8 @@ mutable struct BulkSPACStates{FT}
 end;
 
 BulkSPACStates(spac::BulkSPAC{FT}) where {FT} = BulkSPACStates{FT}(
-            [soil.state for soil in spac.soils],
-            [air.state for air in spac.airs],
+            [deepcopy(soil.state) for soil in spac.soils],
+            [deepcopy(air.state) for air in spac.airs],
             PlantStates(spac.plant),
             MultiLayerCanopyStates(spac.canopy)
 );

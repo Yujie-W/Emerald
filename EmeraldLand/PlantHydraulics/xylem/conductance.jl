@@ -20,7 +20,7 @@ xylem_conductance(organ::Union{CanopyLayer{FT}, Leaf{FT}, Root{FT}, Stem{FT}}) w
 xylem_conductance(xylem::XylemHydraulics{FT}) where {FT} = xylem_conductance(xylem.trait, xylem.state);
 
 xylem_conductance(x_trait::XylemHydraulicsTrait{FT}, x_state::XylemHydraulicsState{FT}) where {FT} = (
-    k_max = x_trait.area * x_trait.k_max / x_trait.l;
+    k_max = x_state.asap * x_trait.k_max / x_trait.l;
     r_xyl::FT = 0;
 
     N = length(x_state.p_history);

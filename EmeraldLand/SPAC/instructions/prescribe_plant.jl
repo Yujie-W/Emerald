@@ -116,12 +116,12 @@ function prescribe_traits!(
         # partition kmax into the roots based on xylem area
         for root in roots
             # root.xylem.trait.k_max = root.xylem.trait.area / trunk.xylem.trait.area * ks[1] * root.xylem.trait.l / root.xylem.trait.area;
-            root.xylem.trait.k_max = ks[1] * root.xylem.trait.l / trunk.xylem.trait.area;
+            root.xylem.trait.k_max = ks[1] * root.xylem.trait.l / trunk.xylem.state.asap;
         end;
-        trunk.xylem.trait.k_max = ks[2] * trunk.xylem.trait.l / trunk.xylem.trait.area;
+        trunk.xylem.trait.k_max = ks[2] * trunk.xylem.trait.l / trunk.xylem.state.asap;
         for stem in branches
             #stem.xylem.state.kmax = stem.xylem.trait.area / trunk.xylem.trait.area * ks[3] * stem.xylem.trait.l / stem.xylem.trait.area;
-            stem.xylem.trait.k_max = ks[3] * stem.xylem.trait.l / trunk.xylem.trait.area;
+            stem.xylem.trait.k_max = ks[3] * stem.xylem.trait.l / trunk.xylem.state.asap;
         end;
         for leaf in leaves
             leaf.xylem.trait.k_max = ks[4] / (can_str.trait.lai * sbulk.trait.area);

@@ -84,8 +84,13 @@ mutable struct CanopyLayerStates{FT<:AbstractFloat}
     xylem::XylemHydraulicsState{FT}
 end;
 
-CanopyLayerStates(clayer::CanopyLayer{FT}) where {FT} =
-    CanopyLayerStates{FT}(clayer.bio.state, clayer.capacitor.state, clayer.energy.state, clayer.flux.state, clayer.photosystem.state, clayer.xylem.state);
+CanopyLayerStates(clayer::CanopyLayer{FT}) where {FT} = CanopyLayerStates{FT}(
+            deepcopy(clayer.bio.state),
+            deepcopy(clayer.capacitor.state),
+            deepcopy(clayer.energy.state),
+            deepcopy(clayer.flux.state),
+            deepcopy(clayer.photosystem.state),
+            deepcopy(clayer.xylem.state));
 
 sync_state!(clayer::CanopyLayer{FT}, states::CanopyLayerStates{FT}) where {FT} = (
     sync_state!(clayer.bio.state, states.bio);

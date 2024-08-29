@@ -88,7 +88,13 @@ mutable struct LeafStates{FT<:AbstractFloat}
     xylem::XylemHydraulicsState{FT}
 end;
 
-LeafStates(leaf::Leaf{FT}) where {FT} = LeafStates{FT}(leaf.bio.state, leaf.capacitor.state, leaf.energy.state, leaf.flux.state, leaf.photosystem.state, leaf.xylem.state);
+LeafStates(leaf::Leaf{FT}) where {FT} = LeafStates{FT}(
+            deepcopy(leaf.bio.state),
+            deepcopy(leaf.capacitor.state),
+            deepcopy(leaf.energy.state),
+            deepcopy(leaf.flux.state),
+            deepcopy(leaf.photosystem.state),
+            deepcopy(leaf.xylem.state));
 
 sync_state!(leaf::Leaf{FT}, states::LeafStates{FT}) where {FT} = (
     sync_state!(leaf.bio.state, states.bio);

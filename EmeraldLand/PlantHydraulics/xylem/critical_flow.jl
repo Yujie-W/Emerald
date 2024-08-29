@@ -25,7 +25,7 @@ function xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {
     end;
 
     # run the pressure profile calculation only if xylem area > 0
-    k_max = xylem.trait.area * xylem.trait.k_max / xylem.trait.l;
+    k_max = xylem.state.asap * xylem.trait.k_max / xylem.trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -88,7 +88,7 @@ function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}
     end;
 
     # set up method to calculate critical flow
-    fh = (xylem.auxil.pressure[1] - p_crt) * xylem.trait.k_max * xylem.trait.area / f_vis;
+    fh = (xylem.auxil.pressure[1] - p_crt) * xylem.trait.k_max * xylem.state.asap / f_vis;
     fl = FT(0);
     ms = cache.solver_nb;
     ms.x_min = fl;
