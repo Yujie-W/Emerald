@@ -46,6 +46,7 @@ step_aux!(spac::BulkSPAC{FT}) where {FT} = (
 );
 
 step_aux!(leaf::CanopyLayer{FT}) where {FT} = (
+    leaf.flux.auxil.∫∂c∂t_in = 0;
     leaf.flux.auxil.∫∂w∂t_out = 0;
 
     return nothing

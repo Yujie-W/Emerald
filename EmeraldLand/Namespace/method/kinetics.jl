@@ -285,8 +285,8 @@ VpmaxTDBoyd(FT)                     = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL
 ηCTDWang(FT)                        = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 1.0 , ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
 ηLTDWang(FT)                        = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 0.75, ΔHA = 0.0    , ΔHD = 225100.0, ΔSV = 710.0 );
 
-Q10TDAngiosperm(FT) = Q10{FT}(Q_10 = 1.4, T_REF = T₂₅(FT), VAL_REF = 0.0140/8760);
-Q10TDGymnosperm(FT) = Q10{FT}(Q_10 = 1.7, T_REF = T₂₅(FT), VAL_REF = 0.0425/8760);
+Q10TDAngiosperm(FT) = Q10{FT}(Q_10 = 1.4, T_REF = T₂₅(FT), VAL_REF = 2 * 0.0140 / 8760 * 1000); # μmol CO2 mol⁻¹ C biomass s⁻¹
+Q10TDGymnosperm(FT) = Q10{FT}(Q_10 = 1.7, T_REF = T₂₅(FT), VAL_REF = 2 * 0.0425 / 8760 * 1000); # μmol CO2 mol⁻¹ C biomass s⁻¹
 Q10TDKpepCLM(FT)    = Q10{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = 0.2);
 
 RespirationTDCLMC4(FT) = Q10PeakHT{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = NaN, ΔT_REF = 328.15, ΔT_SLOPE = 1.3);

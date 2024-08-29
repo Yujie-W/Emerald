@@ -9,6 +9,7 @@
 #     2024-Feb-27: customize leaf area from leaf area index per layer in the constructor function
 #     2024-Jul-24: add field cache to store cache information for speeding up the model
 #     2024-Aug-05: add Y = 1 - beta ^ (100 * -z) to calculate the root area distribution
+#     2024-Aug-29: set crown radius and height change as xylem length
 #
 #######################################################################################################################################################################################################
 """
@@ -48,9 +49,9 @@ end;
 
 BulkSPAC(config::SPACConfiguration{FT};
          air_bounds::Vector{<:Number} = collect(0:0.5:13),
-         basal_area::Number = 1,
+         basal_area::Number = 0.15,
          elevation::Number = 32,
-         ground_area::Number = 500,
+         ground_area::Number = 80,
          latitude::Number = 33.173,
          longitude::Number = 115.4494,
          root_beta::Number = 0.961,
@@ -87,6 +88,8 @@ BulkSPAC(config::SPACConfiguration{FT};
     spac_meteo = Meteorology{FT}(rad_sw = ShortwaveRadiation(config));
 
     # set up the plant (excluding canopy)
+    crown_radius = sqrt(ground_area / π);
+
     # set up the roots
     mask_soil = findall(plant_zs[1] .< soil_bounds .< 0);
     n_root = length(mask_soil) + 1;
@@ -97,6 +100,7 @@ BulkSPAC(config::SPACConfiguration{FT};
         roots[i].xylem.trait.area = basal_area * (root_beta ^ (100 * -soil_bounds[ind_root[i]]) - root_beta ^ (100 * -soil_bounds[ind_root[i]+1])) / normi;
         roots[i].xylem.state.asap = roots[i].xylem.trait.area;
         roots[i].xylem.trait.Δh = 0 - max(plant_zs[1], soil_bounds[ind_root[i]+1]);
+        roots[i].xylem.trait.l = crown_radius + roots[i].xylem.trait.Δh;
     end;
 
     # set up the trunk
@@ -104,6 +108,7 @@ BulkSPAC(config::SPACConfiguration{FT};
     trunk.xylem.trait.area = basal_area;
     trunk.xylem.state.asap = trunk.xylem.trait.area;
     trunk.xylem.trait.Δh = plant_zs[2];
+    trunk.xylem.trait.l = trunk.xylem.trait.Δh;
 
     # set up the branches
     mask_air = findall(plant_zs[2] .< air_bounds .< plant_zs[3]);
@@ -114,6 +119,7 @@ BulkSPAC(config::SPACConfiguration{FT};
         branches[i].xylem.trait.area = basal_area / n_layer;
         branches[i].xylem.state.asap = branches[i].xylem.trait.area;
         branches[i].xylem.trait.Δh = (min(plant_zs[3], air_bounds[ind_layer[i]+1]) - plant_zs[2]);
+        branches[i].xylem.trait.l = crown_radius + branches[i].xylem.trait.Δh;
     end;
 
     # set up the canopy

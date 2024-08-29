@@ -58,6 +58,7 @@ end;
 #     2023-Oct-24: add fields ϕ_f1_* and ϕ_f2_*
 #     2024-Jul-24: add field ∂A∂E and ∂Θ∂E to compute the dgdt using matrix calculation (much faster)
 #     2024-Aug-05: remove the shaded and sunlit distinctions as this is now meant for leaf level only
+#     2024-Aug-29: add field ∫∂c∂t_in for CO₂ exchange with the atmosphere
 #
 #######################################################################################################################################################################################################
 """
@@ -91,6 +92,8 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     p_CO₂_s::FT = 0
 
     # Integrators
+    "Integrator for CO₂ in (GPP - R)"
+    ∫∂c∂t_in::FT = 0
     "Integrator for transpiration out"
     ∫∂w∂t_out::FT = 0
 

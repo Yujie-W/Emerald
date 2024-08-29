@@ -18,7 +18,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct CarbonPoolWholePlant{FT}
     "Carbon pool `[mol]`"
-    c_pool::FT = 100
+    c_pool::FT = 80 * 0.02 * 3 * 10000 / 30
     "Threshold for new growth `[mol]`"
-    c_threshold::FT = 80
+    c_threshold::FT = 80 * 0.02 * 3 * 10000 / 30 * 0.8
 end;

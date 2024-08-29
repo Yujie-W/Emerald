@@ -5,6 +5,7 @@
 # Changes to this struct
 # General
 #     2024-Feb-26: add struct XylemHydraulicsTrait
+#     2024-Aug-29: add xylem respiration rate
 #
 #######################################################################################################################################################################################################
 """
@@ -21,20 +22,28 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemHydraulicsTrait{FT}
     "Area of xylem (root and stem) or of leaf `[m²]`"
     area::FT = 1
-    "Heat capacity of the xylem per volume or of leaf per mass `[J m⁻³ K⁻¹]`"
-    cp::FT = 1e6
-    "Maximal xylem hydraulic conductivity `[mol s⁻¹ MPa⁻¹ m⁻¹]` for root and stem; `[mol s⁻¹ MPa⁻¹ m⁻²]` for leaf"
-    k_max::FT = 25
     "Length `[m]`"
     l::FT = 1
+    "Height change `[m]`"
+    Δh::FT = 1
+
+    "Heat capacity of the xylem per volume or of leaf per mass `[J m⁻³ K⁻¹]`"
+    cp::FT = 1e6
+    "Wood density `[kg m⁻³]`"
+    ρ::FT = 600
+
+    "Maximal xylem hydraulic conductivity `[mol s⁻¹ MPa⁻¹ m⁻¹]` for root and stem; `[mol s⁻¹ MPa⁻¹ m⁻²]` for leaf"
+    k_max::FT = 100
     "Pressure volume curve"
     pv::Union{ExponentialPVCurve{FT}, LinearPVCurve{FT}, SegmentedPVCurve{FT}} = LinearPVCurve{FT}()
     "Maximum capaciatance per volume of wood `[mol m⁻³]`"
     v_max::FT = 0.1 * ρ_H₂O() / M_H₂O()
     "Vulnerability curve"
     vc::Union{ComplexVC{FT}, LogisticVC{FT}, PowerVC{FT}, WeibullVC{FT}} = WeibullVC{FT}()
-    "Height change `[m]`"
-    Δh::FT = 1
+
+    # TODO: move this out in the future to another struct
+    "Respiration rate"
+    r_wood::Q10{FT} = Q10TDAngiosperm(FT)
 end;
 
 

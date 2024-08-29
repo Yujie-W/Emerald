@@ -54,3 +54,59 @@ plant_photosynthesis!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canop
 
     return nothing
 );
+
+
+######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Aug-29: add function to update the carbon pool budget of the plant
+#
+#######################################################################################################################################################################################################
+"""
+
+    plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
+
+Update the carbon pool budget of the plant, given
+- `spac` `BulkSPAC` SPAC
+- `δt` Time step
+
+"""
+function plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
+    plant = spac.plant;
+    # TODO update the carbon pool of the plant to account for root and stem respiration
+    # TODO chemical energy change
+    for r in plant.roots
+        c_mol = r.xylem.trait.area * r.xylem.trait.l * r.xylem.trait.ρ * 1000 / 30; # mol C
+        resp = temperature_corrected_value(r.xylem.trait.r_wood, r.energy.s_aux.t); # μmol mol⁻¹ s⁻¹
+        f = resp * FT(1e-6) * c_mol * δt;
+        plant.pool.c_pool -= f;
+    end;
+
+    # trunk respiration
+    c_mol = plant.trunk.xylem.trait.area * plant.trunk.xylem.trait.l * plant.trunk.xylem.trait.ρ * 1000 / 30; # mol C
+    resp = temperature_corrected_value(plant.trunk.xylem.trait.r_wood, plant.trunk.energy.s_aux.t); # μmol mol⁻¹ s⁻¹
+    f = resp * FT(1e-6) * c_mol * δt;
+    plant.pool.c_pool -= f;
+
+    # branch respiration
+    for s in plant.branches
+        c_mol = s.xylem.trait.area * s.xylem.trait.l * s.xylem.trait.ρ * 1000 / 30; # mol C
+        resp = temperature_corrected_value(s.xylem.trait.r_wood, s.energy.s_aux.t); # μmol mol⁻¹ s⁻¹
+        f = resp * FT(1e-6) * c_mol * δt;
+        plant.pool.c_pool -= f;
+    end;
+
+    # do nothing if LAI == 0; otherwise update the carbon budget of each leaf (or canopy layer)
+    if spac.canopy.structure.trait.lai <= 0
+        return nothing
+    end;
+
+    for l in plant.leaves
+        f = l.flux.auxil.a_n_mean * FT(1e-6) * l.xylem.trait.area * δt;
+        l.flux.auxil.∫∂c∂t_in += f;
+        plant.pool.c_pool += f;
+    end;
+
+    return nothing
+end;

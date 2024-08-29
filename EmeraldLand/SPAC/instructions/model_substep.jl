@@ -37,6 +37,7 @@ end;
 # Changes to the function
 # General
 #     2024-Feb-27: add function substep_budgets! to run the budgets for all ∂x∂t using the adjusted time step
+#     2024-Aug-29: run carbon pool budget of the plant per substep
 #
 #######################################################################################################################################################################################################
 """
@@ -52,6 +53,7 @@ Run the budgets for all ∂x∂t using the adjusted time step, given
 function substep_budgets!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::FT) where {FT}
     soil_budgets!(config, spac, δt);
     plant_water_budget!(spac, δt);
+    plant_carbon_budget!(spac, δt);
     spac_energy_budget!(spac, δt);
     stomatal_conductance!(spac, δt);
     s_aux!(spac);
