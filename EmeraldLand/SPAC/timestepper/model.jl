@@ -61,6 +61,9 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
     # 5. determine whether to regrow the leaves in the next round of LAI update (set flag only)
     regrow_leaves_flag!(config, spac);
 
+    # 6. determine whether tree death occurs
+    plant_death!(config, spac);
+
     return nothing
 end;
 

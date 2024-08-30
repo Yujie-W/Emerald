@@ -35,6 +35,7 @@ include("instructions/aux_state.jl");
 include("instructions/aux_step.jl");
 include("instructions/aux_substep.jl");
 include("instructions/aux_trait.jl");
+include("instructions/death.jl");
 include("instructions/initialize.jl");
 include("instructions/model_step.jl");
 include("instructions/model_substep.jl");

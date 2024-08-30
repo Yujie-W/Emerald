@@ -24,7 +24,7 @@ function plant_growth!(spac::BulkSPAC{FT}) where {FT}
     if plant._leaf_regrow
         c_mol = plant.pool.c_pool - plant.pool.c_pool_min;
     else
-        c_mol = plant.pool.c_pool - plant.pool_c_pool_max;
+        c_mol = plant.pool.c_pool - plant.pool.c_pool_max;
     end;
 
     # if c_mol > 0, allocate the carbon to the xylem
