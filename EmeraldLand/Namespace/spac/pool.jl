@@ -18,10 +18,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CarbonPoolWholePlant{FT}
-    "Carbon pool `[mol]`"
+    "Carbon pool (default is one time the LAI investment at max LAI) `[mol]`"
     c_pool::FT = 3 * 80 * 0.02 * 10000 / 30
-    "Maximum threshold of pool, extra must be used for new growth (need to scale with biomass?) `[mol]`"
-    c_pool_max::FT = 3 * 80 * 0.02 * 10000 / 30 * 10
-    "Minimal threshold for new growth (need to scale with leaf biomass) `[mol]`"
-    c_pool_min::FT = 3 * 80 * 0.02 * 10000 / 30
+    "Maximum threshold of pool, extra must be used for new growth (default is 2 times the LAI + min; need to scale with biomass?) `[mol]`"
+    c_pool_max::FT = 2.5 * c_pool
+    "Minimal threshold used to guarantee maintenance respiration (need to scale with leaf biomass) `[mol]`"
+    c_pool_min::FT = 0.5 * c_pool
 end;

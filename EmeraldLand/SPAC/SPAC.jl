@@ -23,7 +23,8 @@ using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLa
 using ..Namespace: BulkSPAC, BulkSPACStates, SPACCache, SPACConfiguration, sync_state!
 using ..Photosynthesis: plant_carbon_budget!, plant_photosynthesis!
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using ..PlantHydraulics: capacitance_pressure, clear_legacy!, flow_out, plant_flow_profile!, plant_pressure_profile!, plant_water_budget!, update_legacy!, xylem_conductance, xylem_pressure
+using ..PlantHydraulics: capacitance_pressure, flow_out, xylem_conductance, xylem_pressure
+using ..PlantHydraulics: clear_legacy!, plant_flow_profile!, plant_growth!, plant_pressure_profile!, plant_water_budget!, update_legacy!
 using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25
 using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductance!, stomatal_conductance_profile!, β_factor!
 

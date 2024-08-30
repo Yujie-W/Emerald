@@ -52,3 +52,43 @@ recovery_or_growth(xylem::XylemHydraulics{FT}, c_mol::FT, t::FT) where {FT} = (
 
     return k_1 > k_2
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2024-Aug-30: add function to recover the xylem hydraulic system (area added to total area, pressure history updated)
+#
+#######################################################################################################################################################################################################
+"""
+
+    xylem_recovery!(organ::Union{Root{FT}, Stem{FT}}, c_mol::FT) where {FT}
+
+Recover the xylem hydraulic system (area added to total area, pressure history updated), given
+- `organ` `Root` or `Stem` type structure
+- `c_mol` Carbon investment `[mol]`
+
+"""
+function xylem_recovery! end;
+
+xylem_recovery!(organ::Union{Root{FT}, Stem{FT}}, c_mol::FT) where {FT} = xylem_recovery!(organ.xylem, c_mol);
+
+xylem_recovery!(xylem::XylemHydraulics{FT}, c_mol::FT) where {FT} = (
+    N = length(xylem.state.p_history);
+
+    # compute the potential area from the given carbon investment
+    delta_a = c_mol / (xylem.trait.l * xylem.trait.ρ * 1000 / 30);
+
+    # compute the conductance after recovery
+    for i in 1:N
+        k_rel = relative_xylem_k(xylem.trait.vc, xylem.state.p_history[i]) + delta_a / xylem.state.asap;
+        p_his = xylem_pressure(xylem.trait.vc, min(1, k_rel));
+        xylem.state.p_history[i] = p_his;
+    end;
+
+    # add the new xylem area to the total area
+    xylem.trait.area += delta_a;
+
+    return nothing
+);

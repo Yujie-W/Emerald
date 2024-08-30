@@ -10,6 +10,7 @@
 #     2024-Jul-24: add field cache to store cache information for speeding up the model
 #     2024-Aug-05: add Y = 1 - beta ^ (100 * -z) to calculate the root area distribution
 #     2024-Aug-29: set crown radius and height change as xylem length
+#     2024-Aug-30: initialize carbon pool for the whole plant when using the constructor
 #
 #######################################################################################################################################################################################################
 """
@@ -54,6 +55,7 @@ BulkSPAC(config::SPACConfiguration{FT};
          ground_area::Number = 80,
          latitude::Number = 33.173,
          longitude::Number = 115.4494,
+         max_lai::Number = 3,
          root_beta::Number = 0.961,
          soil_bounds::Vector{<:Number} = [0,-0.1,-0.25,-0.5,-1,-3],
          plant_zs::Vector{<:Number} = [-1,6,12],
@@ -133,6 +135,12 @@ BulkSPAC(config::SPACConfiguration{FT};
         leaves[ilf].xylem.state.asap = leaves[ilf].xylem.trait.area;
     end;
 
+    # set up the carbon pools
+    lai_pool = ground_area * max_lai * leaves[1].bio.trait.lma * 10000 / 30;
+    lai_pool_max = 2.5 * lai_pool;
+    lai_pool_min = 0.5 * lai_pool;
+    c_pool = CarbonPoolWholePlant{FT}(lai_pool, lai_pool_max, lai_pool_min);
+
     # set up the plant
     plant = Plant{FT}(
                 zs           = plant_zs,
@@ -143,6 +151,7 @@ BulkSPAC(config::SPACConfiguration{FT};
                 branches     = branches,
                 leaves       = leaves,
                 leaves_index = ind_layer,
+                pool         = c_pool,
                 memory       = PlantMemory(config));
 
     # set up the cache
