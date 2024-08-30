@@ -1,4 +1,5 @@
 # Netcdf configuration for output
+# All keys start with "MOD_" results in multiple outputs, deal with them carefully in the prepare_df.jl file
 SAVING_DICT = Dict{String, Any}(
     # Modeled soil water content and temperature
             "MOD_SWC"     => true,
@@ -21,7 +22,7 @@ SAVING_DICT = Dict{String, Any}(
             "ΣSIF"        => false,
             "ΣSIF_CHL"    => false,
             "ΣSIF_LEAF"   => false,
-            "ΦFΦP"        => false,
+            "MOD_ΦFΦP"    => false,
     # VI (default is false)
             "NDVI"        => false,
             "EVI"         => false,
@@ -30,6 +31,7 @@ SAVING_DICT = Dict{String, Any}(
             "PAR"         => false,
             "PPAR"        => false,
     # Modeled plant health status
+            "C_POOL"      => true,
             "K_PLANT"     => true,
             "K_ROOT_STEM" => true,
             "MOD_P_LEAF"  => false,

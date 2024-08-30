@@ -53,12 +53,12 @@ function prepare_wdf(spac::BulkSPAC{FT}, df::DataFrame; saving_dict::Dict{String
         push!(new_df_cols, "MOD_P_L_MEAN");
         push!(new_df_cols, "MOD_P_L_MIN");
     end;
-    if saving_dict["ΦFΦP"]
+    if saving_dict["MOD_ΦFΦP"]
         push!(new_df_cols, "ΦF");
         push!(new_df_cols, "ΦP");
     end;
     for label in keys(saving_dict)
-        if !(label in ["MOD_SWC", "MOD_T_SOIL", "MOD_T_LEAF", "MOD_T_MMM", "ΦFΦP"])
+        if !(label in ["MOD_SWC", "MOD_T_SOIL", "MOD_T_LEAF", "MOD_T_MMM", "MOD_ΦFΦP"])
             if saving_dict[label]
                 push!(new_df_cols, label);
             end;

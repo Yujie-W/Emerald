@@ -111,7 +111,7 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
 
     # save the VI (and phi) if there is sunlight
     if daytime
-        if saving_dict["ΦFΦP"]
+        if saving_dict["MOD_ΦFΦP"]
             wdf.ΦF[ind],wdf.ΦP[ind] = ΦF_ΦP(spac);
         end;
         if saving_dict["NDVI"]
@@ -129,6 +129,9 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     end;
 
     # save the plant health status
+    if saving_dict["C_POOL"]
+        wdf.C_POOL[ind] = spac.plant.pool.c_pool;
+    end;
     if saving_dict["K_PLANT"]
         wdf.K_PLANT[ind] = K_PLANT(spac);
     end;
