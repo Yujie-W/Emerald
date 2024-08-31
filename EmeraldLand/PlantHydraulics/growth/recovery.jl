@@ -48,8 +48,6 @@ recovery_or_growth(xylem::XylemHydraulics{FT}, c_mol::FT, t::FT) where {FT} = (
     # compute the conductance after new growth
     k_2 = k_0 * (1 + delta_a / xylem.state.asap);
 
-    @info "debugging" k_0 k_1 k_2 k_1 - k_0 k_2 - k_0;
-
     return k_1 > k_2
 );
 
