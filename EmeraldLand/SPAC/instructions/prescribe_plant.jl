@@ -20,6 +20,7 @@
 #     2024-Jul-24: add leaf shedded flag to LAI prescription
 #     2024-Aug-06: add leaf regrow flag to LAI prescription
 #     2024-Aug-29: use carbon pool to update LAI (when LAI increases)
+#     2024-Sep-03: make sure to update leaf asap as well when LAI is updated
 #
 #######################################################################################################################################################################################################
 """
@@ -150,6 +151,7 @@ function prescribe_traits!(
             for irt in 1:n_layer
                 ilf = n_layer - irt + 1;
                 leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
+                leaves[ilf].xylem.state.asap = leaves[ilf].xylem.trait.area;
             end;
 
             # if lai_diff is positive, remove the energy from the carbon pool (grow new xylem here as well!)
