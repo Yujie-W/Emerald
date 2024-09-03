@@ -105,7 +105,14 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} 
         return error("NaN detected in adjusted_time")
     end;
 
-    # make sure that the junction pressure does not change more than 0.1 MPa per time step
+    # make sure the water content of the junction does not exceed the minimum water content (half through here)
+    new_δt = min((plant.junction.state.v_storage - plant.junction.trait.v_max * plant.junction.trait.pv.residual) / abs(plant.junction.auxil.∂w∂t) / 2, new_δt);
+    if isnan(new_δt) || new_δt < 0.001 <= δt
+        @error "NaN or very small δt detected when adjusting δt based on junction water storage" plant.junction.state.v_storage plant.junction.auxil.∂w∂t;
+        return error("NaN detected in adjusted_time")
+    end;
+
+    # make sure that the junction pressure does not change more than 0.1 MPa per time step (change the order to avoid new_v < 0)
     new_v = plant.junction.state.v_storage + plant.junction.auxil.∂w∂t * new_δt;
     new_p = capacitance_pressure(plant.junction.trait.pv, new_v / plant.junction.trait.v_max, plant.junction.s_aux.t);
     if abs(new_p - plant.junction.s_aux.pressure) > 0.1
@@ -113,13 +120,6 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} 
     end;
     if isnan(new_δt) || new_δt < 0.001 <= δt
         @error "NaN or very small δt detected when adjusting δt based on junction pressure change" plant.junction.s_aux.pressure new_p;
-        return error("NaN detected in adjusted_time")
-    end;
-
-    # make sure the water content of the junction does not exceed the minimum water content (half through here)
-    new_δt = min((plant.junction.state.v_storage - plant.junction.trait.v_max * plant.junction.trait.pv.residual) / abs(plant.junction.auxil.∂w∂t) / 2, new_δt);
-    if isnan(new_δt) || new_δt < 0.001 <= δt
-        @error "NaN or very small δt detected when adjusting δt based on junction water storage" plant.junction.state.v_storage plant.junction.auxil.∂w∂t;
         return error("NaN detected in adjusted_time")
     end;
 
