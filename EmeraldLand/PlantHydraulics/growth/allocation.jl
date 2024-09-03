@@ -5,6 +5,7 @@
 # Changes to the function
 # General
 #     2024-Aug-30: add function to allocate carbon to different plant organs
+#     2024-Sep-03: remove field of min threshold for carbon pool
 #
 #######################################################################################################################################################################################################
 """
@@ -18,17 +19,11 @@ Allocate carbon to different plant organs, given
 function plant_growth!(spac::BulkSPAC{FT}) where {FT}
     plant = spac.plant;
 
-    # determine how much carbon is available for xylem growth
-    #     - if not regrow leaf mode, use the max pool threshold
-    #     - if regrow leaf mode, use the min pool threshold (immediately after leaf regrow)
-    if plant._leaf_regrow
-        c_mol = plant.pool.c_pool - plant.pool.c_pool_min;
-    else
-        c_mol = plant.pool.c_pool - plant.pool.c_pool_max;
-    end;
+    # determine how much carbon is available for xylem growth (only if the carbon pool is higher than the threshold)
+    c_mol = plant.pool.c_pool - plant.pool.c_pool_max;
 
-    # if c_mol > 0, allocate the carbon to the xylem
-    if c_mol <= 0
+    # if c_mol > 0.1 of the threshold, allocate the exceeding carbon to the xylem
+    if c_mol <= plant.pool.c_pool_max / 10
         return nothing;
     end;
 

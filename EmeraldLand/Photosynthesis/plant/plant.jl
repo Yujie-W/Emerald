@@ -61,6 +61,7 @@ plant_photosynthesis!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canop
 # Changes to this function
 # General
 #     2024-Aug-29: add function to update the carbon pool budget of the plant
+#     2024-Sep-03: do not update the carbon pool if the plant is dead
 #
 #######################################################################################################################################################################################################
 """
@@ -74,6 +75,10 @@ Update the carbon pool budget of the plant, given
 """
 function plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     plant = spac.plant;
+    if !plant._is_alive
+        return nothing
+    end;
+
     # TODO update the carbon pool of the plant to account for root and stem respiration
     # TODO chemical energy change
     for r in plant.roots

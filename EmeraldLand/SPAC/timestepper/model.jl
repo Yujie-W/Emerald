@@ -19,6 +19,7 @@
 #     2024-Jul-24: set regrow threshold to 50% of the critical pressure
 #     2024-Aug-06: move leaf shedding condition into the substep_aux! function
 #     2024-Aug-06: set regrow threshold to when junction pressure is higher than -0.1 MPa
+#     2024-Sep-03: add step to grow xylem when carbon pool is higher than the threshold
 # To do
 #     TODO: add top soil evaporation
 #
@@ -63,6 +64,9 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
 
     # 6. determine whether tree death occurs
     plant_death!(config, spac);
+
+    # 7. grow xylem when carbon pool is higher than the threshold
+    plant_growth!(spac);
 
     return nothing
 end;
