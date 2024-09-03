@@ -17,6 +17,7 @@
 #     2024-Jul-24: make sure the water content of the junction does not exceed the minimum water content
 #     2024-Aug-06: add junction pressure change controller (not change more than 0.1 MPa per time step)
 #     2024-Sep-03: run stem and branck T check as well (was deactivated by accident)
+#     2024-Sep-03: add leaf capacitance buffer pressure change controller (not change more than 0.1 MPa per time step)
 #
 #######################################################################################################################################################################################################
 """
@@ -113,13 +114,15 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} 
     end;
 
     # make sure that the junction pressure does not change more than 0.1 MPa per time step (change the order to avoid new_v < 0)
-    new_v = plant.junction.state.v_storage + plant.junction.auxil.∂w∂t * new_δt;
-    new_p = capacitance_pressure(plant.junction.trait.pv, new_v / plant.junction.trait.v_max, plant.junction.s_aux.t);
-    if abs(new_p - plant.junction.s_aux.pressure) > 0.1
-        new_δt *= FT(0.1) / abs(new_p - plant.junction.s_aux.pressure);
+    if plant.junction.auxil.∂w∂t > 0
+        new_v = capacitance_volume(plant.junction.trait.pv, plant.junction.s_aux.pressure + FT(0.1), plant.junction.s_aux.t) * plant.junction.trait.v_max;
+        new_δt = min((new_v - plant.junction.state.v_storage) / plant.junction.auxil.∂w∂t, new_δt);
+    elseif plant.junction.auxil.∂w∂t < 0
+        new_v = capacitance_volume(plant.junction.trait.pv, plant.junction.s_aux.pressure - FT(0.1), plant.junction.s_aux.t) * plant.junction.trait.v_max;
+        new_δt = min((new_v - plant.junction.state.v_storage) / plant.junction.auxil.∂w∂t, new_δt);
     end;
     if isnan(new_δt) || new_δt < 0.001 <= δt
-        @error "NaN or very small δt detected when adjusting δt based on junction pressure change" plant.junction.s_aux.pressure new_p;
+        @error "NaN or very small δt detected when adjusting δt based on junction pressure change" plant.junction.s_aux.pressure plant.junction.auxil.∂w∂t;
         return error("NaN detected in adjusted_time")
     end;
 
@@ -144,6 +147,23 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} 
     # leaves adjustments are required only when LAI > 0
     if lai <= 0
         return new_δt
+    end;
+
+    # make sure leaf capacitance buffer does not drain (pressure change does not exceed 0.1 MPa per time step)
+    for leaf in plant.leaves
+        if leaf.capacitor.auxil isa XylemHydraulicsAuxilNSS
+            if leaf.capacitor.auxil.flow > 0
+                new_v = capacitance_volume(leaf.capacitor.trait.pv, leaf.capacitor.auxil.p - FT(0.1), leaf.energy.s_aux.t) * leaf.capacitor.trait.v_max * leaf.xylem.trait.area;
+                new_δt = min((leaf.capacitor.state.v_storage - new_v) / leaf.capacitor.auxil.flow, new_δt);
+            elseif leaf.capacitor.auxil.flow < 0
+                new_v = capacitance_volume(leaf.capacitor.trait.pv, leaf.capacitor.auxil.p + FT(0.1), leaf.energy.s_aux.t) * leaf.capacitor.trait.v_max * leaf.xylem.trait.area;
+                new_δt = min((leaf.capacitor.state.v_storage - new_v) / leaf.capacitor.auxil.flow, new_δt);
+            end;
+        end;
+        if isnan(new_δt) || new_δt < 0.001 <= δt
+            @error "NaN or very small δt detected when adjusting δt based on leaf capacitance buffer" leaf.capacitor.auxil.p leaf.capacitor.auxil.flow;
+            return error("NaN detected in adjusted_time")
+        end;
     end;
 
     # make sure each leaf temperature does not change more than 1 K per time step
