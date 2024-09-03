@@ -6,6 +6,7 @@
 # General
 #     2023-Sep-27: add root_water_budget! function
 #     2024-Feb-28: add LAI <= 0 control
+#     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
 #
 #######################################################################################################################################################################################################
 """
@@ -25,7 +26,7 @@ Set the flow profile of the root or stem xylem, given
 function xylem_water_budget! end;
 
 xylem_water_budget!(xylem::XylemHydraulics{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
-    if xylem.trait.area <= 0
+    if xylem.state.asap <= 0
         return nothing
     end;
 

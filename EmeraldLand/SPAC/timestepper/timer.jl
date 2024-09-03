@@ -16,6 +16,7 @@
 #     2024-Feb-29: add methods for soil and plant time controllers (for cleaner reading experience, may need to add air in the future)
 #     2024-Jul-24: make sure the water content of the junction does not exceed the minimum water content
 #     2024-Aug-06: add junction pressure change controller (not change more than 0.1 MPa per time step)
+#     2024-Sep-03: run stem and branck T check as well (was deactivated by accident)
 #
 #######################################################################################################################################################################################################
 """
@@ -122,11 +123,6 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} 
         return error("NaN detected in adjusted_time")
     end;
 
-    # trunk, branches, and leaves adjustments are required only when LAI > 0
-    if lai <= 0
-        return new_δt
-    end;
-
     # make sure trunk temperature does not change more than 1 K per time step
     ∂T∂t = plant.trunk.energy.auxil.∂e∂t / plant.trunk.energy.s_aux.cp;
     new_δt = min(1 / abs(∂T∂t), new_δt);
@@ -143,6 +139,11 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} 
             @error "NaN or very small δt detected when adjusting δt based on branch temperature" stem.energy.auxil.∂e∂t stem.energy.s_aux.cp ∂T∂t;
             return error("NaN detected in adjusted_time")
         end;
+    end;
+
+    # leaves adjustments are required only when LAI > 0
+    if lai <= 0
+        return new_δt
     end;
 
     # make sure each leaf temperature does not change more than 1 K per time step

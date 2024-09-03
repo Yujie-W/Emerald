@@ -20,7 +20,7 @@ Return the xylem pressure at the end; of xylem, given
 
 """
 function xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {FT}
-    if xylem.trait.area <= 0
+    if xylem.state.asap <= 0
         return FT(0)
     end;
 
@@ -55,6 +55,7 @@ end;
 #     2023-Sep-27: add function to compute xylem critical pressure at steady state (no water exchange through the capacitor along the xylem)
 #     2024-Feb-28: add LAI <= 0 control
 #     2024_Jul-24: use spac cache
+#     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
 #
 #######################################################################################################################################################################################################
 """
@@ -70,7 +71,7 @@ Return the critical flow rate that triggers a given amount of loss of hydraulic 
 
 """
 function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}, cache::SPACCache{FT}, t::FT, ini::FT = FT(0.5)) where {FT}
-    if xylem.trait.area <= 0
+    if xylem.state.asap <= 0
         return FT(0)
     end;
 

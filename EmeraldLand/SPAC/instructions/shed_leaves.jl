@@ -4,6 +4,7 @@
 # General
 #     2024-Jul-24: add leaf shedding function
 #     2024-Aug-06: set g_H₂O_s to 0 when leaves are shedded (so g will be 0 when regrowing)
+#     2024-Sep-03: set asap to 0 when leaves are shedded
 #
 #######################################################################################################################################################################################################
 """
@@ -32,6 +33,7 @@ shed_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     for i in 1:n_layer
         leaf = leaves[i];
         leaf.xylem.trait.area = 0;
+        leaf.xylem.state.asap = 0;
         leaf.flux.state.g_H₂O_s .= 0;
     end;
 

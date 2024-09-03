@@ -9,6 +9,7 @@
 #     2022-Jun-29: rename SPAC to ML*SPAC to be more accurate
 #     2022-Jun-30: add compatibility to Leaf
 #     2022-Jul-08: deflate documentations
+#     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
 #
 #######################################################################################################################################################################################################
 """
@@ -87,15 +88,14 @@ update_legacy!(
 update_legacy!(
             config::SPACConfiguration{FT},
             xylem::XylemHydraulics{FT},
-            t::FT) where {FT} = update_legacy!(config, xylem.trait, xylem.state, xylem.auxil, t);
+            t::FT) where {FT} = update_legacy!(config, xylem.state, xylem.auxil, t);
 
 update_legacy!(
             config::SPACConfiguration{FT},
-            x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilNSS{FT},
             t::FT) where {FT} = (
-    if x_trait.area <= 0 || !config.ENABLE_DROUGHT_LEGACY
+    if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
         return nothing
     end;
 
@@ -115,11 +115,10 @@ update_legacy!(
 
 update_legacy!(
             config::SPACConfiguration{FT},
-            x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilSS{FT},
             t::FT) where {FT} = (
-    if x_trait.area <= 0 || !config.ENABLE_DROUGHT_LEGACY
+    if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
         return nothing
     end;
 
@@ -141,16 +140,15 @@ update_legacy!(
             config::SPACConfiguration{FT},
             xylem::XylemHydraulics{FT},
             t::FT,
-            rev::Bool) where {FT} = update_legacy!(config, xylem.trait, xylem.state, xylem.auxil, t, rev);
+            rev::Bool) where {FT} = update_legacy!(config, xylem.state, xylem.auxil, t, rev);
 
 update_legacy!(
             config::SPACConfiguration{FT},
-            x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilNSS{FT},
             t::FT,
             ::Bool) where {FT} = (
-    if x_trait.area <= 0 || !config.ENABLE_DROUGHT_LEGACY
+    if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
         return nothing
     end;
 
@@ -170,12 +168,11 @@ update_legacy!(
 
 update_legacy!(
             config::SPACConfiguration{FT},
-            x_trait::XylemHydraulicsTrait{FT},
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilSS{FT},
             t::FT,
             ::Bool) where {FT} = (
-    if x_trait.area <= 0 || !config.ENABLE_DROUGHT_LEGACY
+    if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
         return nothing
     end;
 

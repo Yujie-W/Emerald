@@ -12,6 +12,7 @@
 #     2023-Mar-27: weigh the beta among root layers only if flow rate is positive (if all flows are negative, beta = 1)
 #     2023-Aug-27: add nan check for beta calculation of empirical models
 #     2024-Feb-29: add LAI = 0 controller
+#     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
 # Bug fixes
 #     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaf, β, β.PARAM_X) as I forgot to write β_factor! before `()`
 #
@@ -49,7 +50,7 @@ function β_factor! end;
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = (
-    if leaf.xylem.trait.area <= 0
+    if leaf.xylem.state.asap <= 0
         return nothing
     end;
 

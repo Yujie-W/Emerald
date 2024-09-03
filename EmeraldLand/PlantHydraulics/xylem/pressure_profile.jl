@@ -8,6 +8,7 @@
 #     2023-Sep-30: add method to update the xylem pressure profile in the reverse order
 #     2024-Feb-28: add LAI <= 0 control
 #     2024-Aug-05: save the drought legacy
+#     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
 #
 #######################################################################################################################################################################################################
 """
@@ -32,7 +33,7 @@ xylem_pressure_profile!(
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilNSS{FT},
             t::FT) where {FT} = (
-    if x_trait.area <= 0
+    if x_state.asap <= 0
         return nothing
     end;
 
@@ -64,7 +65,7 @@ xylem_pressure_profile!(
             x_state::XylemHydraulicsState{FT},
             x_aux::XylemHydraulicsAuxilSS{FT},
             t::FT) where {FT} = (
-    if x_trait.area <= 0
+    if x_state.asap <= 0
         return nothing
     end;
 
@@ -101,7 +102,7 @@ xylem_pressure_profile!(
             x_aux::XylemHydraulicsAuxilNSS{FT},
             t::FT,
             ::Bool) where {FT} = (
-    if x_trait.area <= 0
+    if x_state.asap <= 0
         return nothing
     end;
 
@@ -134,7 +135,7 @@ xylem_pressure_profile!(
             x_aux::XylemHydraulicsAuxilSS{FT},
             t::FT,
             ::Bool) where {FT} = (
-    if x_trait.area <= 0
+    if x_state.asap <= 0
         return nothing
     end;
 
