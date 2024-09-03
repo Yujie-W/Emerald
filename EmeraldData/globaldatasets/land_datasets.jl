@@ -178,9 +178,9 @@ Base.@kwdef mutable struct LandDatasets{FT<:AbstractFloat}
     "Soil van Genuchten n"
     s_n::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_n))[1], LABELS.nx)
     "Soil van Genuchten Θr"
-    s_Θr::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θr))[1], LABELS.nx)
+    s_Θr::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θr))[1], LABELS.nx)     # TODO: check this
     "Soil van Genuchten Θs"
-    s_Θs::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θs))[1], LABELS.nx)
+    s_Θs::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θs))[1], LABELS.nx)     # TODO: check this
 
     # plant properties
     "Plant canopy height"
