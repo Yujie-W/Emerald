@@ -31,6 +31,7 @@ end;
 # Changes to the struct
 # General
 #     2024-Feb-25: add struct SunGeometrySDAuxil
+#     2024-Sep-04: separate leaf and stem optical properties
 #
 #######################################################################################################################################################################################################
 """
@@ -45,11 +46,17 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
-    # Scattering coefficients
-    "Backward direct->diffuse scatter weight"
-    sdb::FT = 0
-    "Forward direct->diffuse scatter weight"
-    sdf::FT = 0
+    # Scattering coefficients for leaf
+    "Backward direct->diffuse scatter weight (leaf)"
+    sdb_leaf::FT = 0
+    "Forward direct->diffuse scatter weight (leaf)"
+    sdf_leaf::FT = 0
+
+    # Scattering coefficients for stem
+    "Backward direct->diffuse scatter weight (stem)"
+    sdb_stem::FT = 0
+    "Forward direct->diffuse scatter weight (stem)"
+    sdf_stem::FT = 0
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(sza) at different inclination angles"
@@ -62,8 +69,10 @@ Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
     ks_incl::Vector{FT}
 
     # Extinction coefficient related
-    "Solar direction beam extinction coefficient weight (direct)"
-    ks::FT = 0
+    "Solar direction beam extinction coefficient weight (direct) (leaf)"
+    ks_leaf::FT = 0
+    "Solar direction beam extinction coefficient weight (direct) (stem)"
+    ks_stem::FT = 0
     "Probability of directly viewing a leaf in solar direction at different layers"
     p_sunlit::Vector{FT}
 

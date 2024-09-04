@@ -10,6 +10,7 @@
 #     2024-Jun-07: add step to compute e_sifꜛ_layer_sum (contribution to upward SIF from the layer after relection from the lower layers)
 #     2024-Jul-27: use bined PPAR to speed up
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Sep-04: separate leaf and stem optical properties
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
 #
@@ -121,8 +122,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         end;
 
         # add up the SIF from sunlit and shaded leaves for each layer through accounting for the SIF quantum yield
-        ϕ_sunlit_dif = lidf_weight(ϕ_sunlit, can_str.t_aux.p_incl, sun_geo.auxil._vec_azi);
-        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, ϕ_sunlit, sun_geo.s_aux.fs_abs, sun_geo.auxil._vec_azi, can_str.t_aux.p_incl);
+        ϕ_sunlit_dif = lidf_weight(ϕ_sunlit, can_str.t_aux.p_incl_leaf, sun_geo.auxil._vec_azi);
+        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, ϕ_sunlit, sun_geo.s_aux.fs_abs, sun_geo.auxil._vec_azi, can_str.t_aux.p_incl_leaf);
         sun_geo.auxil.e_sif_chl[:,irt] .= sun_geo.auxil._e_dif_shaded .* ϕ_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
     end;
 
@@ -131,7 +132,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # function to weight matrices by inclination angles
     @inline local_lidf_weight(mat_0, mat_1) = (
         sun_geo.auxil._mat_incl_azi .= mat_0 .* mat_1;
-        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.t_aux.p_incl);
+        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.t_aux.p_incl_leaf);
 
         return mean(sun_geo.auxil._vec_azi)
     );
@@ -264,10 +265,10 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
     # 4. compute SIF from the observer direction (CI is accounted for in the p_sensor and p_sun_sensor already, so do NOT use CI here)
     vec_layer = spac.cache.cache_layer_1;
-    vec_layer .= sen_geo.s_aux.p_sun_sensor .* can_str.trait.δlai ./ FT(π);
+    vec_layer .= sen_geo.s_aux.p_sun_sensor_leaf .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_sunlit, sen_geo.auxil.sif_sunlit, vec_layer);
 
-    vec_layer .= (sen_geo.s_aux.p_sensor .- sen_geo.s_aux.p_sun_sensor) .* can_str.trait.δlai ./ FT(π);
+    vec_layer .= (sen_geo.s_aux.p_sensor .- sen_geo.s_aux.p_sun_sensor_leaf) .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_shaded, sen_geo.auxil.sif_shaded, vec_layer);
 
     vec_layer .= sen_geo.s_aux.p_sensor .* can_str.trait.δlai ./ FT(π);

@@ -79,7 +79,7 @@ soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilL
     nir::FT = max(SOIL_ALBEDOS[sbulk.trait.color,2], SOIL_ALBEDOS[sbulk.trait.color,4] + delta);
 
     #
-    # TODO: use a new soil moddel for this, do not GSV which is not process-based
+    # TODO: use a new soil moddel for this, do not use GSV which is not process-based
     #
     # make an initial guess of the weights
     ρ_sw = similar(sbulk.auxil.ρ_sw);
@@ -130,7 +130,7 @@ soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilL
     nir::FT = SOIL_ALBEDOS[sbulk.trait.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,4];
 
     #
-    # TODO: use a new soil moddel for this, do not GSV which is not process-based
+    # TODO: use a new soil moddel for this, do not use GSV which is not process-based
     #
     # make an initial guess of the weights
     ρ_sw = similar(sbulk.auxil.ρ_sw);

@@ -7,6 +7,7 @@
 #     2023-Oct-09: add struct CanopyStructureState
 #     2023-Oct-18: add fields sai and δsai
 #     2024-Feb-27: move hot_spot parameter to SPACConfiguration
+#     2024-Sep-04: separate leaf and stem optical properties
 #
 #######################################################################################################################################################################################################
 """
@@ -24,6 +25,8 @@ Base.@kwdef mutable struct CanopyStructureTrait{FT}
     # canopy structure
     "Leaf inclination angle distribution function algorithm"
     lidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
+    "Stem inclination angle distribution function algorithm"
+    sidf::Union{BetaLIDF{FT}, VerhoefLIDF{FT}} = VerhoefLIDF{FT}()
 
     # Leaf area index
     "Leaf area index"
@@ -49,6 +52,7 @@ end;
 # General
 #     2024-Feb-25: add struct CanopyStructureTDAuxil
 #     2024-Mar-01: add field kd for diffuse radiation extinction coefficient (purely unabsorbed, not after reabsorption)
+#     2024-Sep-04: separate leaf and stem optical properties
 #
 #######################################################################################################################################################################################################
 """
@@ -63,24 +67,35 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
-    "Inclination angle distribution"
-    p_incl::Vector{FT}
+    "Inclination angle distribution of leaves"
+    p_incl_leaf::Vector{FT}
+    "Inclination angle distribution of stems"
+    p_incl_stem::Vector{FT}
     "Canopy level boundary locations"
     x_bnds::Vector{FT}
 
     # diffuse radiation extinction coefficients
-    "Diffuse radiation extinction coefficient weight"
-    kd::FT = 0
+    "Diffuse radiation extinction coefficient weight (leaf)"
+    kd_leaf::FT = 0
+    "Diffuse radiation extinction coefficient weight (stem)"
+    kd_stem::FT = 0
 
-    # canopy scattering coefficients
-    "Backward diffuse->diffuse scatter weight"
-    ddb::FT = 0
-    "Forward diffuse->diffuse scatter weight"
-    ddf::FT = 0
+    # canopy scattering coefficients (leaf)
+    "Backward diffuse->diffuse scatter weight (leaf)"
+    ddb_leaf::FT = 0
+    "Forward diffuse->diffuse scatter weight (leaf)"
+    ddf_leaf::FT = 0
+
+    # canopy scattering coefficients (stem)
+    "Backward diffuse->diffuse scatter weight (stem)"
+    ddb_stem::FT = 0
+    "Forward diffuse->diffuse scatter weight (stem)"
+    ddf_stem::FT = 0
 end;
 
 CanopyStructureTDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureTDAuxil{FT}(
-            p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL,
+            p_incl_leaf = ones(FT, config.DIM_INCL) ./ config.DIM_INCL,
+            p_incl_stem = ones(FT, config.DIM_INCL) ./ config.DIM_INCL,
             x_bnds = zeros(FT, n_layer + 1),
 );
 
@@ -226,7 +241,7 @@ CanopyStructure(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
     t_aux = CanopyStructureTDAuxil(config, n_layer);
     auxil = CanopyStructureAuxil(config, n_layer);
     t_aux.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
-    t_aux.p_incl = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
+    t_aux.p_incl_leaf = ones(FT, config.DIM_INCL) ./ config.DIM_INCL;
 
     return CanopyStructure{FT}(trait = trait, t_aux = t_aux, auxil = auxil)
 );

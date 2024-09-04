@@ -6,6 +6,7 @@
 # General
 #     2024-Feb-22: add function sensor_geometry_aux! to update the state-dependent auxiliary variables for sensor geometry (to call in step_remote_sensing!)
 #     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
+#     2024-Sep-04: separate leaf and stem optical properties
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction
 #
@@ -85,20 +86,27 @@ sensor_geometry_aux!(
         sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
         sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
     end;
-    sensa.ko = t_aux.p_incl' * sensa.ko_incl;
+    sensa.ko_leaf = t_aux.p_incl_leaf' * sensa.ko_incl;
+    sensa.ko_stem = t_aux.p_incl_stem' * sensa.ko_incl;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    sensa.dob = 0;
-    sensa.dof = 0;
+    sensa.dob_leaf = 0;
+    sensa.dof_leaf = 0;
+    sensa.dob_stem = 0;
+    sensa.dof_stem = 0;
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = Θ_INCL[i] / 180;
-        sensa.dob += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl[i];
-        sensa.dof += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl[i];
+        sensa.dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl_leaf[i];
+        sensa.dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl_leaf[i];
+        sensa.dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl_stem[i];
+        sensa.dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl_stem[i];
     end;
-    sensa.sob = t_aux.p_incl' * sensa.sb_incl;
-    sensa.sof = t_aux.p_incl' * sensa.sf_incl;
+    sensa.sob_leaf = t_aux.p_incl_leaf' * sensa.sb_incl;
+    sensa.sof_leaf = t_aux.p_incl_leaf' * sensa.sf_incl;
+    sensa.sob_stem = t_aux.p_incl_stem' * sensa.sb_incl;
+    sensa.sof_stem = t_aux.p_incl_stem' * sensa.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -115,23 +123,28 @@ sensor_geometry_aux!(
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
-    kocipai = sensa.ko * trait.ci * (trait.lai + trait.sai);
+    kocipai = sensa.ko_leaf * trait.ci * trait.lai + sensa.ko_stem * trait.ci * trait.sai;
     for i in eachindex(trait.δlai)
-        koipai = sensa.ko * (trait.δlai[i] + trait.δsai[i]);
+        koipai = sensa.ko_leaf * trait.δlai[i] + sensa.ko_stem * trait.δsai[i];
         sensa.p_sensor[i] = 1 / koipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
     end;
     sensa.p_sensor_soil = exp(-kocipai);
 
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
     dso = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
-    Σk = sensa.ko + sunsa.ks;
-    Πk = sensa.ko * sunsa.ks;
+    Σk_leaf = sensa.ko_leaf + sunsa.ks_leaf;
+    Πk_leaf = sensa.ko_leaf * sunsa.ks_leaf;
+    Σk_stem = sensa.ko_stem + sunsa.ks_stem;
+    Πk_stem = sensa.ko_stem * sunsa.ks_stem;
     cl = trait.ci * (trait.lai + trait.sai);
-    α  = dso / HOT_SPOT * 2 / Σk;
-    pso(x) = dso == 0 ? trait.ci * exp( (Σk - sqrt(Πk)) * cl * x ) : trait.ci * exp( Σk * cl * x + sqrt(Πk) * cl / α * (1 - exp(α * x)) );
+    α_leaf  = dso / HOT_SPOT * 2 / Σk_leaf;
+    α_stem  = dso / HOT_SPOT * 2 / Σk_stem;
+    pso_leaf(x) = dso == 0 ? trait.ci * exp( (Σk_leaf - sqrt(Πk_leaf)) * cl * x ) : trait.ci * exp( Σk_leaf * cl * x + sqrt(Πk_leaf) * cl / α_leaf * (1 - exp(α_leaf * x)) );
+    pso_stem(x) = dso == 0 ? trait.ci * exp( (Σk_stem - sqrt(Πk_stem)) * cl * x ) : trait.ci * exp( Σk_stem * cl * x + sqrt(Πk_stem) * cl / α_stem * (1 - exp(α_stem * x)) );
 
     for i in eachindex(trait.δlai)
-        sensa.p_sun_sensor[i] = quadgk(pso, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-2)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
+        sensa.p_sun_sensor_leaf[i] = quadgk(pso_leaf, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-2)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
+        sensa.p_sun_sensor_stem[i] = quadgk(pso_stem, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-2)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
     end;
 
     return nothing
@@ -149,6 +162,7 @@ sensor_geometry_aux!(
 #     2023-Oct-18: account for SAI in the sensor geometry calculation
 #     2024-Feb-22: add solar zenith angle control
 #     2024-Feb-25: move the trait- and state-dependent calculations to the sensor_geometry_aux! function
+#     2024-Sep-04: separate leaf and stem optical properties
 #
 #######################################################################################################################################################################################################
 """
@@ -178,12 +192,12 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dof .* leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dob .* leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.sof .* leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.s_aux.dob .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.s_aux.dof .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.s_aux.sob .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob_leaf .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dof_leaf .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof_leaf .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dob_leaf .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob_leaf .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.sof_leaf .* leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.s_aux.dob_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.s_aux.dof_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.s_aux.sob_stem .* SPECTRA.ρ_STEM;
     end;
 
     return nothing

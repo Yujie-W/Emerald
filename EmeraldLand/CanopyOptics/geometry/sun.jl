@@ -6,6 +6,7 @@
 # General
 #     2024-Feb-27: add function sun_geometry_aux! to update the trait-dependent auxiliary variables for sun geometry (to call in step_preparations!)
 #     2024-Mar-01: compute the layer shortwave scattering fractions based on the new theory
+#     2024-Sep-04: separate leaf and stem optical properties
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from solar direction
 #
@@ -44,24 +45,29 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
         sunsa.βs_incl[i] = βs;
         sunsa.ks_incl[i] = 2 / FT(π) / cosd(sunst.sza) * (Cs * (βs - FT(π)/2) + Ss * sin(βs));
     end;
-    sunsa.ks = t_aux.p_incl' * sunsa.ks_incl;
+    sunsa.ks_leaf = t_aux.p_incl_leaf' * sunsa.ks_incl;
+    sunsa.ks_stem = t_aux.p_incl_stem' * sunsa.ks_incl;
 
     # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
-    sunsa.sdb = 0;
-    sunsa.sdf = 0;
+    sunsa.sdb_leaf = 0;
+    sunsa.sdf_leaf = 0;
+    sunsa.sdb_stem = 0;
+    sunsa.sdf_stem = 0;
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(sunst.sza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = Θ_INCL[i] / 180;
-        sunsa.sdb += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl[i];
-        sunsa.sdf += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl[i];
+        sunsa.sdb_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl_leaf[i];
+        sunsa.sdf_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl_leaf[i];
+        sunsa.sdb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl_stem[i];
+        sunsa.sdf_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl_stem[i];
     end;
 
     # compute the sunlit leaf fraction
     # sunsa.ps = exp.(sunsa.ks .* trait.ci * trait.lai .* t_aux.x_bnds);
-    kscipai = sunsa.ks * trait.ci * (trait.lai + trait.sai);
+    kscipai = sunsa.ks_leaf * trait.ci * trait.lai + sunsa.ks_stem * trait.ci * trait.sai;
     for i in eachindex(trait.δlai)
-        ksipai = sunsa.ks * (trait.δlai[i] + trait.δsai[i]);
+        ksipai = sunsa.ks_leaf * trait.δlai[i] + sunsa.ks_stem * trait.δsai[i];
         sunsa.p_sunlit[i] = 1 / ksipai * (exp(kscipai * t_aux.x_bnds[i]) - exp(kscipai * t_aux.x_bnds[i+1]));
     end;
 
@@ -71,7 +77,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
     end;
     sunsa.fs ./= cosd(sunst.sza);
     sunsa.fs_abs .= abs.(sunsa.fs);
-    mul!(sunsa.fs_abs_mean, sunsa.fs_abs', t_aux.p_incl);
+    mul!(sunsa.fs_abs_mean, sunsa.fs_abs', t_aux.p_incl_leaf);
     for i in eachindex(Θ_INCL)
         view(sunsa.fs_cos²_incl,i,:) .= view(sunsa.fs,i,:) .* (cosd(Θ_INCL[i]) ^ 2);
     end;
@@ -90,6 +96,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
 #     2023-Oct-18: account for SAI in the sun geometry calculation
 #     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
 #     2024-Jun-06: fix a typo in the calculation of ρ_sd
+#     2024-Sep-04: separate leaf and stem optical properties
 #
 #######################################################################################################################################################################################################
 """
@@ -119,10 +126,10 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdf .* leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdb .* leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.s_aux.sdb .* SPECTRA.ρ_STEM;
-        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.s_aux.sdf .* SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb_leaf .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdf_leaf .* leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf_leaf .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdb_leaf .* leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.s_aux.sdb_stem .* SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.s_aux.sdf_stem .* SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -142,7 +149,7 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
         δlai = can_str.trait.δlai[i];
         δsai = can_str.trait.δsai[i];
         δpai = δlai + δsai;
-        kt_ss_x = sun_geo.s_aux.ks * δpai * can_str.trait.ci;
+        kt_ss_x = sun_geo.s_aux.ks_leaf * δlai * can_str.trait.ci + sun_geo.s_aux.ks_stem * δsai * can_str.trait.ci;
         kt_sd_x .= (view(sun_geo.auxil.sdf_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdf_stem,:,i) .* δsai) ./ δpai;
         kr_sd_x .= (view(sun_geo.auxil.sdb_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdb_stem,:,i) .* δsai) ./ δpai;
         sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);

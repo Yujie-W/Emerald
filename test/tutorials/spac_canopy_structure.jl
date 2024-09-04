@@ -16,7 +16,7 @@ using Test;
     # Currently, function prescribe_traits! supports the modification of leaf area index and clumping index.
     # However, the users should be aware of whether to run the t_aux!, s_aux!, and dull_aux! functions after the modification.
     # Here, changes in LAI and CI imapct the canopy structural parameters and sun-sensor geometrical parameters.
-    EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3, ci = 0.8);
+    EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 3, sai = 0, ci = 0.8);
     EmeraldLand.SPAC.t_aux!(config, spac.canopy, spac.cache);
     EmeraldLand.SPAC.dull_aux!(config, spac);
     @test true;
