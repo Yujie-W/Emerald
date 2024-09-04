@@ -165,6 +165,9 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     if saving_dict["P_JUNCTION"]
         wdf.P_JUNCTION[ind] = spac.plant.junction.s_aux.pressure;
     end;
+    if saving_dict["TRUNK_AREA"]
+        wdf.TRUNK_AREA[ind] = spac.plant.trunk.xylem.trait.area;
+    end;
 
     return nothing
 end;
