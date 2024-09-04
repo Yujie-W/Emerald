@@ -54,6 +54,17 @@ Leaf(config::SPACConfiguration{FT}) where {FT} = (
     return leaf
 );
 
+kill_plant!(st::Leaf{FT}) where {FT} = (
+    kill_plant!(st.bio);
+    kill_plant!(st.capacitor);
+    kill_plant!(st.energy);
+    kill_plant!(st.flux);
+    kill_plant!(st.photosystem);
+    kill_plant!(st.xylem);
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

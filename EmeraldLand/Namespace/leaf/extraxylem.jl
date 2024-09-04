@@ -89,6 +89,12 @@ Base.@kwdef mutable struct ExtraXylemCapacitorAuxil{FT}
     p::FT = 0
 end;
 
+kill_plant!(st::ExtraXylemCapacitorAuxil{FT}) where {FT} = (
+    st.flow = 0;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -117,3 +123,11 @@ Base.@kwdef mutable struct ExtraXylemCapacitor{FT}
     "Auxilary variables of the capacitor"
     auxil::ExtraXylemCapacitorAuxil{FT} = ExtraXylemCapacitorAuxil{FT}()
 end;
+
+kill_plant!(st::ExtraXylemCapacitor{FT}) where {FT} = (
+    kill_plant!(st.trait);
+    kill_plant!(st.state);
+    kill_plant!(st.auxil);
+
+    return nothing
+);

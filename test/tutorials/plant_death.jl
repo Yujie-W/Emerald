@@ -17,6 +17,9 @@ using Test;
 
     # Change carbon pool to negative and kill the plant
     spac.plant.pool.c_pool = -100;
+    EmeraldLand.SPAC.spac!(config, spac, FT(3600)); @info spac.plant.junction.state.v_storage;
+    EmeraldLand.SPAC.spac!(config, spac, FT(3600)); @info spac.plant.junction.state.v_storage;
+    EmeraldLand.SPAC.spac!(config, spac, FT(3600)); @info spac.plant.junction.state.v_storage;
     EmeraldLand.SPAC.spac!(config, spac, FT(3600));
     EmeraldLand.SPAC.spac!(config, spac, FT(3600));
     EmeraldLand.SPAC.spac!(config, spac, FT(3600));

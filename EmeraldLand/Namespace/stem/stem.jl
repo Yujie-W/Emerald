@@ -33,6 +33,13 @@ Stem(config::SPACConfiguration{FT}) where {FT} = (
     return Stem{FT}(xylem = xylem)
 );
 
+kill_plant!(st::Stem{FT}) where {FT} = (
+    kill_plant!(st.energy);
+    kill_plant!(st.xylem);
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #

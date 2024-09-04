@@ -75,7 +75,7 @@ Update the carbon pool budget of the plant, given
 """
 function plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     plant = spac.plant;
-    if !plant._is_alive
+    if plant.pool.c_pool <= 0
         return nothing
     end;
 

@@ -16,7 +16,7 @@ Return the flow rate into the organ
 """
 function flow_in end;
 
-flow_in(xylem::XylemHydraulics{FT}) where {FT} = flow_in(xylem.auxil);
+flow_in(xylem::XylemHydraulics{FT}) where {FT} = xylem.state.asap > 0 ? flow_in(xylem.auxil) : FT(0);
 
 flow_in(flow::XylemHydraulicsAuxilNSS{FT}) where {FT} = flow.flow[1];
 
@@ -39,7 +39,7 @@ Return the flow rate out of the organ
 """
 function flow_out end;
 
-flow_out(xylem::XylemHydraulics{FT}) where {FT} = flow_out(xylem.auxil);
+flow_out(xylem::XylemHydraulics{FT}) where {FT} = xylem.state.asap > 0 ? flow_out(xylem.auxil) : FT(0);
 
 flow_out(x_aux::XylemHydraulicsAuxilNSS{FT}) where {FT} = x_aux.flow[end];
 

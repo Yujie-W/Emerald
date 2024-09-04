@@ -81,6 +81,13 @@ XylemHydraulicsState(config::SPACConfiguration{FT}) where {FT} = XylemHydraulics
             v_storage = ones(FT, config.DIM_XYLEM) ./ config.DIM_XYLEM .* (0.1 * ρ_H₂O() / M_H₂O()),
 );
 
+kill_plant!(st::XylemHydraulicsState{FT}) where {FT} = (
+    st.asap = 0;
+    st.p_history .= 0;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -103,8 +110,6 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct XylemHydraulicsAuxilNSS{FT}
-    "Sap wood area"
-    asap::FT = 1
     "Connected to the soil (for root only)"
     connected::Bool = true
     "Critical flow rate `[mol s⁻¹]`"
@@ -124,6 +129,17 @@ XylemHydraulicsAuxilNSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraul
             flow_buffer = zeros(FT, config.DIM_XYLEM),
             p_storage   = zeros(FT, config.DIM_XYLEM),
             pressure    = zeros(FT, config.DIM_XYLEM + 1)
+);
+
+kill_plant!(st::XylemHydraulicsAuxilNSS{FT}) where {FT} = (
+    st.connected = false;
+    st.e_crit = 0;
+    st.flow .= 0;
+    st.flow_buffer .= 0;
+    st.p_storage .= 0;
+    st.pressure .= 0;
+
+    return nothing
 );
 
 
@@ -160,6 +176,15 @@ end;
 
 XylemHydraulicsAuxilSS(config::SPACConfiguration{FT}) where {FT} = XylemHydraulicsAuxilSS{FT}(pressure  = zeros(FT, config.DIM_XYLEM + 1));
 
+kill_plant!(st::XylemHydraulicsAuxilSS{FT}) where {FT} = (
+    st.connected = false;
+    st.e_crit = 0;
+    st.flow = 0;
+    st.pressure .= 0;
+
+    return nothing
+);
+
 
 #######################################################################################################################################################################################################
 #
@@ -191,4 +216,12 @@ end;
 XylemHydraulics(config::SPACConfiguration{FT}) where {FT} = XylemHydraulics{FT}(
             state = XylemHydraulicsState(config),
             auxil = config.STEADY_STATE_FLOW ? XylemHydraulicsAuxilSS(config) : XylemHydraulicsAuxilNSS(config)
+);
+
+kill_plant!(st::XylemHydraulics{FT}) where {FT} = (
+    kill_plant!(st.trait);
+    kill_plant!(st.state);
+    kill_plant!(st.auxil);
+
+    return nothing
 );

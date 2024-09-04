@@ -25,18 +25,8 @@ function plant_death!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {
 
     # if the plant is dead, set everything to zero
     # TODO: mass conservation (including the carbon pool)
-    spac.plant._is_alive = false;
     shed_leaves!(config, spac);
-
-    # set all xylem area to zero
-    for r in spac.plant.roots
-        r.xylem.state.asap = 0;
-        set_flow_profile!(r.xylem, FT(0));
-    end;
-    spac.plant.trunk.xylem.state.asap = 0;
-    for s in spac.plant.branches
-        s.xylem.state.asap = 0;
-    end;
+    kill_plant!(spac.plant);
 
     return nothing
 end;

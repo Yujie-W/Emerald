@@ -24,3 +24,10 @@ Base.@kwdef mutable struct CarbonPoolWholePlant{FT}
     "Maximum threshold of pool, extra must be used for new growth (default is 2 times the LAI + min; need to scale with biomass?) `[mol]`"
     c_pool_max::FT = 2.5 * c_pool
 end;
+
+sync_state!(state_from::CarbonPoolWholePlant{FT}, state_to::CarbonPoolWholePlant{FT}) where {FT} = (
+    state_to.c_pool = state_from.c_pool;
+    state_to.c_pool_max = state_from.c_pool_max;
+
+    return nothing
+);

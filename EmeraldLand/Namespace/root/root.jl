@@ -86,3 +86,11 @@ sync_state!(states::RootStates{FT}, root::Root{FT}) where {FT} = (
 
     return nothing
 );
+
+kill_plant!(st::Root{FT}) where {FT} = (
+    kill_plant!(st.energy);
+    kill_plant!(st.rhizosphere);
+    kill_plant!(st.xylem);
+
+    return nothing
+);

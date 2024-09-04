@@ -8,7 +8,6 @@
 #     2024-Jul-24: add leaf shedded flag cache
 #     2024-Aug-05: add field z_beta to store the root distribution beta
 #     2024-Aug-29: add carbon pool
-#     2024-Sep-03: add field _is_alive to store the plant status
 #
 #######################################################################################################################################################################################################
 """
@@ -48,13 +47,29 @@ Base.@kwdef mutable struct Plant{FT}
     memory::PlantMemory{FT}
 
     # Cache variables
-    "Whether plant is alive"
-    _is_alive::Bool = true
     "Whether to regrow the leaves"
     _leaf_regrow::Bool = false
     "Whether leaves are shedded"
     _leaf_shedded::Bool = false
 end;
+
+kill_plant!(plant::Plant{FT}) where {FT} = (
+    for root in plant.roots
+        kill_plant!(root);
+    end;
+    kill_plant!(plant.junction);
+    kill_plant!(plant.trunk);
+    for branch in plant.branches
+        kill_plant!(branch);
+    end;
+    for leaf in plant.leaves
+        kill_plant!(leaf);
+    end;
+    kill_plant!(plant.pool);
+    kill_plant!(plant.memory);
+
+    return nothing
+);
 
 
 #######################################################################################################################################################################################################
