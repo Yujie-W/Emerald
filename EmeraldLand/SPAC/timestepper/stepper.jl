@@ -42,7 +42,6 @@ function time_stepper!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::N
                 @warn "Leaf shedding is triggered";
             end;
             shed_leaves!(config, spac);
-            spac.plant._leaf_shedded = true;
         end;
 
         # if total count exceeds 1000, break the loop

@@ -68,6 +68,10 @@ kill_plant!(plant::Plant{FT}) where {FT} = (
     kill_plant!(plant.pool);
     kill_plant!(plant.memory);
 
+    # make sure the flags are correct after killing the plant
+    plant._leaf_regrow = false;
+    plant._leaf_shedded = true;
+
     return nothing
 );
 

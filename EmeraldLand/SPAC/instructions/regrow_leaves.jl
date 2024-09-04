@@ -15,7 +15,7 @@ Regrow leaves if the following conditions are met, given
 
 """
 function regrow_leaves_flag!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
-    if !config.ALLOW_LEAF_SHEDDING || !spac.plant._leaf_shedded
+    if !config.ALLOW_LEAF_SHEDDING || !spac.plant._leaf_shedded || spac.plant.pool.c_pool <= 0
         return nothing
     end;
 

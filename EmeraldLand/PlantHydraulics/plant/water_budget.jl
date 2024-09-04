@@ -23,6 +23,10 @@ Set up the water budget of the plant, given
 
 """
 function plant_water_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
+    if spac.plant.pool.c_pool <= 0
+        return nothing
+    end;
+
     leaf_water_budgets!(spac, δt);
     stem_water_budgets!(spac, δt);
     root_water_budgets!(spac, δt);

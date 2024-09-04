@@ -26,6 +26,7 @@ function plant_photosynthesis! end;
 plant_photosynthesis!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = plant_photosynthesis!(config, spac, spac.plant.leaves[1]);
 
 plant_photosynthesis!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
+    # if there is no leaf, do nothing
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
@@ -75,6 +76,8 @@ Update the carbon pool budget of the plant, given
 """
 function plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     plant = spac.plant;
+
+    # if the plant is dead, do nothing
     if plant.pool.c_pool <= 0
         return nothing
     end;

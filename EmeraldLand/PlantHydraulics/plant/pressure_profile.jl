@@ -22,6 +22,11 @@ Set up the pressure profile of the plant, given
 
 """
 function plant_pressure_profile!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    # if the plant is dead, do nothing
+    if spac.plant.pool.c_pool <= 0
+        return nothing
+    end;
+
     root_pressure_profiles!(spac);
     stem_pressure_profiles!(spac);
     leaf_pressure_profiles!(config, spac);

@@ -74,6 +74,7 @@ Update leaf reflectance and transmittance for SPAC, given
 
 """
 function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    # if there is no leaf, do nothing
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;

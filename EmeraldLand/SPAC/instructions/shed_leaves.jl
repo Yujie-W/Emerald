@@ -37,6 +37,9 @@ shed_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
         leaf.flux.state.g_H₂O_s .= 0;
     end;
 
+    # update the leaf shedding flag
+    spac.plant._leaf_shedded = true;
+
     # update the canopy structure auxilary variables
     t_aux!(config, spac.canopy, spac.cache);
 
