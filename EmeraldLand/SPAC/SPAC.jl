@@ -25,7 +25,7 @@ using ..Namespace: kill_plant!, sync_state!
 using ..Photosynthesis: plant_carbon_budget!, plant_photosynthesis!
 using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..PlantHydraulics: capacitance_pressure, capacitance_volume, flow_out, set_flow_profile!, xylem_conductance, xylem_pressure
-using ..PlantHydraulics: clear_legacy!, plant_flow_profile!, plant_growth!, plant_pressure_profile!, plant_water_budget!, update_legacy!
+using ..PlantHydraulics: clear_legacy!, plant_flow_profile!, plant_growth!, plant_pressure_profile!, plant_water_budget!, xylem_recovery!, update_legacy!
 using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25
 using ..StomatalModels: limit_stomatal_conductance!, read_β, stomatal_conductance!, stomatal_conductance_profile!, β_factor!
 

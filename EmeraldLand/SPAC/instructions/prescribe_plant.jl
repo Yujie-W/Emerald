@@ -21,6 +21,7 @@
 #     2024-Aug-06: add leaf regrow flag to LAI prescription
 #     2024-Aug-29: use carbon pool to update LAI (when LAI increases)
 #     2024-Sep-03: make sure to update leaf asap as well when LAI is updated
+#     2024-Sep-04: when lai_diff > 0, make sure carbon pool is not immediately used up and recover leaf xylem hydraulic system
 #
 #######################################################################################################################################################################################################
 """
@@ -144,28 +145,55 @@ function prescribe_traits!(
     # clear the legacy of leaves if regrow flag is true
     # TODO: use shed_leaves! and grow_leaves! functions in the future
     if !isnothing(lai)
+        # if lai is not 0, grow new leaves is allowed
+        lai_0 = can_str.trait.lai;
+        lai_diff = lai - lai_0;
+        c_demand = lai_diff * sbulk.trait.area * spac.plant.leaves[1].bio.trait.lma * 10000 / 30;
+        c_allocable = spac.plant.pool.c_pool - spac.plant.pool.c_pool_min;
+        if !spac.plant._leaf_shedded
+            if lai_diff > 0
+                if c_allocable <= 0
+                    lai_diff = 0;
+                elseif c_demand > c_allocable
+                    lai_diff *= c_allocable / c_demand;
+                end;
+            end;
+        elseif spac.plant._leaf_regrow
+            # lai_diff > 0 for sure
+            if 0 < c_demand <= c_allocable
+                nothing
+            # c_demand > c_allocable
+            elseif c_allocable <= spac.plant.pool.c_pool_min
+                c_actual = spac.plant.pool.c_pool / 2;
+                lai_diff *= c_actual / c_demand;
+            else # c_allocable > spac.plant.pool.c_pool_min
+                lai_diff *= c_allocable / c_demand;
+            end;
+        end;
+
         if !spac.plant._leaf_shedded || spac.plant._leaf_regrow
-            lai_diff = lai - can_str.trait.lai;
-            can_str.trait.lai = lai;
-            can_str.trait.δlai = lai .* ones(FT, n_layer) ./ n_layer;
+            # update the leaf area
+            can_str.trait.lai = lai_0 + lai_diff;
+            can_str.trait.δlai = can_str.trait.lai .* ones(FT, n_layer) ./ n_layer;
             for irt in 1:n_layer
                 ilf = n_layer - irt + 1;
                 leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
                 leaves[ilf].xylem.state.asap = leaves[ilf].xylem.trait.area;
             end;
 
-            # if lai_diff is positive, remove the energy from the carbon pool (grow new xylem here as well!)
+            # if lai_diff is positive, remove the energy from the carbon pool
             if lai_diff > 0
                 c_mol = lai_diff * sbulk.trait.area * spac.plant.leaves[1].bio.trait.lma * 10000 / 30;
                 spac.plant.pool.c_pool -= c_mol;
             end;
-        end;
-        # reset the flags and clear the legacy of leaves
-        if spac.plant._leaf_regrow
-            spac.plant._leaf_regrow = false;
-            spac.plant._leaf_shedded = false;
-            for l in leaves
-                clear_legacy!(l);
+
+            # reset the flags and clear the legacy of leaves
+            if lai_diff > 0
+                spac.plant._leaf_regrow = false;
+                spac.plant._leaf_shedded = false;
+                for l in leaves
+                    xylem_recovery!(l.xylem, lai_0, lai_diff);
+                end;
             end;
         end;
     end;

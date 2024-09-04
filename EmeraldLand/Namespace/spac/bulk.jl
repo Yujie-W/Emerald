@@ -138,7 +138,8 @@ BulkSPAC(config::SPACConfiguration{FT};
     # set up the carbon pools
     lai_pool = ground_area * max_lai * leaves[1].bio.trait.lma * 10000 / 30;
     lai_pool_max = 2.5 * lai_pool;
-    c_pool = CarbonPoolWholePlant{FT}(lai_pool, lai_pool_max);
+    lai_pool_min = 0.5 * lai_pool;
+    c_pool = CarbonPoolWholePlant{FT}(lai_pool, lai_pool_max, lai_pool_min);
 
     # set up the plant
     plant = Plant{FT}(

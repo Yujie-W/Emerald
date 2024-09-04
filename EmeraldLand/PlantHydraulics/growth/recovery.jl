@@ -57,6 +57,7 @@ recovery_or_growth(xylem::XylemHydraulics{FT}, c_mol::FT, t::FT) where {FT} = (
 # Changes to the function
 # General
 #     2024-Aug-30: add function to recover the xylem hydraulic system (area added to total area, pressure history updated)
+#     2024-Sep-04: add method to recover leaf xylem hydraulic system from new growth
 #
 #######################################################################################################################################################################################################
 """
@@ -72,6 +73,7 @@ function xylem_recovery! end;
 
 xylem_recovery!(organ::Union{Root{FT}, Stem{FT}}, c_mol::FT) where {FT} = xylem_recovery!(organ.xylem, c_mol);
 
+# for stem and root only
 xylem_recovery!(xylem::XylemHydraulics{FT}, c_mol::FT) where {FT} = (
     N = length(xylem.state.p_history);
 
@@ -87,6 +89,22 @@ xylem_recovery!(xylem::XylemHydraulics{FT}, c_mol::FT) where {FT} = (
 
     # add the new xylem area to the total area
     xylem.trait.area += delta_a;
+
+    return nothing
+);
+
+# for leaf only
+xylem_recovery!(xylem::XylemHydraulics{FT}, lai_0::FT, lai_diff::FT) where {FT} = (
+    @assert lai_diff > 0 "The difference in LAI must be positive";
+
+    # compute the conductance after recovery
+    N = length(xylem.state.p_history);
+    for i in 1:N
+        k_rel_0 = relative_xylem_k(xylem.trait.vc, xylem.state.p_history[i]);
+        k_rel_1 = (k_rel_0 * lai_0 + lai_diff) / (lai_0 + lai_diff);
+        p_his = xylem_pressure(xylem.trait.vc, min(1, k_rel_1));
+        xylem.state.p_history[i] = p_his;
+    end;
 
     return nothing
 );

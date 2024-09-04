@@ -56,6 +56,7 @@ clear_legacy!(xylem::XylemHydraulics{FT}) where {FT} = (xylem.state.p_history .=
 # Changes to the function
 # General
 #     2024-Aug-31: migrate some features from plant_pressure_profile! to update_legacy!
+#     2024-Sep-04: remove unnecessary methods (backward) for updating the legacy
 #
 #######################################################################################################################################################################################################
 """
@@ -93,7 +94,7 @@ update_legacy!(
 update_legacy!(
             config::SPACConfiguration{FT},
             x_state::XylemHydraulicsState{FT},
-            x_aux::XylemHydraulicsAuxilNSS{FT},
+            x_aux::Union{XylemHydraulicsAuxilNSS{FT}, XylemHydraulicsAuxilSS{FT}},
             t::FT) where {FT} = (
     if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
         return nothing
@@ -105,83 +106,6 @@ update_legacy!(
     for i in 1:N
         p_mem = x_state.p_history[i];
         p₂₅ = x_aux.pressure[i] / f_st;
-        if p₂₅ < p_mem
-            x_state.p_history[i] = p₂₅;
-        end;
-    end;
-
-    return nothing
-);
-
-update_legacy!(
-            config::SPACConfiguration{FT},
-            x_state::XylemHydraulicsState{FT},
-            x_aux::XylemHydraulicsAuxilSS{FT},
-            t::FT) where {FT} = (
-    if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
-        return nothing
-    end;
-
-    # update the pressure profile calculation only if xylem area > 0
-    f_st = relative_surface_tension(t);
-    N = length(x_state.p_history);
-    for i in 1:N
-        p_mem = x_state.p_history[i];
-        p₂₅ = x_aux.pressure[i] / f_st;
-        if p₂₅ < p_mem
-            x_state.p_history[i] = p₂₅;
-        end;
-    end;
-
-    return nothing
-);
-
-update_legacy!(
-            config::SPACConfiguration{FT},
-            xylem::XylemHydraulics{FT},
-            t::FT,
-            rev::Bool) where {FT} = update_legacy!(config, xylem.state, xylem.auxil, t, rev);
-
-update_legacy!(
-            config::SPACConfiguration{FT},
-            x_state::XylemHydraulicsState{FT},
-            x_aux::XylemHydraulicsAuxilNSS{FT},
-            t::FT,
-            ::Bool) where {FT} = (
-    if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
-        return nothing
-    end;
-
-    # update the pressure profile calculation only if xylem area > 0
-    f_st = relative_surface_tension(t);
-    N = length(x_state.p_history);
-    for i in N:-1:1
-        p_mem = x_state.p_history[i];
-        p₂₅ = x_aux.pressure[i+1] / f_st;
-        if p₂₅ < p_mem
-            x_state.p_history[i] = p₂₅;
-        end;
-    end;
-
-    return nothing
-);
-
-update_legacy!(
-            config::SPACConfiguration{FT},
-            x_state::XylemHydraulicsState{FT},
-            x_aux::XylemHydraulicsAuxilSS{FT},
-            t::FT,
-            ::Bool) where {FT} = (
-    if x_state.asap <= 0 || !config.ENABLE_DROUGHT_LEGACY
-        return nothing
-    end;
-
-    # update the pressure profile calculation only if xylem area > 0
-    f_st = relative_surface_tension(t);
-    N = length(x_state.p_history);
-    for i in N:-1:1
-        p_mem = x_state.p_history[i];
-        p₂₅ = x_aux.pressure[i+1] / f_st;
         if p₂₅ < p_mem
             x_state.p_history[i] = p₂₅;
         end;
