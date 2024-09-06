@@ -69,7 +69,7 @@ function viewer_angles(sat_lat::FT, sat_lon::FT, sat_h::FT, lat::FT, lon::FT, h:
 
     # viewer zenith angle
     r_g = sqrt(rx^2 + ry^2 + rz^2);
-    vza = asind(min(1, top_z / r_g));
+    vza = 90 - asind(min(1, top_z / r_g));
 
     return vza, vaa
 end;
