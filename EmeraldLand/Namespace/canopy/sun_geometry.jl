@@ -32,6 +32,7 @@ end;
 # General
 #     2024-Feb-25: add struct SunGeometrySDAuxil
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: add field ci_sun to store clumping index from solar zenith angle
 #
 #######################################################################################################################################################################################################
 """
@@ -46,6 +47,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
+    # Clumping index from solar zenith angle
+    "Clumping index from solar zenith angle"
+    ci_sun::FT = 1
+
     # Scattering coefficients for leaf
     "Backward direct->diffuse scatter weight (leaf)"
     sdb_leaf::FT = 0

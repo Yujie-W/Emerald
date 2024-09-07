@@ -51,7 +51,7 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::Named
     trigger_lai::Bool = !isnan(df_lai) && (df_lai != spac.canopy.structure.trait.lai);
     trigger_vcm::Bool = !isnan(df_vcm) && (df_vcm != spac.plant.leaves[end].photosystem.trait.v_cmax25);
     trigger_chl::Bool = !isnan(df_chl) && (df_chl != spac.plant.leaves[end].bio.trait.cab);
-    trigger_cli::Bool = !isnan(df_cli) && (df_cli != spac.canopy.structure.trait.ci);
+    trigger_cli::Bool = !isnan(df_cli) && (df_cli != spac.canopy.structure.trait.ci.ci_0);
 
     if trigger_chl
         prescribe_traits!(config, spac; cab = df_chl, car = df_chl / 7);

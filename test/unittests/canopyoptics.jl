@@ -76,7 +76,7 @@ import Emerald.EmeraldLand.SPAC
         @test spac.canopy.sun_geometry.s_aux.ks_leaf >= 0;
         @test spac.canopy.sun_geometry.s_aux.sdb_leaf >= 0;
         @test spac.canopy.sun_geometry.s_aux.sdf_leaf >= 0;
-        @test 0 < spac.canopy.structure.trait.ci <= 1;
+        @test 0 < spac.canopy.structure.trait.ci.ci_0 <= 1;
         @test all(0 .< spac.canopy.sun_geometry.s_aux.p_sunlit .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.ρ_sd_layer .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.τ_ss_layer .< 1);
@@ -103,9 +103,9 @@ import Emerald.EmeraldLand.SPAC
         @test spac.canopy.sensor_geometry.s_aux.sof_leaf >= 0;
         @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sensor .< 1);
         @test 0 < spac.canopy.sensor_geometry.s_aux.p_sensor_soil < 1;
-        @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sun_sensor_leaf .< 1);
-        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor_leaf .< spac.canopy.sun_geometry.s_aux.p_sunlit);
-        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor_leaf .< spac.canopy.sensor_geometry.s_aux.p_sensor);
+        @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< 1);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= spac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= spac.canopy.sensor_geometry.s_aux.p_sensor);
 
         config = NS.SPACConfiguration(Float64);
         tpac = NS.BulkSPAC(config);
@@ -118,8 +118,8 @@ import Emerald.EmeraldLand.SPAC
         CO.sensor_geometry_aux!(config, tpac);
         CO.sensor_geometry!(config, tpac);
         @test all(0 .< tpac.canopy.sun_geometry.s_aux.p_sunlit .< 1);
-        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor_leaf .< tpac.canopy.sun_geometry.s_aux.p_sunlit);
-        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor_leaf .< tpac.canopy.sensor_geometry.s_aux.p_sensor);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= tpac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= tpac.canopy.sensor_geometry.s_aux.p_sensor);
     end;
 
     @testset "Shortwave radiation" begin

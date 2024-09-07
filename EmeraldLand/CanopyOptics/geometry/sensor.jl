@@ -7,8 +7,10 @@
 #     2024-Feb-22: add function sensor_geometry_aux! to update the state-dependent auxiliary variables for sensor geometry (to call in step_remote_sensing!)
 #     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: redesign the pso equation to account for the dngular dependence of clumping index
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction
+#     2024-Sep-07: fix the calculation of sensa.ko_incl (was using [i] = 2 / FT(π) / cosd(FT(pi)) ...)
 #
 #######################################################################################################################################################################################################
 """
@@ -22,10 +24,11 @@ Update sensor geometry related auxiliary variables, given
 """
 function sensor_geometry_aux! end;
 
-sensor_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = sensor_geometry_aux!(config, spac.canopy);
+sensor_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} =
+    sensor_geometry_aux!(config, spac.canopy, max(FT(0.5), spac.plant.leaves[1].bio.trait.width / (spac.plant.zs[2] - spac.plant.zs[1])));
 
-sensor_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) where {FT} =
-    sensor_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux, can.sensor_geometry.state, can.sensor_geometry.s_aux);
+sensor_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lw2ch::FT) where {FT} =
+    sensor_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux, can.sensor_geometry.state, can.sensor_geometry.s_aux, lw2ch);
 
 sensor_geometry_aux!(
             config::SPACConfiguration{FT},
@@ -34,13 +37,17 @@ sensor_geometry_aux!(
             sunst::SunGeometryState{FT},
             sunsa::SunGeometrySDAuxil{FT},
             senst::SensorGeometryState{FT},
-            sensa::SensorGeometrySDAuxil{FT}) where {FT} = (
+            sensa::SensorGeometrySDAuxil{FT},
+            lw2ch::FT) where {FT} = (
     # if none of REF or SIF is enabled, or sza > 89, or LAI+SAI <= 0, do nothing
     if (!config.ENABLE_REF && !config.ENABLE_SIF) || sunst.sza > 89 || (trait.lai <= 0 && trait.sai <= 0)
         return nothing
     end;
 
-    (; HOT_SPOT, Θ_AZI, Θ_INCL) = config;
+    (; Θ_AZI, Θ_INCL) = config;
+
+    # compute clumping index from sensor zenith angle
+    sensa.ci_sensor = trait.ci.ci_0 * (1 - trait.ci.ci_1 * cosd(senst.vza));
 
     # extinction coefficients for the solar radiation
     vza = senst.vza;
@@ -53,7 +60,7 @@ sensor_geometry_aux!(
         sensa.Co_incl[i] = Co;
         sensa.So_incl[i] = So;
         sensa.βo_incl[i] = βo;
-        sensa.ko_incl[i] = 2 / FT(π) / cosd(FT(π)) * (Co * (βo - FT(π)/2) + So * sin(βo));
+        sensa.ko_incl[i] = 2 / FT(π) / cosd(FT(vza)) * (Co * (βo - FT(π)/2) + So * sin(βo));
 
         # compute the scattering coefficients
         Cs = sunsa.Cs_incl[i];
@@ -123,28 +130,28 @@ sensor_geometry_aux!(
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
-    kocipai = sensa.ko_leaf * trait.ci * trait.lai + sensa.ko_stem * trait.ci * trait.sai;
+    kocipai = sensa.ko_leaf * sensa.ci_sensor * trait.lai + sensa.ko_stem * sensa.ci_sensor * trait.sai;
     for i in eachindex(trait.δlai)
         koipai = sensa.ko_leaf * trait.δlai[i] + sensa.ko_stem * trait.δsai[i];
         sensa.p_sensor[i] = 1 / koipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
     end;
     sensa.p_sensor_soil = exp(-kocipai);
 
+    # TODO: the pso function could lead to pso > ps or pso > po, redo the calculation without using the min function
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
-    dso = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
-    Σk_leaf = sensa.ko_leaf + sunsa.ks_leaf;
-    Πk_leaf = sensa.ko_leaf * sunsa.ks_leaf;
-    Σk_stem = sensa.ko_stem + sunsa.ks_stem;
-    Πk_stem = sensa.ko_stem * sunsa.ks_stem;
-    cl = trait.ci * (trait.lai + trait.sai);
-    α_leaf  = dso / HOT_SPOT * 2 / Σk_leaf;
-    α_stem  = dso / HOT_SPOT * 2 / Σk_stem;
-    pso_leaf(x) = dso == 0 ? trait.ci * exp( (Σk_leaf - sqrt(Πk_leaf)) * cl * x ) : trait.ci * exp( Σk_leaf * cl * x + sqrt(Πk_leaf) * cl / α_leaf * (1 - exp(α_leaf * x)) );
-    pso_stem(x) = dso == 0 ? trait.ci * exp( (Σk_stem - sqrt(Πk_stem)) * cl * x ) : trait.ci * exp( Σk_stem * cl * x + sqrt(Πk_stem) * cl / α_stem * (1 - exp(α_stem * x)) );
+    # equations from Appendix C of the mSCOPE paper (Yang et al., 2018)
+    pai = trait.lai + trait.sai;
+    ag = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
+    Σk = (sunsa.ks_leaf * trait.lai * sunsa.ci_sun + sunsa.ks_stem * trait.sai * sunsa.ci_sun + sensa.ko_leaf * trait.lai * sensa.ci_sensor + sensa.ko_stem * trait.sai * sensa.ci_sensor);
+    Πk = sqrt((sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai) * (sensa.ko_leaf * trait.lai + sensa.ko_stem * trait.sai) * sunsa.ci_sun * sensa.ci_sensor);
+    sl = lw2ch * 2 * pai / Σk;
+    # pso(x) = ag == 0 ? sunsa.ci_sun * exp( sunsa.ci_sun * (sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai) * x ) :
+    #                    sunsa.ci_sun * sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
+    pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
 
     for i in eachindex(trait.δlai)
-        sensa.p_sun_sensor_leaf[i] = quadgk(pso_leaf, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-2)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
-        sensa.p_sun_sensor_stem[i] = quadgk(pso_stem, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-2)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
+        sensa.p_sun_sensor[i] = quadgk(pso, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-4)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
+        sensa.p_sun_sensor[i] = min(sensa.p_sun_sensor[i], sensa.p_sensor[i], sunsa.p_sunlit[i]);
     end;
 
     return nothing

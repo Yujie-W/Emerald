@@ -37,6 +37,8 @@ end;
 # Changes to the function
 # General
 #     2024-Jan-11: add function to calculate the viewer angles of an object on the Earth's surface
+# Bug fixes
+#     2024-Sep-06: fix the calculation of the viewer zenith angle (was using elevation angle)
 #
 #######################################################################################################################################################################################################
 """

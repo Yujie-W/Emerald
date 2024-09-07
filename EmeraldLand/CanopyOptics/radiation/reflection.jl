@@ -70,8 +70,8 @@ function reflection_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
         # note here that ci is already accounted for in the p_sensor, so remove it from the equation here
         ilai = can_str.trait.δlai[i];
         isai = can_str.trait.δsai[i];
-        sen_i .= sen_geo.s_aux.p_sensor[i] .* ilai .* (dob_l .* e_d_i .+ dof_l .* e_u_i) .+ sen_geo.s_aux.p_sun_sensor_leaf[i] .* ilai .* so_l .* rad_sw.e_dir .+
-                 sen_geo.s_aux.p_sensor[i] .* isai .* (dob_s .* e_d_i .+ dof_s .* e_u_i) .+ sen_geo.s_aux.p_sun_sensor_stem[i] .* isai .* so_s .* rad_sw.e_dir;
+        sen_i .= sen_geo.s_aux.p_sensor[i] .* ilai .* (dob_l .* e_d_i .+ dof_l .* e_u_i) .+ sen_geo.s_aux.p_sun_sensor[i] .* ilai .* so_l .* rad_sw.e_dir .+
+                 sen_geo.s_aux.p_sensor[i] .* isai .* (dob_s .* e_d_i .+ dof_s .* e_u_i) .+ sen_geo.s_aux.p_sun_sensor[i] .* isai .* so_s .* rad_sw.e_dir;
     end;
     sen_geo.auxil.e_sensor_layer[:,end] .= sen_geo.s_aux.p_sensor_soil .* view(sun_geo.auxil.e_difꜛ,:,n_layer+1);
 

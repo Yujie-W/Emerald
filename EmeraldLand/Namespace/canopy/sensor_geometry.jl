@@ -32,6 +32,7 @@ end;
 # General
 #     2024-Feb-25: add struct SensorGeometrySDAuxil
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: add field ci_sensor to store clumping index from viewer zenith angle
 #
 #######################################################################################################################################################################################################
 """
@@ -46,6 +47,10 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
+    # Clumping index
+    "Clumping index from sensor zenith angle"
+    ci_sensor::FT = 1.0
+
     # Scattering coefficients
     "Backward diffuse->observer scatter weight (leaf)"
     dob_leaf::FT = 0
@@ -89,10 +94,8 @@ Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
     p_sensor::Vector{FT}
     "Probability of directly viewing soil in observer direction at different layer boundaries"
     p_sensor_soil::FT = 0
-    "Bi-directional probability of directly viewing leaf at different layer boundaries (solar->canopy->observer)"
-    p_sun_sensor_leaf::Vector{FT}
-    "Bi-directional probability of directly viewing stem at different layer boundaries (solar->canopy->observer)"
-    p_sun_sensor_stem::Vector{FT}
+    "Bi-directional probability of directly viewing at different layer boundaries (solar->canopy->observer)"
+    p_sun_sensor::Vector{FT}
 
     # Matrix used for radiation to sensor
     "Conversion factor fo for angle towards observer at different inclination and azimuth angles"
@@ -108,20 +111,19 @@ Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
 end;
 
 SensorGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometrySDAuxil{FT}(
-            Co_incl           = zeros(FT, config.DIM_INCL),
-            So_incl           = zeros(FT, config.DIM_INCL),
-            ko_incl           = zeros(FT, config.DIM_INCL),
-            sb_incl           = zeros(FT, config.DIM_INCL),
-            sf_incl           = zeros(FT, config.DIM_INCL),
-            βo_incl           = zeros(FT, config.DIM_INCL),
-            p_sensor          = zeros(FT, n_layer),
-            p_sun_sensor_leaf = zeros(FT, n_layer),
-            p_sun_sensor_stem = zeros(FT, n_layer),
-            fo                = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_abs            = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_cos²_incl      = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs             = zeros(FT, config.DIM_INCL, config.DIM_AZI),
-            fo_fs_abs         = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            Co_incl      = zeros(FT, config.DIM_INCL),
+            So_incl      = zeros(FT, config.DIM_INCL),
+            ko_incl      = zeros(FT, config.DIM_INCL),
+            sb_incl      = zeros(FT, config.DIM_INCL),
+            sf_incl      = zeros(FT, config.DIM_INCL),
+            βo_incl      = zeros(FT, config.DIM_INCL),
+            p_sensor     = zeros(FT, n_layer),
+            p_sun_sensor = zeros(FT, n_layer),
+            fo           = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_abs       = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_cos²_incl = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs        = zeros(FT, config.DIM_INCL, config.DIM_AZI),
+            fo_fs_abs    = zeros(FT, config.DIM_INCL, config.DIM_AZI),
 );
 
 

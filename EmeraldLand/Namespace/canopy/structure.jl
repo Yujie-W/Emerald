@@ -8,6 +8,7 @@
 #     2023-Oct-18: add fields sai and δsai
 #     2024-Feb-27: move hot_spot parameter to SPACConfiguration
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: set ci to be a ClumpingIndex type struct to account for angular dependency
 #
 #######################################################################################################################################################################################################
 """
@@ -42,7 +43,7 @@ Base.@kwdef mutable struct CanopyStructureTrait{FT}
 
     # Clumping index of the canopy
     "Clumping index"
-    ci::FT = 1
+    ci::ClumpingIndex{FT} = ClumpingIndex{FT}()
 end;
 
 
@@ -75,9 +76,9 @@ Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
     x_bnds::Vector{FT}
 
     # diffuse radiation extinction coefficients
-    "Diffuse radiation extinction coefficient weight (leaf)"
+    "Diffuse radiation extinction coefficient (leaf; weighed with angle and clumping index)"
     kd_leaf::FT = 0
-    "Diffuse radiation extinction coefficient weight (stem)"
+    "Diffuse radiation extinction coefficient (stem; weighed with angle and clumping index)"
     kd_stem::FT = 0
 
     # canopy scattering coefficients (leaf)

@@ -8,6 +8,7 @@
 #     2024-Mar-01: compute the extinction coefficients for the diffuse radiation (isotropic)
 #     2024-Mar-01: compute the fraction of ddb and ddf (relative fraction of purely backward and forward scattering)
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf and kd_stem)
 #
 #######################################################################################################################################################################################################
 """
@@ -33,11 +34,12 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait
     end;
 
     # compute the extinction coefficients for the diffuse radiation (isotropic)
+    # these kd_leaf and kd_stem already account for the impact of clumping index
     t_aux.kd_leaf = 0;
     t_aux.kd_stem = 0;
     for i in eachindex(Θ_INCL)
-        t_aux.kd_leaf += extinction_coefficient(Θ_INCL[i]) * t_aux.p_incl_leaf[i];
-        t_aux.kd_stem += extinction_coefficient(Θ_INCL[i]) * t_aux.p_incl_stem[i];
+        t_aux.kd_leaf += extinction_coefficient(Θ_INCL[i], trait.ci) * t_aux.p_incl_leaf[i];
+        t_aux.kd_stem += extinction_coefficient(Θ_INCL[i], trait.ci) * t_aux.p_incl_stem[i];
     end;
 
     # compute the weighed average of the leaf inclination angle distribution
@@ -69,6 +71,7 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait
 #     2023-Oct-18: account for SAI in the canopy structure calculation
 #     2024-Mar-01: compute the layer shortwave and longwave scattering coefficients based on the new theory
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf and kd_stem)
 #
 #######################################################################################################################################################################################################
 """
@@ -116,13 +119,14 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     #     can_str.auxil.ρ_dd_layer = ∫_0^iCIPAI (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
     #     can_str.auxil.τ_dd_layer = ∫_0^iCIPAI (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
     # Then, the total transmitted radiation need to plus the radiation that has not passed though any leaf, namely τ_dd_solar.
+    # As of 2024-Sep-07, we account CI's angular dependency along with kd_leaf and kd_stem, and thus CI is removed here from the equations below.
     k_τ_x = spac.cache.cache_wl_1;
     k_ρ_x = spac.cache.cache_wl_2;
     for i in 1:n_layer
         δlai = can_str.trait.δlai[i];
         δsai = can_str.trait.δsai[i];
         δpai = δlai + δsai;
-        kt_dd_x = (can_str.t_aux.kd_leaf * δlai + can_str.t_aux.kd_stem * δsai) * can_str.trait.ci;
+        kt_dd_x = (can_str.t_aux.kd_leaf * δlai + can_str.t_aux.kd_stem * δsai);
         k_τ_x .= (view(can_str.auxil.ddf_leaf,:,i) .* δlai .+ view(can_str.auxil.ddf_stem,:,i) .* δsai) ./ δpai;
         k_ρ_x .= (view(can_str.auxil.ddb_leaf,:,i) .* δlai .+ view(can_str.auxil.ddb_stem,:,i) .* δsai) ./ δpai;
         τ_dd_solar = exp(-kt_dd_x);
@@ -151,7 +155,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
         δlai = can_str.trait.δlai[irt];
         δsai = can_str.trait.δsai[irt];
         δpai = δlai + δsai;
-        kt_dd_x = (can_str.t_aux.kd_leaf * δlai + can_str.t_aux.kd_stem * δsai) * can_str.trait.ci;
+        kt_dd_x = (can_str.t_aux.kd_leaf * δlai + can_str.t_aux.kd_stem * δsai);
         σ_leaf_b = can_str.t_aux.ddb_leaf * leaf.bio.trait.ρ_lw + can_str.t_aux.ddf_leaf * leaf.bio.trait.τ_lw;
         σ_leaf_f = can_str.t_aux.ddf_leaf * leaf.bio.trait.ρ_lw + can_str.t_aux.ddb_leaf * leaf.bio.trait.τ_lw;
         σ_stem_b = can_str.t_aux.ddb_stem * leaf.bio.trait.ρ_lw;

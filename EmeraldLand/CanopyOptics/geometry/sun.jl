@@ -7,6 +7,7 @@
 #     2024-Feb-27: add function sun_geometry_aux! to update the trait-dependent auxiliary variables for sun geometry (to call in step_preparations!)
 #     2024-Mar-01: compute the layer shortwave scattering fractions based on the new theory
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: use sza dependent clumping index
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from solar direction
 #
@@ -34,6 +35,9 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
     end;
 
     (; Θ_AZI, Θ_INCL) = config;
+
+    # compute the clumping index from solar zenith angle
+    sunsa.ci_sun = trait.ci.ci_0 * (1 - trait.ci.ci_1 * cosd(sunst.sza));
 
     # extinction coefficients for the solar radiation
     for i in eachindex(Θ_INCL)
@@ -64,8 +68,8 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
     end;
 
     # compute the sunlit leaf fraction
-    # sunsa.ps = exp.(sunsa.ks .* trait.ci * trait.lai .* t_aux.x_bnds);
-    kscipai = sunsa.ks_leaf * trait.ci * trait.lai + sunsa.ks_stem * trait.ci * trait.sai;
+    # sunsa.ps = exp.(sunsa.ks .* sunsa.ci_sun * trait.lai .* t_aux.x_bnds);
+    kscipai = sunsa.ks_leaf * sunsa.ci_sun * trait.lai + sunsa.ks_stem * sunsa.ci_sun * trait.sai;
     for i in eachindex(trait.δlai)
         ksipai = sunsa.ks_leaf * trait.δlai[i] + sunsa.ks_stem * trait.δsai[i];
         sunsa.p_sunlit[i] = 1 / ksipai * (exp(kscipai * t_aux.x_bnds[i]) - exp(kscipai * t_aux.x_bnds[i+1]));
@@ -97,6 +101,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
 #     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
 #     2024-Jun-06: fix a typo in the calculation of ρ_sd
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: use sza dependent clumping index
 #
 #######################################################################################################################################################################################################
 """
@@ -134,9 +139,9 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
     # Similarly, we computed the transmittance and reflectance for the whole layer using expotential functions
-    #     sun_geo.auxil.τ_ss_layer .= exp.(-1 .* sun_geo.s_aux.ks .* can_str.trait.δlai .* can_str.trait.ci);
-    #     sun_geo.auxil.τ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdf_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
-    #     sun_geo.auxil.ρ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdb_leaf .* can_str.trait.δlai' .* can_str.trait.ci);
+    #     sun_geo.auxil.τ_ss_layer .= exp.(-1 .* sun_geo.s_aux.ks .* can_str.trait.δlai .* sun_geo.s_aux.ci_sun);
+    #     sun_geo.auxil.τ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdf_leaf .* can_str.trait.δlai' .* sun_geo.s_aux.ci_sun);
+    #     sun_geo.auxil.ρ_sd_layer .= 1 .- exp.(-1 .* sun_geo.auxil.sdb_leaf .* can_str.trait.δlai' .* sun_geo.s_aux.ci_sun);
     # Later, we included SAI as well.
     # However, as of 2024-Feb-29, we found an issue with the equations above when LAI and SAI are big enough in a single layer that sum of reflectance and transmittance is greater than 1.
     # Therefore, we revised the equations using calculus and the equations for the whole layer are as follows:
@@ -149,7 +154,7 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
         δlai = can_str.trait.δlai[i];
         δsai = can_str.trait.δsai[i];
         δpai = δlai + δsai;
-        kt_ss_x = sun_geo.s_aux.ks_leaf * δlai * can_str.trait.ci + sun_geo.s_aux.ks_stem * δsai * can_str.trait.ci;
+        kt_ss_x = sun_geo.s_aux.ks_leaf * δlai * sun_geo.s_aux.ci_sun + sun_geo.s_aux.ks_stem * δsai * sun_geo.s_aux.ci_sun;
         kt_sd_x .= (view(sun_geo.auxil.sdf_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdf_stem,:,i) .* δsai) ./ δpai;
         kr_sd_x .= (view(sun_geo.auxil.sdb_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdb_stem,:,i) .* δsai) ./ δpai;
         sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);

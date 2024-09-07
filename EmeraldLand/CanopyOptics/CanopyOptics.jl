@@ -10,6 +10,7 @@ using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BetaLIDF, VerhoefLIDF
+using ..Namespace: ClumpingIndex
 using ..Namespace: CanopyStructureTrait, CanopyStructureTDAuxil, SensorGeometryState, SensorGeometrySDAuxil, SunGeometryState, SunGeometrySDAuxil
 using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoHyperspectralCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoPrescribe
 using ..Namespace: SoilLayer, SoilBulk

@@ -22,6 +22,7 @@
 #     2024-Aug-29: use carbon pool to update LAI (when LAI increases)
 #     2024-Sep-03: make sure to update leaf asap as well when LAI is updated
 #     2024-Sep-04: when lai_diff > 0, make sure carbon pool is not immediately used up and recover leaf xylem hydraulic system
+#     2024-Sep-07: improve ci prescription to account for angular dependency
 #
 #######################################################################################################################################################################################################
 """
@@ -32,7 +33,7 @@
                 b6f::Union{Number,Nothing} = nothing,
                 cab::Union{Number,Nothing} = nothing,
                 car::Union{Number,Nothing} = nothing,
-                ci::Union{Number,Nothing} = nothing,
+                ci::Union{Number,Vector,Nothing} = nothing,
                 jmax::Union{Number,Nothing} = nothing,
                 kmax::Union{Number,Tuple,Nothing} = nothing,
                 lai::Union{Number,Nothing} = nothing,
@@ -69,7 +70,7 @@ function prescribe_traits!(
             b6f::Union{Number,Nothing} = nothing,
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
-            ci::Union{Number,Nothing} = nothing,
+            ci::Union{Number,Vector,Nothing} = nothing,
             jmax::Union{Number,Nothing} = nothing,
             kmax::Union{Number,Tuple,Nothing} = nothing,
             lai::Union{Number,Nothing} = nothing,
@@ -200,7 +201,13 @@ function prescribe_traits!(
 
     # update CI
     if !isnothing(ci)
-        can_str.trait.ci = ci;
+        if ci isa Number
+            can_str.trait.ci.ci_0 = ci;
+            can_str.trait.ci.ci_1 = 0;
+        else
+            can_str.trait.ci.ci_0 = ci[0];
+            can_str.trait.ci.ci_1 = ci[1];
+        end;
     end;
 
     # update SAI
