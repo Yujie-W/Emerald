@@ -8,6 +8,7 @@
 #     2024-Mar-01: compute the layer shortwave scattering fractions based on the new theory
 #     2024-Sep-04: separate leaf and stem optical properties
 #     2024-Sep-07: use sza dependent clumping index
+#     2024-Sep-09: account for diffuse CI impact on ks
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from solar direction
 #
@@ -49,8 +50,8 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
         sunsa.βs_incl[i] = βs;
         sunsa.ks_incl[i] = 2 / FT(π) / cosd(sunst.sza) * (Cs * (βs - FT(π)/2) + Ss * sin(βs));
     end;
-    sunsa.ks_leaf = t_aux.p_incl_leaf' * sunsa.ks_incl;
-    sunsa.ks_stem = t_aux.p_incl_stem' * sunsa.ks_incl;
+    sunsa.ks_leaf = t_aux.p_incl_leaf' * sunsa.ks_incl * sunsa.ci_sun;
+    sunsa.ks_stem = t_aux.p_incl_stem' * sunsa.ks_incl * sunsa.ci_sun;
 
     # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
     sunsa.sdb_leaf = 0;
@@ -68,11 +69,11 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
     end;
 
     # compute the sunlit leaf fraction
-    # sunsa.ps = exp.(sunsa.ks .* sunsa.ci_sun * trait.lai .* t_aux.x_bnds);
-    kscipai = sunsa.ks_leaf * sunsa.ci_sun * trait.lai + sunsa.ks_stem * sunsa.ci_sun * trait.sai;
+    # ps(x) = sunsa.ci_sun * exp.(sunsa.ks .* trait.lai .* t_aux.x_bnds);
+    kscipai = sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai;
     for i in eachindex(trait.δlai)
-        ksipai = sunsa.ks_leaf * trait.δlai[i] + sunsa.ks_stem * trait.δsai[i];
-        sunsa.p_sunlit[i] = 1 / ksipai * (exp(kscipai * t_aux.x_bnds[i]) - exp(kscipai * t_aux.x_bnds[i+1]));
+        ksciipai = sunsa.ks_leaf * trait.δlai[i] + sunsa.ks_stem * trait.δsai[i];
+        sunsa.p_sunlit[i] = sunsa.ci_sun / ksciipai * (exp(kscipai * t_aux.x_bnds[i]) - exp(kscipai * t_aux.x_bnds[i+1]));
     end;
 
     # compute the fs and fs_abs matrices
@@ -148,13 +149,14 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     #     sun_geo.auxil.ρ_sd_layer = ∫_0^iCIPAI (sdb_leaf * δLAI + sbd_stem * δSAI) / δPAI * ks * exp(-ks * x) * dx = (sdb_leaf * δLAI + sbd_stem * δSAI) / δPAI * (1 - exp(-ks * iCIPAI))
     #     sun_geo.auxil.τ_sd_layer = ∫_0^iCIPAI (sdf_leaf * δLAI + sdf_stem * δSAI) / δPAI * ks * exp(-ks * x) * dx = (sdf_leaf * δLAI + sdf_stem * δSAI) / δPAI * (1 - exp(-ks * iCIPAI))
     # Similarly, we used the same logic for sensor geometry and canopy structure.
+    # As of 2014-Sep-09: we accounted for CI impact through ks_leaf and ks_stem, so we do not need to multiply ks by ci_sun in the code below.
     kt_sd_x = spac.cache.cache_wl_1;
     kr_sd_x = spac.cache.cache_wl_2;
     for i in 1:n_layer
         δlai = can_str.trait.δlai[i];
         δsai = can_str.trait.δsai[i];
         δpai = δlai + δsai;
-        kt_ss_x = sun_geo.s_aux.ks_leaf * δlai * sun_geo.s_aux.ci_sun + sun_geo.s_aux.ks_stem * δsai * sun_geo.s_aux.ci_sun;
+        kt_ss_x = sun_geo.s_aux.ks_leaf * δlai + sun_geo.s_aux.ks_stem * δsai;
         kt_sd_x .= (view(sun_geo.auxil.sdf_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdf_stem,:,i) .* δsai) ./ δpai;
         kr_sd_x .= (view(sun_geo.auxil.sdb_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdb_stem,:,i) .* δsai) ./ δpai;
         sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);

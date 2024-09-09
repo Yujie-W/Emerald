@@ -8,6 +8,7 @@
 #     2024-Mar-01: compute the layer shortwave scattering coefficients based on the new theory
 #     2024-Sep-04: separate leaf and stem optical properties
 #     2024-Sep-07: redesign the pso equation to account for the dngular dependence of clumping index
+#     2024-Sep-09: account for diffuse CI impact on ko
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction
 #     2024-Sep-07: fix the calculation of sensa.ko_incl (was using [i] = 2 / FT(π) / cosd(FT(pi)) ...)
@@ -93,8 +94,8 @@ sensor_geometry_aux!(
         sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
         sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
     end;
-    sensa.ko_leaf = t_aux.p_incl_leaf' * sensa.ko_incl;
-    sensa.ko_stem = t_aux.p_incl_stem' * sensa.ko_incl;
+    sensa.ko_leaf = t_aux.p_incl_leaf' * sensa.ko_incl * sensa.ci_sensor;
+    sensa.ko_stem = t_aux.p_incl_stem' * sensa.ko_incl * sensa.ci_sensor;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
     sensa.dob_leaf = 0;
@@ -130,10 +131,10 @@ sensor_geometry_aux!(
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
-    kocipai = sensa.ko_leaf * sensa.ci_sensor * trait.lai + sensa.ko_stem * sensa.ci_sensor * trait.sai;
+    kocipai = sensa.ko_leaf * trait.lai + sensa.ko_stem * trait.sai;
     for i in eachindex(trait.δlai)
-        koipai = sensa.ko_leaf * trait.δlai[i] + sensa.ko_stem * trait.δsai[i];
-        sensa.p_sensor[i] = 1 / koipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
+        kociipai = sensa.ko_leaf * trait.δlai[i] + sensa.ko_stem * trait.δsai[i];
+        sensa.p_sensor[i] = sensa.ci_sensor / kociipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
     end;
     sensa.p_sensor_soil = exp(-kocipai);
 
@@ -142,11 +143,9 @@ sensor_geometry_aux!(
     # equations from Appendix C of the mSCOPE paper (Yang et al., 2018)
     pai = trait.lai + trait.sai;
     ag = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
-    Σk = (sunsa.ks_leaf * trait.lai * sunsa.ci_sun + sunsa.ks_stem * trait.sai * sunsa.ci_sun + sensa.ko_leaf * trait.lai * sensa.ci_sensor + sensa.ko_stem * trait.sai * sensa.ci_sensor);
-    Πk = sqrt((sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai) * (sensa.ko_leaf * trait.lai + sensa.ko_stem * trait.sai) * sunsa.ci_sun * sensa.ci_sensor);
+    Σk = (sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai + sensa.ko_leaf * trait.lai + sensa.ko_stem * trait.sai);
+    Πk = sqrt((sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai) * (sensa.ko_leaf * trait.lai + sensa.ko_stem * trait.sai));
     sl = lw2ch * 2 * pai / Σk;
-    # pso(x) = ag == 0 ? sunsa.ci_sun * exp( sunsa.ci_sun * (sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai) * x ) :
-    #                    sunsa.ci_sun * sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
     pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
 
     for i in eachindex(trait.δlai)

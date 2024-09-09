@@ -9,6 +9,7 @@
 #     2024-Mar-01: compute the fraction of ddb and ddf (relative fraction of purely backward and forward scattering)
 #     2024-Sep-04: separate leaf and stem optical properties
 #     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf and kd_stem)
+#     2024-Sep-09: compute the CI for the diffuse radiation based on the angle dependent CI
 #
 #######################################################################################################################################################################################################
 """
@@ -26,6 +27,15 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}) 
 
 canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}, t_aux::CanopyStructureTDAuxil{FT}) where {FT} = (
     (; Θ_INCL, Θ_INCL_BNDS) = config;
+
+    # update the clumping index
+    # note here the clumping index should not be a solar zenith angle dependent variable for diffuse light
+    # thus, ci is computed as the integral of zenith angle dependent ci of the diffuse light
+    #     ci = ∫_0^π/2 ci(θ) * sind(θ) dθ / ∫_0^π/2 sind(θ) dθ
+    #     ∫_0^π/2 ci(θ) * sind(θ) dθ = ci_0 * ∫_0^π/2 sind(θ) dθ - ci_0 * ci_1 * ∫_0^π/2 cos(θ) sind(θ) dθ = ci_0 - ci_0 * ci_1 / 2
+    #     ∫_0^π/2 sind(θ) dθ = 1
+    #     ci = ci_0 - ci_0 * ci_1 / 2
+    t_aux.ci_diffuse = trait.ci.ci_0 - trait.ci.ci_0 * trait.ci.ci_1 / 2;
 
     # compute the probability of leaf inclination angles based on lidf
     for i in eachindex(t_aux.p_incl_leaf)
@@ -95,10 +105,6 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
     n_layer = length(leaves);
-
-    # update the clumping index
-    # note here the clumping index should not be a solar zenith angle dependent variable for diffuse light !!!
-    # TODO: redesign the clumping index model
 
     # compute the scattering coefficients for the solar radiation per leaf area
     for irt in 1:n_layer

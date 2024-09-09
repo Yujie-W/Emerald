@@ -54,6 +54,7 @@ end;
 #     2024-Feb-25: add struct CanopyStructureTDAuxil
 #     2024-Mar-01: add field kd for diffuse radiation extinction coefficient (purely unabsorbed, not after reabsorption)
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: add field ci_diffuse
 #
 #######################################################################################################################################################################################################
 """
@@ -68,12 +69,17 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
+    # Angles
     "Inclination angle distribution of leaves"
     p_incl_leaf::Vector{FT}
     "Inclination angle distribution of stems"
     p_incl_stem::Vector{FT}
     "Canopy level boundary locations"
     x_bnds::Vector{FT}
+
+    # Clumping index for diffuse radiation
+    "Clumping index for diffuse radiation"
+    ci_diffuse::FT = 1
 
     # diffuse radiation extinction coefficients
     "Diffuse radiation extinction coefficient (leaf; weighed with angle and clumping index)"
