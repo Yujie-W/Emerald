@@ -6,6 +6,7 @@
 #     2024-Aug-06: output the junction pressure
 #     2024-Aug-06: read leaf water potential only if the leaf is not shedded; otherwise, set it to NaN
 #     2024-Aug-08: save OCS flux if requested
+#     2024-Sep-09: save SAP_VOLUME if requested
 #
 #######################################################################################################################################################################################################
 """
@@ -164,6 +165,9 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     end;
     if saving_dict["P_JUNCTION"]
         wdf.P_JUNCTION[ind] = spac.plant.junction.s_aux.pressure;
+    end;
+    if saving_dict["SAP_VOLUME"]
+        wdf.SAP_VOLUME[ind] = SAP_VOLUME(spac);
     end;
     if saving_dict["TRUNK_AREA"]
         wdf.TRUNK_AREA[ind] = spac.plant.trunk.xylem.trait.area;

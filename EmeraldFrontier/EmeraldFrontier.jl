@@ -9,6 +9,7 @@ using NetcdfIO: read_nc, save_nc!
 using ..EmeraldData.GlobalDatasets: grid_spac
 using ..EmeraldData.WeatherDrivers: grid_weather_driver
 using ..EmeraldLand.Namespace: BulkSPAC, SPACConfiguration
+using ..EmeraldLand.SPAC: SAP_VOLUME
 using ..EmeraldLand.SPAC: BETA, CNPP, GPP, K_PLANT, OCS, T_VEG
 using ..EmeraldLand.SPAC: PAR, PPAR, ΦF_ΦP, ΣSIF, ΣSIF_CHL, ΣSIF_LEAF
 using ..EmeraldLand.SPAC: MODIS_BLUE, MODIS_EVI, MODIS_NDVI, MODIS_NIR, MODIS_NIRv, MODIS_NIRvR, MODIS_RED, OCO2_SIF759, OCO2_SIF770, TROPOMI_SIF683, TROPOMI_SIF740

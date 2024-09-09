@@ -37,6 +37,7 @@ SAVING_DICT = Dict{String, Any}(
             "MOD_P_LEAF"  => false,
             "MOD_P_MMM"   => true,
             "P_JUNCTION"  => true,
+            "SAP_VOLUME"  => true,
             "TRUNK_AREA"  => true,
 );
 
