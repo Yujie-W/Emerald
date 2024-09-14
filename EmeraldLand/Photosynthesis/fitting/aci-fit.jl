@@ -90,7 +90,7 @@ aci_fit(config::SPACConfiguration{FT},
         fitted_γ::Union{Nothing, Number} = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
-        x_maxs = fit_rd ? [200, 10, 10, 10] : [200, 10, 10],
+        x_maxs = fit_rd ? [200, 5, 10, 10] : [200, 5, 10],
         x_inis = fit_rd ? initial_guess[:] : initial_guess[1:3],
         Δ_inis = fit_rd ? [10, 1, 1, 1] : [10, 1, 1],
     );
