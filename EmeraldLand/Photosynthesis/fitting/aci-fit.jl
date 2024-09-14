@@ -63,7 +63,7 @@ aci_fit(config::SPACConfiguration{FT},
         fitted_γ::Union{Nothing, Number} = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, 1, 0.1] : [1, 1, 1],
-        x_maxs = fit_rd ? [999, 999, 10, 10] : [999, 999, 10],
+        x_maxs = fit_rd ? [200, 400, 10, 10] : [200, 400, 10],
         x_inis = fit_rd ? initial_guess : initial_guess[1:3],
         Δ_inis = fit_rd ? [10, 10, 1, 1] : [10, 10, 1],
     );
@@ -90,7 +90,7 @@ aci_fit(config::SPACConfiguration{FT},
         fitted_γ::Union{Nothing, Number} = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.01, 1, 0.1] : [1, 0.01, 1],
-        x_maxs = fit_rd ? [999, 99, 10, 10] : [999, 99, 1],
+        x_maxs = fit_rd ? [200, 10, 10, 10] : [200, 10, 10],
         x_inis = fit_rd ? initial_guess[:] : initial_guess[1:3],
         Δ_inis = fit_rd ? [10, 1, 1, 1] : [10, 1, 1],
     );
@@ -117,7 +117,7 @@ aci_fit(config::SPACConfiguration{FT},
         fitted_γ::Nothing = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 0.1] : [1],
-        x_maxs = fit_rd ? [999, 10] : [999],
+        x_maxs = fit_rd ? [200, 10] : [200],
         x_inis = fit_rd ? initial_guess : initial_guess[1:1],
         Δ_inis = fit_rd ? [10, 1] : [10],
     );
@@ -144,7 +144,7 @@ aci_fit(config::SPACConfiguration{FT},
         fitted_γ::Nothing = nothing) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = fit_rd ? [1, 1, 0.1] : [1, 1],
-        x_maxs = fit_rd ? [999, 999, 10] : [999, 999],
+        x_maxs = fit_rd ? [200, 200, 10] : [200, 200],
         x_inis = fit_rd ? initial_guess : initial_guess[1:2],
         Δ_inis = fit_rd ? [10, 10, 1] : [10, 10],
     );
