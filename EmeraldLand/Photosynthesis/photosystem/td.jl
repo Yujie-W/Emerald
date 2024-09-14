@@ -100,7 +100,7 @@ end;
 #     2022-Feb-07: add v_qmax without temperature dependency
 #     2022-Mar-01: add temperature dependencies for k_q, v_qmax, η_c, and η_l
 #     2024-Apr-15: add support for C4CLMTrait model
-#     2024-Jul-27: set η_c and η_l to min(η_c, η_l) to avoid negative values of η
+#     2024-Jul-27: set η_c and η_l to min(η_c, η_l) to avoid η < 1
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 #
 #######################################################################################################################################################################################################
