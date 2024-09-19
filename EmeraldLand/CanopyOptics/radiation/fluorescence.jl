@@ -220,9 +220,11 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
                                            sun_geo.auxil._e_difꜛ_sif_mean .* sh_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_oθ;
 
         # total emitted SIF for upward and downward direction (ci is already accounted for in p_sunlit, p_sun_sensor, and shortwave radiation, and thus there is no need to use CI here)
-        ilai = can_str.trait.δlai[irt];
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ .* ilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜜ .* ilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ .* ilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜛ .* ilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
+        # add ci_diffuse back to account for the scattering within the canopy layer
+        # TODO: better SIF scattering algorithm
+        ciilai = can_str.trait.δlai[irt] * can_str.t_aux.ci_diffuse;
+        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ .* ciilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜜ .* ciilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
+        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ .* ciilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜛ .* ciilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
     end;
 
     # 2. account for the SIF emission from bottom to up
@@ -234,7 +236,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         f_d_i = view(sun_geo.auxil.e_sifꜜ_layer    ,:,i  );            # downward emitted SIF from layer i
         f_u_i = view(sun_geo.auxil.e_sifꜛ_layer    ,:,i  );            # upward emitted SIF from layer i
-        s_a_i = view(sun_geo.auxil.e_sifꜛ_layer_sum,:,i  );            # final upward SIF in the layer (some of upward and transmitted downward SIF)
+        s_a_i = view(sun_geo.auxil.e_sifꜛ_layer_sum,:,i  );            # final upward SIF in the layer (sum of upward and transmitted downward SIF)
         s_d_i = view(sun_geo.auxil.e_sifꜜ_emit     ,:,i  );            # downward SIF from the layer
         s_u_i = view(sun_geo.auxil.e_sifꜛ_emit     ,:,i  );            # upward SIF from the layer
         s_u_j = view(sun_geo.auxil.e_sifꜛ_emit     ,:,i+1);            # upward SIF from the lower layer
