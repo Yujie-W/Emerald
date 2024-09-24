@@ -76,10 +76,11 @@ regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String
 
     # read the file per slice
     @info "Reading and regridding file $(file_in) per time slice...";
-    if "time" in varname_nc(file_in)
-        var_time = varname_nc(file_in);
-    elseif "valid_time"
-        var_time = "valid_time";
+    all_vars = varname_nc(file_in);
+    var_time = if "time" in all_vars
+        "time";
+    elseif "valid_time" in all_vars # new to ERA5 dataset
+        "valid_time";
     else
         error("Cannot find the time variable in $(file_in)!");
     end;
