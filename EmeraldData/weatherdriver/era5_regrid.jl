@@ -4,6 +4,7 @@
 # General
 #     2023-Mar-10: migrate from research repo to Emerald
 #     2024-Apr-15: skip regrid if the input file does not exist
+#     2024-Sep-24: add support to valid_time (new to ERA5 dataset)
 #
 #######################################################################################################################################################################################################
 """
@@ -75,7 +76,14 @@ regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String
 
     # read the file per slice
     @info "Reading and regridding file $(file_in) per time slice...";
-    times = read_nc(file_in, "time");
+    if "time" in varname_nc(file_in)
+        var_time = varname_nc(file_in);
+    elseif "valid_time"
+        var_time = "valid_time";
+    else
+        error("Cannot find the time variable in $(file_in)!");
+    end;
+    times = read_nc(file_in, var_time);
     matn = zeros((360nx,180nx,length(times))) .* NaN;
     @showprogress for _itim in eachindex(times)
         mati = read_nc(file_in, var_name, _itim);
