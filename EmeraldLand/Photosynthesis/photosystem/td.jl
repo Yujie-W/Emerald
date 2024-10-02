@@ -102,6 +102,7 @@ end;
 #     2024-Apr-15: add support for C4CLMTrait model
 #     2024-Jul-27: set η_c and η_l to min(η_c, η_l) to avoid η < 1
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
+#     2024-Oct-01: typo fix to set η_c and η_l to min(η_c, η_l) to avoid η < 1
 #
 #######################################################################################################################################################################################################
 """
@@ -184,7 +185,7 @@ photosystem_temperature_dependence!(
 
     if FIX_ETA_TD
         psa.η_c = min(pst.TD_ηC.VAL_REF, psa.η_c);
-        psa.η_l = min(pst.TD_ηL.VAL_REF, psa.η_c);
+        psa.η_l = min(pst.TD_ηL.VAL_REF, psa.η_l);
     end;
 
     psa.ϕ_psi_max = PSI_RATE_CONSTANTS.K_P / (PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P);
