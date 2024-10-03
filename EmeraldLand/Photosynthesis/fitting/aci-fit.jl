@@ -79,7 +79,9 @@ aci_fit(config::SPACConfiguration{FT},
         for dfr in eachrow(df)
             photosystem_temperature_dependence!(config, ps, air, dfr.T_LEAF);
             vcmax_guess = nanmax([vcmax_guess, (dfr.A_NET + ps.auxil.r_d) * (dfr.P_I + ps.auxil.k_m) / (dfr.P_I - ps.auxil.γ_star)]);
+            vcmax_guess = nanmin([vcmax_guess, 100]);
             jmax_guess = nanmax([jmax_guess, (dfr.A_NET + ps.auxil.r_d) * (4*dfr.P_I + 8*ps.auxil.γ_star) / (dfr.P_I - ps.auxil.γ_star) * 1.2]);
+            jmax_guess = nanmin([jmax_guess, 200]);
         end;
         # set the initial guess
         mthd = ReduceStepMethodND{FT}(
@@ -137,10 +139,12 @@ aci_fit(config::SPACConfiguration{FT},
         for dfr in eachrow(df)
             photosynthesis!(config, ps, air, dfr.P_I, dfr.PPAR, dfr.T_LEAF);
             vcmax_guess = nanmax([vcmax_guess, (dfr.A_NET + ps.auxil.r_d) * (dfr.P_I + ps.auxil.k_m) / (dfr.P_I - ps.auxil.γ_star)]);
+            vcmax_guess = nanmin([vcmax_guess, 100]);
             j_1 = (dfr.A_NET + ps.auxil.r_d) * (4*dfr.P_I + 8*ps.auxil.γ_star) / (dfr.P_I - ps.auxil.γ_star) * ps.auxil.η;
             p_1 = dfr.PPAR * 0.5 * ps.auxil.ϕ_psi_max;
             v_q = p_1 * j_1 / (p_1 - j_1);
             b6f_guess = nanmax([b6f_guess, v_q / ps.auxil.k_q]);
+            b6f_guess = nanmin([b6f_guess, 1]);
         end;
         # set the initial guess
         mthd = ReduceStepMethodND{FT}(
