@@ -53,11 +53,12 @@ aci_fit(config::SPACConfiguration{FT},
         df::DataFrame,
         initial_guess::Union{Nothing, Vector}) where {FT} = (
     # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
-    if !isnothing(initial_guess) && length(initial_guess) == 4
+    if !isnothing(initial_guess)
+        @assert length(initial_guess) == 4;
         mthd = ReduceStepMethodND{FT}(
             x_mins = [1, 1, 1, 0.1],
             x_maxs = [200, 400, 10, 10],
-            x_inis = initial_guess,
+            x_inis = initial_guess[:],
             Δ_inis = [10, 10, 1, 1],
         );
     else
@@ -71,8 +72,8 @@ aci_fit(config::SPACConfiguration{FT},
             γ_lim_max = nanmin([γ_lim_max, dfr.P_I / temperature_correction(ps.trait.TD_Γ, dfr.T_LEAF)]);
         end;
         # loop through the data once again to guess the Vcmax and Jmax
-        vcmax_guess = 0;
-        jmax_guess = 0;
+        vcmax_guess = 5;
+        jmax_guess = 10;
         ps.trait.r_d25 = rd_lim_min * 1.2;
         ps.trait.TD_Γ.VAL_REF = γ_lim_max * 0.8;
         for dfr in eachrow(df)
@@ -82,14 +83,15 @@ aci_fit(config::SPACConfiguration{FT},
         end;
         # set the initial guess
         mthd = ReduceStepMethodND{FT}(
-            x_mins = [vcmax_guess * 0.5, jmax_guess * 0.5, γ_lim_max * 0.5, rd_lim_min * 1.0],
-            x_maxs = [vcmax_guess * 2.0, jmax_guess * 2.0, γ_lim_max * 1.0, rd_lim_min * 2.0],
+            x_mins = [                1,                1,               1, rd_lim_min * 1.0],
+            x_maxs = [vcmax_guess * 2.0, jmax_guess * 2.0, γ_lim_max * 1.0,                5],
             x_inis = [vcmax_guess * 1.0, jmax_guess * 1.0, γ_lim_max * 0.8, rd_lim_min * 1.2],
             Δ_inis = [10, 10, 1, 1],
         );
     end;
 
     stol = SolutionToleranceND{FT}([0.1, 0.1, 0.01, 0.01], 50);
+    # func(x) = (rme = aci_rmse(config, ps, pst, air, df, x); @info "C3VJP model" x rme ; -rme);
     func(x) = -aci_rmse(config, ps, pst, air, df, x);
     sol = find_peak(func, mthd, stol);
 
@@ -109,7 +111,8 @@ aci_fit(config::SPACConfiguration{FT},
         df::DataFrame,
         initial_guess::Union{Nothing, Vector}) where {FT} = (
     # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
-    if !isnothing(initial_guess) && length(initial_guess) == 4
+    if !isnothing(initial_guess)
+        @assert length(initial_guess) == 4;
         mthd = ReduceStepMethodND{FT}(
             x_mins = [1, 0.01, 1, 0.1],
             x_maxs = [200, 5, 10, 10],
@@ -127,12 +130,12 @@ aci_fit(config::SPACConfiguration{FT},
             γ_lim_max = nanmin([γ_lim_max, dfr.P_I / temperature_correction(ps.trait.TD_Γ, dfr.T_LEAF)]);
         end;
         # loop through the data once again to guess the Vcmax and b6f
-        vcmax_guess = 0;
-        b6f_guess = 0;
+        vcmax_guess = 5;
+        b6f_guess = 0.1;
         ps.trait.r_d25 = rd_lim_min * 1.2;
         ps.trait.TD_Γ.VAL_REF = γ_lim_max * 0.8;
         for dfr in eachrow(df)
-            photosystem_temperature_dependence!(config, ps, air, dfr.T_LEAF);
+            photosynthesis!(config, ps, air, dfr.P_I, dfr.PPAR, dfr.T_LEAF);
             vcmax_guess = nanmax([vcmax_guess, (dfr.A_NET + ps.auxil.r_d) * (dfr.P_I + ps.auxil.k_m) / (dfr.P_I - ps.auxil.γ_star)]);
             j_1 = (dfr.A_NET + ps.auxil.r_d) * (4*dfr.P_I + 8*ps.auxil.γ_star) / (dfr.P_I - ps.auxil.γ_star) * ps.auxil.η;
             p_1 = dfr.PPAR * 0.5 * ps.auxil.ϕ_psi_max;
@@ -141,13 +144,14 @@ aci_fit(config::SPACConfiguration{FT},
         end;
         # set the initial guess
         mthd = ReduceStepMethodND{FT}(
-            x_mins = [vcmax_guess * 0.5, b6f_guess * 0.5, γ_lim_max * 0.5, rd_lim_min * 1.0],
-            x_maxs = [vcmax_guess * 2.0, b6f_guess * 2.0, γ_lim_max * 1.0, rd_lim_min * 2.0],
+            x_mins = [                1,            0.05,               1, rd_lim_min * 1.0],
+            x_maxs = [vcmax_guess * 2.0, b6f_guess * 2.0, γ_lim_max * 1.0,                5],
             x_inis = [vcmax_guess * 1.0, b6f_guess * 1.0, γ_lim_max * 0.8, rd_lim_min * 1.2],
             Δ_inis = [10, 0.1, 1, 1],
         );
     end;
     stol = SolutionToleranceND{FT}([0.1, 0.01, 0.01, 0.01], 50);
+    # func(x) = (rme = aci_rmse(config, ps, pst, air, df, x); @info "C3JB model" x rme; -rme);
     func(x) = -aci_rmse(config, ps, pst, air, df, x);
     sol = find_peak(func, mthd, stol);
 
