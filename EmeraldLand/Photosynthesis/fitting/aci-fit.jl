@@ -34,14 +34,14 @@ aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, ps.trait, air, df, initial_guess);
+        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, ps.trait, air, df, initial_guess);
 
 aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
         pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df, initial_guess);
+        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df, initial_guess);
 
 aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
@@ -51,7 +51,7 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC3Vcmax,
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::::Union{Nothing, Vector}) where {FT} = (
+        initial_guess::Union{Nothing, Vector}) where {FT} = (
     # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
     if !isnothing(initial_guess) && length(initial_guess) == 4
         mthd = ReduceStepMethodND{FT}(
@@ -107,7 +107,7 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC3Vcmax,
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::::Union{Nothing, Vector}) where {FT} = (
+        initial_guess::Union{Nothing, Vector}) where {FT} = (
     # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
     if !isnothing(initial_guess) && length(initial_guess) == 4
         mthd = ReduceStepMethodND{FT}(
@@ -165,7 +165,7 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC4VcmaxPi,
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::::Union{Nothing, Vector}) where {FT} = (
+        initial_guess::Union{Nothing, Vector}) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = [1, 0.1],
         x_maxs = [200, 10],
@@ -190,7 +190,7 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC4VpmaxPi,
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::::Union{Nothing, Vector}) where {FT} = (
+        initial_guess::Union{Nothing, Vector}) where {FT} = (
     mthd = ReduceStepMethodND{FT}(
         x_mins = [1, 1, 0.1],
         x_maxs = [200, 200, 10],
@@ -224,7 +224,7 @@ aci_fit(config::SPACConfiguration{FT},
                 ps::LeafPhotosystem{FT},
                 air::AirLayer{FT},
                 df::DataFrame,
-                initial_guess::::Union{Nothing, Vector};
+                initial_guess::Union{Nothing, Vector};
                 min_count::Int = 9,
                 rmse_threshold::Number = 2) where {FT}
 
@@ -243,7 +243,7 @@ function aci_fit_exclude_outliter(
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             df::DataFrame,
-            initial_guess::::Union{Nothing, Vector};
+            initial_guess::Union{Nothing, Vector};
             min_count::Int = 9,
             rmse_threshold::Number = 2) where {FT}
     # remove outliers using thresholds when necessary
