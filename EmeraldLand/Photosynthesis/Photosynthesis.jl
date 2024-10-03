@@ -5,7 +5,7 @@ using Statistics: mean
 
 using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
-using ..EmeraldMath.Stats: nanmin, rmse
+using ..EmeraldMath.Stats: nanmax, nanmin, rmse
 using ..EmeraldPhysics.Constant: F_O₂, GAS_R
 
 using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterVcmax
