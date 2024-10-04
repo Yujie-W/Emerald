@@ -10,6 +10,7 @@
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #     2024-Aug-06: make initial_guess mandatory
 #     2024-Oct-03: customize the initial guess for C3 models
+#     2024-Oct-04: use max(1, p_1 - j_1) to avoid negative b6f guess
 #
 #######################################################################################################################################################################################################
 """
@@ -145,7 +146,7 @@ aci_fit(config::SPACConfiguration{FT},
             vcmax_guess = nanmin([vcmax_guess, 100]);
             j_1 = (dfr.A_NET + ps.auxil.r_d) * (4*dfr.P_I + 8*ps.auxil.γ_star) / (dfr.P_I - ps.auxil.γ_star) * ps.auxil.η;
             p_1 = dfr.PPAR * 0.5 * ps.auxil.ϕ_psi_max;
-            v_q = p_1 * j_1 / (p_1 - j_1);
+            v_q = p_1 * j_1 / max(1, p_1 - j_1);
             b6f_guess = nanmax([b6f_guess, v_q / ps.auxil.k_q]);
             b6f_guess = nanmin([b6f_guess, 1]);
         end;
