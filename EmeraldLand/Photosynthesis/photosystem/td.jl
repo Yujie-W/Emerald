@@ -8,6 +8,7 @@
 #     2022-Jan-13: add optional input t_ref to allow for manually setting reference temperature
 #     2022-Jul-29: add support to Q10Peak
 #     2024-Aug-01: add support for Q10PeakHT and Q10PeakLTHT
+#     2024-Oct-04: add support to ArrheniusPeak2
 #
 #######################################################################################################################################################################################################
 """
@@ -84,6 +85,7 @@ temperature_correction(td::Q10PeakLTHT{FT}, t::FT; t_ref::FT = td.T_REF) where {
 #     2022-Jan-13: use ClimaCache types, which uses ΔHA, ΔHD, and ΔSV directly
 #     2022-Jan-13: add optional input t_ref to allow for manually setting reference temperature
 #     2022-Jul-29: add support to Q10Peak
+#     2024-Oct-04: add support to ArrheniusPeak2
 #
 #######################################################################################################################################################################################################
 """
@@ -96,7 +98,7 @@ Return the temperature corrected value, given
 - `t_ref` Reference temperature in `K`, default is `td.T_REF` (298.15 K)
 
 """
-function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
+function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, ArrheniusPeak2{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
     return td.VAL_REF * temperature_correction(td, t; t_ref=t_ref)
 end;
 
