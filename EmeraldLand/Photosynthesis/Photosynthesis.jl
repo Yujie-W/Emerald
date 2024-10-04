@@ -10,7 +10,7 @@ using ..EmeraldPhysics.Constant: F_O₂, GAS_R
 
 using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterVcmax
 using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, MedlynSM
-using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
+using ..Namespace: Arrhenius, ArrheniusPeak, ArrheniusPeak2, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
 using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
 using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII

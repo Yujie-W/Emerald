@@ -38,7 +38,7 @@ Base.@kwdef mutable struct GeneralC3Trait{FT}
     "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
     TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KoTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type Kq temperature dependency"
-    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KqTDJohnson(FT)
+    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, ArrheniusPeak2{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KqTDJohnson(FT)
     "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
     TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = RespirationTDCLMC3(FT)
     "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"

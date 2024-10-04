@@ -96,6 +96,44 @@ end;
 #
 # Changes to this struct
 # General
+#     2024-Oct-04: add struct ArrheniusPeak2
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+An `ArrheniusPeak2` type struct using
+```math
+Y_1 = Y_0 \\cdot \\min \\left(1, \\exp \\left( \\dfrac{H_a}{R T_0} - \\dfrac{H_a}{R T_1} \\right) \\right)
+          \\cdot \\min \\left(1, \\dfrac{ 1 + \\exp \\left( \\dfrac{S_v T_0 - H_d}{R T_0} \\right) }
+                                        { 1 + \\exp \\left( \\dfrac{S_v T_1 - H_d}{R T_1} \\right) } \\right)
+```
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct ArrheniusPeak2{FT<:AbstractFloat} <: AbstractTemperatureDependency{FT}
+    # General model information
+    "Reference temperature `[K]`"
+    T_REF::FT
+    "Uncorrected vakye at reference temperature"
+    VAL_REF::FT
+    "Activation energy"
+    ΔHA::FT
+    "Deactivation energy"
+    ΔHD::FT
+    "Entropy factor"
+    ΔSV::FT
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
 #     2022-Jan-13: migrate from Photosynthesis.jl, rename to Q10
 #     2022-Jan-14: make structure mutable
 #
