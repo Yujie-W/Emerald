@@ -26,7 +26,7 @@ Update sensor geometry related auxiliary variables, given
 function sensor_geometry_aux! end;
 
 sensor_geometry_aux!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} =
-    sensor_geometry_aux!(config, spac.canopy, max(FT(0.5), spac.plant.leaves[1].bio.trait.width / (spac.plant.zs[2] - spac.plant.zs[1])));
+    sensor_geometry_aux!(config, spac.canopy, min(FT(0.5), spac.plant.leaves[1].bio.trait.width / (spac.plant.zs[2] - spac.plant.zs[1])));
 
 sensor_geometry_aux!(config::SPACConfiguration{FT}, can::MultiLayerCanopy{FT}, lw2ch::FT) where {FT} =
     sensor_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux, can.sensor_geometry.state, can.sensor_geometry.s_aux, lw2ch);
