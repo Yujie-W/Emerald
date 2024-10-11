@@ -330,3 +330,18 @@ Q10TDKpepCLM(FT)    = Q10{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = 0.2);
 RespirationTDCLMC4(FT) = Q10PeakHT{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = NaN, ΔT_REF = 328.15, ΔT_SLOPE = 1.3);
 
 VcmaxTDCLMC4(FT) = Q10PeakLTHT{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = NaN, ΔHT_REF = 313.15, ΔHT_SLOPE = 0.3, ΔLT_REF = 288.15, ΔLT_SLOPE = 0.2);
+
+
+#######################################################################################################################################################################################################
+#
+# New parameters for the temperature dependency based on fitting A-Ci curves I collected
+# TODO: make it default in the future after the paper is accepted
+#
+#######################################################################################################################################################################################################
+ΓStarTDWang2024(FT) = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 4.56, ΔHA = 11800.0);
+
+JmaxTDWang2024(FT, t::Number = T₂₅())  = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN   , ΔHA = 50000, ΔHD = 201000, ΔSV = 659.70 - 0.75 * (t - T₀(FT)));
+KqTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 300   , ΔHA = 21900, ΔHD = 232000, ΔSV = 700);
+VcmaxTDWang2024(FT, t::Number = T₂₅()) = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN   , ΔHA = 63000, ΔHD = 204000, ΔSV = 668.39 - 1.07 * (t - T₀(FT)));
+ηCTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 2*3/14, ΔHA = 21900, ΔHD = 232000, ΔSV = 700);
+ηLTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 3*3/14, ΔHA = 21900, ΔHD = 232000, ΔSV = 700);
