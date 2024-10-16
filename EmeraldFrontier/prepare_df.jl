@@ -57,8 +57,9 @@ function prepare_wdf(spac::BulkSPAC{FT}, df::DataFrame; saving_dict::Dict{String
         push!(new_df_cols, "ΦF");
         push!(new_df_cols, "ΦP");
     end;
+    # if the label does not contain MOD_ prefix
     for label in keys(saving_dict)
-        if !(label in ["MOD_SWC", "MOD_T_SOIL", "MOD_T_LEAF", "MOD_T_MMM", "MOD_ΦFΦP"])
+        if !occursin("MOD_", label)
             if saving_dict[label]
                 push!(new_df_cols, label);
             end;

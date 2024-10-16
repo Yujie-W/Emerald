@@ -11,9 +11,6 @@ import Emerald.EmeraldLand.SPAC
 
         ks = CO.extinction_coefficient.(sza, lias);
         @test all(ks .>= 0);
-
-        kd = CO.extinction_coefficient.(lias);
-        @test all(kd .>= 0);
     end;
 
     @testset "Soil albedo" begin

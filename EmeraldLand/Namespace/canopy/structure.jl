@@ -55,6 +55,7 @@ end;
 #     2024-Mar-01: add field kd for diffuse radiation extinction coefficient (purely unabsorbed, not after reabsorption)
 #     2024-Sep-04: separate leaf and stem optical properties
 #     2024-Sep-07: add field ci_diffuse
+#     2024-Oct-16: change kd_leaf and kd_stem to be 90 elements long (per degree of a isotropic radiation)
 #
 #######################################################################################################################################################################################################
 """
@@ -82,10 +83,10 @@ Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
     ci_diffuse::FT = 1
 
     # diffuse radiation extinction coefficients
-    "Diffuse radiation extinction coefficient (leaf; weighed with angle and clumping index)"
-    kd_leaf::FT = 0
-    "Diffuse radiation extinction coefficient (stem; weighed with angle and clumping index)"
-    kd_stem::FT = 0
+    "Diffuse radiation extinction coefficient (leaf; weighed with leaf angle and clumping index; per direction)"
+    kd_leaf::Vector{FT} = zeros(FT, 90)
+    "Diffuse radiation extinction coefficient (stem; weighed with leaf angle and clumping index; per direction)"
+    kd_stem::Vector{FT} = zeros(FT, 90)
 
     # canopy scattering coefficients (leaf)
     "Backward diffuse->diffuse scatter weight (leaf)"
@@ -113,6 +114,7 @@ CanopyStructureTDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} =
 # General
 #     2023-Oct-09: add struct CanopyStructureAuxil
 #     2023-Oct-18: add fields ddb_stem, ddf_stem, lw_layer_leaf, lw_layer_stem, r_net_lw_leaf, r_net_lw_stem
+#     2024-Oct-16: add field τ_dd_isotropic
 #
 #######################################################################################################################################################################################################
 """
@@ -136,6 +138,10 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     ddb_stem::Matrix{FT}
     "Forward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of stem"
     ddf_stem::Matrix{FT}
+
+    # Weight tranmittance
+    "The transmittance chance that isotropic radiation will not reach any leaf surface"
+    τ_dd_isotropic::Vector{FT}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
     "Reflectance for diffuse->diffuse at each canopy layer"
@@ -185,28 +191,29 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
 end;
 
 CanopyStructureAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureAuxil{FT}(
-            ddb_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
-            ddf_leaf      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
-            ddb_stem      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
-            ddf_stem      = zeros(FT, length(config.SPECTRA.Λ), n_layer),
-            ρ_dd_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer),
-            τ_dd_layer    = zeros(FT, length(config.SPECTRA.Λ), n_layer),
-            ρ_dd          = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
-            τ_dd          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
-            ϵ_lw_layer    = zeros(FT, n_layer),
-            ρ_lw_layer    = zeros(FT, n_layer),
-            τ_lw_layer    = zeros(FT, n_layer),
-            ρ_lw          = zeros(FT, n_layer + 1),
-            τ_lw          = zeros(FT, n_layer),
-            lw_layer      = zeros(FT, n_layer),
-            lw_layer_leaf = zeros(FT, n_layer),
-            lw_layer_stem = zeros(FT, n_layer),
-            lwꜜ           = zeros(FT, n_layer + 1),
-            lwꜛ           = zeros(FT, n_layer + 1),
-            emitꜜ         = zeros(FT, n_layer),
-            emitꜛ         = zeros(FT, n_layer + 1),
-            r_net_lw_leaf = zeros(FT, n_layer),
-            r_net_lw_stem = zeros(FT, n_layer),
+            ddb_leaf       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddf_leaf       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddb_stem       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ddf_stem       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            τ_dd_isotropic = zeros(FT, n_layer),
+            ρ_dd_layer     = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            τ_dd_layer     = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ρ_dd           = zeros(FT, length(config.SPECTRA.Λ), n_layer + 1),
+            τ_dd           = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            ϵ_lw_layer     = zeros(FT, n_layer),
+            ρ_lw_layer     = zeros(FT, n_layer),
+            τ_lw_layer     = zeros(FT, n_layer),
+            ρ_lw           = zeros(FT, n_layer + 1),
+            τ_lw           = zeros(FT, n_layer),
+            lw_layer       = zeros(FT, n_layer),
+            lw_layer_leaf  = zeros(FT, n_layer),
+            lw_layer_stem  = zeros(FT, n_layer),
+            lwꜜ            = zeros(FT, n_layer + 1),
+            lwꜛ            = zeros(FT, n_layer + 1),
+            emitꜜ          = zeros(FT, n_layer),
+            emitꜛ          = zeros(FT, n_layer + 1),
+            r_net_lw_leaf  = zeros(FT, n_layer),
+            r_net_lw_stem  = zeros(FT, n_layer),
 );
 
 
