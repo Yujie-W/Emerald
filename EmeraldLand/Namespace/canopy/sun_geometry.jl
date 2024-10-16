@@ -114,6 +114,7 @@ SunGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = Sun
 #     2023-Oct-18: add fields sdb_stem, sdf_stem, r_net_lw_leaf, r_net_lw_stem
 #     2024-Jul-27: use bined PPAR to speed up
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
 """
@@ -128,6 +129,12 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometryAuxil{FT}
+    # Effective leaf reflectance and transmittance for solar radiation
+    "Effective leaf reflectance after accounting for the CI effect"
+    ρ_leaf_eff::Matrix{FT}
+    "Effective leaf transmittance after accounting for the CI  effect"
+    τ_leaf_eff::Matrix{FT}
+
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
     sdb_leaf::Matrix{FT}
@@ -277,6 +284,8 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
     cache_dim_ppar = isnothing(config.DIM_PPAR_BINS) ? config.DIM_INCL * config.DIM_AZI : config.DIM_PPAR_BINS;
 
     return SunGeometryAuxil{FT}(
+                ρ_leaf_eff       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                τ_leaf_eff       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
                 sdb_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
                 sdf_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
                 sdb_stem         = zeros(FT, length(config.SPECTRA.Λ), n_layer),

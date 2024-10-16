@@ -134,6 +134,7 @@ SensorGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = 
 #     2023-Oct-09: add struct SensorGeometryAuxil
 #     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
 #     2024-Jul-27: use bined PPAR to speed up (moved sif yield here from leaf)
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
 """
@@ -148,6 +149,12 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometryAuxil{FT}
+    # Effective leaf reflectance and transmittance for solar radiation
+    "Effective leaf reflectance after accounting for the CI effect"
+    ρ_leaf_eff::Matrix{FT}
+    "Effective leaf transmittance after accounting for the CI  effect"
+    τ_leaf_eff::Matrix{FT}
+
     # Scattering coefficients per leaf area or stem area
     "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins of leaf"
     dob_leaf::Matrix{FT}
@@ -194,6 +201,8 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometryAuxil{FT}(
+            ρ_leaf_eff        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            τ_leaf_eff        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             dob_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             dof_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             so_leaf           = zeros(FT, length(config.SPECTRA.Λ), n_layer),

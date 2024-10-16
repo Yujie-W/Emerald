@@ -89,6 +89,7 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait
 #     2024-Sep-04: separate leaf and stem optical properties
 #     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf and kd_stem)
 #     2024-Oct-16: weigh the extinction coefficient for diffuse radiation when computing the transmittance
+#     2024-Oct-16: add option to compute effective leaf spectra based on CI
 #
 #######################################################################################################################################################################################################
 """
@@ -108,18 +109,38 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     end;
 
     # run the canopy structure function only when LAI+SAI > 0
-    (; SPECTRA) = config;
+    (; EFFECTIVE_LEAF_SPECTRA, SPECTRA) = config;
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
     n_layer = length(leaves);
+
+    # compute the effective leaf reflectance and transmittance spectra using the PROSPECT model scheme
+    # Note: this step can be bypassed if leaf reflectance and transmittance are not changing
+    if EFFECTIVE_LEAF_SPECTRA
+        ρ_2 = spac.cache.cache_wl_1;
+        τ_2 = spac.cache.cache_wl_2;
+        n_eff = 1 / can_str.t_aux.ci_diffuse;
+        for irt in 1:n_layer
+            ilf = n_layer + 1 - irt;
+            leaf = leaves[ilf];
+            ρ_1 = leaf.bio.auxil.ρ_leaf;
+            τ_1 = leaf.bio.auxil.τ_leaf;
+            ρ_2 .= layer_2_ρ.(ρ_1, τ_1, n_eff - 1);
+            τ_2 .= layer_2_τ.(ρ_1, τ_1, n_eff - 1);
+            can_str.auxil.ρ_leaf_eff[:,irt] .= leaf_ρ.(ρ_1, τ_1, ρ_1, τ_1, ρ_2);
+            can_str.auxil.τ_leaf_eff[:,irt] .= leaf_τ.(τ_1, ρ_1, ρ_2, τ_2);
+        end;
+    end;
 
     # compute the scattering coefficients for the solar radiation per leaf area
     # TODO: add cosine of the diffuse angle and CI impacts on the rho and tau of an effective leaf
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
-        can_str.auxil.ddb_leaf[:,irt] .= can_str.t_aux.ddb_leaf .* leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddf_leaf .* leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddf_leaf[:,irt] .= can_str.t_aux.ddf_leaf .* leaf.bio.auxil.ρ_leaf .+ can_str.t_aux.ddb_leaf .* leaf.bio.auxil.τ_leaf;
+        ρ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(can_str.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
+        τ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(can_str.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
+        can_str.auxil.ddb_leaf[:,irt] .= can_str.t_aux.ddb_leaf .* ρ_leaf .+ can_str.t_aux.ddf_leaf .* τ_leaf;
+        can_str.auxil.ddf_leaf[:,irt] .= can_str.t_aux.ddf_leaf .* ρ_leaf .+ can_str.t_aux.ddb_leaf .* τ_leaf;
         can_str.auxil.ddb_stem[:,irt] .= can_str.t_aux.ddb_stem .* SPECTRA.ρ_STEM;
         can_str.auxil.ddf_stem[:,irt] .= can_str.t_aux.ddf_stem .* SPECTRA.ρ_STEM;
     end;

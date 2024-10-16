@@ -18,6 +18,8 @@ using ..Namespace: MultiLayerCanopy
 using ..Namespace: CanopyLayer, Leaf
 using ..Namespace: BulkSPAC, SPACConfiguration
 
+using ..LeafOptics: layer_2_ρ, layer_2_τ, leaf_ρ, leaf_τ
+
 
 # functions related to canopy geometry
 include("geometry/direction.jl");

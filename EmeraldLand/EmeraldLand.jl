@@ -10,10 +10,12 @@ using ..EmeraldUtility
 include("Namespace/Namespace.jl");
 
 # depends on Namespace
-include("CanopyOptics/CanopyOptics.jl");
 include("LeafOptics/LeafOptics.jl");
 include("Photosynthesis/Photosynthesis.jl");
 include("PhysicalChemistry.jl");
+
+# depends on LeafOptics
+include("CanopyOptics/CanopyOptics.jl");
 
 # depends on PhysicalChemistry
 include("SoilHydraulics/SoilHydraulics.jl");

@@ -115,6 +115,7 @@ CanopyStructureTDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} =
 #     2023-Oct-09: add struct CanopyStructureAuxil
 #     2023-Oct-18: add fields ddb_stem, ddf_stem, lw_layer_leaf, lw_layer_stem, r_net_lw_leaf, r_net_lw_stem
 #     2024-Oct-16: add field τ_dd_isotropic
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
 """
@@ -129,6 +130,12 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct CanopyStructureAuxil{FT}
+    # Effective leaf reflectance and transmittance for solar radiation
+    "Effective leaf reflectance after accounting for the CI effect"
+    ρ_leaf_eff::Matrix{FT}
+    "Effective leaf transmittance after accounting for the CI  effect"
+    τ_leaf_eff::Matrix{FT}
+
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for diffuse->diffuse at different layers and wavelength bins of leaf"
     ddb_leaf::Matrix{FT}
@@ -191,6 +198,8 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
 end;
 
 CanopyStructureAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = CanopyStructureAuxil{FT}(
+            ρ_leaf_eff     = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            τ_leaf_eff     = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             ddb_leaf       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             ddf_leaf       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             ddb_stem       = zeros(FT, length(config.SPECTRA.Λ), n_layer),

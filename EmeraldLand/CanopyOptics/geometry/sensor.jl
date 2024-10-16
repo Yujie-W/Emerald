@@ -169,6 +169,7 @@ sensor_geometry_aux!(
 #     2024-Feb-22: add solar zenith angle control
 #     2024-Feb-25: move the trait- and state-dependent calculations to the sensor_geometry_aux! function
 #     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Oct-16: add option to compute effective leaf spectra based on CI
 #
 #######################################################################################################################################################################################################
 """
@@ -189,18 +190,39 @@ function sensor_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) whe
     end;
 
     # run the sensor geometry simulations only if any of canopy reflectance feature or fluorescence feature is enabled and if LAI+SAI > 0
-    (; SPECTRA) = config;
+    (; EFFECTIVE_LEAF_SPECTRA, SPECTRA) = config;
     leaves = spac.plant.leaves;
     sen_geo = spac.canopy.sensor_geometry;
     n_layer = length(leaves);
+
+    # compute the effective leaf reflectance and transmittance spectra using the PROSPECT model scheme
+    if EFFECTIVE_LEAF_SPECTRA
+        ρ_2 = spac.cache.cache_wl_1;
+        τ_2 = spac.cache.cache_wl_2;
+        n_eff = 1 / sen_geo.s_aux.ci_sensor;
+        for irt in 1:n_layer
+            ilf = n_layer + 1 - irt;
+            leaf = leaves[ilf];
+            ρ_1 = leaf.bio.auxil.ρ_leaf;
+            τ_1 = leaf.bio.auxil.τ_leaf;
+            ρ_2 .= layer_2_ρ.(ρ_1, τ_1, n_eff - 1);
+            τ_2 .= layer_2_τ.(ρ_1, τ_1, n_eff - 1);
+            sen_geo.auxil.ρ_leaf_eff[:,irt] .= leaf_ρ.(ρ_1, τ_1, ρ_1, τ_1, ρ_2);
+            sen_geo.auxil.τ_leaf_eff[:,irt] .= leaf_τ.(τ_1, ρ_1, ρ_2, τ_2);
+        end;
+    end;
 
     # compute the scattering coefficients per leaf area
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob_leaf .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dof_leaf .* leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof_leaf .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.dob_leaf .* leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob_leaf .* leaf.bio.auxil.ρ_leaf .+ sen_geo.s_aux.sof_leaf .* leaf.bio.auxil.τ_leaf;
+        ρ_leaf_dif = EFFECTIVE_LEAF_SPECTRA ? view(sen_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
+        τ_leaf_dif = EFFECTIVE_LEAF_SPECTRA ? view(sen_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
+        ρ_leaf_dir = EFFECTIVE_LEAF_SPECTRA ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
+        τ_leaf_dir = EFFECTIVE_LEAF_SPECTRA ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
+        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob_leaf .* ρ_leaf_dif .+ sen_geo.s_aux.dof_leaf .* τ_leaf_dif;
+        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof_leaf .* ρ_leaf_dif .+ sen_geo.s_aux.dob_leaf .* τ_leaf_dif;
+        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob_leaf .* ρ_leaf_dir .+ sen_geo.s_aux.sof_leaf .* τ_leaf_dir;
         sen_geo.auxil.dob_stem[:,irt] .= sen_geo.s_aux.dob_stem .* SPECTRA.ρ_STEM;
         sen_geo.auxil.dof_stem[:,irt] .= sen_geo.s_aux.dof_stem .* SPECTRA.ρ_STEM;
         sen_geo.auxil.so_stem[:,irt]  .= sen_geo.s_aux.sob_stem .* SPECTRA.ρ_STEM;

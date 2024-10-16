@@ -103,6 +103,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
 #     2024-Jun-06: fix a typo in the calculation of ρ_sd
 #     2024-Sep-04: separate leaf and stem optical properties
 #     2024-Sep-07: use sza dependent clumping index
+#     2024-Oct-16: add option to compute effective leaf spectra based on CI
 #
 #######################################################################################################################################################################################################
 """
@@ -123,17 +124,37 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     end;
 
     # if sza <= 89 and LAI+SAI > 0, run the sun geometry function
-    (; SPECTRA) = config;
+    (; EFFECTIVE_LEAF_SPECTRA, SPECTRA) = config;
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;
     n_layer = length(leaves);
 
+    # compute the effective leaf reflectance and transmittance spectra using the PROSPECT model scheme
+    if EFFECTIVE_LEAF_SPECTRA
+        ρ_2 = spac.cache.cache_wl_1;
+        τ_2 = spac.cache.cache_wl_2;
+        n_eff = 1 / sun_geo.s_aux.ci_sun;
+        for irt in 1:n_layer
+            ilf = n_layer + 1 - irt;
+            leaf = leaves[ilf];
+            ρ_1 = leaf.bio.auxil.ρ_leaf;
+            τ_1 = leaf.bio.auxil.τ_leaf;
+            ρ_2 .= layer_2_ρ.(ρ_1, τ_1, n_eff - 1);
+            τ_2 .= layer_2_τ.(ρ_1, τ_1, n_eff - 1);
+            sun_geo.auxil.ρ_leaf_eff[:,irt] .= leaf_ρ.(ρ_1, τ_1, ρ_1, τ_1, ρ_2);
+            sun_geo.auxil.τ_leaf_eff[:,irt] .= leaf_τ.(τ_1, ρ_1, ρ_2, τ_2);
+        end;
+    end;
+
     # compute the scattering coefficients for the solar radiation per leaf area
+    # use effective leaf spectra if EFFECTIVE_LEAF_SPECTRA is true
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb_leaf .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdf_leaf .* leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf_leaf .* leaf.bio.auxil.ρ_leaf .+ sun_geo.s_aux.sdb_leaf .* leaf.bio.auxil.τ_leaf;
+        ρ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
+        τ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
+        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb_leaf .* ρ_leaf .+ sun_geo.s_aux.sdf_leaf .* τ_leaf;
+        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf_leaf .* ρ_leaf .+ sun_geo.s_aux.sdb_leaf .* τ_leaf;
         sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.s_aux.sdb_stem .* SPECTRA.ρ_STEM;
         sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.s_aux.sdf_stem .* SPECTRA.ρ_STEM;
     end;

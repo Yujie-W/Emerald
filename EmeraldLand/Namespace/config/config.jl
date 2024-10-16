@@ -29,6 +29,7 @@
 #     2024-Aug-05: set ENABLE_DROUGHT_LEGACY to true by default (add corresponding functions in PlantHydraulics module)
 #     2024-Aug-06: set root disconnection threshold to 0.5 loss of root conductance (to avoid numerical issues)
 #     2024-Sep-07: remove field HOT_SPOT (leaf width / canopy height, will use crown height instead)
+#     2024-Oct-16: add option EFFECTIVE_LEAF_SPECTRA
 #
 #######################################################################################################################################################################################################
 """
@@ -62,6 +63,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     #
     # Canopy optics
     #
+    "Effective leaf spectra based on CI effect"
+    EFFECTIVE_LEAF_SPECTRA::Bool = true
     "Whether to compute canopy reflectance"
     ENABLE_REF::Bool = true
     "Soil albedo method"
