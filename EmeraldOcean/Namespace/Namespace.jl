@@ -1,0 +1,4 @@
+module Namespace
+
+
+end # module
