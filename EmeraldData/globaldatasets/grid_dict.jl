@@ -160,34 +160,34 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
 );
 
 grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64, ccs::DataFrame = CCS) = (
-    lmsk = read_LUT(query_collection(dtl.tag_t_lm), lat, lon)[1];
+    lmsk = read_LUT(dtl.tag_t_lm, lat, lon; include_std = false);
     if !(lmsk > 0)
         return error("The target grid does not contain land!");
     end;
 
-    lais = read_LUT(query_collection(dtl.tag_p_lai), lat, lon)[1];
+    lais = read_LUT(dtl.tag_p_lai, lat, lon; include_std = false);
     if !(nanmax(lais) > 0)
         return error("The target grid is not vegetated!");
     end;
 
     co2 = ccs.MEAN[findfirst(ccs.YEAR .== dtl.year)];
-    scolor = min(20, max(1, Int(floor(read_LUT(query_collection(dtl.tag_s_cc), lat, lon)[1]))));
-    s_α = read_LUT(query_collection(dtl.tag_s_α), lat, lon)[1];
-    s_n = read_LUT(query_collection(dtl.tag_s_n), lat, lon)[1];
-    s_Θr = read_LUT(query_collection(dtl.tag_s_Θr), lat, lon)[1];
-    s_Θs = read_LUT(query_collection(dtl.tag_s_Θs), lat, lon)[1];
+    scolor = min(20, max(1, Int(floor(read_LUT(dtl.tag_s_cc, lat, lon; include_std = false)))));
+    s_α = read_LUT(dtl.tag_s_α, lat, lon; include_std = false);
+    s_n = read_LUT(dtl.tag_s_n, lat, lon; include_std = false);
+    s_Θr = read_LUT(dtl.tag_s_Θr, lat, lon; include_std = false);
+    s_Θs = read_LUT(dtl.tag_s_Θs, lat, lon; include_std = false);
 
     # else return the grid dictionary if the grid is masked as plant
-    chls = read_LUT(query_collection(dtl.tag_p_chl), lat, lon)[1];
-    cis = read_LUT(query_collection(dtl.tag_p_ci), lat, lon)[1];
-    lma = 1 / read_LUT(query_collection(dtl.tag_p_sla), lat, lon)[1] / 10;
-    pfts = read_LUT(query_collection(dtl.tag_t_pft), lat, lon)[1];
-    zc = read_LUT(query_collection(dtl.tag_p_ch), lat, lon)[1];
+    chls = read_LUT(dtl.tag_p_chl, lat, lon; include_std = false);
+    cis = read_LUT(dtl.tag_p_ci, lat, lon; include_std = false);
+    lma = 1 / read_LUT(dtl.tag_p_sla, lat, lon; include_std = false) / 10;
+    pfts = read_LUT(dtl.tag_t_pft, lat, lon; include_std = false);
+    zc = read_LUT(dtl.tag_p_ch, lat, lon; include_std = false);
 
     if dtl.gm_tag == "gm3"
-        vcmax = read_LUT(query_collection("VCMAX_2X_1Y_V2"), lat, lon)[1] .* 0.6;
+        vcmax = read_LUT("VCMAX_2X_1Y_V2", lat, lon; include_std = false) .* 0.6;
     else
-        vcmax = read_LUT(query_collection(dtl.tag_p_vcm), lat, lon)[1];
+        vcmax = read_LUT(dtl.tag_p_vcm, lat, lon; include_std = false);
     end;
 
     # gap fill the data for seasonal trends
@@ -222,7 +222,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
                 "CHLOROPHYLL"   => chls,
                 "CLUMPING"      => cis,
                 "CO2"           => co2,
-                "ELEVATION"     => read_LUT(query_collection(dtl.tag_t_ele), lat, lon)[1],
+                "ELEVATION"     => read_LUT(dtl.tag_t_ele, lat, lon; include_std = false),
                 "FT"            => FT,
                 "G1_MEDLYN_C3"  => g1_c3_medlyn,
                 "G1_MEDLYN_C4"  => g1_c4_medlyn,

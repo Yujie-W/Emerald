@@ -6,7 +6,6 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using Statistics: mean
 
 using GriddingMachine.Blender: regrid
-using GriddingMachine.Collector: query_collection
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 
 using ..EmeraldIO.Text: read_csv
