@@ -30,6 +30,7 @@
 #     2024-Aug-06: set root disconnection threshold to 0.5 loss of root conductance (to avoid numerical issues)
 #     2024-Sep-07: remove field HOT_SPOT (leaf width / canopy height, will use crown height instead)
 #     2024-Oct-16: add option EFFECTIVE_LEAF_SPECTRA
+#     2024-Oct-29: add option ALLOW_XYLEM_GROWTH
 #
 #######################################################################################################################################################################################################
 """
@@ -127,6 +128,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     ALLOW_LEAF_CONDENSATION::Bool = false
     "Allow leaf shedding in prescibe LAI mode to avoid numerical issues"
     ALLOW_LEAF_SHEDDING::Bool = true
+    "Allow xylem to grow"
+    ALLOW_XYLEM_GROWTH::Bool = true
     "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
     DIM_XYLEM::Int = 5
     "Enable drought legacy effect"

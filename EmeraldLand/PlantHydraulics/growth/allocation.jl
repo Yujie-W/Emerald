@@ -10,13 +10,18 @@
 #######################################################################################################################################################################################################
 """
 
-    plant_growth!(spac::BulkSPAC{FT})
+    plant_growth!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
 
 Allocate carbon to different plant organs, given
 - `spac` `BulkSPAC` structure
 
 """
-function plant_growth!(spac::BulkSPAC{FT}) where {FT}
+function plant_growth!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    if !config.ALLOW_XYLEM_GROWTH
+        return nothing
+    end;
+
+    # only if the xylem growth is allowed
     plant = spac.plant;
 
     # determine how much carbon is available for xylem growth (only if the carbon pool is higher than the threshold)
