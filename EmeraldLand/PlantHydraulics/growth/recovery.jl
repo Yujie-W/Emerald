@@ -58,6 +58,7 @@ recovery_or_growth(xylem::XylemHydraulics{FT}, c_mol::FT, t::FT) where {FT} = (
 # General
 #     2024-Aug-30: add function to recover the xylem hydraulic system (area added to total area, pressure history updated)
 #     2024-Sep-04: add method to recover leaf xylem hydraulic system from new growth
+#     2024-Oct-20: reconnect leaf when recover the xylem hydraulic system for leaf
 #
 #######################################################################################################################################################################################################
 """
@@ -105,6 +106,9 @@ xylem_recovery!(xylem::XylemHydraulics{FT}, lai_0::FT, lai_diff::FT) where {FT} 
         p_his = xylem_pressure(xylem.trait.vc, min(1, k_rel_1));
         xylem.state.p_history[i] = p_his;
     end;
+
+    # set connection status to true
+    xylem.state.connected = true;
 
     return nothing
 );

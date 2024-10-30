@@ -9,6 +9,7 @@
 #     2023-Mar-11: do nothing if LAI == 0
 #     2023-Sep-14: add root disconnection control
 #     2023-Feb-12: limit stomatal conductance within its structural limits after updating the conductance based on ∂g∂t
+#     2024-Oct-30: add leaf connection check
 #
 #######################################################################################################################################################################################################
 """
@@ -34,6 +35,14 @@ stomatal_conductance!(spac::BulkSPAC{FT}, δt::FT) where {FT} = (
 );
 
 stomatal_conductance!(leaf::CanopyLayer{FT}, δt::FT) where {FT} = (
+    # if leaf xylem is not connected, do nothing
+    if !leaf.xylem.state.connected
+        leaf.flux.state.g_H₂O_s .= 0;
+
+        return nothing
+    end;
+
+    # update the stomatal conductance based on ∂g∂t
     leaf.flux.state.g_H₂O_s .+= leaf.flux.auxil.∂g∂t .* δt;
     limit_stomatal_conductance!(leaf);
 
@@ -41,6 +50,14 @@ stomatal_conductance!(leaf::CanopyLayer{FT}, δt::FT) where {FT} = (
 );
 
 stomatal_conductance!(leaf::Leaf{FT}, δt::FT) where {FT} = (
+    # if leaf xylem is not connected, do nothing
+    if !leaf.xylem.state.connected
+        leaf.flux.state.g_H₂O_s = 0;
+
+        return nothing
+    end;
+
+    # update the stomatal conductance based on ∂g∂t
     leaf.flux.state.g_H₂O_s += leaf.flux.auxil.∂g∂t * δt;
     limit_stomatal_conductance!(leaf);
 

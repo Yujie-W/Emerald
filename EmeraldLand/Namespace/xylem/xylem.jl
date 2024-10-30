@@ -54,6 +54,7 @@ end;
 #     2023-Sep-22: define the struct to store the state variables used in xylem hydraulics
 #     2023-Sep-22: add field v_max, pv
 #     2023-Sep-23: add field cp
+#     2024-Oct-20: add field connected
 #
 #######################################################################################################################################################################################################
 """
@@ -70,6 +71,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemHydraulicsState{FT}
     "Sap wood area"
     asap::FT = 1
+    "Connected to the upsteam (used for non-shedded leaves)"
+    connected::Bool = true
     "Vector of xylem water pressure history (normalized to 298.15 K) `[MPa]`"
     p_history::Vector{FT}
     "Storage per element `[mol]`"

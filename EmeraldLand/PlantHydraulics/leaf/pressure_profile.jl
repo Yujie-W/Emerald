@@ -11,6 +11,7 @@
 #     2024-Jul-24: use spac cache
 #     2024-Jul-25: remove initial e_crit guess to make sure states are consistent
 #     2024-Jul-30: set e_crit to be all area in a layer
+#     2024-Oct-30: disconnect leaf if xylem end pressure is less than the critical pressure
 #
 #######################################################################################################################################################################################################
 """
@@ -34,6 +35,14 @@ function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Union{Canop
     leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, cache, leaf.energy.s_aux.t);
     xylem_pressure_profile!(leaf.xylem, leaf.energy.s_aux.t);
     extraxylary_pressure_profile!(leaf);
+
+    # if leaf xylem end pressure is less than the critical pressure, set the leaf to be disconnected (but not shedding)
+    f_st = relative_surface_tension(leaf.energy.s_aux.t);
+    p = leaf.xylem.auxil.pressure[end] / f_st;
+    k = relative_xylem_k(leaf.xylem.trait.vc, p);
+    if k <= config.KR_THRESHOLD
+        leaf.state.connected = false;
+    end;
 
     return nothing
 end;

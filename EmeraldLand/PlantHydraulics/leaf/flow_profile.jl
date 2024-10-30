@@ -13,6 +13,7 @@ flow_out(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = flow_out(leaf.xyle
 #     2023-Sep-28: account for the buffer from capacitor when running under non-steady state mode
 #     2024-Feb-28: add LAI <= 0 control
 #     2024-Feb-28: set leaf flow rate as the total flow rate of all area
+#     2024-Oct-30: add leaf connection check
 #
 #######################################################################################################################################################################################################
 """
@@ -51,14 +52,21 @@ leaf_flow_profiles!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::CanopyL
         irt = n_layer + 1 - ilf;
         leaf = leaves[ilf];
 
-        g_ss .= 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (FT(1.35) .* leaf.flux.auxil.g_CO₂_b));
-        g = g_ss' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
-        d = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000) - airs[lindex[ilf]].s_aux.ps[3];
-        ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
-        f = g * d / airs[lindex[ilf]].state.p_air * leaf.xylem.trait.area;
+        # if leaf is connected
+        if leaf.xylem.state.connected
+            g_ss .= 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (FT(1.35) .* leaf.flux.auxil.g_CO₂_b));
+            g = g_ss' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
+            d = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000) - airs[lindex[ilf]].s_aux.ps[3];
+            ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
+            f = g * d / airs[lindex[ilf]].state.p_air * leaf.xylem.trait.area;
 
-        # set_flow_out!
-        set_flow_profile!(leaf.xylem, f - leaf.capacitor.auxil.flow);
+            # set_flow_out!
+            set_flow_profile!(leaf.xylem, f - leaf.capacitor.auxil.flow);
+        # if leaf is not connected, set the flow rate to 0 (including the buffer from capacitor)
+        else
+            leaf.capacitor.auxil.flow = 0;
+            set_flow_profile!(leaf.xylem, FT(0));
+        end;
     end;
 
     return nothing

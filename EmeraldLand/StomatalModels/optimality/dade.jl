@@ -12,6 +12,7 @@
 #     2023-Aug-23: add nan check for some methods (not all, to do later)
 #     2023-Aug-27: make sure D >= 1 when compute dAdE
 #     2024-Jul-24: add function to update the ∂A∂E for sunlit leaves (matrix version)
+#     2024-Oct-30: add leaf connection check
 #
 #######################################################################################################################################################################################################
 """
@@ -27,6 +28,14 @@ Update the ∂A∂E for sunlit leaves, given
 function ∂A∂E! end;
 
 ∂A∂E!(cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
+    # if leaf xylem is not connected, do nothing
+    if !leaf.xylem.state.connected
+        leaf.flux.auxil.∂A∂E .= 0;
+
+        return nothing
+    end;
+
+    # if leaf xylem is connected
     p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
