@@ -66,7 +66,7 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
     plant_death!(config, spac);
 
     # 7. grow xylem when carbon pool is higher than the threshold
-    plant_growth!(spac);
+    plant_growth!(config, spac);
 
     return nothing
 end;
