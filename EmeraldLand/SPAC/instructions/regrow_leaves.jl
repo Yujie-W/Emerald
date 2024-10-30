@@ -19,6 +19,13 @@ function regrow_leaves_flag!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
         return nothing
     end;
 
+    # do thing if leaf regrowth is not allowed
+    if !config.ALLOW_LEAF_REGROWTH
+        spac.plant._leaf_regrow = false;
+
+        return nothing
+    end;
+
     # set the regrow flag to true only if all roots are connected to the soil and the junction pressure is not too low
     flag = true;
     one_root = spac.plant.roots[1];

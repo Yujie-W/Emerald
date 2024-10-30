@@ -31,6 +31,7 @@
 #     2024-Sep-07: remove field HOT_SPOT (leaf width / canopy height, will use crown height instead)
 #     2024-Oct-16: add option EFFECTIVE_LEAF_SPECTRA
 #     2024-Oct-29: add option ALLOW_XYLEM_GROWTH
+#     2024-Oct-30: add option ALLOW_LEAF_REGROWTH
 #
 #######################################################################################################################################################################################################
 """
@@ -126,6 +127,8 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     #
     "Allow leaf condensation"
     ALLOW_LEAF_CONDENSATION::Bool = false
+    "Allow leaf regrowth when junction pressure is higher than -0.1 MPa"
+    ALLOW_LEAF_REGROWTH::Bool = true
     "Allow leaf shedding in prescibe LAI mode to avoid numerical issues"
     ALLOW_LEAF_SHEDDING::Bool = true
     "Allow xylem to grow"
