@@ -41,7 +41,7 @@ function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Union{Canop
     p = leaf.xylem.auxil.pressure[end] / f_st;
     k = relative_xylem_k(leaf.xylem.trait.vc, p);
     if k <= config.KR_THRESHOLD
-        leaf.state.connected = false;
+        leaf.xylem.state.connected = false;
     end;
 
     return nothing
