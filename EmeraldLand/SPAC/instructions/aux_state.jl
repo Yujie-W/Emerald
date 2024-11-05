@@ -14,6 +14,7 @@
 #     2024-Feb-27: add s_aux! method for BulkSPAC
 #     2024-Jul-24: add leaf shedded flag
 #     2024-Jul-30: compute OCS fraction in the air layer
+#     2024-Nov-05: remove leaf shedded flag
 #
 #######################################################################################################################################################################################################
 """
@@ -68,10 +69,8 @@ s_aux!(plant::Plant{FT}) where {FT} = (
     for stem in plant.branches
         s_aux!(stem);
     end;
-    if !plant._leaf_shedded
-        for leaf in plant.leaves
-            s_aux!(leaf);
-        end;
+    for leaf in plant.leaves
+        s_aux!(leaf);
     end;
 
     return nothing

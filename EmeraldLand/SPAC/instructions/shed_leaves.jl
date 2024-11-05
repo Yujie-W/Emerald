@@ -5,6 +5,7 @@
 #     2024-Jul-24: add leaf shedding function
 #     2024-Aug-06: set g_H₂O_s to 0 when leaves are shedded (so g will be 0 when regrowing)
 #     2024-Sep-03: set asap to 0 when leaves are shedded
+#     2024-Nov-05: move leaf shedding warning message into the function
 #
 #######################################################################################################################################################################################################
 """
@@ -42,6 +43,11 @@ shed_leaves!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     # update the canopy structure auxilary variables
     t_aux!(config, spac.canopy, spac.cache);
+
+    # pop out warning message
+    if config.MESSAGE_LEVEL == 2
+        @warn "Leaf shedding is triggered";
+    end;
 
     return nothing
 );
