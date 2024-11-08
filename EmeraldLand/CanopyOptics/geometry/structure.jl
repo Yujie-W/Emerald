@@ -90,6 +90,7 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait
 #     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf and kd_stem)
 #     2024-Oct-16: weigh the extinction coefficient for diffuse radiation when computing the transmittance
 #     2024-Oct-16: add option to compute effective leaf spectra based on CI
+#     2024-Nov-08: when using EFFECTIVE_LEAF_SPECTRA make sure LAI > 0
 #
 #######################################################################################################################################################################################################
 """
@@ -116,7 +117,8 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
 
     # compute the effective leaf reflectance and transmittance spectra using the PROSPECT model scheme
     # Note: this step can be bypassed if leaf reflectance and transmittance are not changing
-    if EFFECTIVE_LEAF_SPECTRA
+    mask_effective = EFFECTIVE_LEAF_SPECTRA && can_str.trait.lai > 0;
+    if mask_effective
         ρ_2 = spac.cache.cache_wl_1;
         τ_2 = spac.cache.cache_wl_2;
         n_eff = 1 / can_str.t_aux.ci_diffuse;
@@ -137,8 +139,8 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
-        ρ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(can_str.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
-        τ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(can_str.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
+        ρ_leaf = mask_effective ? view(can_str.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
+        τ_leaf = mask_effective ? view(can_str.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
         can_str.auxil.ddb_leaf[:,irt] .= can_str.t_aux.ddb_leaf .* ρ_leaf .+ can_str.t_aux.ddf_leaf .* τ_leaf;
         can_str.auxil.ddf_leaf[:,irt] .= can_str.t_aux.ddf_leaf .* ρ_leaf .+ can_str.t_aux.ddb_leaf .* τ_leaf;
         can_str.auxil.ddb_stem[:,irt] .= can_str.t_aux.ddb_stem .* SPECTRA.ρ_STEM;

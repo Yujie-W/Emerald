@@ -104,6 +104,7 @@ sun_geometry_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait{FT}
 #     2024-Sep-04: separate leaf and stem optical properties
 #     2024-Sep-07: use sza dependent clumping index
 #     2024-Oct-16: add option to compute effective leaf spectra based on CI
+#     2024-Nov-08: when using EFFECTIVE_LEAF_SPECTRA make sure LAI > 0
 #
 #######################################################################################################################################################################################################
 """
@@ -130,7 +131,8 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     n_layer = length(leaves);
 
     # compute the effective leaf reflectance and transmittance spectra using the PROSPECT model scheme
-    if EFFECTIVE_LEAF_SPECTRA
+    mask_effective = EFFECTIVE_LEAF_SPECTRA && can_str.trait.lai > 0;
+    if mask_effective
         ρ_2 = spac.cache.cache_wl_1;
         τ_2 = spac.cache.cache_wl_2;
         n_eff = 1 / sun_geo.s_aux.ci_sun;
@@ -151,8 +153,8 @@ function sun_geometry!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where 
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        ρ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
-        τ_leaf = EFFECTIVE_LEAF_SPECTRA ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
+        ρ_leaf = mask_effective ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
+        τ_leaf = mask_effective ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
         sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.s_aux.sdb_leaf .* ρ_leaf .+ sun_geo.s_aux.sdf_leaf .* τ_leaf;
         sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.s_aux.sdf_leaf .* ρ_leaf .+ sun_geo.s_aux.sdb_leaf .* τ_leaf;
         sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.s_aux.sdb_stem .* SPECTRA.ρ_STEM;
