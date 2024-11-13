@@ -32,6 +32,7 @@
 #     2024-Oct-16: add option EFFECTIVE_LEAF_SPECTRA
 #     2024-Oct-29: add option ALLOW_XYLEM_GROWTH
 #     2024-Oct-30: add option ALLOW_LEAF_REGROWTH
+#     2024-Nov-13: add option to read only a selection of wavelengths when creating the configuration
 #
 #######################################################################################################################################################################################################
 """
@@ -167,8 +168,43 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     PRESCRIBE_AIR::Bool = true
 end;
 
-SPACConfiguration(FT::DataType; dataset::String = OLD_PHI_2021, jld2_file::String = LAND_ARTIFACT, wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) = SPACConfiguration{FT}(
+"""
+
+    SPACConfiguration(
+                FT::DataType;
+                dataset::String = OLD_PHI_2021,
+                jld2_file::String = LAND_ARTIFACT,
+                wl_par::Vector = [300,750],
+                wl_par_700::Vector = [300,700],
+                wl_selection::Union{Nothing,Vector} = nothing)
+
+Create and return a SPAC configuration, given
+- `FT` the floating number type
+- `dataset` the dataset name in the JLD2 file
+- `jld2_file` the JLD2 file name
+- `wl_par` the wavelength range for PAR
+- `wl_par_700` the wavelength range for PAR 700
+- `wl_selection` the wavelength selection
+
+# Examples
+
+```julia
+using Emerald;
+config = EmeraldLand.Namespace.SPACConfiguration(Float64);
+config_2 = EmeraldLand.Namespace.SPACConfiguration(Float64; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
+config_2 = EmeraldLand.Namespace.SPACConfiguration(Float64; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM, wl_selection = [400, 700]);
+```
+
+"""
+SPACConfiguration(
+            FT::DataType;
+            dataset::String = OLD_PHI_2021,
+            jld2_file::String = LAND_ARTIFACT,
+            wl_par::Vector = [300,750],
+            wl_par_700::Vector = [300,700],
+            wl_selection::Union{Nothing,Vector} = nothing) =
+SPACConfiguration{FT}(
             JLD2_FILE = jld2_file,
             DATASET   = dataset,
-            SPECTRA   = ReferenceSpectra{FT}(jld2_file, dataset; wl_par = wl_par, wl_par_700 = wl_par_700),
+            SPECTRA   = ReferenceSpectra{FT}(jld2_file, dataset; wl_par = wl_par, wl_par_700 = wl_par_700, wl_selection = wl_selection),
 );

@@ -18,6 +18,8 @@
 #     2024-Jan-23: add field for PAR using the 300-700 nm definition
 #     2024-Jan-23: redefine IΛ_PAR_700 to be the index within IΛ_PAR so that we can simply subset the PPAR even though the definition of PAR is changed
 #     2024-Feb-27: remove field DATASET and create a new constructor function that specifies the dataset location
+#     2024-Nov-11: remove fields Λ_UPPER and Λ_LOWER
+#     2024-Nov-11: add option to read only the selected wavelengths
 #
 #######################################################################################################################################################################################################
 """
@@ -35,12 +37,8 @@ Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
     # Wavelegnth bins and upper/lower boundaries
     "Wavelength (bins) `[nm]`"
     Λ::Vector{FT}
-    "Lower boundary wavelength `[nm]`"
-    Λ_LOWER::Vector{FT}
-    "Upper boundary wavelength `[nm]`"
-    Λ_UPPER::Vector{FT}
     "Differential wavelength `[nm]`"
-    ΔΛ::Vector{FT} = Λ_UPPER .- Λ_LOWER
+    ΔΛ::Vector{FT}
 
     # Constant features for the leaf
     "Specific absorption coefficients of anthocyanin `[-]`"
@@ -125,13 +123,101 @@ Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
     Λ_SIFE::Vector{FT} = Λ[IΛ_SIFE]
 end;
 
-ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700]) where {FT} = (
+"""
+#
+    ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700], wl_selection::Union{Nothing,Vector} = nothing) where {FT}
+
+Create and return a ReferenceSpectra object, given
+- `jld2_file` the JLD2 file name
+- `dataset` the dataset name in the JLD2 file
+- `wl_par` the wavelength range for PAR
+- `wl_par_700` the wavelength range for PAR 700
+- `wl_selection` the wavelength selection
+
+"""
+ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700], wl_selection::Union{Nothing,Vector} = nothing) where {FT} = (
     df = read_jld2(jld2_file, dataset);
 
+    # if wl_selection is provided, loop through the wavelengths and find the target values and use ΔΛ = 1 nm
+    if !isnothing(wl_selection)
+        if !occursin("1NM", dataset) && !occursin("1nm", dataset)
+            @warn "It is recommended to use 1 nm resolution data when specifying the wavelength selection!";
+        end;
+
+        wls            = FT.(sort(wl_selection));
+        Λ_interp       = wls;
+        ΔΛ_interp      = ones(FT, length(wls));
+        K_ANT_interp   = similar(wls, FT);
+        K_BROWN_interp = similar(wls, FT);
+        K_CAB_interp   = similar(wls, FT);
+        K_CAR_V_interp = similar(wls, FT);
+        K_CAR_Z_interp = similar(wls, FT);
+        K_CBC_interp   = similar(wls, FT);
+        K_H₂O_interp   = similar(wls, FT);
+        K_LMA_interp   = similar(wls, FT);
+        K_PRO_interp   = similar(wls, FT);
+        NR_interp      = similar(wls, FT);
+        Φ_PS_interp    = similar(wls, FT);
+        Φ_PSI_interp   = similar(wls, FT);
+        Φ_PSII_interp  = similar(wls, FT);
+        GSV_1_interp   = similar(wls, FT);
+        GSV_2_interp   = similar(wls, FT);
+        GSV_3_interp   = similar(wls, FT);
+        GSV_4_interp   = similar(wls, FT);
+        E_DIR_interp   = similar(wls, FT);
+        E_DIFF_interp  = similar(wls, FT);
+
+        # interpolate the data
+        for i in eachindex(wls)
+            K_ANT_interp[i] = interpolate_data(df.WL, df.K_ANT, wls[i]);
+            K_BROWN_interp[i] = interpolate_data(df.WL, df.K_BROWN, wls[i]);
+            K_CAB_interp[i] = interpolate_data(df.WL, df.K_CAB, wls[i]);
+            K_CAR_V_interp[i] = interpolate_data(df.WL, df.K_CAR_V, wls[i]);
+            K_CAR_Z_interp[i] = interpolate_data(df.WL, df.K_CAR_Z, wls[i]);
+            K_CBC_interp[i] = interpolate_data(df.WL, df.K_CBC, wls[i]);
+            K_H₂O_interp[i] = interpolate_data(df.WL, df.K_H₂O, wls[i]);
+            K_LMA_interp[i] = interpolate_data(df.WL, df.K_LMA, wls[i]);
+            K_PRO_interp[i] = interpolate_data(df.WL, df.K_PRO, wls[i]);
+            NR_interp[i] = interpolate_data(df.WL, df.NR, wls[i]);
+            Φ_PS_interp[i] = interpolate_data(df.WL, df.K_PS, wls[i]);
+            Φ_PSI_interp[i] = interpolate_data(df.WL, df.K_PS1, wls[i]);
+            Φ_PSII_interp[i] = interpolate_data(df.WL, df.K_PS2, wls[i]);
+            GSV_1_interp[i] = interpolate_data(df.WL, df.GSV_1, wls[i]);
+            GSV_2_interp[i] = interpolate_data(df.WL, df.GSV_2, wls[i]);
+            GSV_3_interp[i] = interpolate_data(df.WL, df.GSV_3, wls[i]);
+            GSV_4_interp[i] = interpolate_data(df.WL, df.GSV_4, wls[i]);
+            E_DIR_interp[i] = interpolate_data(df.WL, df.E_DIR, wls[i]);
+            E_DIFF_interp[i] = interpolate_data(df.WL, df.E_DIFF, wls[i]);
+        end;
+
+        # return the ReferenceSpectra object
+        return ReferenceSpectra{FT}(
+                    Λ          = Λ_interp,
+                    ΔΛ         = ΔΛ_interp,
+                    K_ANT      = K_ANT_interp,
+                    K_BROWN    = K_BROWN_interp,
+                    K_CAB      = K_CAB_interp,
+                    K_CAR_V    = K_CAR_V_interp,
+                    K_CAR_Z    = K_CAR_Z_interp,
+                    K_CBC      = K_CBC_interp,
+                    K_H₂O      = K_H₂O_interp,
+                    K_LMA      = K_LMA_interp,
+                    K_PRO      = K_PRO_interp,
+                    NR         = NR_interp,
+                    Φ_PS       = Φ_PS_interp,
+                    Φ_PSI      = Φ_PSI_interp,
+                    Φ_PSII     = Φ_PSII_interp,
+                    MAT_SOIL   = FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp],
+                    SOLAR_RAD  = FT[E_DIR_interp E_DIFF_interp],
+                    WL_PAR     = wl_par,
+                    WL_PAR_700 = wl_par_700,
+        )
+    end;
+
+    # if wl_selection is not provided, use the default
     return ReferenceSpectra{FT}(
             Λ          = df.WL,
-            Λ_LOWER    = df.WL_LOWER,
-            Λ_UPPER    = df.WL_UPPER,
+            ΔΛ         = df.WL_UPPER - df.WL_LOWER,
             K_ANT      = df.K_ANT,
             K_BROWN    = df.K_BROWN,
             K_CAB      = df.K_CAB,

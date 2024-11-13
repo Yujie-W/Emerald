@@ -2,6 +2,8 @@ module SPAC
 
 using Statistics: mean
 
+using ..EmeraldMath.Data: interpolate_data
+
 using ..EmeraldPhysics.Constant: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O
 using ..EmeraldPhysics.Optics: photon
 
