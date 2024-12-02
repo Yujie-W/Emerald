@@ -7,15 +7,13 @@ using ProgressMeter: @showprogress
 using GriddingMachine.Fetcher: fetch_data!
 using NetcdfIO: append_nc!, read_nc, save_nc!, varname_nc
 
+using ..EmeraldIO.Folders: ERA5_SL_HOURLY, ERA5_SL_MONTHLY, LAND_DRIVER
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldMath.Data: interpolate_data
 using ..EmeraldMath.Stats: nanmean
 using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Email: send_email!
 
-
-# CliMA Land settings
-DRIVER_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/drivers";
 
 # ERA5 settings and functions
 include("era5_type.jl");

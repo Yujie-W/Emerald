@@ -25,8 +25,8 @@ function process_data!(ftds::FluxTowerDataset; displaying::Bool = false, force::
         file_in = "$(AMERIFLUX_DATA)/$(fn).csv";
         file_out = "$(AMERIFLUX_REPROCESSED)/$(fn).nc";
     elseif ftds.LABEL[1:3] == "FLX"
-        file_in = "$(FLUXNET_DATA)/$(fn).csv";
-        file_out = "$(FLUXNET_REPROCESSED)/$(fn).nc";
+        file_in = "$(FLUXNET2015_DATA)/$(fn).csv";
+        file_out = "$(FLUXNET2015_REPROCESSED)/$(fn).nc";
     else
         return error("Unknown tower label: $(ftds.LABEL)")
     end;

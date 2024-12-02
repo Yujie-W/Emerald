@@ -1,7 +1,3 @@
-ERA5_FOLDER_HOURLY = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels/Hourly";
-ERA5_FOLDER_MONTHLY = "/home/wyujie/DATASERVER/reanalysis/ERA5/SingleLevels/Monthly"
-
-
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
@@ -94,7 +90,7 @@ function grid_file_path(gm_dict::Dict{String,Any})
     year    = gm_dict["YEAR"];
     nc_name = "weather_driver_wd1_$(year)_$(lat_ind)_$(lon_ind)_$(nx)X.nc";
 
-    return "$(DRIVER_FOLDER)/$(year)/$(nc_name)"
+    return "$(LAND_DRIVER)/$(year)/$(nc_name)"
 end;
 
 
@@ -113,7 +109,7 @@ function original_file_path end;
 
 original_file_path(gm_dict::Dict{String,Any}, varlabel::String) = original_file_path(varlabel, gm_dict["YEAR"]);
 
-original_file_path(varlabel::String, year::Int; folder::String = ERA5_FOLDER_HOURLY) = "$(folder)/original/$(varlabel)_SL_$(year).nc";
+original_file_path(varlabel::String, year::Int; folder::String = ERA5_SL_HOURLY) = "$(folder)/original/$(varlabel)_SL_$(year).nc";
 
 
 """
@@ -132,4 +128,4 @@ function reprocessed_file_path end;
 
 reprocessed_file_path(gm_dict::Dict{String,Any}, varlabel::String) = reprocessed_file_path(varlabel, gm_dict["YEAR"], gm_dict["RESO_SPACE"]);
 
-reprocessed_file_path(varlabel::String, year::Int, nx::Int; folder::String = ERA5_FOLDER_HOURLY) = "$(folder)/reprocessed/$(varlabel)_SL_$(year)_$(nx)X.nc";
+reprocessed_file_path(varlabel::String, year::Int, nx::Int; folder::String = ERA5_SL_HOURLY) = "$(folder)/reprocessed/$(varlabel)_SL_$(year)_$(nx)X.nc";

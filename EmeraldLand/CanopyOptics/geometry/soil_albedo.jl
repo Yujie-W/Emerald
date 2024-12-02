@@ -1,6 +1,8 @@
 # This file contains function to compute soil albedo
 
 # Soil albedo values from CLM
+#                     PAR  NIR  PAR  NIR
+#                     DRY  DRY  WET  WET
 const SOIL_ALBEDOS = [0.36 0.61 0.25 0.50;    # color = 1
                       0.34 0.57 0.23 0.46;    # color = 2
                       0.32 0.53 0.21 0.42;    # color = 3

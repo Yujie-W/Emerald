@@ -24,10 +24,8 @@ using ..EmeraldUtility.Threading: dynamic_workers!
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 
 
-# simulation settings
-RESULT_FOLDER = "/home/wyujie/DATASERVER/model/CLIMA/LAND/simulations";
-SETUP_FOLDER  = "/home/wyujie/DATASERVER/model/CLIMA/LAND/setups";
 CACHE_CONFIG  = nothing;
+
 
 include("setup.jl");
 include("threads.jl");

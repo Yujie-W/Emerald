@@ -51,7 +51,7 @@ function reprocess_data!(
     for _i_year in _i_years
         # determine whether to skip based on the tag
         _tag = (isnothing(_years) ? griddingmachine_tag(dict) : griddingmachine_tag(dict, _years[_i_year]));
-        _reprocessed_file = "/home/wyujie/GriddingMachine/reprocessed/$(_tag).nc";
+        _reprocessed_file = joinpath(homedir(), "GriddingMachine/reprocessed/$(_tag).nc");
 
         # reprocess the data only if file does not exist
         if !isfile(_reprocessed_file)
