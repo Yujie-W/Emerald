@@ -60,11 +60,11 @@ verified_input(message::String, judge_function::Function) = (
 # alias functions
 input_integer(msg::String; int_conversion::Bool = false, non_negative::Bool = false, positive::Bool = true) = (
     if positive
-        _input = verified_input(msg, is_int, is_positive);
+        _input = verified_input(msg, to_int, is_positive);
     elseif non_negative
-        _input = verified_input(msg, is_int, is_not_negative);
+        _input = verified_input(msg, to_int, is_not_negative);
     else
-        _input = verified_input(msg, is_int);
+        _input = verified_input(msg, to_int);
     end;
 
     if int_conversion
