@@ -3,6 +3,8 @@
 # Changes to this function
 # General
 #     2025-Feb-09: add function to derive the SIF spectra for one plate using the doubling adding method
+# Bug fixes
+#     2025-Feb-09: fix the issue for d² <= 0
 #
 #######################################################################################################################################################################################################
 """
@@ -59,9 +61,12 @@ function kubelka_munk_sif_matrices!(
     b = ones(FT, length(ρ_no));
     for i in eachindex(a)
         if ρ_no[i] + τ_no[i] <= 1
-            d = sqrt((1 + ρ_no[i] + τ_no[i]) * (1 + ρ_no[i] - τ_no[i]) * (1 - ρ_no[i] + τ_no[i]) * (1 - ρ_no[i] - τ_no[i]));
-            a[i] = (1 + ρ_no[i] ^ 2 - τ_no[i] ^ 2 + d) / (2 * ρ_no[i]);
-            b[i] = (1 - ρ_no[i] ^ 2 + τ_no[i] ^ 2 + d) / (2 * τ_no[i]);
+            d² = (1 + ρ_no[i] + τ_no[i]) * (1 + ρ_no[i] - τ_no[i]) * (1 - ρ_no[i] + τ_no[i]) * (1 - ρ_no[i] - τ_no[i]);
+            if d² > 0
+                d = sqrt(d²);
+                a[i] = (1 + ρ_no[i] ^ 2 - τ_no[i] ^ 2 + d) / (2 * ρ_no[i]);
+                b[i] = (1 - ρ_no[i] ^ 2 + τ_no[i] ^ 2 + d) / (2 * τ_no[i]);
+            end;
         end;
     end;
 
