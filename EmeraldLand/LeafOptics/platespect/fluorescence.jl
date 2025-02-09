@@ -333,9 +333,9 @@ function leaf_sif_matrices! end;
 
 leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}) where {FT} = leaf_sif_matrices!(config, bio, bio.trait.SIF_METHOD);
 
-leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixExcitationEmissionMethod) where {FT} = leaf_sif_matrices!(config, bio, mtd, mtd.N);
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixPlatespectMethod) where {FT} = leaf_sif_matrices!(config, bio, mtd, mtd.N);
 
-leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixExcitationEmissionMethod, N::Int) where {FT} = (
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixPlatespectMethod, N::Int) where {FT} = (
     (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 
@@ -425,7 +425,7 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatr
     return nothing
 );
 
-leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::SIFMatrixExcitationEmissionMethod, ::Nothing) where {FT} = (
+leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::SIFMatrixPlatespectMethod, ::Nothing) where {FT} = (
     (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 

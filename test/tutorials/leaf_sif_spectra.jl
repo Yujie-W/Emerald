@@ -64,7 +64,7 @@ using Test;
     # the default SIF model is my new SIF model, but you can change it to the old model in Fluspect-B
     config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
     bio = EmeraldLand.Namespace.LeafBio(config);
-    bio.trait.SIF_METHOD = EmeraldLand.Namespace.SIFMatrixDoublingMethod();
+    bio.trait.SIF_METHOD = EmeraldLand.Namespace.SIFMatrixFluspectMethod();
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 end;

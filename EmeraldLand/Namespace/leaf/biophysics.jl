@@ -21,7 +21,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafBioTrait{FT<:AbstractFloat}
     "SIF matrix method"
-    SIF_METHOD::Union{SIFMatrixDoublingMethod, SIFMatrixExcitationEmissionMethod} = SIFMatrixExcitationEmissionMethod()
+    SIF_METHOD::Union{SIFMatrixDualspectMethod, SIFMatrixFluspectMethod, SIFMatrixPlatespectMethod} = SIFMatrixPlatespectMethod()
 
     "Anthocyanin content `[μg cm⁻²]`"
     ant::FT = 0

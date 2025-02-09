@@ -201,9 +201,9 @@ function leaf_sublayer_f_τ! end;
 
 leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, bio.trait.SIF_METHOD);
 
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixDoublingMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, nothing);
+leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixFluspectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, nothing);
 
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixExcitationEmissionMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, mtd.N);
+leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixPlatespectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, mtd.N);
 
 leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT} = (
     (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = config.SPECTRA;

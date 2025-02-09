@@ -5,7 +5,7 @@ using SpecialFunctions: expint
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
 using ..EmeraldUtility.StructEqual: sync_struct!
 
-using ..Namespace: SIFMatrixDoublingMethod, SIFMatrixExcitationEmissionMethod
+using ..Namespace: SIFMatrixDualspectMethod, SIFMatrixFluspectMethod, SIFMatrixPlatespectMethod
 using ..Namespace: LeafBio, LeafBioState, LeafBioTrait
 using ..Namespace: BulkSPAC, SPACConfiguration
 
@@ -17,6 +17,9 @@ include("prospect/leaf.jl");
 
 include("platespect/effective.jl");
 include("platespect/fluorescence.jl");
+
+# Both Fluspect and Dualspect use the same doubling adding method
+include("kubelka-munk/plate.jl");
 
 include("fluspect/doubling.jl");
 
