@@ -5,22 +5,33 @@
 #     2025-Feb-09: add function to derive the SIF spectra for one plate using the doubling adding method
 #
 #######################################################################################################################################################################################################
-# Need the following input
-#     - layer level reflectance and transmittance
-#     - interface level reflectance and transmittance
 """
-To test the function, do the following:
 
-using Emerald, Revise, Test;
-config = Emerald.EmeraldLand.Namespace.SPACConfiguration{Float64}(DATASET = Emerald.EmeraldLand.Namespace.OLD_PHI_2021_1NM, Φ_SIF_CUTOFF = 2, Φ_SIF_RESCALE = true);
-bio = Emerald.EmeraldLand.Namespace.LeafBio(config);
-bio.trait.SIF_METHOD = Emerald.EmeraldLand.Namespace.SIFMatrixFluspectMethod();
-bio.trait.meso_n = 1.5;
+kubelka_munk_sif_matrices!(
+            config::SPACConfiguration{FT},
+            ρ_plate::Vector{FT},
+            τ_plate::Vector{FT},
+            ρ_i_θ::Vector{FT},
+            τ_i_θ::Vector{FT},
+            ρ_i_21::Vector{FT},
+            τ_i_21::Vector{FT},
+            f_sife::Vector{FT},
+            N::Int,
+            mat_b::Matrix{FT},
+            mat_f::Matrix{FT}) where {FT}
 
-# do the calculation using existing method
-Emerald.EmeraldLand.LeafOptics.leaf_spectra!(config, bio, 5.0);
-bio.auxil.mat_b
-bio.auxil.mat_f
+Update the SIF matrices for one plate (or effective plate) using the doubling adding method, given
+- `config` SPAC configuration
+- `ρ_plate` reflectance of the plate
+- `τ_plate` transmittance of the plate
+- `ρ_i_θ` reflectance of the interface at incoming radiation angle (theta or diffuse)
+- `τ_1_θ` transmittance of the interface at incoming radiation angle (theta or diffuse)
+- `ρ_i_21` reflectance of the regular water-air interface
+- `τ_i_21` transmittance of the regular water-air interface
+- `f_sife` SIF excitation efficiency
+- `N` number of doubling adding steps
+- `mat_b` backward SIF matrix to be updated
+- `mat_f` forward SIF matrix to be updated
 
 """
 function kubelka_munk_sif_matrices!(

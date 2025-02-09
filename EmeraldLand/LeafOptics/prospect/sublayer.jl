@@ -201,6 +201,8 @@ function leaf_sublayer_f_τ! end;
 
 leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, bio.trait.SIF_METHOD);
 
+leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixDualspectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, nothing);
+
 leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixFluspectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, nothing);
 
 leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixPlatespectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, mtd.N);

@@ -21,6 +21,7 @@ include("platespect/fluorescence.jl");
 # Both Fluspect and Dualspect use the same doubling adding method
 include("kubelka-munk/fluorescence.jl");
 
+include("dualspect/fluorescence.jl");
 include("fluspect/fluorescence.jl");
 
 
