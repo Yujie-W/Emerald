@@ -60,13 +60,11 @@ function kubelka_munk_sif_matrices!(
     a = ones(FT, length(ρ_no));
     b = ones(FT, length(ρ_no));
     for i in eachindex(a)
-        if ρ_no[i] + τ_no[i] <= 1
-            d² = (1 + ρ_no[i] + τ_no[i]) * (1 + ρ_no[i] - τ_no[i]) * (1 - ρ_no[i] + τ_no[i]) * (1 - ρ_no[i] - τ_no[i]);
-            if d² > 0
-                d = sqrt(d²);
-                a[i] = (1 + ρ_no[i] ^ 2 - τ_no[i] ^ 2 + d) / (2 * ρ_no[i]);
-                b[i] = (1 - ρ_no[i] ^ 2 + τ_no[i] ^ 2 + d) / (2 * τ_no[i]);
-            end;
+        d² = (1 + ρ_no[i] + τ_no[i]) * (1 + ρ_no[i] - τ_no[i]) * (1 - ρ_no[i] + τ_no[i]) * (1 - ρ_no[i] - τ_no[i]);
+        if d² > 0
+            d = sqrt(d²);
+            a[i] = (1 + ρ_no[i] ^ 2 - τ_no[i] ^ 2 + d) / (2 * ρ_no[i]);
+            b[i] = (1 - ρ_no[i] ^ 2 + τ_no[i] ^ 2 + d) / (2 * τ_no[i]);
         end;
     end;
 

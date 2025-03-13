@@ -78,9 +78,9 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct LeafBioState{FT<:AbstractFloat}
     "Zeaxanthin fraction in Carotenoid (1=all Zeaxanthin, 0=all Violaxanthin) `[-]`"
     f_zeax::FT = 0
-    "Fraction of carotenoid aborption into SIF `[-]`"
+    "Fraction of carotenoid absorption into SIF `[-]`"
     ϕ_car::FT = 1
-    "Fraction of carotenoid aborption into PPAR `[-]`"
+    "Fraction of carotenoid absorption into PPAR `[-]`"
     ϕ_car_ppar::FT = 1
 end;
 
