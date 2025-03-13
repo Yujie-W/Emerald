@@ -33,6 +33,7 @@
 #     2024-Oct-29: add option ALLOW_XYLEM_GROWTH
 #     2024-Oct-30: add option ALLOW_LEAF_REGROWTH
 #     2024-Nov-13: add option to read only a selection of wavelengths when creating the configuration
+#     2025-Mar-13: add field BROADBAND to enable broadband mode
 #
 #######################################################################################################################################################################################################
 """
@@ -66,12 +67,14 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     #
     # Canopy optics
     #
+    "Broadband mode"
+    BROADBAND::Bool = false
     "Effective leaf spectra based on CI effect"
     EFFECTIVE_LEAF_SPECTRA::Bool = true
     "Whether to compute canopy reflectance"
     ENABLE_REF::Bool = true
     "Soil albedo method"
-    SOIL_ALBEDO::Union{SoilAlbedoPrescribe, SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoBroadbandCLIMA()
+    SOIL_ALBEDO::Union{SoilAlbedoPrescribe, SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoHyperspectralCLIMA()
     "Vertical distribution of leaf biophysical properties (if false, run leaf_spectra! only once)"
     VERTICAL_BIO::Bool = false
 
@@ -172,6 +175,7 @@ end;
 
     SPACConfiguration(
                 FT::DataType;
+                broadband::Bool = false,
                 dataset::String = OLD_PHI_2021,
                 jld2_file::String = LAND_ARTIFACT,
                 wl_par::Vector = [300,750],
@@ -180,6 +184,7 @@ end;
 
 Create and return a SPAC configuration, given
 - `FT` the floating number type
+- `broadband` whether to use broadband spectra; default is false
 - `dataset` the dataset name in the JLD2 file
 - `jld2_file` the JLD2 file name
 - `wl_par` the wavelength range for PAR
@@ -190,21 +195,27 @@ Create and return a SPAC configuration, given
 
 ```julia
 using Emerald;
-config = EmeraldLand.Namespace.SPACConfiguration(Float64);
+config_1 = EmeraldLand.Namespace.SPACConfiguration(Float64);
 config_2 = EmeraldLand.Namespace.SPACConfiguration(Float64; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
-config_2 = EmeraldLand.Namespace.SPACConfiguration(Float64; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM, wl_selection = [400, 700]);
+config_3 = EmeraldLand.Namespace.SPACConfiguration(Float64; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM, wl_selection = [400, 700]);
+config_4 = EmeraldLand.Namespace.SPACConfiguration(Float64; broadband = true, dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
 ```
 
 """
 SPACConfiguration(
             FT::DataType;
+            broadband::Bool = false,
             dataset::String = OLD_PHI_2021,
             jld2_file::String = LAND_ARTIFACT,
             wl_par::Vector = [300,750],
             wl_par_700::Vector = [300,700],
-            wl_selection::Union{Nothing,Vector} = nothing) =
-SPACConfiguration{FT}(
-            JLD2_FILE = jld2_file,
-            DATASET   = dataset,
-            SPECTRA   = ReferenceSpectra{FT}(jld2_file, dataset; wl_par = wl_par, wl_par_700 = wl_par_700, wl_selection = wl_selection),
+            wl_selection::Union{Nothing,Vector} = nothing) = (
+    return SPACConfiguration{FT}(
+                DATASET     = dataset,
+                JLD2_FILE   = jld2_file,
+                SPECTRA     = ReferenceSpectra{FT}(jld2_file, dataset; broadband = broadband, wl_par = wl_par, wl_par_700 = wl_par_700, wl_selection = wl_selection),
+                BROADBAND   = broadband,
+                SOIL_ALBEDO = broadband ? SoilAlbedoBroadbandCLIMA() : SoilAlbedoHyperspectralCLIMA(),
+                ENABLE_SIF  = !broadband,
+    )
 );

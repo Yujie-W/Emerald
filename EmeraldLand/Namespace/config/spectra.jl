@@ -20,6 +20,7 @@
 #     2024-Feb-27: remove field DATASET and create a new constructor function that specifies the dataset location
 #     2024-Nov-11: remove fields Λ_UPPER and Λ_LOWER
 #     2024-Nov-11: add option to read only the selected wavelengths
+#     2025-Mar-13: add option to create broadband spectra using the constructor
 #
 #######################################################################################################################################################################################################
 """
@@ -125,26 +126,41 @@ end;
 
 """
 #
-    ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700], wl_selection::Union{Nothing,Vector} = nothing) where {FT}
+    ReferenceSpectra{FT}(
+                jld2_file::String,
+                dataset::String;
+                broadband::Bool = false,
+                wl_par::Vector = [300,750],
+                wl_par_700::Vector = [300,700],
+                wl_selection::Union{Nothing,Vector} = nothing) where {FT}
 
 Create and return a ReferenceSpectra object, given
 - `jld2_file` the JLD2 file name
 - `dataset` the dataset name in the JLD2 file
+- `broadband` whether to use broadband spectra; default is false
 - `wl_par` the wavelength range for PAR
 - `wl_par_700` the wavelength range for PAR 700
 - `wl_selection` the wavelength selection
 
 """
-ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,750], wl_par_700::Vector = [300,700], wl_selection::Union{Nothing,Vector} = nothing) where {FT} = (
-    df = read_jld2(jld2_file, dataset);
+ReferenceSpectra{FT}(
+            jld2_file::String,
+            dataset::String;
+            broadband::Bool = false,
+            wl_par::Vector = [300,750],
+            wl_par_700::Vector = [300,700],
+            wl_selection::Union{Nothing,Vector} = nothing) where {FT} = (
+    # force to add 1nm to the dataset name if broadband is true
+    _dataset = (broadband && !occursin("1nm", dataset)) ? "$(dataset)_1nm" : dataset;
+    _dataset = (!isnothing(wl_selection) && !occursin("1nm", _dataset)) ? "$(_dataset)_1nm" : _dataset;
+    df = read_jld2(jld2_file, _dataset);
 
-    # if wl_selection is provided, loop through the wavelengths and find the target values and use ΔΛ = 1 nm
-    if !isnothing(wl_selection)
-        if !occursin("1NM", dataset) && !occursin("1nm", dataset)
-            @warn "It is recommended to use 1 nm resolution data when specifying the wavelength selection!";
-        end;
+    # if broadband, force to use [500, 1200]
+    _wl_selection = broadband ? [500, 1200] : wl_selection;
 
-        wls            = FT.(sort(wl_selection));
+    # if _wl_selection is provided, loop through the wavelengths and find the target values and use ΔΛ = 1 nm
+    if !isnothing(_wl_selection)
+        wls            = FT.(sort(_wl_selection));
         Λ_interp       = wls;
         ΔΛ_interp      = ones(FT, length(wls));
         K_ANT_interp   = similar(wls, FT);
@@ -190,6 +206,16 @@ ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,7
             E_DIFF_interp[i] = interpolate_data(df.WL, df.E_DIFF, wls[i]);
         end;
 
+        # if broadband, use the broadband spectra for solar radiation
+        if broadband
+            i_par = findall( df.WL .<= 700 );
+            i_nir = findall( df.WL .> 700 );
+            E_DIR_interp[1] = sum(df.E_DIR[i_par]);
+            E_DIR_interp[2] = sum(df.E_DIR[i_nir]);
+            E_DIFF_interp[1] = sum(df.E_DIFF[i_par]);
+            E_DIFF_interp[2] = sum(df.E_DIFF[i_nir]);
+        end;
+
         # return the ReferenceSpectra object
         return ReferenceSpectra{FT}(
                     Λ          = Λ_interp,
@@ -214,7 +240,7 @@ ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,7
         )
     end;
 
-    # if wl_selection is not provided, use the default
+    # if _wl_selection is not provided, use the default
     return ReferenceSpectra{FT}(
             Λ          = df.WL,
             ΔΛ         = df.WL_UPPER - df.WL_LOWER,
@@ -236,49 +262,4 @@ ReferenceSpectra{FT}(jld2_file::String, dataset::String; wl_par::Vector = [300,7
             WL_PAR     = wl_par,
             WL_PAR_700 = wl_par_700,
     )
-);
-
-"""
-
-    broadband_spectra(FT)
-
-Return a ReferenceSpectra object with broadband spectra, given
-- `FT`: the floating point type to use
-
-"""
-broadband_spectra(FT) = ReferenceSpectra{FT}(
-            Λ         = [550, 1600],
-            Λ_LOWER   = [400, 700],
-            Λ_UPPER   = [700, 2500],
-            ΔΛ        = [300, 1800],
-            K_ANT     = [0, 0],                             # will not be used
-            K_BROWN   = [0, 0],                             # will not be used
-            K_CAB     = [0, 0],                             # will not be used
-            K_CAR_V   = [0, 0],                             # will not be used
-            K_CAR_Z   = [0, 0],                             # will not be used
-            K_CBC     = [0, 0],                             # will not be used
-            K_H₂O     = [0, 0],                             # will not be used
-            K_LMA     = [0, 0],                             # will not be used
-            K_PRO     = [0, 0],                             # will not be used
-            NR        = [1.5, 1.5],                         # will not be used
-            Φ_PS      = [0, 0],                             # will not be used
-            Φ_PSI     = [0, 0],                             # will not be used
-            Φ_PSII    = [0, 0],                             # will not be used
-            ρ_STEM    = [0.16, 0.39],
-            MAT_SOIL  = [0 0 0 0],                          # will not be used
-            SOLAR_RAD = [191.544 119.923; 277.752 55.076],
-            WL_NIR    = [700, 2500],
-            WL_PAR    = [400, 700],
-            WL_SIF    = [640, 850],                         # will not be used
-            WL_SIFE   = [400, 750],                         # will not be used
-            IΛ_NIR    = [2],
-            IΛ_PAR    = [1],
-            IΛ_SIF    = [1],                                # will not be used
-            IΛ_SIFE   = [1],                                # will not be used
-            ΔΛ_PAR    = [300],
-            ΔΛ_SIF    = [210],                              # will not be used
-            ΔΛ_SIFE   = [350],                              # will not be used
-            Λ_PAR     = [550],
-            Λ_SIF     = [745],                              # will not be used
-            Λ_SIFE    = [550],                              # will not be used
 );
