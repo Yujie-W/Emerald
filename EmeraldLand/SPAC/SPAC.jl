@@ -17,7 +17,7 @@ using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
 using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
 using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
 using ..Namespace: GeneralC3Trait, GeneralC4Trait
-using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
+using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBio, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
 using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Plant, Root, Stem
 using ..Namespace: CanopyStructure, CanopyStructureTrait, CanopyStructureTDAuxil, MultiLayerCanopy
 using ..Namespace: AirLayer, AirLayerState, AirLayerSDAuxil, AirLayerTDAuxil
@@ -59,6 +59,7 @@ include("timestepper/timer.jl");
 # quantities of SPAC
 include("quantity/beta.jl");
 include("quantity/biomass.jl");
+include("quantity/broadband.jl");
 include("quantity/et.jl");
 include("quantity/gpp.jl");
 include("quantity/goes.jl");
