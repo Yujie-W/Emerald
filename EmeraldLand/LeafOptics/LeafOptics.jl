@@ -66,6 +66,7 @@ end;
 #     2022-Jun-29: add method for BulkSPAC
 #     2024-Feb-22: do nothing if lai is zero
 #     2024-Feb-28: support VERTICAL_BIO feature to update leaf spectra from top leaf
+#     2025-Mar-15: add method to prescribe broadband leaf reflectance and transmittance
 #
 #######################################################################################################################################################################################################
 """
@@ -77,7 +78,9 @@ Update leaf reflectance and transmittance for SPAC, given
 - `spac` `BulkSPAC` type SPAC
 
 """
-function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+function plant_leaf_spectra! end;
+
+plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     # if there is no leaf, do nothing
     if spac.canopy.structure.trait.lai <= 0
         return nothing
@@ -102,7 +105,22 @@ function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     end;
 
     return nothing
-end;
+);
+
+plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ρ_par::Number, τ_par::Number, ρ_nir::Number, τ_nir::Number) where {FT} = (
+    (; SPECTRA) = config;
+
+    # update leaf broadband reflectance and transmittance for SPAC
+    for leaf in spac.plant.leaves
+        leaf.bio.auxil.ρ_leaf[SPECTRA.IΛ_PAR] .= ρ_par;
+        leaf.bio.auxil.τ_leaf[SPECTRA.IΛ_PAR] .= τ_par;
+        leaf.bio.auxil.ρ_leaf[SPECTRA.IΛ_NIR] .= ρ_nir;
+        leaf.bio.auxil.τ_leaf[SPECTRA.IΛ_NIR] .= τ_nir;
+        leaf.bio.auxil.α_leaf .= 1 .- leaf.bio.auxil.ρ_leaf .- leaf.bio.auxil.τ_leaf;
+    end;
+
+    return nothing
+);
 
 
 #=
