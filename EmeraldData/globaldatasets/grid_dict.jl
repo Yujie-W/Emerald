@@ -101,11 +101,23 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
     # compute g1 for Medlyn model
     ind_c3 = [2:14;16;17];
     ind_c4 = 15;
+    ind_plant = [2:14;16;17];
 
     g1_c3_medlyn = CLM5_PFTG[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     if isnan(g1_c3_medlyn) g1_c3_medlyn = nanmean(CLM5_PFTG[ind_c3]) end;
     g1_c4_medlyn = CLM5_PFTG[ind_c4];
 
+    # broadband leaf optical properties
+    ρ_par = CLM5_ρPAR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    τ_par = CLM5_τPAR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    ρ_nir = CLM5_ρNIR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    τ_nir = CLM5_τNIR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    if isnan(ρ_par) ρ_par = nanmean(CLM5_ρPAR[ind_plant]) end;
+    if isnan(τ_par) τ_par = nanmean(CLM5_τPAR[ind_plant]) end;
+    if isnan(ρ_nir) ρ_nir = nanmean(CLM5_ρNIR[ind_plant]) end;
+    if isnan(τ_nir) τ_nir = nanmean(CLM5_τNIR[ind_plant]) end;
+
+    # compute the leaf optical properties for C3 and C4 separately
     ρ_par_c3 = CLM5_ρPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     τ_par_c3 = CLM5_τPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     ρ_nir_c3 = CLM5_ρNIR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
@@ -114,6 +126,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
     if isnan(τ_par_c3) τ_par_c3 = nanmean(CLM5_τPAR[ind_c3]) end;
     if isnan(ρ_nir_c3) ρ_nir_c3 = nanmean(CLM5_ρNIR[ind_c3]) end;
     if isnan(τ_nir_c3) τ_nir_c3 = nanmean(CLM5_τNIR[ind_c3]) end;
+
     ρ_par_c4 = CLM5_ρPAR[ind_c4];
     τ_par_c4 = CLM5_τPAR[ind_c4];
     ρ_nir_c4 = CLM5_ρNIR[ind_c4];
@@ -146,12 +159,16 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                 "SOIL_ΘS"       => s_Θs,
                 "VCMAX25"       => vcmax,
                 "YEAR"          => dts.LABELS.year,
+                "ρ_NIR"         => ρ_nir,
                 "ρ_NIR_C3"      => ρ_nir_c3,
                 "ρ_NIR_C4"      => ρ_nir_c4,
+                "ρ_PAR"         => ρ_par,
                 "ρ_PAR_C3"      => ρ_par_c3,
                 "ρ_PAR_C4"      => ρ_par_c4,
+                "τ_NIR"         => τ_nir,
                 "τ_NIR_C3"      => τ_nir_c3,
                 "τ_NIR_C4"      => τ_nir_c4,
+                "τ_PAR"         => τ_par,
                 "τ_PAR_C3"      => τ_par_c3,
                 "τ_PAR_C4"      => τ_par_c4);
     verify_grid_dict!(gm_dict);
