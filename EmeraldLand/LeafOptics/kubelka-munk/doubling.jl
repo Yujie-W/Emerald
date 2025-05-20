@@ -2,7 +2,7 @@
 #
 # Changes to this function
 # General
-#     2025-May-20: refactor the function with my own understanding, and found a bug in the original code...
+#     2025-May-20: refactor the function with my own understanding
 #
 #######################################################################################################################################################################################################
 """
@@ -95,8 +95,9 @@ function kubelka_munk_sif_matrices_new!(
 
     ρ_i_21_f = ρ_i_21[IΛ_SIF];
     τ_i_21_f = τ_i_21[IΛ_SIF];
+    ρ_no_f = ρ_no[IΛ_SIF];
     τ_no_f = τ_no[IΛ_SIF];
-    R_b_f = R_b[IΛ_SIF];
+    ρ_b_f = @. ρ_no_f + τ_no_f^2 * ρ_i_21_f / (1 - ρ_i_21_f * ρ_no_f);
 
     δx = FT(2) ^ -N;
     ρ_f_1 = s[IΛ_SIF] .* δx;
@@ -117,11 +118,11 @@ function kubelka_munk_sif_matrices_new!(
         τ_e_i  = τ_e_1;
         for _ in 1:N
             # for excitation doubling
-            ρ_e_j = ρ_e_i + τ_e_i * ρ_e_i / (1 - ρ_e_i^2);
             τ_e_j = τ_e_i^2 / (1 - ρ_e_i^2);
+            ρ_e_j = ρ_e_i * (1 + τ_e_j);
             # for fluorescence doubling
-            ρ_f_j = @. ρ_f_i + τ_f_i * ρ_f_i / (1 - ρ_f_i^2);
             τ_f_j = @. τ_f_i^2 / (1 - ρ_f_i^2);
+            ρ_f_j = @. ρ_f_i * (1 + τ_f_j);
             # for fluorescence scattering doubling
             f_b_j = @. f_b_i + f_f_i * ρ_f_i * τ_f_i / (1 - ρ_f_i^2) +
                        τ_e_i / (1 - ρ_e_i^2) * f_b_i * τ_f_i / (1 - ρ_f_i^2) +
@@ -141,8 +142,8 @@ function kubelka_munk_sif_matrices_new!(
         f_b_no = @. τ_i_θ[i_e] / (1 - ρ_i_21[i_e] * R_b[i_e]) * f_b_j;
         f_f_no = @. τ_i_θ[i_e] / (1 - ρ_i_21[i_e] * R_b[i_e]) * f_f_j;
         # account for the scattering by the interfaces
-        f_b = @. (f_b_no + f_f_no * ρ_i_21_f * τ_no_f / (1 - ρ_i_21_f * τ_no_f)) * τ_i_21_f / (1 - ρ_i_21_f * R_b_f);
-        f_f = @. (f_f_no + f_b_no * ρ_i_21_f * τ_no_f / (1 - ρ_i_21_f * τ_no_f)) * τ_i_21_f / (1 - ρ_i_21_f * R_b_f);
+        f_b = @. (f_b_no + f_f_no * ρ_i_21_f * τ_no_f / (1 - ρ_i_21_f * τ_no_f)) * τ_i_21_f / (1 - ρ_i_21_f * ρ_b_f);
+        f_f = @. (f_f_no + f_b_no * ρ_i_21_f * τ_no_f / (1 - ρ_i_21_f * τ_no_f)) * τ_i_21_f / (1 - ρ_i_21_f * ρ_b_f);
         # update the matrices
         mat_b[:,i] .= f_b;
         mat_f[:,i] .= f_f;

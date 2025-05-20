@@ -5,7 +5,6 @@
 #     2025-Feb-09: add function to derive the SIF spectra for one plate using the doubling adding method
 # Bug fixes
 #     2025-Feb-09: fix the issue for d² <= 0
-#     2025-may-20: fix the issue for ρ_e_n and ρ_f_n in the doubling adding method
 #
 #######################################################################################################################################################################################################
 """
@@ -98,8 +97,8 @@ function kubelka_munk_sif_matrices!(
         x_f     = τ_f ./ (1 .- ρ_f .^ 2);
         τ_e_n   = τ_e .* x_e;
         τ_f_n   = τ_f .* x_f;
-        ρ_e_n   = ρ_e .* (1 .+ x_e);
-        ρ_f_n   = ρ_f .* (1 .+ x_f);
+        ρ_e_n   = ρ_e .* (1 .+ τ_e_n);
+        ρ_f_n   = ρ_f .* (1 .+ τ_f_n);
         a₁₁     = x_f .* m_1_e .+ m_f_1 .* x_e';
         a₁₂     = (x_f .* x_e') .* (ρ_f .* m_1_e .+ m_f_1 .* ρ_e');
         a₂₁     = 1 .+ (x_f * x_e') .* (1 .+ ρ_f * ρ_e');
