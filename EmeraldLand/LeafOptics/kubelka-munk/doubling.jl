@@ -53,6 +53,7 @@ function kubelka_munk_sif_matrices_new!(
     z    = @. τ_plate * (1 - R_b * ρ_i_21) / (τ_i_θ * τ_i_21);
     ρ_no = @. max(0, (R_b - ρ_i_21 * z ^ 2) / (1 - (ρ_i_21 * z) ^ 2));
     τ_no = @. (1 - R_b * ρ_i_21) / (1 - (ρ_i_21 * z) ^ 2) * z;
+    ρ_b  = @. ρ_no + τ_no^2 * ρ_i_21 / (1 - ρ_i_21 * ρ_no);
 
     # make sure the combined values are okay
     a = ones(FT, length(ρ_no));
@@ -95,9 +96,8 @@ function kubelka_munk_sif_matrices_new!(
 
     ρ_i_21_f = ρ_i_21[IΛ_SIF];
     τ_i_21_f = τ_i_21[IΛ_SIF];
-    ρ_no_f = ρ_no[IΛ_SIF];
-    τ_no_f = τ_no[IΛ_SIF];
-    ρ_b_f = @. ρ_no_f + τ_no_f^2 * ρ_i_21_f / (1 - ρ_i_21_f * ρ_no_f);
+    τ_no_f   = τ_no[IΛ_SIF];
+    ρ_b_f    = ρ_b[IΛ_SIF];
 
     δx = FT(2) ^ -N;
     ρ_f_1 = s[IΛ_SIF] .* δx;
@@ -139,8 +139,8 @@ function kubelka_munk_sif_matrices_new!(
             f_f_i = @. f_f_j;
         end;
         # account for the incoming radiation into the top of the plate without interface, and get the SIF without rescattering by the interfaces
-        f_b_no = @. τ_i_θ[i_e] / (1 - ρ_i_21[i_e] * R_b[i_e]) * f_b_j;
-        f_f_no = @. τ_i_θ[i_e] / (1 - ρ_i_21[i_e] * R_b[i_e]) * f_f_j;
+        f_b_no = @. τ_i_θ[i_e] / (1 - ρ_i_21[i_e] * ρ_b[i_e]) * (f_b_j + τ_no[i_e] * ρ_i_21[i_e] / (1 - ρ_i_21[i_e] * ρ_no[i_e]) * f_f_j);
+        f_f_no = @. τ_i_θ[i_e] / (1 - ρ_i_21[i_e] * ρ_b[i_e]) * (f_f_j + τ_no[i_e] * ρ_i_21[i_e] / (1 - ρ_i_21[i_e] * ρ_no[i_e]) * f_b_j);
         # account for the scattering by the interfaces
         f_b = @. (f_b_no + f_f_no * ρ_i_21_f * τ_no_f / (1 - ρ_i_21_f * τ_no_f)) * τ_i_21_f / (1 - ρ_i_21_f * ρ_b_f);
         f_f = @. (f_f_no + f_b_no * ρ_i_21_f * τ_no_f / (1 - ρ_i_21_f * τ_no_f)) * τ_i_21_f / (1 - ρ_i_21_f * ρ_b_f);
