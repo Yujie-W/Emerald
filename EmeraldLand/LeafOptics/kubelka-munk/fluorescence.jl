@@ -5,22 +5,23 @@
 #     2025-Feb-09: add function to derive the SIF spectra for one plate using the doubling adding method
 # Bug fixes
 #     2025-Feb-09: fix the issue for d² <= 0
+#     2025-may-20: fix the issue for ρ_e_n and ρ_f_n in the doubling adding method
 #
 #######################################################################################################################################################################################################
 """
 
-kubelka_munk_sif_matrices!(
-            config::SPACConfiguration{FT},
-            ρ_plate::Vector{FT},
-            τ_plate::Vector{FT},
-            ρ_i_θ::Vector{FT},
-            τ_i_θ::Vector{FT},
-            ρ_i_21::Vector{FT},
-            τ_i_21::Vector{FT},
-            f_sife::Vector{FT},
-            N::Int,
-            mat_b::Matrix{FT},
-            mat_f::Matrix{FT}) where {FT}
+    kubelka_munk_sif_matrices!(
+                config::SPACConfiguration{FT},
+                ρ_plate::Vector{FT},
+                τ_plate::Vector{FT},
+                ρ_i_θ::Vector{FT},
+                τ_i_θ::Vector{FT},
+                ρ_i_21::Vector{FT},
+                τ_i_21::Vector{FT},
+                f_sife::Vector{FT},
+                N::Int,
+                mat_b::Matrix{FT},
+                mat_f::Matrix{FT}) where {FT}
 
 Update the SIF matrices for one plate (or effective plate) using the doubling adding method, given
 - `config` SPAC configuration
@@ -97,8 +98,8 @@ function kubelka_munk_sif_matrices!(
         x_f     = τ_f ./ (1 .- ρ_f .^ 2);
         τ_e_n   = τ_e .* x_e;
         τ_f_n   = τ_f .* x_f;
-        ρ_e_n   = ρ_e .* (1 .+ τ_e_n);
-        ρ_f_n   = ρ_f .* (1 .+ τ_f_n);
+        ρ_e_n   = ρ_e .* (1 .+ x_e);
+        ρ_f_n   = ρ_f .* (1 .+ x_f);
         a₁₁     = x_f .* m_1_e .+ m_f_1 .* x_e';
         a₁₂     = (x_f .* x_e') .* (ρ_f .* m_1_e .+ m_f_1 .* ρ_e');
         a₂₁     = 1 .+ (x_f * x_e') .* (1 .+ ρ_f * ρ_e');
