@@ -2,12 +2,13 @@
 #
 # Changes to this function
 # General
-#     2025-Feb-09: add method for Dualspect as a proxy for fluorMODleaf
+#     2025-Feb-09: add method for Dualspect as an extended Fluspect with inter-plate scattering
+# Bug fix
+#     2025-May-20: fix an bug related to the temporary mat_b and mat_f for the two layers
 #
 #######################################################################################################################################################################################################
 leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatrixDualspectMethod) where {FT} = (
     (; IΛ_SIF, IΛ_SIFE) = config.SPECTRA;
-    (; ρ_leaf, τ_leaf) = bio.auxil;
     (; ρ_interface_θ, τ_interface_θ, ρ_interface_12, τ_interface_12, ρ_interface_21, τ_interface_21, f_sife) = bio.auxil;
     (; ρ_layer_θ, τ_layer_θ, ρ_layer_1, τ_layer_1, ρ_layer_2, τ_layer_2) = bio.auxil;
 
@@ -42,10 +43,14 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatr
     rad_3 = @. τ_layer_1 * ρ_layer_2 / (1 - ρ_layer_2 * ρ_layer_1);
     rad_2_sife = rad_2[IΛ_SIFE];
     rad_3_sife = rad_3[IΛ_SIFE];
-    mat_b_1 .= mat_b_θ .+ mat_f_1 .* rad_3_sife';
-    mat_f_1 .= mat_f_θ .+ mat_b_1 .* rad_3_sife';
-    mat_b_2 .= mat_b_2 .* rad_2_sife';
-    mat_f_2 .= mat_f_2 .* rad_2_sife';
+    _mat_b_1 = similar(bio.auxil.mat_b);
+    _mat_f_1 = similar(bio.auxil.mat_f);
+    _mat_b_2 = similar(bio.auxil.mat_b);
+    _mat_f_2 = similar(bio.auxil.mat_f);
+    _mat_b_1 .= mat_b_θ .+ mat_f_1 .* rad_3_sife';
+    _mat_f_1 .= mat_f_θ .+ mat_b_1 .* rad_3_sife';
+    _mat_b_2 .= mat_b_2 .* rad_2_sife';
+    _mat_f_2 .= mat_f_2 .* rad_2_sife';
 
     # 5. Now, consider the SIF scattering between the 2 layers.
     # The Total backward SIF is the sum of
@@ -61,8 +66,8 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatr
     ρ_2_sif = ρ_layer_2[IΛ_SIF];
     τ_2_sif = τ_layer_2[IΛ_SIF];
     denom = 1 .- ρ_2_sif .* ρ_1_sif;
-    bio.auxil.mat_b .= mat_b_1 .+ mat_f_1 .* ρ_2_sif .* τ_1_sif ./ denom .+ mat_b_2 .* τ_1_sif ./ denom;
-    bio.auxil.mat_f .= mat_f_1 .* τ_2_sif ./ denom .+ mat_b_2 .* ρ_1_sif .* τ_2_sif ./ denom .+ mat_f_2;
+    bio.auxil.mat_b .= _mat_b_1 .+ _mat_f_1 .* ρ_2_sif .* τ_1_sif ./ denom .+ _mat_b_2 .* τ_1_sif ./ denom;
+    bio.auxil.mat_f .= _mat_f_1 .* τ_2_sif ./ denom .+ _mat_b_2 .* ρ_1_sif .* τ_2_sif ./ denom .+ _mat_f_2;
 
     # compute the mean and mean diff of mat_b and mat_f
     bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
