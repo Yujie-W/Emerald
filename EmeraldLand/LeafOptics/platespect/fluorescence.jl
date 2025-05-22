@@ -6,6 +6,8 @@
 #     2023-Sep-16: clear vec_b and vec_f before the calculation (for the case of recalculating the SIF conversion matrix)
 #     2023-Oct-24: remove Φ_PS from the calculation so as to use with separate PSI and PSII SIF spectra
 #     2024-Aug-13: add alternative function to compute SIF matrices using k_e and k_f analytically
+# Bug fix:
+#     2025-May-22: fix the issue when ke = kf, then the intergral is exp(-kf), not 1
 #
 #######################################################################################################################################################################################################
 """
@@ -48,7 +50,7 @@ function layer_1_sif_vec!(τ_i_θ::FT, τ_i_12::FT, τ_i_21::FT, k_e::FT, τ_θ:
     return nothing
 end;
 
-int_exp_kef⁻(kf::FT, ke::FT) where {FT} = (kf == ke) ? FT(1) : (exp(-ke) - exp(-kf)) / (kf - ke);
+int_exp_kef⁻(kf::FT, ke::FT) where {FT} = (kf == ke) ? exp(-kf) : (exp(-ke) - exp(-kf)) / (kf - ke);
 int_exp_kef⁺(kf::FT, ke::FT) where {FT} = (1 - exp(-kf-ke)) / (kf + ke);
 
 
