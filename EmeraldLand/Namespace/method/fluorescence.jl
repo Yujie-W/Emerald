@@ -120,7 +120,7 @@ QLFluorescenceModelHanC4(FT) = QLFluorescenceModelHan{FT}(K_A = 0.83, K_B = 0.63
 # Changes to the struct
 # General
 #     2024-Aug-16: add SIFMatrixFluspectMethod (N_DUB)
-#     2024-Aug-16: add SIFMatrixPlatespectMethod (only a N)
+#     2024-Aug-16: add SIFMatrixPlatespectMethod
 #     2024-Feb-09: add SIFMatrixDualspectMethod (N_DUB)
 #
 #######################################################################################################################################################################################################
@@ -137,6 +137,4 @@ end;
 
 
 """ Method to compute SIF matrices using the excitation-emission method """
-Base.@kwdef struct SIFMatrixPlatespectMethod
-    N::Union{Int, Nothing} = nothing
-end;
+struct SIFMatrixPlatespectMethod end;

@@ -127,14 +127,22 @@ Update the reflectance and transmittance of the leaf layers, given
 
 """
 function leaf_layer_ρ_τ!(bio::LeafBio{FT}) where {FT}
-    bio.auxil.ρ_layer_θ .= layer_1_ρ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
-    bio.auxil.τ_layer_θ .= layer_1_τ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
-    bio.auxil.ρ_layer_1 .= layer_1_ρ.(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
-    bio.auxil.τ_layer_1 .= layer_1_τ.(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
+    # first layer
+    @. bio.auxil.ρ_layer_θ = layer_1_ρ(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
+    @. bio.auxil.τ_layer_θ = layer_1_τ(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
+    @. bio.auxil.ρ_layer_1 = layer_1_ρ(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
+    @. bio.auxil.τ_layer_1 = layer_1_τ(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
 
+    # second layer
     m = bio.trait.meso_n - 1;
-    bio.auxil.ρ_layer_2 .= layer_2_ρ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
-    bio.auxil.τ_layer_2 .= layer_2_τ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
+    @. bio.auxil.ρ_layer_2 = layer_2_ρ(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
+    @. bio.auxil.τ_layer_2 = layer_2_τ(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
+
+    # effective interface reflectance for the second layer
+    @. bio.auxil.ρ_interface_12_eff = effective_ρ_12(bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2, bio.auxil.τ_all_2);
+    @. bio.auxil.ρ_interface_21_eff = effective_ρ_21(bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2, bio.auxil.τ_all_2);
+    @. bio.auxil.τ_interface_12_eff = 1 - bio.auxil.ρ_interface_12_eff;
+    @. bio.auxil.τ_interface_21_eff = 1 - bio.auxil.ρ_interface_21_eff;
 
     return nothing
 end;

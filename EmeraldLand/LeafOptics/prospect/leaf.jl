@@ -66,9 +66,9 @@ Update the leaf reflectance and transmittance within `bio`, given
 
 """
 function leaf_ρ_τ!(bio::LeafBio{FT}) where {FT}
-    bio.auxil.ρ_leaf .= leaf_ρ.(bio.auxil.ρ_layer_θ, bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, bio.auxil.ρ_layer_2);
-    bio.auxil.τ_leaf .= leaf_τ.(bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2);
-    bio.auxil.α_leaf .= 1 .- bio.auxil.ρ_leaf .- bio.auxil.τ_leaf;
+    @. bio.auxil.ρ_leaf = leaf_ρ(bio.auxil.ρ_layer_θ, bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, bio.auxil.ρ_layer_2);
+    @. bio.auxil.τ_leaf = leaf_τ(bio.auxil.τ_layer_θ, bio.auxil.ρ_layer_1, bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2);
+    @. bio.auxil.α_leaf = 1 - bio.auxil.ρ_leaf - bio.auxil.τ_leaf;
 
     return nothing
 end;

@@ -137,6 +137,14 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     ρ_interface_21::Vector{FT}
     "Water-air interface transmittance with isotropic light `[-]`"
     τ_interface_21::Vector{FT}
+    "Effective air-water interface reflectance with isotropic light `[-]`"
+    ρ_interface_12_eff::Vector{FT}
+    "Effective air-water interface transmittance with isotropic light `[-]`"
+    τ_interface_12_eff::Vector{FT}
+    "Effective water-air interface reflectance with isotropic light `[-]`"
+    ρ_interface_21_eff::Vector{FT}
+    "Effective water-air interface transmittance with isotropic light `[-]`"
+    τ_interface_21_eff::Vector{FT}
 
     # transmittance within a sublayer of a layer
     "First Layer sublayer transmittance with isotropic light `[-]`"
@@ -213,90 +221,98 @@ end;
 
 LeafBioAuxil(config::SPACConfiguration{FT}) where {FT} = (
     return LeafBioAuxil{FT}(
-                f_cab            = zeros(FT, length(config.SPECTRA.Λ)),
-                f_car            = zeros(FT, length(config.SPECTRA.Λ)),
-                f_ppar           = zeros(FT, length(config.SPECTRA.Λ)),
-                f_psii           = zeros(FT, length(config.SPECTRA.Λ)),
-                f_sife           = zeros(FT, length(config.SPECTRA.Λ)),
-                ρ_interface_θ    = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_interface_θ    = zeros(FT, length(config.SPECTRA.Λ)),
-                ρ_interface_12   = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_interface_12   = zeros(FT, length(config.SPECTRA.Λ)),
-                ρ_interface_21   = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_interface_21   = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_sub_1          = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_sub_2          = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_all_1          = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_all_2          = zeros(FT, length(config.SPECTRA.Λ)),
-                k_all_1          = zeros(FT, length(config.SPECTRA.Λ)),
-                k_all_2          = zeros(FT, length(config.SPECTRA.Λ)),
-                ρ_layer_θ        = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_layer_θ        = zeros(FT, length(config.SPECTRA.Λ)),
-                ρ_layer_1        = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_layer_1        = zeros(FT, length(config.SPECTRA.Λ)),
-                ρ_layer_2        = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_layer_2        = zeros(FT, length(config.SPECTRA.Λ)),
-                ρ_leaf           = zeros(FT, length(config.SPECTRA.Λ)),
-                τ_leaf           = zeros(FT, length(config.SPECTRA.Λ)),
-                α_leaf           = zeros(FT, length(config.SPECTRA.Λ)),
-                mat_b_1          = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_f_1          = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_b_2          = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_f_2          = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_b_1_out      = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_f_1_out      = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_b_2_out      = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_f_2_out      = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_b            = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_f            = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_mean         = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                mat_diff         = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
-                _ϕ_sif           = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
-                _ϕ1_sif          = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
-                _ϕ2_sif          = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                f_cab              = zeros(FT, length(config.SPECTRA.Λ)),
+                f_car              = zeros(FT, length(config.SPECTRA.Λ)),
+                f_ppar             = zeros(FT, length(config.SPECTRA.Λ)),
+                f_psii             = zeros(FT, length(config.SPECTRA.Λ)),
+                f_sife             = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_interface_θ      = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_interface_θ      = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_interface_12     = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_interface_12     = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_interface_21     = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_interface_21     = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_interface_12_eff = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_interface_12_eff = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_interface_21_eff = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_interface_21_eff = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_sub_1            = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_sub_2            = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_all_1            = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_all_2            = zeros(FT, length(config.SPECTRA.Λ)),
+                k_all_1            = zeros(FT, length(config.SPECTRA.Λ)),
+                k_all_2            = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_layer_θ          = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_layer_θ          = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_layer_1          = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_layer_1          = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_layer_2          = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_layer_2          = zeros(FT, length(config.SPECTRA.Λ)),
+                ρ_leaf             = zeros(FT, length(config.SPECTRA.Λ)),
+                τ_leaf             = zeros(FT, length(config.SPECTRA.Λ)),
+                α_leaf             = zeros(FT, length(config.SPECTRA.Λ)),
+                mat_b_1            = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_f_1            = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_b_2            = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_f_2            = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_b_1_out        = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_f_1_out        = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_b_2_out        = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_f_2_out        = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_b              = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_f              = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_mean           = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                mat_diff           = zeros(FT, length(config.SPECTRA.IΛ_SIF), length(config.SPECTRA.IΛ_SIFE)),
+                _ϕ_sif             = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _ϕ1_sif            = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
+                _ϕ2_sif            = zeros(FT, length(config.SPECTRA.IΛ_SIF)),
     )
 );
 
 sync_struct!(bio_from::LeafBioAuxil{FT}, bio_to::LeafBioAuxil{FT}) where {FT} = (
-    bio_to.f_cab          .= bio_from.f_cab;
-    bio_to.f_car          .= bio_from.f_car;
-    bio_to.f_ppar         .= bio_from.f_ppar;
-    bio_to.f_psii         .= bio_from.f_psii;
-    bio_to.f_sife         .= bio_from.f_sife;
-    bio_to.ρ_interface_θ  .= bio_from.ρ_interface_θ;
-    bio_to.τ_interface_θ  .= bio_from.τ_interface_θ;
-    bio_to.ρ_interface_12 .= bio_from.ρ_interface_12;
-    bio_to.τ_interface_12 .= bio_from.τ_interface_12;
-    bio_to.ρ_interface_21 .= bio_from.ρ_interface_21;
-    bio_to.τ_interface_21 .= bio_from.τ_interface_21;
-    bio_to.τ_sub_1        .= bio_from.τ_sub_1;
-    bio_to.τ_sub_2        .= bio_from.τ_sub_2;
-    bio_to.τ_all_1        .= bio_from.τ_all_1;
-    bio_to.τ_all_2        .= bio_from.τ_all_2;
-    bio_to.ρ_layer_θ      .= bio_from.ρ_layer_θ;
-    bio_to.τ_layer_θ      .= bio_from.τ_layer_θ;
-    bio_to.ρ_layer_1      .= bio_from.ρ_layer_1;
-    bio_to.τ_layer_1      .= bio_from.τ_layer_1;
-    bio_to.ρ_layer_2      .= bio_from.ρ_layer_2;
-    bio_to.τ_layer_2      .= bio_from.τ_layer_2;
-    bio_to.ρ_leaf         .= bio_from.ρ_leaf;
-    bio_to.τ_leaf         .= bio_from.τ_leaf;
-    bio_to.α_leaf         .= bio_from.α_leaf;
-    bio_to.mat_b_1        .= bio_from.mat_b_1;
-    bio_to.mat_f_1        .= bio_from.mat_f_1;
-    bio_to.mat_b_2        .= bio_from.mat_b_2;
-    bio_to.mat_f_2        .= bio_from.mat_f_2;
-    bio_to.mat_b_1_out    .= bio_from.mat_b_1_out;
-    bio_to.mat_f_1_out    .= bio_from.mat_f_1_out;
-    bio_to.mat_b_2_out    .= bio_from.mat_b_2_out;
-    bio_to.mat_f_2_out    .= bio_from.mat_f_2_out;
-    bio_to.mat_b          .= bio_from.mat_b;
-    bio_to.mat_f          .= bio_from.mat_f;
-    bio_to.mat_mean       .= bio_from.mat_mean;
-    bio_to.mat_diff       .= bio_from.mat_diff;
-    bio_to._ϕ_sif         .= bio_from._ϕ_sif;
-    bio_to._ϕ1_sif        .= bio_from._ϕ1_sif;
-    bio_to._ϕ2_sif        .= bio_from._ϕ2_sif;
+    bio_to.f_cab              .= bio_from.f_cab;
+    bio_to.f_car              .= bio_from.f_car;
+    bio_to.f_ppar             .= bio_from.f_ppar;
+    bio_to.f_psii             .= bio_from.f_psii;
+    bio_to.f_sife             .= bio_from.f_sife;
+    bio_to.ρ_interface_θ      .= bio_from.ρ_interface_θ;
+    bio_to.τ_interface_θ      .= bio_from.τ_interface_θ;
+    bio_to.ρ_interface_12     .= bio_from.ρ_interface_12;
+    bio_to.τ_interface_12     .= bio_from.τ_interface_12;
+    bio_to.ρ_interface_21     .= bio_from.ρ_interface_21;
+    bio_to.τ_interface_21     .= bio_from.τ_interface_21;
+    bio_to.ρ_interface_12_eff .= bio_from.ρ_interface_12_eff;
+    bio_to.τ_interface_12_eff .= bio_from.τ_interface_12_eff;
+    bio_to.ρ_interface_21_eff .= bio_from.ρ_interface_21_eff;
+    bio_to.τ_interface_21_eff .= bio_from.τ_interface_21_eff;
+    bio_to.τ_sub_1            .= bio_from.τ_sub_1;
+    bio_to.τ_sub_2            .= bio_from.τ_sub_2;
+    bio_to.τ_all_1            .= bio_from.τ_all_1;
+    bio_to.τ_all_2            .= bio_from.τ_all_2;
+    bio_to.ρ_layer_θ          .= bio_from.ρ_layer_θ;
+    bio_to.τ_layer_θ          .= bio_from.τ_layer_θ;
+    bio_to.ρ_layer_1          .= bio_from.ρ_layer_1;
+    bio_to.τ_layer_1          .= bio_from.τ_layer_1;
+    bio_to.ρ_layer_2          .= bio_from.ρ_layer_2;
+    bio_to.τ_layer_2          .= bio_from.τ_layer_2;
+    bio_to.ρ_leaf             .= bio_from.ρ_leaf;
+    bio_to.τ_leaf             .= bio_from.τ_leaf;
+    bio_to.α_leaf             .= bio_from.α_leaf;
+    bio_to.mat_b_1            .= bio_from.mat_b_1;
+    bio_to.mat_f_1            .= bio_from.mat_f_1;
+    bio_to.mat_b_2            .= bio_from.mat_b_2;
+    bio_to.mat_f_2            .= bio_from.mat_f_2;
+    bio_to.mat_b_1_out        .= bio_from.mat_b_1_out;
+    bio_to.mat_f_1_out        .= bio_from.mat_f_1_out;
+    bio_to.mat_b_2_out        .= bio_from.mat_b_2_out;
+    bio_to.mat_f_2_out        .= bio_from.mat_f_2_out;
+    bio_to.mat_b              .= bio_from.mat_b;
+    bio_to.mat_f              .= bio_from.mat_f;
+    bio_to.mat_mean           .= bio_from.mat_mean;
+    bio_to.mat_diff           .= bio_from.mat_diff;
+    bio_to._ϕ_sif             .= bio_from._ϕ_sif;
+    bio_to._ϕ1_sif            .= bio_from._ϕ1_sif;
+    bio_to._ϕ2_sif            .= bio_from._ϕ2_sif;
 
     return nothing
 );

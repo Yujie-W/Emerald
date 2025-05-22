@@ -197,37 +197,7 @@ Update the sublayer absorption and transmittance within `bio`, given
 - `lwc` leaf water content
 
 """
-function leaf_sublayer_f_τ! end;
-
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, bio.trait.SIF_METHOD);
-
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixDualspectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, nothing);
-
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixFluspectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, nothing);
-
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, mtd::SIFMatrixPlatespectMethod) where {FT} = leaf_sublayer_f_τ!(config, bio, lwc, mtd.N);
-
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT} = (
-    (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = config.SPECTRA;
-
-    x = 1 / bio.trait.meso_n;
-    @. bio.auxil.f_cab  = sublayer_f_cab((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
-    @. bio.auxil.f_car  = sublayer_f_car((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
-    @. bio.auxil.f_ppar = bio.auxil.f_cab + bio.auxil.f_car * bio.state.ϕ_car_ppar;
-    @. bio.auxil.f_psii = psii_fraction(Λ);
-    @. bio.auxil.f_sife = bio.auxil.f_cab + bio.auxil.f_car * bio.state.ϕ_car;
-
-    @. bio.auxil.τ_all_1 = sublayer_τ((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x);
-    @. bio.auxil.τ_all_2 = sublayer_τ((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, 1-x);
-    @. bio.auxil.τ_sub_1 = bio.auxil.τ_all_1 .^ (FT(1) / N);
-    @. bio.auxil.τ_sub_2 = bio.auxil.τ_all_2 .^ (FT(1) / N);
-    @. bio.auxil.k_all_1 = -log(bio.auxil.τ_all_1);
-    @. bio.auxil.k_all_2 = -log(bio.auxil.τ_all_2);
-
-    return nothing
-);
-
-leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, ::Nothing) where {FT} = (
+function leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT) where {FT}
     (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = config.SPECTRA;
 
     x = 1 / bio.trait.meso_n;
@@ -243,4 +213,4 @@ leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, ::
     @. bio.auxil.k_all_2 = -log(bio.auxil.τ_all_2);
 
     return nothing
-);
+end;

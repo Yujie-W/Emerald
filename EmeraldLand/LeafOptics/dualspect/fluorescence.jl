@@ -15,17 +15,17 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, mtd::SIFMatr
     # 1. Get the matrix for the first layer (1 plate) using incoming radiation angle
     mat_b_θ = similar(bio.auxil.mat_b);
     mat_f_θ = similar(bio.auxil.mat_f);
-    kubelka_munk_sif_matrices_new!(config, ρ_layer_θ, τ_layer_θ, ρ_interface_θ, τ_interface_θ, ρ_interface_21, τ_interface_21, f_sife, mtd.N, mat_b_θ, mat_f_θ);
+    kubelka_munk_sif_matrices!(config, ρ_layer_θ, τ_layer_θ, ρ_interface_θ, τ_interface_θ, ρ_interface_21, τ_interface_21, f_sife, mtd.N, mat_b_θ, mat_f_θ);
 
     # 2. Get the matrix for the first layer (1 plate) using diffuse radiation
     mat_b_1 = similar(bio.auxil.mat_b);
     mat_f_1 = similar(bio.auxil.mat_f);
-    kubelka_munk_sif_matrices_new!(config, ρ_layer_1, τ_layer_1, ρ_interface_12, τ_interface_12, ρ_interface_21, τ_interface_21, f_sife, mtd.N, mat_b_1, mat_f_1);
+    kubelka_munk_sif_matrices!(config, ρ_layer_1, τ_layer_1, ρ_interface_12, τ_interface_12, ρ_interface_21, τ_interface_21, f_sife, mtd.N, mat_b_1, mat_f_1);
 
     # 3. Get the matrix for the second layer (N-1 plates) using diffuse radiation
     mat_b_2 = similar(bio.auxil.mat_b);
     mat_f_2 = similar(bio.auxil.mat_f);
-    kubelka_munk_sif_matrices_new!(config, ρ_layer_2, τ_layer_2, ρ_interface_12, τ_interface_12, ρ_interface_21, τ_interface_21, f_sife, mtd.N, mat_b_2, mat_f_2);
+    kubelka_munk_sif_matrices!(config, ρ_layer_2, τ_layer_2, ρ_interface_12, τ_interface_12, ρ_interface_21, τ_interface_21, f_sife, mtd.N, mat_b_2, mat_f_2);
 
     # 4. Now that we need to consider 3 cases for non-scattered SIF:
     #     - case 1: incoming radiation directly to the first layer
