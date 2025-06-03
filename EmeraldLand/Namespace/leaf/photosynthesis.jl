@@ -205,6 +205,7 @@ end;
 # General
 #     2023-Oct-03: add LeafPhotosystemAuxil struct
 #     2023-Oct-24: add fields ϕ_f1 and ϕ_f2; remove fields ϵ_1 and ϵ_2 (computed in the LeafOptics module)
+#     2025-Jun-03: add filed ϕ_d and ϕ_n
 #
 #######################################################################################################################################################################################################
 """
@@ -280,8 +281,12 @@ Base.@kwdef mutable struct LeafPhotosystemAuxil{FT}
     η_l::FT = 0
 
     # yield variables
+    "Heat dissipation yield"
+    ϕ_d::FT = 0
     "Fluorescence yield"
     ϕ_f::FT = 0
+    "Non-photochemical yield"
+    ϕ_n::FT = 0
     "Photochemical yield"
     ϕ_p::FT = 0
 
@@ -327,6 +332,7 @@ end;
 # General
 #     2024-Jul-25: define CanopyLayerPhotosystemAuxil struct to store 1D leaf photosynthesis variables (for canopy layer; Leaf will be repurposed back to elementwise)
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2025-Jun-03: add filed ϕ_d and ϕ_n
 #
 #######################################################################################################################################################################################################
 """
@@ -404,8 +410,12 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
     η_l::FT = 0
 
     # yield variables
+    "Heat dissipation yield"
+    ϕ_d::Vector{FT}
     "Fluorescence yield"
     ϕ_f::Vector{FT}
+    "Non-photochemical yield"
+    ϕ_n::Vector{FT}
     "Photochemical yield"
     ϕ_p::Vector{FT}
 
@@ -459,7 +469,9 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 j_pot = zeros(FT, cache_dim_ppar+1),
                 j_psi = zeros(FT, cache_dim_ppar+1),
                 η     = zeros(FT, cache_dim_ppar+1),
+                ϕ_d   = zeros(FT, cache_dim_ppar+1),
                 ϕ_f   = zeros(FT, cache_dim_ppar+1),
+                ϕ_n   = zeros(FT, cache_dim_ppar+1),
                 ϕ_p   = zeros(FT, cache_dim_ppar+1),
                 ϕ_f1  = zeros(FT, cache_dim_ppar+1),
                 ϕ_f2  = zeros(FT, cache_dim_ppar+1),

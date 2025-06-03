@@ -18,6 +18,7 @@
 #     2023-Oct-30: compute q_l using exp(-flm.K_B * ppar) (omitting K_A)
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 #     2024-Aug-01: compute q_l using flm.K_A * exp(-flm.K_B * ppar) for QLFluorescenceModelHan model
+#     2025-Jun-03: save filed ϕ_d and ϕ_n
 # Bug fixes
 #     2022-Feb-24: a typo from "rc.ϕ_f  = rc.f_m′ / (1 - rc.ϕ_p);" to "rc.ϕ_f  = rc.f_m′ * (1 - rc.ϕ_p);"
 #     2022-Feb-28: ps.e_to_c is recalculated based on analytically resolving leaf.p_CO₂_i from leaf.g_CO₂, this ps.e_to_c used to be calculated as ps.a_j / ps.j (a_j here is not p_CO₂_i based)
@@ -74,7 +75,9 @@ photosystem_coefficients!(
             ppar::FT;
             β::FT = FT(1)) where {FT} = (
     if ppar == 0
+        psa.ϕ_d = 0;
         psa.ϕ_f = 0;
+        psa.ϕ_n = 0;
         psa.ϕ_p = 0;
 
         return nothing
@@ -107,8 +110,14 @@ photosystem_coefficients!(
     # save the weighted fluorescence and photosynthesis yields in reaction center
     psa.ϕ_f1 = ϕ_F1_a;
     psa.ϕ_f2 = ϕ_F2_a;
-    psa.ϕ_f  = ϕ_F1_a * (1 - psa.f_psii) + ϕ_F2_a * psa.f_psii;
-    psa.ϕ_p  = ϕ_P1_a * (1 - psa.f_psii) + ϕ_P2_a * psa.f_psii;
+    _ϕ_d1 = PSI_RATE_CONSTANTS.K_D / PSI_RATE_CONSTANTS.K_F * psa.ϕ_f1;
+    _ϕ_d2 = PSII_RATE_CONSTANTS.K_D / PSII_RATE_CONSTANTS.K_F * psa.ϕ_f2;
+    _ϕ_n1 = 1 - psa.ϕ_f1 - _ϕ_d1 - ϕ_P1_a;
+    _ϕ_n2 = 1 - psa.ϕ_f2 - _ϕ_d2 - ϕ_P2_a;
+    psa.ϕ_d = _ϕ_d1 * (1 - psa.f_psii) + _ϕ_d2 * psa.f_psii;
+    psa.ϕ_f = psa.ϕ_f1 * (1 - psa.f_psii) + psa.ϕ_f2 * psa.f_psii;
+    psa.ϕ_n = _ϕ_n1 * (1 - psa.f_psii) + _ϕ_n2 * psa.f_psii;
+    psa.ϕ_p = ϕ_P1_a * (1 - psa.f_psii) + ϕ_P2_a * psa.f_psii;
 
     return nothing
 );
@@ -152,6 +161,8 @@ photosystem_coefficients!(
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
+    psa.ϕ_d  = psa.ϕ_f * psa.k_d / PS_RATE_CONSTANTS.K_F;
+    psa.ϕ_n  = 1 - psa.ϕ_f - psa.ϕ_d - psa.ϕ_p;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
@@ -196,6 +207,8 @@ photosystem_coefficients!(
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
+    psa.ϕ_d  = psa.ϕ_f * psa.k_d / PS_RATE_CONSTANTS.K_F;
+    psa.ϕ_n  = 1 - psa.ϕ_f - psa.ϕ_d - psa.ϕ_p;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
@@ -240,6 +253,8 @@ photosystem_coefficients!(
     psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     psa.ϕ_f1 = psa.ϕ_f;
     psa.ϕ_f2 = psa.ϕ_f;
+    psa.ϕ_d  = psa.ϕ_f * psa.k_d / PS_RATE_CONSTANTS.K_F;
+    psa.ϕ_n  = 1 - psa.ϕ_f - psa.ϕ_d - psa.ϕ_p;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
@@ -320,9 +335,15 @@ photosystem_coefficients!(
     @. ϕ_U2_a = (q2 * PSII_RATE_CONSTANTS.K_U / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_U / k_sum_1);
     @. psa.ϕ_f2 = (q2 * PSII_RATE_CONSTANTS.K_F / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_F / k_sum_1) / (1 - ϕ_U2_a);
     @. psa.ϕ_f1 = PSI_RATE_CONSTANTS.K_F / k_sum_3 * q1 + PSI_RATE_CONSTANTS.K_F / k_sum_4 * (1 - q1);
+    _ϕ_d1 = @. PSI_RATE_CONSTANTS.K_D / PSI_RATE_CONSTANTS.K_F * psa.ϕ_f1;
+    _ϕ_d2 = @. PSII_RATE_CONSTANTS.K_D / PSII_RATE_CONSTANTS.K_F * psa.ϕ_f2;
+    _ϕ_n1 = @. 1 - psa.ϕ_f1 - _ϕ_d1 - ϕ_P1_a;
+    _ϕ_n2 = @. 1 - psa.ϕ_f2 - _ϕ_d2 - ϕ_P2_a;
 
     # save the weighted fluorescence and photosynthesis yields in reaction center
+    @. psa.ϕ_d = _ϕ_d1 * (1 - psa.f_psii) + _ϕ_d2 * psa.f_psii;
     @. psa.ϕ_f = psa.ϕ_f1 * (1 - psa.f_psii) + psa.ϕ_f2 * psa.f_psii;
+    @. psa.ϕ_n = _ϕ_n1 * (1 - psa.f_psii) + _ϕ_n2 * psa.f_psii;
     @. psa.ϕ_p = ϕ_P1_a * (1 - psa.f_psii) + ϕ_P2_a * psa.f_psii;
 
     return nothing
@@ -372,6 +393,8 @@ photosystem_coefficients!(
     @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     @. psa.ϕ_f1 = psa.ϕ_f;
     @. psa.ϕ_f2 = psa.ϕ_f;
+    @. psa.ϕ_d  = psa.ϕ_f .* psa.k_d ./ PS_RATE_CONSTANTS.K_F;
+    @. psa.ϕ_n  = 1 .- psa.ϕ_f .- psa.ϕ_d .- psa.ϕ_p;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
@@ -418,6 +441,8 @@ photosystem_coefficients!(
     @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     @. psa.ϕ_f1 = psa.ϕ_f;
     @. psa.ϕ_f2 = psa.ϕ_f;
+    @. psa.ϕ_d  = psa.ϕ_f * psa.k_d / PS_RATE_CONSTANTS.K_F;
+    @. psa.ϕ_n  = 1 - psa.ϕ_f - psa.ϕ_d - psa.ϕ_p;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);
@@ -464,6 +489,8 @@ photosystem_coefficients!(
     @. psa.ϕ_f  = psa.f_m′ * (1 - psa.ϕ_p);
     @. psa.ϕ_f1 = psa.ϕ_f;
     @. psa.ϕ_f2 = psa.ϕ_f;
+    @. psa.ϕ_d  = psa.ϕ_f * psa.k_d / PS_RATE_CONSTANTS.K_F;
+    @. psa.ϕ_n  = 1 - psa.ϕ_f - psa.ϕ_d - psa.ϕ_p;
 
     # TODO: if K_N is used above, do we need to recalculate _npq
     # rc._npq = (rc._k_npq_rev + rc.k_npq_sus) / (K_F + rc._k_d + rc.k_npq_sus);

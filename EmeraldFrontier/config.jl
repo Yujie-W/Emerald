@@ -11,7 +11,8 @@ SAVING_DICT = Dict{String, Any}(
     # Modeled CO2, H2O, and OCS fluxes
             "BETA"        => false,
             "CNPP"        => true,
-            "ET_VEG"      => true,
+            "ET_SOIL"     => true,
+            "ET_VEGE"     => true,
             "GPP"         => true,
             "OCS"         => true,
     # SIF (default is false)
@@ -22,6 +23,7 @@ SAVING_DICT = Dict{String, Any}(
             "ΣSIF"        => false,
             "ΣSIF_CHL"    => false,
             "ΣSIF_LEAF"   => false,
+            "MOD_ΦDΦN"    => false,
             "MOD_ΦFΦP"    => false,
     # VI (default is false)
             "NDVI"        => false,

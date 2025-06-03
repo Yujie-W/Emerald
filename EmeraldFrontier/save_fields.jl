@@ -70,8 +70,11 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     if saving_dict["CNPP"]
         wdf.CNPP[ind] = CNPP(spac);
     end;
-    if saving_dict["ET_VEG"]
-        wdf.ET_VEG[ind] = T_VEG(spac);
+    if saving_dict["ET_SOIL"]
+        wdf.ET_SOIL[ind] = ET_SOIL(spac);
+    end;
+    if saving_dict["ET_VEGE"]
+        wdf.ET_VEGE[ind] = ET_VEGE(spac);
     end;
     if saving_dict["GPP"]
         wdf.GPP[ind] = GPP(spac);
@@ -112,6 +115,9 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
 
     # save the VI (and phi) if there is sunlight
     if daytime
+        if saving_dict["MOD_ΦDΦN"]
+            wdf.ΦF[ind],wdf.ΦP[ind] = ΦD_ΦN(spac);
+        end;
         if saving_dict["MOD_ΦFΦP"]
             wdf.ΦF[ind],wdf.ΦP[ind] = ΦF_ΦP(spac);
         end;

@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2024-Aug-06: isolate the function to prepare the DataFrame for the WDF
+#     2025-Jun-03: add function chunk to save Φ_D and Φ_N
 #
 #######################################################################################################################################################################################################
 """
@@ -52,6 +53,10 @@ function prepare_wdf(spac::BulkSPAC{FT}, df::DataFrame; saving_dict::Dict{String
         push!(new_df_cols, "MOD_P_L_MAX");
         push!(new_df_cols, "MOD_P_L_MEAN");
         push!(new_df_cols, "MOD_P_L_MIN");
+    end;
+    if saving_dict["MOD_ΦDΦN"]
+        push!(new_df_cols, "ΦD");
+        push!(new_df_cols, "ΦN");
     end;
     if saving_dict["MOD_ΦFΦP"]
         push!(new_df_cols, "ΦF");
