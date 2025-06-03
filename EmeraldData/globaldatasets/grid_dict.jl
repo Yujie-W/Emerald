@@ -14,14 +14,13 @@
 #######################################################################################################################################################################################################
 """
 
-    grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) where {FT}
-    grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; ccs::DataFrame = CCS)
+    grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT}
+    grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64)
 
 Prepare a dictionary of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct
 - `ilat` latitude index
 - `ilon` longitude index
-- `ccs` CO2 concentration data (provided by default)
 - `dtl` `LandDatasetLabels` type data struct
 - `year` year of the datasets
 - `nx` grid resolution (1/nx °)
@@ -31,9 +30,9 @@ Prepare a dictionary of GriddingMachine data to feed SPAC, given
 """
 function grid_dict end;
 
-grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) where {FT} = (
+grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT} = (
     reso   = 1 / dts.LABELS.nx;
-    co2    = ccs.MEAN[findfirst(ccs.YEAR .== dts.LABELS.year)];
+    co2    = CO₂_pressure(dts.LABELS.year);
     lmsk   = dts.t_lm[ilon,ilat,1];
     scolor = min(20, max(1, Int(floor(dts.s_cc[ilon,ilat,1]))));
     s_α    = dts.s_α[ilon,ilat,:];
@@ -176,7 +175,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
     return gm_dict
 );
 
-grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64, ccs::DataFrame = CCS) = (
+grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64) = (
     lmsk = read_LUT(dtl.tag_t_lm, lat, lon; include_std = false);
     if !(lmsk > 0)
         return error("The target grid does not contain land!");
@@ -187,7 +186,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
         return error("The target grid is not vegetated!");
     end;
 
-    co2 = ccs.MEAN[findfirst(ccs.YEAR .== dtl.year)];
+    co2 = CO₂_pressure(dtl.year);
     scolor = min(20, max(1, Int(floor(read_LUT(dtl.tag_s_cc, lat, lon; include_std = false)))));
     s_α = read_LUT(dtl.tag_s_α, lat, lon; include_std = false);
     s_n = read_LUT(dtl.tag_s_n, lat, lon; include_std = false);

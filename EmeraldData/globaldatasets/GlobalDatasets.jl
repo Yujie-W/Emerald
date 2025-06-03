@@ -18,9 +18,10 @@ using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 
 
-CCS = read_csv("$(@__DIR__)/../../data/CO2-1Y.csv");
+CCS_1Y = read_csv("$(@__DIR__)/../../data/CO2-1Y.csv");
 
 
+include("co2.jl");
 include("clm.jl");
 include("land_datasets.jl");
 include("query_data.jl");
