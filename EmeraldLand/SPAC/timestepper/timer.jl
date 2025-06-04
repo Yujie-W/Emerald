@@ -18,6 +18,8 @@
 #     2024-Aug-06: add junction pressure change controller (not change more than 0.1 MPa per time step)
 #     2024-Sep-03: run stem and branck T check as well (was deactivated by accident)
 #     2024-Sep-03: add leaf capacitance buffer pressure change controller (not change more than 0.1 MPa per time step)
+# Bug fixes
+#     2025-Jun-05: fix a typo (bug) in soil temperature related time controller (forgot to account for soil layer thickness)
 #
 #######################################################################################################################################################################################################
 """
@@ -66,7 +68,7 @@ adjusted_time(soil::SoilLayer{FT}, δt::FT) where {FT} = (
     end;
 
     # make sure soil temperature does not change more than 1 K per time step
-    ∂T∂t = soil.auxil.∂e∂t / soil.s_aux.cp;
+    ∂T∂t = soil.auxil.∂e∂t / soil.s_aux.cp / soil.t_aux.δz;
     new_δt = min(1 / abs(∂T∂t), new_δt);
     if isnan(new_δt) || new_δt < 0.01 <= δt
         @error "NaN or very small δt detected when adjusting δt based on soil temperature" soil.auxil.∂e∂t soil.s_aux.cp ∂T∂t;
