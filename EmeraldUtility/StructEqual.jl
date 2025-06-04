@@ -60,7 +60,7 @@ compare_struct!(struct1::ST, struct2::ST; approximation::Bool = true, first_elem
                 end;
                 n_error += 1;
             end;
-        elseif fntype <:AbstractArray && eltype(fntype) <: Union{Number, Bool}
+        elseif fntype <:AbstractArray && eltype(getfield(struct1, fn)) <: Union{Number, Bool}
             if approximation
                 if !(getfield(struct1, fn) ≈ getfield(struct2, fn))
                     if show_diff_msg
@@ -102,7 +102,7 @@ compare_struct!(struct1::ST, struct2::ST, target::Symbol; first_element_array::B
     end;
 
     if ST <: AbstractArray
-        if eltype(ST) <: Union{Number, String, Bool, Function}
+        if eltype(struct1) <: Union{Number, String, Bool, Function}
             return nothing
         else
             if first_element_array
@@ -133,6 +133,8 @@ compare_struct!(struct1::ST, struct2::ST, target::Symbol; first_element_array::B
 # Changes to this function
 # General
 #     2024-Feb-24: add function sync_struct! to sync fields from one struct to another recursively
+#     2025-Jun-03: add method to sync the struct to a dictionary (to write to file)
+#     2025-Jun-04: add method to sync the struct from a dictionary (to read from file)
 #
 #######################################################################################################################################################################################################
 """
@@ -142,13 +144,15 @@ compare_struct!(struct1::ST, struct2::ST, target::Symbol; first_element_array::B
 Sync the fields from `struct_from` to `struct_to`.
 
 """
-function sync_struct!(struct_from::ST, struct_to::ST) where ST
+function sync_struct! end;
+
+sync_struct!(struct_from::ST, struct_to::ST) where ST = (
     for fn in fieldnames(ST)
         fntype = fieldtype(ST, fn);
         # TODO: memory allocation when sync numbers and bools
         if fntype <: Union{Number, String, Bool}
             setfield!(struct_to, fn, getfield(struct_from, fn));
-        elseif fntype <:AbstractArray && eltype(fntype) <: Union{Number, String, Bool}
+        elseif fntype <:AbstractArray && eltype(getfield(struct_from, fn)) <: Union{Number, String, Bool}
             setfield!(struct_to, fn, getfield(struct_from, fn));
         elseif fntype <: Function
             setfield!(struct_to, fn, deepcopy(getfield(struct_from, fn)));
@@ -158,7 +162,59 @@ function sync_struct!(struct_from::ST, struct_to::ST) where ST
     end;
 
     return nothing
-end;
+);
+
+sync_struct!(struct_from::ST) where ST = (
+    dict = Dict{String,Any}();
+
+    for fn in fieldnames(ST)
+        fntype = fieldtype(ST, fn);
+
+        if fntype <: Union{Number, String, Bool}
+            dict[String(fn)] = getfield(struct_from, fn);
+        elseif fntype <:AbstractArray && eltype(getfield(struct_from, fn)) <: Union{AbstractArray, Number, String, Bool}
+            dict[String(fn)] = getfield(struct_from, fn);
+        elseif fntype <:AbstractArray
+            dict[String(fn)] = [
+                sync_struct!(getfield(struct_from, fn)[i]) for i in eachindex(getfield(struct_from, fn))
+            ];
+        elseif fntype <: Function
+            @warn "Function field $fn is not copied...";
+        else
+            dict[String(fn)] = sync_struct!(getfield(struct_from, fn));
+        end;
+    end;
+
+    return dict
+);
+
+sync_struct!(dict_from::Dict, struct_to::ST) where ST = (
+    fns = fieldnames(ST);
+
+    for (k,v) in dict_from
+        if Symbol(k) in fns
+            fntype = fieldtype(ST, Symbol(k));
+
+            if fntype <: Union{Number, String, Bool}
+                setfield!(struct_to, Symbol(k), v);
+            elseif fntype <:AbstractArray && eltype(v) <: Union{Number, String, Bool}
+                setfield!(struct_to, Symbol(k), v);
+            elseif fntype <:AbstractArray
+                for idict in eachindex(v)
+                    sync_struct!(v[idict], getfield(struct_to, Symbol(k))[idict]);
+                end;
+            elseif fntype <: Function
+                @warn "Function field $(k) is not copied...";
+            else
+                sync_struct!(v, getfield(struct_to, Symbol(k)));
+            end;
+        else
+            @warn "Field $(k) not existing in the target struct!";
+        end;
+    end;
+
+    return nothing
+);
 
 
 end # module

@@ -181,7 +181,8 @@ BulkSPAC(config::SPACConfiguration{FT};
 #
 # Changes to this struct
 # General
-#     2024-Feb-2: add struct BulkSPACStates
+#     2024-Feb-02: add struct BulkSPACStates
+#     2025-Jun-04: add methods to sync the states to/from a file
 #
 #######################################################################################################################################################################################################
 """
@@ -237,6 +238,29 @@ sync_state!(states::BulkSPACStates{FT}, spac::BulkSPAC{FT}) where {FT} = (
     end;
     sync_state!(states.plant, spac.plant);
     sync_state!(states.canopy, spac.canopy);
+
+    return nothing
+);
+
+sync_state!(states::BulkSPACStates{FT}, filename::String) where {FT} = (
+    dict = sync_struct!(states);
+    save_jld2!(filename, dict);
+
+    return nothing
+);
+
+sync_state!(filename::String, states::BulkSPACStates{FT}) where {FT} = (
+    dict = read_jld2(filename);
+    sync_struct!(dict, states);
+
+    return nothing
+);
+
+sync_state!(filename::String, spac::BulkSPAC{FT}) where {FT} = (
+    dict = read_jld2(filename);
+    states = BulkSPACStates(spac);
+    sync_struct!(dict, states);
+    sync_state!(states, spac);
 
     return nothing
 );

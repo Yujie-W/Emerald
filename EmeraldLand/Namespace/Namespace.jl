@@ -10,7 +10,7 @@ using LazyArtifacts
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
-using ..EmeraldIO.Jld2: read_jld2
+using ..EmeraldIO.Jld2: read_jld2, save_jld2!
 using ..EmeraldIO.Text: read_csv
 
 using ..EmeraldMath.Data: interpolate_data
