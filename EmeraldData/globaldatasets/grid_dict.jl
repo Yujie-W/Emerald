@@ -10,6 +10,7 @@
 #     2024-Feb-23: set SAI to be 1/10 of the maximum LAI
 #     2024-Feb-29: veritfy the GriddingMachine data dictionary before returning
 #     2024-Aug-08: fix two typos in the land mask determination and the SOIL_α value (was SOIL_N)
+#     2025-Jun-04: use monthly mean CO₂ concentration time series as default
 #
 #######################################################################################################################################################################################################
 """
@@ -32,7 +33,7 @@ function grid_dict end;
 
 grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT} = (
     reso   = 1 / dts.LABELS.nx;
-    co2    = CO₂_pressure(dts.LABELS.year);
+    co2    = CO₂_ppm(dts.LABELS.year, true);
     lmsk   = dts.t_lm[ilon,ilat,1];
     scolor = min(20, max(1, Int(floor(dts.s_cc[ilon,ilat,1]))));
     s_α    = dts.s_α[ilon,ilat,:];
@@ -186,7 +187,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
         return error("The target grid is not vegetated!");
     end;
 
-    co2 = CO₂_pressure(dtl.year);
+    co2 = CO₂_ppm(dtl.year, true);
     scolor = min(20, max(1, Int(floor(read_LUT(dtl.tag_s_cc, lat, lon; include_std = false)))));
     s_α = read_LUT(dtl.tag_s_α, lat, lon; include_std = false);
     s_n = read_LUT(dtl.tag_s_n, lat, lon; include_std = false);

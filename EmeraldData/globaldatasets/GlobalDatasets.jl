@@ -19,6 +19,7 @@ using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 
 
 CCS_1Y = read_csv("$(@__DIR__)/../../data/CO2-1Y.csv");
+CCS_1M = read_csv("$(@__DIR__)/../../data/CO2-1M.csv");
 
 
 include("co2.jl");
