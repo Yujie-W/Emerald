@@ -1,6 +1,6 @@
 module SoilHydraulics
 
-using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, GAS_R, M_H₂O, ρ_H₂O, ρg_MPa
+using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, GAS_R, M_H₂O, T₀, ρ_H₂O, ρg_MPa
 
 using ..Namespace: BrooksCorey, VanGenuchten
 using ..Namespace: XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS

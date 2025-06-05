@@ -83,7 +83,7 @@ Base.@kwdef mutable struct SoilLayerState{FT}
     ns::Vector{FT} = zeros(FT,5)
     "Soil water content"
     θ::FT = 0.3
-    "Total stored energy per volume `[J m⁻³]`"
+    "Total stored energy per volume relative to triple temperature `[J m⁻³]`"
     Σe::FT = 0
 end;
 

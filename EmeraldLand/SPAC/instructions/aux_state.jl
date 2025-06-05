@@ -15,6 +15,7 @@
 #     2024-Jul-24: add leaf shedded flag
 #     2024-Jul-30: compute OCS fraction in the air layer
 #     2024-Nov-05: remove leaf shedded flag
+#     2025-Jun-05: make soil total energy relative to triple temperature for phase change purposes
 #
 #######################################################################################################################################################################################################
 """
@@ -47,7 +48,7 @@ s_aux!(spac::BulkSPAC{FT}) where {FT} = (
 
 s_aux!(soil::SoilLayer{FT}) where {FT} = (
     soil.s_aux.cp = heat_capacitance(soil);
-    soil.s_aux.t = soil.state.Σe / soil.s_aux.cp;
+    soil.s_aux.t = soil.state.Σe / soil.s_aux.cp + T₀(FT);
 
     # update the conductance, potential, diffusivity, and thermal conductivity (0.5 for tortuosity factor)
     soil.s_aux.k = relative_soil_k(soil.trait.vc, soil.state.θ) * soil.trait.vc.K_MAX * relative_viscosity(soil.s_aux.t) / soil.t_aux.δz;

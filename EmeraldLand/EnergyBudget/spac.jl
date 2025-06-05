@@ -34,6 +34,7 @@ end;
 # General
 #     2023-Oct-02: add function to run spac energy budget
 #     2023-Oct-07: add soil energy budget
+#     2025-Jun-05: make soil total energy relative to triple temperature for phase change purposes
 #
 #######################################################################################################################################################################################################
 """
@@ -66,8 +67,8 @@ function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     top_soil = soils[1];
     if top_soil.state.θ > top_soil.trait.vc.Θ_SAT
         cp = heat_capacitance(top_soil; runoff = top_soil.auxil.runoff);
-        t  = top_soil.state.Σe / cp;
-        top_soil.state.Σe -= top_soil.auxil.runoff / top_soil.t_aux.δz * CP_L_MOL(FT) * t;
+        t  = top_soil.state.Σe / cp + T₀(FT);
+        top_soil.state.Σe -= top_soil.auxil.runoff / top_soil.t_aux.δz * CP_L_MOL(FT) * (t - T₀(FT));
     end;
 
     # update the temperature for roots

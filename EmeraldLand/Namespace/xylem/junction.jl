@@ -48,7 +48,7 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct JunctionCapacitorState{FT}
-    "Total energy storage of the capacitor `[J]`"
+    "Total energy storage of the capacitor relative to 0 K `[J]`"
     Σe::FT = 500 * CP_L_MOL() * T₂₅()
     "Current volume of the capacitor `[mol]`"
     v_storage::FT = 500

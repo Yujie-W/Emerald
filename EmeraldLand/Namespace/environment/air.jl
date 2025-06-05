@@ -74,7 +74,7 @@ Base.@kwdef mutable struct AirLayerState{FT}
     ns::Vector{FT} = FT[0, 0, 0, 0, 0, 0]
     "Atmospheric pressure `[Pa]`"
     p_air::FT = P_ATM(FT)
-    "Total energy within the air layer `[J m⁻²]`"
+    "Total energy within the air layer relative to 0 K`[J m⁻²]`"
     Σe::FT = 0
 end;
 

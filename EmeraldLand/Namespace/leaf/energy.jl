@@ -20,7 +20,7 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct LeafEnergyState{FT}
-    "Total energy `[J]`"
+    "Total energy relative to 0 K `[J]`"
     Σe::FT = 0
 end;
 
