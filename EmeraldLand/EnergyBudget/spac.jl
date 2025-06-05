@@ -64,6 +64,7 @@ function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     end;
 
     # update the energy loss related to surface runoff
+    # TODO: check whether this is impacted by ice content
     top_soil = soils[1];
     if top_soil.state.θ > top_soil.trait.vc.Θ_SAT
         cp = heat_capacitance(top_soil; runoff = top_soil.auxil.runoff);

@@ -20,6 +20,7 @@ function soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
     soils = spac.soils;
 
     # iterate from the lowest soil layer to the top
+    # TODO: ice volume is not accounted for, so the water flow may not be correct
     N = length(soils);
     for i in N-1:-1:1
         soili = soils[i];
@@ -39,7 +40,8 @@ function soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
         end;
     end;
 
-    # run the soil water runoffn from the top layer (energy will be updated in EnergyBudgets.jl because of the need to call heat_capacitance function)
+    # run the soil water runoff from the top layer (energy will be updated in EnergyBudgets.jl because of the need to call heat_capacitance function)
+    # TODO: ice volume is not accounted for, so the water flow may not be correct
     top_soil = soils[1];
     if top_soil.state.θ > top_soil.trait.vc.Θ_SAT
         sbulk.auxil.runoff = (top_soil.state.θ - top_soil.trait.vc.Θ_SAT) * top_soil.t_aux.δz * ρ_H₂O(FT) / M_H₂O(FT);

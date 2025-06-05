@@ -22,6 +22,7 @@ function prepare_wdf(spac::BulkSPAC{FT}, df::DataFrame; saving_dict::Dict{String
     if saving_dict["MOD_SWC"]
         for i in eachindex(spac.soils)
             push!(new_df_cols, "MOD_SWC_$i");
+            push!(new_df_cols, "MOD_SWC_ICE_$i");
         end;
     end;
     if saving_dict["MOD_P_SOIL"]

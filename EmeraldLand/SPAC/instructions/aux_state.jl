@@ -16,6 +16,7 @@
 #     2024-Jul-30: compute OCS fraction in the air layer
 #     2024-Nov-05: remove leaf shedded flag
 #     2025-Jun-05: make soil total energy relative to triple temperature for phase change purposes
+#     2025-Jun-05: account for ice volume in the calculation of vapor and gas diffusion related auxiliary variables
 #
 #######################################################################################################################################################################################################
 """
@@ -51,11 +52,12 @@ s_aux!(soil::SoilLayer{FT}) where {FT} = (
     soil.s_aux.t = soil.state.Σe / soil.s_aux.cp + T₀(FT);
 
     # update the conductance, potential, diffusivity, and thermal conductivity (0.5 for tortuosity factor)
+    # TODO: add Λ_THERMAL_H₂O for ice
     soil.s_aux.k = relative_soil_k(soil.trait.vc, soil.state.θ) * soil.trait.vc.K_MAX * relative_viscosity(soil.s_aux.t) / soil.t_aux.δz;
     soil.s_aux.ψ = soil_ψ_25(soil.trait.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.s_aux.t);
-    soil.s_aux.kd = 0.5 * max(0, soil.trait.vc.Θ_SAT - soil.state.θ) / soil.t_aux.δz;
-    soil.s_aux.kv = 0.5 * soil.trait.vc.Θ_SAT / max(FT(0.01), soil.trait.vc.Θ_SAT - soil.state.θ) / soil.t_aux.δz;
-    soil.s_aux.λ_soil_water = (soil.trait.λ_soil + soil.state.θ * Λ_THERMAL_H₂O(FT)) / soil.t_aux.δz;
+    soil.s_aux.kd = 0.5 * max(0, soil.trait.vc.Θ_SAT - soil.state.θ - soil.state.θ_ice) / soil.t_aux.δz;
+    soil.s_aux.kv = 0.5 * soil.trait.vc.Θ_SAT / max(FT(0.01), soil.trait.vc.Θ_SAT - soil.state.θ - soil.state.θ_ice) / soil.t_aux.δz;
+    soil.s_aux.λ_soil_water = (soil.trait.λ_soil + (soil.state.θ + soil.state.θ_ice) * Λ_THERMAL_H₂O(FT)) / soil.t_aux.δz;
 
     return nothing
 );

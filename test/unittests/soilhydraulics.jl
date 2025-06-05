@@ -40,8 +40,10 @@ import Emerald.EmeraldLand.SPAC
 
         # set the soil to be not saturated
         SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3, 0.3));
-        spac.soils[5].state.ns[4] = spac.airs[1].state.p_air * (spac.soils[5].trait.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].t_aux.δz / (CS.GAS_R() * spac.soils[5].s_aux.t);
-        spac.soils[5].state.ns[5] = spac.airs[1].state.p_air * (spac.soils[5].trait.vc.Θ_SAT - spac.soils[5].state.θ) * spac.soils[5].t_aux.δz / (CS.GAS_R() * spac.soils[5].s_aux.t);
+        spac.soils[5].state.ns[4] = spac.airs[1].state.p_air * max(0, spac.soils[5].trait.vc.Θ_SAT - spac.soils[5].state.θ - spac.soils[5].state.θ_ice) *
+                                    spac.soils[5].t_aux.δz / (CS.GAS_R() * spac.soils[5].s_aux.t);
+        spac.soils[5].state.ns[5] = spac.airs[1].state.p_air * max(0, spac.soils[5].trait.vc.Θ_SAT - spac.soils[5].state.θ - spac.soils[5].state.θ_ice) *
+                                    spac.soils[5].t_aux.δz / (CS.GAS_R() * spac.soils[5].s_aux.t);
         SH.volume_balance!(config, spac);
         SPAC.substep_aux!(spac);
         SH.trace_gas_diffusion!(config, spac);

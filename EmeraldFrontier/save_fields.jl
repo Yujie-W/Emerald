@@ -30,6 +30,7 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     if saving_dict["MOD_SWC"]
         for i in eachindex(spac.soils)
             wdf[Symbol("MOD_SWC_$i")][ind] = spac.soils[i].state.θ;
+            wdf[Symbol("MOD_SWC_ICE_$i")][ind] = spac.soils[i].state.θ_ice;
         end;
     end;
     if saving_dict["MOD_P_SOIL"]

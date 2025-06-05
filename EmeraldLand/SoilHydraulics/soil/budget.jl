@@ -7,6 +7,7 @@
 #     2023-Oct-07: add function to run the soil water condensation or evaporation
 #     2023-Oct-07: add 0.01 to the water vapor volume per soil layer
 #     2023-Oct-09: remove condensation or evaporation of water vapor from the soil trace gas moles
+#     2025-Jun-05: account for ice volume in the calculation of condensation or evaporation
 #
 #######################################################################################################################################################################################################
 """
@@ -19,7 +20,7 @@ Run the soil water condensation or evaporation, given
 """
 function soil_water_condensation!(soil::SoilLayer{FT}) where {FT}
     p_sat = saturation_vapor_pressure(soil.s_aux.t, soil.s_aux.ψ * 1000000);
-    n_con = soil.state.ns[3] - p_sat * (max(0, soil.trait.vc.Θ_SAT - soil.state.θ) * soil.t_aux.δz + FT(0.01)) / (GAS_R(FT) * soil.s_aux.t);
+    n_con = soil.state.ns[3] - p_sat * (max(0, soil.trait.vc.Θ_SAT - soil.state.θ - soil.state.θ_ice) * soil.t_aux.δz + FT(0.01)) / (GAS_R(FT) * soil.s_aux.t);
     v_liq = n_con * M_H₂O(FT) / ρ_H₂O(FT);
 
     soil.auxil.n_con = n_con;
