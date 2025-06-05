@@ -13,8 +13,12 @@
 #     2023-Aug-27: add nan check for beta calculation of empirical models
 #     2024-Feb-29: add LAI = 0 controller
 #     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
+#     2025-Jun-05: when computing beta from soil water content or potential, use eps when there is ice
 # Bug fixes
 #     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaf, β, β.PARAM_X) as I forgot to write β_factor! before `()`
+#
+# To-dos
+#     TODO: add ice control for the cases when plant hydraulics takes effect
 #
 #######################################################################################################################################################################################################
 """
@@ -76,7 +80,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].s_aux.k);
+        beta = soils[i].state.θ_ice <= 0 ? β_factor(β.FUNC, soils[i].s_aux.k) : eps(FT);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
@@ -89,7 +93,7 @@ function β_factor! end;
     if denom > 0
         leaf.flux.auxil.β = norm / denom;
     elseif sumf < 0
-        leaf.flux.auxil.β = 1
+        leaf.flux.auxil.β = 1;
     else
         leaf.flux.auxil.β = eps(FT);
     end;
@@ -109,7 +113,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].s_aux.ψ);
+        beta = soils[i].state.θ_ice <= 0 ? β_factor(β.FUNC, soils[i].s_aux.ψ) : eps(FT);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
@@ -136,7 +140,7 @@ function β_factor! end;
     sumf = 0;
     denom = 0;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].state.θ);
+        beta = soils[i].state.θ_ice <= 0 ? β_factor(β.FUNC, soils[i].state.θ) : eps(FT);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;

@@ -35,7 +35,77 @@ end;
 #
 # Changes to this function
 # General
+#     2025-Jun-05: add function to run the soil water freeze/thaw
+#
+#######################################################################################################################################################################################################
+"""
+
+    soil_water_freeze_thaw!(soil::SoilLayer{FT}) where {FT}
+
+Run the soil water freeze or thaw, given
+- `soil` `SoilLayer` type soil layer
+
+"""
+function soil_water_freeze_thaw!(soil::SoilLayer{FT}) where {FT}
+    # when there is water and ice, water thaw occurs all the time when Σe > 0
+    #     if the energy is enough to melt the ice, then melt all
+    #     otherwise, melt as much as possible
+    if soil.state.θ_ice > 0 && soil.state.Σe > 0
+        e_melt = soil.state.θ_ice * ρ_H₂O(FT) * latent_heat_melt(soil.s_aux.t);
+        if soil.state.Σe >= e_melt
+            soil.state.θ += soil.state.θ_ice;
+            soil.state.θ_ice = 0;
+            soil.state.Σe -= e_melt;
+        else
+            dθ_ice = soil.state.Σe / e_melt * soil.state.θ_ice;
+            soil.state.θ += dθ_ice;
+            soil.state.θ_ice -= dθ_ice;
+            soil.state.Σe -= dθ_ice / soil.state.θ_ice * e_melt;
+        end;
+
+        return nothing
+    end;
+
+    # when there is water only, make sure the energy is enough to lower the total temperature to -2 Celcius
+    # then add a 0.001 fraction of ice core, so that the part below can be triggered
+    if soil.state.θ_ice == 0 && soil.state.Σe < -2 * soil.s_aux.cp
+        dθ_ice = min(FT(0.001), soil.state.θ - soil.trait.vc.Θ_RES);
+        soil.state.θ -= dθ_ice;
+        soil.state.θ_ice += dθ_ice;
+        soil.state.Σe += dθ_ice * ρ_H₂O(FT) * latent_heat_melt(soil.s_aux.t);
+    end;
+
+    # when there is water and ice, water freeze occurs when Σe < 0
+    #     if the energy is enough to freeze the water, then freeze all water except the residual water
+    #     otherwise, freeze as much as possible
+    if soil.state.θ > soil.trait.vc.Θ_RES && soil.state.θ_ice > 0 && soil.state.Σe < 0
+        e_freeze = (soil.state.θ - soil.trait.vc.Θ_RES) * ρ_H₂O(FT) * latent_heat_melt(soil.s_aux.t);
+        if soil.state.Σe <= -e_freeze
+            dθ_ice = soil.state.θ - soil.trait.vc.Θ_RES;
+            soil.state.θ -= dθ_ice;
+            soil.state.θ_ice += dθ_ice;
+            soil.state.Σe += e_freeze;
+        else
+            dθ_ice = -soil.state.Σe / e_freeze * (soil.state.θ - soil.trait.vc.Θ_RES);
+            soil.state.θ -= dθ_ice;
+            soil.state.θ_ice += dθ_ice;
+            soil.state.Σe += dθ_ice / (soil.state.θ - soil.trait.vc.Θ_RES) * e_freeze;
+        end;
+
+        return nothing
+    end;
+
+    # do nothing otherwise
+    return nothing
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2023-Oct-07: add function to run the soil budgets for water and gas
+#     2025-Jun-05: run soil freezing/thawing control at the end of each sub-step
 #
 #######################################################################################################################################################################################################
 """
@@ -61,8 +131,9 @@ function soil_budgets!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::F
         # run the water transport (mass flow)
         (soil).state.θ += (soil).auxil.∂θ∂t * δt;
 
-        # run the soil water condensation or evaporation
+        # run the soil water condensation/evaporation and freeze/thaw
         soil_water_condensation!(soil);
+        soil_water_freeze_thaw!(soil);
     end;
 
     # compute surface runoff and volume balance for the air

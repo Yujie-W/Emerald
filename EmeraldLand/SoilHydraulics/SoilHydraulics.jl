@@ -7,7 +7,7 @@ using ..Namespace: XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS
 using ..Namespace: Root
 using ..Namespace: SoilLayer
 using ..Namespace: BulkSPAC, SPACConfiguration
-using ..PhysicalChemistry: diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure
+using ..PhysicalChemistry: diffusive_coefficient, latent_heat_melt, relative_surface_tension, saturation_vapor_pressure
 
 
 # vc
