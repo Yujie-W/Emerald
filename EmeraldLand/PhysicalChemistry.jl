@@ -1,6 +1,6 @@
 module PhysicalChemistry
 
-using ..EmeraldPhysics.Constant: CP_L, CP_V, GAS_R, K_BOLTZMANN, LH_V₀, PRESS_TRIPLE, R_V, T₂₅, T_TRIPLE, V_H₂O
+using ..EmeraldPhysics.Constant: CP_I, CP_L, CP_V, GAS_R, K_BOLTZMANN, LH_M₀, LH_V₀, PRESS_TRIPLE, R_V, T₂₅, T_TRIPLE, V_H₂O
 
 using ..Namespace: AbstractTraceGas, TraceGasAir, TraceGasCH₄, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
 
@@ -122,8 +122,23 @@ relative_diffusive_coefficient(T::FT, mol::Union{TraceGasCO₂{FT}, TraceGasN₂
 # Changes to the function
 # General:
 #     2022-Oct-17: clean docs
+#     2025-Jun-05: add function to compute latent heat of melting
 #
 #######################################################################################################################################################################################################
+"""
+
+    latent_heat_melt(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT}
+
+Latent heat of melting in `[J kg⁻¹]`, given
+- `T` Medium temperature in `[K]`
+- `med` Medium. Optional. Default is liquid water
+
+"""
+function latent_heat_melt end;
+
+latent_heat_melt(T::FT, med::TraceLiquidH₂O{FT} = TraceLiquidH₂O{FT}()) where {FT} = LH_M₀(FT) + (CP_L(FT) - CP_I(FT)) * (T - T_TRIPLE(FT));
+
+
 """
 
 Water evaporation from liquid phase is a key process to regulate leaf temperature, and to best represent this process. We computed the latent heat coefficient from water temperature:

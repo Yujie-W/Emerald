@@ -13,6 +13,7 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 #     2022-Jul-20: rename field LH_V0 to LH_V₀, T_0 to T₀
 #     2022-Sep-09: move constants from ClimaCache.jl to EmeraldConstants.jl
 #     2024-Jul-22: add field GLUCOSE
+#     2025-Jun-05: add field LH_M₀ for latent heat of melting at T₀
 #
 #######################################################################################################################################################################################################
 """
@@ -55,7 +56,9 @@ Base.@kwdef mutable struct UniversalConstants
     K_STEFAN::Float64 = 5.670e-8
     "Von Karman constant `[-]`"
     K_VON_KARMAN::Float64 = 0.4
-    "Latent heat vaporization at T₀ `[K kg⁻¹]`"
+    "Latent heat of melting at T₀ `[J kg⁻¹]`"
+    LH_M₀::Float64 = 3.34e5
+    "Latent heat of vaporization at T₀ `[J kg⁻¹]`"
     LH_V₀::Float64 = 2.5008e6
     "Light speed in vacuum `[m s⁻¹]`"
     LIGHT_SPEED::Float64 = 2.99792458e8
@@ -148,7 +151,10 @@ K_STEFAN(FT=Float64) = FT(UNIVERSAL_CONSTANTS.K_STEFAN);
 """ Von Karman constant `[-]` """
 K_VON_KARMAN(FT=Float64) = FT(UNIVERSAL_CONSTANTS.K_VON_KARMAN);
 
-""" Latent heat vaporization at T₀ `[K kg⁻¹]` """
+""" Latent heat of melting at T₀ `[J kg⁻¹]` """
+LH_M₀(FT=Float64) = FT(UNIVERSAL_CONSTANTS.LH_M₀);
+
+""" Latent heat of vaporization at T₀ `[J kg⁻¹]` """
 LH_V₀(FT=Float64) = FT(UNIVERSAL_CONSTANTS.LH_V₀);
 
 """ Light speed in vacuum `[m s⁻¹]` """
