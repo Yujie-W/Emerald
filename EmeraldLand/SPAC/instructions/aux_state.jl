@@ -17,6 +17,7 @@
 #     2024-Nov-05: remove leaf shedded flag
 #     2025-Jun-05: make soil total energy relative to triple temperature for phase change purposes
 #     2025-Jun-05: account for ice volume in the calculation of vapor and gas diffusion related auxiliary variables
+#     2025-Jun-07: set a maximum effective water volume to each layer as the soil is allowed to be oversaturated
 #
 #######################################################################################################################################################################################################
 """
@@ -57,7 +58,7 @@ s_aux!(soil::SoilLayer{FT}) where {FT} = (
     soil.s_aux.ψ = soil_ψ_25(soil.trait.vc, soil.state.θ; oversaturation = true) * relative_surface_tension(soil.s_aux.t);
     soil.s_aux.kd = 0.5 * max(0, soil.trait.vc.Θ_SAT - soil.state.θ - soil.state.θ_ice) / soil.t_aux.δz;
     soil.s_aux.kv = 0.5 * soil.trait.vc.Θ_SAT / max(FT(0.01), soil.trait.vc.Θ_SAT - soil.state.θ - soil.state.θ_ice) / soil.t_aux.δz;
-    soil.s_aux.λ_soil_water = (soil.trait.λ_soil + (soil.state.θ + soil.state.θ_ice) * Λ_THERMAL_H₂O(FT)) / soil.t_aux.δz;
+    soil.s_aux.λ_soil_water = (soil.trait.λ_soil + max(soil.trait.vc.Θ_SAT, soil.state.θ + soil.state.θ_ice) * Λ_THERMAL_H₂O(FT)) / soil.t_aux.δz;
 
     return nothing
 );

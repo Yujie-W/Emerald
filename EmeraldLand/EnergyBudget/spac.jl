@@ -58,9 +58,6 @@ function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     for soil in soils
         # water mass and energy flow
         soil.state.Σe += soil.auxil.∂e∂t * δt / soil.t_aux.δz;
-
-        # soil water condensation or evaporation
-        soil.state.Σe += soil.auxil.n_con * M_H₂O(FT) * latent_heat_vapor(soil.s_aux.t) / soil.t_aux.δz;
     end;
 
     # update the energy loss related to surface runoff

@@ -10,6 +10,7 @@
 #     2024-Feb-22: remove state and auxil from spac struct
 #     2024-Apr-17: update solar azimuth angle as well
 #     2024-Jul-24: remove lai, ci, vcmax, and cab from memory (use traits instead)
+#     2025-Jun-05: set precipation to snow if air temperature is below T₀, otherwise set it to rain
 # Bug fixes
 #     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88
 #
@@ -44,7 +45,14 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::Named
     df_wnd::FT = df.WIND[ind];
 
     # prescribe the precipitation related parameters
-    spac.meteo.rain = df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
+    # if the temperature is above T₀, it is rain, otherwise it is snow
+    if df_tar >= T₀(FT)
+        spac.meteo.rain = df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
+        spac.meteo.snow = 0;
+    else
+        spac.meteo.rain = 0;
+        spac.meteo.snow = df_pcp * ρ_H₂O(FT) / M_H₂O(FT) / 3600;
+    end;
     spac.meteo.t_precip = df_tar;
 
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)

@@ -4,7 +4,7 @@ using Statistics: mean
 
 using ..EmeraldMath.Data: interpolate_data
 
-using ..EmeraldPhysics.Constant: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O
+using ..EmeraldPhysics.Constant: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O, ρ_H₂O
 using ..EmeraldPhysics.Optics: photon
 
 using ..CanopyOptics: canopy_structure!, canopy_structure_aux!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!, sun_geometry_aux!
@@ -25,7 +25,7 @@ using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLa
 using ..Namespace: BulkSPAC, BulkSPACStates, SPACCache, SPACConfiguration
 using ..Namespace: kill_plant!, sync_state!
 using ..Photosynthesis: plant_carbon_budget!, plant_photosynthesis!
-using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
+using ..PhysicalChemistry: latent_heat_melt, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..PlantHydraulics: capacitance_pressure, capacitance_volume, flow_out, set_flow_profile!, xylem_conductance, xylem_pressure
 using ..PlantHydraulics: clear_legacy!, plant_flow_profile!, plant_growth!, plant_pressure_profile!, plant_water_budget!, xylem_recovery!, update_legacy!
 using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25

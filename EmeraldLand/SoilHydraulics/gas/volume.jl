@@ -37,7 +37,7 @@ function volume_balance!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wher
         ndry_i = soil_i.state.ns[1] + soil_i.state.ns[2] + soil_i.state.ns[4] + soil_i.state.ns[5];
         ndry_j = soil_j.state.ns[1] + soil_j.state.ns[2] + soil_j.state.ns[4] + soil_j.state.ns[5];
         nmax_j = (air.state.p_air - saturation_vapor_pressure(soil_j.s_aux.t, soil_j.s_aux.ψ * 1000000)) * soil_j.t_aux.δz *
-                 (soil_j.trait.vc.Θ_SAT - soil_j.state.θ - soil_j.state.θ_ice) / (GAS_R(FT) * soil_j.s_aux.t);
+                 max(0, soil_j.trait.vc.Θ_SAT - soil_j.state.θ - soil_j.state.θ_ice) / (GAS_R(FT) * soil_j.s_aux.t);
 
         # if ndry_j == nmax_j, no air needs to be transferred from/to the upper layer
 
