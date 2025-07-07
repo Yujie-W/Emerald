@@ -6,7 +6,6 @@ using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using Statistics: mean
 
 using GriddingMachine.Blender: regrid
-using GriddingMachine.Collector: query_collection
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 
 using ..EmeraldIO.Text: read_csv
@@ -19,9 +18,11 @@ using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 
 
-CCS = read_csv("$(@__DIR__)/../../data/CO2-1Y.csv");
+CCS_1Y = read_csv("$(@__DIR__)/../../data/CO2-1Y.csv");
+CCS_1M = read_csv("$(@__DIR__)/../../data/CO2-1M.csv");
 
 
+include("co2.jl");
 include("clm.jl");
 include("land_datasets.jl");
 include("query_data.jl");

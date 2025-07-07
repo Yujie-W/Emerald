@@ -1,0 +1,68 @@
+# This file contains the algorithm to allocate carbon to different plant organs
+
+#######################################################################################################################################################################################################
+#
+# Changes to the function
+# General
+#     2024-Aug-30: add function to allocate carbon to different plant organs
+#     2024-Sep-03: remove field of min threshold for carbon pool
+#
+#######################################################################################################################################################################################################
+"""
+
+    plant_growth!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
+
+Allocate carbon to different plant organs, given
+- `spac` `BulkSPAC` structure
+
+"""
+function plant_growth!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    if !config.ALLOW_XYLEM_GROWTH
+        return nothing
+    end;
+
+    # only if the xylem growth is allowed
+    plant = spac.plant;
+
+    # determine how much carbon is available for xylem growth (only if the carbon pool is higher than the threshold)
+    c_mol = plant.pool.c_pool - plant.pool.c_pool_max;
+
+    # if c_mol > 0.1 of the threshold, allocate the exceeding carbon to the xylem
+    if c_mol <= plant.pool.c_pool_max / 10
+        return nothing;
+    end;
+
+    # compute the new trunk area to grow
+    branches = plant.branches;
+    trunk = plant.trunk;
+    roots = plant.roots;
+    denom = 0;
+    for s in branches
+        denom += s.xylem.trait.area / (trunk).xylem.trait.area * s.xylem.trait.l * s.xylem.trait.ρ;
+    end;
+    denom += (trunk).xylem.trait.l * (trunk).xylem.trait.ρ;
+    for r in roots
+        denom += r.xylem.trait.area / (trunk).xylem.trait.area * r.xylem.trait.l * r.xylem.trait.ρ;
+    end;
+    denom *= 1000 / 30;
+    delta_a = c_mol / denom;
+
+    # compute the energy cost for the new growth to each organ
+    for s in branches
+        c_mol_s = delta_a * (s).xylem.trait.area / (trunk).xylem.trait.area * (s).xylem.trait.l * (s).xylem.trait.ρ * 1000 / 30;
+        allocate_carbon!(s, c_mol_s);
+    end;
+    c_mol_t = delta_a * (trunk).xylem.trait.l * (trunk).xylem.trait.ρ * 1000 / 30;
+    allocate_carbon!(trunk, c_mol_t);
+    for r in roots
+        c_mol_r = delta_a * (r).xylem.trait.area / (trunk).xylem.trait.area * (r).xylem.trait.l * (r).xylem.trait.ρ * 1000 / 30;
+        allocate_carbon!(r, c_mol_r);
+    end;
+
+    # update the carbon pool
+    plant.pool.c_pool -= c_mol;
+
+    return nothing
+end;
+
+allocate_carbon!(organ::Union{Root{FT}, Stem{FT}}, c_mol::FT) where {FT} = recovery_or_growth(organ, c_mol) ? xylem_recovery!(organ, c_mol) : xylem_growth!(organ, c_mol);

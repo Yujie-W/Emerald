@@ -24,6 +24,11 @@ Set up the flow profile along the rhizosphere-root-stem-leaf continuum, given
 
 """
 function plant_flow_profile!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    # if the plant is dead, do nothing
+    if spac.plant.pool.c_pool <= 0
+        return nothing
+    end;
+
     leaf_flow_profiles!(config, spac);
     stem_flow_profiles!(spac);
     root_flow_profiles!(config, spac);

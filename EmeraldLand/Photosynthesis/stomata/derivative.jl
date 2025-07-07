@@ -10,15 +10,15 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂R∂T(leaf::Leaf{FT}) where {FT}
+    ∂R∂T(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT}
 
 Return the marginal increase in respiration rate per temperature, given
-- `leaf` `Leaf` type leaf
+- `leaf` `CanopyLayer` or `Leaf` type structure
 
 """
 function ∂R∂T end;
 
-∂R∂T(leaf::Leaf{FT}) where {FT} = ∂R∂T(leaf.photosystem, leaf.energy.s_aux.t);
+∂R∂T(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = ∂R∂T(leaf.photosystem, leaf.energy.s_aux.t);
 
 ∂R∂T(ps::LeafPhotosystem{FT}, t::FT) where {FT} = ∂R∂T(ps.trait.TD_R, ps.trait.r_d25, t);
 

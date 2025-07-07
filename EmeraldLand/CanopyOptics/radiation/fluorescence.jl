@@ -10,8 +10,10 @@
 #     2024-Jun-07: add step to compute e_sifꜛ_layer_sum (contribution to upward SIF from the layer after relection from the lower layers)
 #     2024-Jul-27: use bined PPAR to speed up
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Sep-04: separate leaf and stem optical properties
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
+#     2024-Sep-07: do not use CI in the SIF emission calculation (introduced in 2024-Mar-06)
 #
 #######################################################################################################################################################################################################
 """
@@ -76,7 +78,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
     #
     #
-    # TODO: make sure to be consistent with leaf level calculations, such as Φ_SIF_WL, Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
+    # TODO: make sure to be consistent with leaf level calculations, such as Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
     # TODO: better use mat_b and mat_f for a non-reabsorbing scenario
     #
     #
@@ -121,8 +123,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         end;
 
         # add up the SIF from sunlit and shaded leaves for each layer through accounting for the SIF quantum yield
-        ϕ_sunlit_dif = lidf_weight(ϕ_sunlit, can_str.t_aux.p_incl, sun_geo.auxil._vec_azi);
-        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, ϕ_sunlit, sun_geo.s_aux.fs_abs, sun_geo.auxil._vec_azi, can_str.t_aux.p_incl);
+        ϕ_sunlit_dif = lidf_weight(ϕ_sunlit, can_str.t_aux.p_incl_leaf, sun_geo.auxil._vec_azi);
+        ϕ_sunlit_dir = lidf_weight(sun_geo.auxil._mat_incl_azi, ϕ_sunlit, sun_geo.s_aux.fs_abs, sun_geo.auxil._vec_azi, can_str.t_aux.p_incl_leaf);
         sun_geo.auxil.e_sif_chl[:,irt] .= sun_geo.auxil._e_dif_shaded .* ϕ_shaded .+ sun_geo.auxil._e_dif_sunlit .* ϕ_sunlit_dif .+ sun_geo.auxil._e_dir_sunlit .* ϕ_sunlit_dir;
     end;
 
@@ -131,7 +133,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     # function to weight matrices by inclination angles
     @inline local_lidf_weight(mat_0, mat_1) = (
         sun_geo.auxil._mat_incl_azi .= mat_0 .* mat_1;
-        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.t_aux.p_incl);
+        mul!(sun_geo.auxil._vec_azi, sun_geo.auxil._mat_incl_azi', can_str.t_aux.p_incl_leaf);
 
         return mean(sun_geo.auxil._vec_azi)
     );
@@ -178,7 +180,6 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         #
         #
         # TODO: refactor this part when fully understand what is happening here
-        # TODO: whether should we apply CI?
         #
         #
         # add up the fluorescence at various wavelength bins for sunlit and (up- and down-ward) diffuse SIF
@@ -218,8 +219,10 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
         sen_geo.auxil.sif_shaded[:,irt] .= sun_geo.auxil._e_difꜜ_sif_mean .* sh_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sh_oθ .+
                                            sun_geo.auxil._e_difꜛ_sif_mean .* sh_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_oθ;
 
-        # total emitted SIF for upward and downward direction (the SIF matrices are based on raw radiation, so CI needs to be applied here!)
-        ciilai = can_str.trait.δlai[irt] * can_str.trait.ci;
+        # total emitted SIF for upward and downward direction (ci is already accounted for in p_sunlit, p_sun_sensor, and shortwave radiation, and thus there is no need to use CI here)
+        # add ci_diffuse back to account for the scattering within the canopy layer
+        # TODO: better SIF scattering algorithm
+        ciilai = can_str.trait.δlai[irt] * can_str.t_aux.ci_diffuse;
         sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ .* ciilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜜ .* ciilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
         sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ .* ciilai .* sun_geo.s_aux.p_sunlit[irt] .+ sun_geo.auxil._sif_shadedꜛ .* ciilai .* (1 - sun_geo.s_aux.p_sunlit[irt]);
     end;
@@ -233,7 +236,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         f_d_i = view(sun_geo.auxil.e_sifꜜ_layer    ,:,i  );            # downward emitted SIF from layer i
         f_u_i = view(sun_geo.auxil.e_sifꜛ_layer    ,:,i  );            # upward emitted SIF from layer i
-        s_a_i = view(sun_geo.auxil.e_sifꜛ_layer_sum,:,i  );            # final upward SIF in the layer (some of upward and transmitted downward SIF)
+        s_a_i = view(sun_geo.auxil.e_sifꜛ_layer_sum,:,i  );            # final upward SIF in the layer (sum of upward and transmitted downward SIF)
         s_d_i = view(sun_geo.auxil.e_sifꜜ_emit     ,:,i  );            # downward SIF from the layer
         s_u_i = view(sun_geo.auxil.e_sifꜛ_emit     ,:,i  );            # upward SIF from the layer
         s_u_j = view(sun_geo.auxil.e_sifꜛ_emit     ,:,i+1);            # upward SIF from the lower layer

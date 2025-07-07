@@ -72,7 +72,7 @@ import Emerald.EmeraldLand.SPAC
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar .= 100.0;
         leaf.flux.state.g_H₂O_s .= 0.02;
-        SPAC.substep_aux!(leaf);
+        SPAC.substep_aux!(leaf, false);
         PS.leaf_photosynthesis!(config, spac.cache, leaf, air, 1.0; rd_only = false);
         SM.∂A∂E!(spac.cache, leaf, air);
 
@@ -99,11 +99,9 @@ import Emerald.EmeraldLand.SPAC
         spac = NS.BulkSPAC(config);
         leaf = NS.Leaf(config);
         air = NS.AirLayer{Float64}();
-        leaf.flux.state.g_H₂O_s_shaded = 0.02;
-        leaf.flux.state.g_H₂O_s_sunlit .= 0.02;
-        leaf.flux.auxil.ppar_sunlit .= 0;
-        leaf.flux.auxil.ppar_shaded = 0;
-        SPAC.substep_aux!(leaf);
+        leaf.flux.state.g_H₂O_s = 0.02;
+        leaf.flux.auxil.ppar = 0;
+        SPAC.substep_aux!(leaf, false);
         PS.leaf_photosynthesis!(leaf, air, 1.0; rd_only = false);
         PH.leaf_pressure_profile!(config, leaf, spac.cache, 0.0);
 
@@ -138,7 +136,7 @@ import Emerald.EmeraldLand.SPAC
 
         # ∂gₙ∂t is only valid for WangSM
         leaf.flux.state.g_H₂O_s .= 0.1;
-        SPAC.substep_aux!(leaf);
+        SPAC.substep_aux!(leaf, false);
         @test SM.∂gₙ∂t(leaf, air, 1.0) < 0;
     end;
 

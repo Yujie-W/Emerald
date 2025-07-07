@@ -9,10 +9,22 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_photosynthesis!(leaf::CanopyLayer{FT}, air::AirLayer{FT}; rd_only::Bool = false) where {FT}
+    leaf_photosynthesis!(
+                config::SPACConfiguration{FT},
+                cache::SPACCache{FT},
+                leaf::CanopyLayer{FT},
+                air::AirLayer{FT};
+                rd_only::Bool = false) where {FT}
+    leaf_photosynthesis!(
+                config::SPACConfiguration{FT},
+                leaf::Leaf{FT},
+                air::AirLayer{FT};
+                rd_only::Bool = false) where {FT}
 
 Updates leaf photosynthetic rates for the leaf based on leaf stomtal model, given
-- `leaf` `CanopyLayer` type structure
+- `config` `SPACConfiguration` type structure
+- `cache` `SPACCache` type structure
+- `leaf` `CanopyLayer` or `Leaf` structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `rd_only` Whether to compute respiration rate only
 

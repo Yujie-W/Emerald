@@ -22,13 +22,6 @@ Set the flow profile of the leaf, given
 function leaf_water_budget! end;
 
 leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
-    # make sure the buffer rate does not drain or overflow the capacictance
-    # TODO: add this to time_stepper! function, otherwise the water budget will not be consvered
-    if leaf.capacitor.auxil.flow > 0 && leaf.capacitor.state.v_storage * leaf.xylem.trait.area <= leaf.capacitor.auxil.flow * δt
-        @warn "The capacitance buffer is drained, use only half of the remaining water in the buffer!";
-        leaf.capacitor.auxil.flow = (leaf.capacitor.state.v_storage * leaf.xylem.trait.area / 2) / δt;
-    end;
-
     # update the integrators of the flow
     leaf.flux.auxil.∫∂w∂t_out += flow_out(leaf) * δt;
 

@@ -17,3 +17,8 @@ Synchonize the state variables from one to another
 function sync_state! end;
 
 sync_state!(from::ST, to::ST) where {ST} = sync_struct!(from, to);
+
+
+function kill_plant! end;
+
+kill_plant!(s::ST) where {ST} = nothing;

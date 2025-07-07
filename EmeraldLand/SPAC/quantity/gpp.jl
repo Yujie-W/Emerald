@@ -63,3 +63,36 @@ GPP_LAYER(spac::BulkSPAC{FT}) where {FT} = (
 
     return gpps
 );
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2024-Aug-08: add function to return OCS flux for SPAC
+#
+#######################################################################################################################################################################################################
+"""
+
+    GPP(spac::BulkSPAC{FT}) where {FT}
+
+Return the OCS flux per ground area, given
+- `spac` `BulkSPAC` SPAC
+
+"""
+function OCS end;
+
+OCS(spac::BulkSPAC{FT}) where {FT} = (
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    # compute GPP
+    ocs::FT = 0;
+    for irt in 1:n_layer
+        ilf = n_layer + 1 - irt;
+        ocs += leaves[ilf].flux.auxil.f_ocs_mean * canopy.structure.trait.δlai[irt];
+    end;
+
+    return ocs
+);

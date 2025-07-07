@@ -10,9 +10,12 @@ using LazyArtifacts
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
-using ..EmeraldIO.Jld2: read_jld2
+using ..EmeraldIO.Jld2: read_jld2, save_jld2!
 using ..EmeraldIO.Text: read_csv
+
+using ..EmeraldMath.Data: interpolate_data
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
+
 using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
 
 import ..EmeraldUtility.StructEqual: sync_struct!
@@ -83,7 +86,8 @@ include("stem/stem.jl");
 include("leaf/biophysics.jl");
 include("leaf/energy.jl");
 include("leaf/extraxylem.jl");
-include("leaf/flux.jl");
+include("leaf/leafflux.jl");
+
 include("leaf/layerflux.jl");
 
 include("leaf/photosynthesis.jl");
@@ -93,6 +97,7 @@ include("leaf/leaf.jl");
 
 
 # Canopy
+include("canopy/clumping.jl");
 include("canopy/sensor_geometry.jl");
 include("canopy/structure.jl");
 include("canopy/sun_geometry.jl");
@@ -111,6 +116,7 @@ include("environment/meteorology.jl");
 include("spac/cache.jl");
 include("spac/info.jl");
 include("spac/memory.jl");
+include("spac/pool.jl");
 
 include("spac/plant.jl");
 

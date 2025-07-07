@@ -65,6 +65,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Oct-05: add struct SoilLayerState
+#     2025-Jun-05: add field θ_ice to account for the ice volume in the soil (equivalent to liquid water content in frozen soil)
 #
 #######################################################################################################################################################################################################
 """
@@ -83,7 +84,9 @@ Base.@kwdef mutable struct SoilLayerState{FT}
     ns::Vector{FT} = zeros(FT,5)
     "Soil water content"
     θ::FT = 0.3
-    "Total stored energy per volume `[J m⁻³]`"
+    "Soil ice content (equivalent to liquid water content in frozen soil) `[m³ m⁻³]`"
+    θ_ice::FT = 0
+    "Total stored energy per volume relative to triple temperature `[J m⁻³]`"
     Σe::FT = 0
 end;
 

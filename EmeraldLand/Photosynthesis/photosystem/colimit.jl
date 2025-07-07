@@ -13,15 +13,12 @@
 #######################################################################################################################################################################################################
 """
 
-    colimited_rate(a_1::FT, a_2::FT, colim::MinimumColimit{FT}) where {FT}
-    colimited_rate(a_1::FT, a_2::FT, colim::QuadraticColimit{FT}) where {FT}
-    colimited_rate(a_1::FT, a_2::FT, colim::SerialColimit{FT}) where {FT}
-    colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT}
+    colimited_rate(a_1::FT, a_2::FT, colim::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}}) where {FT}
 
 Return the minimum of two rates, given
 - `a_1` Rate 1
 - `a_2` Rate 2
-- `colim` `MinimumColimit`, `QuadraticColimit`, or `SerialColimit` type struct
+- `colim` `MinimumColimit`, `QuadraticColimit`, `SerialColimit`, or `SquareColimit` type struct
 
 """
 function colimited_rate end;
@@ -44,7 +41,7 @@ colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT} = a_1 * a_
 #######################################################################################################################################################################################################
 """
 
-    colimited_rate!(a_1::Union{FT, Vector{FT}}, a_2::Vector{FT}, a_i::Vector{FT}, colim) where {FT}
+    colimited_rate!(a_1::Union{FT, Vector{FT}}, a_2::Vector{FT}, a_i::Vector{FT}, colim::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}}) where {FT}
 
 Colimit the rates, given
 - `a_1` Rate 1
@@ -94,9 +91,10 @@ colimited_rate!(
 """
 
     colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT}
+    colimit_photosynthesis!(psm::CanopyLayerPhotosystem{FT}; β::FT = FT(1)) where {FT}
 
 Colimit the photosynthesis by rubisco-, light-, and product-limited photosynthetic rates, given
-- `psm` `LeafPhotosystem` type photosynthesis model
+- `psm` `CanopyLayerPhotosystem` or `LeafPhotosystem` type photosynthesis model
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd (default is 1)
 
 """

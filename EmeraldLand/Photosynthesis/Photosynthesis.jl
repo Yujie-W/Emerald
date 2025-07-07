@@ -5,12 +5,12 @@ using Statistics: mean
 
 using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
-using ..EmeraldMath.Stats: nanmin, rmse
+using ..EmeraldMath.Stats: nanmax, nanmin, rmse
 using ..EmeraldPhysics.Constant: F_O₂, GAS_R
 
 using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterVcmax
 using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, MedlynSM
-using ..Namespace: Arrhenius, ArrheniusPeak, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
+using ..Namespace: Arrhenius, ArrheniusPeak, ArrheniusPeak2, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
 using ..Namespace: MinimumColimit, QuadraticColimit, SerialColimit, SquareColimit
 using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
 using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
@@ -47,6 +47,10 @@ include("plant/leaf.jl");
 include("plant/plant.jl");
 
 # function to fit the traits
+include("fitting/aci-an.jl");
+include("fitting/aci-curve.jl");
+include("fitting/aci-rmse.jl");
+include("fitting/aci-fit.jl");
 include("fitting/aci.jl");
 
 

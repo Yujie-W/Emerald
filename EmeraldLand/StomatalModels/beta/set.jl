@@ -12,8 +12,13 @@
 #     2023-Mar-27: weigh the beta among root layers only if flow rate is positive (if all flows are negative, beta = 1)
 #     2023-Aug-27: add nan check for beta calculation of empirical models
 #     2024-Feb-29: add LAI = 0 controller
+#     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
+#     2025-Jun-05: when computing beta from soil water content or potential, use eps when there is ice
+#     2025-Jun-07: set beta to eps(FT) when there is ice in the root zone
 # Bug fixes
 #     2022-Oct-20: fix the issue related to β_factor!(roots, soil, leaf, β, β.PARAM_X) as I forgot to write β_factor! before `()`
+# To-dos
+#     TODO: add ice control for the cases when plant hydraulics takes effect
 #
 #######################################################################################################################################################################################################
 """
@@ -49,7 +54,7 @@ function β_factor! end;
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::AbstractStomataModel{FT}) where {FT} = nothing;
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = (
-    if leaf.xylem.trait.area <= 0
+    if leaf.xylem.state.asap <= 0
         return nothing
     end;
 
@@ -74,13 +79,19 @@ function β_factor! end;
     norm = 0;
     sumf = 0;
     denom = 0;
+    betas = false;
     for i in eachindex(roots)
         beta = β_factor(β.FUNC, soils[i].s_aux.k);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].xylem.trait.area * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
+        kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
+
+        # if ice > 0.05, then we need to use eps(FT) for the beta
+        if soils[i].state.θ_ice > 0.05
+            betas = true;
+        end;
     end;
 
     @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
@@ -88,8 +99,13 @@ function β_factor! end;
     if denom > 0
         leaf.flux.auxil.β = norm / denom;
     elseif sumf < 0
-        leaf.flux.auxil.β = 1
+        leaf.flux.auxil.β = 1;
     else
+        leaf.flux.auxil.β = eps(FT);
+    end;
+
+    # if ice exists, then we need to use eps(FT) for the beta
+    if betas
         leaf.flux.auxil.β = eps(FT);
     end;
 
@@ -107,13 +123,19 @@ function β_factor! end;
     norm = 0;
     sumf = 0;
     denom = 0;
+    betas = false;
     for i in eachindex(roots)
         beta = β_factor(β.FUNC, soils[i].s_aux.ψ);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].xylem.trait.area * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
+        kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
+
+        # if ice > 0.05, then we need to use eps(FT) for the beta
+        if soils[i].state.θ_ice > 0.05
+            betas = true;
+        end;
     end;
 
     @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
@@ -126,6 +148,11 @@ function β_factor! end;
         leaf.flux.auxil.β = eps(FT);
     end;
 
+    # if ice exists, then we need to use eps(FT) for the beta
+    if betas
+        leaf.flux.auxil.β = eps(FT);
+    end;
+
     return nothing
 );
 
@@ -134,13 +161,19 @@ function β_factor! end;
     norm = 0;
     sumf = 0;
     denom = 0;
+    betas = false;
     for i in eachindex(roots)
         beta = β_factor(β.FUNC, soils[i].state.θ);
         f_in = flow_in(roots[i]);
-        kmax = f_in > 0 ? roots[i].xylem.trait.area * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
+        kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
         sumf += f_in;
         denom += kmax;
+
+        # if ice > 0.05, then we need to use eps(FT) for the beta
+        if soils[i].state.θ_ice > 0.05
+            betas = true;
+        end;
     end;
 
     @assert !isnan(norm) && !isnan(denom) && !isnan(sumf) "NaN detected in beta calculation!";
@@ -150,6 +183,11 @@ function β_factor! end;
     elseif sumf < 0
         leaf.flux.auxil.β = 1
     else
+        leaf.flux.auxil.β = eps(FT);
+    end;
+
+    # if ice exists, then we need to use eps(FT) for the beta
+    if betas
         leaf.flux.auxil.β = eps(FT);
     end;
 

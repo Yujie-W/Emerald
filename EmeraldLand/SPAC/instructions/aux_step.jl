@@ -8,6 +8,7 @@
 #     2024-Jan-24: update leaf boundary layer conductance based on wind speed and leaf width
 #     2024-Jul-24: add leaf shedded flag
 #     2024-Jul-30: compute OCS boundary layer conductance as well
+#     2024-Nov-05: remove leaf shedded flag
 #
 #######################################################################################################################################################################################################
 """
@@ -21,10 +22,6 @@ Update the auxiliary variables at big time step, given
 function step_aux! end;
 
 step_aux!(spac::BulkSPAC{FT}) where {FT} = (
-    if spac.plant._leaf_shedded
-        return nothing
-    end;
-
     airs = spac.airs;
     leaves = spac.plant.leaves;
     lindex = spac.plant.leaves_index;
@@ -46,6 +43,7 @@ step_aux!(spac::BulkSPAC{FT}) where {FT} = (
 );
 
 step_aux!(leaf::CanopyLayer{FT}) where {FT} = (
+    leaf.flux.auxil.∫∂c∂t_in = 0;
     leaf.flux.auxil.∫∂w∂t_out = 0;
 
     return nothing

@@ -12,6 +12,7 @@
 #     2023-Oct-17: rename the function to substep_aux! to be consistent with the other function names such as t_aux!, s_aux!, dull_aux!, and step_aux!
 #     2024-Jul-24: add leaf shedded flag
 #     2024-Jul-30: compute OCS conductance along with CO₂ conductance
+#     2024-Nov-05: use the leaf shedded flag only when updating the flow in/out of the leaf capacitor
 #
 #######################################################################################################################################################################################################
 """
@@ -56,10 +57,8 @@ substep_aux!(spac::BulkSPAC{FT}) where {FT} = (
     end;
 
     # update the leaf auxiliary variables
-    if !spac.plant._leaf_shedded
-        for leaf in leaves
-            substep_aux!(leaf);
-        end;
+    for leaf in leaves
+        substep_aux!(leaf, spac.plant._leaf_shedded);
     end;
 
     return nothing
@@ -132,19 +131,21 @@ substep_aux!(stem::Stem{FT}) where {FT} = (
     return nothing
 );
 
-substep_aux!(leaf::CanopyLayer{FT}) where {FT} = (
+substep_aux!(leaf::CanopyLayer{FT}, shedded::Bool) where {FT} = (
     # update the leaf buffer pressure and flow
-    x_aux = leaf.xylem.auxil;
-    c_aux = leaf.capacitor.auxil;
-    if x_aux isa XylemHydraulicsAuxilNSS
-        x_tra = leaf.xylem.trait;
-        c_tra = leaf.capacitor.trait;
-        c_sta = leaf.capacitor.state;
-        f_vis = relative_viscosity(leaf.energy.s_aux.t);
-        c_aux.p = capacitance_pressure(c_tra.pv, c_sta.v_storage / c_tra.v_max, leaf.energy.s_aux.t);
-        c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_tra.pv.k_refill / f_vis * c_sta.v_storage * x_tra.area;
-    else
-        c_aux.flow = 0;
+    if !shedded
+        x_aux = leaf.xylem.auxil;
+        c_aux = leaf.capacitor.auxil;
+        if x_aux isa XylemHydraulicsAuxilNSS
+            x_tra = leaf.xylem.trait;
+            c_tra = leaf.capacitor.trait;
+            c_sta = leaf.capacitor.state;
+            f_vis = relative_viscosity(leaf.energy.s_aux.t);
+            c_aux.p = capacitance_pressure(c_tra.pv, c_sta.v_storage / c_tra.v_max, leaf.energy.s_aux.t);
+            c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_tra.pv.k_refill / f_vis * c_sta.v_storage * x_tra.area;
+        else
+            c_aux.flow = 0;
+        end;
     end;
 
     # update the stomatal conductance

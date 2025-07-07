@@ -22,6 +22,7 @@ include("../EmeraldUtility/EmeraldUtility.jl");
 include("../EmeraldMath/EmeraldMath.jl");
 
 include("../EmeraldLand/EmeraldLand.jl");
+include("../EmeraldOcean/EmeraldOcean.jl");
 
 include("../EmeraldData/EmeraldData.jl");
 

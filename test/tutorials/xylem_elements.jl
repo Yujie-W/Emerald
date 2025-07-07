@@ -11,7 +11,7 @@ using Test
         stem = EmeraldLand.Namespace.Stem(config);
         stem.xylem.auxil.flow = 2.2;
         stem.xylem.auxil.e_crit = EmeraldLand.PlantHydraulics.critical_flow(config, stem.xylem, spac.cache, stem.energy.s_aux.t);
-        EmeraldLand.PlantHydraulics.stem_pressure_profile!(stem, FT(-2));
+        EmeraldLand.PlantHydraulics.stem_pressure_profile!(config, stem, FT(-2));
         @test !isnan(stem.xylem.auxil.pressure[end]);
     end;
 end;

@@ -172,37 +172,37 @@ Base.@kwdef mutable struct LandDatasets{FT<:AbstractFloat}
 
     # soil properties
     "Soil color class"
-    s_cc::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_cc))[1], LABELS.nx);
+    s_cc::Array{FT} = regrid(read_LUT(LABELS.tag_s_cc; include_std = false), LABELS.nx);
     "Soil van Genuchten α"
-    s_α::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_α))[1], LABELS.nx)
+    s_α::Array{FT} = regrid(read_LUT(LABELS.tag_s_α; include_std = false), LABELS.nx)
     "Soil van Genuchten n"
-    s_n::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_n))[1], LABELS.nx)
+    s_n::Array{FT} = regrid(read_LUT(LABELS.tag_s_n; include_std = false), LABELS.nx)
     "Soil van Genuchten Θr"
-    s_Θr::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θr))[1], LABELS.nx)
+    s_Θr::Array{FT} = regrid(read_LUT(LABELS.tag_s_Θr; include_std = false), LABELS.nx)     # TODO: check this
     "Soil van Genuchten Θs"
-    s_Θs::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_s_Θs))[1], LABELS.nx)
+    s_Θs::Array{FT} = regrid(read_LUT(LABELS.tag_s_Θs; include_std = false), LABELS.nx)     # TODO: check this
 
     # plant properties
     "Plant canopy height"
-    p_ch::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_ch))[1], LABELS.nx)
+    p_ch::Array{FT} = regrid(read_LUT(LABELS.tag_p_ch; include_std = false), LABELS.nx)
     "Plant chlorophyll content"
-    p_chl::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_chl))[1], LABELS.nx)
+    p_chl::Array{FT} = regrid(read_LUT(LABELS.tag_p_chl; include_std = false), LABELS.nx)
     "Stand clumping index"
-    p_ci::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_ci))[1], LABELS.nx)
+    p_ci::Array{FT} = regrid(read_LUT(LABELS.tag_p_ci; include_std = false), LABELS.nx)
     "Stand leaf area index"
-    p_lai::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_lai))[1], LABELS.nx)
+    p_lai::Array{FT} = regrid(read_LUT(LABELS.tag_p_lai; include_std = false), LABELS.nx)
     "Plant leaf specific area"
-    p_sla::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_sla))[1], LABELS.nx)
+    p_sla::Array{FT} = regrid(read_LUT(LABELS.tag_p_sla; include_std = false), LABELS.nx)
     "Plant maximum carboxylation rate"
-    p_vcm::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_p_vcm))[1], LABELS.nx)
+    p_vcm::Array{FT} = regrid(read_LUT(LABELS.tag_p_vcm; include_std = false), LABELS.nx)
 
     # stand properties
     "Stand elevation"
-    t_ele::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_ele))[1], LABELS.nx)
+    t_ele::Array{FT} = regrid(read_LUT(LABELS.tag_t_ele; include_std = false), LABELS.nx)
     "Stand land mask"
-    t_lm::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_lm))[1], LABELS.nx)
+    t_lm::Array{FT} = regrid(read_LUT(LABELS.tag_t_lm; include_std = false), LABELS.nx)
     "Stand PFT percentages `[%]`"
-    t_pft::Array{FT} = regrid(read_LUT(query_collection(LABELS.tag_t_pft))[1], LABELS.nx)
+    t_pft::Array{FT} = regrid(read_LUT(LABELS.tag_t_pft; include_std = false), LABELS.nx)
 
     # masks
     "Mask for bare soil"
@@ -226,7 +226,7 @@ LandDatasets{FT}(gm_tag::String, year::Int) where {FT} = (
     if gm_tag in ["gm1", "gm2", "gm4"]
         dts = LandDatasets{FT}(LABELS = dtl);
     elseif gm_tag == "gm3"
-        dts = LandDatasets{FT}(LABELS = dtl, p_vcm = regrid(read_LUT(query_collection("VCMAX_2X_1Y_V2"))[1], 1) .* 0.6);
+        dts = LandDatasets{FT}(LABELS = dtl, p_vcm = regrid(read_LUT("VCMAX_2X_1Y_V2"; include_std = false), 1) .* 0.6);
     else
         error("Tag $(gm_tag) is not supported!");
     end;

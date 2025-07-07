@@ -9,18 +9,19 @@
 #     2024-Feb-23: use 0 for the plant-related fields for non-vegetated land
 #     2024-Feb-23: set SAI to be 1/10 of the maximum LAI
 #     2024-Feb-29: veritfy the GriddingMachine data dictionary before returning
+#     2024-Aug-08: fix two typos in the land mask determination and the SOIL_α value (was SOIL_N)
+#     2025-Jun-04: use monthly mean CO₂ concentration time series as default
 #
 #######################################################################################################################################################################################################
 """
 
-    grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) where {FT}
-    grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; ccs::DataFrame = CCS)
+    grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT}
+    grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64)
 
 Prepare a dictionary of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct
 - `ilat` latitude index
 - `ilon` longitude index
-- `ccs` CO2 concentration data (provided by default)
 - `dtl` `LandDatasetLabels` type data struct
 - `year` year of the datasets
 - `nx` grid resolution (1/nx °)
@@ -30,9 +31,9 @@ Prepare a dictionary of GriddingMachine data to feed SPAC, given
 """
 function grid_dict end;
 
-grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) where {FT} = (
+grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT} = (
     reso   = 1 / dts.LABELS.nx;
-    co2    = ccs.MEAN[findfirst(ccs.YEAR .== dts.LABELS.year)];
+    co2    = CO₂_ppm(dts.LABELS.year, true);
     lmsk   = dts.t_lm[ilon,ilat,1];
     scolor = min(20, max(1, Int(floor(dts.s_cc[ilon,ilat,1]))));
     s_α    = dts.s_α[ilon,ilat,:];
@@ -100,11 +101,23 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
     # compute g1 for Medlyn model
     ind_c3 = [2:14;16;17];
     ind_c4 = 15;
+    ind_plant = [2:14;16;17];
 
     g1_c3_medlyn = CLM5_PFTG[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     if isnan(g1_c3_medlyn) g1_c3_medlyn = nanmean(CLM5_PFTG[ind_c3]) end;
     g1_c4_medlyn = CLM5_PFTG[ind_c4];
 
+    # broadband leaf optical properties
+    ρ_par = CLM5_ρPAR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    τ_par = CLM5_τPAR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    ρ_nir = CLM5_ρNIR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    τ_nir = CLM5_τNIR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    if isnan(ρ_par) ρ_par = nanmean(CLM5_ρPAR[ind_plant]) end;
+    if isnan(τ_par) τ_par = nanmean(CLM5_τPAR[ind_plant]) end;
+    if isnan(ρ_nir) ρ_nir = nanmean(CLM5_ρNIR[ind_plant]) end;
+    if isnan(τ_nir) τ_nir = nanmean(CLM5_τNIR[ind_plant]) end;
+
+    # compute the leaf optical properties for C3 and C4 separately
     ρ_par_c3 = CLM5_ρPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     τ_par_c3 = CLM5_τPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     ρ_nir_c3 = CLM5_ρNIR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
@@ -113,6 +126,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
     if isnan(τ_par_c3) τ_par_c3 = nanmean(CLM5_τPAR[ind_c3]) end;
     if isnan(ρ_nir_c3) ρ_nir_c3 = nanmean(CLM5_ρNIR[ind_c3]) end;
     if isnan(τ_nir_c3) τ_nir_c3 = nanmean(CLM5_τNIR[ind_c3]) end;
+
     ρ_par_c4 = CLM5_ρPAR[ind_c4];
     τ_par_c4 = CLM5_τPAR[ind_c4];
     ρ_nir_c4 = CLM5_ρNIR[ind_c4];
@@ -145,12 +159,16 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
                 "SOIL_ΘS"       => s_Θs,
                 "VCMAX25"       => vcmax,
                 "YEAR"          => dts.LABELS.year,
+                "ρ_NIR"         => ρ_nir,
                 "ρ_NIR_C3"      => ρ_nir_c3,
                 "ρ_NIR_C4"      => ρ_nir_c4,
+                "ρ_PAR"         => ρ_par,
                 "ρ_PAR_C3"      => ρ_par_c3,
                 "ρ_PAR_C4"      => ρ_par_c4,
+                "τ_NIR"         => τ_nir,
                 "τ_NIR_C3"      => τ_nir_c3,
                 "τ_NIR_C4"      => τ_nir_c4,
+                "τ_PAR"         => τ_par,
                 "τ_PAR_C3"      => τ_par_c3,
                 "τ_PAR_C4"      => τ_par_c4);
     verify_grid_dict!(gm_dict);
@@ -158,35 +176,35 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; ccs::DataFrame = CCS) whe
     return gm_dict
 );
 
-grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64, ccs::DataFrame = CCS) = (
-    lmsk = read_LUT(query_collection(dtl.tag_t_ele), lat, lon)[1];
+grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64) = (
+    lmsk = read_LUT(dtl.tag_t_lm, lat, lon; include_std = false);
     if !(lmsk > 0)
         return error("The target grid does not contain land!");
     end;
 
-    lais = read_LUT(query_collection(dtl.tag_p_lai), lat, lon)[1];
+    lais = read_LUT(dtl.tag_p_lai, lat, lon; include_std = false);
     if !(nanmax(lais) > 0)
         return error("The target grid is not vegetated!");
     end;
 
-    co2 = ccs.MEAN[findfirst(ccs.YEAR .== dtl.year)];
-    scolor = min(20, max(1, Int(floor(read_LUT(query_collection(dtl.tag_s_cc), lat, lon)[1]))));
-    s_α = read_LUT(query_collection(dtl.tag_s_n), lat, lon)[1];
-    s_n = read_LUT(query_collection(dtl.tag_s_n), lat, lon)[1];
-    s_Θr = read_LUT(query_collection(dtl.tag_s_Θr), lat, lon)[1];
-    s_Θs = read_LUT(query_collection(dtl.tag_s_Θs), lat, lon)[1];
+    co2 = CO₂_ppm(dtl.year, true);
+    scolor = min(20, max(1, Int(floor(read_LUT(dtl.tag_s_cc, lat, lon; include_std = false)))));
+    s_α = read_LUT(dtl.tag_s_α, lat, lon; include_std = false);
+    s_n = read_LUT(dtl.tag_s_n, lat, lon; include_std = false);
+    s_Θr = read_LUT(dtl.tag_s_Θr, lat, lon; include_std = false);
+    s_Θs = read_LUT(dtl.tag_s_Θs, lat, lon; include_std = false);
 
     # else return the grid dictionary if the grid is masked as plant
-    chls = read_LUT(query_collection(dtl.tag_p_chl), lat, lon)[1];
-    cis = read_LUT(query_collection(dtl.tag_p_ci), lat, lon)[1];
-    lma = 1 / read_LUT(query_collection(dtl.tag_p_sla), lat, lon)[1] / 10;
-    pfts = read_LUT(query_collection(dtl.tag_t_pft), lat, lon)[1];
-    zc = read_LUT(query_collection(dtl.tag_p_ch), lat, lon)[1];
+    chls = read_LUT(dtl.tag_p_chl, lat, lon; include_std = false);
+    cis = read_LUT(dtl.tag_p_ci, lat, lon; include_std = false);
+    lma = 1 / read_LUT(dtl.tag_p_sla, lat, lon; include_std = false) / 10;
+    pfts = read_LUT(dtl.tag_t_pft, lat, lon; include_std = false);
+    zc = read_LUT(dtl.tag_p_ch, lat, lon; include_std = false);
 
     if dtl.gm_tag == "gm3"
-        vcmax = read_LUT(query_collection("VCMAX_2X_1Y_V2"), lat, lon)[1] .* 0.6;
+        vcmax = read_LUT("VCMAX_2X_1Y_V2", lat, lon; include_std = false) .* 0.6;
     else
-        vcmax = read_LUT(query_collection(dtl.tag_p_vcm), lat, lon)[1];
+        vcmax = read_LUT(dtl.tag_p_vcm, lat, lon; include_std = false);
     end;
 
     # gap fill the data for seasonal trends
@@ -198,10 +216,21 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
     # compute g1 for Medlyn model
     ind_c3 = [2:14;16;17];
     ind_c4 = 15;
+    ind_plant = 2:17;
 
     g1_c3_medlyn = CLM5_PFTG[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     if isnan(g1_c3_medlyn) g1_c3_medlyn = nanmean(CLM5_PFTG[ind_c3]) end;
     g1_c4_medlyn = CLM5_PFTG[ind_c4];
+
+    # broadband leaf optical properties
+    ρ_par = CLM5_ρPAR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    τ_par = CLM5_τPAR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    ρ_nir = CLM5_ρNIR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    τ_nir = CLM5_τNIR[ind_plant]' * pfts[ind_plant] / sum(pfts[ind_plant]);
+    if isnan(ρ_par) ρ_par = nanmean(CLM5_ρPAR[ind_plant]) end;
+    if isnan(τ_par) τ_par = nanmean(CLM5_τPAR[ind_plant]) end;
+    if isnan(ρ_nir) ρ_nir = nanmean(CLM5_ρNIR[ind_plant]) end;
+    if isnan(τ_nir) τ_nir = nanmean(CLM5_τNIR[ind_plant]) end;
 
     ρ_par_c3 = CLM5_ρPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
     τ_par_c3 = CLM5_τPAR[ind_c3]' * pfts[ind_c3] / sum(pfts[ind_c3]);
@@ -211,6 +240,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
     if isnan(τ_par_c3) τ_par_c3 = nanmean(CLM5_τPAR[ind_c3]) end;
     if isnan(ρ_nir_c3) ρ_nir_c3 = nanmean(CLM5_ρNIR[ind_c3]) end;
     if isnan(τ_nir_c3) τ_nir_c3 = nanmean(CLM5_τNIR[ind_c3]) end;
+
     ρ_par_c4 = CLM5_ρPAR[ind_c4];
     τ_par_c4 = CLM5_τPAR[ind_c4];
     ρ_nir_c4 = CLM5_ρNIR[ind_c4];
@@ -221,7 +251,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
                 "CHLOROPHYLL"   => chls,
                 "CLUMPING"      => cis,
                 "CO2"           => co2,
-                "ELEVATION"     => read_LUT(query_collection(dtl.tag_t_ele), lat, lon)[1],
+                "ELEVATION"     => read_LUT(dtl.tag_t_ele, lat, lon; include_std = false),
                 "FT"            => FT,
                 "G1_MEDLYN_C3"  => g1_c3_medlyn,
                 "G1_MEDLYN_C4"  => g1_c4_medlyn,
@@ -243,12 +273,16 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
                 "SOIL_ΘS"       => s_Θs,
                 "VCMAX25"       => vcmax,
                 "YEAR"          => dtl.year,
+                "ρ_NIR"         => ρ_nir,
                 "ρ_NIR_C3"      => ρ_nir_c3,
                 "ρ_NIR_C4"      => ρ_nir_c4,
+                "ρ_PAR"         => ρ_par,
                 "ρ_PAR_C3"      => ρ_par_c3,
                 "ρ_PAR_C4"      => ρ_par_c4,
+                "τ_NIR"         => τ_nir,
                 "τ_NIR_C3"      => τ_nir_c3,
                 "τ_NIR_C4"      => τ_nir_c4,
+                "τ_PAR"         => τ_par,
                 "τ_PAR_C3"      => τ_par_c3,
                 "τ_PAR_C4"      => τ_par_c4);
     verify_grid_dict!(gm_dict);

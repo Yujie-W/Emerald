@@ -7,6 +7,7 @@
 #     2022-Jul-11: add method for WangSM model on Leaf for nocturnal transpiration
 #     2023-Jun-16: compute saturated vapor pressure based on water water potential
 #     2024-Jul-24: use remove unnecessary TD for A_net calculation
+#     2024-Oct-30: add leaf connection check
 #
 #######################################################################################################################################################################################################
 """
@@ -23,13 +24,19 @@ function ∂Θₙ∂E end;
 ∂Θₙ∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(leaf.flux.trait.stomatal_model, leaf, air);
 
 ∂Θₙ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+    # if leaf xylem is not connected, do nothing
+    if !leaf.xylem.state.connected
+        return 0
+    end;
+
+    # compute the ∂Θₙ∂E when leaf xylem is connected
     (; F_FITNESS) = sm;
 
     p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.s_aux.ps[3]);
 
     # compute the A and E at the current setting
-    gs = leaf.flux.state.g_H₂O_s_shaded;
+    gs = leaf.flux.state.g_H₂O_s;
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gc = 1 / (FT(1.6) / gs + 1 / leaf.flux.auxil.g_CO₂_b);
     e  = gh * d / air.state.p_air;

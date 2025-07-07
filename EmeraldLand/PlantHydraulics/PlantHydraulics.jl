@@ -53,11 +53,15 @@ include("plant/pressure_profile.jl");
 include("plant/water_budget.jl");
 
 
-
-
 # include functions related to drought effects
 include("drought/disconnection.jl");
 include("drought/legacy.jl");
+
+
+# include functions related to growth and recovery
+include("growth/allocation.jl");
+include("growth/newxylem.jl");
+include("growth/recovery.jl");
 
 
 end; # module

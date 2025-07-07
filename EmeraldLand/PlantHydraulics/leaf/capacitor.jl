@@ -11,10 +11,10 @@
 #######################################################################################################################################################################################################
 """
 
-    extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT}
+    extraxylary_pressure_profile!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT}
 
 Update the extraxylary pressure profile, given
-- `leaf` `Leaf` type struct
+- `leaf` `CanopyLayer` or `Leaf` type structure
 
 """
 function extraxylary_pressure_profile! end;

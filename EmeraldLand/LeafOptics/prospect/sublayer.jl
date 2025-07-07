@@ -85,6 +85,7 @@ end;
 # Changes to this function
 # General
 #     2023-Sep-15: add function to compute the sublayer transmission
+#     2024-Aug-13: use the function to compute tau for the entire layer and then compute the sublayer tau in another function when needed
 #
 #######################################################################################################################################################################################################
 """
@@ -101,10 +102,9 @@ end;
                k_lma::FT,
                k_pro::FT,
                lwc::FT,
-               x::FT,
-               N::Int) where {FT}
+               x::FT) where {FT}
 
-Return the fraction of chlorophyll a and b absorption in the sublayer, given
+Return the transmittance in the sublayer, given
 - `bios` leaf biophysical state variables
 - `k_ant` anthocyanin absorption coefficient
 - `k_brown` brown pigments absorption coefficient
@@ -117,7 +117,6 @@ Return the fraction of chlorophyll a and b absorption in the sublayer, given
 - `k_pro` protein absorption coefficient
 - `lwc` leaf water content
 - `x` proportion of the layer of the whole leaf
-- `N` number of sublayers of each layer
 
 """
 function sublayer_τ(
@@ -133,8 +132,7 @@ function sublayer_τ(
             k_lma::FT,
             k_pro::FT,
             lwc::FT,
-            x::FT,
-            N::Int) where {FT}
+            x::FT) where {FT}
     Σkx = k_ant * biot.ant +
           k_brown * biot.brown +
           k_cab * biot.cab +
@@ -145,9 +143,8 @@ function sublayer_τ(
           k_lma * (biot.lma - biot.cbc - biot.pro) +
           k_pro * biot.pro;
     Σkx *= x;
-    τ_layer = (1 - Σkx) * exp(-Σkx) + Σkx^2 * expint(Σkx + eps(FT));
 
-    return τ_layer ^ (FT(1) / N)
+    return (1 - Σkx) * exp(-Σkx) + Σkx^2 * expint(Σkx + eps(FT));
 end;
 
 
@@ -186,35 +183,34 @@ end;
 #     2023-Sep-16: fix a typo related to f_car (was using 1 - f_car)
 #     2023-Sep-18: save τ_all_i after computing τ_sub_i
 #     2023-Sep-19: save f_ppar at the same time
+#     2024-Aug-13: save layer excitation coefficient exp(-kx) = t_all
+#     2024-Aug-16: abstractize the function with SIF_METHOD
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT}
-    leaf_sublayer_f_τ!(spectra::ReferenceSpectra{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT}
+    leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT) where {FT}
 
 Update the sublayer absorption and transmittance within `bio`, given
 - `config` SPAC configuration
 - `bio` LeafBio struct
 - `lwc` leaf water content
-- `N` number of sublayers of each layer
-- `spectra` ReferenceSpectra struct
 
 """
-function leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, N::Int) where {FT}
+function leaf_sublayer_f_τ!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT) where {FT}
     (; K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, Λ) = config.SPECTRA;
 
     x = 1 / bio.trait.meso_n;
-    bio.auxil.f_cab  .= sublayer_f_cab.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
-    bio.auxil.f_car  .= sublayer_f_car.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
-    bio.auxil.f_ppar .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car_ppar;
-    bio.auxil.f_psii .= psii_fraction.(Λ);
-    bio.auxil.f_sife .= bio.auxil.f_cab .+ bio.auxil.f_car .* bio.state.ϕ_car;
+    @. bio.auxil.f_cab  = sublayer_f_cab((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    @. bio.auxil.f_car  = sublayer_f_car((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc);
+    @. bio.auxil.f_ppar = bio.auxil.f_cab + bio.auxil.f_car * bio.state.ϕ_car_ppar;
+    @. bio.auxil.f_psii = psii_fraction(Λ);
+    @. bio.auxil.f_sife = bio.auxil.f_cab + bio.auxil.f_car * bio.state.ϕ_car;
 
-    bio.auxil.τ_sub_1 .= sublayer_τ.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x, N);
-    bio.auxil.τ_sub_2 .= sublayer_τ.((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, 1-x, N);
-    bio.auxil.τ_all_1 .= bio.auxil.τ_sub_1 .^ N;
-    bio.auxil.τ_all_2 .= bio.auxil.τ_sub_2 .^ N;
+    @. bio.auxil.τ_all_1 = sublayer_τ((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, x);
+    @. bio.auxil.τ_all_2 = sublayer_τ((bio.trait,), (bio.state,), K_ANT, K_BROWN, K_CAB, K_CAR_V, K_CAR_Z, K_CBC, K_H₂O, K_LMA, K_PRO, lwc, 1-x);
+    @. bio.auxil.k_all_1 = -log(bio.auxil.τ_all_1);
+    @. bio.auxil.k_all_2 = -log(bio.auxil.τ_all_2);
 
     return nothing
 end;

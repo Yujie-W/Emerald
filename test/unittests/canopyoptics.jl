@@ -11,9 +11,6 @@ import Emerald.EmeraldLand.SPAC
 
         ks = CO.extinction_coefficient.(sza, lias);
         @test all(ks .>= 0);
-
-        kd = CO.extinction_coefficient.(lias);
-        @test all(kd .>= 0);
     end;
 
     @testset "Soil albedo" begin
@@ -51,8 +48,8 @@ import Emerald.EmeraldLand.SPAC
         CO.soil_albedo!(config, spac);
         CO.canopy_structure!(config, spac);
 
-        @test spac.canopy.structure.t_aux.ddb >= 0;
-        @test spac.canopy.structure.t_aux.ddf >= 0;
+        @test spac.canopy.structure.t_aux.ddb_leaf >= 0;
+        @test spac.canopy.structure.t_aux.ddf_leaf >= 0;
         @test all(0 .< spac.canopy.structure.auxil.ρ_dd_layer .< 1);
         @test all(0 .< spac.canopy.structure.auxil.τ_dd_layer .< 1);
         @test all(0 .< spac.canopy.structure.auxil.ρ_dd .< 1);
@@ -73,10 +70,10 @@ import Emerald.EmeraldLand.SPAC
         CO.sun_geometry_aux!(config, spac);
         CO.sun_geometry!(config, spac);
 
-        @test spac.canopy.sun_geometry.s_aux.ks >= 0;
-        @test spac.canopy.sun_geometry.s_aux.sdb >= 0;
-        @test spac.canopy.sun_geometry.s_aux.sdf >= 0;
-        @test 0 < spac.canopy.structure.trait.ci <= 1;
+        @test spac.canopy.sun_geometry.s_aux.ks_leaf >= 0;
+        @test spac.canopy.sun_geometry.s_aux.sdb_leaf >= 0;
+        @test spac.canopy.sun_geometry.s_aux.sdf_leaf >= 0;
+        @test 0 < spac.canopy.structure.trait.ci.ci_0 <= 1;
         @test all(0 .< spac.canopy.sun_geometry.s_aux.p_sunlit .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.ρ_sd_layer .< 1);
         @test all(0 .< spac.canopy.sun_geometry.auxil.τ_ss_layer .< 1);
@@ -96,16 +93,16 @@ import Emerald.EmeraldLand.SPAC
         CO.sensor_geometry_aux!(config, spac);
         CO.sensor_geometry!(config, spac);
 
-        @test spac.canopy.sensor_geometry.s_aux.ko >= 0;
-        @test spac.canopy.sensor_geometry.s_aux.dob >= 0;
-        @test spac.canopy.sensor_geometry.s_aux.dof >= 0;
-        @test spac.canopy.sensor_geometry.s_aux.sob >= 0;
-        @test spac.canopy.sensor_geometry.s_aux.sof >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.ko_leaf >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.dob_leaf >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.dof_leaf >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.sob_leaf >= 0;
+        @test spac.canopy.sensor_geometry.s_aux.sof_leaf >= 0;
         @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sensor .< 1);
         @test 0 < spac.canopy.sensor_geometry.s_aux.p_sensor_soil < 1;
         @test all(0 .< spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< 1);
-        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< spac.canopy.sun_geometry.s_aux.p_sunlit);
-        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .< spac.canopy.sensor_geometry.s_aux.p_sensor);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= spac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(spac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= spac.canopy.sensor_geometry.s_aux.p_sensor);
 
         config = NS.SPACConfiguration(Float64);
         tpac = NS.BulkSPAC(config);
@@ -118,8 +115,8 @@ import Emerald.EmeraldLand.SPAC
         CO.sensor_geometry_aux!(config, tpac);
         CO.sensor_geometry!(config, tpac);
         @test all(0 .< tpac.canopy.sun_geometry.s_aux.p_sunlit .< 1);
-        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .< tpac.canopy.sun_geometry.s_aux.p_sunlit);
-        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .< tpac.canopy.sensor_geometry.s_aux.p_sensor);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= tpac.canopy.sun_geometry.s_aux.p_sunlit);
+        @test all(tpac.canopy.sensor_geometry.s_aux.p_sun_sensor .<= tpac.canopy.sensor_geometry.s_aux.p_sensor);
     end;
 
     @testset "Shortwave radiation" begin

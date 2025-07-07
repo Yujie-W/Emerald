@@ -4,27 +4,22 @@ using Revise
 
 FT = Float64;
 
-
 config = EmeraldLand.Namespace.SPACConfiguration(FT);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 
-for s in spac.soils
-    s.state.θ = s.trait.vc.Θ_RES + 0.001;
-end;
-
 EmeraldLand.SPAC.initialize_spac!(config, spac);
-EmeraldLand.SPAC.spac!(config, spac, FT(0));
+EmeraldLand.SPAC.spac!(config, spac, FT(1));
 
-while !spac.plant._leaf_shedded
 
-    EmeraldLand.SPAC.spac!(config, spac, 3600);
-    @info "Debugging" spac.plant.leaves[end].xylem.auxil.pressure[end] spac.plant.junction.state.v_storage spac.plant.junction.s_aux.pressure spac.plant.leaves[end].energy.s_aux.t;
-    println();
-
+spac_bak1 = deepcopy(spac);
+spac_bak2 = deepcopy(spac);
+for i in 1:10
+    global spac_bak1, spac_bak2;
+    @time EmeraldLand.SPAC.spac!(config, spac, FT(3600));
+    spac_bak1 = deepcopy(spac);
+    @time EmeraldLand.SPAC.spac!(config, spac, FT(3600));
+    spac_bak2 = deepcopy(spac);
+    # @info "debugging" spac_bak1.plant.leaves[1].xylem.auxil.pressure[end] spac_bak2.plant.leaves[1].xylem.auxil.pressure[end];
+    # @info "debugging" [l.xylem.state.connected for l in spac.plant.leaves];
+    @info "debugging" spac.plant.junction.state.v_storage spac.plant.junction.s_aux.pressure;
 end;
-
-#  EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 0);
-EmeraldLand.SPAC.prescribe_soil!(spac; swcs = (0.3, 0.3, 0.3, 0.3));
-
-
-EmeraldLand.SPAC.prescribe_traits!(config, spac; lai = 1);

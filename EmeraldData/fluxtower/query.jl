@@ -20,7 +20,7 @@ function processed_flux_tower_data(ftds::FluxTowerDataset)
     if ftds.LABEL[1:3] == "AMF"
         file_out = "$(AMERIFLUX_REPROCESSED)/$(fn).nc";
     elseif ftds.LABEL[1:3] == "FLX"
-        file_out = "$(FLUXNET_REPROCESSED)/$(fn).nc";
+        file_out = "$(FLUXNET2015_REPROCESSED)/$(fn).nc";
     end;
 
     # if the file does not exist, process the data
@@ -55,7 +55,7 @@ function raw_flux_tower_data(ftds::FluxTowerDataset)
     if ftds.LABEL[1:3] == "AMF"
         file_in = "$(AMERIFLUX_DATA)/$(fn).csv";
     elseif ftds.LABEL[1:3] == "FLX"
-        file_in = "$(FLUXNET_DATA)/$(fn).csv";
+        file_in = "$(FLUXNET2015_DATA)/$(fn).csv";
     end;
 
     # if the file does not exist, warn the user

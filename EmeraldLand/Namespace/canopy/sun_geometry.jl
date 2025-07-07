@@ -31,6 +31,8 @@ end;
 # Changes to the struct
 # General
 #     2024-Feb-25: add struct SunGeometrySDAuxil
+#     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: add field ci_sun to store clumping index from solar zenith angle
 #
 #######################################################################################################################################################################################################
 """
@@ -45,11 +47,21 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
-    # Scattering coefficients
-    "Backward direct->diffuse scatter weight"
-    sdb::FT = 0
-    "Forward direct->diffuse scatter weight"
-    sdf::FT = 0
+    # Clumping index from solar zenith angle
+    "Clumping index from solar zenith angle"
+    ci_sun::FT = 1
+
+    # Scattering coefficients for leaf
+    "Backward direct->diffuse scatter weight (leaf)"
+    sdb_leaf::FT = 0
+    "Forward direct->diffuse scatter weight (leaf)"
+    sdf_leaf::FT = 0
+
+    # Scattering coefficients for stem
+    "Backward direct->diffuse scatter weight (stem)"
+    sdb_stem::FT = 0
+    "Forward direct->diffuse scatter weight (stem)"
+    sdf_stem::FT = 0
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(sza) at different inclination angles"
@@ -62,8 +74,10 @@ Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
     ks_incl::Vector{FT}
 
     # Extinction coefficient related
-    "Solar direction beam extinction coefficient weight (direct)"
-    ks::FT = 0
+    "Solar direction beam extinction coefficient weight (direct) (leaf)"
+    ks_leaf::FT = 0
+    "Solar direction beam extinction coefficient weight (direct) (stem)"
+    ks_stem::FT = 0
     "Probability of directly viewing a leaf in solar direction at different layers"
     p_sunlit::Vector{FT}
 
@@ -100,6 +114,7 @@ SunGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = Sun
 #     2023-Oct-18: add fields sdb_stem, sdf_stem, r_net_lw_leaf, r_net_lw_stem
 #     2024-Jul-27: use bined PPAR to speed up
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
 """
@@ -114,6 +129,12 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SunGeometryAuxil{FT}
+    # Effective leaf reflectance and transmittance for solar radiation
+    "Effective leaf reflectance after accounting for the CI effect"
+    ρ_leaf_eff::Matrix{FT}
+    "Effective leaf transmittance after accounting for the CI  effect"
+    τ_leaf_eff::Matrix{FT}
+
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
     sdb_leaf::Matrix{FT}
@@ -263,6 +284,8 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
     cache_dim_ppar = isnothing(config.DIM_PPAR_BINS) ? config.DIM_INCL * config.DIM_AZI : config.DIM_PPAR_BINS;
 
     return SunGeometryAuxil{FT}(
+                ρ_leaf_eff       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+                τ_leaf_eff       = zeros(FT, length(config.SPECTRA.Λ), n_layer),
                 sdb_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
                 sdf_leaf         = zeros(FT, length(config.SPECTRA.Λ), n_layer),
                 sdb_stem         = zeros(FT, length(config.SPECTRA.Λ), n_layer),

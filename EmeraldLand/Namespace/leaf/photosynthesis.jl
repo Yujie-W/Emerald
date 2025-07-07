@@ -38,7 +38,7 @@ Base.@kwdef mutable struct GeneralC3Trait{FT}
     "[`AbstractTemperatureDependency`](@ref) type Ko temperature dependency"
     TD_KO::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KoTDCLM(FT)
     "[`AbstractTemperatureDependency`](@ref) type Kq temperature dependency"
-    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KqTDJohnson(FT)
+    TD_KQ::Union{Arrhenius{FT}, ArrheniusPeak{FT}, ArrheniusPeak2{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = KqTDJohnson(FT)
     "[`AbstractTemperatureDependency`](@ref) type respiration temperature dependency"
     TD_R::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}} = RespirationTDCLMC3(FT)
     "[`AbstractTemperatureDependency`](@ref) type Vcmax temperature dependency"
@@ -205,6 +205,7 @@ end;
 # General
 #     2023-Oct-03: add LeafPhotosystemAuxil struct
 #     2023-Oct-24: add fields ϕ_f1 and ϕ_f2; remove fields ϵ_1 and ϵ_2 (computed in the LeafOptics module)
+#     2025-Jun-03: add filed ϕ_d and ϕ_n
 #
 #######################################################################################################################################################################################################
 """
@@ -280,8 +281,12 @@ Base.@kwdef mutable struct LeafPhotosystemAuxil{FT}
     η_l::FT = 0
 
     # yield variables
+    "Heat dissipation yield"
+    ϕ_d::FT = 0
     "Fluorescence yield"
     ϕ_f::FT = 0
+    "Non-photochemical yield"
+    ϕ_n::FT = 0
     "Photochemical yield"
     ϕ_p::FT = 0
 
@@ -327,6 +332,7 @@ end;
 # General
 #     2024-Jul-25: define CanopyLayerPhotosystemAuxil struct to store 1D leaf photosynthesis variables (for canopy layer; Leaf will be repurposed back to elementwise)
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2025-Jun-03: add filed ϕ_d and ϕ_n
 #
 #######################################################################################################################################################################################################
 """
@@ -404,8 +410,12 @@ Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
     η_l::FT = 0
 
     # yield variables
+    "Heat dissipation yield"
+    ϕ_d::Vector{FT}
     "Fluorescence yield"
     ϕ_f::Vector{FT}
+    "Non-photochemical yield"
+    ϕ_n::Vector{FT}
     "Photochemical yield"
     ϕ_p::Vector{FT}
 
@@ -459,7 +469,9 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 j_pot = zeros(FT, cache_dim_ppar+1),
                 j_psi = zeros(FT, cache_dim_ppar+1),
                 η     = zeros(FT, cache_dim_ppar+1),
+                ϕ_d   = zeros(FT, cache_dim_ppar+1),
                 ϕ_f   = zeros(FT, cache_dim_ppar+1),
+                ϕ_n   = zeros(FT, cache_dim_ppar+1),
                 ϕ_p   = zeros(FT, cache_dim_ppar+1),
                 ϕ_f1  = zeros(FT, cache_dim_ppar+1),
                 ϕ_f2  = zeros(FT, cache_dim_ppar+1),
@@ -481,6 +493,7 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = (
 #     2023-Oct-03: add C3VJP, C3Cyto, and C4VJP structs
 #     2023-Oct-36: combine C3Cyto, C3VJP, and C4VJP into LeafPhotosystem
 #     2024-Feb-26: add field trait
+#     2024-Aug-06: add constructor for different models
 #
 #######################################################################################################################################################################################################
 """
@@ -496,12 +509,96 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct LeafPhotosystem{FT}
     "Trait variables"
-    trait::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}} = GeneralC3Trait{FT}()
+    trait::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}}
     "State variables"
-    state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
+    state::Union{C3State{FT}, C4State{FT}}
     "Auxilary variables"
     auxil::LeafPhotosystemAuxil{FT} = LeafPhotosystemAuxil{FT}()
 end;
+
+LeafPhotosystem{FT}(model::String) where {FT} = (
+    if model == "C3Cyto"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3CytoInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3JB"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3JBInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3VJP"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+    elseif model == "C3VJPInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+    elseif model == "C3CLM"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C3CLMInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C4CLM"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4CLMSmooth"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4VJP"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VpmaxPi();
+        ps.auxil.f_psii = 0.41;
+    else
+        return error("Unknown model: $model")
+    end;
+
+    return ps
+);
 
 
 #######################################################################################################################################################################################################
@@ -509,13 +606,14 @@ end;
 # Changes to this struct
 # General
 #     2024-Jul-25: add CanopyLayerPhotosystem
+#     2024-Aug-13: add constructor for different models
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the fields for C3 photosynthesis (VJP model)
+Struct that contains the fields for C3 photosynthesis
 
 # Fields
 
@@ -524,11 +622,90 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct CanopyLayerPhotosystem{FT}
     "Trait variables"
-    trait::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}} = GeneralC3Trait{FT}()
+    trait::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}}
     "State variables"
-    state::Union{C3State{FT}, C4State{FT}} = C3State{FT}()
+    state::Union{C3State{FT}, C4State{FT}}
     "Auxilary variables"
     auxil::CanopyLayerPhotosystemAuxil{FT}
 end;
 
-CanopyLayerPhotosystem(config::SPACConfiguration{FT}) where {FT} = CanopyLayerPhotosystem{FT}(auxil = CanopyLayerPhotosystemAuxil(config));
+CanopyLayerPhotosystem(config::SPACConfiguration{FT}, model::String = "C3VJP") where {FT} = (
+    auxil = CanopyLayerPhotosystemAuxil(config);
+    if model == "C3Cyto"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3CytoInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3JB"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3JBInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3VJP"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+    elseif model == "C3VJPInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+    elseif model == "C3CLM"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C3CLMInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C4CLM"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4CLMSmooth"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4VJP"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VpmaxPi();
+        ps.auxil.f_psii = 0.41;
+    else
+        return error("Unknown model: $model")
+    end;
+
+    return ps
+);

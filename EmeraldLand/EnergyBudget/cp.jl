@@ -9,6 +9,7 @@
 #     2023-Oct-07: account for the runoff water in the heat capacitance of the top soil
 #     2023-Oct-09: add method for AirLayer
 #     2024-Jul-30: add OCS mole to air heat capacitance
+#     2025-Jun-05: account for ice volume in the heat capacitance of the soil
 #
 #######################################################################################################################################################################################################
 """
@@ -26,7 +27,7 @@ heat_capacitance(soiltr::SoilLayerTrait{FT}, soilta::SoilLayerTDAuxil{FT}, soils
 
     # runoff in mol m⁻² s⁻¹, convert it to kg and then
 
-    return soiltr.ρ * soiltr.cp + soilst.θ * ρ_H₂O(FT) * CP_L(FT) + cp_gas + runoff * CP_L_MOL(FT) / soilta.δz
+    return soiltr.ρ * soiltr.cp + soilst.θ * ρ_H₂O(FT) * CP_L(FT) + soilst.θ_ice * ρ_H₂O(FT) * CP_I(FT) + cp_gas + runoff * CP_L_MOL(FT) / soilta.δz
 );
 
 heat_capacitance(soil::SoilLayer{FT}; runoff::FT = FT(0)) where {FT} = heat_capacitance(soil.trait, soil.t_aux, soil.state, runoff = runoff);

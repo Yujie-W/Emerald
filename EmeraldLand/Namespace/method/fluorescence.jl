@@ -56,6 +56,7 @@ KNFluorescenceModelDrought(FT) = KNFluorescenceModel{FT}(K_0 = 5.01, K_A = 1.93,
 # General
 #     2023-Oct-27: add qL based model
 #     2023-Oct-30: remove K_A from the method (which should be 1)
+#     2023-Oct-27: scale K_B by 1/0.85 because the original euqation used PAR (we use PPAR)
 # Sources
 #     Han et al. (2022) The physiological basis for estimating photosynthesis from Chla fluorescence
 #
@@ -73,12 +74,12 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct QLFluorescenceModel{FT<:AbstractFloat}
     "Fitting parameter qb"
-    K_B::FT = 0.95e-3
+    K_B::FT = 0.95e-3 / 0.85
 end;
 
-QLFluorescenceModelC3(FT) = QLFluorescenceModel{FT}(K_B = 0.95e-3);
+QLFluorescenceModelC3(FT) = QLFluorescenceModel{FT}(K_B = 0.95e-3 / 0.85);
 
-QLFluorescenceModelC4(FT) = QLFluorescenceModel{FT}(K_B = 0.63e-3);
+QLFluorescenceModelC4(FT) = QLFluorescenceModel{FT}(K_B = 0.63e-3 / 0.85);
 
 
 #######################################################################################################################################################################################################
@@ -86,6 +87,7 @@ QLFluorescenceModelC4(FT) = QLFluorescenceModel{FT}(K_B = 0.63e-3);
 # Changes to the struct
 # General
 #     2023-Oct-27: add qL based model
+#     2023-Oct-27: scale K_B by 1/0.85 because the original euqation used PAR (we use PPAR)
 # Sources
 #     Han et al. (2022) The physiological basis for estimating photosynthesis from Chla fluorescence
 #
@@ -105,9 +107,34 @@ Base.@kwdef mutable struct QLFluorescenceModelHan{FT<:AbstractFloat}
     "Fitting parameter α"
     K_A::FT = 0.8
     "Fitting parameter β"
-    K_B::FT = 0.95e-3
+    K_B::FT = 0.95e-3 / 0.85
 end;
 
-QLFluorescenceModelHanC3(FT) = QLFluorescenceModelHan{FT}(K_A = 0.8, K_B = 0.95e-3);
+QLFluorescenceModelHanC3(FT) = QLFluorescenceModelHan{FT}(K_A = 0.8, K_B = 0.95e-3 / 0.85);
 
-QLFluorescenceModelHanC4(FT) = QLFluorescenceModelHan{FT}(K_A = 0.83, K_B = 0.63e-3);
+QLFluorescenceModelHanC4(FT) = QLFluorescenceModelHan{FT}(K_A = 0.83, K_B = 0.63e-3 / 0.85);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to the struct
+# General
+#     2024-Aug-16: add SIFMatrixFluspectMethod (N_DUB)
+#     2024-Aug-16: add SIFMatrixPlatespectMethod
+#     2024-Feb-09: add SIFMatrixDualspectMethod (N_DUB)
+#
+#######################################################################################################################################################################################################
+""" Method to compute SIF matrices using the doubling method """
+Base.@kwdef struct SIFMatrixDualspectMethod
+    N::Int = 10
+end;
+
+
+""" Method to compute SIF matrices using the doubling method """
+Base.@kwdef struct SIFMatrixFluspectMethod
+    N::Int = 10
+end;
+
+
+""" Method to compute SIF matrices using the excitation-emission method """
+struct SIFMatrixPlatespectMethod end;

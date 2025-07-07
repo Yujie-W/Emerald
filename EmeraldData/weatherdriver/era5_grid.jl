@@ -26,7 +26,7 @@ function era5_weather_driver_file(wd::ERA5SingleLevelsDriver, gm_dict::Dict{Stri
     msg_lvl  = gm_dict["MESSAGE_LEVEL"];
 
     # folders that stores the input data
-    @assert isdir(DRIVER_FOLDER) "Weather driver folder $(DRIVER_FOLDER) does not exist...";
+    @assert isdir(LAND_DRIVER) "Weather driver folder $(LAND_DRIVER) does not exist...";
     nc_path = grid_file_path(gm_dict);
 
     # if file exists and appending is false

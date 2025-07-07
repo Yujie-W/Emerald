@@ -17,6 +17,9 @@
 #     2023-Oct-18: design the logic flow with new time_stepper! function design
 #     2024-Jul-24: add leaf shedded flag
 #     2024-Jul-24: set regrow threshold to 50% of the critical pressure
+#     2024-Aug-06: move leaf shedding condition into the substep_aux! function
+#     2024-Aug-06: set regrow threshold to when junction pressure is higher than -0.1 MPa
+#     2024-Sep-03: add step to grow xylem when carbon pool is higher than the threshold
 # To do
 #     TODO: add top soil evaporation
 #
@@ -43,8 +46,6 @@ Run SPAC model and move forward in time with time stepper controller, given
 
 """
 function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, δt::Number) where {FT}
-    (; KR_THRESHOLD) = config;
-
     # 1. run the functions are do not need to be run at sub time step (e.g. shortwave radiation)
     step_preparations!(config, spac);
 
@@ -55,21 +56,17 @@ function soil_plant_air_continuum!(config::SPACConfiguration{FT}, spac::BulkSPAC
     # 3. run canopy reflectance and fluorescence to use with remote sensing
     step_remote_sensing!(config, spac);
 
-    # 4. determine whether to shed leaves
-    bottom_leaf = spac.plant.leaves[1];
-    p_crt = xylem_pressure(bottom_leaf.xylem.trait.vc, KR_THRESHOLD) * relative_surface_tension(bottom_leaf.energy.s_aux.t);
-    if !spac.plant._leaf_shedded && bottom_leaf.xylem.auxil.pressure[end] < p_crt
-        @warn "Leaf shedding is triggered";
-        shed_leaves!(config, spac);
-        spac.plant._leaf_shedded = true;
-    end;
+    # 4. update the legacy for the next time step
+    update_legacy!(config, spac);
 
-    # 5. determine whether to regrow the leaves in the next round of LAI update
-    p_50 = xylem_pressure(bottom_leaf.xylem.trait.vc, FT(0.5)) * relative_surface_tension(bottom_leaf.energy.s_aux.t);
-    if (spac.plant.junction.s_aux.pressure > p_50) && spac.plant._leaf_shedded
-        @warn "Leaf regrowth is triggered, LAI prescribe enabled in the next round";
-        spac.plant._leaf_shedded = false;
-    end;
+    # 5. determine whether to regrow the leaves in the next round of LAI update (set flag only)
+    regrow_leaves_flag!(config, spac);
+
+    # 6. determine whether tree death occurs
+    plant_death!(config, spac);
+
+    # 7. grow xylem when carbon pool is higher than the threshold
+    plant_growth!(config, spac);
 
     return nothing
 end;

@@ -17,7 +17,6 @@ using Test;
     #                               1: sharp cut off
     #                               2: sigmoid used in SCOPE
     #     Φ_SIF_RESCALE     Bool    whether to rescale the SIF emission PDF after cut off (default true)
-    #     Φ_SIF_WL          Bool    whether to partition the SIF emission PDF based on the excitation wavelength (default true)
     config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
     bio = EmeraldLand.Namespace.LeafBio(config);
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
@@ -59,6 +58,13 @@ using Test;
     # If you change leaf biophysical traits such as chlorophyll content, you can change them in the state field of the bio
     bio.trait.cab = 20;
     bio.trait.car = 5;
+    EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
+    @test true;
+
+    # the default SIF model is my new SIF model, but you can change it to the old model in Fluspect-B
+    config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
+    bio = EmeraldLand.Namespace.LeafBio(config);
+    bio.trait.SIF_METHOD = EmeraldLand.Namespace.SIFMatrixFluspectMethod();
     EmeraldLand.LeafOptics.leaf_spectra!(config, bio, FT(5));
     @test true;
 end;

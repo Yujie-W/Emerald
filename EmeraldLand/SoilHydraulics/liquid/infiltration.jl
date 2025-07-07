@@ -6,6 +6,7 @@
 # General
 #     2023-Oct-06: add function soil water infiltration
 #     2024-Feb-29: add controller to make sure when both layers are very dry (potential < -50 MPa), there is no water exchange between them
+#     2025-Jun-05: account for ice volume in the calculation of infiltration
 #
 #######################################################################################################################################################################################################
 """
@@ -37,16 +38,17 @@ function soil_water_infiltration!(spac::BulkSPAC{FT}) where {FT}
         end;
 
         # if flow into the lower > 0, but the lower layer is already saturated, set the flow to 0
-        if (sbulk.auxil.q[i] > 0) && (soils[i+1].state.θ >= soils[i+1].trait.vc.Θ_SAT)
+        if (sbulk.auxil.q[i] > 0) && (soils[i+1].state.θ + soils[i+1].state.θ_ice >= soils[i+1].trait.vc.Θ_SAT)
             sbulk.auxil.q[i] = 0;
         end;
 
         # if flow into the lower < 0, but the upper layer is already saturated, set the flow to 0
-        if (sbulk.auxil.q[i] < 0) && (soils[i].state.θ >= soils[i].trait.vc.Θ_SAT)
+        if (sbulk.auxil.q[i] < 0) && (soils[i].state.θ + soils[i].state.θ_ice >= soils[i].trait.vc.Θ_SAT)
             sbulk.auxil.q[i] = 0;
         end;
 
         # if both layers are oversaturated, move the oversaturated part from lower layer to upper layer
+        # TODO: ice could impact this again, ignore it for now...
         if (soils[i].state.θ >= soils[i].trait.vc.Θ_SAT) && (soils[i+1].state.θ > soils[i+1].trait.vc.Θ_SAT)
             sbulk.auxil.q[i] = -1 * (soils[i+1].state.θ - soils[i+1].trait.vc.Θ_SAT) * soils[i+1].t_aux.δz * ρ_H₂O(FT) / M_H₂O(FT);
         end;

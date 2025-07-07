@@ -24,6 +24,7 @@ function step_preparations!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) w
     sun_geometry_aux!(config, spac);
     sun_geometry!(config, spac);
     shortwave_radiation!(config, spac);
+
     return nothing
 end;
 

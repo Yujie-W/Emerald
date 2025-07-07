@@ -10,7 +10,7 @@ using ..EmeraldIO.Terminal: has_no_space, input_integer, input_string, input_yes
 using ..EmeraldUtility.Artifact: deploy_artifact!
 
 
-GRIDDING_MACHINE_HOME = "/home/wyujie/GriddingMachine";
+GRIDDING_MACHINE_HOME = joinpath(homedir(), "GriddingMachine");
 ARTIFACT_TOML         = "$(GRIDDING_MACHINE_HOME)/Artifacts.toml";
 DATASET_FOLDER        = "$(GRIDDING_MACHINE_HOME)/reprocessed";
 ARTIFACT_FOLDER       = "$(GRIDDING_MACHINE_HOME)/artifacts"

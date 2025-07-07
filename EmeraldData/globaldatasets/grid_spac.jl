@@ -6,6 +6,7 @@
 #     2024-Feb-25: add t_aux! and s_aux! functions to update the axiliary variables
 #     2024-Feb-27: t_aux! and s_aux! functions moved to initialize_spac!
 #     2024-Feb-28: move function to EmeraldData as it is based on GriddingMachine.jl datasets
+#     2025-Mar-13: add method to initialize the spac for a given date
 #
 #######################################################################################################################################################################################################
 """
@@ -17,7 +18,9 @@ Create a un-initialized SPAC using the data from a grid (CHL, VCMAX25, LAI, and 
 - `gm_dict` Dictionary of GriddingMachine data in a grid
 
 """
-function grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}) where {FT}
+function grid_spac end;
+
+grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}) where {FT} = (
     #
     # TODO: add support to C4 photosynthesis
     #
@@ -57,7 +60,15 @@ function grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}) whe
     end;
 
     return spac
-end;
+);
+
+# this function is a tailored function meant to create a SPAC for a given date
+grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}, iday::Int) where {FT} = (
+    spac = grid_spac(config, gm_dict);
+    prescribe_gm_wd_data!(config, spac, gm_dict, iday);
+
+    return spac
+);
 
 
 #######################################################################################################################################################################################################
@@ -72,6 +83,7 @@ end;
 #     2024-Feb-28: rename function to prescribe_gm_wd_data! and move it to EmeraldData
 #     2024-Feb-28: make it possible to initialize spac with ss_dict
 #     2024-Apr-17: update solar azimuth angle as well
+#     2025-Mar-13: add method to update SPAC for a given date (without weather driver data)
 #
 #######################################################################################################################################################################################################
 """
@@ -86,7 +98,9 @@ Prescribe the SPAC with GriddingMachine and weather driver data, given
 - `ss_dict` Dictionary of initial states
 
 """
-function prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Union{Dict{String,Any},Nothing} = nothing) where {FT}
+function prescribe_gm_wd_data! end;
+
+prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Union{Dict{String,Any},Nothing} = nothing) where {FT} = (
     # update environmental conditions
     for air in spac.airs
         air.state.p_air = wd_dict["P_ATM"];
@@ -128,4 +142,16 @@ function prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}
     end;
 
     return nothing
-end;
+);
+
+# this function is a tailored function meant to create a SPAC for a given date
+prescribe_gm_wd_data!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{String,Any}, iday::Int) where {FT} = (
+    # synchronize LAI, CHL, and CI
+    chl = query_griddingmachine_data(gm_dict["CHLOROPHYLL"], gm_dict["YEAR"], iday);
+    ci = query_griddingmachine_data(gm_dict["CLUMPING"], gm_dict["YEAR"], iday);
+    lai = query_griddingmachine_data(gm_dict["LAI"], gm_dict["YEAR"], iday);
+    vcm = query_griddingmachine_data(gm_dict["VCMAX25"], gm_dict["YEAR"], iday);
+    prescribe_traits!(config, spac; cab = chl, car = chl / 7, ci = ci, lai = lai, vcmax = vcm, vertical_expo = 0.3);
+
+    return nothing
+);

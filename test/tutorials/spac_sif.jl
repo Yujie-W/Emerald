@@ -9,7 +9,6 @@ using Test;
 
     # The default spectra using the old phi settings
     config = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
-    config.Φ_SIF_WL = false;
     spac = EmeraldLand.Namespace.BulkSPAC(config);
     EmeraldLand.SPAC.initialize_spac!(config, spac);
     EmeraldLand.SPAC.spac!(config, spac, 3600);
@@ -17,18 +16,9 @@ using Test;
 
     # Use the spectra used by Yinon Bar-On
     config_new = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.NEW_PHI_2021_1NM);
-    config_new.Φ_SIF_WL = false;
     spac_new = EmeraldLand.Namespace.BulkSPAC(config_new);
     EmeraldLand.SPAC.initialize_spac!(config_new, spac_new);
     EmeraldLand.SPAC.spac!(config_new, spac_new, 3600);
-    @test true;
-
-    # Use my WL-dependent spectra
-    config_def = EmeraldLand.Namespace.SPACConfiguration(FT; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
-    config_def.Φ_SIF_WL = true;
-    spac_def = EmeraldLand.Namespace.BulkSPAC(config_def);
-    EmeraldLand.SPAC.initialize_spac!(config_def, spac_def);
-    EmeraldLand.SPAC.spac!(config_def, spac_def, 3600);
     @test true;
 
     # save the data as a CSV file

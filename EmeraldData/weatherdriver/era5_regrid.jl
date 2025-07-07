@@ -4,6 +4,8 @@
 # General
 #     2023-Mar-10: migrate from research repo to Emerald
 #     2024-Apr-15: skip regrid if the input file does not exist
+#     2024-Sep-24: add support to valid_time (new to ERA5 dataset)
+#     2024-Dec-02: add support to date (newer to ERA5 dataset)
 #
 #######################################################################################################################################################################################################
 """
@@ -45,7 +47,7 @@ regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false) = (
     era5_wd = ERA5SingleLevelsDriver();
     era5_labs = [getfield(era5_wd, fn)[2] for fn in fieldnames(ERA5SingleLevelsDriver)];
     era5_vars = [getfield(era5_wd, fn)[1] for fn in fieldnames(ERA5SingleLevelsDriver)];
-    regrid_ERA5!.(year, nx, era5_labs, era5_vars; folder = ERA5_FOLDER_HOURLY);
+    regrid_ERA5!.(year, nx, era5_labs, era5_vars; folder = ERA5_SL_HOURLY);
     @info "Finished regridding all the datasets!";
     if notification
         send_email!("[ERA5 DATA STATUS] Regridding data for year $(year)",
@@ -57,7 +59,7 @@ regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false) = (
     return nothing;
 );
 
-regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String = ERA5_FOLDER_HOURLY) = (
+regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String = ERA5_SL_HOURLY) = (
     file_in = original_file_path(label, year; folder = folder);
     file_out = reprocessed_file_path(label, year, nx; folder = folder);
 
@@ -75,7 +77,17 @@ regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String
 
     # read the file per slice
     @info "Reading and regridding file $(file_in) per time slice...";
-    times = read_nc(file_in, "time");
+    all_vars = varname_nc(file_in);
+    var_time = if "time" in all_vars
+        "time";
+    elseif "valid_time" in all_vars # new to ERA5 dataset
+        "valid_time";
+    elseif "date" in all_vars # newer to ERA5 dataset
+        "date";
+    else
+        error("Cannot find the time variable in $(file_in)!");
+    end;
+    times = read_nc(file_in, var_time);
     matn = zeros((360nx,180nx,length(times))) .* NaN;
     @showprogress for _itim in eachindex(times)
         mati = read_nc(file_in, var_name, _itim);

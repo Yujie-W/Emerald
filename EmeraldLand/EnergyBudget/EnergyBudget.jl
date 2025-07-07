@@ -4,7 +4,7 @@ module EnergyBudget
 
 using Statistics: mean
 
-using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GLUCOSE, M_H₂O, ρ_H₂O
+using ..EmeraldPhysics.Constant: CP_D_MOL, CP_I, CP_I_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GLUCOSE, M_H₂O, T₀, ρ_H₂O
 
 using ..Namespace: XylemHydraulics
 using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Root, Stem

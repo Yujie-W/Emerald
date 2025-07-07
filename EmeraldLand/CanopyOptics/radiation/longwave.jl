@@ -8,6 +8,9 @@
 #     2023-Oct-14: if LAI <= 0, run soil longwave radiation only
 #     2023-Oct-18: partition the energy between leaf and stem
 #     2024-Feb-23: fix the energy budget when lai=0 but sai>0
+#     2024-Sep-09: account for diffuse CI impact on longwave radiation
+# Bug fixes:
+#     2025-Jun-04: the longwave emission from leaf and stem should not be scaled by clumping index
 #
 #######################################################################################################################################################################################################
 """
@@ -56,11 +59,7 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
         # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.s_aux.t ^ 4;
         f_leaf = can_str.trait.δlai[irt] / (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]);
         f_stem = 1 - f_leaf;
-        if f_leaf > 0
-            can_str.auxil.lw_layer_leaf[irt] = leaf.energy.s_aux.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
-        else
-            can_str.auxil.lw_layer_leaf[irt] = 0;
-        end;
+        can_str.auxil.lw_layer_leaf[irt] = leaf.energy.s_aux.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
         can_str.auxil.lw_layer_stem[irt] = stem.energy.s_aux.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
         can_str.auxil.lw_layer[irt] = can_str.auxil.lw_layer_leaf[irt] + can_str.auxil.lw_layer_stem[irt];
     end;

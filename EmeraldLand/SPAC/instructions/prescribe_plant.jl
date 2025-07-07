@@ -17,7 +17,12 @@
 #     2024-Feb-08: add support to C3State
 #     2024-Feb-27: run dull_aux! when any of the canopy structural parameters or leaf pigments is updated
 #     2024-Feb-28: set minimum LAI to 0 if a negative value is prescribed
-#     2024-Jul-24: add leaf shedded flag
+#     2024-Jul-24: add leaf shedded flag to LAI prescription
+#     2024-Aug-06: add leaf regrow flag to LAI prescription
+#     2024-Aug-29: use carbon pool to update LAI (when LAI increases)
+#     2024-Sep-03: make sure to update leaf asap as well when LAI is updated
+#     2024-Sep-04: when lai_diff > 0, make sure carbon pool is not immediately used up and recover leaf xylem hydraulic system
+#     2024-Sep-07: improve ci prescription to account for angular dependency
 #
 #######################################################################################################################################################################################################
 """
@@ -28,7 +33,7 @@
                 b6f::Union{Number,Nothing} = nothing,
                 cab::Union{Number,Nothing} = nothing,
                 car::Union{Number,Nothing} = nothing,
-                ci::Union{Number,Nothing} = nothing,
+                ci::Union{Number,Vector,Nothing} = nothing,
                 jmax::Union{Number,Nothing} = nothing,
                 kmax::Union{Number,Tuple,Nothing} = nothing,
                 lai::Union{Number,Nothing} = nothing,
@@ -65,7 +70,7 @@ function prescribe_traits!(
             b6f::Union{Number,Nothing} = nothing,
             cab::Union{Number,Nothing} = nothing,
             car::Union{Number,Nothing} = nothing,
-            ci::Union{Number,Nothing} = nothing,
+            ci::Union{Number,Vector,Nothing} = nothing,
             jmax::Union{Number,Nothing} = nothing,
             kmax::Union{Number,Tuple,Nothing} = nothing,
             lai::Union{Number,Nothing} = nothing,
@@ -115,12 +120,12 @@ function prescribe_traits!(
         # partition kmax into the roots based on xylem area
         for root in roots
             # root.xylem.trait.k_max = root.xylem.trait.area / trunk.xylem.trait.area * ks[1] * root.xylem.trait.l / root.xylem.trait.area;
-            root.xylem.trait.k_max = ks[1] * root.xylem.trait.l / trunk.xylem.trait.area;
+            root.xylem.trait.k_max = ks[1] * root.xylem.trait.l / trunk.xylem.state.asap;
         end;
-        trunk.xylem.trait.k_max = ks[2] * trunk.xylem.trait.l / trunk.xylem.trait.area;
+        trunk.xylem.trait.k_max = ks[2] * trunk.xylem.trait.l / trunk.xylem.state.asap;
         for stem in branches
             #stem.xylem.state.kmax = stem.xylem.trait.area / trunk.xylem.trait.area * ks[3] * stem.xylem.trait.l / stem.xylem.trait.area;
-            stem.xylem.trait.k_max = ks[3] * stem.xylem.trait.l / trunk.xylem.trait.area;
+            stem.xylem.trait.k_max = ks[3] * stem.xylem.trait.l / trunk.xylem.state.asap;
         end;
         for leaf in leaves
             leaf.xylem.trait.k_max = ks[4] / (can_str.trait.lai * sbulk.trait.area);
@@ -137,20 +142,72 @@ function prescribe_traits!(
     #
     # canopy structure
     #
-    # update LAI and leaf area if leaf shedding flag is not true
-    if !isnothing(lai) && !spac.plant._leaf_shedded
-        epslai = max(0, lai);
-        can_str.trait.lai = epslai;
-        can_str.trait.δlai = epslai .* ones(FT, n_layer) ./ n_layer;
-        for irt in 1:n_layer
-            ilf = n_layer - irt + 1;
-            leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
+    # update LAI and leaf area if leaf shedding flag is not true or regrow flag is true
+    # clear the legacy of leaves if regrow flag is true
+    # TODO: use shed_leaves! and grow_leaves! functions in the future
+    if !isnothing(lai)
+        # if lai is not 0, grow new leaves is allowed
+        lai_0 = can_str.trait.lai;
+        lai_diff = lai - lai_0;
+        c_demand = lai_diff * sbulk.trait.area * spac.plant.leaves[1].bio.trait.lma * 10000 / 30;
+        c_allocable = spac.plant.pool.c_pool - spac.plant.pool.c_pool_min;
+        if !spac.plant._leaf_shedded
+            if lai_diff > 0
+                if c_allocable <= 0
+                    lai_diff = 0;
+                elseif c_demand > c_allocable
+                    lai_diff *= c_allocable / c_demand;
+                end;
+            end;
+        elseif spac.plant._leaf_regrow
+            # lai_diff > 0 for sure
+            if 0 < c_demand <= c_allocable
+                nothing
+            # c_demand > c_allocable
+            elseif c_allocable <= spac.plant.pool.c_pool_min
+                c_actual = spac.plant.pool.c_pool / 2;
+                lai_diff *= c_actual / c_demand;
+            else # c_allocable > spac.plant.pool.c_pool_min
+                lai_diff *= c_allocable / c_demand;
+            end;
+        end;
+
+        if !spac.plant._leaf_shedded || spac.plant._leaf_regrow
+            # update the leaf area
+            can_str.trait.lai = lai_0 + lai_diff;
+            can_str.trait.δlai = can_str.trait.lai .* ones(FT, n_layer) ./ n_layer;
+            for irt in 1:n_layer
+                ilf = n_layer - irt + 1;
+                leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
+                leaves[ilf].xylem.state.asap = leaves[ilf].xylem.trait.area;
+            end;
+
+            # if lai_diff is positive, remove the energy from the carbon pool
+            if lai_diff > 0
+                c_mol = lai_diff * sbulk.trait.area * spac.plant.leaves[1].bio.trait.lma * 10000 / 30;
+                spac.plant.pool.c_pool -= c_mol;
+            end;
+
+            # reset the flags and clear the legacy of leaves
+            if lai_diff > 0
+                spac.plant._leaf_regrow = false;
+                spac.plant._leaf_shedded = false;
+                for l in leaves
+                    xylem_recovery!(l.xylem, lai_0, lai_diff);
+                end;
+            end;
         end;
     end;
 
     # update CI
     if !isnothing(ci)
-        can_str.trait.ci = ci;
+        if ci isa Number
+            can_str.trait.ci.ci_0 = ci;
+            can_str.trait.ci.ci_1 = 0;
+        else
+            can_str.trait.ci.ci_0 = ci[0];
+            can_str.trait.ci.ci_1 = ci[1];
+        end;
     end;
 
     # update SAI
@@ -192,6 +249,7 @@ end;
 # General
 #     2024-Jul-23: add method to prescribe Vcmax, Jmax, b6f, and Rd for C3 models (C4 models pending)
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-09: typo fix for GeneralC4Trait
 #
 #######################################################################################################################################################################################################
 """
@@ -228,7 +286,7 @@ prescribe_ps_traits!(
             vpmax::Union{Nothing, Number} = nothing) = prescribe_ps_traits!(leaf.photosystem.trait; b6f = b6f, jmax = jmax, rd = rd, vcmax = vcmax, vpmax = vpmax);
 
 prescribe_ps_traits!(
-            pst::GeneralC3Trait;
+            pst::Union{GeneralC3Trait, GeneralC4Trait};
             b6f::Union{Nothing, Number} = nothing,
             jmax::Union{Nothing, Number} = nothing,
             rd::Union{Nothing, Number} = nothing,
@@ -318,7 +376,7 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::GeneralC3Trait,
+            pst::GeneralC4Trait,
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VcmaxPi;
@@ -347,7 +405,7 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::GeneralC3Trait,
+            pst::GeneralC4Trait,
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VpmaxPi;
@@ -487,6 +545,7 @@ prescribe_ps_traits!(
 # General
 #     2024-Jul-23: add method to prescribe Vcmax25 and Jmax25 TD temperature dependent
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
+#     2024-Aug-01: fix the dispatching issue with GeneralC4Trait models
 #
 #######################################################################################################################################################################################################
 """
@@ -506,21 +565,23 @@ function prescribe_ps_td! end;
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}};
-            t_clm::Union{Nothing, Number}) where {FT} = prescribe_ps_td!(config, pst, pst.ACM, pst.AJM; t_clm = t_clm);
+            pst::GeneralC3Trait{FT};
+            t_clm::Union{Nothing, Number}) where {FT} = prescribe_ps_td!(config, pst.TD_VCMAX, pst.TD_JMAX; t_clm = t_clm);
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::GeneralC3Trait{FT},
-            acm::AcMethodC3VcmaxPi,
-            ajm::AjMethodC3JmaxPi;
+            vtd::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}},
+            jtd::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}};
             t_clm::Union{Nothing, Number}) where {FT} = (
     (; T_CLM) = config;
 
-    if !isnothing(t_clm)
-        if T_CLM
-            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-            pst.TD_JMAX.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
+    # TODO: double check if there is memory allocation in this method
+    if !isnothing(t_clm) && T_CLM
+        if vtd isa ArrheniusPeak || vtd isa Q10Peak
+            vtd.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+        end;
+        if jtd isa ArrheniusPeak || jtd isa Q10Peak
+            jtd.ΔSV = 659.70 - 0.75 * (t_clm - T₀(FT));
         end;
     end;
 
@@ -529,32 +590,18 @@ prescribe_ps_td!(
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::GeneralC3Trait{FT},
-            acm::AcMethodC3VcmaxPi,
-            ajm::AjMethodC3VqmaxPi;
-            t_clm::Union{Nothing, Number}) where {FT} = (
-    (; T_CLM) = config;
-
-    if !isnothing(t_clm)
-        if T_CLM
-            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
-        end;
-    end;
-
-    return nothing
-);
+            pst::GeneralC4Trait{FT};
+            t_clm::Union{Nothing, Number}) where {FT} = prescribe_ps_td!(config, pst.TD_VCMAX; t_clm = t_clm);
 
 prescribe_ps_td!(
             config::SPACConfiguration{FT},
-            pst::GeneralC4Trait{FT},
-            acm::AcMethodC4Vcmax,
-            ajm::AjMethodC4JPSII;
+            vtd::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}};
             t_clm::Union{Nothing, Number}) where {FT} = (
     (; T_CLM) = config;
 
-    if !isnothing(t_clm)
-        if T_CLM
-            pst.TD_VCMAX.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
+    if !isnothing(t_clm) && T_CLM
+        if vtd isa ArrheniusPeak || vtd isa Q10Peak
+            vtd.ΔSV = 668.39 - 1.07 * (t_clm - T₀(FT));
         end;
     end;
 

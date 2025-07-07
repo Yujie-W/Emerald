@@ -31,6 +31,8 @@ end;
 # Changes to the struct
 # General
 #     2024-Feb-25: add struct SensorGeometrySDAuxil
+#     2024-Sep-04: separate leaf and stem optical properties
+#     2024-Sep-07: add field ci_sensor to store clumping index from viewer zenith angle
 #
 #######################################################################################################################################################################################################
 """
@@ -45,15 +47,29 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
+    # Clumping index
+    "Clumping index from sensor zenith angle"
+    ci_sensor::FT = 1.0
+
     # Scattering coefficients
-    "Backward diffuse->observer scatter weight"
-    dob::FT = 0
-    "Forward diffuse->observer scatter weight"
-    dof::FT = 0
-    "Backward direct->observer scatter weight"
-    sob::FT = 0
-    "Forward direct->observer scatter weight"
-    sof::FT = 0
+    "Backward diffuse->observer scatter weight (leaf)"
+    dob_leaf::FT = 0
+    "Forward diffuse->observer scatter weight (leaf)"
+    dof_leaf::FT = 0
+    "Backward direct->observer scatter weight (leaf)"
+    sob_leaf::FT = 0
+    "Forward direct->observer scatter weight (leaf)"
+    sof_leaf::FT = 0
+
+    # Scattering coefficients for stems
+    "Backward diffuse->observer scatter weight (stem)"
+    dob_stem::FT = 0
+    "Forward diffuse->observer scatter weight (stem)"
+    dof_stem::FT = 0
+    "Backward direct->observer scatter weight (stem)"
+    sob_stem::FT = 0
+    "Forward direct->observer scatter weight (stem)"
+    sof_stem::FT = 0
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(vza) at different inclination angles"
@@ -70,13 +86,15 @@ Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
     βo_incl::Vector{FT}
 
     # Extinction coefficient related
-    "Observer direction beam extinction coefficient weight (diffuse)"
-    ko::FT = 0
+    "Observer direction beam extinction coefficient weight (diffuse) (leaf)"
+    ko_leaf::FT = 0
+    "Observer direction beam extinction coefficient weight (diffuse) (stem)"
+    ko_stem::FT = 0
     "Probability of directly viewing a leaf in observer direction at different layer boundaries"
     p_sensor::Vector{FT}
     "Probability of directly viewing soil in observer direction at different layer boundaries"
     p_sensor_soil::FT = 0
-    "Bi-directional probability of directly viewing a leaf at different layer boundaries (solar->canopy->observer)"
+    "Bi-directional probability of directly viewing at different layer boundaries (solar->canopy->observer)"
     p_sun_sensor::Vector{FT}
 
     # Matrix used for radiation to sensor
@@ -116,6 +134,7 @@ SensorGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = 
 #     2023-Oct-09: add struct SensorGeometryAuxil
 #     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
 #     2024-Jul-27: use bined PPAR to speed up (moved sif yield here from leaf)
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
 """
@@ -130,6 +149,12 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct SensorGeometryAuxil{FT}
+    # Effective leaf reflectance and transmittance for solar radiation
+    "Effective leaf reflectance after accounting for the CI effect"
+    ρ_leaf_eff::Matrix{FT}
+    "Effective leaf transmittance after accounting for the CI  effect"
+    τ_leaf_eff::Matrix{FT}
+
     # Scattering coefficients per leaf area or stem area
     "Backward scattering coefficient for diffuse->observer at different layers and wavelength bins of leaf"
     dob_leaf::Matrix{FT}
@@ -176,6 +201,8 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = SensorGeometryAuxil{FT}(
+            ρ_leaf_eff        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
+            τ_leaf_eff        = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             dob_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             dof_leaf          = zeros(FT, length(config.SPECTRA.Λ), n_layer),
             so_leaf           = zeros(FT, length(config.SPECTRA.Λ), n_layer),

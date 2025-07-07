@@ -14,7 +14,10 @@ using Test
     include("tutorials/leaf_spectra.jl");
     include("tutorials/leaf_sif_spectra.jl");
 
+    include("tutorials/plant_death.jl");
+
     include("tutorials/spac_basic.jl");
+    include("tutorials/spac_broadband.jl");
     include("tutorials/spac_canopy_structure.jl");
     include("tutorials/spac_leaf_bio.jl");
     include("tutorials/spac_par_wl.jl");

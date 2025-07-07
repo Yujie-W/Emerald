@@ -5,6 +5,7 @@ using SpecialFunctions: expint
 using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
 using ..EmeraldUtility.StructEqual: sync_struct!
 
+using ..Namespace: SIFMatrixDualspectMethod, SIFMatrixFluspectMethod, SIFMatrixPlatespectMethod
 using ..Namespace: LeafBio, LeafBioState, LeafBioTrait
 using ..Namespace: BulkSPAC, SPACConfiguration
 
@@ -14,9 +15,16 @@ include("prospect/sublayer.jl");
 include("prospect/layer.jl");
 include("prospect/leaf.jl");
 
-include("sif/doubling.jl");
-include("sif/effective.jl");
-include("sif/fluorescence.jl");
+include("platespect/effective.jl");
+include("platespect/fluorescence.jl");
+include("platespect/sublayer.jl");
+
+# Both Fluspect and Dualspect use the same doubling adding method
+include("kubelka-munk/doubling.jl");
+
+include("dualspect/fluorescence.jl");
+
+include("fluspect/fluorescence.jl");
 
 
 #######################################################################################################################################################################################################
@@ -25,28 +33,28 @@ include("sif/fluorescence.jl");
 # General
 #     2023-Sep-15: add function to run all the step within one function all
 #     2023-Sep-16: compute SIF conversion matrices within this function
+#     2024-Aug-13: add option to compute SIF matrices using N = nothing (default) for integral method (super fast and accurate) or N = Int for numerical method
 #
 #######################################################################################################################################################################################################
 """
 
-    leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+    leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40)) where {FT}
 
 Update the interface, sublayer, layer, and leaf level reflectance and transmittance within `bio`, given
 - `config` SPAC configuration
 - `bio` LeafBio struct
 - `lwc` Leaf water content
 - `θ` Incoming radiation angle
-- `N` Number of sublayers
 
 """
-function leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40); N::Int = 10) where {FT}
+function leaf_spectra!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40)) where {FT}
     leaf_interface_ρ_τ!(config, bio, θ);
-    leaf_sublayer_f_τ!(config, bio, lwc, N);
-    leaf_layer_ρ_τ!(bio, N);
+    leaf_sublayer_f_τ!(config, bio, lwc);
+    leaf_layer_ρ_τ!(bio);
     leaf_ρ_τ!(bio);
 
     if config.ENABLE_SIF
-        leaf_sif_matrices!(config, bio, N);
+        leaf_sif_matrices!(config, bio);
     end;
 
     return nothing
@@ -60,6 +68,7 @@ end;
 #     2022-Jun-29: add method for BulkSPAC
 #     2024-Feb-22: do nothing if lai is zero
 #     2024-Feb-28: support VERTICAL_BIO feature to update leaf spectra from top leaf
+#     2025-Mar-15: add method to prescribe broadband leaf reflectance and transmittance
 #
 #######################################################################################################################################################################################################
 """
@@ -71,7 +80,10 @@ Update leaf reflectance and transmittance for SPAC, given
 - `spac` `BulkSPAC` type SPAC
 
 """
-function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+function plant_leaf_spectra! end;
+
+plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
+    # if there is no leaf, do nothing
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
@@ -95,7 +107,22 @@ function plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) 
     end;
 
     return nothing
-end;
+);
+
+plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ρ_par::Number, τ_par::Number, ρ_nir::Number, τ_nir::Number) where {FT} = (
+    (; SPECTRA) = config;
+
+    # update leaf broadband reflectance and transmittance for SPAC
+    for leaf in spac.plant.leaves
+        leaf.bio.auxil.ρ_leaf[SPECTRA.IΛ_PAR] .= ρ_par;
+        leaf.bio.auxil.τ_leaf[SPECTRA.IΛ_PAR] .= τ_par;
+        leaf.bio.auxil.ρ_leaf[SPECTRA.IΛ_NIR] .= ρ_nir;
+        leaf.bio.auxil.τ_leaf[SPECTRA.IΛ_NIR] .= τ_nir;
+        leaf.bio.auxil.α_leaf .= 1 .- leaf.bio.auxil.ρ_leaf .- leaf.bio.auxil.τ_leaf;
+    end;
+
+    return nothing
+);
 
 
 #=

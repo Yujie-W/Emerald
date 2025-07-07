@@ -7,9 +7,10 @@
 #######################################################################################################################################################################################################
 """
 
-    photosynthesis!(ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT}
+    photosynthesis!(config::SPACConfiguration{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT}
 
 Update the photosynthesis rate, given
+- `config` `SPACConfiguration` struct
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `p_i` Internal CO₂ partial pressure in `Pa`

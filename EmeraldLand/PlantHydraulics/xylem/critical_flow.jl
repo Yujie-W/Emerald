@@ -20,12 +20,12 @@ Return the xylem pressure at the end; of xylem, given
 
 """
 function xylem_end_pressure(xylem::XylemHydraulics{FT}, flow::FT, t::FT) where {FT}
-    if xylem.trait.area <= 0
+    if xylem.state.asap <= 0
         return FT(0)
     end;
 
     # run the pressure profile calculation only if xylem area > 0
-    k_max = xylem.trait.area * xylem.trait.k_max / xylem.trait.l;
+    k_max = xylem.state.asap * xylem.trait.k_max / xylem.trait.l;
     f_st = relative_surface_tension(t);
     f_vis = relative_viscosity(t);
 
@@ -55,6 +55,7 @@ end;
 #     2023-Sep-27: add function to compute xylem critical pressure at steady state (no water exchange through the capacitor along the xylem)
 #     2024-Feb-28: add LAI <= 0 control
 #     2024_Jul-24: use spac cache
+#     2024-Sep-03: use state.asap to check the xylem status (<= 0 means the xylem is dead)
 #
 #######################################################################################################################################################################################################
 """
@@ -70,7 +71,7 @@ Return the critical flow rate that triggers a given amount of loss of hydraulic 
 
 """
 function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}, cache::SPACCache{FT}, t::FT, ini::FT = FT(0.5)) where {FT}
-    if xylem.trait.area <= 0
+    if xylem.state.asap <= 0
         return FT(0)
     end;
 
@@ -88,7 +89,7 @@ function critical_flow(config::SPACConfiguration{FT}, xylem::XylemHydraulics{FT}
     end;
 
     # set up method to calculate critical flow
-    fh = (xylem.auxil.pressure[1] - p_crt) * xylem.trait.k_max * xylem.trait.area / f_vis;
+    fh = (xylem.auxil.pressure[1] - p_crt) * xylem.trait.k_max * xylem.state.asap / f_vis;
     fl = FT(0);
     ms = cache.solver_nb;
     ms.x_min = fl;

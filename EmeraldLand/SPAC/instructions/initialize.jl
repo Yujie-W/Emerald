@@ -8,6 +8,8 @@
 #     2024-Feb-23: rename function to initialize_states! to be more consistent with its aim
 #     2024-Feb-27: rename function to initialize_energy_states! to be more consistent with its aim
 #     2024-Jul-30: add OCS to the trace gasses
+#     2025-Jun-05: make soil total energy relative to triple temperature for phase change purposes
+#     2025-Jun-05: account for ice volume when initializing the energy states of the soil
 #
 #######################################################################################################################################################################################################
 """
@@ -18,13 +20,13 @@ Initialize the energy related state variables of the SPAC structs.
 function initialize_energy_states! end;
 
 initialize_energy_states!(soil::SoilLayer{FT}, air::AirLayer{FT}) where {FT} = (
-    δθ = max(0, soil.trait.vc.Θ_SAT - soil.state.θ);
+    δθ = max(0, soil.trait.vc.Θ_SAT - soil.state.θ - soil.state.θ_ice);
     rt = GAS_R(FT) * soil.s_aux.t;
     soil.state.ns[3] = saturation_vapor_pressure(soil.s_aux.t) * soil.t_aux.δz * (δθ + FT(0.01)) / rt;
     soil.state.ns[4] = air.state.p_air * F_N₂(FT) * soil.t_aux.δz * δθ / rt;
     soil.state.ns[5] = air.state.p_air * F_O₂(FT) * soil.t_aux.δz * δθ / rt;
     soil.s_aux.cp = heat_capacitance(soil);
-    soil.state.Σe = soil.s_aux.cp * soil.s_aux.t;
+    soil.state.Σe = soil.s_aux.cp * (soil.s_aux.t - T₀(FT));
 
     return nothing
 );

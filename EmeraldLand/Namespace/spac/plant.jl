@@ -6,6 +6,8 @@
 # General
 #     2023-Oct-17: add struct Plant
 #     2024-Jul-24: add leaf shedded flag cache
+#     2024-Aug-05: add field z_beta to store the root distribution beta
+#     2024-Aug-29: add carbon pool
 #
 #######################################################################################################################################################################################################
 """
@@ -22,6 +24,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct Plant{FT}
     "Plant root depth and height information `[m]`"
     zs::Vector{FT}
+    "Plant root distribution beta"
+    z_beta::FT
 
     "Root hydraulic system"
     roots::Vector{Root{FT}}
@@ -37,15 +41,39 @@ Base.@kwdef mutable struct Plant{FT}
     leaves::Vector{CanopyLayer{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
+    "Carbon pool `[mol]`"
+    pool::CarbonPoolWholePlant{FT} = CarbonPoolWholePlant{FT}()
     "Memory cache"
     memory::PlantMemory{FT}
 
     # Cache variables
+    "Whether to regrow the leaves"
+    _leaf_regrow::Bool = false
     "Whether leaves are shedded"
     _leaf_shedded::Bool = false
-    "Whether there is any root connected to soil"
-    _root_connection::Bool = true
 end;
+
+kill_plant!(plant::Plant{FT}) where {FT} = (
+    for root in plant.roots
+        kill_plant!(root);
+    end;
+    kill_plant!(plant.junction);
+    kill_plant!(plant.trunk);
+    for branch in plant.branches
+        kill_plant!(branch);
+    end;
+    for leaf in plant.leaves
+        kill_plant!(leaf);
+    end;
+    kill_plant!(plant.pool);
+    kill_plant!(plant.memory);
+
+    # make sure the flags are correct after killing the plant
+    plant._leaf_regrow = false;
+    plant._leaf_shedded = true;
+
+    return nothing
+);
 
 
 #######################################################################################################################################################################################################
@@ -53,6 +81,7 @@ end;
 # Changes to this struct
 # General
 #     2024-Feb-22: add struct PlantStates
+#     2024-Aug-29: add carbon pool
 #
 #######################################################################################################################################################################################################
 """
@@ -83,20 +112,23 @@ mutable struct PlantStates{FT<:AbstractFloat}
     leaves::Vector{CanopyLayerStates{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
+    "Carbon pool `[mol]`"
+    pool::CarbonPoolWholePlant{FT}
     "Memory cache"
     memory::PlantMemory{FT}
 end;
 
 PlantStates(plant::Plant{FT}) where {FT} = PlantStates{FT}(
-            plant.zs,
+            deepcopy(plant.zs),
             [RootStates(root) for root in plant.roots],
-            plant.roots_index,
-            plant.junction.state,
+            deepcopy(plant.roots_index),
+            deepcopy(plant.junction.state),
             StemStates(plant.trunk),
             [StemStates(branch) for branch in plant.branches],
             [CanopyLayerStates(l) for l in plant.leaves],
-            plant.leaves_index,
-            plant.memory
+            deepcopy(plant.leaves_index),
+            deepcopy(plant.pool),
+            deepcopy(plant.memory)
 );
 
 sync_state!(plant::Plant{FT}, states::PlantStates{FT}) where {FT} = (
@@ -114,6 +146,7 @@ sync_state!(plant::Plant{FT}, states::PlantStates{FT}) where {FT} = (
         sync_state!(plant.leaves[i], states.leaves[i]);
     end;
     states.leaves_index .= plant.leaves_index;
+    sync_state!(plant.pool, states.pool);
     sync_state!(plant.memory, states.memory);
 
     return nothing
@@ -134,6 +167,7 @@ sync_state!(states::PlantStates{FT}, plant::Plant{FT}) where {FT} = (
         sync_state!(states.leaves[i], plant.leaves[i]);
     end;
     plant.leaves_index .= states.leaves_index;
+    sync_state!(states.pool, plant.pool);
     sync_state!(states.memory, plant.memory);
 
     return nothing

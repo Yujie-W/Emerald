@@ -38,6 +38,7 @@ CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = (
 #     2024-Jul-25: add CanopyLayerFluxAuxil
 #     2024-Jul-30: add OCS to the trace gasses
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Aug-29: add field ∫∂c∂t_in for CO₂ exchange with the atmosphere
 #
 #######################################################################################################################################################################################################
 """
@@ -89,6 +90,8 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     f_ocs::Vector{FT}
 
     # Integrators
+    "Integrator for CO₂ in (GPP - R)"
+    ∫∂c∂t_in::FT = 0
     "Integrator for transpiration out"
     ∫∂w∂t_out::FT = 0
 

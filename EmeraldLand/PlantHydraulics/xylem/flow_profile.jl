@@ -16,7 +16,7 @@ Return the flow rate into the organ
 """
 function flow_in end;
 
-flow_in(xylem::XylemHydraulics{FT}) where {FT} = flow_in(xylem.auxil);
+flow_in(xylem::XylemHydraulics{FT}) where {FT} = xylem.state.asap > 0 ? flow_in(xylem.auxil) : FT(0);
 
 flow_in(flow::XylemHydraulicsAuxilNSS{FT}) where {FT} = flow.flow[1];
 
@@ -39,7 +39,7 @@ Return the flow rate out of the organ
 """
 function flow_out end;
 
-flow_out(xylem::XylemHydraulics{FT}) where {FT} = flow_out(xylem.auxil);
+flow_out(xylem::XylemHydraulics{FT}) where {FT} = xylem.state.asap > 0 ? flow_out(xylem.auxil) : FT(0);
 
 flow_out(x_aux::XylemHydraulicsAuxilNSS{FT}) where {FT} = x_aux.flow[end];
 
@@ -52,6 +52,7 @@ flow_out(x_aux::XylemHydraulicsAuxilSS{FT}) where {FT} = x_aux.flow;
 # General
 #     2023-Sep-23: add function to set the flow rate profile in the xylem based on the flow rate out of the xylem
 #     2024-Feb-28: add LAI <= 0 control
+#     2024-Sep-03: remove the xylem area control (to enable the setting to 0 for dead xylem)
 #
 #######################################################################################################################################################################################################
 """
@@ -65,16 +66,7 @@ Set the flow rate profile in the xylem, given
 """
 function set_flow_profile! end;
 
-set_flow_profile!(xylem::XylemHydraulics{FT}, flow::FT) where {FT} = (
-    if xylem.trait.area <= 0
-        return nothing
-    end;
-
-    # update the flow profile calculation only if xylem area > 0
-    set_flow_profile!(xylem.auxil, flow);
-
-    return nothing
-);
+set_flow_profile!(xylem::XylemHydraulics{FT}, flow::FT) where {FT} = set_flow_profile!(xylem.auxil, flow);
 
 set_flow_profile!(x_aux::XylemHydraulicsAuxilNSS{FT}, flow::FT) where {FT} = (
     x_aux.flow[end] = flow;

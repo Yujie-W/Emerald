@@ -7,26 +7,20 @@
 #######################################################################################################################################################################################################
 """
 
-    layer_1_ρ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT}
     layer_1_ρ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT}
 
 Return the rescaled reflectance of the first layer of a leaf, given
 - `τ_in` transmittance of the incoming radiation
 - `ρ_21` reflectance at the water(2)-air(1) interface
 - `τ_sub` transmittance within a sublayer
-- `N` number of sublayers of each layer
 - `τ_all` transmittance within a layer
 
 """
-function layer_1_ρ end;
-
-layer_1_ρ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT} = layer_1_ρ(τ_in, ρ_21, τ_sub ^ N);
-
-layer_1_ρ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT} = (
+function layer_1_ρ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT}
     denom = 1 - ρ_21 * τ_all * ρ_21 * τ_all;
 
     return 1 - τ_in + τ_in * τ_all * ρ_21 * τ_all * (1 - ρ_21) / denom
-);
+end;
 
 
 #######################################################################################################################################################################################################
@@ -38,26 +32,20 @@ layer_1_ρ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT} = (
 #######################################################################################################################################################################################################
 """
 
-    layer_1_τ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT}
     layer_1_τ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT}
 
 Return the rescaled transmittance of the first layer of a leaf, given
 - `τ_in` transmittance of the incoming radiation
 - `ρ_21` reflectance at the water(2)-air(1) interface
 - `τ_sub` transmittance within a sublayer
-- `N` number of sublayers of each layer
 - `τ_all` transmittance within a layer
 
 """
-function layer_1_τ end;
-
-layer_1_τ(τ_in::FT, ρ_21::FT, τ_sub::FT, N::Int) where {FT} = layer_1_τ(τ_in, ρ_21, τ_sub ^ N);
-
-layer_1_τ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT} = (
+function layer_1_τ(τ_in::FT, ρ_21::FT, τ_all::FT) where {FT}
     denom = 1 - ρ_21 * τ_all * ρ_21 * τ_all;
 
     return τ_in * τ_all * (1 - ρ_21) / denom
-);
+end;
 
 
 #######################################################################################################################################################################################################
@@ -132,22 +120,29 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_layer_ρ_τ!(bio::LeafBio{FT}, N::Int) where {FT}
+    leaf_layer_ρ_τ!(bio::LeafBio{FT}) where {FT}
 
 Update the reflectance and transmittance of the leaf layers, given
 - `bio` leaf hyperspectral biophysics
-- `N` number of sublayers of each layer
 
 """
-function leaf_layer_ρ_τ!(bio::LeafBio{FT}, N::Int) where {FT}
-    bio.auxil.ρ_layer_θ .= layer_1_ρ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
-    bio.auxil.τ_layer_θ .= layer_1_τ.(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
-    bio.auxil.ρ_layer_1 .= layer_1_ρ.(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
-    bio.auxil.τ_layer_1 .= layer_1_τ.(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_sub_1, N);
+function leaf_layer_ρ_τ!(bio::LeafBio{FT}) where {FT}
+    # first layer
+    @. bio.auxil.ρ_layer_θ = layer_1_ρ(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
+    @. bio.auxil.τ_layer_θ = layer_1_τ(bio.auxil.τ_interface_θ , bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
+    @. bio.auxil.ρ_layer_1 = layer_1_ρ(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
+    @. bio.auxil.τ_layer_1 = layer_1_τ(bio.auxil.τ_interface_12, bio.auxil.ρ_interface_21, bio.auxil.τ_all_1);
 
+    # second layer
     m = bio.trait.meso_n - 1;
-    bio.auxil.ρ_layer_2 .= layer_2_ρ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
-    bio.auxil.τ_layer_2 .= layer_2_τ.(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
+    @. bio.auxil.ρ_layer_2 = layer_2_ρ(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
+    @. bio.auxil.τ_layer_2 = layer_2_τ(bio.auxil.ρ_layer_1, bio.auxil.τ_layer_1, m);
+
+    # effective interface reflectance for the second layer
+    @. bio.auxil.ρ_interface_12_eff = effective_ρ_12(bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2, bio.auxil.τ_all_2);
+    @. bio.auxil.ρ_interface_21_eff = effective_ρ_21(bio.auxil.ρ_layer_2, bio.auxil.τ_layer_2, bio.auxil.τ_all_2);
+    @. bio.auxil.τ_interface_12_eff = 1 - bio.auxil.ρ_interface_12_eff;
+    @. bio.auxil.τ_interface_21_eff = 1 - bio.auxil.ρ_interface_21_eff;
 
     return nothing
 end;

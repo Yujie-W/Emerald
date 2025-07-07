@@ -42,7 +42,7 @@ function TROPOMI_SIF740 end;
 TROPOMI_SIF740(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = TROPOMI_SIF740(spac.canopy, config.SPECTRA);
 
 TROPOMI_SIF740(can::MultiLayerCanopy{FT}, spectra::ReferenceSpectra{FT}) where {FT} = (
-    return read_spectrum(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(740))
+    return interpolate_data(spectra.Λ_SIF, can.sensor_geometry.auxil.sif_obs, FT(740))
 );
 
 

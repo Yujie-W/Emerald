@@ -9,6 +9,7 @@
 #     2023-Oct-14: if SZA > 89, set all shortwave fluxes to 0 and reflectance to NaN
 #     2023-Oct-14: if LAI <= 0, use soil reflectance only
 #     2023-Oct-18: account for SAI in the canopy reflectance calculation
+#     2024-Sep-04: separate leaf and stem optical properties
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
 #

@@ -25,8 +25,8 @@ function process_data!(ftds::FluxTowerDataset; displaying::Bool = false, force::
         file_in = "$(AMERIFLUX_DATA)/$(fn).csv";
         file_out = "$(AMERIFLUX_REPROCESSED)/$(fn).nc";
     elseif ftds.LABEL[1:3] == "FLX"
-        file_in = "$(FLUXNET_DATA)/$(fn).csv";
-        file_out = "$(FLUXNET_REPROCESSED)/$(fn).nc";
+        file_in = "$(FLUXNET2015_DATA)/$(fn).csv";
+        file_out = "$(FLUXNET2015_REPROCESSED)/$(fn).nc";
     else
         return error("Unknown tower label: $(ftds.LABEL)")
     end;
@@ -50,7 +50,7 @@ function process_data!(ftds::FluxTowerDataset; displaying::Bool = false, force::
                 RAD    = detect_data(df_in, "SW_IN"; displaying = displaying),      # W m⁻²
                 RAD_LW = detect_data(df_in, "LW_IN"; displaying = displaying),      # W m⁻²
                 P_ATM  = detect_data(df_in, "PA"; displaying = displaying) .* 1000, # Pa
-                PRECIP = detect_data(df_in, "P"; displaying = displaying),          # mm
+                PRECIP = detect_data(df_in, "P"; displaying = displaying),          # m
                 CO2    = detect_data(df_in, "CO2"; displaying = displaying),        # ppm
                 T_SOIL = detect_data(df_in, "TS"; displaying = displaying) .+ T₀(), # K
                 SWC    = detect_data(df_in, "SWC"; displaying = displaying),        # m³ m⁻³
