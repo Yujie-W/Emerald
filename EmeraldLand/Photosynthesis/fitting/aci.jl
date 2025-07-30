@@ -7,13 +7,15 @@
 #     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
 #     2024-Aug-06: move constructor to Namespace
 #     2024-Oct-03: remove options for Rd and Γ_star fitting
+#     2025-Jul-30: improved curve fitting algorithm
 #
 #######################################################################################################################################################################################################
 """
 
     aci_fit!(config::SPACConfiguration{FT},
              df::DataFrame,
-             model::String;
+             model::String,
+             params::Vector{String};
              initial_guess::Union{Nothing, Vector} = nothing,
              min_count::Int = 9,
              remove_outlier::Bool = false,
@@ -23,6 +25,7 @@ Fit the A-Ci curve, given
 - `config` `SPACConfiguration` struct
 - `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
 - `model` Photosynthesis model string (C3Cyto, C3CytoInfAp, C3JB, C3JBInfAp, C3VJP, C3VJPInfAp, C3CLM, C3CLMInfAp, C4CLM, C4CLMSmooth, C4VJP)
+- `params` Vector of fitting parameters (e.g., ["Vcmax25", "Jmax25", "Γstar25", "Rd25", "b₆f"])
 - `initial_guess` Initial guess of fitting parameters
 - `min_count` Minimum number of data points to fit an A-Ci curve
 - `remove_outlier` Remove outliers or not
@@ -32,7 +35,8 @@ Fit the A-Ci curve, given
 function aci_fit!(
             config::SPACConfiguration{FT},
             df::DataFrame,
-            model::String;
+            model::String,
+            params::Vector{String};
             initial_guess::Union{Nothing, Vector} = nothing,
             min_count::Int = 9,
             remove_outlier::Bool = false,
@@ -51,6 +55,7 @@ function aci_fit!(
                     ps,
                     AirLayer{FT}(),
                     df,
+                    params,
                     initial_guess;
                     min_count = min_count,
                     rmse_threshold = rmse_threshold)
@@ -60,6 +65,7 @@ function aci_fit!(
                     ps,
                     AirLayer{FT}(),
                     df,
+                    params,
                     initial_guess)
     end;
 end;

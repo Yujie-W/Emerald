@@ -494,6 +494,7 @@ CanopyLayerPhotosystemAuxil(config::SPACConfiguration{FT}) where {FT} = (
 #     2023-Oct-36: combine C3Cyto, C3VJP, and C4VJP into LeafPhotosystem
 #     2024-Feb-26: add field trait
 #     2024-Aug-06: add constructor for different models
+#     2025-Jul-30: fix photosynthesis model constructor
 #
 #######################################################################################################################################################################################################
 """
@@ -522,7 +523,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3CytoInfAp"
@@ -530,7 +532,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3JB"
@@ -538,7 +541,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3JBInfAp"
@@ -546,7 +550,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit{FT}()
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3VJP"
@@ -607,6 +612,7 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
 # General
 #     2024-Jul-25: add CanopyLayerPhotosystem
 #     2024-Aug-13: add constructor for different models
+#     2025-Jul-30: fix photosynthesis model constructor
 #
 #######################################################################################################################################################################################################
 """
@@ -636,6 +642,8 @@ CanopyLayerPhotosystem(config::SPACConfiguration{FT}, model::String = "C3VJP") w
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3CytoInfAp"
@@ -643,6 +651,8 @@ CanopyLayerPhotosystem(config::SPACConfiguration{FT}, model::String = "C3VJP") w
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3JB"
@@ -650,6 +660,8 @@ CanopyLayerPhotosystem(config::SPACConfiguration{FT}, model::String = "C3VJP") w
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3JBInfAp"
@@ -657,6 +669,8 @@ CanopyLayerPhotosystem(config::SPACConfiguration{FT}, model::String = "C3VJP") w
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3VJP"

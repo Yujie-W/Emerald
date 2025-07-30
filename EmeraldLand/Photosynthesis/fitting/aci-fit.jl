@@ -11,6 +11,7 @@
 #     2024-Aug-06: make initial_guess mandatory
 #     2024-Oct-03: customize the initial guess for C3 models
 #     2024-Oct-04: use max(1, p_1 - j_1) to avoid negative b6f guess
+#     2025-Jul-30: improved curve fitting algorithm
 #
 #######################################################################################################################################################################################################
 """
@@ -19,6 +20,7 @@
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             df::DataFrame,
+            params::Vector{String},
             initial_guess::Vector) where {FT}
 
 Fit the A-Ci curve (will be abstractized based on the trait and methods embedded), given
@@ -26,6 +28,7 @@ Fit the A-Ci curve (will be abstractized based on the trait and methods embedded
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
+- `params` Vector of fitting parameters (e.g., ["Vcmax25", "Jmax25", "Γstar25", "Rd25", "b₆f"])
 - `initial_guess` Initial guess of fitting parameters
 
 """
@@ -35,14 +38,16 @@ aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, ps.trait, air, df, initial_guess);
+        params::Vector{String},
+        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, ps.trait, air, df, params, initial_guess);
 
 aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
         pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
         air::AirLayer{FT},
         df::DataFrame,
-        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df, initial_guess);
+        params::Vector{String},
+        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, pst, pst.ACM, pst.AJM, pst.APM, air, df, params, initial_guess);
 
 aci_fit(config::SPACConfiguration{FT},
         ps::LeafPhotosystem{FT},
@@ -52,16 +57,48 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC3Vcmax,
         air::AirLayer{FT},
         df::DataFrame,
+        params::Vector{String},
         initial_guess::Union{Nothing, Vector}) where {FT} = (
     # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
+    x_mins = FT[];
+    x_maxs = FT[];
+    x_inis = FT[];
+    Δ_inis = FT[];
+    Δ_tols = FT[];
     if !isnothing(initial_guess)
-        @assert length(initial_guess) == 4;
-        mthd = ReduceStepMethodND{FT}(
-            x_mins = [1, 1, 1, 0.1],
-            x_maxs = [200, 400, 10, 10],
-            x_inis = initial_guess[:],
-            Δ_inis = [10, 10, 1, 1],
-        );
+        @assert length(initial_guess) == length(params);
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            iguess = findfirst(params .== "Vcmax25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Jmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 400);
+            iguess = findfirst(params .== "Jmax25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Γstar25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 10);
+            iguess = findfirst(params .== "Γstar25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+        if "Rd25" in params
+            push!(x_mins, 0.1);
+            push!(x_maxs, 10);
+            iguess = findfirst(params .== "Rd25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
     else
         # loop through the data once to get the respiration and Γ_star limits
         rd_lim_min = 0.1;
@@ -87,20 +124,43 @@ aci_fit(config::SPACConfiguration{FT},
             jmax_guess = nanmin([jmax_guess, 200]);
         end;
         # set the initial guess
-        mthd = ReduceStepMethodND{FT}(
-            x_mins = [                1,                1,               1, rd_lim_min * 1.0],
-            x_maxs = [vcmax_guess * 2.0, jmax_guess * 2.0, γ_lim_max * 1.0,                5],
-            x_inis = [vcmax_guess * 1.0, jmax_guess * 1.0, γ_lim_max * 0.8, rd_lim_min * 1.2],
-            Δ_inis = [10, 10, 1, 1],
-        );
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, vcmax_guess * 2.0);
+            push!(x_inis, vcmax_guess * 1.0);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Jmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, jmax_guess * 2.0);
+            push!(x_inis, jmax_guess * 1.0);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Γstar25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, γ_lim_max * 1.0);
+            push!(x_inis, γ_lim_max * 0.8);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+        if "Rd25" in params
+            push!(x_mins, rd_lim_min * 1.0);
+            push!(x_maxs, 5);
+            push!(x_inis, rd_lim_min * 1.2);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
     end;
 
-    stol = SolutionToleranceND{FT}([0.1, 0.1, 0.01, 0.01], 50);
+    mthd = ReduceStepMethodND{FT}(x_mins = x_mins, x_maxs = x_maxs, x_inis = x_inis, Δ_inis = Δ_inis);
+    stol = SolutionToleranceND{FT}(Δ_tols, 50);
     # func(x) = (rme = aci_rmse(config, ps, pst, air, df, x); @info "C3VJP model" x rme ; -rme);
-    func(x) = -aci_rmse(config, ps, pst, air, df, x);
+    func(x) = -aci_rmse(config, ps, pst, air, df, params, x);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(config, ps, pst, air, df, sol);
+    best_rmse = aci_rmse(config, ps, pst, air, df, params, sol);
     aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
@@ -114,16 +174,48 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC3Vcmax,
         air::AirLayer{FT},
         df::DataFrame,
+        params::Vector{String},
         initial_guess::Union{Nothing, Vector}) where {FT} = (
     # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
+    x_mins = FT[];
+    x_maxs = FT[];
+    x_inis = FT[];
+    Δ_inis = FT[];
+    Δ_tols = FT[];
     if !isnothing(initial_guess)
-        @assert length(initial_guess) == 4;
-        mthd = ReduceStepMethodND{FT}(
-            x_mins = [1, 0.01, 1, 0.1],
-            x_maxs = [200, 5, 10, 10],
-            x_inis = initial_guess[:],
-            Δ_inis = [10, 1, 1, 1],
-        );
+        @assert length(initial_guess) == length(params);
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            iguess = findfirst(params .== "Vcmax25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "b₆f" in params
+            push!(x_mins, 0.01);
+            push!(x_maxs, 5);
+            iguess = findfirst(params .== "b₆f");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+        if "Γstar25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 10);
+            iguess = findfirst(params .== "Γstar25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+        if "Rd25" in params
+            push!(x_mins, 0.1);
+            push!(x_maxs, 10);
+            iguess = findfirst(params .== "Rd25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
     else
         # loop through the data once to get the respiration and Γ_star limits
         rd_lim_min = 0.1;
@@ -151,19 +243,42 @@ aci_fit(config::SPACConfiguration{FT},
             b6f_guess = nanmin([b6f_guess, 1]);
         end;
         # set the initial guess
-        mthd = ReduceStepMethodND{FT}(
-            x_mins = [                1,            0.05,               1, rd_lim_min * 1.0],
-            x_maxs = [vcmax_guess * 2.0, b6f_guess * 2.0, γ_lim_max * 1.0,                5],
-            x_inis = [vcmax_guess * 1.0, b6f_guess * 1.0, γ_lim_max * 0.8, rd_lim_min * 1.2],
-            Δ_inis = [10, 0.1, 1, 1],
-        );
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, vcmax_guess * 2.0);
+            push!(x_inis, vcmax_guess * 1.0);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "b₆f" in params
+            push!(x_mins, 0.01);
+            push!(x_maxs, b6f_guess * 2.0);
+            push!(x_inis, b6f_guess * 1.0);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+        if "Γstar25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, γ_lim_max * 1.0);
+            push!(x_inis, γ_lim_max * 0.8);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+        if "Rd25" in params
+            push!(x_mins, rd_lim_min * 1.0);
+            push!(x_maxs, 5);
+            push!(x_inis, rd_lim_min * 1.2);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
     end;
-    stol = SolutionToleranceND{FT}([0.1, 0.01, 0.01, 0.01], 50);
+    mthd = ReduceStepMethodND{FT}(x_mins = x_mins, x_maxs = x_maxs, x_inis = x_inis, Δ_inis = Δ_inis);
+    stol = SolutionToleranceND{FT}(Δ_tols, 50);
     # func(x) = (rme = aci_rmse(config, ps, pst, air, df, x); @info "C3JB model" x rme; -rme);
-    func(x) = -aci_rmse(config, ps, pst, air, df, x);
+    func(x) = -aci_rmse(config, ps, pst, air, df, params, x);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(config, ps, pst, air, df, sol);
+    best_rmse = aci_rmse(config, ps, pst, air, df, params, sol);
     aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
@@ -177,18 +292,55 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC4VcmaxPi,
         air::AirLayer{FT},
         df::DataFrame,
+        params::Vector{String},
         initial_guess::Union{Nothing, Vector}) where {FT} = (
-    mthd = ReduceStepMethodND{FT}(
-        x_mins = [1, 0.1],
-        x_maxs = [200, 10],
-        x_inis = initial_guess,
-        Δ_inis = [10, 1],
-    );
-    stol = SolutionToleranceND{FT}([0.1, 0.01], 50);
-    func(x) = -aci_rmse(config, ps, pst, air, df, x);
+    # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
+    x_mins = FT[];
+    x_maxs = FT[];
+    x_inis = FT[];
+    Δ_inis = FT[];
+    Δ_tols = FT[];
+    if !isnothing(initial_guess)
+        @assert length(initial_guess) == length(params);
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            iguess = findfirst(params .== "Vcmax25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Rd25" in params
+            push!(x_mins, 0.1);
+            push!(x_maxs, 10);
+            iguess = findfirst(params .== "Rd25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+    else
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            push!(x_inis, 50);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Rd25" in params
+            push!(x_mins, 0.1);
+            push!(x_maxs, 10);
+            push!(x_inis, 1);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+    end;
+
+    mthd = ReduceStepMethodND{FT}(x_mins = x_mins, x_maxs = x_maxs, x_inis = x_inis, Δ_inis = Δ_inis);
+    stol = SolutionToleranceND{FT}(Δ_tols, 50);
+    func(x) = -aci_rmse(config, ps, pst, air, df, params, x);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(config, ps, pst, air, df, sol);
+    best_rmse = aci_rmse(config, ps, pst, air, df, params, sol);
     aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
@@ -202,18 +354,70 @@ aci_fit(config::SPACConfiguration{FT},
         apm::ApMethodC4VpmaxPi,
         air::AirLayer{FT},
         df::DataFrame,
+        params::Vector{String},
         initial_guess::Union{Nothing, Vector}) where {FT} = (
-    mthd = ReduceStepMethodND{FT}(
-        x_mins = [1, 1, 0.1],
-        x_maxs = [200, 200, 10],
-        x_inis = initial_guess,
-        Δ_inis = [10, 10, 1],
-    );
-    stol = SolutionToleranceND{FT}([0.1, 0.1, 0.01], 50);
-    func(x) = -aci_rmse(config, ps, pst, air, df, x);
+    # if initial_guess is not provided, derive the ranges from the data, else use the provided initial_guess (limit is twice of the initial_guess)
+    x_mins = FT[];
+    x_maxs = FT[];
+    x_inis = FT[];
+    Δ_inis = FT[];
+    Δ_tols = FT[];
+    if !isnothing(initial_guess)
+        @assert length(initial_guess) == length(params);
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            iguess = findfirst(params .== "Vcmax25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Vpmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            iguess = findfirst(params .== "Vpmax25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Rd25" in params
+            push!(x_mins, 0.1);
+            push!(x_maxs, 10);
+            iguess = findfirst(params .== "Rd25");
+            push!(x_inis, initial_guess[iguess]);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+    else
+        if "Vcmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            push!(x_inis, 50);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Vpmax25" in params
+            push!(x_mins, 1);
+            push!(x_maxs, 200);
+            push!(x_inis, 50);
+            push!(Δ_inis, 10);
+            push!(Δ_tols, 0.1);
+        end;
+        if "Rd25" in params
+            push!(x_mins, 0.1);
+            push!(x_maxs, 10);
+            push!(x_inis, 1);
+            push!(Δ_inis, 1);
+            push!(Δ_tols, 0.01);
+        end;
+    end;
+
+    mthd = ReduceStepMethodND{FT}(x_mins = x_mins, x_maxs = x_maxs, x_inis = x_inis, Δ_inis = Δ_inis);
+    stol = SolutionToleranceND{FT}(Δ_tols, 50);
+    func(x) = -aci_rmse(config, ps, pst, air, df, params, x);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(config, ps, pst, air, df, sol);
+    best_rmse = aci_rmse(config, ps, pst, air, df, params, sol);
     aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
@@ -236,6 +440,7 @@ aci_fit(config::SPACConfiguration{FT},
                 ps::LeafPhotosystem{FT},
                 air::AirLayer{FT},
                 df::DataFrame,
+                params::Vector{String},
                 initial_guess::Union{Nothing, Vector};
                 min_count::Int = 9,
                 rmse_threshold::Number = 2) where {FT}
@@ -245,6 +450,7 @@ Fit the A-Ci curve by removing outliers, given
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
+- `params` Vector of fitting parameters (e.g., ["Vcmax25", "Jmax25", "Γstar25", "Rd25", "b₆f"])
 - `initial_guess` Initial guess of fitting parameters
 - `min_count` Minimum number of data points to fit an A-Ci curve
 - `rmse_threshold` Threshold of RMSE to stop removing outliers
@@ -255,6 +461,7 @@ function aci_fit_exclude_outliter(
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             df::DataFrame,
+            params::Vector{String},
             initial_guess::Union{Nothing, Vector};
             min_count::Int = 9,
             rmse_threshold::Number = 2) where {FT}
@@ -265,7 +472,7 @@ function aci_fit_exclude_outliter(
     last_df = deepcopy(df);
     crnt_df = deepcopy(df);
     while true
-        sol, best_rmse, aci = aci_fit(config, ps, air, crnt_df, initial_guess);
+        sol, best_rmse, aci = aci_fit(config, ps, air, crnt_df, params, initial_guess);
         if last_rmse - best_rmse < rmse_threshold
             break
         else
@@ -281,7 +488,7 @@ function aci_fit_exclude_outliter(
 
     # change the df and traits
     df.A_NET .= last_df.A_NET;
-    best_rmse = aci_rmse(config, ps, air, df, last_sol);
+    best_rmse = aci_rmse(config, ps, air, df, params, last_sol);
     aci = aci_curve(config, ps, air, df);
 
     return last_sol, best_rmse, aci
