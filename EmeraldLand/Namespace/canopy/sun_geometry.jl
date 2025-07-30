@@ -115,6 +115,7 @@ SunGeometrySDAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = Sun
 #     2024-Jul-27: use bined PPAR to speed up
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
+#     2025-Jul-30: add fields for APAR calculation
 #
 #######################################################################################################################################################################################################
 """
@@ -220,6 +221,8 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     ppar_sunlit::Array{FT,3}
 
     # PPAR bins
+    "Sum of APAR in each bin"
+    _apar_sum::Vector{FT}
     "Sum of PPAR in each bin"
     _ppar_sum::Vector{FT}
     "Count of PPAR in each bin"

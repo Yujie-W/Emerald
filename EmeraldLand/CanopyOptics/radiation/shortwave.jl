@@ -16,6 +16,7 @@
 #     2024-Jul-27: use bined PPAR to speed up
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Aug-05: add a special case when DIM_PPAR_BINS is 0 (one leaf model, no sunlit and shaded fraction)
+#     2025-Jul-30: add code chunk to save APAR as well as PPAR
 #
 #######################################################################################################################################################################################################
 """
@@ -197,26 +198,33 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
             # bin the PPAR values based on their PPAR if DIM_PPAR_BINS is not nothing
             if isnothing(DIM_PPAR_BINS)
                 for j in 1:DIM_AZI
+                    leaf.flux.auxil.apar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_apar_dir .+ Σ_apar_dif;
                     leaf.flux.auxil.ppar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_ppar_dir .+ Σ_ppar_dif;
                 end;
                 sun_geo.auxil.ppar_fraction[1:end-1,irt] .= 1 ./ ( DIM_INCL * DIM_AZI) .* sun_geo.s_aux.p_sunlit[irt];
             elseif DIM_PPAR_BINS == 0
                 # mean_ppar_sunlit = mean(view(sun_geo.auxil.ppar_sunlit,:,:,irt));
                 # leaf.flux.auxil.ppar[1] = mean_ppar_sunlit * sun_geo.s_aux.p_sunlit[irt] + Σ_ppar_dif * (1 - sun_geo.s_aux.p_sunlit[irt]);
+                leaf.flux.auxil.apar[1] = Σ_apar_dir / normi * sun_geo.s_aux.p_sunlit[irt] + Σ_apar_dif;
                 leaf.flux.auxil.ppar[1] = Σ_ppar_dir / normi * sun_geo.s_aux.p_sunlit[irt] + Σ_ppar_dif;
                 sun_geo.auxil.ppar_index .= 1;
             else
+                min_apar = minimum(view(sun_geo.auxil.apar_sunlit, :, :, irt));
+                max_apar = maximum(view(sun_geo.auxil.apar_sunlit, :, :, irt));
                 min_ppar = minimum(view(sun_geo.auxil.ppar_sunlit, :, :, irt));
                 max_ppar = maximum(view(sun_geo.auxil.ppar_sunlit, :, :, irt));
                 δ_ppar = (max_ppar - min_ppar) / DIM_PPAR_BINS;
+                sun_geo.auxil._apar_sum .= 0;
                 sun_geo.auxil._ppar_sum .= 0;
                 sun_geo.auxil._ppar_count .= 0;
                 if δ_ppar == 0
+                    sun_geo.auxil._apar_sum[1] += max_apar * DIM_INCL * DIM_AZI;
                     sun_geo.auxil._ppar_sum[1] += max_ppar * DIM_INCL * DIM_AZI;
                     sun_geo.auxil._ppar_count[1] += DIM_INCL * DIM_AZI;
                 else
                     for i in 1:DIM_INCL, j in 1:DIM_AZI
                         ind = min(DIM_PPAR_BINS, Int((sun_geo.auxil.ppar_sunlit[i,j,irt] - min_ppar) ÷ δ_ppar + 1));
+                        sun_geo.auxil._apar_sum[ind] += sun_geo.auxil.apar_sunlit[i,j,irt];
                         sun_geo.auxil._ppar_sum[ind] += sun_geo.auxil.ppar_sunlit[i,j,irt];
                         sun_geo.auxil._ppar_count[ind] += 1;
                         sun_geo.auxil.ppar_index[i,j,irt] = ind;
@@ -224,16 +232,20 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
                 end;
                 for i in 1:DIM_PPAR_BINS
                     if sun_geo.auxil._ppar_count[i] > 0
+                        leaf.flux.auxil.apar[i] = sun_geo.auxil._apar_sum[i] / sun_geo.auxil._ppar_count[i];
                         leaf.flux.auxil.ppar[i] = sun_geo.auxil._ppar_sum[i] / sun_geo.auxil._ppar_count[i];
                     else
+                        leaf.flux.auxil.apar[i] = 0;
                         leaf.flux.auxil.ppar[i] = 0;
                     end;
                 end;
                 sun_geo.auxil.ppar_fraction[1:DIM_PPAR_BINS,irt] .= sun_geo.auxil._ppar_count ./ ( DIM_INCL * DIM_AZI) .* sun_geo.s_aux.p_sunlit[irt];
             end;
+            leaf.flux.auxil.apar[end] = Σ_apar_dif;
             leaf.flux.auxil.ppar[end] = Σ_ppar_dif;
             sun_geo.auxil.ppar_fraction[end,irt] = 1 - sun_geo.s_aux.p_sunlit[irt];
         else
+            leaf.flux.auxil.apar .= 0;
             leaf.flux.auxil.ppar .= 0;
         end;
     end;

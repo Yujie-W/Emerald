@@ -33,6 +33,39 @@ PAR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 #
 # Changes to this function
 # General
+#     2025-Jul-30: add function for APAR
+#
+#######################################################################################################################################################################################################
+"""
+
+    APAR(spac::BulkSPAC{FT}) where {FT}
+
+Return the canopy integrated APAR per ground area, given
+- `spac` `BulkSPAC` SPAC
+
+"""
+function APAR end;
+
+APAR(spac::BulkSPAC{FT}) where {FT} = (
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+    n_layer = length(leaves);
+
+    # compute GPP
+    apar::FT = 0;
+    for irt in eachindex(leaves)
+        ilf = n_layer + 1 - irt;
+        apar += leaves[ilf].flux.auxil.apar' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt) * canopy.structure.trait.δlai[irt];
+    end;
+
+    return apar
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
 #     2022-Oct-19: add function to compute canopy integrated PPAR
 #     2023-May-19: use δlai per canopy layer
 #

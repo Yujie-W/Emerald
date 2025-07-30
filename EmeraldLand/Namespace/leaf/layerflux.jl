@@ -39,6 +39,7 @@ CanopyLayerFluxState(config::SPACConfiguration{FT}) where {FT} = (
 #     2024-Jul-30: add OCS to the trace gasses
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Aug-29: add field ∫∂c∂t_in for CO₂ exchange with the atmosphere
+#     2025-Jul-30: add fields for APAR calculation
 #
 #######################################################################################################################################################################################################
 """
@@ -96,6 +97,8 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     ∫∂w∂t_out::FT = 0
 
     # ppar from canopy radiation
+    "Absorbed photosynthetically active radiation for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
+    apar::Vector{FT}
     "Absorbed photosynthetically active radiation used for photosynthesis for sunlit and shaded (end element) leaves `[μmol m⁻² s⁻¹]`"
     ppar::Vector{FT}
 
@@ -122,6 +125,7 @@ CanopyLayerFluxAuxil(config::SPACConfiguration{FT}) where {FT} = (
                 a_g     = zeros(FT, cache_dim_ppar+1),
                 a_n     = zeros(FT, cache_dim_ppar+1),
                 f_ocs   = zeros(FT, cache_dim_ppar+1),
+                apar    = zeros(FT, cache_dim_ppar+1),
                 ppar    = zeros(FT, cache_dim_ppar+1),
     )
 );
