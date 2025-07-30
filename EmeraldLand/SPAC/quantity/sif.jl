@@ -3,33 +3,24 @@
 # Changes to this function
 # General
 #     2023-Jun-13: add function to add up total SIF photons (unit mol m⁻² s⁻¹)
+#     2025-Jul-30: fix SIF calculation
 #
 #######################################################################################################################################################################################################
 """
 
 ΣSIF(spac::BulkSPAC{FT}) where {FT}
 
-Return the total SIF at chloroplast level (without any reabsorption) per ground area, given
+Return the total SIF at top of the canopy after reabsorption in W m⁻² per ground area, given
 - `spac` `BulkSPAC` SPAC
 
 """
 function ΣSIF end;
 
 ΣSIF(spac::BulkSPAC{FT}) where {FT} = (
-    canopy = spac.canopy;
-    leaves = spac.plant.leaves;
-    n_layer = length(leaves);
-    n_sunlit = length(leaves[1].flux.auxil.ppar) - 1;
+    sun_geo = spac.canopy.sun_geometry;
+    (; SPECTRA) = spac.config;
 
-    # compute SIF in photons unit
-    Σsif::FT = 0;
-    N = length(leaves);
-    for irt in 1:n_layer
-        ilf = n_layer + 1 - irt;
-        Σsif += leaves[ilf].flux.auxil.ppar' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt) * canopy.structure.trait.δlai[irt];
-    end;
-
-    return Σsif
+    return sun_geo.auxil.e_sifꜛ[1]' * SPECTRA.ΔΛ_SIF / 1000
 );
 
 
