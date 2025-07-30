@@ -31,6 +31,7 @@ SAVING_DICT = Dict{String, Any}(
             "NIRvI"       => false,
             "NIRvR"       => false,
             "PAR"         => false,
+            "APAR"        => false,
             "PPAR"        => false,
     # Modeled plant health status
             "C_POOL"      => true,

@@ -110,6 +110,9 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     if saving_dict["PAR"]
         wdf.PAR[ind] = daytime ? PAR(config, spac) : 0;
     end;
+    if saving_dict["APAR"]
+        wdf.APAR[ind] = daytime ? APAR(spac) : 0;
+    end;
     if saving_dict["PPAR"]
         wdf.PPAR[ind] = daytime ? PPAR(spac) : 0;
     end;
