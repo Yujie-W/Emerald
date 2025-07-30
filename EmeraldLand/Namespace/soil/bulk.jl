@@ -22,7 +22,7 @@ $(TYPEDFIELDS)
 """
 Base.@kwdef mutable struct SoilBulkTrait{FT}
     "Total area of the soil `[m²]`"
-    area::FT = 500
+    area::FT = 80
     "Color class as in CLM"
     color::Int = 1
     "Reflectance for longwave radiation"

@@ -96,11 +96,11 @@ photosystem_coefficients!(
     k_sum_nb = -1 * (PSII_RATE_CONSTANTS.K_U * ϕ_P2_a + PSII_RATE_CONSTANTS.K_P * (q2 - ϕ_P2_a));
     k_sum_nc = -1 * (ϕ_P2_a * (1 - q2) * PSII_RATE_CONSTANTS.K_U * PSII_RATE_CONSTANTS.K_P);
     k_sum    = upper_quadratic(k_sum_na, k_sum_nb, k_sum_nc);
-    k_n      = k_sum - PSII_RATE_CONSTANTS.K_F - PSII_RATE_CONSTANTS.K_U - PSII_RATE_CONSTANTS.K_D;
+    psa.k_n  = k_sum - PSII_RATE_CONSTANTS.K_F - PSII_RATE_CONSTANTS.K_U - PSII_RATE_CONSTANTS.K_D;
 
     # compute PSII and PSI yeilds
-    k_sum_1 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n;
-    k_sum_2 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n + PSII_RATE_CONSTANTS.K_P;
+    k_sum_1 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + psa.k_n;
+    k_sum_2 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + psa.k_n + PSII_RATE_CONSTANTS.K_P;
     k_sum_3 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P;
     k_sum_4 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_X;
     ϕ_U2_a  = (q2 * PSII_RATE_CONSTANTS.K_U / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_U / k_sum_1);
@@ -309,7 +309,6 @@ photosystem_coefficients!(
     k_sum_nb = cache.cache_incl_azi_2_5;
     k_sum_nc = cache.cache_incl_azi_2_6;
     k_sum    = cache.cache_incl_azi_2_7;
-    k_n      = cache.cache_incl_azi_2_8;
     k_sum_1  = cache.cache_incl_azi_2_9;
     k_sum_2  = cache.cache_incl_azi_3_1;
     ϕ_U2_a   = cache.cache_incl_azi_3_2;
@@ -325,11 +324,11 @@ photosystem_coefficients!(
     @. k_sum_nb = -1 * (PSII_RATE_CONSTANTS.K_U * ϕ_P2_a + PSII_RATE_CONSTANTS.K_P * (q2 - ϕ_P2_a));
     @. k_sum_nc = -1 * (ϕ_P2_a * (1 - q2) * PSII_RATE_CONSTANTS.K_U * PSII_RATE_CONSTANTS.K_P);
     @. k_sum    = upper_quadratic(k_sum_na, k_sum_nb, k_sum_nc);
-    @. k_n      = k_sum - PSII_RATE_CONSTANTS.K_F - PSII_RATE_CONSTANTS.K_U - PSII_RATE_CONSTANTS.K_D;
+    @. psa.k_n  = k_sum - PSII_RATE_CONSTANTS.K_F - PSII_RATE_CONSTANTS.K_U - PSII_RATE_CONSTANTS.K_D;
 
     # compute PSII and PSI yeilds
-    @. k_sum_1 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n;
-    @. k_sum_2 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + k_n + PSII_RATE_CONSTANTS.K_P;
+    @. k_sum_1 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + psa.k_n;
+    @. k_sum_2 = PSII_RATE_CONSTANTS.K_D + PSII_RATE_CONSTANTS.K_F + PSII_RATE_CONSTANTS.K_U + psa.k_n + PSII_RATE_CONSTANTS.K_P;
     k_sum_3 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P;
     k_sum_4 = PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_X;
     @. ϕ_U2_a = (q2 * PSII_RATE_CONSTANTS.K_U / k_sum_2 + (1 - q2) * PSII_RATE_CONSTANTS.K_U / k_sum_1);

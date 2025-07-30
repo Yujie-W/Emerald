@@ -50,7 +50,8 @@ function process_data!(ftds::FluxTowerDataset; displaying::Bool = false, force::
                 RAD    = detect_data(df_in, "SW_IN"; displaying = displaying),      # W m⁻²
                 RAD_LW = detect_data(df_in, "LW_IN"; displaying = displaying),      # W m⁻²
                 P_ATM  = detect_data(df_in, "PA"; displaying = displaying) .* 1000, # Pa
-                PRECIP = detect_data(df_in, "P"; displaying = displaying),          # m
+                PRECIP = detect_data(df_in, "P"; displaying = displaying),          # m h⁻¹         TODO: check the unit if the data is per 30 minutes
+                PAR    = detect_data(df_in, "PAR"; displaying = displaying),        # µmol m⁻² s⁻¹
                 CO2    = detect_data(df_in, "CO2"; displaying = displaying),        # ppm
                 T_SOIL = detect_data(df_in, "TS"; displaying = displaying) .+ T₀(), # K
                 SWC    = detect_data(df_in, "SWC"; displaying = displaying),        # m³ m⁻³
