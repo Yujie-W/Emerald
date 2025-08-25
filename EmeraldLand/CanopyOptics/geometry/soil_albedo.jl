@@ -88,7 +88,7 @@ soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilL
 
 soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoBroadbandCLIMA) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)
-    rwc = max(top_soil.trait.vc.Θ_SAT, top_soil.state.θ + top_soil.state.θ_ice) / top_soil.trait.vc.Θ_SAT;
+    rwc = max(top_soil.trait.vc.Θ_RES, top_soil.state.θ + top_soil.state.θ_ice) / top_soil.trait.vc.Θ_SAT;
     par::FT = SOIL_ALBEDOS[sbulk.trait.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,3];
     nir::FT = SOIL_ALBEDOS[sbulk.trait.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,4];
 
@@ -99,7 +99,7 @@ soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilL
 
 soil_albedo!(config::SPACConfiguration{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoHyperspectralCLIMA) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)
-    rwc = max(top_soil.trait.vc.Θ_SAT, top_soil.state.θ + top_soil.state.θ_ice) / top_soil.trait.vc.Θ_SAT;
+    rwc = max(top_soil.trait.vc.Θ_RES, top_soil.state.θ + top_soil.state.θ_ice) / top_soil.trait.vc.Θ_SAT;
     par::FT = SOIL_ALBEDOS[sbulk.trait.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,3];
     nir::FT = SOIL_ALBEDOS[sbulk.trait.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,4];
 
