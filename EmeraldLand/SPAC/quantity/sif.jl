@@ -8,7 +8,7 @@
 #######################################################################################################################################################################################################
 """
 
-ΣSIF(spac::BulkSPAC{FT}) where {FT}
+    ΣSIF(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Return the total SIF at top of the canopy after reabsorption in W m⁻² per ground area, given
 - `spac` `BulkSPAC` SPAC
@@ -16,11 +16,11 @@ Return the total SIF at top of the canopy after reabsorption in W m⁻² per gro
 """
 function ΣSIF end;
 
-ΣSIF(spac::BulkSPAC{FT}) where {FT} = (
+ΣSIF(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
+    (; SPECTRA) = config;
     sun_geo = spac.canopy.sun_geometry;
-    (; SPECTRA) = spac.config;
 
-    return sun_geo.auxil.e_sifꜛ[1]' * SPECTRA.ΔΛ_SIF / 1000
+    return sun_geo.auxil.e_sifꜛ[:,1]' * SPECTRA.ΔΛ_SIF / 1000
 );
 
 

@@ -323,6 +323,7 @@ SunGeometryAuxil(config::SPACConfiguration{FT}, n_layer::Int) where {FT} = (
                 apar_sunlit      = zeros(FT, config.DIM_INCL, config.DIM_AZI, n_layer),
                 ppar_shaded      = zeros(FT, n_layer),
                 ppar_sunlit      = zeros(FT, config.DIM_INCL, config.DIM_AZI, n_layer),
+                _apar_sum        = zeros(FT, cache_dim_ppar),
                 _ppar_sum        = zeros(FT, cache_dim_ppar),
                 _ppar_count      = zeros(FT, cache_dim_ppar),
                 ppar_fraction    = zeros(FT, cache_dim_ppar + 1, n_layer),

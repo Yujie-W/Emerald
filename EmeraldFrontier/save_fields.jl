@@ -99,7 +99,7 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
         wdf.SIF771[ind] = daytime ? OCO2_SIF770(config, spac) : 0;
     end;
     if saving_dict["ΣSIF"]
-        wdf.ΣSIF[ind] = daytime ? ΣSIF(spac) : 0;
+        wdf.ΣSIF[ind] = daytime ? ΣSIF(config, spac) : 0;
     end;
     if saving_dict["ΣSIF_CHL"]
         wdf.ΣSIF_CHL[ind] = daytime ? ΣSIF_CHL(config, spac) : 0;
