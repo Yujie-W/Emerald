@@ -25,7 +25,18 @@ import Emerald.EmeraldData as EDATA
 gm_tag = "gm2";
 wd_tag = "wd1";
 gm_dict = GD.grid_dict(GD.LandDatasetLabels(gm_tag, 2001), 38.74, -92.20);
+df1 = EDATA.WeatherDrivers.grid_weather_driver(wd_tag, gm_dict);
+
 gm_dict["LAI"] = rand(12);
-df = EDATA.WeatherDrivers.grid_weather_driver(wd_tag, gm_dict; appending = true);
+df2 = EDATA.WeatherDrivers.grid_weather_driver(wd_tag, gm_dict);
+
 df = EDATA.WeatherDrivers.grid_weather_driver(wd_tag, gm_dict, "/path/to/file/weather_driver_wd1_2001_774_1845_1X.nc");
+
+lats = [,,,]
+lons = [,,,]
+for (lat, lon) in zip(lats, lons)
+    gm_dict = GD.grid_dict(GD.LandDatasetLabels(gm_tag, 2001), lat, lon);
+    df = EF.simulation!(wd_tag, gm_dict);
+end;
+
 """

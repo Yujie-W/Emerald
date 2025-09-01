@@ -97,7 +97,7 @@ grid_weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool =
     if wd_tag == "wd1"
         nc_wd = era5_weather_driver_file(ERA5SingleLevelsDriver(), gm_dict; appending = appending);
 
-        return grid_file_driver(wd_tag, gm_dict, nc_wd)
+        return grid_weather_driver(wd_tag, gm_dict, nc_wd)
     end;
 
     return error("Weather driver tag $(wd_tag) is not supported...")
