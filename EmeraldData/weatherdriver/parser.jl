@@ -75,6 +75,7 @@ end;
 #     2023-Mar-28: add simulated swc and temperatures into dataframe so as to output
 #     2023-Aug-25: move method to interpolate data to EmeraldMath.jl
 #     2024-Mar-07: move function from EmeraldFrontier to EmeraldData (to use with EmeraldFrontier and ClimaLandPRO)
+#     2025-Sep-01: add new methods to read from an existing weather driver file
 #
 #######################################################################################################################################################################################################
 """
@@ -87,21 +88,33 @@ Prepare weather driver dataframe in a grid to feed SPAC, given
 - `appending` If true, always check whether there are new fields to add
 
 """
-function grid_weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false)
+function grid_weather_driver end;
+
+grid_weather_driver(wd_tag::String, gm_dict::Dict{String,Any}; appending::Bool = false) = (
     @assert wd_tag in ["wd1"] "Weather driver tag $(wd_tag) is not supported...";
 
     # wd1 is the ERA5 single level driver
     if wd_tag == "wd1"
         nc_wd = era5_weather_driver_file(ERA5SingleLevelsDriver(), gm_dict; appending = appending);
-        df_wd = read_nc(nc_wd);
 
-        # interpolate the data to a new resolution
-        df_wd[!,"CO2"    ] .= interpolate_data(gm_dict["CO2"], gm_dict["YEAR"]; out_reso = "1H");
-        df_wd[!,"CHL"    ] .= interpolate_data(gm_dict["CHLOROPHYLL"], gm_dict["YEAR"]; out_reso = "1H");
-        df_wd[!,"CI"     ] .= interpolate_data(gm_dict["CLUMPING"], gm_dict["YEAR"]; out_reso = "1H");
-        df_wd[!,"LAI"    ] .= interpolate_data(gm_dict["LAI"], gm_dict["YEAR"]; out_reso = "1H");
-        df_wd[!,"VCMAX25"] .= interpolate_data(gm_dict["VCMAX25"], gm_dict["YEAR"]; out_reso = "1H");
+        return grid_file_driver(wd_tag, gm_dict, nc_wd)
     end;
 
+    return error("Weather driver tag $(wd_tag) is not supported...")
+);
+
+grid_weather_driver(wd_tag::String, gm_dict::Dict{String,Any}, nc_path::String) = (
+    @assert wd_tag in ["wd1"] "Weather driver tag $(wd_tag) is not supported...";
+
+    # wd1 is the ERA5 single level driver
+    df_wd = read_nc(nc_path);
+
+    # interpolate the data to a new resolution
+    df_wd[!,"CO2"    ] .= interpolate_data(gm_dict["CO2"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CHL"    ] .= interpolate_data(gm_dict["CHLOROPHYLL"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CI"     ] .= interpolate_data(gm_dict["CLUMPING"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"LAI"    ] .= interpolate_data(gm_dict["LAI"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"VCMAX25"] .= interpolate_data(gm_dict["VCMAX25"], gm_dict["YEAR"]; out_reso = "1H");
+
     return df_wd
-end;
+);

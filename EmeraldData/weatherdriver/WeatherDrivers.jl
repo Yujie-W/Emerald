@@ -7,7 +7,7 @@ using ProgressMeter: @showprogress
 using GriddingMachine.Fetcher: fetch_data!
 using NetcdfIO: append_nc!, read_nc, save_nc!, varname_nc
 
-using ..EmeraldIO.Folders: ERA5_SL_HOURLY, ERA5_SL_MONTHLY, LAND_DRIVER
+using ..EmeraldIO.Folders: ERA5_SL_HOURLY, LAND_DRIVER
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldMath.Data: interpolate_data
 using ..EmeraldMath.Stats: nanmean
