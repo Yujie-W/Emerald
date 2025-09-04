@@ -20,6 +20,7 @@
 #     2024-Aug-05: save plant hydraulics health status
 #     2024-Aug-05: add method to use externally prepared config, spac, and weather driver (will process the dataframe to NamedTuple)
 #     2024-Aug-05: add option to save soil water potential
+#     2025-Sep-04: remove the option to prescribe leaf temperature (need to spin up in the future)
 #
 #######################################################################################################################################################################################################
 """
@@ -27,14 +28,12 @@
     simulation!(wd_tag::String,
                 gm_dict::Dict{String,Any};
                 appending::Bool = false,
-                initialize_state::Union{Nothing,Bool} = true,
                 saving::Union{Nothing,String} = nothing,
                 saving_dict::Dict{String,Any} = SAVING_DICT,
                 selection = :)
     simulation!(config::SPACConfiguration{FT},
                 spac::BulkSPAC{FT},
                 df::DataFrame;
-                initialize_state::Union{Nothing,Bool} = true,
                 saving::Union{Nothing,String} = nothing,
                 saving_dict::Dict{String,Any} = SAVING_DICT,
                 selection = :) where {FT}
@@ -43,7 +42,6 @@ Run simulation on site level, given
 - `wd_tag` Weather drive tag such as `wd1`
 - `gm_dict` GriddingMachine dict for site information
 - `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
-- `initialize_state` Initial state of spac: if is a bool, load the first data from the weather driver
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
 - `selection` Run selection of data, default is : (namely 1:end;)
 
@@ -58,7 +56,6 @@ function simulation! end;
 simulation!(wd_tag::String,
             gm_dict::Dict{String,Any};
             appending::Bool = false,
-            initialize_state::Union{Nothing,Bool} = true,
             saving::Union{Nothing,String} = nothing,
             saving_dict::Dict{String,Any} = SAVING_DICT,
             selection = :) = (
@@ -66,20 +63,19 @@ simulation!(wd_tag::String,
     spac = grid_spac(config, gm_dict);
     df = grid_weather_driver(wd_tag, gm_dict; appending = appending);
 
-    return simulation!(config, spac, df; initialize_state = initialize_state, saving = saving, saving_dict = saving_dict, selection = selection);
+    return simulation!(config, spac, df; saving = saving, saving_dict = saving_dict, selection = selection);
 );
 
 simulation!(config::SPACConfiguration{FT},
             spac::BulkSPAC{FT},
             df::DataFrame;
-            initialize_state::Union{Nothing,Bool} = true,
             saving::Union{Nothing,String} = nothing,
             saving_dict::Dict{String,Any} = SAVING_DICT,
             selection = :) where {FT} = (
     # convert the DataFrame to NamedTuple with new fields
     wdf = prepare_wdf(spac, df; saving_dict = saving_dict);
 
-    simulation!(config, spac, wdf; initialize_state = initialize_state, saving = saving, saving_dict = saving_dict, selection = selection);
+    simulation!(config, spac, wdf; saving = saving, saving_dict = saving_dict, selection = selection);
 
     return isnothing(saving) ? DataFrame(wdf) : nothing
 );
@@ -87,14 +83,13 @@ simulation!(config::SPACConfiguration{FT},
 simulation!(config::SPACConfiguration{FT},
             spac::BulkSPAC{FT},
             wdf::NamedTuple;
-            initialize_state::Union{Nothing,Bool} = true,
             saving::Union{Nothing,String} = nothing,
             saving_dict::Dict{String,Any} = SAVING_DICT,
             selection = :) where {FT} = (
     (; MESSAGE_LEVEL) = config;
 
-    # initialize spac based on initialize_state
-    prescribe!(config, spac, wdf, 1; initialize_state = initialize_state);
+    # initialize spac based on initialize_state for the first time step
+    prescribe!(config, spac, wdf, 1; initialize_state = true);
 
     # iterate through the time steps
     if MESSAGE_LEVEL == 0

@@ -11,6 +11,7 @@
 #     2024-Apr-17: update solar azimuth angle as well
 #     2024-Jul-24: remove lai, ci, vcmax, and cab from memory (use traits instead)
 #     2025-Jun-05: set precipation to snow if air temperature is below T₀, otherwise set it to rain
+#     2025-Sep-04: remove the option to prescribe leaf temperature (need to spin up in the future)
 # Bug fixes
 #     2023-Aug-26: computed sza in the middle of a time pierod may be > 0 when cumulated radiation is > 0, set it to 88
 #
@@ -24,7 +25,7 @@ Prescribe traits and environmental conditions, given
 - `spac` `BulkSPAC` type SPAC
 - `df` `NamedTuple` type weather driver
 - `ind` Index of the named tuple
-- `initialize_state` If true, initialize the energy state of spac
+- `initialize_state` If true, initialize the energy state of spac (forced for the first time step of a simulation)
 
 """
 function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::NamedTuple, ind::Int; initialize_state::Bool = false) where {FT}
@@ -79,20 +80,6 @@ function prescribe!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, df::Named
 
     # prescribe soil water contents and leaf temperature and initialize the spac (for first time step only)
     if initialize_state
-        df_tlf::FT = df.T_LEAF[ind];
-        df_ts1::FT = df.T_SOIL_1[ind];
-        df_ts2::FT = df.T_SOIL_2[ind];
-        df_ts3::FT = df.T_SOIL_3[ind];
-        df_ts4::FT = df.T_SOIL_4[ind];
-        df_sw1::FT = df.SWC_1[ind];
-        df_sw2::FT = df.SWC_2[ind];
-        df_sw3::FT = df.SWC_3[ind];
-        df_sw4::FT = df.SWC_4[ind];
-
-        # adjust optimum t based on the first known temperature
-        @. spac.plant.memory.t_history = max(df_tar, df_tlf);
-        prescribe_traits!(config, spac; t_clm = max(df_tar, df_tlf), t_leaf = max(df_tar, df_tlf));
-        prescribe_soil!(spac; swcs = (df_sw1, df_sw2, df_sw3, df_sw4), t_soils = (df_ts1, df_ts2, df_ts3, df_ts4));
         initialize_spac!(config, spac);
     else
         # adjust optimum t based on 10 day moving average skin temperature
