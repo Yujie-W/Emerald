@@ -63,6 +63,7 @@ include("quantity/broadband.jl");
 include("quantity/et.jl");
 include("quantity/gpp.jl");
 include("quantity/goes.jl");
+include("quantity/heat_fluxes.jl");
 include("quantity/hydraulics.jl");
 include("quantity/npp.jl");
 include("quantity/par.jl");

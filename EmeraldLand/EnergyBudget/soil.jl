@@ -8,6 +8,7 @@
 #     2023-Oct-07: add calculations for diffusion related energy transfer
 #     2025-Jun-05: all soil enery flow calculations are relative to the triple point temperature (T₀)
 #     2026-Jun-06: account for sensible heat transfer between soil and air (assumed 0.2 mol m⁻² s⁻¹ conductance)
+#     2025-Sep-09: add functions chunk to save the heat fluxes
 # Todos
 #     TODO: compute the sensible heat transfer between soil and air using wind speed of the first air layer
 #
@@ -30,7 +31,9 @@ function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
 
     # add rain and radiation energy into the first layer
     soils[1].auxil.∂e∂t += meteo.rain * CP_L_MOL(FT) * (meteo.t_precip - T₀(FT));
-    soils[1].auxil.∂e∂t += sbulk.auxil.r_net_lw + sbulk.auxil.r_net_sw;
+    soils[1].auxil.∂e∂t_lw = sbulk.auxil.r_net_lw;
+    soils[1].auxil.∂e∂t_sw = sbulk.auxil.r_net_sw;
+    soils[1].auxil.∂e∂t += soils[1].auxil.∂e∂t_lw + soils[1].auxil.∂e∂t_sw;
 
     # water and energy exchange among layers
     N = length(sbulk.auxil.q);
@@ -52,6 +55,9 @@ function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
     soils[1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * (t - T₀(FT));
     t = δn4 > 0 ? soils[1].s_aux.t : air.s_aux.t;
     soils[1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * (t - T₀(FT));
+    # compute the latent heat here, but the actual heat fluxes are updated in the water condensation and evaporation function call
+    # TODO: fix these later
+    soils[1].auxil.∂e∂t_le = -δn1 * M_H₂O(FT) * latent_heat_vapor(soils[1].s_aux.t);
 
     # update the diffusion among soil layers
     N = length(sbulk.auxil.q);
@@ -67,7 +73,8 @@ function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
     end;
 
     # TODO: assume a 0.2 mol m⁻² s⁻¹ heat conductance between the first air layer and the first soil layer
-    soils[1].auxil.∂e∂t -= 0.2 * CP_D_MOL(FT) * (soils[1].s_aux.t - air.s_aux.t);
+    soils[1].auxil.∂e∂t_sh = 0.2 * CP_D_MOL(FT) * (air.s_aux.t - soils[1].s_aux.t);
+    soils[1].auxil.∂e∂t += soils[1].auxil.∂e∂t_sh;
 
     return nothing
 end;

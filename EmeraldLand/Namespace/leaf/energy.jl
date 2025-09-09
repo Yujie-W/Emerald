@@ -57,6 +57,7 @@ end;
 # General
 #     2023-Sep-25: add LeafEnergyAuxil
 #     2023-Nov-03: add fields ∂e∂t_le and ∂e∂t_sh
+#     2025-Sep-09: add fields for heat fluxes
 #
 #######################################################################################################################################################################################################
 """
@@ -78,8 +79,12 @@ Base.@kwdef mutable struct LeafEnergyAuxil{FT}
     ∂e∂t::FT = 0
     "Partial derivative of the energy per time for latent heat `[J s⁻¹]`"
     ∂e∂t_le::FT = 0
+    "Partial derivative of the energy per time for longwave radiation `[J s⁻¹]`"
+    ∂e∂t_lw::FT = 0
     "Partial derivative of the energy per time for sensible heat `[J s⁻¹]`"
     ∂e∂t_sh::FT = 0
+    "Partial derivative of the energy per time for shotwave radiation `[J s⁻¹]`"
+    ∂e∂t_sw::FT = 0
 end;
 
 

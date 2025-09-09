@@ -56,6 +56,7 @@ end;
 # Changes to this struct
 # General
 #     2023-Sep-23: add XylemEnergyAuxil
+#     2025-Sep-09: add fields for heat fluxes
 #
 #######################################################################################################################################################################################################
 """
@@ -72,6 +73,10 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct XylemEnergyAuxil{FT}
     "Partial derivative of the energy per time `[J s⁻¹]`"
     ∂e∂t::FT = 0
+    "Partial derivative of the energy per time due to longwave radiation `[J s⁻¹]`"
+    ∂e∂t_lw::FT = 0
+    "Partial derivative of the energy per time due to shortwave radiation `[J s⁻¹]`"
+    ∂e∂t_sw::FT = 0
 end;
 
 

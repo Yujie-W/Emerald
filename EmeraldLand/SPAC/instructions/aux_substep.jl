@@ -67,6 +67,10 @@ substep_aux!(spac::BulkSPAC{FT}) where {FT} = (
 substep_aux!(soil::SoilLayer{FT}) where {FT} = (
     # clean up the partial derivatives
     soil.auxil.∂e∂t = 0;
+    soil.auxil.∂e∂t_le = 0;
+    soil.auxil.∂e∂t_lw = 0;
+    soil.auxil.∂e∂t_sh = 0;
+    soil.auxil.∂e∂t_sw = 0;
     soil.auxil.∂n∂t .= 0;
     soil.auxil.∂θ∂t = 0;
 
@@ -127,6 +131,8 @@ substep_aux!(stem::Stem{FT}) where {FT} = (
 
     # clear the partial derivatives
     stem.energy.auxil.∂e∂t = 0;
+    stem.energy.auxil.∂e∂t_lw = 0;
+    stem.energy.auxil.∂e∂t_sw = 0;
 
     return nothing
 );
@@ -155,7 +161,9 @@ substep_aux!(leaf::CanopyLayer{FT}, shedded::Bool) where {FT} = (
     # clear the partial derivatives
     leaf.energy.auxil.∂e∂t = 0;
     leaf.energy.auxil.∂e∂t_le = 0;
+    leaf.energy.auxil.∂e∂t_lw = 0;
     leaf.energy.auxil.∂e∂t_sh = 0;
+    leaf.energy.auxil.∂e∂t_sw = 0;
     leaf.flux.auxil.∂g∂t .= 0;
 
     return nothing

@@ -134,6 +134,7 @@ end;
 #     2023-Oct-05: add struct SoilLayerAuxil
 #     2023-Oct-05: add field kv
 #     2023-Oct-05: add field n_con
+#     2025-Sep-09: add fields for heat fluxes
 #
 #######################################################################################################################################################################################################
 """
@@ -152,7 +153,15 @@ Base.@kwdef mutable struct SoilLayerAuxil{FT}
     n_con::FT = 0
     "Marginal increase in energy `[W m⁻²]`"
     ∂e∂t::FT = 0
-    "Marginal increase in trace gas moles `[mol s⁻¹]`"
+    "Marginal increase in energy of latent heat `[W m⁻²]`"
+    ∂e∂t_le::FT = 0
+    "Marginal increase in energy of longwave radiation `[W m⁻²]`"
+    ∂e∂t_lw::FT = 0
+    "Marginal increase in energy of sensible heat `[W m⁻²]`"
+    ∂e∂t_sh::FT = 0
+    "Marginal increase in energy of shortwave radiation `[W m⁻²]`"
+    ∂e∂t_sw::FT = 0
+    "Marginal increase in trace gas moles `[mol m⁻² s⁻¹]`"
     ∂n∂t::Vector{FT} = zeros(FT,5)
     "Marginal increase in soil water content `[s⁻¹]`"
     ∂θ∂t::FT = 0

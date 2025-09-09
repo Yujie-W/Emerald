@@ -7,6 +7,7 @@
 #     2024-Aug-06: read leaf water potential only if the leaf is not shedded; otherwise, set it to NaN
 #     2024-Aug-08: save OCS flux if requested
 #     2024-Sep-09: save SAP_VOLUME if requested
+#     2025-Sep-09: add functions chunk to compute the heat fluxes
 #
 #######################################################################################################################################################################################################
 """
@@ -181,6 +182,14 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
     end;
     if saving_dict["TRUNK_AREA"]
         wdf.TRUNK_AREA[ind] = spac.plant.trunk.xylem.trait.area;
+    end;
+
+    # save the heat fluxes
+    if saving_dict["MOD_HEAT"]
+        wdf.MOD_LATENT_HEAT[ind] = LATENT_HEAT(spac);
+        wdf.MOD_SENSIBLE_HEAT[ind] = SENSIBLE_HEAT(spac);
+        wdf.MOD_NET_LONGWAVE[ind] = NET_LONGWAVE(spac);
+        wdf.MOD_NET_SHORTWAVE[ind] = NET_SHORTWAVE(spac);
     end;
 
     return nothing

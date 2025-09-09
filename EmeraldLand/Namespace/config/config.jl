@@ -132,15 +132,15 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Allow leaf condensation"
     ALLOW_LEAF_CONDENSATION::Bool = false
     "Allow leaf regrowth when junction pressure is higher than -0.1 MPa"
-    ALLOW_LEAF_REGROWTH::Bool = true
+    ALLOW_LEAF_REGROWTH::Bool = false
     "Allow leaf shedding in prescibe LAI mode to avoid numerical issues"
-    ALLOW_LEAF_SHEDDING::Bool = true
+    ALLOW_LEAF_SHEDDING::Bool = false
     "Allow xylem to grow"
-    ALLOW_XYLEM_GROWTH::Bool = true
+    ALLOW_XYLEM_GROWTH::Bool = false
     "Dimension of xylem slices of leaf, stem, and root; xylem capaciatance of stem and root"
     DIM_XYLEM::Int = 5
     "Enable drought legacy effect"
-    ENABLE_DROUGHT_LEGACY::Bool = true
+    ENABLE_DROUGHT_LEGACY::Bool = false
     "Threshold of the critical pressure or flow that trigger root disconnection"
     KR_ROOT_DISCONNECTION::FT = 0.5
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"

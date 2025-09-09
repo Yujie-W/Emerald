@@ -7,6 +7,7 @@
 #     2023-Sep-30: add function to calculate the energy flow of the stem (trunk and branches)
 #     2023-Oct-18: add net radiation to branch energy budget
 #     2024-Feb-28: add LAI <= 0 control
+#     2025-Sep-09: add functions chunk to save the heat fluxes
 #
 #######################################################################################################################################################################################################
 """
@@ -69,7 +70,9 @@ function stem_energy_flows!(spac::BulkSPAC{FT}) where {FT}
         end;
 
         # add the net radiation energy to the leaf (to total leaf area)
-        stem.energy.auxil.∂e∂t += (canopy.sun_geometry.auxil.r_net_sw_stem[irt] + canopy.structure.auxil.r_net_lw_stem[irt]) * sbulk.trait.area;
+        stem.energy.auxil.∂e∂t_sw = canopy.sun_geometry.auxil.r_net_sw_stem[irt] * sbulk.trait.area;
+        stem.energy.auxil.∂e∂t_lw = canopy.structure.auxil.r_net_lw_stem[irt] * sbulk.trait.area;
+        stem.energy.auxil.∂e∂t += stem.energy.auxil.∂e∂t_sw + stem.energy.auxil.∂e∂t_lw;
     end;
 
     return nothing

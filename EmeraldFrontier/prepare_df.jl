@@ -4,6 +4,7 @@
 # General
 #     2024-Aug-06: isolate the function to prepare the DataFrame for the WDF
 #     2025-Jun-03: add function chunk to save Φ_D and Φ_N
+#     2025-Sep-09: add functions chunk to compute the heat fluxes
 #
 #######################################################################################################################################################################################################
 """
@@ -63,6 +64,12 @@ function prepare_wdf(spac::BulkSPAC{FT}, df::DataFrame; saving_dict::Dict{String
         push!(new_df_cols, "ΦF");
         push!(new_df_cols, "ΦP");
     end;
+    if saving_dict["MOD_HEAT"]
+        push!(new_df_cols, "MOD_LATENT_HEAT");
+        push!(new_df_cols, "MOD_SENSIBLE_HEAT");
+        push!(new_df_cols, "MOD_NET_LONGWAVE");
+        push!(new_df_cols, "MOD_NET_SHORTWAVE");
+    end;
     # if the label does not contain MOD_ prefix
     for label in keys(saving_dict)
         if !occursin("MOD_", label)
@@ -71,6 +78,8 @@ function prepare_wdf(spac::BulkSPAC{FT}, df::DataFrame; saving_dict::Dict{String
             end;
         end;
     end;
+
+    # add the new fields to the DataFrame
     for label in new_df_cols
         df[!,label] .= NaN;
     end;

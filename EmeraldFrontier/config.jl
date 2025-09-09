@@ -42,6 +42,8 @@ SAVING_DICT = Dict{String, Any}(
             "P_JUNCTION"  => true,
             "SAP_VOLUME"  => true,
             "TRUNK_AREA"  => true,
+    # Modeled heat fluxes
+            "MOD_HEAT"    => true,
 );
 
 
