@@ -14,6 +14,7 @@
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
 #     2024-Sep-07: do not use CI in the SIF emission calculation (introduced in 2024-Mar-06)
+#     2025-Sep-12: add a special case when toral rad is zero (to avoid NaN issue)
 #
 #######################################################################################################################################################################################################
 """
@@ -35,8 +36,12 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
     n_layer = length(leaves);
+    rad_sw = spac.meteo.rad_sw;
+    (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS, SPECTRA, Φ_PHOTON) = config;
 
-    if sun_geo.state.sza > 89 || can_str.trait.lai <= 0
+    # if sza > 89, set all the radiation variables to 0
+    total_sw_rad = (rad_sw.e_dir .+ rad_sw.e_dif)' * SPECTRA.ΔΛ / 1000;
+    if sun_geo.state.sza > 89 || can_str.trait.lai <= 0 || total_sw_rad <= 0
         sun_geo.auxil.e_sif_chl .= 0;
         sun_geo.auxil.e_sifꜜ_layer .= 0;
         sun_geo.auxil.e_sifꜛ_layer .= 0;
@@ -57,8 +62,6 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
     end;
 
     # run the fluorescence simulations only if fluorescence feature is enabled
-    (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS, SPECTRA, Φ_PHOTON) = config;
-
     # broadcast the phi_f from bined array to 3D array
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;

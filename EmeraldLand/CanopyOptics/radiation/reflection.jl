@@ -12,6 +12,7 @@
 #     2024-Sep-04: separate leaf and stem optical properties
 # Bug fixes
 #     2024-Mar-06: ci impact on fraction from viewer direction (otherwise will be accounted twice)
+#     2025-Sep-12: add a special case when toral rad is zero (to avoid NaN issue)
 #
 #######################################################################################################################################################################################################
 """
@@ -34,8 +35,12 @@ function reflection_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT})
     sen_geo = spac.canopy.sensor_geometry;
     sun_geo = spac.canopy.sun_geometry;
     n_layer = length(can_str.trait.δlai);
+    rad_sw = spac.meteo.rad_sw;
+    (; SPECTRA) = config;
 
-    if sun_geo.state.sza > 89
+    # if sza > 89, set all the radiation variables to 0
+    total_sw_rad = (rad_sw.e_dir .+ rad_sw.e_dif)' * SPECTRA.ΔΛ / 1000;
+    if sun_geo.state.sza > 89 || total_sw_rad <= 0
         sen_geo.auxil.e_sensor_layer .= 0;
         sen_geo.auxil.e_sensor .= 0;
         sen_geo.auxil.reflectance .= NaN;

@@ -39,4 +39,11 @@ for (lat, lon) in zip(lats, lons)
     df = EF.simulation!(wd_tag, gm_dict);
 end;
 
+
+gm_dict = GD.grid_dict(GD.LandDatasetLabels(gm_tag, 2001), 30.82, 104.1756; verification=false);
+gm_dict["VCMAX25"] = 50.0;
+gm_dict["MESSAGE_LEVEL"] = 1;
+df = EDATA.WeatherDrivers.grid_weather_driver(wd_tag, gm_dict);
+df_result = EF.simulation!(wd_tag, gm_dict);
+
 """

@@ -17,6 +17,8 @@
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Aug-05: add a special case when DIM_PPAR_BINS is 0 (one leaf model, no sunlit and shaded fraction)
 #     2025-Jul-30: add code chunk to save APAR as well as PPAR
+# Bug fixes
+#     2025-Sep-12: add a special case when toral rad is zero (to avoid NaN issue)
 #
 #######################################################################################################################################################################################################
 """
@@ -38,9 +40,12 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
     sbulk = spac.soil_bulk;
     sun_geo = spac.canopy.sun_geometry;
     n_layer = length(leaves);
+    rad_sw = spac.meteo.rad_sw;
+    (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS, SPECTRA) = config;
 
     # if sza > 89, set all the radiation variables to 0
-    if sun_geo.state.sza > 89
+    total_sw_rad = (rad_sw.e_dir .+ rad_sw.e_dif)' * SPECTRA.ΔΛ / 1000;
+    if sun_geo.state.sza > 89 || total_sw_rad <= 0
         sun_geo.auxil.e_difꜜ .= 0;
         sun_geo.auxil.e_difꜛ .= 0;
         sun_geo.auxil.e_dirꜜ .= 0;
@@ -62,8 +67,6 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
     end;
 
     # if LAI <= 0, run soil albedo only
-    (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS, SPECTRA) = config;
-    rad_sw = spac.meteo.rad_sw;
     if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         # 1. update upward and downward direct and diffuse radiation profiles
         sun_geo.auxil.e_dirꜜ .= rad_sw.e_dir;
