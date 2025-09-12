@@ -11,17 +11,19 @@
 #     2024-Feb-29: veritfy the GriddingMachine data dictionary before returning
 #     2024-Aug-08: fix two typos in the land mask determination and the SOIL_α value (was SOIL_N)
 #     2025-Jun-04: use monthly mean CO₂ concentration time series as default
+#     2025-Sep-12: add option verification to turn on/off the verification of the GriddingMachine data dictionary
 #
 #######################################################################################################################################################################################################
 """
 
-    grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT}
-    grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64)
+    grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; verification::Bool = true) where {FT}
+    grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64, verification::Bool = true)
 
 Prepare a dictionary of GriddingMachine data to feed SPAC, given
 - `dts` `LandDatasets` type data struct
 - `ilat` latitude index
 - `ilon` longitude index
+- `verification` verify the dictionary per key and value to make sure there is not NaN
 - `dtl` `LandDatasetLabels` type data struct
 - `year` year of the datasets
 - `nx` grid resolution (1/nx °)
@@ -31,7 +33,7 @@ Prepare a dictionary of GriddingMachine data to feed SPAC, given
 """
 function grid_dict end;
 
-grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT} = (
+grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; verification::Bool = true) where {FT} = (
     reso   = 1 / dts.LABELS.nx;
     co2    = CO₂_ppm(dts.LABELS.year, true);
     lmsk   = dts.t_lm[ilon,ilat,1];
@@ -78,7 +80,7 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT} = (
                     "τ_NIR_C4"      => 0,
                     "τ_PAR_C3"      => 0,
                     "τ_PAR_C4"      => 0);
-        verify_grid_dict!(gm_dict);
+        verification ? verify_grid_dict!(gm_dict) : nothing;
 
         return gm_dict
     end;
@@ -171,12 +173,12 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int) where {FT} = (
                 "τ_PAR"         => τ_par,
                 "τ_PAR_C3"      => τ_par_c3,
                 "τ_PAR_C4"      => τ_par_c4);
-    verify_grid_dict!(gm_dict);
+    verification ? verify_grid_dict!(gm_dict) : nothing;
 
     return gm_dict
 );
 
-grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64) = (
+grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float64, verification::Bool = true) = (
     lmsk = read_LUT(dtl.tag_t_lm, lat, lon; include_std = false);
     if !(lmsk > 0)
         return error("The target grid does not contain land!");
@@ -285,7 +287,7 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
                 "τ_PAR"         => τ_par,
                 "τ_PAR_C3"      => τ_par_c3,
                 "τ_PAR_C4"      => τ_par_c4);
-    verify_grid_dict!(gm_dict);
+    verification ? verify_grid_dict!(gm_dict) : nothing;
 
     return gm_dict
 );
