@@ -46,4 +46,10 @@ gm_dict["MESSAGE_LEVEL"] = 1;
 df = EDATA.WeatherDrivers.grid_weather_driver(wd_tag, gm_dict);
 df_result = EF.simulation!(wd_tag, gm_dict);
 
+
+gm_dict = GD.grid_dict(GD.LandDatasetLabels(gm_tag, 2001), 43.82, 87.61; verification=false);
+gm_dict["VCMAX25"] = 50.0;
+gm_dict["MESSAGE_LEVEL"] = 1;
+df = EDATA.WeatherDrivers.grid_weather_driver(wd_tag, gm_dict);
+df_result = EF.simulation!(wd_tag, gm_dict);
 """
