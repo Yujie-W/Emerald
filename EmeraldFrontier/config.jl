@@ -52,6 +52,7 @@ SAVING_DICT = Dict{String, Any}(
 # Changes to this function
 # General
 #     2023-Apr-13: add function to create spac configuration
+#     2025-Sep-15: do not set default BIN
 #
 #######################################################################################################################################################################################################
 """
@@ -65,7 +66,6 @@ Create a SPAC configuration struct, given
 function spac_config(gm_dict::Dict)
     config = SPACConfiguration(gm_dict["FT"]);
     config.MESSAGE_LEVEL = gm_dict["MESSAGE_LEVEL"];
-    config.DIM_PPAR_BINS = 10;
 
     return config
 end;
