@@ -12,6 +12,7 @@
 #     2024-Jul-25: remove initial e_crit guess to make sure states are consistent
 #     2024-Jul-30: set e_crit to be all area in a layer
 #     2024-Oct-30: disconnect leaf if xylem end pressure is less than the critical pressure
+#     2025-Sep-25: disconnect leaf if leaf shedding is allowed
 #
 #######################################################################################################################################################################################################
 """
@@ -40,7 +41,7 @@ function leaf_pressure_profile!(config::SPACConfiguration{FT}, leaf::Union{Canop
     f_st = relative_surface_tension(leaf.energy.s_aux.t);
     p = leaf.xylem.auxil.pressure[end] / f_st;
     k = relative_xylem_k(leaf.xylem.trait.vc, p);
-    if k <= config.KR_THRESHOLD
+    if k <= config.KR_THRESHOLD && config.ALLOW_LEAF_SHEDDING
         leaf.xylem.state.connected = false;
     end;
 

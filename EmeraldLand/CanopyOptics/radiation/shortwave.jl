@@ -20,6 +20,7 @@
 # Bug fixes
 #     2025-Sep-12: add a special case when toral rad is zero (to avoid NaN issue)
 #     2025-Sep-15: make sure ppar_index and ppar_fraction are correctly set at special cases
+#     2025-Sep-25: make sure ppar_index and ppar_fraction are correctly set at special cases when there is no bins
 #
 #######################################################################################################################################################################################################
 """
@@ -63,9 +64,11 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
         for leaf in leaves
             leaf.flux.auxil.ppar .= 0;
         end;
-        sun_geo.auxil.ppar_index .= DIM_PPAR_BINS + 1;
-        sun_geo.auxil.ppar_fraction .= 0;
-        sun_geo.auxil.ppar_fraction[end,:] .= 1;
+        if !isnothing(DIM_PPAR_BINS)
+            sun_geo.auxil.ppar_index .= DIM_PPAR_BINS + 1;
+            sun_geo.auxil.ppar_fraction .= 0;
+            sun_geo.auxil.ppar_fraction[end,:] .= 1;
+        end;
 
         return nothing
     end;
@@ -94,9 +97,11 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
         for leaf in leaves
             leaf.flux.auxil.ppar .= 0;
         end;
-        sun_geo.auxil.ppar_index .= DIM_PPAR_BINS + 1;
-        sun_geo.auxil.ppar_fraction .= 0;
-        sun_geo.auxil.ppar_fraction[end,:] .= 1;
+        if !isnothing(DIM_PPAR_BINS)
+            sun_geo.auxil.ppar_index .= DIM_PPAR_BINS + 1;
+            sun_geo.auxil.ppar_fraction .= 0;
+            sun_geo.auxil.ppar_fraction[end,:] .= 1;
+        end;
 
         return nothing
     end;
