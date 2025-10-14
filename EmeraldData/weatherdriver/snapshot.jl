@@ -2,43 +2,6 @@
 #
 # Changes to this function
 # General
-#     2024-Feb-23: add function to create a snapshot matrix from initial states
-#
-#######################################################################################################################################################################################################
-"""
-
-    initial_states_snapshot(sts::Dict{String,Matrix})
-
-Create a snapshot matrix from initial states, given
-- `sts` Initial states
-
-"""
-function initial_states_snapshot(sts::Dict{String,Any})
-    @info "Creating a snapshot matrix from initial states...";
-
-    # create a matrix of initial states
-    st_keys = [k for k in keys(sts) if !(k in ["RESO_SPACE", "YEAR", "IND"])];
-    nx = sts["RESO_SPACE"];
-    mat_st = Matrix{Dict{String,Any}}(undef, 360nx, 180nx);
-    for ilon in axes(mat_st,1), ilat in axes(mat_st,2)
-        dict = Dict{String,Any}(
-                    "YEAR" => sts["YEAR"],
-                    "RESO_SPACE" => sts["RESO_SPACE"],
-                    "IND" => sts["IND"]);
-        for k in st_keys
-            dict[k] = sts[k][ilon,ilat];
-        end;
-        mat_st[ilon,ilat] = dict;
-    end;
-
-    return mat_st
-end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
 #     2024-Feb-23: add function to extract a slice of weather data from preloaded drivers
 #
 #######################################################################################################################################################################################################

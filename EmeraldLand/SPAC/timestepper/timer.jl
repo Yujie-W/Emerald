@@ -18,6 +18,7 @@
 #     2024-Aug-06: add junction pressure change controller (not change more than 0.1 MPa per time step)
 #     2024-Sep-03: run stem and branck T check as well (was deactivated by accident)
 #     2024-Sep-03: add leaf capacitance buffer pressure change controller (not change more than 0.1 MPa per time step)
+#     2025-Oct-14: use a minimum time step of 600 seconds (10 minutes) to avoid too small time steps
 # Bug fixes
 #     2025-Jun-05: fix a typo (bug) in soil temperature related time controller (forgot to account for soil layer thickness)
 #
@@ -35,7 +36,7 @@ Return adjusted time that soil does not over saturate or drain, given
 function adjusted_time end;
 
 adjusted_time(spac::BulkSPAC{FT}, δt::FT) where {FT} = (
-    new_δt::FT = δt;
+    new_δt::FT = min(600, δt);
 
     # adjust the time based on soil
     for soil in spac.soils

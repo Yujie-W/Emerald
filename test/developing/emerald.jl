@@ -15,15 +15,12 @@ if gethostname()[1:5] == "curry"
     #     dts: land datasets
     #     gms: griddingmachine dataset matrix
     #     wds: preloaded weather drivers
-    #     iss: initial soil and skin states
     #     wdi: weather drivers snapshot matrix
     #     mss: initial states snapshot matrix
     dts = EmeraldData.GlobalDatasets.LandDatasets{FT}(GMDATA_VER, 2019);
     gms = EmeraldData.GlobalDatasets.grid_dict_mat(dts; vegetation_only = true);
     wds = EmeraldData.WeatherDrivers.preloaded_weather_drivers(WDRIVER_VER, 2019, 1, 1);
-    iss = EmeraldData.WeatherDrivers.initial_soil_skin_states(WDRIVER_VER, 2019, 1, 1);
     wd1 = EmeraldData.WeatherDrivers.weather_drivers_snapshot(wds, 1);
-    mss = EmeraldData.WeatherDrivers.initial_states_snapshot(iss);
 
     # use multiple threads on curry and initialize the states matrix with multiple threads and run the model for one time step
     EmeraldEarth.add_threads!(160, FT);

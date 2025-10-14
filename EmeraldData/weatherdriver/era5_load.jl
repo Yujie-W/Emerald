@@ -85,38 +85,3 @@ era5_weather_drivers(wd::ERA5SingleLevelsDriver, year::Int, nx::Int, ind::Int) =
                 "WIND"       => wd_wind,
     );
 );
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Feb-23: add function to load initial soil and skin states from ERA5
-#
-#######################################################################################################################################################################################################
-"""
-
-    era5_initial_states(wd::ERA5SingleLevelsDriver, year::Int, nx::Int, ind::Int)
-
-Load initial soil and skin states from ERA5, given
-- `wd` `ERA5SingleLevelsDriver` weather driver struct that stores the ERA5 info
-- `year` Year of the data
-- `nx` Number of grids in the 1 degree lat/lon
-- `ind` Index of the data
-
-"""
-function era5_initial_states(wd::ERA5SingleLevelsDriver, year::Int, nx::Int, ind::Int)
-    @tinfo "Load initial soil and skin states from ERA5...";
-    states = Dict{String,Any}("YEAR" => year, "IND" => ind, "RESO_SPACE" => nx);
-    states["SWC_1"] = read_nc(reprocessed_file_path(wd.SWC_1[2], year, nx), wd.SWC_1[1], ind);
-    states["SWC_2"] = read_nc(reprocessed_file_path(wd.SWC_2[2], year, nx), wd.SWC_2[1], ind);
-    states["SWC_3"] = read_nc(reprocessed_file_path(wd.SWC_3[2], year, nx), wd.SWC_3[1], ind);
-    states["SWC_4"] = read_nc(reprocessed_file_path(wd.SWC_4[2], year, nx), wd.SWC_4[1], ind);
-    states["T_S_1"] = read_nc(reprocessed_file_path(wd.T_S_1[2], year, nx), wd.T_S_1[1], ind);
-    states["T_S_2"] = read_nc(reprocessed_file_path(wd.T_S_2[2], year, nx), wd.T_S_2[1], ind);
-    states["T_S_3"] = read_nc(reprocessed_file_path(wd.T_S_3[2], year, nx), wd.T_S_3[1], ind);
-    states["T_S_4"] = read_nc(reprocessed_file_path(wd.T_S_4[2], year, nx), wd.T_S_4[1], ind);
-    states["T_SKN"] = read_nc(reprocessed_file_path(wd.T_SKN[2], year, nx), wd.T_SKN[1], ind);
-
-    return states
-end;
