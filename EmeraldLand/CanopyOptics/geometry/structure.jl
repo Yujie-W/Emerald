@@ -91,6 +91,8 @@ canopy_structure_aux!(config::SPACConfiguration{FT}, trait::CanopyStructureTrait
 #     2024-Oct-16: weigh the extinction coefficient for diffuse radiation when computing the transmittance
 #     2024-Oct-16: add option to compute effective leaf spectra based on CI
 #     2024-Nov-08: when using EFFECTIVE_LEAF_SPECTRA make sure LAI > 0
+# Bug fixes
+#     2025-Oct-16: τ_dd_isotropic was already the tranmittance of longwave, so do not use exp(-τ_dd_isotropic)
 #
 #######################################################################################################################################################################################################
 """
@@ -210,7 +212,7 @@ function canopy_structure!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) wh
         σ_stem_f = can_str.t_aux.ddf_stem * leaf.bio.trait.ρ_lw;
         k_ρ_x = (σ_leaf_b * δlai .+ σ_stem_b * δsai) ./ δpai;
         k_τ_x = (σ_leaf_f * δlai .+ σ_stem_f * δsai) ./ δpai;
-        τ_dd_lw = exp(-can_str.auxil.τ_dd_isotropic[irt]);
+        τ_dd_lw = can_str.auxil.τ_dd_isotropic[irt];
         can_str.auxil.τ_lw_layer[irt] = (1 - τ_dd_lw) .* k_τ_x .+ τ_dd_lw;
         can_str.auxil.ρ_lw_layer[irt] = (1 - τ_dd_lw) .* k_ρ_x;
         can_str.auxil.ϵ_lw_layer[irt] = 1 - can_str.auxil.τ_lw_layer[irt] - can_str.auxil.ρ_lw_layer[irt];
