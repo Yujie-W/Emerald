@@ -5,6 +5,7 @@
 #     2024-Aug-06: isolate the function to prepare the DataFrame for the WDF
 #     2025-Jun-03: add function chunk to save Φ_D and Φ_N
 #     2025-Sep-09: add functions chunk to compute the heat fluxes
+#     2025-Nov-03: save the shortwave and longwave outgoing radiation if requested
 #
 #######################################################################################################################################################################################################
 """
@@ -69,6 +70,8 @@ function prepare_wdf(spac::BulkSPAC{FT}, df::DataFrame; saving_dict::Dict{String
         push!(new_df_cols, "MOD_SENSIBLE_HEAT");
         push!(new_df_cols, "MOD_NET_LONGWAVE");
         push!(new_df_cols, "MOD_NET_SHORTWAVE");
+        push!(new_df_cols, "MOD_LONGWAVE_OUT");
+        push!(new_df_cols, "MOD_SHORTWAVE_OUT");
     end;
     # if the label does not contain MOD_ prefix
     for label in keys(saving_dict)

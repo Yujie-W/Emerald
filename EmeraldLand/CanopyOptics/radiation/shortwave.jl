@@ -21,6 +21,7 @@
 #     2025-Sep-12: add a special case when toral rad is zero (to avoid NaN issue)
 #     2025-Sep-15: make sure ppar_index and ppar_fraction are correctly set at special cases
 #     2025-Sep-25: make sure ppar_index and ppar_fraction are correctly set at special cases when there is no bins
+#     2025-Nov-03: fix the issue with sw out if SAI and LAI are both zero (was only at the soil layer before)
 #
 #######################################################################################################################################################################################################
 """
@@ -78,8 +79,9 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
         # 1. update upward and downward direct and diffuse radiation profiles
         sun_geo.auxil.e_dirꜜ .= rad_sw.e_dir;
         sun_geo.auxil.e_difꜜ .= rad_sw.e_dif;
-        sun_geo.auxil.e_difꜛ .= 0;
-        sun_geo.auxil.e_difꜛ[:,end] .= (rad_sw.e_dir .+ rad_sw.e_dif) .* sbulk.auxil.ρ_sw;
+        for irt in axes(sun_geo.auxil.e_difꜛ,2)
+            sun_geo.auxil.e_difꜛ[:,irt] .= (rad_sw.e_dir .+ rad_sw.e_dif) .* sbulk.auxil.ρ_sw;
+        end;
         sun_geo.auxil.albedo .= sbulk.auxil.ρ_sw;
 
         # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil

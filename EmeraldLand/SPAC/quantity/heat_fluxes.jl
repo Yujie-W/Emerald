@@ -3,6 +3,7 @@
 # Changes to this function
 # General
 #     2025-Sep-09: add functions to compute the latent and sensible heat fluxes, net longwave and shortwave radiation for SPAC
+#     2025-Nov-03: add functions to compute the outgoing longwave and shortwave radiation for SPAC
 #
 #######################################################################################################################################################################################################
 """
@@ -111,3 +112,33 @@ function NET_SHORTWAVE(spac::BulkSPAC{FT}) where {FT}
 
     return soil_sw + canopy_sw / sbulk.trait.area
 end;
+
+
+"""
+
+    LONGWAVE_OUT(spac::BulkSPAC{FT}) where {FT}
+
+Return the outgoing longwave radiation per ground area, given
+- `spac` `BulkSPAC` SPAC
+
+"""
+function LONGWAVE_OUT(spac::BulkSPAC{FT}) where {FT}
+    return spac.canopy.structure.auxil.lwꜛ[1]
+end;
+
+
+"""
+
+    SHORTWAVE_OUT(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Return the outgoing shortwave radiation per ground area, given
+- `config` `SPACConfiguration` configuration
+- `spac` `BulkSPAC` SPAC
+
+"""
+function SHORTWAVE_OUT(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
+    dwl = config.SPECTRA.ΔΛ;
+    sw_out = spac.canopy.sun_geometry.auxil.e_difꜛ[:,1];
+
+    return (sw_out' * dwl) / 1000
+end

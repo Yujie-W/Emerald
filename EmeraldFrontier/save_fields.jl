@@ -8,6 +8,7 @@
 #     2024-Aug-08: save OCS flux if requested
 #     2024-Sep-09: save SAP_VOLUME if requested
 #     2025-Sep-09: add functions chunk to compute the heat fluxes
+#     2025-Nov-03: save the shortwave and longwave outgoing radiation if requested
 #
 #######################################################################################################################################################################################################
 """
@@ -190,6 +191,8 @@ function save_fields!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, wdf::Na
         wdf.MOD_SENSIBLE_HEAT[ind] = SENSIBLE_HEAT(spac);
         wdf.MOD_NET_LONGWAVE[ind] = NET_LONGWAVE(spac);
         wdf.MOD_NET_SHORTWAVE[ind] = NET_SHORTWAVE(spac);
+        wdf.MOD_LONGWAVE_OUT[ind] = LONGWAVE_OUT(spac);
+        wdf.MOD_SHORTWAVE_OUT[ind] = SHORTWAVE_OUT(config, spac);
     end;
 
     return nothing
