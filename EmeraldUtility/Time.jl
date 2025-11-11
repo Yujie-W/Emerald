@@ -145,21 +145,31 @@ parse_timestamp(year::Int, doy::AbstractFloat; out_format::String = "DOY") = (
 # Changes to this function
 # General
 #     2022-Aug-24: move function outside of the folder
+#     2025-Nov-11: add option ranges to return ranges of days say 1:31 for January
 #
 #######################################################################################################################################################################################################
 """
 
-    month_days(year::Int, month::Int)
+    month_days(year::Int, month::Int; ranges::Bool = false)
 
 Return the number of days per month, given
 - `year` Year
 - `month` Month
+- `ranges` If true, return the range of days in the month; else, return the number of days in the month
 
 """
-function month_days(year::Int, month::Int)
+function month_days(year::Int, month::Int; ranges::Bool = false)
     @assert 1 <= month <= 12;
 
-    return isleapyear(year) ? NDAYS_LEAP[month] : NDAYS[month]
+    # if not returning ranges
+    if !ranges
+        return isleapyear(year) ? NDAYS_LEAP[month] : NDAYS[month]
+    end;
+
+    # if returning ranges
+    mdays = isleapyear(year) ? MDAYS_LEAP : MDAYS;
+
+    return (mdays[month]+1):mdays[month+1]
 end;
 
 
