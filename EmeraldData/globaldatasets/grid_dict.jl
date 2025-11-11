@@ -95,10 +95,10 @@ grid_dict(dts::LandDatasets{FT}, ilat::Int, ilon::Int; verification::Bool = true
     zc    = dts.p_ch[ilon,ilat,1];
 
     # gap fill the data for seasonal trends
-    interpolate_data!(chls);
-    interpolate_data!(cis);
-    interpolate_data!(lais);
-    interpolate_data!(vcmax);
+    gapfill_data!(chls);
+    gapfill_data!(cis);
+    gapfill_data!(lais);
+    gapfill_data!(vcmax);
 
     # compute g1 for Medlyn model
     ind_c3 = [2:14;16;17];
@@ -210,10 +210,10 @@ grid_dict(dtl::LandDatasetLabels, lat::Number, lon::Number; FT::DataType = Float
     end;
 
     # gap fill the data for seasonal trends
-    interpolate_data!(chls);
-    interpolate_data!(cis);
-    interpolate_data!(lais);
-    interpolate_data!(vcmax);
+    gapfill_data!(chls);
+    gapfill_data!(cis);
+    gapfill_data!(lais);
+    gapfill_data!(vcmax);
 
     # compute g1 for Medlyn model
     ind_c3 = [2:14;16;17];

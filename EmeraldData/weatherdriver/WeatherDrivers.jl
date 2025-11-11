@@ -9,7 +9,7 @@ using NetcdfIO: append_nc!, read_nc, save_nc!, varname_nc
 
 using ..EmeraldIO.Folders: ERA5_SL_HOURLY, LAND_DRIVER
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
-using ..EmeraldMath.Data: interpolate_data
+using ..EmeraldMath.Data: resample_data
 using ..EmeraldMath.Stats: nanmean
 using ..EmeraldUtility.Log: @tinfo
 using ..EmeraldUtility.Email: send_email!

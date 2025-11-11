@@ -38,7 +38,7 @@ function extend_data!(dts::LandDatasets{FT}) where {FT}
                 # extend the data first based on interpolations
                 for ilon in axes(dts.t_lm,1), ilat in axes(dts.t_lm,2)
                     tmp = data[ilon,ilat,:];
-                    interpolate_data!(tmp);
+                    gapfill_data!(tmp);
                     @. data[ilon,ilat,:] = tmp;
                 end;
 

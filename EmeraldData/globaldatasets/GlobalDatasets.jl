@@ -11,7 +11,7 @@ using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration, WangSM
 using ..EmeraldLand.SPAC: initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!
-using ..EmeraldMath.Data: interpolate_data!
+using ..EmeraldMath.Data: gapfill_data!
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 using ..EmeraldUtility.Log: @tinfo

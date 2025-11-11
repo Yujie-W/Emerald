@@ -82,11 +82,11 @@ grid_weather_driver(wd_tag::String, gm_dict::Dict{String,Any}, nc_path::String) 
     df_wd = read_nc(nc_path);
 
     # interpolate the data to a new resolution
-    df_wd[!,"CO2"    ] .= interpolate_data(gm_dict["CO2"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"CHL"    ] .= interpolate_data(gm_dict["CHLOROPHYLL"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"CI"     ] .= interpolate_data(gm_dict["CLUMPING"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"LAI"    ] .= interpolate_data(gm_dict["LAI"], gm_dict["YEAR"]; out_reso = "1H");
-    df_wd[!,"VCMAX25"] .= interpolate_data(gm_dict["VCMAX25"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CO2"    ] .= resample_data(gm_dict["CO2"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CHL"    ] .= resample_data(gm_dict["CHLOROPHYLL"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"CI"     ] .= resample_data(gm_dict["CLUMPING"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"LAI"    ] .= resample_data(gm_dict["LAI"], gm_dict["YEAR"]; out_reso = "1H");
+    df_wd[!,"VCMAX25"] .= resample_data(gm_dict["VCMAX25"], gm_dict["YEAR"]; out_reso = "1H");
 
     return df_wd
 );

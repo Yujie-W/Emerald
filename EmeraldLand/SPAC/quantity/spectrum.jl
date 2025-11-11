@@ -5,7 +5,7 @@
 # General
 #     2022-Jun-13: add method to interpolate the spectrum
 #     2022-Jun-13: add method to interpolate the spectrum via multiple steps
-#     2024-Nov-13: move the method of read_spectrum for single x as interpolate_data
+#     2024-Nov-13: move the method of read_spectrum for single x as resample_data
 #
 #######################################################################################################################################################################################################
 """
@@ -29,7 +29,7 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, x₁::FT, x₂::FT; steps::Int = 2) 
     δx = (x₂ - x₁) / steps;
     for i in 1:(steps+1)
         xi = x₁ + (i - 1) * δx;
-        ys += interpolate_data(x, y, xi);
+        ys += resample_data(x, y, xi);
     end;
 
     return ys / (steps + 1)
@@ -41,8 +41,8 @@ read_spectrum(x::Vector{FT}, y::Vector{FT}, w::Vector{FT}, x₁::FT, x₂::FT; s
     δx = (x₂ - x₁) / steps;
     for i in 1:(steps+1)
         xi = x₁ + (i - 1) * δx;
-        ys += interpolate_data(x, y, xi);
-        ws += interpolate_data(x, w, xi);
+        ys += resample_data(x, y, xi);
+        ws += resample_data(x, w, xi);
     end;
 
     return ys / ws

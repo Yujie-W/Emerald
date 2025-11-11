@@ -15,27 +15,27 @@ using ..EmeraldUtility.Time: month_days
 #######################################################################################################################################################################################################
 """
 
-    interpolate_data!(data::Union{FT, Vector{FT}}) where {FT}
+    gapfill_data!(data::Union{FT, Vector{FT}}) where {FT}
 
 Gap fill the data linearly, given
 - `data` Input data
 
 """
-function interpolate_data! end;
+function gapfill_data! end;
 
-interpolate_data!(data::Union{FT, Vector{FT}}) where {FT} = (
+gapfill_data!(data::Union{FT, Vector{FT}}) where {FT} = (
     if sum(.!isnan.(data)) in [0, length(data)]
         return nothing
     end;
 
     data_3x = [data; data; data];
-    interpolate_data!.([data_3x], (length(data)+1):(length(data)*2));
+    gapfill_data!.([data_3x], (length(data)+1):(length(data)*2));
     data .= data_3x[(length(data)+1):(length(data)*2)];
 
     return nothing
 );
 
-interpolate_data!(vec_in::Vector{FT}, ind::Int) where {FT} = (
+gapfill_data!(vec_in::Vector{FT}, ind::Int) where {FT} = (
     if isnan(vec_in[ind])
         (xi,yi) = previous_number(vec_in, ind);
         (xj,yj) = next_number(vec_in, ind);
@@ -80,13 +80,13 @@ next_number(vec_in::Vector{FT}, ind::Int) where {FT} = (
 # General
 #     2023-Aug-25: add function (moved from EmeraldFrontier.jl)
 #     2023-Aug-25: add support for single value number (not an array)
-#     2024-Nov-13: move the method of read_spectrum as interpolate_data
+#     2024-Nov-13: move the method of read_spectrum as resample_data
 #     2025-Nov-11: add supports for different output temporal resolutions (say 7D, 8D, and 1M)
 #
 #######################################################################################################################################################################################################
 """
 
-    interpolate_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H") where {FT}
+    resample_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H") where {FT}
 
 Interpolate the data to 1H or 1D resolution, given
 - `dat_in` Input data
@@ -95,7 +95,7 @@ Interpolate the data to 1H or 1D resolution, given
 
 #
 
-    interpolate_data(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT}
+    resample_data(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT}
 
 Linearly interpolate the data, given
 - `x` Input x data
@@ -103,9 +103,9 @@ Linearly interpolate the data, given
 - `target` Target x value
 
 """
-function interpolate_data end;
+function resample_data end;
 
-interpolate_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H") where {FT} = (
+resample_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H") where {FT} = (
     nday = isleapyear(year) ? 366 : 365;
     @assert length(dat_in) in [nday*24, nday, 53, 52, 46, 12, 1] "Dataset length not supported";
     @assert out_reso in ["1H", "1D", "7D", "8D", "1M"] "Output temporal resolution not supported";
@@ -138,7 +138,7 @@ interpolate_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "
     end;
 );
 
-interpolate_data(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
+resample_data(x::Vector{FT}, y::Vector{FT}, target::FT) where {FT} = (
     @assert length(x) == length(y) "Dimensions of provided spectrum x and y must match!";
     @assert x[1] <= target <= x[end] "Target wavelength must be within the range provided spectum!";
 
