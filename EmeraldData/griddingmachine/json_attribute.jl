@@ -34,7 +34,7 @@ function reference_attribute_dict()
         _msg = "    Please input the DOI of the publication > ";
         _doi = input_string(_msg; no_space = false);
 
-        _attribute_dict = Dict{String,String}(
+        _attribute_dict = Dict{String,Any}(
             "authors"   => _authors,
             "year"      => _year_pub,
             "title"     => _title,
@@ -73,7 +73,7 @@ function variable_attribute_dict()
     @info "These inputs are meant to generate the variable attributes witin the Netcdf dataset...";
 
     # loop the inputs until satisfied
-    _attribute_dict = Dict{String,String}();
+    _attribute_dict = Dict{String,Any}();
     while true
         _msg = "    Please input the long name of the variable to save > ";
         _longname = input_string(_msg; no_space = false);
@@ -84,7 +84,7 @@ function variable_attribute_dict()
         _msg = "    Please input some more details of the variable to save > ";
         _about = input_string(_msg; no_space = false);
 
-        _attribute_dict = Dict{String,String}(
+        _attribute_dict = Dict{String,Any}(
             "long_name" => _longname,
             "unit"      => _unit,
             "about"     => _about,

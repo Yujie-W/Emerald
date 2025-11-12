@@ -50,7 +50,7 @@ function era5_weather_driver_file(wd::ERA5SingleLevelsDriver, gm_dict::Dict{Stri
             if !(varfn[3] in existed_varnames)
                 nc_var = reprocessed_file_path(gm_dict, varfn[2]);
                 nc_vec = read_nc(nc_var, varfn[1], lon_ind, lat_ind);
-                append_nc!(nc_path, varfn[3], nc_vec, Dict{String,String}("longname" => varfn[2]), ["ind"]);
+                append_nc!(nc_path, varfn[3], nc_vec, Dict{String,Any}("longname" => varfn[2]), ["ind"]);
             end;
         end;
 
@@ -84,11 +84,11 @@ function era5_weather_driver_file(wd::ERA5SingleLevelsDriver, gm_dict::Dict{Stri
     df[!,"VPD"    ] = saturation_vapor_pressure.(df.T_AIR) .- saturation_vapor_pressure.(df.T_DEW);
     var_labels = [getfield(wd, fn)[2] for fn in fieldnames(ERA5SingleLevelsDriver)];
     var_dflabs = [getfield(wd, fn)[3] for fn in fieldnames(ERA5SingleLevelsDriver)];
-    var_attrs = Dict{String,String}[[Dict{String,String}("longname" => label) for label in var_labels];
-                                     Dict{String,String}("longname" => "Day of year");
-                                     Dict{String,String}("longname" => "Wind speed");
-                                     Dict{String,String}("longname" => "Diffuse radiation");
-                                     Dict{String,String}("longname" => "Vapor pressure deficit")];
+    var_attrs = Dict{String,Any}[[Dict{String,Any}("longname" => label) for label in var_labels];
+                                  Dict{String,Any}("longname" => "Day of year");
+                                  Dict{String,Any}("longname" => "Wind speed");
+                                  Dict{String,Any}("longname" => "Diffuse radiation");
+                                  Dict{String,Any}("longname" => "Vapor pressure deficit")];
     save_nc!(nc_path, df, [var_dflabs; "FDOY"; "WIND"; "RAD_DIF"; "VPD"], var_attrs);
 
     return nc_path

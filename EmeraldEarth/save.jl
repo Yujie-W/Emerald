@@ -74,23 +74,23 @@ function save_simulations!(filename::String, states::Matrix{Union{Nothing}}, doy
         _3d_s770[:,:,1] .= _mat_sif₇₇₀;
         _3d_tran[:,:,1] .= _mat_tran;
 
-        append_nc!(filename, "lat", collect(Float32, (-90+_res_lat):_res_lat:90), Dict{String,String}("about" => "latitude"), ["lat"]);
-        append_nc!(filename, "lon", collect(Float32, (-180+_res_lon):_res_lon:180), Dict{String,String}("about" => "longitude"), ["lon"]);
-        append_nc!(filename, "DOY", Float32[doy], Dict{String,String}("about" => "index of hour in a year"), ["ind"]);
-        append_nc!(filename, "BETA", _3d_beta, Dict{String,String}("about" => "Beta factor"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "CSIF", _3d_csif, Dict{String,String}("about" => "Total Chlorophyll SIF photons in [μmol m⁻² s⁻¹] (before reabsorption)"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "ETR", _3d_etr, Dict{String,String}("about" => "Total electron transport in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "GPP", _3d_gpp, Dict{String,String}("about" => "GPP in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "EVI", _3d_evi, Dict{String,String}("about" => "MODIS EVI"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "NDVI", _3d_ndvi, Dict{String,String}("about" => "MODIS NDVI"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "NIRv", _3d_nirv, Dict{String,String}("about" => "MODIS NIRv"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "PAR", _3d_par, Dict{String,String}("about" => "Incoming PAR in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "PPAR", _3d_ppar, Dict{String,String}("about" => "Photosynthesis PAR in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "SIF₆₈₃", _3d_s683, Dict{String,String}("about" => "TROPOMI SIF at 683 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "SIF₇₄₀", _3d_s740, Dict{String,String}("about" => "TROPOMI SIF at 740 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "SIF₇₅₉", _3d_s759, Dict{String,String}("about" => "OCO SIF at 759 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "SIF₇₇₀", _3d_s770, Dict{String,String}("about" => "OCO SIF at 770 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
-        append_nc!(filename, "TRANSPIRATION", _3d_tran, Dict{String,String}("about" => "Transpiration rate in [mol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "lat", collect(Float32, (-90+_res_lat):_res_lat:90), Dict{String,Any}("about" => "latitude"), ["lat"]);
+        append_nc!(filename, "lon", collect(Float32, (-180+_res_lon):_res_lon:180), Dict{String,Any}("about" => "longitude"), ["lon"]);
+        append_nc!(filename, "DOY", Float32[doy], Dict{String,Any}("about" => "index of hour in a year"), ["ind"]);
+        append_nc!(filename, "BETA", _3d_beta, Dict{String,Any}("about" => "Beta factor"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "CSIF", _3d_csif, Dict{String,Any}("about" => "Total Chlorophyll SIF photons in [μmol m⁻² s⁻¹] (before reabsorption)"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "ETR", _3d_etr, Dict{String,Any}("about" => "Total electron transport in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "GPP", _3d_gpp, Dict{String,Any}("about" => "GPP in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "EVI", _3d_evi, Dict{String,Any}("about" => "MODIS EVI"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "NDVI", _3d_ndvi, Dict{String,Any}("about" => "MODIS NDVI"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "NIRv", _3d_nirv, Dict{String,Any}("about" => "MODIS NIRv"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "PAR", _3d_par, Dict{String,Any}("about" => "Incoming PAR in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "PPAR", _3d_ppar, Dict{String,Any}("about" => "Photosynthesis PAR in [μmol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "SIF₆₈₃", _3d_s683, Dict{String,Any}("about" => "TROPOMI SIF at 683 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "SIF₇₄₀", _3d_s740, Dict{String,Any}("about" => "TROPOMI SIF at 740 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "SIF₇₅₉", _3d_s759, Dict{String,Any}("about" => "OCO SIF at 759 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "SIF₇₇₀", _3d_s770, Dict{String,Any}("about" => "OCO SIF at 770 nm in [mW m⁻² nm⁻¹ sr⁻¹]"), ["lon", "lat", "ind"]);
+        append_nc!(filename, "TRANSPIRATION", _3d_tran, Dict{String,Any}("about" => "Transpiration rate in [mol m⁻² s⁻¹]"), ["lon", "lat", "ind"]);
 
         return nothing
     end;
