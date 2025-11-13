@@ -61,7 +61,7 @@ Return the path of the weather driver file, given
 function grid_file_path(gm_dict::Dict{String,Any})
     lat_ind = gm_dict["LAT_INDEX"];
     lon_ind = gm_dict["LON_INDEX"];
-    nx      = gm_dict["RESO_SPACE"]
+    nx      = gm_dict["RESO_SPACE"];
     year    = gm_dict["YEAR"];
     nc_name = "weather_driver_wd1_$(year)_$(lat_ind)_$(lon_ind)_$(nx)X.nc";
 
