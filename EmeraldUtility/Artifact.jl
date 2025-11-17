@@ -96,7 +96,7 @@ deploy_artifact!(art_toml::String, art_name::String, art_locf::String, art_file:
             _in   = art_file[i];
             _out  = new_file[i];
             _path = joinpath(art_locf, _in);
-            @tinfo_mid "Copying file $(_in)...";
+            display_message!("Copying file $(_in)...", "tinfo_mid");
             cp(_path, joinpath(artifact_dir, _out));
         end;
     end;

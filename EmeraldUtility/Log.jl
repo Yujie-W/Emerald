@@ -18,39 +18,11 @@ using Dates: format, now
 
 Add a time tag to @error expression, and display the message.
 
-Users may choose to use `@terror_pre`, `@terror_mid`, and `@terror_end` to display multi-line error messages
-```julia
-begin
-    @terror_pre "Timed error message:";
-    @terror_mid "This is the second line of the error message.";
-    @terror_end "This is the last line of the error message.";
-end;
-```
 """
 macro terror(exps...)
     quote
         @error "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n       $($(esc(exps[1])))" $(exps[2:end]...)
     end;
-end;
-
-macro terror_pre(msg::String)
-    printstyled("┌ Error: "; bold = true, color = :red);
-    printstyled("$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n"; bold = false, color = :white);
-    printstyled("│        "; bold = true, color = :red);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
-end;
-
-macro terror_mid(msg::String)
-    printstyled("│        "; bold = true, color = :red);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
-end;
-
-macro terror_end(msg::String)
-    printstyled("└        "; bold = true, color = :red);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
 end;
 
 
@@ -60,40 +32,11 @@ end;
 
 Add a time tag to @info expression, and display the message
 
-Users may choose to use `@tinfo_pre`, `@tinfo_mid`, and `@tinfo_end` to display multi-line info messages
-```julia
-begin
-    @tinfo_pre "Timed info message:";
-    @tinfo_mid "This is the second line of the info message.";
-    @tinfo_end "This is the last line of the info message.";
-end;
-```
-
 """
 macro tinfo(exps...)
     quote
         @info "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n      $($(esc(exps[1])))" $(exps[2:end]...)
     end;
-end;
-
-macro tinfo_pre(msg::String)
-    printstyled("┌ Info: "; bold = true, color = :cyan);
-    printstyled("$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n"; bold = false, color = :white);
-    printstyled("│       "; bold = true, color = :cyan);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
-end;
-
-macro tinfo_mid(msg::String)
-    printstyled("│       "; bold = true, color = :cyan);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
-end;
-
-macro tinfo_end(msg::String)
-    printstyled("└       "; bold = true, color = :cyan);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
 end;
 
 
@@ -103,39 +46,11 @@ end;
 
 Add a time tag to @warn expression, and display the message
 
-Users may choose to use `@twarn_pre`, `@twarn_mid`, and `@twarn_end` to display multi-line warning messages
-```julia
-begin
-    @twarn_pre "Timed warning message:";
-    @twarn_mid "This is the second line of the warning message.";
-    @twarn_end "This is the last line of the warning message.";
-end;
-```
 """
 macro twarn(exps...)
     quote
         @warn "$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n         $($(esc(exps[1])))" $(exps[2:end]...)
     end;
-end;
-
-macro twarn_pre(msg::String)
-    printstyled("┌ Warning: "; bold = true, color = :yellow);
-    printstyled("$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n"; bold = false, color = :white);
-    printstyled("│          "; bold = true, color = :yellow);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
-end;
-
-macro twarn_mid(msg::String)
-    printstyled("│          "; bold = true, color = :yellow);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
-end;
-
-macro twarn_end(msg::String)
-    printstyled("└          "; bold = true, color = :yellow);
-    printstyled(msg; bold = false, color = :white);
-    print("\n");
 end;
 
 
@@ -161,38 +76,110 @@ function display_message!(msg::String, msg_level::String = "println")
     elseif msg_level == "tinfo"
         @tinfo msg;
     elseif msg_level == "tinfo_pre"
-        @tinfo_pre msg;
+        display_timed_info!(msg, "pre");
     elseif msg_level == "tinfo_mid"
-        @tinfo_mid msg;
+        display_timed_info!(msg, "mid");
     elseif msg_level == "tinfo_end"
-        @tinfo_end msg;
+        display_timed_info!(msg, "end");
 
     elseif msg_level == "warn"
         @warn msg;
     elseif msg_level == "twarn"
         @twarn msg;
     elseif msg_level == "twarn_pre"
-        @twarn_pre msg;
+        display_timed_warning!(msg, "pre");
     elseif msg_level == "twarn_mid"
-        @twarn_mid msg;
+        display_timed_warning!(msg, "mid");
     elseif msg_level == "twarn_end"
-        @twarn_end msg;
+        display_timed_warning!(msg, "end");
 
     elseif msg_level == "error"
         @error msg;
     elseif msg_level == "terror"
         @terror msg;
     elseif msg_level == "terror_pre"
-        @terror_pre msg;
+        display_timed_error!(msg, "pre");
     elseif msg_level == "terror_mid"
-        @terror_mid msg;
+        display_timed_error!(msg, "mid");
     elseif msg_level == "terror_end"
-        @terror_end msg;
+        display_timed_error!(msg, "end");
 
     elseif msg_level == "println"
         println(msg);
     elseif msg_level == "print"
         print(msg);
+    end;
+
+    return nothing
+end;
+
+function display_timed_info!(msg::String, msg_level::String)
+    if msg_level == "pre"
+        printstyled("┌ Info: "; bold = true, color = :cyan);
+        printstyled("$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n"; bold = false, color = :white);
+        printstyled("│       "; bold = true, color = :cyan);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    if msg_level == "mid"
+        printstyled("│       "; bold = true, color = :cyan);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    if msg_level == "end"
+        printstyled("└       "; bold = true, color = :cyan);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    return nothing
+end;
+
+function display_timed_warning!(msg::String, msg_level::String)
+    if msg_level == "pre"
+        printstyled("┌ Warning: "; bold = true, color = :yellow);
+        printstyled("$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n"; bold = false, color = :white);
+        printstyled("│          "; bold = true, color = :yellow);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    if msg_level == "mid"
+        printstyled("│          "; bold = true, color = :yellow);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    if msg_level == "end"
+        printstyled("└          "; bold = true, color = :yellow);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    return nothing
+end;
+
+function display_timed_error!(msg::String, msg_level::String)
+    if msg_level == "pre"
+        printstyled("┌ Error: "; bold = true, color = :red);
+        printstyled("$(format(now(),"yyyy-mm-dd HH:MM:SS"))\n"; bold = false, color = :white);
+        printstyled("│        "; bold = true, color = :red);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    if msg_level == "mid"
+        printstyled("│        "; bold = true, color = :red);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
+    end;
+
+    if msg_level == "end"
+        printstyled("└        "; bold = true, color = :red);
+        printstyled(msg; bold = false, color = :white);
+        print("\n");
     end;
 
     return nothing
