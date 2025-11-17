@@ -11,7 +11,7 @@ using ..EmeraldIO.Folders: ERA5_SL_HOURLY, LAND_DRIVER
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldMath.Data: resample_data
 using ..EmeraldMath.Stats: nanmean
-using ..EmeraldUtility.Log: @tinfo
+using ..EmeraldUtility.Log: display_message!
 using ..EmeraldUtility.Email: send_email!
 
 

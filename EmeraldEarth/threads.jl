@@ -15,11 +15,11 @@ Add processors to run code in multiple threadings, given
 
 """
 function add_threads!(threads::Int, FT::DataType = Float64)
-    @tinfo "Adding a total of $(threads) threadings...";
+    display_message!("Adding a total of $(threads) threadings...", "tinfo_pre");
     dynamic_workers!(threads);
     @everywhere Base.MainInclude.eval(:(using Emerald.EmeraldEarth));
 
-    @tinfo "Initializing the SPAC cache in each thread...";
+    display_message!("Initializing the SPAC cache in each thread...", "tinfo_end");
     @everywhere EmeraldEarth.setup_cache!($FT);
 
     return nothing

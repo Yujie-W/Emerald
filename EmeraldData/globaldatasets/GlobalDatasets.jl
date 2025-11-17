@@ -14,7 +14,7 @@ using ..EmeraldLand.SPAC: initialize_spac!, prescribe_air!, prescribe_soil!, pre
 using ..EmeraldMath.Data: gapfill_data!
 using ..EmeraldMath.Stats: nanmax, nanmean
 using ..EmeraldPhysics.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
-using ..EmeraldUtility.Log: display_message!, @tinfo
+using ..EmeraldUtility.Log: display_message!
 using ..EmeraldUtility.Time: MDAYS, MDAYS_LEAP
 
 

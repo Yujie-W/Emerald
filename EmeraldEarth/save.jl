@@ -20,7 +20,7 @@ Save the simulation results to netcdf file, given
 """
 function save_simulations!(filename::String, states::Matrix{Union{Nothing}}, doy::Number; displaying::Bool = true)
     if displaying
-        @tinfo "Saving the simulation results to netcdf file...";
+        display_message!("Saving the simulation results to netcdf file...", "tinfo");
     end;
 
     # read results from matrix of states

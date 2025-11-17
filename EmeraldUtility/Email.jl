@@ -1,6 +1,6 @@
 module Email
 
-using ..Log: @tinfo
+using ..Log: display_message!
 
 
 #######################################################################################################################################################################################################
@@ -22,7 +22,7 @@ Send out email, given
 
 """
 function send_email!(subject::String, from_email::String, to_email::String, body::String)
-    @tinfo "Sending email to $(to_email)...";
+    display_message!("Sending email to $(to_email)...", "tinfo");
 
     # compose email and write the email to local drive
     Base.write(".tmp_email", "Subject: $(subject)\nFrom: $(from_email)\nTo: $(to_email)\n$(body)");
