@@ -2,7 +2,7 @@ module Artifact
 
 using Pkg.Artifacts: archive_artifact, artifact_exists, artifact_hash, bind_artifact!, create_artifact
 
-using ..Log: @tinfo
+using ..Log: display_message!
 
 
 #######################################################################################################################################################################################################
@@ -83,29 +83,31 @@ deploy_artifact!(art_toml::String, art_name::String, art_locf::String, art_file:
 
     # if artifact exists already skip
     if !isnothing(_art_hash) && artifact_exists(_art_hash)
-        @tinfo "Artifact $(art_name) already exists, skip it";
+        display_message!("Artifact $(art_name) already exists, skip it.", "tinfo");
+
         return nothing;
     end;
 
     # create artifact
-    @tinfo "Artifact $(art_name) not found, deploy it now...";
-    @tinfo "Copying files into artifact folder...";
+    display_message!("Artifact $(art_name) not found, deploy it now...", "tinfo_pre");
+    display_message!("Copying files into artifact folder...", "tinfo_mid");
     _art_hash = create_artifact() do artifact_dir
         for i in eachindex(art_file)
             _in   = art_file[i];
             _out  = new_file[i];
             _path = joinpath(art_locf, _in);
-            @tinfo "Copying file $(_in)...";
+            @tinfo_mid "Copying file $(_in)...";
             cp(_path, joinpath(artifact_dir, _out));
         end;
     end;
 
     # compress artifact
-    @tinfo "Compressing artifact $(art_name)...";
+    display_message!("Compressing artifact $(art_name)...", "tinfo_mid");
     _tar_loc  = "$(art_tarf)/$(art_name).tar.gz";
     _tar_hash = archive_artifact(_art_hash, _tar_loc);
 
     # bind artifact to download information
+    display_message!("Binding artifact $(art_name) to $(art_toml)...", "tinfo_end");
     _download_info = [("$(_url)/$(art_name).tar.gz", _tar_hash) for _url in art_urls];
     bind_artifact!(art_toml, art_name, _art_hash; download_info=_download_info, lazy=true, force=true);
 
