@@ -105,8 +105,8 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         # convert the excitation radiation to fluorescence components
         if Φ_PHOTON
-            photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_dif_sife);
-            photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_dir_sife);
+            energy_to_photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_dif_sife);
+            energy_to_photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_dir_sife);
         end;
 
         # convert the excitation radiation to fluorescence components
@@ -120,9 +120,9 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         # convert the SIF back to energy unit if ϕ_photon is true
         if Φ_PHOTON
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dif_shaded);
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dif_sunlit);
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dir_sunlit);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dif_shaded);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dif_sunlit);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dir_sunlit);
         end;
 
         # add up the SIF from sunlit and shaded leaves for each layer through accounting for the SIF quantum yield
@@ -157,9 +157,9 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         # convert the excitation radiation to photons if ϕ_photon is true
         if Φ_PHOTON
-            photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_dirꜜ_sife);
-            photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_difꜜ_sife);
-            photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_difꜛ_sife);
+            energy_to_photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_dirꜜ_sife);
+            energy_to_photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_difꜜ_sife);
+            energy_to_photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_difꜛ_sife);
         end;
 
         # convert the excitation radiation to fluorescence components
@@ -172,12 +172,12 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
         # convert the SIF back to energy unit if ϕ_photon is true
         if Φ_PHOTON
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dirꜜ_sif_mean);
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dirꜜ_sif_diff);
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜜ_sif_mean);
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜜ_sif_diff);
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜛ_sif_mean);
-            energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜛ_sif_diff);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dirꜜ_sif_mean);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_dirꜜ_sif_diff);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜜ_sif_mean);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜜ_sif_diff);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜛ_sif_mean);
+            photon_to_energy!(SPECTRA.Λ_SIF, sun_geo.auxil._e_difꜛ_sif_diff);
         end;
 
         #
