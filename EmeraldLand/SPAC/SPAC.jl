@@ -2,9 +2,9 @@ module SPAC
 
 using Statistics: mean
 
-using ..EmeraldMath.Data: resample_data
+using EmeraldUtilities.UniversalConstants: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O, ρ_H₂O
 
-using ..EmeraldPhysics.Constant: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O, ρ_H₂O
+using ..EmeraldMath.Data: resample_data
 using ..EmeraldPhysics.Optics: photon
 
 using ..CanopyOptics: canopy_structure!, canopy_structure_aux!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!, sun_geometry_aux!

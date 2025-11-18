@@ -4,7 +4,7 @@ using SpecialFunctions: expint
 
 using EmeraldUtilities.RecursiveTools: sync_struct!
 
-using ..EmeraldPhysics.Constant: M_H₂O, ρ_H₂O
+using EmeraldUtilities.UniversalConstants: M_H₂O, ρ_H₂O
 
 using ..Namespace: SIFMatrixDualspectMethod, SIFMatrixFluspectMethod, SIFMatrixPlatespectMethod
 using ..Namespace: LeafBio, LeafBioState, LeafBioTrait

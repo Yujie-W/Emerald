@@ -2,9 +2,10 @@ module PlantHydraulics
 
 using Statistics: mean
 
+using EmeraldUtilities.UniversalConstants: GAS_R, ρg_MPa
+
 using ..EmeraldMath.Math: upper_quadratic
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
-using ..EmeraldPhysics.Constant: GAS_R, ρg_MPa
 
 using ..Namespace: ComplexVC, LogisticVC, PowerVC, WeibullVC
 using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve

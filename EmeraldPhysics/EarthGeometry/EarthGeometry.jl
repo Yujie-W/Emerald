@@ -1,6 +1,6 @@
 module EarthGeometry
 
-using ..Constant: R_EQUATOR, R_POLAR, YEAR_D
+using EmeraldUtilities.UniversalConstants: R_EQUATOR, R_POLAR, YEAR_D
 
 
 include("earth.jl");

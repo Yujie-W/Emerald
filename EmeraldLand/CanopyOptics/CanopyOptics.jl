@@ -5,8 +5,9 @@ using QuadGK: quadgk
 using SpecialFunctions: beta_inc
 using Statistics: mean
 
+using EmeraldUtilities.UniversalConstants: K_STEFAN
+
 using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
-using ..EmeraldPhysics.Constant: K_STEFAN
 using ..EmeraldPhysics.Optics: energy!, photon, photon!
 
 using ..Namespace: BetaLIDF, VerhoefLIDF

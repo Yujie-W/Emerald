@@ -1,6 +1,6 @@
 module StomatalModels
 
-using ..EmeraldPhysics.Constant: CP_D_MOL, K_STEFAN, M_H₂O
+using EmeraldUtilities.UniversalConstants: CP_D_MOL, K_STEFAN, M_H₂O
 
 using ..Namespace: AbstractSoilVC
 using ..Namespace: AbstractXylemVC

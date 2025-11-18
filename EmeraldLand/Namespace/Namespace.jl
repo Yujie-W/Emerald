@@ -18,7 +18,7 @@ using ..EmeraldIO.Text: read_csv
 using ..EmeraldMath.Data: resample_data
 using ..EmeraldMath.Solver: NewtonBisectionMethod, SolutionTolerance, find_zero
 
-using ..EmeraldPhysics.Constant: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
+using EmeraldUtilities.UniversalConstants: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
 
 
 # Please do not use V1/V2/V3 files here as they do not contain the Phi_PSI and Phi_PSII variables

@@ -1,6 +1,6 @@
 module Optics
 
-using ..Constant: AVOGADRO, H_PLANCK, LIGHT_SPEED
+using EmeraldUtilities.UniversalConstants: AVOGADRO, H_PLANCK, LIGHT_SPEED
 
 
 const FAC = 1e-9 / (H_PLANCK() * LIGHT_SPEED() * AVOGADRO());
