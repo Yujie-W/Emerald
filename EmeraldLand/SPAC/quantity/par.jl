@@ -22,7 +22,7 @@ PAR(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     ppfd::FT = 0;
     for i_par in eachindex(SPECTRA.Λ_PAR)
-        ppfd += photon(SPECTRA.Λ_PAR[i_par], rad_sw.e_dif[SPECTRA.IΛ_PAR[i_par]] + rad_sw.e_dir[SPECTRA.IΛ_PAR[i_par]]) * 1000 * SPECTRA.ΔΛ_PAR[i_par];
+        ppfd += energy_to_photon(SPECTRA.Λ_PAR[i_par], rad_sw.e_dif[SPECTRA.IΛ_PAR[i_par]] + rad_sw.e_dir[SPECTRA.IΛ_PAR[i_par]]) * 1000 * SPECTRA.ΔΛ_PAR[i_par];
     end;
 
     return ppfd

@@ -4,7 +4,6 @@ module EmeraldData
 using ..EmeraldIO
 using ..EmeraldLand
 using ..EmeraldMath
-using ..EmeraldPhysics
 
 
 include("fluxtower/FluxTower.jl");
