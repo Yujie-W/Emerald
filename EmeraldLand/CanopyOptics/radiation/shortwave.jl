@@ -191,8 +191,8 @@ shortwave_radiation!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}, ::Canopy
             α_apar = view(leaf.bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
             p_leaf = view(f_leaf, SPECTRA.IΛ_PAR);
             # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
-            sun_geo.auxil._apar_shaded .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt];
-            sun_geo.auxil._apar_sunlit .= photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt] ./ sun_geo.s_aux.p_sunlit[irt];
+            sun_geo.auxil._apar_shaded .= energy_to_photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt];
+            sun_geo.auxil._apar_sunlit .= energy_to_photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt] ./ sun_geo.s_aux.p_sunlit[irt];
             sun_geo.auxil._ppar_shaded .= sun_geo.auxil._apar_shaded .* α_apar;
             sun_geo.auxil._ppar_sunlit .= sun_geo.auxil._apar_sunlit .* α_apar;
 

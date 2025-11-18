@@ -323,9 +323,9 @@ end;
 # read the radiation
 df = Emerald.EmeraldIO.Jld2.read_jld2(Emerald.EmeraldLand.Namespace.LAND_ARTIFACT, Emerald.EmeraldLand.Namespace.OLD_PHI_2021_1NM);
 rad = df.E_DIR .+ df.E_DIFF;
-rad_photon = Emerald.EmeraldPhysics.Optics.photon.(owl.Λ, rad);
+rad_photon = EmeraldUtilities.UniversalConstants.energy_to_photon.(owl.Λ, rad);
 sif_photon = owl.sif_mat * rad_photon;
-sif = Emerald.EmeraldPhysics.Optics.energy.(owl.Λ, sif_photon);
+sif = EmeraldUtilities.UniversalConstants.photon_to_energy.(owl.Λ, sif_photon);
 
 df_owl = DataFrames.DataFrame(WL = owl.Λ, NR = owl.NR, REFL = owl.ρ_surface, SIF = sif, PHI = owl.Φ_PS);
 Emerald.EmeraldIO.Text.save_csv!(df_owl, "sif.csv");

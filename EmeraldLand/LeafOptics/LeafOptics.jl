@@ -172,12 +172,12 @@ function leaf_PAR(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectr
     _e_ppar_diff = _α_ppar .* _e_apar_diff;
 
     # PAR, APAR, and PPAR photons from direct and diffuse light
-    _par_dir   = photon.(Λ_PAR, _e_par_dir  );
-    _par_diff  = photon.(Λ_PAR, _e_par_diff );
-    _apar_dir  = photon.(Λ_PAR, _e_apar_dir );
-    _apar_diff = photon.(Λ_PAR, _e_apar_diff);
-    _ppar_dir  = photon.(Λ_PAR, _e_ppar_dir );
-    _ppar_diff = photon.(Λ_PAR, _e_ppar_diff);
+    _par_dir   = energy_to_photon.(Λ_PAR, _e_par_dir  );
+    _par_diff  = energy_to_photon.(Λ_PAR, _e_par_diff );
+    _apar_dir  = energy_to_photon.(Λ_PAR, _e_apar_dir );
+    _apar_diff = energy_to_photon.(Λ_PAR, _e_apar_diff);
+    _ppar_dir  = energy_to_photon.(Λ_PAR, _e_ppar_dir );
+    _ppar_diff = energy_to_photon.(Λ_PAR, _e_ppar_diff);
 
     # total PAR and APAR in μmol photons m⁻² s⁻¹
     _Σpar_dir   = _par_dir'   * ΔΛ_PAR * 1000;
@@ -238,15 +238,15 @@ function leaf_SIF(bio::HyperspectralLeafBiophysics{FT}, spectra::ReferenceSpectr
     end;
 
     # convert energy to photon
-    _phot_excitation = photon.(Λ_SIFE, _e_excitation);
+    _phot_excitation = energy_to_photon.(Λ_SIFE, _e_excitation);
 
     # convert photon to photon using the matrices
     _phot_b = bio.mat_b * _phot_excitation * ϕ / FT(π);
     _phot_f = bio.mat_f * _phot_excitation * ϕ / FT(π);
 
     # convert photon to back to energy
-    _sif_b = energy.(Λ_SIF, _phot_b);
-    _sif_f = energy.(Λ_SIF, _phot_f);
+    _sif_b = photon_to_energy.(Λ_SIF, _phot_b);
+    _sif_f = photon_to_energy.(Λ_SIF, _phot_f);
 
     return _sif_b, _sif_f
 end;

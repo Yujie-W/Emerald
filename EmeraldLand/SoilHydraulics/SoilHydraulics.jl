@@ -1,5 +1,6 @@
 module SoilHydraulics
 
+using EmeraldUtilities.PhysicalChemistry: diffusive_coefficient, latent_heat_melt, latent_heat_vapor, relative_surface_tension, saturation_vapor_pressure
 using EmeraldUtilities.UniversalConstants: CP_D_MOL, CP_I_MOL, CP_L, GAS_R, M_H₂O, T₀, ρ_H₂O, ρg_MPa
 
 using ..Namespace: BrooksCorey, VanGenuchten
@@ -7,7 +8,6 @@ using ..Namespace: XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS
 using ..Namespace: Root
 using ..Namespace: SoilLayer
 using ..Namespace: BulkSPAC, SPACConfiguration
-using ..PhysicalChemistry: diffusive_coefficient, latent_heat_melt, latent_heat_vapor, relative_surface_tension, saturation_vapor_pressure
 
 
 # vc

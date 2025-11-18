@@ -1,5 +1,6 @@
 module StomatalModels
 
+using EmeraldUtilities.PhysicalChemistry: latent_heat_vapor, relative_diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure
 using EmeraldUtilities.UniversalConstants: CP_D_MOL, K_STEFAN, M_H₂O
 
 using ..Namespace: AbstractSoilVC
@@ -11,7 +12,6 @@ using ..Namespace: AirLayer, SoilLayer
 using ..Namespace: BulkSPAC, SPACCache
 
 using ..Photosynthesis: photosynthesis_only!, ∂R∂T
-using ..PhysicalChemistry: latent_heat_vapor, relative_diffusive_coefficient, relative_surface_tension, saturation_vapor_pressure
 using ..PlantHydraulics: flow_in, flow_out, relative_xylem_k, xylem_end_pressure
 
 

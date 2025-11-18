@@ -3,6 +3,7 @@ module PlantHydraulics
 using Statistics: mean
 
 using EmeraldUtilities.MathTools: NewtonBisectionMethod, SolutionTolerance, find_zero, upper_quadratic
+using EmeraldUtilities.PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using EmeraldUtilities.UniversalConstants: GAS_R, ρg_MPa
 
 using ..Namespace: ComplexVC, LogisticVC, PowerVC, WeibullVC
@@ -13,7 +14,6 @@ using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Root, Stem
 using ..Namespace: SoilLayer
 using ..Namespace: BulkSPAC, SPACCache, SPACConfiguration
 
-using ..PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using ..SoilHydraulics: relative_soil_k
 
 

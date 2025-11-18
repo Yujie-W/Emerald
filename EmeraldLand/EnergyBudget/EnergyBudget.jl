@@ -4,6 +4,7 @@ module EnergyBudget
 
 using Statistics: mean
 
+using EmeraldUtilities.PhysicalChemistry: latent_heat_vapor
 using EmeraldUtilities.UniversalConstants: CP_D_MOL, CP_I, CP_I_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GLUCOSE, M_H₂O, T₀, ρ_H₂O
 
 using ..Namespace: XylemHydraulics
@@ -12,7 +13,6 @@ using ..Namespace: AirLayer, AirLayerState
 using ..Namespace: SoilLayer, SoilLayerState, SoilLayerTrait, SoilLayerTDAuxil
 using ..Namespace: ExtraXylemCapacitorState, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil, XylemHydraulicsState, XylemHydraulicsTrait
 using ..Namespace: BulkSPAC, SPACConfiguration
-using ..PhysicalChemistry: latent_heat_vapor
 using ..PlantHydraulics: flow_in, flow_out
 
 

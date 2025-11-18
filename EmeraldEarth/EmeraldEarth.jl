@@ -10,6 +10,7 @@ using ProgressMeter: @showprogress
 
 using EmeraldUtilities.DistributedTools: dynamic_workers!
 using EmeraldUtilities.MathTools: nanmax, nanmean
+using EmeraldUtilities.PhysicalChemistry: saturation_vapor_pressure
 using EmeraldUtilities.PrettyDisplay: pretty_display!
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 using NetcdfIO: append_nc!, create_nc!, grow_nc!, read_nc
@@ -19,7 +20,6 @@ using ..EmeraldData.GlobalDatasets: LandDatasets, grid_dict, grid_spac, prescrib
 using ..EmeraldIO.Text: read_csv
 using ..EmeraldLand.Namespace: BetaFunction, BetaParameterG1, BetaParameterPsoil, MedlynSM, BulkSPAC, BulkSPACStates, SPACConfiguration
 using ..EmeraldLand.Namespace: sync_state!
-using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldLand.SPAC: GPP, PPAR, initialize_spac!, prescribe_air!, prescribe_soil!, prescribe_traits!, push_t_history!, soil_plant_air_continuum!
 
 

@@ -9,13 +9,10 @@ include("Namespace/Namespace.jl");
 # depends on Namespace
 include("LeafOptics/LeafOptics.jl");
 include("Photosynthesis/Photosynthesis.jl");
-include("PhysicalChemistry.jl");
+include("SoilHydraulics/SoilHydraulics.jl");
 
 # depends on LeafOptics
 include("CanopyOptics/CanopyOptics.jl");
-
-# depends on PhysicalChemistry
-include("SoilHydraulics/SoilHydraulics.jl");
 
 # depends on SoilHydraulics
 include("PlantHydraulics/PlantHydraulics.jl");
