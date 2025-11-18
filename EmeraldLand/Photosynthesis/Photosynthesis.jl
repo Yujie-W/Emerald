@@ -3,11 +3,8 @@ module Photosynthesis
 using DataFrames: DataFrame
 using Statistics: mean
 
+using EmeraldUtilities.MathTools: ReduceStepMethodND, SolutionToleranceND, find_peak, lower_quadratic, nanmax, nanmin, rmse, upper_quadratic
 using EmeraldUtilities.UniversalConstants: F_O₂, GAS_R
-
-using ..EmeraldMath.Math: lower_quadratic, upper_quadratic
-using ..EmeraldMath.Solver: ReduceStepMethodND, SolutionToleranceND, find_peak
-using ..EmeraldMath.Stats: nanmax, nanmin, rmse
 
 using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterVcmax
 using ..Namespace: AbstractStomataModel, BallBerrySM, GentineSM, LeuningSM, MedlynSM

@@ -185,25 +185,25 @@ ReferenceSpectra{FT}(
 
         # interpolate the data
         for i in eachindex(wls)
-            K_ANT_interp[i] = resample_data(df.WL, df.K_ANT, wls[i]);
-            K_BROWN_interp[i] = resample_data(df.WL, df.K_BROWN, wls[i]);
-            K_CAB_interp[i] = resample_data(df.WL, df.K_CAB, wls[i]);
-            K_CAR_V_interp[i] = resample_data(df.WL, df.K_CAR_V, wls[i]);
-            K_CAR_Z_interp[i] = resample_data(df.WL, df.K_CAR_Z, wls[i]);
-            K_CBC_interp[i] = resample_data(df.WL, df.K_CBC, wls[i]);
-            K_H₂O_interp[i] = resample_data(df.WL, df.K_H₂O, wls[i]);
-            K_LMA_interp[i] = resample_data(df.WL, df.K_LMA, wls[i]);
-            K_PRO_interp[i] = resample_data(df.WL, df.K_PRO, wls[i]);
-            NR_interp[i] = resample_data(df.WL, df.NR, wls[i]);
-            Φ_PS_interp[i] = resample_data(df.WL, df.K_PS, wls[i]);
-            Φ_PSI_interp[i] = resample_data(df.WL, df.K_PS1, wls[i]);
-            Φ_PSII_interp[i] = resample_data(df.WL, df.K_PS2, wls[i]);
-            GSV_1_interp[i] = resample_data(df.WL, df.GSV_1, wls[i]);
-            GSV_2_interp[i] = resample_data(df.WL, df.GSV_2, wls[i]);
-            GSV_3_interp[i] = resample_data(df.WL, df.GSV_3, wls[i]);
-            GSV_4_interp[i] = resample_data(df.WL, df.GSV_4, wls[i]);
-            E_DIR_interp[i] = resample_data(df.WL, df.E_DIR, wls[i]);
-            E_DIFF_interp[i] = resample_data(df.WL, df.E_DIFF, wls[i]);
+            K_ANT_interp[i] = interpolate_data(df.WL, df.K_ANT, wls[i]);
+            K_BROWN_interp[i] = interpolate_data(df.WL, df.K_BROWN, wls[i]);
+            K_CAB_interp[i] = interpolate_data(df.WL, df.K_CAB, wls[i]);
+            K_CAR_V_interp[i] = interpolate_data(df.WL, df.K_CAR_V, wls[i]);
+            K_CAR_Z_interp[i] = interpolate_data(df.WL, df.K_CAR_Z, wls[i]);
+            K_CBC_interp[i] = interpolate_data(df.WL, df.K_CBC, wls[i]);
+            K_H₂O_interp[i] = interpolate_data(df.WL, df.K_H₂O, wls[i]);
+            K_LMA_interp[i] = interpolate_data(df.WL, df.K_LMA, wls[i]);
+            K_PRO_interp[i] = interpolate_data(df.WL, df.K_PRO, wls[i]);
+            NR_interp[i] = interpolate_data(df.WL, df.NR, wls[i]);
+            Φ_PS_interp[i] = interpolate_data(df.WL, df.K_PS, wls[i]);
+            Φ_PSI_interp[i] = interpolate_data(df.WL, df.K_PS1, wls[i]);
+            Φ_PSII_interp[i] = interpolate_data(df.WL, df.K_PS2, wls[i]);
+            GSV_1_interp[i] = interpolate_data(df.WL, df.GSV_1, wls[i]);
+            GSV_2_interp[i] = interpolate_data(df.WL, df.GSV_2, wls[i]);
+            GSV_3_interp[i] = interpolate_data(df.WL, df.GSV_3, wls[i]);
+            GSV_4_interp[i] = interpolate_data(df.WL, df.GSV_4, wls[i]);
+            E_DIR_interp[i] = interpolate_data(df.WL, df.E_DIR, wls[i]);
+            E_DIFF_interp[i] = interpolate_data(df.WL, df.E_DIFF, wls[i]);
         end;
 
         # if broadband, use the broadband spectra for solar radiation

@@ -2,10 +2,9 @@ module SPAC
 
 using Statistics: mean
 
+using EmeraldUtilities.MathTools: interpolate_data, read_spectrum
 using EmeraldUtilities.UniversalConstants: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O, ρ_H₂O
 using EmeraldUtilities.UniversalConstants: energy_to_photon
-
-using ..EmeraldMath.Data: resample_data
 
 using ..CanopyOptics: canopy_structure!, canopy_structure_aux!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!, sun_geometry_aux!
 using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geometry!, sensor_geometry_aux!
@@ -72,7 +71,6 @@ include("quantity/yield.jl");
 
 include("quantity/modis.jl");
 include("quantity/oco.jl");
-include("quantity/spectrum.jl");
 include("quantity/tropomi.jl");
 
 

@@ -7,7 +7,6 @@ export EmeraldEarth
 export EmeraldFrontier
 export EmeraldIO
 export EmeraldLand
-export EmeraldMath
 
 
 # include the submodules
