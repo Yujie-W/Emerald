@@ -8,12 +8,10 @@ export EmeraldFrontier
 export EmeraldIO
 export EmeraldLand
 export EmeraldMath
-export EmeraldPhysics
 
 
 # include the submodules
 include("../EmeraldIO/EmeraldIO.jl");
-include("../EmeraldPhysics/EmeraldPhysics.jl");
 
 include("../EmeraldMath/EmeraldMath.jl");
 

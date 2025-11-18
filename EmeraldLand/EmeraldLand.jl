@@ -2,7 +2,6 @@ module EmeraldLand
 
 using ..EmeraldIO
 using ..EmeraldMath
-using ..EmeraldPhysics
 
 
 # no internal inter-dependencies
