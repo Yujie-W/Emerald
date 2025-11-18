@@ -32,7 +32,7 @@ function global_simulations!(
             single_thread_regions::Tuple = (:,:)) where {FT}
     if single_thread
         for j in axes(gm_mat,2)[single_thread_regions[2]], i in axes(gm_mat,1)[single_thread_regions[1]]
-            display_message!("Running simulation for grid $(i), $(j)", "tinfo");
+            pretty_display!("Running simulation for grid $(i), $(j)", "tinfo");
             gm_dict = gm_mat[i,j];
             wd_dict = wd_mat[i,j];
             state = st_mat[i,j];

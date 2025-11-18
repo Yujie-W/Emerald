@@ -2,8 +2,9 @@ module Data
 
 using Dates: isleapyear
 
+using EmeraldUtilities.TimeParser: month_doys
+
 using ..Stats: nanmean
-using ..EmeraldUtility.Time: month_days
 
 
 #######################################################################################################################################################################################################
@@ -114,7 +115,7 @@ resample_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H"
     dat_1d = if length(dat_in) == 1
         repeat([dat_in;]; inner = nday)
     elseif length(dat_in) == 12
-        [([repeat(dat_in[_m:_m], month_days(year, _m)) for _m in 1:12]...)...]
+        [([repeat(dat_in[_m:_m], month_doys(year, _m)) for _m in 1:12]...)...]
     elseif length(dat_in) == 46
         repeat(dat_in; inner = 8)[1:nday]
     elseif length(dat_in) in [52,53]
@@ -135,7 +136,7 @@ resample_data(dat_in::Union{FT,Vector{FT}}, year::Int64; out_reso::String = "1H"
     elseif out_reso == "8D"
         [nanmean(dat_1d[((d8-1)*8+1):min(d8*8, nday)]) for d8 in 1:46]
     elseif out_reso == "1M"
-        [nanmean(dat_1d[month_days(year, m; ranges = true)]) for m in 1:12]
+        [nanmean(dat_1d[month_doys(year, m; ranges = true)]) for m in 1:12]
     elseif out_reso == "1Y"
         nanmean(dat_1d)
     end;

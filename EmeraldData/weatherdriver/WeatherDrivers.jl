@@ -4,6 +4,7 @@ using DataFrames: DataFrame
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
 
+using EmeraldUtilities.PrettyDisplay: pretty_display!
 using GriddingMachine.Fetcher: fetch_data!
 using NetcdfIO: append_nc!, read_nc, save_nc!, varname_nc
 
@@ -11,8 +12,6 @@ using ..EmeraldIO.Folders: ERA5_SL_HOURLY, LAND_DRIVER
 using ..EmeraldLand.PhysicalChemistry: saturation_vapor_pressure
 using ..EmeraldMath.Data: resample_data
 using ..EmeraldMath.Stats: nanmean
-using ..EmeraldUtility.Log: display_message!
-using ..EmeraldUtility.Email: send_email!
 
 
 # ERA5 settings and functions

@@ -24,21 +24,21 @@ function era5_weather_drivers end;
 
 era5_weather_drivers(wd::ERA5SingleLevelsDriver, year::Int, nx::Int) = (
     # prescribe air layer environments and radiation
-    display_message!("Preloading weather driver for atmospheric pressure...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for atmospheric pressure...", "tinfo_mid");
     wd_p_atm = read_nc(reprocessed_file_path(wd.P_ATM[2], year, nx), wd.P_ATM[1]);
-    display_message!("Preloading weather driver for 2m air temperature...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for 2m air temperature...", "tinfo_mid");
     wd_t_air = read_nc(reprocessed_file_path(wd.T_AIR[2], year, nx), wd.T_AIR[1]);
-    display_message!("Preloading weather driver for 2m dew temperature...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for 2m dew temperature...", "tinfo_mid");
     wd_t_dew = read_nc(reprocessed_file_path(wd.T_DEW[2], year, nx), wd.T_DEW[1]);
-    display_message!("Preloading weather driver for wind speed u...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for wind speed u...", "tinfo_mid");
     wd_windu = read_nc(reprocessed_file_path(wd.WINDU[2], year, nx), wd.WINDU[1]);
-    display_message!("Preloading weather driver for wind speed v...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for wind speed v...", "tinfo_mid");
     wd_windv = read_nc(reprocessed_file_path(wd.WINDV[2], year, nx), wd.WINDV[1]);
-    display_message!("Preloading weather driver for longwave radiation...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for longwave radiation...", "tinfo_mid");
     wd_l_all = read_nc(reprocessed_file_path(wd.L_RAD[2], year, nx), wd.L_RAD[1]);
-    display_message!("Preloading weather driver for total shortwave radiation...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for total shortwave radiation...", "tinfo_mid");
     wd_s_all = read_nc(reprocessed_file_path(wd.S_ALL[2], year, nx), wd.S_ALL[1]);
-    display_message!("Preloading weather driver for direct shortwave radiation...", "tinfo_mid");
+    pretty_display!("Preloading weather driver for direct shortwave radiation...", "tinfo_mid");
     wd_s_dir = read_nc(reprocessed_file_path(wd.S_DIR[2], year, nx), wd.S_DIR[1]);
     wd_s_dif = wd_s_all .- wd_s_dir;
     wd_vpd   = saturation_vapor_pressure.(wd_t_air) .- saturation_vapor_pressure.(wd_t_dew);
@@ -59,7 +59,7 @@ era5_weather_drivers(wd::ERA5SingleLevelsDriver, year::Int, nx::Int) = (
 );
 
 era5_weather_drivers(wd::ERA5SingleLevelsDriver, year::Int, nx::Int, ind::Int) = (
-    display_message!("Load weather drivers from ERA5...", "tinfo");
+    pretty_display!("Load weather drivers from ERA5...", "tinfo");
     wd_p_atm = read_nc(reprocessed_file_path(wd.P_ATM[2], year, nx), wd.P_ATM[1], ind);
     wd_t_air = read_nc(reprocessed_file_path(wd.T_AIR[2], year, nx), wd.T_AIR[1], ind);
     wd_t_dew = read_nc(reprocessed_file_path(wd.T_DEW[2], year, nx), wd.T_DEW[1], ind);

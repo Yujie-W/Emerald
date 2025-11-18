@@ -348,7 +348,7 @@ Prepare a matrix of GriddingMachine data to feed SPAC, given
 function grid_dict_mat(dts::LandDatasets{FT}; vegetation_only::Bool = true) where {FT}
     # create a matrix of GriddingMachine data
     # TODO: add a step to verify the input datasets
-    display_message!("Preparing a matrix of GriddingMachine data to work on...", "tinfo");
+    pretty_display!("Preparing a matrix of GriddingMachine data to work on...", "tinfo");
     mat_gm = Matrix{Union{Nothing,Dict{String,Any}}}(nothing, size(dts.t_lm));
     for ilon in axes(dts.t_lm,1), ilat in axes(dts.t_lm,2)
         if vegetation_only

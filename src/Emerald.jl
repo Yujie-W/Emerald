@@ -9,15 +9,11 @@ export EmeraldIO
 export EmeraldLand
 export EmeraldMath
 export EmeraldPhysics
-export EmeraldTest
-export EmeraldUtility
 
 
 # include the submodules
 include("../EmeraldIO/EmeraldIO.jl");
 include("../EmeraldPhysics/EmeraldPhysics.jl");
-include("../EmeraldTest/EmeraldTest.jl");
-include("../EmeraldUtility/EmeraldUtility.jl");
 
 include("../EmeraldMath/EmeraldMath.jl");
 

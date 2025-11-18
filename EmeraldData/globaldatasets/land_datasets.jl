@@ -220,10 +220,10 @@ Constructor of LandDatasets, given
 - `year` year of simulations
 
 """
-LandDatasets{FT}(gm_tag::String, year::Int; msg_level::String = "") where {FT} = (
+LandDatasets{FT}(gm_tag::String, year::Int; msg_level::String = "tinfo") where {FT} = (
     dtl = LandDatasetLabels(gm_tag, year);
 
-    display_message!("Querying data from GriddingMachine...", msg_level);
+    pretty_display!("Querying data from GriddingMachine...", msg_level);
     if gm_tag in ["gm1", "gm2", "gm4"]
         dts = LandDatasets{FT}(LABELS = dtl);
     elseif gm_tag == "gm3"
@@ -232,7 +232,7 @@ LandDatasets{FT}(gm_tag::String, year::Int; msg_level::String = "") where {FT} =
         error("Tag $(gm_tag) is not supported!");
     end;
 
-    display_message!("Gap-filling data from GriddingMachine...", msg_level);
+    pretty_display!("Gap-filling data from GriddingMachine...", msg_level);
     extend_data!(dts);
 
     return dts

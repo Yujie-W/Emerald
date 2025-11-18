@@ -10,13 +10,12 @@
 #######################################################################################################################################################################################################
 """
 
-    regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false)
+    regrid_ERA5!(year::Int, nx::Int = 1)
     regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String = ERA5_FOLDER_HOURLY)
 
 Regrid the ERA5 datasets, given
 - `year` Which year of data to regrid
 - `nx` The spatial resolution is `1/nx` degree
-- `notification` If true, send out emails. Default is `false`
 - `label` File name label of the source NC dataset
 - `var_name` Variable label in the NC dataset
 - `folder` The folder where the original NC datasets are stored. Default is `ERA5_FOLDER_HOURLY`
@@ -43,23 +42,15 @@ Thus, we need to regrid the dataset to ensure that the pixel orders match. For e
 """
 function regrid_ERA5! end;
 
-regrid_ERA5!(year::Int, nx::Int = 1; notification::Bool = false) = (
-    display_message!("Regridding ERA5 data for year $year...", "tinfo_pre");
+regrid_ERA5!(year::Int, nx::Int = 1) = (
+    pretty_display!("Regridding ERA5 data for year $year...", "tinfo_pre");
 
     era5_wd = ERA5SingleLevelsDriver();
     era5_labs = [getfield(era5_wd, fn)[2] for fn in fieldnames(ERA5SingleLevelsDriver)];
     era5_vars = [getfield(era5_wd, fn)[1] for fn in fieldnames(ERA5SingleLevelsDriver)];
     regrid_ERA5!.(year, nx, era5_labs, era5_vars; folder = ERA5_SL_HOURLY);
 
-    display_message!("Finished regridding all the datasets!", "tinfo_end");
-
-    # send out notification email if needed
-    if notification
-        send_email!("[ERA5 DATA STATUS] Regridding data for year $(year)",
-                    "fluo@gps.caltech.edu",
-                    "jesiner@gmail.com",
-                    "ERA5 data regridding is finished for year $(year)!");
-    end;
+    pretty_display!("Finished regridding all the datasets!", "tinfo_end");
 
     return nothing;
 );
@@ -70,7 +61,7 @@ regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String
 
     # if file exists already, skip
     if isfile(file_out)
-        display_message!("File $(file_out) already exists!", "tinfo_mid");
+        pretty_display!("File $(file_out) already exists!", "tinfo_mid");
 
         return nothing
     end;
@@ -81,7 +72,7 @@ regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String
     end;
 
     # read the file per slice
-    display_message!("Reading and regridding file $(file_in) per time slice...", "tinfo_mid");
+    pretty_display!("Reading and regridding file $(file_in) per time slice...", "tinfo_mid");
     all_vars = varname_nc(file_in);
     var_time = if "time" in all_vars
         "time";
@@ -122,7 +113,7 @@ regrid_ERA5!(year::Int, nx::Int, label::String, var_name::String; folder::String
     end;
 
     # save the regridded dataset
-    display_message!("Saving regridded dataset to $(file_out)...", "tinfo_mid");
+    pretty_display!("Saving regridded dataset to $(file_out)...", "tinfo_mid");
     attr = Dict(var_name => label, "unit" => "Same as $(file_in)");
     save_nc!(file_out, var_name, matn, attr);
 

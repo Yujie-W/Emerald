@@ -1,7 +1,5 @@
 module EmeraldMath
 
-using ..EmeraldUtility
-
 
 include("Math.jl");
 include("Regression.jl");

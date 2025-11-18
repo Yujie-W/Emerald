@@ -15,7 +15,7 @@ Extract a slice of weather data from preloaded drivers, given
 
 """
 function weather_drivers_snapshot(wds::Dict{String,Any}, ind::Int)
-    display_message!("Extracting a slice matrix of weather data from preloaded drivers...", "tinfo");
+    pretty_display!("Extracting a slice matrix of weather data from preloaded drivers...", "tinfo");
 
     # create a matrix of weather drivers
     wd_keys = [k for k in keys(wds) if !(k in ["RESO_SPACE", "YEAR", "IND"])];
