@@ -26,6 +26,7 @@ Manifest.toml
 # Generated file
 *.csv
 *.gif
+*.jld2
 *.jpg
 *.nc
 *.png

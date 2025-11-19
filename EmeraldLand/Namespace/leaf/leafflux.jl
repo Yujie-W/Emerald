@@ -22,7 +22,7 @@ Base.@kwdef mutable struct LeafFluxTrait{FT}
     "Stomtal model"
     stomatal_model::Union{AndereggSM{FT}, BallBerrySM{FT}, EllerSM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}} = WangSM{FT}()
     "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
-    g_limits::Vector{FT} = FT[1e-4, 0.3]
+    g_limits::Vector{FT} = FT[0, 0.3]
 end;
 
 

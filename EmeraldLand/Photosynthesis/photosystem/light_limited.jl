@@ -12,6 +12,7 @@
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 # Bug fixes
 #     2023-Sep-21: if g_lc is 0, set a_j to r
+#     2025-Nov-19: set a_j per g_lc
 #
 #######################################################################################################################################################################################################
 """
@@ -199,10 +200,12 @@ light_limited_rate!(
     @. qc = a * p - b - r * (c * p + d);
     @. an = lower_quadratic(qa, qb, qc);
 
-    if g_lc[1] == 0 && g_lc[end] == 0
-        @. psa.a_j = r;
-    else
-        @. psa.a_j = an + r;
+    for i in eachindex(g_lc)
+        if g_lc[i] == 0
+            psa.a_j[i] = r;
+        else
+            psa.a_j[i] = an[i] + r;
+        end;
     end;
 
     return nothing
@@ -248,10 +251,12 @@ light_limited_rate!(
     @. qc = a * p - b - r * (c * p + d);
     @. an = lower_quadratic(qa, qb, qc);
 
-    if g_lc[1] == 0 && g_lc[end] == 0
-        @. psa.a_j = r;
-    else
-        @. psa.a_j = an + r;
+    for i in eachindex(g_lc)
+        if g_lc[i] == 0
+            psa.a_j[i] = r;
+        else
+            psa.a_j[i] = an[i] + r;
+        end;
     end;
 
     return nothing

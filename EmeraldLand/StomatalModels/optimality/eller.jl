@@ -6,6 +6,8 @@
 #     2023-Oct-16: make sure maximum gsc does not exceed g_CO₂_b
 #     2024-Oct-16: make sure gsm is positive
 #     2024-Oct-30: add leaf connection check
+# Bug fixes
+#     2025-Nov-19: set min A to 0.01 when computing ∂Θ∂E
 #
 #######################################################################################################################################################################################################
 ∂Θ∂E!(cache::SPACCache{FT}, sm::EllerSM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
@@ -22,7 +24,7 @@
     dedp1 = ∂E∂P(leaf, e; δe = δe);
     dedp2 = ∂E∂P(leaf, e; δe = -δe);
     dkde  = (dedp2 - dedp1) / δe;
-    leaf.flux.auxil.∂Θ∂E .= dkde .* leaf.flux.auxil.a_n ./ dedp1;
+    leaf.flux.auxil.∂Θ∂E .= dkde .* max.(FT(0.01), leaf.flux.auxil.a_n) ./ dedp1;
 
     return nothing
 );

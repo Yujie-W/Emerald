@@ -13,6 +13,7 @@
 #     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
 # Bug fixes
 #     2023-Sep-21: if g_lc is 0, set a_p to r
+#     2025-Nov-19: set a_j per g_lc
 #
 #######################################################################################################################################################################################################
 """
@@ -241,10 +242,12 @@ product_limited_rate!(
     @. qb = f * r - p - d - a * f;
     @. an = lower_quadratic(qa, qb, qc);
 
-    if g_lc[1] == 0 && g_lc[end] == 0
-        @. psa.a_p = r;
-    else
-        @. psa.a_p = an + r;
+    for i in eachindex(g_lc)
+        if g_lc[i] == 0
+            psa.a_p[i] = r;
+        else
+            psa.a_p[i] = an[i] + r;
+        end;
     end;
 
     return nothing

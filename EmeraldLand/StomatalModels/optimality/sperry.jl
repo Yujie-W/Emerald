@@ -7,6 +7,8 @@
 #     2023-Oct-16: make sure maximum gsc does not exceed g_CO₂_b
 #     2024-Oct-16: make sure gsm is positive
 #     2024-Oct-30: add leaf connection check
+# Bug fixes
+#     2025-Nov-19: set min A to 0.01 when computing ∂Θ∂E
 #
 #######################################################################################################################################################################################################
 ∂Θ∂E!(cache::SPACCache{FT}, sm::SperrySM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
@@ -41,7 +43,7 @@
     gcm .= 1 ./ (FT(1.6) ./ gsm .+ 1 ./ leaf.flux.auxil.g_CO₂_b);
     am = photosynthesis_only!(cache, leaf.photosystem, air, gcm, leaf.flux.auxil.ppar);
 
-    leaf.flux.auxil.∂Θ∂E .= dkde .* am ./ dedpm;
+    leaf.flux.auxil.∂Θ∂E .= dkde .* max.(FT(0.01), am) ./ dedpm;
 
     return nothing
 );
