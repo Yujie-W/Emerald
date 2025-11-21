@@ -2,9 +2,9 @@ module LeafOptics
 
 using SpecialFunctions: expint
 
-using EmeraldUtilities.RecursiveTools: sync_struct!
+using PkgUtility.RecursiveTools: sync_struct!
 
-using EmeraldUtilities.UniversalConstants: M_H₂O, ρ_H₂O
+using PkgUtility.UniversalConstants: M_H₂O, ρ_H₂O
 
 using ..Namespace: SIFMatrixDualspectMethod, SIFMatrixFluspectMethod, SIFMatrixPlatespectMethod
 using ..Namespace: LeafBio, LeafBioState, LeafBioTrait

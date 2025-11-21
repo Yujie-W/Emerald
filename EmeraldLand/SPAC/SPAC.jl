@@ -2,9 +2,9 @@ module SPAC
 
 using Statistics: mean
 
-using EmeraldUtilities.MathTools: interpolate_data, read_spectrum
-using EmeraldUtilities.PhysicalChemistry: latent_heat_melt, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using EmeraldUtilities.UniversalConstants: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O, ρ_H₂O, energy_to_photon
+using PkgUtility.MathTools: interpolate_data, read_spectrum
+using PkgUtility.PhysicalChemistry: latent_heat_melt, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
+using PkgUtility.UniversalConstants: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O, ρ_H₂O, energy_to_photon
 
 using ..CanopyOptics: canopy_structure!, canopy_structure_aux!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!, sun_geometry_aux!
 using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geometry!, sensor_geometry_aux!

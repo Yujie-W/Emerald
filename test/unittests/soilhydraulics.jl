@@ -1,7 +1,7 @@
 using Test
 
-import EmeraldUtilities.PhysicalChemistry as PC
-import EmeraldUtilities.UniversalConstants as UC
+import PkgUtility.PhysicalChemistry as PC
+import PkgUtility.UniversalConstants as UC
 
 import Emerald.EmeraldLand.Namespace as NS
 import Emerald.EmeraldLand.SoilHydraulics as SH

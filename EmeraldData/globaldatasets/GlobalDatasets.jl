@@ -5,10 +5,10 @@ using Dates: isleapyear
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using Statistics: mean
 
-using EmeraldUtilities.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
-using EmeraldUtilities.MathTools: gapfill_data!, nanmax, nanmean
-using EmeraldUtilities.PrettyDisplay: pretty_display!
-using EmeraldUtilities.TimeParser: MDAYS, MDAYS_LEAP
+using PkgUtility.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
+using PkgUtility.MathTools: gapfill_data!, nanmax, nanmean
+using PkgUtility.PrettyDisplay: pretty_display!
+using PkgUtility.TimeParser: MDAYS, MDAYS_LEAP
 using GriddingMachine.Blender: regrid
 using GriddingMachine.Indexer: lat_ind, lon_ind, read_LUT
 

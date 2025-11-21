@@ -10,10 +10,10 @@ using LazyArtifacts
 
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 
-using EmeraldUtilities.MathTools: NewtonBisectionMethod, SolutionTolerance, find_zero, interpolate_data
-using EmeraldUtilities.RecursiveTools: sync_struct!
-using EmeraldUtilities.UniversalConstants: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
-using EmeraldUtilities.UniversalConstants: TraceGasAir, TraceGasCH₄, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
+using PkgUtility.MathTools: NewtonBisectionMethod, SolutionTolerance, find_zero, interpolate_data
+using PkgUtility.RecursiveTools: sync_struct!
+using PkgUtility.UniversalConstants: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
+using PkgUtility.UniversalConstants: TraceGasAir, TraceGasCH₄, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
 
 using ..EmeraldIO.Jld2: read_jld2, save_jld2!
 using ..EmeraldIO.Text: read_csv

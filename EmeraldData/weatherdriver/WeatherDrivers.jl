@@ -4,9 +4,9 @@ using DataFrames: DataFrame
 using DocStringExtensions: TYPEDEF, TYPEDFIELDS
 using ProgressMeter: @showprogress
 
-using EmeraldUtilities.MathTools: nanmean, resample_data
-using EmeraldUtilities.PhysicalChemistry: saturation_vapor_pressure
-using EmeraldUtilities.PrettyDisplay: pretty_display!
+using PkgUtility.MathTools: nanmean, resample
+using PkgUtility.PhysicalChemistry: saturation_vapor_pressure
+using PkgUtility.PrettyDisplay: pretty_display!
 using GriddingMachine.Fetcher: fetch_data!
 using NetcdfIO: append_nc!, read_nc, save_nc!, varname_nc
 

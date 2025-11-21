@@ -2,9 +2,9 @@ module PlantHydraulics
 
 using Statistics: mean
 
-using EmeraldUtilities.MathTools: NewtonBisectionMethod, SolutionTolerance, find_zero, upper_quadratic
-using EmeraldUtilities.PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
-using EmeraldUtilities.UniversalConstants: GAS_R, ρg_MPa
+using PkgUtility.MathTools: NewtonBisectionMethod, SolutionTolerance, find_zero, upper_quadratic
+using PkgUtility.PhysicalChemistry: relative_surface_tension, relative_viscosity, saturation_vapor_pressure
+using PkgUtility.UniversalConstants: GAS_R, ρg_MPa
 
 using ..Namespace: ComplexVC, LogisticVC, PowerVC, WeibullVC
 using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve

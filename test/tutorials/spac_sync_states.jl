@@ -1,5 +1,5 @@
 using Emerald;
-using EmeraldUtilities;
+using PkgUtility;
 using Test;
 
 
@@ -38,8 +38,8 @@ using Test;
             EmeraldLand.SPAC.spac!(config, spac_2, 3600);
             EmeraldLand.Namespace.sync_state!(spac_1, state_1);
             EmeraldLand.Namespace.sync_state!(spac_2, state_2);
-            EmeraldUtilities.RecursiveTools.sync_struct!(spac_1, spac_2; approximation = false, show_diff_msg = true);
-            @test EmeraldUtilities.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
+            PkgUtility.RecursiveTools.sync_struct!(spac_1, spac_2; approximation = false, show_diff_msg = true);
+            @test PkgUtility.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
         end;
     end;
 
@@ -61,7 +61,7 @@ using Test;
         EmeraldLand.SPAC.spac!(config, spac_2, 3600);
         EmeraldLand.Namespace.sync_state!(spac_1, state_1);
         EmeraldLand.Namespace.sync_state!(spac_2, state_2);
-        @test EmeraldUtilities.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
+        @test PkgUtility.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
     end;
 
     @testset "SPAC with LAI = 0 and SAI > 0" begin
@@ -82,7 +82,7 @@ using Test;
         EmeraldLand.SPAC.spac!(config, spac_2, 3600);
         EmeraldLand.Namespace.sync_state!(spac_1, state_1);
         EmeraldLand.Namespace.sync_state!(spac_2, state_2);
-        @test EmeraldUtilities.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
+        @test PkgUtility.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
     end;
 
     @testset "SPAC with LAI = 0 and SAI = 0" begin
@@ -103,6 +103,6 @@ using Test;
         EmeraldLand.SPAC.spac!(config, spac_2, 3600);
         EmeraldLand.Namespace.sync_state!(spac_1, state_1);
         EmeraldLand.Namespace.sync_state!(spac_2, state_2);
-        @test EmeraldUtilities.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
+        @test PkgUtility.RecursiveTools.sync_struct!(spac_1, spac_2; show_diff_msg = false) == 0;
     end;
 end;
