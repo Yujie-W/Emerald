@@ -54,16 +54,6 @@ Base.@kwdef mutable struct GeneralC3Trait{FT}
     "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
     K_OCS::FT = 1400 * 1e-6
 
-    # Embedded method structures
-    "Ac method"
-    ACM::AcMethodC3VcmaxPi = AcMethodC3VcmaxPi()
-    "Aj method"
-    AJM::Union{AjMethodC3JmaxPi, AjMethodC3VqmaxPi} = AjMethodC3JmaxPi()
-    "Ap method"
-    APM::Union{ApMethodC3Inf, ApMethodC3Vcmax} = ApMethodC3Vcmax()
-    "Fluorescence model"
-    FLM::Union{CytochromeFluorescenceModel{FT}, KNFluorescenceModel{FT}, QLFluorescenceModel{FT}, QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
-
     # Prognostic variables
     "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
     b₆f::FT = 350 / 300
@@ -119,16 +109,6 @@ Base.@kwdef mutable struct GeneralC4Trait{FT}
     # Related to OCS uptake
     "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
     K_OCS::FT = 8862 * 1e-6
-
-    # Embedded structures
-    "Ac method"
-    ACM::AcMethodC4Vcmax = AcMethodC4Vcmax()
-    "Aj method"
-    AJM::AjMethodC4JPSII = AjMethodC4JPSII()
-    "Ap method"
-    APM::Union{ApMethodC4VcmaxPi, ApMethodC4VpmaxPi} = ApMethodC4VcmaxPi()
-    "Fluorescence model"
-    FLM::Union{KNFluorescenceModel{FT}, QLFluorescenceModel{FT}, QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
 
     # Prognostic variables
     "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"

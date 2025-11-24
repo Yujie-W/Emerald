@@ -11,7 +11,7 @@
 #######################################################################################################################################################################################################
 """
 
-    stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT}
+    stomatal_conductance_profile!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Compute marginal stomatal conductance change for H₂O, given
 - `spac` `BulkSPAC` type struct
@@ -19,7 +19,7 @@ Compute marginal stomatal conductance change for H₂O, given
 """
 function stomatal_conductance_profile! end;
 
-stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
+stomatal_conductance_profile!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     can_str = spac.canopy.structure;
 
     # if lai = 0 or roots are not connected, do nothing
@@ -34,28 +34,28 @@ stomatal_conductance_profile!(spac::BulkSPAC{FT}) where {FT} = (
 
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
-        stomatal_conductance_profile!(spac.cache, leaves[ilf], airs[lindex[ilf]], can_str.auxil.ϵ_lw_layer[irt]);
+        stomatal_conductance_profile!(config, spac.cache, leaves[ilf], airs[lindex[ilf]], can_str.auxil.ϵ_lw_layer[irt]);
     end;
 
     return nothing
 );
 
-stomatal_conductance_profile!(cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
+stomatal_conductance_profile!(config::SPACConfiguration{FT}, cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
     if leaf.flux.auxil.ppar[end] > 0
-        ∂g∂t!(cache, leaf, air);
+        ∂g∂t!(config, cache, leaf, air);
     else
-        dgndt = ∂gₙ∂t(leaf, air, eff_ϵ);
+        dgndt = ∂gₙ∂t(config, leaf, air, eff_ϵ);
         @. leaf.flux.auxil.∂g∂t = dgndt;
     end;
 
     return nothing
 );
 
-stomatal_conductance_profile!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
+stomatal_conductance_profile!(config::SPACConfiguration{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
     if leaf.flux.auxil.ppar > 0
-        ∂g∂t!(cache, leaf, air);
+        ∂g∂t!(config, cache, leaf, air);
     else
-        dgndt = ∂gₙ∂t(leaf, air, eff_ϵ);
+        dgndt = ∂gₙ∂t(config, leaf, air, eff_ϵ);
         leaf.flux.auxil.∂g∂t = dgndt;
     end;
 

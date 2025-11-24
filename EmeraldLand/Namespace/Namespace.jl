@@ -42,15 +42,16 @@ include("method/colimit.jl");
 include("method/fluorescence.jl");
 include("method/kinetics.jl");
 include("method/lidf.jl");
-include("method/photosynthesis.jl");
 include("method/pv.jl");
 include("method/soil.jl");
 include("method/soil_albedo.jl");
-include("method/stomata.jl");
 include("method/xylem.jl");
 
 
 # The configuration of the SPAC system
+include("config/methods/fluorescence.jl");
+include("config/methods/photosynthesis.jl");
+include("config/methods/stomata.jl");
 include("config/spac-method-selections.jl");
 
 include("config/rate_constants.jl");
