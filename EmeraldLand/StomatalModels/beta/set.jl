@@ -23,9 +23,10 @@
 #######################################################################################################################################################################################################
 """
 
-    β_factor!(spac::BulkSPAC{FT}) where {FT}
+    β_factor!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Update the β factor for the leaves in SPAC, given
+- `config` Configuration for `BulkSPAC`
 - `spac` `BulkSPAC` type SPAC
 
 Note that if the β function is based on Kleaf or Pleaf, β factor is taken as that of leaf; if the β function is based on Ksoil, Psoil, or Θ, β is taken as the average weighted by flow rate in each
@@ -34,7 +35,7 @@ Note that if the β function is based on Kleaf or Pleaf, β factor is taken as t
 """
 function β_factor! end;
 
-β_factor!(spac::BulkSPAC{FT}) where {FT} = (
+β_factor!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;
@@ -45,7 +46,7 @@ function β_factor! end;
     soils = spac.soils;
 
     for i in eachindex(leaves)
-        β_factor!(roots, soils, leaves[i], leaves[i].flux.trait.stomatal_model);
+        β_factor!(roots, soils, leaves[i], config.METHODS.STOMATAL_MODEL);
     end;
 
     return nothing

@@ -19,7 +19,7 @@ import Emerald.EmeraldLand.SPAC
         PS.leaf_photosynthesis!(config, spac.cache, leaf, air, 1.0; rd_only = false);
 
         for sm in [NS.BallBerrySM{Float64}(), NS.GentineSM{Float64}(), NS.LeuningSM{Float64}(), NS.MedlynSM{Float64}()]
-            leaf.flux.trait.stomatal_model = sm;
+            config.METHODS.STOMATAL_MODEL = sm;
             gs = SM.empirical_equation(sm, leaf, air);
             @test all(gs .>= 0);
         end;
@@ -43,7 +43,7 @@ import Emerald.EmeraldLand.SPAC
         SPAC.initialize_spac!(config, spac);
 
         # the function does not for optimality models
-        SM.β_factor!(spac);
+        SM.β_factor!(config, spac);
         for leaf in spac.plant.leaves
             @test isnan(SM.read_β(leaf));
         end;
@@ -55,11 +55,9 @@ import Emerald.EmeraldLand.SPAC
 
         # BetaParameterKleaf
         for param_x in [NS.BetaParameterKleaf(), NS.BetaParameterKsoil(), NS.BetaParameterPleaf(), NS.BetaParameterPsoil(), NS.BetaParameterΘ()]
-            for leaf in spac.plant.leaves
-                leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
-                leaf.flux.trait.stomatal_model.β.PARAM_X = param_x;
-            end;
-            SM.β_factor!(spac);
+            config.METHODS.STOMATAL_MODEL = NS.BallBerrySM{Float64}();
+            config.METHODS.STOMATAL_MODEL.β.PARAM_X = param_x;
+            SM.β_factor!(config, spac);
             for leaf in spac.plant.leaves
                 @test 0 < SM.read_β(leaf) <= 1;
             end;

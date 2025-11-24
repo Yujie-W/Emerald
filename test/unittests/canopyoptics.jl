@@ -16,25 +16,25 @@ import Emerald.EmeraldLand.SPAC
     @testset "Soil albedo" begin
         config = NS.SPACConfiguration(Float64);
 
-        config.SOIL_ALBEDO = NS.SoilAlbedoHyperspectralCLM();
+        config.METHODS.SOIL_ALBEDO = NS.SoilAlbedoHyperspectralCLM();
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
-        config.SOIL_ALBEDO = NS.SoilAlbedoBroadbandCLM();
+        config.METHODS.SOIL_ALBEDO = NS.SoilAlbedoBroadbandCLM();
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
-        config.SOIL_ALBEDO = NS.SoilAlbedoHyperspectralCLIMA();
+        config.METHODS.SOIL_ALBEDO = NS.SoilAlbedoHyperspectralCLIMA();
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);
         @test all(0 .< spac.soil_bulk.auxil.ρ_sw .< 1);
 
-        config.SOIL_ALBEDO = NS.SoilAlbedoBroadbandCLIMA();
+        config.METHODS.SOIL_ALBEDO = NS.SoilAlbedoBroadbandCLIMA();
         spac = NS.BulkSPAC(config);
         SPAC.initialize_spac!(config, spac);
         CO.soil_albedo!(config, spac);

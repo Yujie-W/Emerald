@@ -68,7 +68,6 @@ end;
 # General
 #     2022-Jun-29: add method for BulkSPAC
 #     2024-Feb-22: do nothing if lai is zero
-#     2024-Feb-28: support VERTICAL_BIO feature to update leaf spectra from top leaf
 #     2025-Mar-15: add method to prescribe broadband leaf reflectance and transmittance
 #
 #######################################################################################################################################################################################################
@@ -86,19 +85,6 @@ function plant_leaf_spectra! end;
 plant_leaf_spectra!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT}) where {FT} = (
     # if there is no leaf, do nothing
     if spac.canopy.structure.trait.lai <= 0
-        return nothing
-    end;
-
-    # update leaf reflectance and transmittance only if LAI > 0
-    # use top leaf to update the rest
-    (; VERTICAL_BIO) = config;
-    if !VERTICAL_BIO
-        topleaf = spac.plant.leaves[end];
-        leaf_spectra!(config, topleaf.bio, topleaf.capacitor.state.v_storage);
-        for i in 1:length(spac.plant.leaves)-1
-            sync_struct!(topleaf.bio.auxil, spac.plant.leaves[i].bio.auxil);
-        end;
-
         return nothing
     end;
 

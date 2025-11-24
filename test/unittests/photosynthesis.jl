@@ -190,19 +190,19 @@ import Emerald.EmeraldLand.SPAC
         @test true;
 
         # optimality stomatal model
-        leaf.flux.trait.stomatal_model = NS.WangSM{Float64}();
+        config.METHODS.STOMATAL_MODEL = NS.WangSM{Float64}();
         PS.leaf_photosynthesis!(config, spac.cache, leaf, air; rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on G1)
-        leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
-        leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterG1();
+        config.METHODS.STOMATAL_MODEL = NS.BallBerrySM{Float64}();
+        config.METHODS.STOMATAL_MODEL.β.PARAM_Y = NS.BetaParameterG1();
         PS.leaf_photosynthesis!(config, spac.cache, leaf, air; rd_only = false);
         @test true;
 
         # empirical stomatal model (beta on Vcmax)
-        leaf.flux.trait.stomatal_model = NS.BallBerrySM{Float64}();
-        leaf.flux.trait.stomatal_model.β.PARAM_Y = NS.BetaParameterVcmax();
+        config.METHODS.STOMATAL_MODEL = NS.BallBerrySM{Float64}();
+        config.METHODS.STOMATAL_MODEL.β.PARAM_Y = NS.BetaParameterVcmax();
         PS.leaf_photosynthesis!(config, spac.cache, leaf, air; rd_only = false);
         @test true;
     end;

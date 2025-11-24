@@ -38,10 +38,8 @@ grid_spac(config::SPACConfiguration{FT}, gm_dict::Dict{String,Any}) where {FT} =
     bt = BetaFunction{FT}(FUNC = linear_p_soil, PARAM_X = BetaParameterPsoil(), PARAM_Y = BetaParameterG1());
     for i in eachindex(spac.plant.leaves)
         spac.plant.leaves[i].bio.trait.lma = gm_dict["LMA"];
-        #spac.plant.leaves[i].flux.trait.stomatal_model = MedlynSM{FT}(G0 = 0.005, β = bt);
-        #spac.plant.leaves[i].flux.trait.stomatal_model.G1 = gm_dict["G1_MEDLYN_C3"];
-        spac.plant.leaves[i].flux.trait.stomatal_model = WangSM{FT}();
     end;
+    config.METHODS.STOMATAL_MODEL = WangSM{FT}();
 
     # set up SAI
     prescribe_traits!(config, spac; sai = gm_dict["SAI"]);

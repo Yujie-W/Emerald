@@ -9,7 +9,7 @@ using ..Namespace: BetaFunction, BetaParameterG1, BetaParameterKleaf, BetaParame
 using ..Namespace: AbstractStomataModel, AndereggSM, BallBerrySM, EllerSM, GentineSM, LeuningSM, MedlynSM, SperrySM, WangSM, Wang2SM
 using ..Namespace: CanopyLayer, Leaf, Root
 using ..Namespace: AirLayer, SoilLayer
-using ..Namespace: BulkSPAC, SPACCache
+using ..Namespace: BulkSPAC, SPACCache, SPACConfiguration
 
 using ..Photosynthesis: photosynthesis_only!, ∂R∂T
 using ..PlantHydraulics: flow_in, flow_out, relative_xylem_k, xylem_end_pressure

@@ -81,7 +81,7 @@ function fluorescence_spectrum!(config::SPACConfiguration{FT}, spac::BulkSPAC{FT
 
     #
     #
-    # TODO: make sure to be consistent with leaf level calculations, such as Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
+    # TODO: make sure to be consistent with leaf level calculations, such as Φ_SIF_CUTOFF
     # TODO: better use mat_b and mat_f for a non-reabsorbing scenario
     #
     #

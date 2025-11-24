@@ -27,7 +27,7 @@ end;
 
 
 function leaf_sif_matrices_new!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::SIFMatrixPlatespectMethod) where {FT}
-    (; Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
+    (; Φ_SIF_CUTOFF) = config;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = config.SPECTRA;
 
     # alias from the auxiliary variables
@@ -133,8 +133,8 @@ function leaf_sif_matrices_new!(config::SPACConfiguration{FT}, bio::LeafBio{FT},
             factor = 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp(Λ_SIFE[i] / 10));
             ϕ .*= factor;
         end;
-         # rescale ϕ if Φ_SIF_RESCALE is true
-        if Φ_SIF_RESCALE && Φ_SIF_CUTOFF > 0
+         # rescale ϕ if Φ_SIF_CUTOFF is greater than 0
+        if Φ_SIF_CUTOFF > 0
             ϕ ./= ΔΛ_SIF' * ϕ;
         end;
         @. f_b *= ϕ;

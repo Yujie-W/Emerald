@@ -51,6 +51,8 @@ include("method/xylem.jl");
 
 
 # The configuration of the SPAC system
+include("config/spac-method-selections.jl");
+
 include("config/rate_constants.jl");
 include("config/spectra.jl");
 

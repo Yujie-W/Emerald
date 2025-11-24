@@ -222,7 +222,7 @@ function leaf_sif_matrices! end;
 leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}) where {FT} = leaf_sif_matrices!(config, bio, bio.trait.SIF_METHOD);
 
 leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::SIFMatrixPlatespectMethod) where {FT} = (
-    (; SPECTRA, Φ_SIF_CUTOFF, Φ_SIF_RESCALE) = config;
+    (; SPECTRA, Φ_SIF_CUTOFF) = config;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 
     # update the SIF emission vector per excitation wavelength
@@ -256,8 +256,8 @@ leaf_sif_matrices!(config::SPACConfiguration{FT}, bio::LeafBio{FT}, ::SIFMatrixP
             ϕ .*= factor;
         end;
 
-        # rescale ϕ if Φ_SIF_RESCALE is true
-        if Φ_SIF_RESCALE && Φ_SIF_CUTOFF > 0
+        # rescale ϕ if Φ_SIF_CUTOFF is greater than 0
+        if Φ_SIF_CUTOFF > 0
             ϕ ./= ΔΛ_SIF' * ϕ;
         end;
 

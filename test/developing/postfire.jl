@@ -21,7 +21,7 @@ EmeraldLand.SPAC.prescribe_traits!(config_1, spac_1; lai=0.0, sai=0.0);
 EmeraldLand.SPAC.prescribe_traits!(config_1, spac_2; lai=0.0, sai=0.0);
 EmeraldLand.SPAC.prescribe_traits!(config_1, spac_3; lai=0.0, sai=0.0);
 
-config_2.SOIL_ALBEDO = Emerald.EmeraldLand.Namespace.SoilAlbedoPrescribe();
+config_2.METHODS.SOIL_ALBEDO = Emerald.EmeraldLand.Namespace.SoilAlbedoPrescribe();
 
 EmeraldLand.SPAC.initialize_spac!(config_1, spac_1);
 EmeraldLand.SPAC.initialize_spac!(config_1, spac_2);

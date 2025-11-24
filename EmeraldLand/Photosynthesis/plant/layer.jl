@@ -37,7 +37,7 @@ leaf_photosynthesis!(
             cache::SPACCache{FT},
             leaf::CanopyLayer{FT},
             air::AirLayer{FT};
-            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, leaf.flux.trait.stomatal_model; rd_only = rd_only);
+            rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, config.METHODS.STOMATAL_MODEL; rd_only = rd_only);
 
 # if stomtal model is not empirical model, then use the default β = 1
 leaf_photosynthesis!(

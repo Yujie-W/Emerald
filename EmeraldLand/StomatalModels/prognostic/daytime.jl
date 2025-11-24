@@ -16,9 +16,10 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂g∂t!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}) where {FT}
+    ∂g∂t!(config::SPACConfiguration{FT}, cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT}
 
 Update the ∂g∂t for sunlit leaves, given
+- `config` `SPACConfiguration` type configuration
 - `cache` `SPACCache` type cache
 - `leaf` `Leaf` type leaf
 - `air` `AirLayer` type air
@@ -26,7 +27,7 @@ Update the ∂g∂t for sunlit leaves, given
 """
 function ∂g∂t! end;
 
-∂g∂t!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = ∂g∂t!(cache, leaf.flux.trait.stomatal_model, leaf, air; δe = δe);
+∂g∂t!(config::SPACConfiguration{FT}, cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = ∂g∂t!(cache, config.METHODS.STOMATAL_MODEL, leaf, air; δe = δe);
 
 ∂g∂t!(cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::CanopyLayer{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     ∂A∂E!(cache, leaf, air);

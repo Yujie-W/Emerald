@@ -14,14 +14,13 @@
 #     2023-Aug-27: add field ALLOW_LEAF_CONDENSATION
 #     2023-Sep-07: add fields ALLOW_LEAF_SHEDDING, and T_CLM
 #     2023-Sep-11: add fields ENABLE_DROUGHT_LEGACY, KR_THRESHOLD
-#     2023-Sep-19: add fields Φ_SIF_CUTOFF, and Φ_SIF_RESCALE
+#     2023-Sep-19: add fields Φ_SIF_CUTOFF
 #     2023-Sep-20: add new meta field SPECTRA (WLSET, MAT_ρ, ...)
 #     2023-Oct-02: add field MESSAGE_LEVEL
 #     2023-Oct-05: add field ENABLE_SIF
 #     2023-Oct-14: add field ENABLE_REF
 #     2024-Feb-27: add field HOT_SPOT and SOIL_ALBEDO
 #     2024-Feb-27: add constructor function to create the configuration using customized settings
-#     2024-Feb-28: add field VERTICAL_BIO
 #     2024-Jul-22: add field ENABLE_CHEMICAL_ENERGY
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Jul-31: add rate constants fields (constants for PSI, PSII, and combined)
@@ -67,16 +66,10 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     #
     # Canopy optics
     #
-    "Broadband mode"
-    BROADBAND::Bool = false
     "Effective leaf spectra based on CI effect"
     EFFECTIVE_LEAF_SPECTRA::Bool = true
     "Whether to compute canopy reflectance"
     ENABLE_REF::Bool = true
-    "Soil albedo method"
-    SOIL_ALBEDO::Union{SoilAlbedoPrescribe, SoilAlbedoBroadbandCLM, SoilAlbedoBroadbandCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoHyperspectralCLIMA} = SoilAlbedoHyperspectralCLIMA()
-    "Vertical distribution of leaf biophysical properties (if false, run leaf_spectra! only once)"
-    VERTICAL_BIO::Bool = false
 
     #
     # Canopy structure
@@ -100,9 +93,7 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     "Whether to convert energy to photons when computing fluorescence"
     Φ_PHOTON::Bool = true
     "How SIF wavelength cutoff is handled (0 for no cut off, 1 for sharp cut off, and 2 for sigmoid used in SCOPE)"
-    Φ_SIF_CUTOFF::Int = 0
-    "Rescale SIF fluorescence to wavelength lower than the excitation wavelength"
-    Φ_SIF_RESCALE::Bool = true
+    Φ_SIF_CUTOFF::Int = 2
 
     #
     # Photosynthesis
@@ -169,13 +160,18 @@ Base.@kwdef mutable struct SPACConfiguration{FT}
     #
     "Prescribe air layer information such as partial pressures"
     PRESCRIBE_AIR::Bool = true
+
+    #
+    # Method selections
+    #
+    "Method selections"
+    METHODS::SPACMethodSelections{FT} = SPACMethodSelections{FT}()
 end;
 
 """
 
     SPACConfiguration(
                 FT::DataType;
-                broadband::Bool = false,
                 dataset::String = OLD_PHI_2021,
                 jld2_file::String = LAND_ARTIFACT,
                 wl_par::Vector = [300,750],
@@ -184,27 +180,15 @@ end;
 
 Create and return a SPAC configuration, given
 - `FT` the floating number type
-- `broadband` whether to use broadband spectra; default is false
 - `dataset` the dataset name in the JLD2 file
 - `jld2_file` the JLD2 file name
 - `wl_par` the wavelength range for PAR
 - `wl_par_700` the wavelength range for PAR 700
 - `wl_selection` the wavelength selection
 
-# Examples
-
-```julia
-using Emerald;
-config_1 = EmeraldLand.Namespace.SPACConfiguration(Float64);
-config_2 = EmeraldLand.Namespace.SPACConfiguration(Float64; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
-config_3 = EmeraldLand.Namespace.SPACConfiguration(Float64; dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM, wl_selection = [400, 700]);
-config_4 = EmeraldLand.Namespace.SPACConfiguration(Float64; broadband = true, dataset = EmeraldLand.Namespace.OLD_PHI_2021_1NM);
-```
-
 """
 SPACConfiguration(
             FT::DataType;
-            broadband::Bool = false,
             dataset::String = OLD_PHI_2021,
             jld2_file::String = LAND_ARTIFACT,
             wl_par::Vector = [300,750],
@@ -213,9 +197,6 @@ SPACConfiguration(
     return SPACConfiguration{FT}(
                 DATASET     = dataset,
                 JLD2_FILE   = jld2_file,
-                SPECTRA     = ReferenceSpectra{FT}(jld2_file, dataset; broadband = broadband, wl_par = wl_par, wl_par_700 = wl_par_700, wl_selection = wl_selection),
-                BROADBAND   = broadband,
-                SOIL_ALBEDO = broadband ? SoilAlbedoBroadbandCLIMA() : SoilAlbedoHyperspectralCLIMA(),
-                ENABLE_SIF  = !broadband,
+                SPECTRA     = ReferenceSpectra{FT}(jld2_file, dataset; wl_par = wl_par, wl_par_700 = wl_par_700, wl_selection = wl_selection),
     )
 );

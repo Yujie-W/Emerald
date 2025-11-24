@@ -21,7 +21,7 @@ Compute the ∂Θₙ∂E for nocturnal stomatal opening, given
 """
 function ∂Θₙ∂E end;
 
-∂Θₙ∂E(leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(leaf.flux.trait.stomatal_model, leaf, air);
+∂Θₙ∂E(config::SPACConfiguration{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂Θₙ∂E(config.METHODS.STOMATAL_MODEL, leaf, air);
 
 ∂Θₙ∂E(sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     # if leaf xylem is not connected, do nothing
