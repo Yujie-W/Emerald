@@ -1,0 +1,678 @@
+# This file contains the state and auxiliary variables for leaf photosynthesis
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-27: use modified TD for η_C and η_L
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
+#     2024-Jul-31: add new GeneralC3Trait struct
+#     2024-Aug-01: add support to Q10Peak, Q10PeakHT, and Q10PeakLTHT
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C3 photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct GeneralC3Trait{FT}
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 1400 * 1e-6
+
+    # Prognostic variables
+    "Total concentration of Cytochrome b₆f `[μmol m⁻²]`"
+    b₆f::FT = 350 / 300
+    "Maximal electron transport rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    j_max25::FT = 83.5
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Apr-15: add C4CLMTrait struct
+#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
+#     2024-Jul-31: add new GeneralC4Trait struct
+#     2024-Aug-01: add support to Q10Peak, Q10PeakHT, and Q10PeakLTHT
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the trait variables for C4 photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct GeneralC4Trait{FT}
+    # Related to OCS uptake
+    "Multiplier to derive internal conductance for OCS `[mol μmol⁻¹]`"
+    K_OCS::FT = 8862 * 1e-6
+
+    # Prognostic variables
+    "Respiration rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    r_d25::FT = 0.75
+    "Maximal carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_cmax25::FT = 50
+    "Maximal PEP carboxylation rate at 298.15 K `[μmol m⁻² s⁻¹]`"
+    v_pmax25::FT = 50
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2023-Oct-03: add C3State struct
+#     2023-Oct-28: add support to QLFluorescenceModel
+#     2024-Jul-22: support all C3 models
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the state variables for C3 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C3State{FT}
+    # General model information
+    "Coefficient 4.0/4.5 for NADPH/ATP requirement stochiometry, respectively"
+    EFF_1::FT = 4
+    "Coefficient 8.0/10.5 for NADPH/ATP requirement stochiometry, respectively"
+    EFF_2::FT = 8
+
+    # Prognostic variables (for VJP model)
+    "Sustained NPQ rate constant (for seasonal changes, default is zero)"
+    k_npq_sus::FT = 0
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2023-Oct-03: add C4State struct
+#     2023-Oct-28: add support to QLFluorescenceModel
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the state variables for C4 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct C4State{FT}
+    # Prognostic variables
+    "Sustained NPQ rate constant (for seasonal changes, default is zero)"
+    k_npq_sus::FT = 0
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2023-Oct-03: add LeafPhotosystemAuxil struct
+#     2023-Oct-24: add fields ϕ_f1 and ϕ_f2; remove fields ϵ_1 and ϵ_2 (computed in the LeafOptics module)
+#     2025-Jun-03: add filed ϕ_d and ϕ_n
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the auxiliary variables for leaf photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct LeafPhotosystemAuxil{FT}
+    # photosynthetic rates
+    "RubisCO limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_c::FT = 0
+    "Gross photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_g::FT = 0
+    "Light limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_j::FT = 0
+    "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_n::FT = 0
+    "Product limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_p::FT = 0
+
+    # electron transport rates
+    "Electron to CO₂ coefficient"
+    e2c::FT = 0
+    "Fraction of absorbed light used by PSII ETR"
+    f_psii::FT = 0.5
+    "Electron transport `[μmol m⁻² s⁻¹]`"
+    j::FT = 0
+    "Maximal electron transport rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    j_max::FT = 0
+    "Potential Electron Transport Rate `[μmol m⁻² s⁻¹]`"
+    j_pot::FT = 0
+    "PSI electron transport rate after colimitation"
+    j_psi::FT = 0
+
+    # photosynthesis rate coefficients
+    "RubisCO coefficient Kc `[Pa]`"
+    k_c::FT = 0
+    "Michaelis-Menten's coefficient `[Pa]`"
+    k_m::FT = 0
+    "RubisCO coefficient Ko `[Pa]`"
+    k_o::FT = 0
+    "PEP coefficient Kpep `[Pa]`"
+    k_pep::FT = 0
+    "PEP coefficient Kpep fro CLM (different algorithm) `[Pa]`"
+    k_pep_clm::FT = 0
+    "Maximal turnover rate of Cytochrome b₆f `[e⁻ s⁻¹]`"
+    k_q::FT = 0
+    "CO₂ compensation point with the absence of Rd `[Pa]`"
+    γ_star::FT = 0
+
+    # respiration and carboxylation
+    "Respiration rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    r_d::FT = 0
+    "Maximal carboxylation rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    v_cmax::FT = 0
+    "Maximal PEP carboxylation rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    v_pmax::FT = 0
+    "Maximal Cytochrome b₆f activity `[μmol e⁻ m⁻² s⁻¹]`"
+    v_qmax::FT = 0
+
+    # C3 Cytochrome model variables
+    "ratio between J_P700 and J_P680"
+    η::FT = 0
+    "Coupling efficiency of cyclic electron flow `[mol ATP mol⁻¹ e⁻]`"
+    η_c::FT = 0
+    "Coupling efficiency of linear electron flow `[mol ATP mol⁻¹ e⁻]`"
+    η_l::FT = 0
+
+    # yield variables
+    "Heat dissipation yield"
+    ϕ_d::FT = 0
+    "Fluorescence yield"
+    ϕ_f::FT = 0
+    "Non-photochemical yield"
+    ϕ_n::FT = 0
+    "Photochemical yield"
+    ϕ_p::FT = 0
+
+    # fluorescence yeolds of two photosystems
+    "Fluorescence yield of PSI"
+    ϕ_f1::FT = 0
+    "Fluorescence yield of PSII"
+    ϕ_f2::FT = 0
+
+    # fluorescence variables
+    "Dark adapted yield (`Kp=0`)"
+    f_m::FT = 0
+    "Light adapted yield (`Kp=0`)"
+    f_m′::FT = 0
+    "Dark-adapted fluorescence yield (`Kp=max`)"
+    f_o::FT = 0
+    "Light-adapted fluorescence yield in the dark (`Kp=max`)"
+    f_o′::FT = 0
+    "Non-Photochemical quenching "
+    npq::FT = 0
+    "Energy quenching"
+    q_e::FT = 0
+    "Photochemical quenching"
+    q_p::FT = 0
+
+    # fluorescence rate coefficients
+    "Rate constant for thermal dissipation"
+    k_d::FT = 0
+    "Reversible NPQ rate constant (initially zero)"
+    k_n::FT = 0
+    "Rate constant for photochemistry"
+    k_p::FT = 0
+    "Maximal PS I photochemical yield"
+    ϕ_psi_max::FT = 0
+    "max PSII yield (_k_npq_rev = 0, all RC open)"
+    ϕ_psii_max::FT = 0
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-25: define CanopyLayerPhotosystemAuxil struct to store 1D leaf photosynthesis variables (for canopy layer; Leaf will be repurposed back to elementwise)
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2025-Jun-03: add filed ϕ_d and ϕ_n
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the auxiliary variables for leaf photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct CanopyLayerPhotosystemAuxil{FT}
+    # photosynthetic rates
+    "RubisCO limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_c::Vector{FT}
+    "Gross photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_g::Vector{FT}
+    "Intermediate photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_i::Vector{FT}
+    "Light limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_j::Vector{FT}
+    "Net photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_n::Vector{FT}
+    "Product limited photosynthetic rate `[μmol m⁻² s⁻¹]`"
+    a_p::Vector{FT}
+
+    # electron transport rates
+    "Electron to CO₂ coefficient"
+    e2c::Vector{FT}
+    "Fraction of absorbed light used by PSII ETR"
+    f_psii::FT = 0.5
+    "Electron transport `[μmol m⁻² s⁻¹]`"
+    j::Vector{FT}
+    "Maximal electron transport rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    j_max::FT = 0
+    "Potential Electron Transport Rate `[μmol m⁻² s⁻¹]`"
+    j_pot::Vector{FT}
+    "PSI electron transport rate after colimitation"
+    j_psi::Vector{FT}
+
+    # photosynthesis rate coefficients
+    "RubisCO coefficient Kc `[Pa]`"
+    k_c::FT = 0
+    "Michaelis-Menten's coefficient `[Pa]`"
+    k_m::FT = 0
+    "RubisCO coefficient Ko `[Pa]`"
+    k_o::FT = 0
+    "PEP coefficient Kpep `[Pa]`"
+    k_pep::FT = 0
+    "PEP coefficient Kpep fro CLM (different algorithm) `[Pa]`"
+    k_pep_clm::FT = 0
+    "Maximal turnover rate of Cytochrome b₆f `[e⁻ s⁻¹]`"
+    k_q::FT = 0
+    "CO₂ compensation point with the absence of Rd `[Pa]`"
+    γ_star::FT = 0
+
+    # respiration and carboxylation
+    "Respiration rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    r_d::FT = 0
+    "Maximal carboxylation rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    v_cmax::FT = 0
+    "Maximal PEP carboxylation rate at leaf temperature `[μmol m⁻² s⁻¹]`"
+    v_pmax::FT = 0
+    "Maximal Cytochrome b₆f activity `[μmol e⁻ m⁻² s⁻¹]`"
+    v_qmax::FT = 0
+
+    # C3 Cytochrome model variables
+    "ratio between J_P700 and J_P680"
+    η::Vector{FT}
+    "Coupling efficiency of cyclic electron flow `[mol ATP mol⁻¹ e⁻]`"
+    η_c::FT = 0
+    "Coupling efficiency of linear electron flow `[mol ATP mol⁻¹ e⁻]`"
+    η_l::FT = 0
+
+    # yield variables
+    "Heat dissipation yield"
+    ϕ_d::Vector{FT}
+    "Fluorescence yield"
+    ϕ_f::Vector{FT}
+    "Non-photochemical yield"
+    ϕ_n::Vector{FT}
+    "Photochemical yield"
+    ϕ_p::Vector{FT}
+
+    # fluorescence yeolds of two photosystems
+    "Fluorescence yield of PSI"
+    ϕ_f1::Vector{FT}
+    "Fluorescence yield of PSII"
+    ϕ_f2::Vector{FT}
+
+    # fluorescence variables
+    "Dark adapted yield (`Kp=0`)"
+    f_m::FT = 0
+    "Light adapted yield (`Kp=0`)"
+    f_m′::Vector{FT}
+    "Dark-adapted fluorescence yield (`Kp=max`)"
+    f_o::FT = 0
+    "Light-adapted fluorescence yield in the dark (`Kp=max`)"
+    f_o′::Vector{FT}
+    "Non-Photochemical quenching "
+    npq::Vector{FT}
+    "Energy quenching"
+    q_e::Vector{FT}
+    "Photochemical quenching"
+    q_p::Vector{FT}
+
+    # fluorescence rate coefficients
+    "Rate constant for thermal dissipation"
+    k_d::FT = 0
+    "Reversible NPQ rate constant (initially zero)"
+    k_n::Vector{FT}
+    "Rate constant for photochemistry"
+    k_p::Vector{FT}
+    "Maximal PS I photochemical yield"
+    ϕ_psi_max::FT = 0
+    "max PSII yield (_k_npq_rev = 0, all RC open)"
+    ϕ_psii_max::FT = 0
+end;
+
+CanopyLayerPhotosystemAuxil(config::SPACConfig{FT}) where {FT} = (
+    cache_dim_ppar = isnothing(config.DIMENSIONS.DIM_PPAR_BINS) ? config.DIMENSIONS.DIM_INCL * config.DIMENSIONS.DIM_AZI : config.DIMENSIONS.DIM_PPAR_BINS;
+
+    return CanopyLayerPhotosystemAuxil{FT}(
+                a_c   = zeros(FT, cache_dim_ppar+1),
+                a_g   = zeros(FT, cache_dim_ppar+1),
+                a_i   = zeros(FT, cache_dim_ppar+1),
+                a_j   = zeros(FT, cache_dim_ppar+1),
+                a_n   = zeros(FT, cache_dim_ppar+1),
+                a_p   = zeros(FT, cache_dim_ppar+1),
+                e2c   = zeros(FT, cache_dim_ppar+1),
+                j     = zeros(FT, cache_dim_ppar+1),
+                j_pot = zeros(FT, cache_dim_ppar+1),
+                j_psi = zeros(FT, cache_dim_ppar+1),
+                η     = zeros(FT, cache_dim_ppar+1),
+                ϕ_d   = zeros(FT, cache_dim_ppar+1),
+                ϕ_f   = zeros(FT, cache_dim_ppar+1),
+                ϕ_n   = zeros(FT, cache_dim_ppar+1),
+                ϕ_p   = zeros(FT, cache_dim_ppar+1),
+                ϕ_f1  = zeros(FT, cache_dim_ppar+1),
+                ϕ_f2  = zeros(FT, cache_dim_ppar+1),
+                f_m′  = zeros(FT, cache_dim_ppar+1),
+                f_o′  = zeros(FT, cache_dim_ppar+1),
+                npq   = zeros(FT, cache_dim_ppar+1),
+                q_e   = zeros(FT, cache_dim_ppar+1),
+                q_p   = zeros(FT, cache_dim_ppar+1),
+                k_n   = zeros(FT, cache_dim_ppar+1),
+                k_p   = zeros(FT, cache_dim_ppar+1)
+    )
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2023-Oct-03: add C3VJP, C3Cyto, and C4VJP structs
+#     2023-Oct-36: combine C3Cyto, C3VJP, and C4VJP into LeafPhotosystem
+#     2024-Feb-26: add field trait
+#     2024-Aug-06: add constructor for different models
+#     2025-Jul-30: fix photosynthesis model constructor
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the fields for C3 photosynthesis (VJP model)
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct LeafPhotosystem{FT}
+    "Trait variables"
+    trait::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}}
+    "State variables"
+    state::Union{C3State{FT}, C4State{FT}}
+    "Auxilary variables"
+    auxil::LeafPhotosystemAuxil{FT} = LeafPhotosystemAuxil{FT}()
+end;
+
+#=
+LeafPhotosystem{FT}(model::String) where {FT} = (
+    if model == "C3Cyto"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3CytoInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3JB"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3JBInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3VJP"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+    elseif model == "C3VJPInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+    elseif model == "C3CLM"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C3CLMInfAp"
+        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}());
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C4CLM"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4CLMSmooth"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4VJP"
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}());
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VpmaxPi();
+        ps.auxil.f_psii = 0.41;
+    else
+        return error("Unknown model: $model")
+    end;
+
+    return ps
+);
+=#
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-25: add CanopyLayerPhotosystem
+#     2024-Aug-13: add constructor for different models
+#     2025-Jul-30: fix photosynthesis model constructor
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains the fields for C3 photosynthesis
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct CanopyLayerPhotosystem{FT}
+    "Trait variables"
+    trait::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}}
+    "State variables"
+    state::Union{C3State{FT}, C4State{FT}}
+    "Auxilary variables"
+    auxil::CanopyLayerPhotosystemAuxil{FT}
+end;
+
+CanopyLayerPhotosystem(config::SPACConfig{FT}, model::String = "C3") where {FT} = (
+    auxil = CanopyLayerPhotosystemAuxil(config);
+    if model == "C3"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+    elseif model == "C4"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
+        ps.auxil.f_psii = 0.41;
+    else
+        return error("Unknown model: $model")
+    end;
+
+    return ps
+);
+
+
+#=
+CanopyLayerPhotosystem(config::SPACConfig{FT}, model::String = "C3VJP") where {FT} = (
+    auxil = CanopyLayerPhotosystemAuxil(config);
+    if model == "C3Cyto"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3CytoInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDWang(FT);
+        ps.trait.TD_ηL = ηLTDWang(FT);
+    elseif model == "C3JB"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3JBInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_J = SerialColimit{FT}();
+        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.TD_ηC = ηCTDJohnson(FT);
+        ps.trait.TD_ηL = ηLTDJohnson(FT);
+    elseif model == "C3VJP"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+    elseif model == "C3VJPInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3JmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+    elseif model == "C3CLM"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Vcmax();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C3CLMInfAp"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC3VcmaxPi();
+        ps.trait.AJM = AjMethodC3VqmaxPi();
+        ps.trait.APM = ApMethodC3Inf();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+    elseif model == "C4CLM"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4CLMSmooth"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VcmaxPi();
+        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(FT);
+        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
+        ps.auxil.f_psii = 0.41;
+    elseif model == "C4VJP"
+        ps = CanopyLayerPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
+        ps.trait.ACM = AcMethodC4Vcmax();
+        ps.trait.AJM = AjMethodC4JPSII();
+        ps.trait.APM = ApMethodC4VpmaxPi();
+        ps.auxil.f_psii = 0.41;
+    else
+        return error("Unknown model: $model")
+    end;
+
+    return ps
+);
+=#

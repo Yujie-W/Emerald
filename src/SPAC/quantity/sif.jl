@@ -1,0 +1,93 @@
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Jun-13: add function to add up total SIF photons (unit mol m⁻² s⁻¹)
+#     2025-Jul-30: fix SIF calculation
+#
+#######################################################################################################################################################################################################
+"""
+
+    ΣSIF(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Return the total SIF at top of the canopy after reabsorption in W m⁻² per ground area, given
+- `spac` `BulkSPAC` SPAC
+
+"""
+function ΣSIF end;
+
+ΣSIF(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
+    (; SPECTRA) = config.CONSTANTS;
+    sun_geo = spac.canopy.sun_geometry;
+
+    return sun_geo.auxil.e_sifꜛ[:,1]' * SPECTRA.ΔΛ_SIF / 1000
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-11: add function to add up total SIF at chloroplast level (without any reabsorption)
+#     2023-Sep-11: convert the unit to W m⁻² per ground area from nW m⁻²
+#
+#######################################################################################################################################################################################################
+"""
+
+    ΣSIF_CHL(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Return the total SIF at chloroplast level (without any reabsorption) in W m⁻² per ground area, given
+- `config` `SPACConfig` SPAC configuration
+- `spac` `BulkSPAC` SPAC
+
+"""
+function ΣSIF_CHL end;
+
+ΣSIF_CHL(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
+    (; SPECTRA) = config.CONSTANTS;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+
+    # compute SIF in energy unit before reabsorption within leaves (W m⁻²)
+    Σsif::FT = 0;
+    for i in eachindex(leaves)
+        Σsif += view(canopy.sun_geometry.auxil.e_sif_chl,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
+    end;
+
+    return Σsif
+);
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this function
+# General
+#     2023-Sep-11: add function to add up total SIF in energy unit at leaf level after reabsorption
+#     2023-Sep-11: convert the unit to W m⁻² per ground area from nW m⁻²
+#
+#######################################################################################################################################################################################################
+"""
+
+    ΣSIF_LEAF(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Return the total SIF at leaf level after reabsorption in W m⁻² per ground area, given
+- `config` `SPACConfig` SPAC configuration
+- `spac` `BulkSPAC` SPAC
+
+"""
+function ΣSIF_LEAF end;
+
+ΣSIF_LEAF(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
+    (; SPECTRA) = config.CONSTANTS;
+    canopy = spac.canopy;
+    leaves = spac.plant.leaves;
+
+    # compute SIF in energy unit after reabsorption within leaves (W m⁻²)
+    Σsif::FT = 0;
+    for i in eachindex(leaves)
+        Σsif += view(canopy.sun_geometry.auxil.e_sifꜜ_layer,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
+        Σsif += view(canopy.sun_geometry.auxil.e_sifꜛ_layer,:,i)' * SPECTRA.ΔΛ_SIF / 1000;
+    end;
+
+    return Σsif
+);
