@@ -68,6 +68,9 @@ function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::Named
     if saving_dict["OCS"]
         results.OCS[ind] = OCS(spac);
     end;
+    if saving_dict["PCI"]
+        results.PCI[ind] = LEAF_PCI(spac);
+    end;
 
     # save the SIF (PAR and PPAR) if there is sunlight (0 otherwise)
     daytime = PAR(config, spac) > 0;

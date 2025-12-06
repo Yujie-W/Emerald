@@ -14,6 +14,7 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
             "ET_VEGE"     => true,
             "GPP"         => true,
             "OCS"         => true,
+            "PCI"         => false,
     # SIF (default is false)
             "SIF683"      => false,
             "SIF740"      => true,

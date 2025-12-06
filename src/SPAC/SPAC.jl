@@ -58,6 +58,7 @@ include("timestepper/timer.jl");
 include("quantity/beta.jl");
 include("quantity/biomass.jl");
 include("quantity/broadband.jl");
+include("quantity/co2.jl");
 include("quantity/et.jl");
 include("quantity/gpp.jl");
 include("quantity/goes.jl");
