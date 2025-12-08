@@ -18,9 +18,10 @@ function LEAF_PCI(spac::BulkSPAC{FT}) where {FT}
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        @. ppar_pci = leaf.flux.auxil.ppar * leaf.flux.auxil.p_CO₂_i;
+        mask = leaf.flux.auxil.a_n .> 0;
+        @. ppar_pci = leaf.flux.auxil.ppar * (mask * leaf.flux.auxil.p_CO₂_i);
         sum_pci += ppar_pci' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
-        sum_par += leaf.flux.auxil.ppar' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
+        sum_par += (leaf.flux.auxil.ppar .* mask)' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
     end;
 
     return sum_pci / sum_par
