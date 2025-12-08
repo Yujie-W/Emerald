@@ -27,6 +27,8 @@ Base.@kwdef mutable struct SoilBulkTrait{FT}
     color::Int = 1
     "Reflectance for longwave radiation"
     ρ_lw::FT = 0.06
+    "Ash coverage"
+    f_ash::FT = 0.0
 end;
 
 

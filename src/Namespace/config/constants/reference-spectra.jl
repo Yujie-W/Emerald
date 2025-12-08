@@ -43,6 +43,8 @@ Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
     # Variable features for the soil
     "A matrix of characteristic curves"
     MAT_SOIL::Matrix{FT}
+    "A new matrix for soil reflectance calculation"
+    MAT_SOIL_ALBEDO::Matrix{FT}
 
     # Variable features for the radiation
     "Downwelling shortwave radiation reference spectrum"
@@ -147,6 +149,10 @@ ReferenceSpectra{FT}(
         GSV_2_interp   = similar(wls, FT);
         GSV_3_interp   = similar(wls, FT);
         GSV_4_interp   = similar(wls, FT);
+        HSA_dry_soil   = similar(wls, FT);
+        HSA_wet_soil   = similar(wls, FT);
+        HSA_dry_ash    = similar(wls, FT);
+        HSA_wet_ash    = similar(wls, FT);
         E_DIR_interp   = similar(wls, FT);
         E_DIFF_interp  = similar(wls, FT);
 
@@ -169,6 +175,14 @@ ReferenceSpectra{FT}(
             GSV_2_interp[i]   = interpolate_data(df.WL, df.GSV_2  , wls[i]);
             GSV_3_interp[i]   = interpolate_data(df.WL, df.GSV_3  , wls[i]);
             GSV_4_interp[i]   = interpolate_data(df.WL, df.GSV_4  , wls[i]);
+            # HSA_dry_soil[i]   = interpolate_data(df.WL, df.HSA_DRY_SOIL, wls[i]);
+            # HSA_wet_soil[i]   = interpolate_data(df.WL, df.HSA_WET_SOIL, wls[i]);
+            # HSA_dry_ash[i]    = interpolate_data(df.WL, df.HSA_DRY_ASH , wls[i]);
+            # HSA_wet_ash[i]    = interpolate_data(df.WL, df.HSA_WET_ASH , wls[i]);
+            HSA_dry_soil[i]   = 0.3;
+            HSA_wet_soil[i]   = 0.2;
+            HSA_dry_ash[i]    = 0.3;
+            HSA_wet_ash[i]    = 0.2;
             E_DIR_interp[i]   = interpolate_data(df.WL, df.E_DIR  , wls[i]);
             E_DIFF_interp[i]  = interpolate_data(df.WL, df.E_DIFF , wls[i]);
         end;
@@ -185,48 +199,51 @@ ReferenceSpectra{FT}(
 
         # return the ReferenceSpectra object
         return ReferenceSpectra{FT}(
-                    Λ          = Λ_interp,
-                    ΔΛ         = ΔΛ_interp,
-                    K_ANT      = K_ANT_interp,
-                    K_BROWN    = K_BROWN_interp,
-                    K_CAB      = K_CAB_interp,
-                    K_CAR_V    = K_CAR_V_interp,
-                    K_CAR_Z    = K_CAR_Z_interp,
-                    K_CBC      = K_CBC_interp,
-                    K_H₂O      = K_H₂O_interp,
-                    K_LMA      = K_LMA_interp,
-                    K_PRO      = K_PRO_interp,
-                    NR         = NR_interp,
-                    Φ_PS       = Φ_PS_interp,
-                    Φ_PSI      = Φ_PSI_interp,
-                    Φ_PSII     = Φ_PSII_interp,
-                    MAT_SOIL   = FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp],
-                    SOLAR_RAD  = FT[E_DIR_interp E_DIFF_interp],
-                    WL_PAR     = wl_par,
-                    WL_PAR_700 = wl_par_700,
+                    Λ               = Λ_interp,
+                    ΔΛ              = ΔΛ_interp,
+                    K_ANT           = K_ANT_interp,
+                    K_BROWN         = K_BROWN_interp,
+                    K_CAB           = K_CAB_interp,
+                    K_CAR_V         = K_CAR_V_interp,
+                    K_CAR_Z         = K_CAR_Z_interp,
+                    K_CBC           = K_CBC_interp,
+                    K_H₂O           = K_H₂O_interp,
+                    K_LMA           = K_LMA_interp,
+                    K_PRO           = K_PRO_interp,
+                    NR              = NR_interp,
+                    Φ_PS            = Φ_PS_interp,
+                    Φ_PSI           = Φ_PSI_interp,
+                    Φ_PSII          = Φ_PSII_interp,
+                    MAT_SOIL        = FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp],
+                    MAT_SOIL_ALBEDO = FT[HSA_dry_soil HSA_wet_soil HSA_dry_ash HSA_wet_ash],
+                    SOLAR_RAD       = FT[E_DIR_interp E_DIFF_interp],
+                    WL_PAR          = wl_par,
+                    WL_PAR_700      = wl_par_700,
         )
     end;
 
     # if _wl_selection is not provided, use the default
     return ReferenceSpectra{FT}(
-            Λ          = df.WL,
-            ΔΛ         = df.WL_UPPER - df.WL_LOWER,
-            K_ANT      = df.K_ANT,
-            K_BROWN    = df.K_BROWN,
-            K_CAB      = df.K_CAB,
-            K_CAR_V    = df.K_CAR_V,
-            K_CAR_Z    = df.K_CAR_Z,
-            K_CBC      = df.K_CBC,
-            K_H₂O      = df.K_H₂O,
-            K_LMA      = df.K_LMA,
-            K_PRO      = df.K_PRO,
-            NR         = df.NR,
-            Φ_PS       = df.K_PS,
-            Φ_PSI      = df.K_PS1,
-            Φ_PSII     = df.K_PS2,
-            MAT_SOIL   = FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4],
-            SOLAR_RAD  = FT[df.E_DIR df.E_DIFF],
-            WL_PAR     = wl_par,
-            WL_PAR_700 = wl_par_700,
+            Λ               = df.WL,
+            ΔΛ              = df.WL_UPPER - df.WL_LOWER,
+            K_ANT           = df.K_ANT,
+            K_BROWN         = df.K_BROWN,
+            K_CAB           = df.K_CAB,
+            K_CAR_V         = df.K_CAR_V,
+            K_CAR_Z         = df.K_CAR_Z,
+            K_CBC           = df.K_CBC,
+            K_H₂O           = df.K_H₂O,
+            K_LMA           = df.K_LMA,
+            K_PRO           = df.K_PRO,
+            NR              = df.NR,
+            Φ_PS            = df.K_PS,
+            Φ_PSI           = df.K_PS1,
+            Φ_PSII          = df.K_PS2,
+            MAT_SOIL        = FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4],
+            # MAT_SOIL_ALBEDO = FT[df.HSA_DRY_SOIL df.HSA_WET_SOIL df.HSA_DRY_ASH df.HSA_WET_ASH],
+            MAT_SOIL_ALBEDO = [ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2 ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2],
+            SOLAR_RAD       = FT[df.E_DIR df.E_DIFF],
+            WL_PAR          = wl_par,
+            WL_PAR_700      = wl_par_700,
     )
 );

@@ -75,6 +75,23 @@ soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT
     return nothing
 );
 
+soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoHyperspectralAsh) where {FT} = (
+    # use linear interpolation method or CLM method (with upper limit)#
+    #     1. dry soil
+    #     2. wet soil
+    #     3. dry ash
+    #     4. wet ash
+    rwc = max(top_soil.trait.vc.Θ_RES, top_soil.state.θ + top_soil.state.θ_ice) / top_soil.trait.vc.Θ_SAT;
+    alb_soil = config.CONSTANTS.SPECTRA.MAT_SOIL_ALBEDO[:,1] * (1 - rwc) + rwc * config.CONSTANTS.SPECTRA.MAT_SOIL_ALBEDO[:,2];
+    alb_ash  = config.CONSTANTS.SPECTRA.MAT_SOIL_ALBEDO[:,3] * (1 - rwc) + rwc * config.CONSTANTS.SPECTRA.MAT_SOIL_ALBEDO[:,4];
+    @. sbulk.auxil.ρ_sw = alb_soil * (1 - sbulk.trait.f_ash) + alb_ash * sbulk.trait.f_ash;
+
+    @info "tests";
+
+    return nothing
+);
+
+
 soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoHyperspectralCLM) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)
     delta = max(0, FT(0.11) - FT(0.4) * max(top_soil.trait.vc.Θ_SAT, top_soil.state.θ + top_soil.state.θ_ice));
