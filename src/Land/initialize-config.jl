@@ -1,12 +1,12 @@
 """
 
-    site_config(gmd::Dict)
+    site_config(settings::Union{Dict, OrderedDict}, gmd::Union{Dict, OrderedDict})
 
 Create a SPAC configuration struct, given
 - `gmd` Dictionary of GriddingMachine data in a grid
 
 """
-function site_config(gmd::Dict)
+function site_config(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict})
     config = SPACConfig(gmd["FT"]);
     config.CONFIG_INFO.MESSAGE_LEVEL = gmd["MESSAGE_LEVEL"];
 
