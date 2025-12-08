@@ -12,7 +12,7 @@ import Emerald.EmeraldData as EDATA
     # Path to the weather driver data will be automatically retrieved with the tag and dict (which contains lat and lon information).
     gm_tag = "gm2";
     wd_tag = "wd1";
-    gm_dict = GD.grid_dict(GD.LandDatasetLabels(gm_tag, 2019), 38.74, -92.20);
-    df_simu = EF.simulation!(wd_tag, gm_dict; appending = false, selection = 1:24);
+    gmd = GD.grid_dict(GD.LandDatasetLabels(gm_tag, 2019), 38.74, -92.20);
+    df_simu = EF.simulation!(wd_tag, gmd; appending = false, selection = 1:24);
     @test true;
 end;

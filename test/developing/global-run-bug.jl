@@ -19,15 +19,15 @@ using Emerald.EmeraldIO.Jld2: read_jld2
 
 
 # load the data for debugging purpose
-gm_dict = read_jld2("debug.jld2");
-gm_dict["MESSAGE_LEVEL"] = 1;
+gmd = read_jld2("debug.jld2");
+gmd["MESSAGE_LEVEL"] = 1;
 
 
 # run the simulations with data from wd1
-# df_result = EF.simulation!(wd_tag, gm_dict);
+# df_result = EF.simulation!(wd_tag, gmd);
 wd_tag = "wd1";
 
-config = EF.spac_config(gm_dict);
+config = EF.spac_config(gmd);
 config.ALLOW_LEAF_REGROWTH = false;
 config.ALLOW_LEAF_SHEDDING = false;
 config.ALLOW_XYLEM_GROWTH = false;
@@ -36,14 +36,14 @@ config.ENABLE_DROUGHT_LEGACY = false;
 config.ENABLE_REF = true;
 config.ENABLE_SIF = true;
 
-spac = GD.grid_spac(config, gm_dict);
+spac = GD.grid_spac(config, gmd);
 for s in spac.soils
     s.state.θ = s.trait.vc.Θ_SAT;
 end;
 spac.plant.pool.c_pool = Inf;
 SPAC.initialize_spac!(config, spac);
 
-df = WD.grid_weather_driver(wd_tag, gm_dict);
+df = WD.grid_weather_driver(wd_tag, gmd);
 wdf = EF.prepare_wdf(spac, df);
 
 EF.prescribe!(config, spac, wdf, 1; initialize_state = true);

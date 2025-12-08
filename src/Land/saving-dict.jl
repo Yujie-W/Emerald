@@ -2,18 +2,18 @@
 const DEFAULT_SAVING_DICT = Dict{String,Bool}(
     # Modeled soil water content and temperature
             "MOD_SWC"     => true,
-            "MOD_P_SOIL"  => true,
+            "MOD_P_SOIL"  => false,
             "MOD_T_SOIL"  => true,
     # Modeled leaf temperature
             "MOD_T_LEAF"  => false,
-            "MOD_T_MMM"   => true,
+            "MOD_T_MMM"   => false,
     # Modeled CO2, H2O, and OCS fluxes
             "BETA"        => false,
-            "CNPP"        => true,
+            "CNPP"        => false,
             "ET_SOIL"     => true,
             "ET_VEGE"     => true,
             "GPP"         => true,
-            "OCS"         => true,
+            "OCS"         => false,
             "PCI"         => false,
     # SIF (default is false)
             "SIF683"      => false,
@@ -34,14 +34,14 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
             "APAR"        => false,
             "PPAR"        => false,
     # Modeled plant health status
-            "C_POOL"      => true,
-            "K_PLANT"     => true,
-            "K_ROOT_STEM" => true,
+            "C_POOL"      => false,
+            "K_PLANT"     => false,
+            "K_ROOT_STEM" => false,
             "MOD_P_LEAF"  => false,
-            "MOD_P_MMM"   => true,
-            "P_JUNCTION"  => true,
-            "SAP_VOLUME"  => true,
-            "TRUNK_AREA"  => true,
+            "MOD_P_MMM"   => false,
+            "P_JUNCTION"  => false,
+            "SAP_VOLUME"  => false,
+            "TRUNK_AREA"  => false,
     # Modeled heat fluxes
             "MOD_HEAT"    => true,
 );
@@ -49,19 +49,29 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
 
 """
 
-    parameters_to_save(; save_all::Bool = false)
+    parameters_to_save(varnames::Vector{String} = String[]; save_all::Bool = false)
 
 Create a saving dict for simulation, given
+- `varnames` Vector of variable names to be saved
 - `save_all` If true, set all parameters to be saved
 
 """
-function parameters_to_save(; save_all::Bool = false)
+function parameters_to_save(varnames::Vector{String} = String[]; save_all::Bool = false)
     new_dict = deepcopy(DEFAULT_SAVING_DICT);
 
     # If save_all is true, set all values to true
     if save_all
         for (k, _) in new_dict
             new_dict[k] = true;
+        end;
+
+        return new_dict
+    end;
+
+    # otherwise, loop through the varnames and set the corresponding keys to true
+    for vn in varnames
+        if haskey(new_dict, vn)
+            new_dict[vn] = true;
         end;
     end;
 

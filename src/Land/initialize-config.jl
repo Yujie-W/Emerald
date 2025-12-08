@@ -1,14 +1,14 @@
 """
 
-    site_config(settings::Union{Dict, OrderedDict}, gmd::Union{Dict, OrderedDict})
+    site_config(settings::Union{Dict,OrderedDict})
 
 Create a SPAC configuration struct, given
 - `gmd` Dictionary of GriddingMachine data in a grid
 
 """
-function site_config(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict})
-    config = SPACConfig(gmd["FT"]);
-    config.CONFIG_INFO.MESSAGE_LEVEL = gmd["MESSAGE_LEVEL"];
+function site_config(settings::Union{Dict,OrderedDict})
+    config = SPACConfig(settings["FT"]);
+    config.CONFIG_INFO.MESSAGE_LEVEL = settings["MESSAGE_LEVEL"];
 
     # set up the default features
     config.FEATURES.ALLOW_LEAF_REGROWTH = false;
@@ -21,7 +21,22 @@ function site_config(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedD
     config.FEATURES.UNLIMITED_NSC_POOL = true;
 
     # set up the default methods
-    config.METHODS.STOMATAL_MODEL = WangSM{gmd["FT"]}();
+    config.METHODS.STOMATAL_MODEL = Namespace.WangSM{settings["FT"]}();
+
+    # set up the photosynthesis model
+    if settings["C3_MODEL"] == "FvCB"
+        config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
+        config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3JmaxPi();
+        config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
+        config.METHODS.COLIMIT_J = Namespace.ColimitJCLM(settings["FT"]);
+    elseif settings["C3_MODEL"] == "J3B"
+        config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
+        config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3VqmaxPi();
+        config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
+        config.METHODS.COLIMIT_J = Namespace.SerialColimit{settings["FT"]}();
+    else
+        pretty_display!("C3 photosynthesis model not recognized: $(settings["C3_MODEL"]), use testing setting instead...", "twarn");
+    end;
 
     return config
 end;

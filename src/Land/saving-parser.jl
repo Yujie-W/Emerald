@@ -10,7 +10,7 @@ Save the fields to the NamedTuple, given
 - `saving_dict` the dictionary to store the settings for saving the outputs
 
 """
-function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::NamedTuple, ind::Int; saving_dict::Dict{String,Bool} = DEFAULT_SAVING_DICT) where {FT}
+function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::NamedTuple, ind::Int; saving_dict::Dict{String,Bool} = parameters_to_save()) where {FT}
     # save the profiles of the soil
     if saving_dict["MOD_SWC"]
         for i in eachindex(spac.soils)

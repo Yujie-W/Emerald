@@ -25,58 +25,32 @@
 #######################################################################################################################################################################################################
 """
 
-    simulation!(wd_tag::String,
-                gm_dict::Dict{String,Any};
-                appending::Bool = false,
-                saving::Union{Nothing,String} = nothing,
-                saving_dict::Dict{String,Bool} = SAVING_DICT,
-                selection = :)
-    simulation!(config::SPACConfig{FT},
-                spac::BulkSPAC{FT},
-                df::DataFrame;
-                saving::Union{Nothing,String} = nothing,
-                saving_dict::Dict{String,Bool} = SAVING_DICT,
-                selection = :) where {FT}
+    simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; saving::Union{Nothing,String} = nothing)
+    simulation!(settings::Union{Dict,OrderedDict}, gmd::Dict{String,Any}; saving::Union{Nothing,String} = nothing)
 
 Run simulation on site level, given
-- `wd_tag` Weather drive tag such as `wd1`
-- `gm_dict` GriddingMachine dict for site information
-- `appending` If true, append new variables to weather driver when querying the file (set it to true when encountering any errors)
+- `settings` Dictionary of settings
+- `lat` Latitude of the site
+- `lon` Longitude of the site
+- `year` Year of the simulation
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
-- `selection` Run selection of data, default is : (namely 1:end;)
-
-The second method can be used to run externally prepared config, spac, and weather driver, given
-- `config` SPAC configuration
-- `spac` SPAC
-- `df` Weather driver dataframe
+- `gmd` GriddingMachine dict for site information
 
 """
 function simulation! end;
 
-simulation!(gm_tag::String,
-            wd_tag::String,
-            lat::Number,
-            lon::Number,
-            year::Int;
-            saving::Union{Nothing,String} = nothing,
-            saving_dict::Dict{String,Bool} = DEFAULT_SAVING_DICT,
-            selection = :) = simulation!(grid_dict(LandDatasetLabels(gm_tag, year), lat, lon), wd_tag, lat, lon, year; saving = saving, saving_dict = saving_dict, selection = selection);
+simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; saving::Union{Nothing,String} = nothing) =
+    simulation!(settings, grid_dict(LandDatasetLabels(settings["GM_VERSION"], year), lat, lon); saving = saving);
 
-simulation!(gmd::Dict{String,Any},
-            wd_tag::String,
-            lat::Number,
-            lon::Number,
-            year::Int;
-            saving::Union{Nothing,String} = nothing,
-            saving_dict::Dict{String,Bool} = DEFAULT_SAVING_DICT,
-            selection = :) = (
-    wd = grid_weather(WeatherDriverLabels(wd_tag, year), lat, lon);
-    config = site_config(gmd);
+simulation!(settings::Union{Dict,OrderedDict}, gmd::Dict{String,Any}; saving::Union{Nothing,String} = nothing) = (
+    wd = grid_weather(WeatherDriverLabels(settings["WD_VERSION"], gmd["YEAR"]), gmd["LATITUDE"], gmd["LONGITUDE"]);
+    sd = parameters_to_save(settings["VARIABLES_TO_SAVE"]);
+    config = site_config(settings);
     spac = site_spac(config, gmd);
     driver = site_driver_tuple(gmd, wd);
-    results = site_result_tuple(spac, wd, parameters_to_save());
+    results = site_result_tuple(spac, wd, sd);
 
-    return simulation!(config, spac, driver, results; saving = saving, saving_dict = saving_dict, selection = selection);
+    return simulation!(config,  spac, driver, results; saving = saving, saving_dict = sd, selection = settings["SIMULATION_PERIOD"], δt = settings["TIME_STEP"]);
 );
 
 simulation!(config::SPACConfig{FT},
@@ -84,8 +58,9 @@ simulation!(config::SPACConfig{FT},
             driver::NamedTuple,
             results::NamedTuple;
             saving::Union{Nothing,String} = nothing,
-            saving_dict::Dict{String,Bool} = DEFAULT_SAVING_DICT,
-            selection = :) where {FT} = (
+            saving_dict::Dict{String,Bool} = parameters_to_save(),
+            selection = :,
+            δt::Number = 3600) where {FT} = (
     (; MESSAGE_LEVEL) = config.CONFIG_INFO;
 
     # initialize spac based on initialize_state for the first time step
@@ -94,28 +69,25 @@ simulation!(config::SPACConfig{FT},
     # iterate through the time steps
     if MESSAGE_LEVEL == 0
         for idx in eachindex(driver.FDOY)[selection]
-            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict);
+            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict, δt = δt);
         end;
     elseif MESSAGE_LEVEL == 1
         @showprogress for idx in eachindex(driver.FDOY)[selection]
-            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict);
+            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict, δt = δt);
         end;
     elseif MESSAGE_LEVEL == 2
         for idx in eachindex(driver.FDOY)[selection]
             print("Running simulation for $idx out of $(length(driver.FDOY))...");
-            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict);
+            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict, δt = δt);
         end;
     else
         error("MESSAGE_LEVEL should be 0, 1, or 2");
     end;
 
     # save simulation results to hard drive
-    if !isnothing(saving)
-        df = DataFrame(results);
-        save_nc!(saving, df[selection, names(df)]);
-    end;
+    df = DataFrame(results);
 
-    return nothing
+    return isnothing(saving) ? df[selection, names(df)] : save_nc!(saving, df[selection, names(df)])
 );
 
 simulation!(config::SPACConfig{FT},
@@ -123,7 +95,7 @@ simulation!(config::SPACConfig{FT},
             driver::NamedTuple,
             results::NamedTuple,
             ind::Int;
-            saving_dict::Dict{String,Bool} = DEFAULT_SAVING_DICT,
+            saving_dict::Dict{String,Bool} = parameters_to_save(),
             δt::Number = 3600) where {FT} = (
     # prescribe parameters
     prescribe!(config, spac, driver, ind);

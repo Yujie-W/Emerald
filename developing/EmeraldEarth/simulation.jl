@@ -34,10 +34,10 @@ function global_simulations!(
     if single_thread
         for j in axes(gm_mat,2)[single_thread_regions[2]], i in axes(gm_mat,1)[single_thread_regions[1]]
             pretty_display!("Running simulation for grid $(i), $(j)", "tinfo");
-            gm_dict = gm_mat[i,j];
+            gmd = gm_mat[i,j];
             wd_dict = wd_mat[i,j];
             state = st_mat[i,j];
-            grid_simulation!(gm_dict, wd_dict, state);
+            grid_simulation!(gmd, wd_dict, state);
         end;
 
         return nothing
@@ -64,32 +64,32 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    grid_simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::BulkSPACStates)
-    grid_simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::Nothing)
-    grid_simulation!(gm_dict::Nothing, wd_dict::Dict{String,Any}, state::Nothing)
+    grid_simulation!(gmd::Dict{String,Any}, wd_dict::Dict{String,Any}, state::BulkSPACStates)
+    grid_simulation!(gmd::Dict{String,Any}, wd_dict::Dict{String,Any}, state::Nothing)
+    grid_simulation!(gmd::Nothing, wd_dict::Dict{String,Any}, state::Nothing)
 
 Run simulations on SPAC, given
-- `gm_dict` GriddingMachine inputs
+- `gmd` GriddingMachine inputs
 - `wd_dict` Weather drivers
 - `state` Initial states
 
 """
 function grid_simulation! end;
 
-grid_simulation!(gm_dict::Nothing, wd_dict::Dict{String,Any}, state::Nothing) = nothing;
+grid_simulation!(gmd::Nothing, wd_dict::Dict{String,Any}, state::Nothing) = nothing;
 
-grid_simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::Nothing) = nothing;
+grid_simulation!(gmd::Dict{String,Any}, wd_dict::Dict{String,Any}, state::Nothing) = nothing;
 
-grid_simulation!(gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, state::BulkSPACStates) = (
+grid_simulation!(gmd::Dict{String,Any}, wd_dict::Dict{String,Any}, state::BulkSPACStates) = (
     # if wd_dict contains NaN, return nothing
     if dict_contains_nan(wd_dict)
-        #@warn "Weather driver contains NaN, skipping the simulation..." gm_dict["LATITUDE"] gm_dict["LONGITUDE"];
+        #@warn "Weather driver contains NaN, skipping the simulation..." gmd["LATITUDE"] gmd["LONGITUDE"];
         return nothing
     end;
 
     # continue only if wd_dict does not have NaN
-    spac = grid_spac(CACHE_CONFIG, gm_dict);
-    prescribe_gm_wd_data!(CACHE_CONFIG, spac, gm_dict, wd_dict);
+    spac = grid_spac(CACHE_CONFIG, gmd);
+    prescribe_gm_wd_data!(CACHE_CONFIG, spac, gmd, wd_dict);
     initialize_spac!(CACHE_CONFIG, spac, state);
     soil_plant_air_continuum!(CACHE_CONFIG, spac, 3600);
     push_t_history!(CACHE_CONFIG, spac);

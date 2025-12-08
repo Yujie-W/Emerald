@@ -204,8 +204,8 @@ photosystem_temperature_dependence!(
     psa.v_qmax = pst.b₆f * psa.k_q;
 
     if FIX_ETA_TD
-        psa.η_c = min(pst.TD_ηC.VAL_REF, psa.η_c);
-        psa.η_l = min(pst.TD_ηL.VAL_REF, psa.η_l);
+        psa.η_c = min(config.METHODS.TD_ηC.VAL_REF, psa.η_c);
+        psa.η_l = min(config.METHODS.TD_ηL.VAL_REF, psa.η_l);
     end;
 
     psa.ϕ_psi_max = PSI_RATE_CONSTANTS.K_P / (PSI_RATE_CONSTANTS.K_D + PSI_RATE_CONSTANTS.K_F + PSI_RATE_CONSTANTS.K_P);

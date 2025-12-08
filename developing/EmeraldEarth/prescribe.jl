@@ -1,8 +1,8 @@
 #=
 # this function is a tailored function meant to create a SPAC for a given date
-site_spac(config::SPACConfig{FT}, gm_dict::Dict{String,Any}, iday::Int) where {FT} = (
-    spac = site_spac(config, gm_dict);
-    prescribe_gm_wd_data!(config, spac, gm_dict, iday);
+site_spac(config::SPACConfig{FT}, gmd::Dict{String,Any}, iday::Int) where {FT} = (
+    spac = site_spac(config, gmd);
+    prescribe_gm_wd_data!(config, spac, gmd, iday);
 
     return spac
 );
@@ -25,23 +25,23 @@ site_spac(config::SPACConfig{FT}, gm_dict::Dict{String,Any}, iday::Int) where {F
 #######################################################################################################################################################################################################
 """
 
-    prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Union{Dict{String,Any},Nothing} = nothing) where {FT}
+    prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gmd::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Union{Dict{String,Any},Nothing} = nothing) where {FT}
 
 Prescribe the SPAC with GriddingMachine and weather driver data, given
 - `config` Configurations for SPAC
 - `spac` SPAC to be prescribed
-- `gm_dict` Dictionary of GriddingMachine data
+- `gmd` Dictionary of GriddingMachine data
 - `wd_dict` Dictionary of weather driver data
 - `ss_dict` Dictionary of initial states
 
 """
 function prescribe_gm_wd_data! end;
 
-prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Union{Dict{String,Any},Nothing} = nothing) where {FT} = (
+prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gmd::Dict{String,Any}, wd_dict::Dict{String,Any}, ss_dict::Union{Dict{String,Any},Nothing} = nothing) where {FT} = (
     # update environmental conditions
     for air in spac.airs
         air.state.p_air = wd_dict["P_ATM"];
-        prescribe_air!(air; f_CO₂ = gm_dict["CO2"], t = wd_dict["T_AIR"], vpd = wd_dict["VPD"], wind = wd_dict["WIND"]);
+        prescribe_air!(air; f_CO₂ = gmd["CO2"], t = wd_dict["T_AIR"], vpd = wd_dict["VPD"], wind = wd_dict["WIND"]);
     end;
 
     # update shortwave and longwave radiation
@@ -60,10 +60,10 @@ prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{
 
     # synchronize LAI, CHL, and CI
     iday = Int(floor(wd_dict["INDEX"] / 24)) + 1;
-    chl = gm_dict["CHLOROPHYLL"][iday];
-    ci = gm_dict["CLUMPING"][iday];
-    lai = gm_dict["LAI"][iday];
-    vcm = gm_dict["VCMAX25"][iday];
+    chl = gmd["CHLOROPHYLL"][iday];
+    ci = gmd["CLUMPING"][iday];
+    lai = gmd["LAI"][iday];
+    vcm = gmd["VCMAX25"][iday];
     prescribe_traits!(config, spac; cab = chl, car = chl / 7, ci = ci, lai = lai, vcmax = vcm, vertical_expo = 0.3);
 
     # if ss_dict is not nothing, update soil water content and leaf temperature
@@ -82,12 +82,12 @@ prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{
 );
 
 # this function is a tailored function meant to create a SPAC for a given date
-prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gm_dict::Dict{String,Any}, iday::Int) where {FT} = (
+prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gmd::Dict{String,Any}, iday::Int) where {FT} = (
     # synchronize LAI, CHL, and CI
-    chl = gm_dict["CHLOROPHYLL"][iday];
-    ci = gm_dict["CLUMPING"][iday];
-    lai = gm_dict["LAI"][iday];
-    vcm = gm_dict["VCMAX25"][iday];
+    chl = gmd["CHLOROPHYLL"][iday];
+    ci = gmd["CLUMPING"][iday];
+    lai = gmd["LAI"][iday];
+    vcm = gmd["VCMAX25"][iday];
     prescribe_traits!(config, spac; cab = chl, car = chl / 7, ci = ci, lai = lai, vcmax = vcm, vertical_expo = 0.3);
 
     return nothing

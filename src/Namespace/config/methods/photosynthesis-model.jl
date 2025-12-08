@@ -30,7 +30,7 @@ Abstract type for photosynthesis rate calculation methods for Aj:
 - AjMethodC3VqmaxPi
 - AjMethodC4JPSII
 """
-abstract type AbstractAjMethod <: AbstractAcMethod end;
+abstract type AbstractAjMethod end;
 
 
 """
@@ -68,7 +68,7 @@ Abstract type for photosynthesis rate calculation methods for Ap:
 - ApMethodC4VcmaxPi
 - ApMethodC4VpmaxPi
 """
-abstract type AbstractApMethod <: AbstractAjMethod end;
+abstract type AbstractApMethod end;
 
 
 """

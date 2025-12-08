@@ -2,6 +2,5 @@ using Test
 
 
 @testset verbose = true "Emerald" begin
-    include("unittest.jl");
-    include("tutorial.jl");
+    include("Land/site-run.jl");
 end;
