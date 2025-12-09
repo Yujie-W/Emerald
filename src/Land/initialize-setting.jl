@@ -20,16 +20,17 @@ function land_model_settings(; mode::String = "testing")
         "MESSAGE_LEVEL"        => 0,
         "TIME_STEP"            => 3600,
 
-        # method selections
+        # SPAC settings
         "C3_MODEL"             => "FvCB",
+
         # threading settings
         "GRID_THREADS"         => 40,
         "SIMU_THREADS"         => 480,
         "REMOVE_WHEN_DONE"     => true,
 
         # saving settings related to the global NetCDF output files
-        "VARIABLES_TO_SAVE" => String["GPP", "ET_SOIL", "ET_VEGE", "PPAR", "SIF740", "MOD_ΦFΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"],
-        "VARIABLES_TO_COMBINE" => String["GPP", "ET", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"],
+        "VARIABLES_TO_SAVE" => String["GPP", "ET_SOIL", "ET_VEGE", "PCI", "PPAR", "SIF740", "MOD_ΦFΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"],
+        "VARIABLES_TO_COMBINE" => String["GPP", "ET", "PCI", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"],
 
         # testing settings (by default, run the model for 10 days in the middle of a year)
         "SIMULATION_PERIOD"    => 4321:4344,

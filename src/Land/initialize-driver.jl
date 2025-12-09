@@ -8,9 +8,11 @@ Prepare the Tuple of weather and trait drivers to drive the simulations, given
 
 """
 function site_driver_tuple(gmd::Dict{String,Any}, wd::Dict{String,Vector{FT}}) where {FT}
+    wd["B6F"    ] = resample(FT.(gmd["B6F"        ]), "1H", gmd["YEAR"]);
     wd["CO2"    ] = resample(FT.(gmd["CO2"        ]), "1H", gmd["YEAR"]);
     wd["CHL"    ] = resample(FT.(gmd["CHLOROPHYLL"]), "1H", gmd["YEAR"]);
     wd["CI"     ] = resample(FT.(gmd["CLUMPING"   ]), "1H", gmd["YEAR"]);
+    wd["JMAX25" ] = resample(FT.(gmd["JMAX25"     ]), "1H", gmd["YEAR"]);
     wd["LAI"    ] = resample(FT.(gmd["LAI"        ]), "1H", gmd["YEAR"]);
     wd["VCMAX25"] = resample(FT.(gmd["VCMAX25"    ]), "1H", gmd["YEAR"]);
 

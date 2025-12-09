@@ -1,4 +1,13 @@
+"""
 
+    site_result_tuple(spac::BulkSPAC{FT}, wd::Dict{String,Vector{FT}}, saving_dict::Dict{String,Bool}) where {FT}
+
+Create a NamedTuple to store simulation results, given
+- `spac` the SPAC model
+- `wd` the weather driver data
+- `saving_dict` the dictionary to store the settings for saving the outputs
+
+"""
 function site_result_tuple(spac::BulkSPAC{FT}, wd::Dict{String,Vector{FT}}, saving_dict::Dict{String,Bool}) where {FT}
     # length of the time series
     n = length(wd["FDOY"]);

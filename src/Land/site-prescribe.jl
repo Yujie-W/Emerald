@@ -12,9 +12,11 @@ Prescribe traits and environmental conditions, given
 """
 function prescribe!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, driver::NamedTuple, ind::Int; initialize_state::Bool = false) where {FT}
     # read the data out of dataframe row to reduce memory allocation
+    driver_b6f::FT = driver.B6F[ind];
     driver_chl::FT = driver.CHL[ind];
     driver_cli::FT = driver.CI[ind];
     driver_co2::FT = driver.CO2[ind];
+    driver_jmx::FT = driver.JMAX25[ind];
     driver_lai::FT = driver.LAI[ind];
     driver_vcm::FT = driver.VCMAX25[ind];
 
@@ -39,18 +41,16 @@ function prescribe!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, driver::NamedTup
     end;
     spac.meteo.t_precip = driver_tar;
 
+    # vcmax, jmax, and b6f are prescribed at any time step
+    prescribe_traits!(config, spac; b6f = driver_b6f, jmax = driver_jmx, vcmax = driver_vcm, vertical_expo = 0.3);
+
     # if total LAI, Vcmax, or Chl changes, update them (add vertical Vcmax profile as well)
     trigger_lai::Bool = !isnan(driver_lai) && (driver_lai != spac.canopy.structure.trait.lai);
-    trigger_vcm::Bool = !isnan(driver_vcm) && (driver_vcm != spac.plant.leaves[end].photosystem.trait.v_cmax25);
     trigger_chl::Bool = !isnan(driver_chl) && (driver_chl != spac.plant.leaves[end].bio.trait.cab);
     trigger_cli::Bool = !isnan(driver_cli) && (driver_cli != spac.canopy.structure.trait.ci.ci_0);
 
     if trigger_chl
         prescribe_traits!(config, spac; cab = driver_chl, car = driver_chl / 7);
-    end;
-
-    if trigger_vcm
-        prescribe_traits!(config, spac; vcmax = driver_vcm, vertical_expo = 0.3);
     end;
 
     if trigger_lai

@@ -50,7 +50,7 @@ simulation!(settings::Union{Dict,OrderedDict}, gmd::Dict{String,Any}; saving::Un
     driver = site_driver_tuple(gmd, wd);
     results = site_result_tuple(spac, wd, sd);
 
-    return simulation!(config,  spac, driver, results; saving = saving, saving_dict = sd, selection = settings["SIMULATION_PERIOD"], δt = settings["TIME_STEP"]);
+    return simulation!(config, spac, driver, results; saving = saving, saving_dict = sd, selection = settings["SIMULATION_PERIOD"], δt = settings["TIME_STEP"]);
 );
 
 simulation!(config::SPACConfig{FT},
@@ -77,7 +77,7 @@ simulation!(config::SPACConfig{FT},
         end;
     elseif MESSAGE_LEVEL == 2
         for idx in eachindex(driver.FDOY)[selection]
-            print("Running simulation for $idx out of $(length(driver.FDOY))...");
+            print("\rRunning simulation for $(lpad(idx,4," ")) out of $(lpad(length(driver.FDOY),4," "))...");
             simulation!(config, spac, driver, results, idx; saving_dict = saving_dict, δt = δt);
         end;
     else
