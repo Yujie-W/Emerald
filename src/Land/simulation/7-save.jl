@@ -55,53 +55,6 @@ function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::Named
         results.MOD_T_L_MIN[ind]  = min_t;
     end;
 
-    # save the CO2 and H2O fluxes
-    if saving_setting["CNPP"]
-        results.CNPP[ind] = CNPP(spac);
-    end;
-    if saving_setting["ET_SOIL"]
-        results.ET_SOIL[ind] = ET_SOIL(spac);
-    end;
-    if saving_setting["ET_VEGE"]
-        results.ET_VEGE[ind] = ET_VEGE(spac);
-    end;
-    if saving_setting["PCI"]
-        results.PCI[ind] = LEAF_PCI(spac);
-    end;
-
-    # save the SIF (PAR and PPAR) if there is sunlight (0 otherwise)
-    daytime = PAR(config, spac) > 0;
-    if saving_setting["SIF683"]
-        results.SIF683[ind] = daytime ? TROPOMI_SIF683(config, spac) : 0;
-    end;
-    if saving_setting["SIF740"]
-        results.SIF740[ind] = daytime ? TROPOMI_SIF740(config, spac) : 0;
-    end;
-    if saving_setting["SIF757"]
-        results.SIF757[ind] = daytime ? OCO2_SIF759(config, spac) : 0;
-    end;
-    if saving_setting["SIF771"]
-        results.SIF771[ind] = daytime ? OCO2_SIF770(config, spac) : 0;
-    end;
-    if saving_setting["ΣSIF"]
-        results.ΣSIF[ind] = daytime ? ΣSIF(config, spac) : 0;
-    end;
-    if saving_setting["ΣSIF_CHL"]
-        results.ΣSIF_CHL[ind] = daytime ? ΣSIF_CHL(config, spac) : 0;
-    end;
-    if saving_setting["ΣSIF_LEAF"]
-        results.ΣSIF_LEAF[ind] = daytime ? ΣSIF_LEAF(config, spac) : 0;
-    end;
-    if saving_setting["PAR"]
-        results.PAR[ind] = daytime ? PAR(config, spac) : 0;
-    end;
-    if saving_setting["APAR"]
-        results.APAR[ind] = daytime ? APAR(spac) : 0;
-    end;
-    if saving_setting["PPAR"]
-        results.PPAR[ind] = daytime ? PPAR(spac) : 0;
-    end;
-
     # save the VI (and phi) if there is sunlight
     if daytime
         if saving_setting["MOD_ΦDΦN"]

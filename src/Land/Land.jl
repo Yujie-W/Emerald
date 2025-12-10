@@ -5,14 +5,14 @@ using GriddingMachine.Indexer: LandDatasetLabels, WeatherDriverLabels, grid_dict
 using NetcdfIO: read_nc, save_nc!
 using OrderedCollections: OrderedDict
 using PkgUtility.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
-using PkgUtility.MathTools: nanmax, nanmean, nanmin, resample
+using PkgUtility.MathTools: interpolate_data, nanmax, nanmean, nanmin, read_spectrum, resample
 using PkgUtility.PrettyDisplay: pretty_display!
 using PkgUtility.UniversalConstants: M_H₂O, T₀, ρ_H₂O, energy_to_photon
 using ProgressMeter: @showprogress
 using Statistics: mean
 
 using ..Namespace
-using ..Namespace: BulkSPAC, SPACConfig
+using ..Namespace: BulkSPAC, MultiLayerCanopy, ReferenceSpectra, SPACConfig
 using ..PlantHydraulics: flow_out
 using ..StomatalModels: read_β
 # using ..SPAC: SAP_VOLUME
@@ -30,6 +30,7 @@ include("quantity/et.jl");
 include("quantity/gpp.jl");
 include("quantity/ocs.jl");
 include("quantity/par.jl");
+include("quantity/sif.jl");
 
 include("setting/saving.jl");
 include("setting/setting.jl");

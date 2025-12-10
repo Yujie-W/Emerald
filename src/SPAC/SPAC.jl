@@ -60,12 +60,9 @@ include("quantity/broadband.jl");
 include("quantity/goes.jl");
 include("quantity/heat_fluxes.jl");
 include("quantity/hydraulics.jl");
-include("quantity/sif.jl");
 include("quantity/yield.jl");
 
 include("quantity/modis.jl");
-include("quantity/oco.jl");
-include("quantity/tropomi.jl");
 
 
 end; # module

@@ -11,6 +11,14 @@ DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
     ParameterFunctionMapper("PCI", false, LEAF_PCI, []),
     ParameterFunctionMapper("PAR", false, PAR, []),
     ParameterFunctionMapper("PPAR", false, PPAR, []),
+    ParameterFunctionMapper("SIF683", false, TROPOMI_SIF683, []),
+    ParameterFunctionMapper("SIF740", true, TROPOMI_SIF740, []),
+    ParameterFunctionMapper("SIF747", false, TROPOMI_SIF747, []),
+    ParameterFunctionMapper("SIF757", false, OCO2_SIF759, []),
+    ParameterFunctionMapper("SIF771", false, OCO2_SIF770, []),
+    ParameterFunctionMapper("ΣSIF", false, ΣSIF, []),
+    ParameterFunctionMapper("ΣSIF_CHL", false, ΣSIF_CHL, []),
+    ParameterFunctionMapper("ΣSIF_LEAF", false, ΣSIF_LEAF, []),
 ];
 
 
@@ -38,9 +46,6 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
             "EVI"         => false,
             "NIRvI"       => false,
             "NIRvR"       => false,
-            "PAR"         => false,
-            "APAR"        => false,
-            "PPAR"        => false,
     # Modeled plant health status
             "C_POOL"      => false,
             "K_PLANT"     => false,
