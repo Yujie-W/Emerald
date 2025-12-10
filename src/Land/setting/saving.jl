@@ -1,7 +1,10 @@
-# All keys start with "MOD_" results in multiple outputs, deal with them carefully in the prepare_df.jl file
 """ Default saving settings """
 DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
     ParameterFunctionMapper("BETA", false, BETA, []),
+    ParameterFunctionMapper("CNPP", false, CNPP, []),
+    ParameterFunctionMapper("ET", true, ET, []),
+    ParameterFunctionMapper("ET_SOIL", false, ET_SOIL, []),
+    ParameterFunctionMapper("ET_VEGE", false, ET_VEGE, []),
     ParameterFunctionMapper("GPP", true, GPP, []),
     ParameterFunctionMapper("OCS", false, OCS, []),
 ];
@@ -17,9 +20,6 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
             "MOD_T_LEAF"  => false,
             "MOD_T_MMM"   => false,
     # Modeled CO2, H2O, and OCS fluxes
-            "CNPP"        => false,
-            "ET_SOIL"     => true,
-            "ET_VEGE"     => true,
             "PCI"         => false,
     # SIF (default is false)
             "SIF683"      => false,

@@ -13,6 +13,7 @@ using Statistics: mean
 
 using ..Namespace
 using ..Namespace: BulkSPAC, SPACConfig
+using ..PlantHydraulics: flow_out
 using ..StomatalModels: read_β
 # using ..SPAC: SAP_VOLUME
 # using ..SPAC: CNPP, ET_SOIL, ET_VEGE, GPP, LATENT_HEAT, LEAF_PCI, K_PLANT, LONGWAVE_OUT, NET_LONGWAVE, NET_SHORTWAVE, OCS, SENSIBLE_HEAT, SHORTWAVE_OUT
@@ -24,7 +25,9 @@ using ..SPAC: dull_aux!, initialize_spac!, prescribe_air!, prescribe_soil!, pres
 include("type/param-func-mapper.jl");
 
 include("quantity/beta.jl");
+include("quantity/et.jl");
 include("quantity/gpp.jl");
+include("quantity/npp.jl");
 include("quantity/ocs.jl");
 
 include("setting/saving.jl");

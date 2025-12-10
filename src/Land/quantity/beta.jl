@@ -1,6 +1,6 @@
 """
 
-    BETA(::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+    BETA(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     BETA(spac::BulkSPAC{FT}) where {FT}
 
 Return the average beta factor for
@@ -10,7 +10,7 @@ Return the average beta factor for
 """
 function BETA end;
 
-BETA(::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = BETA(spac);
+BETA(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = BETA(spac);
 
 BETA(spac::BulkSPAC{FT}) where {FT} = (
     leaves = spac.plant.leaves;
