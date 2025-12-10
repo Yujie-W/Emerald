@@ -1,62 +1,47 @@
 """ Default saving settings """
 DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
     ParameterFunctionMapper("APAR", false, APAR, []),
+    ParameterFunctionMapper("PAR", false, PAR, []),
+    ParameterFunctionMapper("PPAR", false, PPAR, []),
+
     ParameterFunctionMapper("BETA", false, BETA, []),
+    ParameterFunctionMapper("PCI", false, LEAF_PCI, []),
+
     ParameterFunctionMapper("CNPP", false, CNPP, []),
     ParameterFunctionMapper("ET", true, ET, []),
     ParameterFunctionMapper("ET_SOIL", false, ET_SOIL, []),
     ParameterFunctionMapper("ET_VEGE", false, ET_VEGE, []),
+    ParameterFunctionMapper("GPP", true, GPP, []),
+    ParameterFunctionMapper("OCS", false, OCS, []),
+
     ParameterFunctionMapper("EVI", false, MODIS_EVI, []),
     ParameterFunctionMapper("EVI2", false, MODIS_EVI2, []),
-    ParameterFunctionMapper("GPP", true, GPP, []),
     ParameterFunctionMapper("LSWI", false, MODIS_LSWI, []),
     ParameterFunctionMapper("NDVI", false, MODIS_NDVI, []),
-    ParameterFunctionMapper("OCS", false, OCS, []),
-    ParameterFunctionMapper("PCI", false, LEAF_PCI, []),
-    ParameterFunctionMapper("PAR", false, PAR, []),
-    ParameterFunctionMapper("PPAR", false, PPAR, []),
+    ParameterFunctionMapper("NIRv", false, MODIS_NIRv, []),
+    ParameterFunctionMapper("NIRvR", false, MODIS_NIRvR, []),
+
+    ParameterFunctionMapper("LATENT_HEAT", true, LATENT_HEAT, []),
+    ParameterFunctionMapper("LONGWAVE_OUT", true, LONGWAVE_OUT, []),
+    ParameterFunctionMapper("NET_LONGWAVE", true, NET_LONGWAVE, []),
+    ParameterFunctionMapper("NET_SHORTWAVE", true, NET_SHORTWAVE, []),
+    ParameterFunctionMapper("SENSIBLE_HEAT", true, SENSIBLE_HEAT, []),
+    ParameterFunctionMapper("SHORTWAVE_OUT", true, SHORTWAVE_OUT, []),
+
     ParameterFunctionMapper("SIF683", false, TROPOMI_SIF683, []),
     ParameterFunctionMapper("SIF740", true, TROPOMI_SIF740, []),
     ParameterFunctionMapper("SIF747", false, TROPOMI_SIF747, []),
     ParameterFunctionMapper("SIF757", false, OCO2_SIF759, []),
     ParameterFunctionMapper("SIF771", false, OCO2_SIF770, []),
+    ParameterFunctionMapper("ΣSIF", false, ΣSIF, []),
+    ParameterFunctionMapper("ΣSIF_CHL", false, ΣSIF_CHL, []),
+    ParameterFunctionMapper("ΣSIF_LEAF", false, ΣSIF_LEAF, []),
+
     ParameterFunctionMapper("ΦD", false, ΦD, []),
     ParameterFunctionMapper("ΦF", false, ΦF, []),
     ParameterFunctionMapper("ΦN", false, ΦN, []),
     ParameterFunctionMapper("ΦP", false, ΦP, []),
-    ParameterFunctionMapper("ΣSIF", false, ΣSIF, []),
-    ParameterFunctionMapper("ΣSIF_CHL", false, ΣSIF_CHL, []),
-    ParameterFunctionMapper("ΣSIF_LEAF", false, ΣSIF_LEAF, []),
 ];
-
-
-#=
-const DEFAULT_SAVING_DICT = Dict{String,Bool}(
-    # Modeled soil water content and temperature
-            "MOD_SWC"     => true,
-            "MOD_P_SOIL"  => false,
-            "MOD_T_SOIL"  => true,
-    # Modeled leaf temperature
-            "MOD_T_LEAF"  => false,
-            "MOD_T_MMM"   => false,
-    # VI (default is false)
-            "NDVI"        => false,
-            "EVI"         => false,
-            "NIRvI"       => false,
-            "NIRvR"       => false,
-    # Modeled plant health status
-            "C_POOL"      => false,
-            "K_PLANT"     => false,
-            "K_ROOT_STEM" => false,
-            "MOD_P_LEAF"  => false,
-            "MOD_P_MMM"   => false,
-            "P_JUNCTION"  => false,
-            "SAP_VOLUME"  => false,
-            "TRUNK_AREA"  => false,
-    # Modeled heat fluxes
-            "MOD_HEAT"    => true,
-);
-=#
 
 
 """

@@ -54,12 +54,4 @@ include("timestepper/stepper.jl");
 include("timestepper/timer.jl");
 
 
-# quantities of SPAC
-include("quantity/biomass.jl");
-include("quantity/broadband.jl");
-include("quantity/goes.jl");
-include("quantity/heat_fluxes.jl");
-include("quantity/hydraulics.jl");
-
-
 end; # module
