@@ -1,12 +1,18 @@
 """
 
+    LEAF_PCI(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     LEAF_PCI(spac::BulkSPAC{FT}) where {FT}
 
 Return the weighted average of internal leaf CO₂ partial pressure, given
+- `config` `SPACConfig` type struct
 - `spac` `BulkSPAC` type struct
 
 """
-function LEAF_PCI(spac::BulkSPAC{FT}) where {FT}
+function LEAF_PCI end;
+
+LEAF_PCI(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = LEAF_PCI(spac);
+
+LEAF_PCI(spac::BulkSPAC{FT}) where {FT} = (
     canopy = spac.canopy;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
@@ -25,4 +31,4 @@ function LEAF_PCI(spac::BulkSPAC{FT}) where {FT}
     end;
 
     return sum_pci / sum_par
-end;
+);

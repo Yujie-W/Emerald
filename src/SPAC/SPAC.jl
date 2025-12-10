@@ -57,11 +57,9 @@ include("timestepper/timer.jl");
 # quantities of SPAC
 include("quantity/biomass.jl");
 include("quantity/broadband.jl");
-include("quantity/co2.jl");
 include("quantity/goes.jl");
 include("quantity/heat_fluxes.jl");
 include("quantity/hydraulics.jl");
-include("quantity/par.jl");
 include("quantity/sif.jl");
 include("quantity/yield.jl");
 

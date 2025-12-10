@@ -7,7 +7,7 @@ using OrderedCollections: OrderedDict
 using PkgUtility.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 using PkgUtility.MathTools: nanmax, nanmean, nanmin, resample
 using PkgUtility.PrettyDisplay: pretty_display!
-using PkgUtility.UniversalConstants: M_H₂O, T₀, ρ_H₂O
+using PkgUtility.UniversalConstants: M_H₂O, T₀, ρ_H₂O, energy_to_photon
 using ProgressMeter: @showprogress
 using Statistics: mean
 
@@ -25,10 +25,11 @@ using ..SPAC: dull_aux!, initialize_spac!, prescribe_air!, prescribe_soil!, pres
 include("type/param-func-mapper.jl");
 
 include("quantity/beta.jl");
+include("quantity/co2.jl");
 include("quantity/et.jl");
 include("quantity/gpp.jl");
-include("quantity/npp.jl");
 include("quantity/ocs.jl");
+include("quantity/par.jl");
 
 include("setting/saving.jl");
 include("setting/setting.jl");

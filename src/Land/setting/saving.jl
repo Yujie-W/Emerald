@@ -1,5 +1,6 @@
 """ Default saving settings """
 DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
+    ParameterFunctionMapper("APAR", false, APAR, []),
     ParameterFunctionMapper("BETA", false, BETA, []),
     ParameterFunctionMapper("CNPP", false, CNPP, []),
     ParameterFunctionMapper("ET", true, ET, []),
@@ -7,6 +8,9 @@ DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
     ParameterFunctionMapper("ET_VEGE", false, ET_VEGE, []),
     ParameterFunctionMapper("GPP", true, GPP, []),
     ParameterFunctionMapper("OCS", false, OCS, []),
+    ParameterFunctionMapper("PCI", false, LEAF_PCI, []),
+    ParameterFunctionMapper("PAR", false, PAR, []),
+    ParameterFunctionMapper("PPAR", false, PPAR, []),
 ];
 
 
@@ -19,8 +23,6 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
     # Modeled leaf temperature
             "MOD_T_LEAF"  => false,
             "MOD_T_MMM"   => false,
-    # Modeled CO2, H2O, and OCS fluxes
-            "PCI"         => false,
     # SIF (default is false)
             "SIF683"      => false,
             "SIF740"      => true,
