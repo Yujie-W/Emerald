@@ -61,7 +61,5 @@ include("quantity/goes.jl");
 include("quantity/heat_fluxes.jl");
 include("quantity/hydraulics.jl");
 
-include("quantity/modis.jl");
-
 
 end; # module

@@ -12,7 +12,7 @@ using ProgressMeter: @showprogress
 using Statistics: mean
 
 using ..Namespace
-using ..Namespace: BulkSPAC, MultiLayerCanopy, ReferenceSpectra, SPACConfig
+using ..Namespace: BulkSPAC, MultiLayerCanopy, ReferenceSpectra, ShortwaveRadiation, SPACConfig
 using ..PlantHydraulics: flow_out
 using ..StomatalModels: read_β
 # using ..SPAC: SAP_VOLUME

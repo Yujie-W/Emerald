@@ -8,14 +8,6 @@ const MODIS_BAND_7 = [2105, 2155];  # SWIR
 const MODIS_BANDS = [MODIS_BAND_1, MODIS_BAND_2, MODIS_BAND_3, MODIS_BAND_4, MODIS_BAND_5, MODIS_BAND_6, MODIS_BAND_7];
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to these functions
-# General
-#     2024-Jul-10: add function to compute MODIS band reflectance (general)
-#     2024-Jul-10: add option to weight the reflectance based on radiation
-#
-#######################################################################################################################################################################################################
 """
 
     MODIS_BAND_REFL(config::SPACConfig{FT}, spac::BulkSPAC{FT}, i::Int; steps::Int = 4) where {FT}
@@ -47,15 +39,6 @@ MODIS_BLUE(config::SPACConfig{FT}, spac::BulkSPAC{FT}; weighted::Bool = false) w
 MODIS_SWIR(config::SPACConfig{FT}, spac::BulkSPAC{FT}; weighted::Bool = false) where {FT} = MODIS_BAND_REFL(config, spac, 7; steps = 5, weighted = weighted);
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to these functions
-# General
-#     2022-Jun-13: add function to compute MODIS EVI, EVI2, LSWI, NDVI, and NIRv
-#     2022-Oct-19: add function to compute MODIS BLUE, NIR, RED, and NIRv radiance
-#     2024-Jul-10: add option to weight the reflectance based on radiation
-#
-#######################################################################################################################################################################################################
 """
 
     MODIS_EVI(config::SPACConfig{FT}, spac::BulkSPAC{FT}; weighted::Bool = false) where {FT}
