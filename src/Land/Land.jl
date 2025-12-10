@@ -24,13 +24,12 @@ using ..SPAC: dull_aux!, initialize_spac!, prescribe_air!, prescribe_soil!, pres
 
 include("type/param-func-mapper.jl");
 
-include("quantity/beta.jl");
-include("quantity/co2.jl");
-include("quantity/et.jl");
-include("quantity/gpp.jl");
-include("quantity/ocs.jl");
-include("quantity/par.jl");
-include("quantity/sif.jl");
+include("quantity/flux.jl");
+include("quantity/PAR.jl");
+include("quantity/SIF.jl");
+include("quantity/stomata.jl");
+include("quantity/VI.jl");
+include("quantity/yield.jl");
 
 include("setting/saving.jl");
 include("setting/setting.jl");

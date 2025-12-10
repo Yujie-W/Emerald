@@ -16,6 +16,10 @@ DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
     ParameterFunctionMapper("SIF747", false, TROPOMI_SIF747, []),
     ParameterFunctionMapper("SIF757", false, OCO2_SIF759, []),
     ParameterFunctionMapper("SIF771", false, OCO2_SIF770, []),
+    ParameterFunctionMapper("ΦD", false, ΦD, []),
+    ParameterFunctionMapper("ΦF", false, ΦF, []),
+    ParameterFunctionMapper("ΦN", false, ΦN, []),
+    ParameterFunctionMapper("ΦP", false, ΦP, []),
     ParameterFunctionMapper("ΣSIF", false, ΣSIF, []),
     ParameterFunctionMapper("ΣSIF_CHL", false, ΣSIF_CHL, []),
     ParameterFunctionMapper("ΣSIF_LEAF", false, ΣSIF_LEAF, []),
@@ -31,16 +35,6 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
     # Modeled leaf temperature
             "MOD_T_LEAF"  => false,
             "MOD_T_MMM"   => false,
-    # SIF (default is false)
-            "SIF683"      => false,
-            "SIF740"      => true,
-            "SIF757"      => false,
-            "SIF771"      => false,
-            "ΣSIF"        => false,
-            "ΣSIF_CHL"    => false,
-            "ΣSIF_LEAF"   => false,
-            "MOD_ΦDΦN"    => false,
-            "MOD_ΦFΦP"    => false,
     # VI (default is false)
             "NDVI"        => false,
             "EVI"         => false,
