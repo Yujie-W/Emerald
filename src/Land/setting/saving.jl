@@ -1,17 +1,4 @@
 # All keys start with "MOD_" results in multiple outputs, deal with them carefully in the prepare_df.jl file
-""" General structure to map parameter saving settings to functions """
-mutable struct ParameterFunctionMapper
-    "Parameter name"
-    name::String
-    "Whether to save the parameter"
-    to_save::Bool
-    "Function to compute the parameter"
-    func::Function
-    "Extra parameters to be passed to the function other than config and spac"
-    params::Vector
-end;
-
-
 """ Default saving settings """
 DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
     ParameterFunctionMapper("BETA", false, BETA, []),
