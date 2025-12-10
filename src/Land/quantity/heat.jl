@@ -164,3 +164,24 @@ SHORTWAVE_OUT(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     return (sw_out' * dwl) / 1000
 );
+
+
+"""
+
+    T_SKIN(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+    T_SKIN(spac::BulkSPAC{FT}) where {FT}
+
+Return the skin temperature, given
+- `config` `SPACConfig` configuration
+- `spac` `BulkSPAC` SPAC
+
+"""
+function T_SKIN end;
+
+T_SKIN(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = T_SKIN(spac);
+
+T_SKIN(spac::BulkSPAC{FT}) where {FT} = (
+    lw_out = LONGWAVE_OUT(spac);
+
+    return FT( (lw_out / FT(0.98) / K_STEFAN()) ^ (1/4) )
+);
