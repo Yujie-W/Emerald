@@ -1,4 +1,26 @@
 # All keys start with "MOD_" results in multiple outputs, deal with them carefully in the prepare_df.jl file
+""" General structure to map parameter saving settings to functions """
+mutable struct ParameterFunctionMapper
+    "Parameter name"
+    name::String
+    "Whether to save the parameter"
+    to_save::Bool
+    "Function to compute the parameter"
+    func::Function
+    "Extra parameters to be passed to the function other than config and spac"
+    params::Vector
+end;
+
+
+""" Default saving settings """
+DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
+    ParameterFunctionMapper("BETA", false, BETA, []),
+    ParameterFunctionMapper("GPP", true, GPP, []),
+    ParameterFunctionMapper("OCS", false, OCS, []),
+];
+
+
+#=
 const DEFAULT_SAVING_DICT = Dict{String,Bool}(
     # Modeled soil water content and temperature
             "MOD_SWC"     => true,
@@ -8,12 +30,9 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
             "MOD_T_LEAF"  => false,
             "MOD_T_MMM"   => false,
     # Modeled CO2, H2O, and OCS fluxes
-            "BETA"        => false,
             "CNPP"        => false,
             "ET_SOIL"     => true,
             "ET_VEGE"     => true,
-            "GPP"         => true,
-            "OCS"         => false,
             "PCI"         => false,
     # SIF (default is false)
             "SIF683"      => false,
@@ -45,35 +64,39 @@ const DEFAULT_SAVING_DICT = Dict{String,Bool}(
     # Modeled heat fluxes
             "MOD_HEAT"    => true,
 );
+=#
 
 
 """
 
     parameters_to_save(varnames::Vector{String} = String[]; save_all::Bool = false)
 
-Create a saving dict for simulation, given
+Create a saving setting vector for simulation, given
 - `varnames` Vector of variable names to be saved
 - `save_all` If true, set all parameters to be saved
 
 """
 function parameters_to_save(varnames::Vector{String} = String[]; save_all::Bool = false)
-    new_dict = deepcopy(DEFAULT_SAVING_DICT);
+    new_vec = deepcopy(DEFAULT_SAVING_SETTINGS);
 
     # If save_all is true, set all values to true
     if save_all
-        for (k, _) in new_dict
-            new_dict[k] = true;
+        for lpm in new_vec
+            lpm.to_save = true;
         end;
 
-        return new_dict
+        return new_vec
     end;
 
     # otherwise, loop through the varnames and set the corresponding keys to true
     for vn in varnames
-        if haskey(new_dict, vn)
-            new_dict[vn] = true;
+        for lpm in new_vec
+            if lpm.name == vn
+                lpm.to_save = true;
+                break;
+            end;
         end;
     end;
 
-    return new_dict
+    return new_vec
 end;

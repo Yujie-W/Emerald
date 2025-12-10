@@ -23,9 +23,9 @@ function land_model_settings(; mode::String = "testing")
         # SPAC settings
         "C3_MODEL"             => "FvCB",
 
-        # threading settings
+        # threading settings (default is 75% of CPU cores)
         "GRID_THREADS"         => 40,
-        "SIMU_THREADS"         => 480,
+        "SIMU_THREADS"         => Int(ceil(Sys.CPU_THREADS * 0.75)),
         "REMOVE_WHEN_DONE"     => true,
 
         # saving settings related to the global NetCDF output files

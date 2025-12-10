@@ -16,7 +16,7 @@
 #     2023-Sep-09: save the quantum yields when saving the simulation results
 #     2023-Sep-11: save the integrated SIF when saving the simulation results
 #     2024-Mar-07: add fields for saved parameters and simulations in the dataframe (as grid_weather_driver did not do it)
-#     2024-Aug-05: use saving_dict to determine which variables to save
+#     2024-Aug-05: use saving_setting to determine which variables to save
 #     2024-Aug-05: save plant hydraulics health status
 #     2024-Aug-05: add method to use externally prepared config, spac, and weather driver (will process the dataframe to NamedTuple)
 #     2024-Aug-05: add option to save soil water potential
@@ -50,7 +50,7 @@ simulation!(settings::Union{Dict,OrderedDict}, gmd::Dict{String,Any}; saving::Un
     driver = site_driver_tuple(gmd, wd);
     results = site_result_tuple(spac, wd, sd);
 
-    return simulation!(config, spac, driver, results; saving = saving, saving_dict = sd, selection = settings["SIMULATION_PERIOD"], δt = settings["TIME_STEP"]);
+    return simulation!(config, spac, driver, results; saving = saving, saving_setting = sd, selection = settings["SIMULATION_PERIOD"], δt = settings["TIME_STEP"]);
 );
 
 simulation!(config::SPACConfig{FT},
@@ -58,7 +58,7 @@ simulation!(config::SPACConfig{FT},
             driver::NamedTuple,
             results::NamedTuple;
             saving::Union{Nothing,String} = nothing,
-            saving_dict::Dict{String,Bool} = parameters_to_save(),
+            saving_setting::Vector{ParameterFunctionMapper} = parameters_to_save(),
             selection = :,
             δt::Number = 3600) where {FT} = (
     (; MESSAGE_LEVEL) = config.CONFIG_INFO;
@@ -69,16 +69,16 @@ simulation!(config::SPACConfig{FT},
     # iterate through the time steps
     if MESSAGE_LEVEL == 0
         for idx in eachindex(driver.FDOY)[selection]
-            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict, δt = δt);
+            simulation!(config, spac, driver, results, idx; saving_setting = saving_setting, δt = δt);
         end;
     elseif MESSAGE_LEVEL == 1
         @showprogress for idx in eachindex(driver.FDOY)[selection]
-            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict, δt = δt);
+            simulation!(config, spac, driver, results, idx; saving_setting = saving_setting, δt = δt);
         end;
     elseif MESSAGE_LEVEL == 2
         for idx in eachindex(driver.FDOY)[selection]
             print("\rRunning simulation for $(lpad(idx,4," ")) out of $(lpad(length(driver.FDOY),4," "))...");
-            simulation!(config, spac, driver, results, idx; saving_dict = saving_dict, δt = δt);
+            simulation!(config, spac, driver, results, idx; saving_setting = saving_setting, δt = δt);
         end;
     else
         error("MESSAGE_LEVEL should be 0, 1, or 2");
@@ -95,7 +95,7 @@ simulation!(config::SPACConfig{FT},
             driver::NamedTuple,
             results::NamedTuple,
             ind::Int;
-            saving_dict::Dict{String,Bool} = parameters_to_save(),
+            saving_setting::Vector{ParameterFunctionMapper} = parameters_to_save(),
             δt::Number = 3600) where {FT} = (
     # prescribe parameters
     prescribe!(config, spac, driver, ind);
@@ -105,7 +105,7 @@ simulation!(config::SPACConfig{FT},
     push_t_history!(config, spac);
 
     # save the results
-    save_fields!(config, spac, results, ind; saving_dict = saving_dict);
+    save_fields!(config, spac, results, ind; saving_setting = saving_setting);
 
     return nothing
 );

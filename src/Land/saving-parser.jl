@@ -1,41 +1,47 @@
 """
 
-    save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::NamedTuple, ind::Int; saving_dict::Dict{String,Bool} = SAVING_DICT) where {FT}
+    save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::NamedTuple, ind::Int; saving_setting::Dict{String,Bool} = SAVING_DICT) where {FT}
 
 Save the fields to the NamedTuple, given
 - `config` the configuration of the SPAC model
 - `spac` the SPAC model
 - `results` the NamedTuple to store the outputs
 - `ind` the index of the row in the DataFrame
-- `saving_dict` the dictionary to store the settings for saving the outputs
+- `saving_setting` the dictionary to store the settings for saving the outputs
 
 """
-function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::NamedTuple, ind::Int; saving_dict::Dict{String,Bool} = parameters_to_save()) where {FT}
+function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::NamedTuple, ind::Int; saving_setting::Vector{ParameterFunctionMapper} = parameters_to_save()) where {FT}
+    for lpm in saving_setting
+        if lpm.to_save
+            results[Symbol(lpm.name)][ind] = lpm.func(config, spac, lpm.params...);
+        end;
+    end;
+    #=
     # save the profiles of the soil
-    if saving_dict["MOD_SWC"]
+    if saving_setting["MOD_SWC"]
         for i in eachindex(spac.soils)
             results[Symbol("MOD_SWC_$i")][ind] = spac.soils[i].state.θ;
             results[Symbol("MOD_SWC_ICE_$i")][ind] = spac.soils[i].state.θ_ice;
         end;
     end;
-    if saving_dict["MOD_P_SOIL"]
+    if saving_setting["MOD_P_SOIL"]
         for i in eachindex(spac.soils)
             results[Symbol("MOD_P_SOIL_$i")][ind] = spac.soils[i].s_aux.ψ;
         end;
     end;
-    if saving_dict["MOD_T_SOIL"]
+    if saving_setting["MOD_T_SOIL"]
         for i in eachindex(spac.soils)
             results[Symbol("MOD_T_SOIL_$i")][ind] = spac.soils[i].s_aux.t;
         end;
     end;
 
     # save the profiles of the leaves
-    if saving_dict["MOD_T_LEAF"]
+    if saving_setting["MOD_T_LEAF"]
         for i in eachindex(spac.plant.leaves)
             results[Symbol("MOD_T_LEAF_$i")][ind] = spac.plant.leaves[i].energy.s_aux.t;
         end;
     end;
-    if saving_dict["MOD_T_MMM"]
+    if saving_setting["MOD_T_MMM"]
         sum_t::FT = 0;
         min_t::FT = 999;
         max_t::FT = 0;
@@ -50,99 +56,90 @@ function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::Named
     end;
 
     # save the CO2 and H2O fluxes
-    if saving_dict["BETA"]
-        results.BETA[ind] = BETA(spac);
-    end;
-    if saving_dict["CNPP"]
+    if saving_setting["CNPP"]
         results.CNPP[ind] = CNPP(spac);
     end;
-    if saving_dict["ET_SOIL"]
+    if saving_setting["ET_SOIL"]
         results.ET_SOIL[ind] = ET_SOIL(spac);
     end;
-    if saving_dict["ET_VEGE"]
+    if saving_setting["ET_VEGE"]
         results.ET_VEGE[ind] = ET_VEGE(spac);
     end;
-    if saving_dict["GPP"]
-        results.GPP[ind] = GPP(spac);
-    end;
-    if saving_dict["OCS"]
-        results.OCS[ind] = OCS(spac);
-    end;
-    if saving_dict["PCI"]
+    if saving_setting["PCI"]
         results.PCI[ind] = LEAF_PCI(spac);
     end;
 
     # save the SIF (PAR and PPAR) if there is sunlight (0 otherwise)
     daytime = PAR(config, spac) > 0;
-    if saving_dict["SIF683"]
+    if saving_setting["SIF683"]
         results.SIF683[ind] = daytime ? TROPOMI_SIF683(config, spac) : 0;
     end;
-    if saving_dict["SIF740"]
+    if saving_setting["SIF740"]
         results.SIF740[ind] = daytime ? TROPOMI_SIF740(config, spac) : 0;
     end;
-    if saving_dict["SIF757"]
+    if saving_setting["SIF757"]
         results.SIF757[ind] = daytime ? OCO2_SIF759(config, spac) : 0;
     end;
-    if saving_dict["SIF771"]
+    if saving_setting["SIF771"]
         results.SIF771[ind] = daytime ? OCO2_SIF770(config, spac) : 0;
     end;
-    if saving_dict["ΣSIF"]
+    if saving_setting["ΣSIF"]
         results.ΣSIF[ind] = daytime ? ΣSIF(config, spac) : 0;
     end;
-    if saving_dict["ΣSIF_CHL"]
+    if saving_setting["ΣSIF_CHL"]
         results.ΣSIF_CHL[ind] = daytime ? ΣSIF_CHL(config, spac) : 0;
     end;
-    if saving_dict["ΣSIF_LEAF"]
+    if saving_setting["ΣSIF_LEAF"]
         results.ΣSIF_LEAF[ind] = daytime ? ΣSIF_LEAF(config, spac) : 0;
     end;
-    if saving_dict["PAR"]
+    if saving_setting["PAR"]
         results.PAR[ind] = daytime ? PAR(config, spac) : 0;
     end;
-    if saving_dict["APAR"]
+    if saving_setting["APAR"]
         results.APAR[ind] = daytime ? APAR(spac) : 0;
     end;
-    if saving_dict["PPAR"]
+    if saving_setting["PPAR"]
         results.PPAR[ind] = daytime ? PPAR(spac) : 0;
     end;
 
     # save the VI (and phi) if there is sunlight
     if daytime
-        if saving_dict["MOD_ΦDΦN"]
+        if saving_setting["MOD_ΦDΦN"]
             results.ΦF[ind],results.ΦP[ind] = ΦD_ΦN(spac);
         end;
-        if saving_dict["MOD_ΦFΦP"]
+        if saving_setting["MOD_ΦFΦP"]
             results.ΦF[ind],results.ΦP[ind] = ΦF_ΦP(spac);
         end;
-        if saving_dict["NDVI"]
+        if saving_setting["NDVI"]
             results.NDVI[ind] = MODIS_NDVI(config, spac);
         end;
-        if saving_dict["EVI"]
+        if saving_setting["EVI"]
             results.EVI[ind] = MODIS_EVI(config, spac);
         end;
-        if saving_dict["NIRvI"]
+        if saving_setting["NIRvI"]
             results.NIRvI[ind] = MODIS_NIRv(config, spac);
         end;
-        if saving_dict["NIRvR"]
+        if saving_setting["NIRvR"]
             results.NIRvR[ind] = MODIS_NIRvR(config, spac);
         end;
     end;
 
     # save the plant health status
-    if saving_dict["C_POOL"]
+    if saving_setting["C_POOL"]
         results.C_POOL[ind] = spac.plant.pool.c_pool;
     end;
-    if saving_dict["K_PLANT"]
+    if saving_setting["K_PLANT"]
         results.K_PLANT[ind] = K_PLANT(spac);
     end;
-    if saving_dict["K_ROOT_STEM"]
+    if saving_setting["K_ROOT_STEM"]
         results.K_ROOT_STEM[ind] = K_PLANT(spac; include_leaf = false);
     end;
-    if saving_dict["MOD_P_LEAF"]
+    if saving_setting["MOD_P_LEAF"]
         for i in eachindex(spac.plant.leaves)
             results[Symbol("MOD_P_LEAF_$i")][ind] = spac.plant._leaf_shedded ? NaN : spac.plant.leaves[i].xylem.auxil.pressure[end];
         end;
     end;
-    if saving_dict["MOD_P_MMM"]
+    if saving_setting["MOD_P_MMM"]
         if spac.plant._leaf_shedded
             results.MOD_P_L_MAX[ind]  = NaN;
             results.MOD_P_L_MEAN[ind] = NaN;
@@ -161,18 +158,18 @@ function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::Named
             results.MOD_P_L_MIN[ind]  = min_p;
         end;
     end;
-    if saving_dict["P_JUNCTION"]
+    if saving_setting["P_JUNCTION"]
         results.P_JUNCTION[ind] = spac.plant.junction.s_aux.pressure;
     end;
-    if saving_dict["SAP_VOLUME"]
+    if saving_setting["SAP_VOLUME"]
         results.SAP_VOLUME[ind] = SAP_VOLUME(spac);
     end;
-    if saving_dict["TRUNK_AREA"]
+    if saving_setting["TRUNK_AREA"]
         results.TRUNK_AREA[ind] = spac.plant.trunk.xylem.trait.area;
     end;
 
     # save the heat fluxes
-    if saving_dict["MOD_HEAT"]
+    if saving_setting["MOD_HEAT"]
         results.MOD_LATENT_HEAT[ind] = LATENT_HEAT(spac);
         results.MOD_SENSIBLE_HEAT[ind] = SENSIBLE_HEAT(spac);
         results.MOD_NET_LONGWAVE[ind] = NET_LONGWAVE(spac);
@@ -180,6 +177,7 @@ function save_fields!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, results::Named
         results.MOD_LONGWAVE_OUT[ind] = LONGWAVE_OUT(spac);
         results.MOD_SHORTWAVE_OUT[ind] = SHORTWAVE_OUT(config, spac);
     end;
+    =#
 
     return nothing
 end;
