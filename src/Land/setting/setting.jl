@@ -22,6 +22,7 @@ function land_model_settings(; mode::String = "testing")
 
         # SPAC settings
         "C3_MODEL"             => "FvCB",
+        "MAX_LAI_LAYERING"     => true,
 
         # threading settings (default is 75% of CPU cores)
         "GRID_THREADS"         => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 40),

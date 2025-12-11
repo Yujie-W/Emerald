@@ -21,7 +21,7 @@ simulation!(settings::Union{Dict,OrderedDict}, gmd::Dict{String,Any}; saving::Un
     wd = grid_weather(WeatherDriverLabels(settings["WD_VERSION"], gmd["YEAR"]), gmd["LATITUDE"], gmd["LONGITUDE"]);
     sd = parameters_to_save(settings["VARIABLES_TO_SAVE"]);
     config = site_config(settings);
-    spac = site_spac(config, gmd);
+    spac = site_spac(config, gmd; lai_layer_strategy = settings["MAX_LAI_LAYERING"]);
     driver = site_driver_tuple(gmd, wd);
     results = site_result_tuple(spac, wd, sd);
 
