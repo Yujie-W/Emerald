@@ -10,7 +10,7 @@ function land_model_settings(; mode::String = "testing")
     settings = OrderedDict{String,Any}(
         # Emerald version
         "EMERALD_VERSION"      => "b01",
-        "CONFIG_TAG"           => "testing",
+        "CONFIG_TAG"           => mode,
 
         # general settings
         "FT"                   => Float64,
@@ -24,29 +24,50 @@ function land_model_settings(; mode::String = "testing")
         "C3_MODEL"             => "FvCB",
 
         # threading settings (default is 75% of CPU cores)
-        "GRID_THREADS"         => 40,
-        "SIMU_THREADS"         => Int(ceil(Sys.CPU_THREADS * 0.75)),
+        "GRID_THREADS"         => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 40),
+        "SIMU_THREADS"         => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 480),
         "REMOVE_WHEN_DONE"     => true,
 
         # saving settings related to the global NetCDF output files
-        "VARIABLES_TO_SAVE"    => String["GPP", "ET", "PCI", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"],
-        "VARIABLES_TO_COMBINE" => String["GPP", "ET", "PCI", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"],
+        "VARIABLES_TO_SAVE"    => String["GPP", "ET", "SIF740"],
+        "VARIABLES_TO_COMBINE" => String["GPP", "ET", "SIF740"],
 
         # testing settings (by default, run the model for 10 days in the middle of a year)
-        "SIMULATION_PERIOD"    => 4321:4344,
+        "SIMULATION_PERIOD"    => :,
     );
 
     # if mode is default
     if mode == "default"
-        settings["CONFIG_TAG"] = "default";
-        settings["SIMULATION_PERIOD"] = :;
+        return settings
+    end;
+
+    # if mode contains "testing"
+    if occursin("testing", mode)
+        settings["SIMULATION_PERIOD"] = 4321:4344;
+    end;
+
+    # if mode contains SIF (this is meant for Christoph's SIF experiments)
+    if occursin("SIF", mode)
+        for vn in ["PCI", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"]
+            if !(vn in settings["VARIABLES_TO_SAVE"])
+                push!(settings["VARIABLES_TO_SAVE"], vn);
+            end;
+            if !(vn in settings["VARIABLES_TO_COMBINE"])
+                push!(settings["VARIABLES_TO_COMBINE"], vn);
+            end;
+        end;
+        return settings
     end;
 
     # if mode is cytochrome
-    if mode == "cytochrome"
-        settings["CONFIG_TAG"] = "cytochrome";
+    if occursin("cytochrome", mode)
         settings["C3_MODEL"] = "J3B";
-        settings["SIMULATION_PERIOD"] = :;
+        return settings
+    end;
+
+    # default is testing, and print warning if unrecognized mode
+    if mode != "testing"
+        @warn "Unrecognized mode '$mode'; use 'testing' settings...";
     end;
 
     return settings
