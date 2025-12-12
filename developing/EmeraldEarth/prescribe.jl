@@ -55,8 +55,8 @@ prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gmd::Dict{Stri
     spac.canopy.sun_geometry.state.saa = saa;
     spac.canopy.sun_geometry.state.sza = (wd_dict["RAD_DIR"] + wd_dict["RAD_DIF"] > 10) ? min(sza, 88) : sza;
 
-    # update t_clm to make Vcmax25 and Jmax25 TD temperature dependent
-    prescribe_traits!(config, spac; t_clm = mean(spac.plant.memory.t_history));
+    # update t_acclim to make Vcmax25 and Jmax25 TD temperature dependent
+    prescribe_traits!(config, spac; t_acclim = mean(spac.plant.memory.t_history));
 
     # synchronize LAI, CHL, and CI
     iday = Int(floor(wd_dict["INDEX"] / 24)) + 1;
@@ -75,7 +75,7 @@ prescribe_gm_wd_data!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, gmd::Dict{Stri
 
         # prescribe leaf temperature from skin temperature
         @. spac.plant.memory.t_history = ss_dict["T_SKN"];
-        prescribe_traits!(config, spac; t_leaf = ss_dict["T_SKN"], t_clm = mean(spac.plant.memory.t_history));
+        prescribe_traits!(config, spac; t_leaf = ss_dict["T_SKN"], t_acclim = mean(spac.plant.memory.t_history));
     end;
 
     return nothing

@@ -66,7 +66,7 @@ function prescribe!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, driver::NamedTup
         initialize_spac!(config, spac);
     else
         # adjust optimum t based on 10 day moving average skin temperature
-        prescribe_traits!(config, spac; t_clm = mean(spac.plant.memory.t_history));
+        prescribe_traits!(config, spac; t_acclim = mean(spac.plant.memory.t_history));
     end;
 
     # update environmental conditions

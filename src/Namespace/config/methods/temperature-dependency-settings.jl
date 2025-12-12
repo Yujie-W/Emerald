@@ -46,7 +46,7 @@ VcmaxTDCLMC4(FT) = Q10PeakLTHT{FT}(Q_10 = 2.0, T_REF = T₂₅(FT), VAL_REF = Na
 ΓStarTDWang2024(FT) = Arrhenius{FT}(T_REF = T₂₅(FT), VAL_REF = 4.56, ΔHA = 11800.0);
 
 JmaxTDWang2024(FT, t::Number = T₂₅())  = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN   , ΔHA = 50000, ΔHD = 201000, ΔSV = 659.70 - 0.75 * (t - T₀(FT)));
-KqTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 300   , ΔHA = 21900, ΔHD = 232000, ΔSV = 700);
+KqTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 300   , ΔHA = 28500, ΔHD = 223500, ΔSV = 700);
 VcmaxTDWang2024(FT, t::Number = T₂₅()) = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = NaN   , ΔHA = 63000, ΔHD = 204000, ΔSV = 668.39 - 1.07 * (t - T₀(FT)));
-ηCTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 2*3/14, ΔHA = 21900, ΔHD = 232000, ΔSV = 700);
-ηLTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 3*3/14, ΔHA = 21900, ΔHD = 232000, ΔSV = 700);
+ηCTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 4*3/14, ΔHA = 28500, ΔHD = 223500, ΔSV = 700);
+ηLTDWang2024(FT)                       = ArrheniusPeak{FT}(T_REF = T₂₅(FT), VAL_REF = 3*3/14, ΔHA = 28500, ΔHD = 223500, ΔSV = 700);
