@@ -85,7 +85,7 @@ photosystem_electron_transport!(
 
     psa.e2c   = (p_i == Inf) ? (1 / pss.EFF_1) : (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
     psa.j_psi = colimited_rate(β * psa.v_qmax, ppar * (1 - psa.f_psii) * psa.ϕ_psi_max, config.METHODS.COLIMIT_J);
-    psa.η     = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
+    psa.η     = (p_i == Inf) ? (1 - psa.η_l / psa.η_c + 3 / pss.EFF_1 / psa.η_c) : (1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c);
     psa.j_pot = psa.j_psi / psa.η;
     psa.j     = psa.j_pot;
 
@@ -173,10 +173,13 @@ photosystem_electron_transport!(
     @. _j = ppar * (1 - psa.f_psii) * psa.ϕ_psi_max;
     colimited_rate!(β * psa.v_qmax, _j, psa.j_psi, config.METHODS.COLIMIT_J);
 
-    @. psa.η     = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
+    @. psa.η = 1 - psa.η_l / psa.η_c + (3 * p_i + 7 * psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star) / psa.η_c;
+    for i in eachindex(psa.η)
+        isnan(psa.η[i]) ? (psa.η[i] = 1 - psa.η_l / psa.η_c + 3 / pss.EFF_1 / psa.η_c) : nothing;
+    end;
     @. psa.j_pot = psa.j_psi / psa.η;
-    @. psa.j     = psa.j_pot;
-    @. psa.e2c   = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
+    @. psa.j = psa.j_pot;
+    @. psa.e2c = (p_i - psa.γ_star) / (pss.EFF_1 * p_i + pss.EFF_2 * psa.γ_star);
     for i in eachindex(psa.e2c)
         isnan(psa.e2c[i]) ? (psa.e2c[i] = 1 / pss.EFF_1) : nothing;
     end;

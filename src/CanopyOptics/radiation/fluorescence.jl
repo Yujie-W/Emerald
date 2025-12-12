@@ -195,8 +195,7 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         sl_θ² = local_lidf_weight(ϕ_sunlit, _COS²_Θ_INCL_AZI);
 
         if isnan(sl_S_)
-            println("\n\nasdfsafsdfsd sdfads");
-            @show local_lidf_weight(ϕ_sunlit, sun_geo.s_aux.fs_abs) ϕ_sunlit sun_geo.s_aux.fs_abs;
+            @show local_lidf_weight(ϕ_sunlit, sun_geo.s_aux.fs_abs) ϕ_shaded ϕ_sunlit sun_geo.s_aux.fs_abs;
             error("NaN detected in SIF weight computation");
         end;
 

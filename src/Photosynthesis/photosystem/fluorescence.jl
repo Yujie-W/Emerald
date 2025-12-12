@@ -345,6 +345,12 @@ photosystem_coefficients!(
     @. psa.ϕ_n = _ϕ_n1 * (1 - psa.f_psii) + _ϕ_n2 * psa.f_psii;
     @. psa.ϕ_p = ϕ_P1_a * (1 - psa.f_psii) + ϕ_P2_a * psa.f_psii;
 
+    if any(isnan.(psa.ϕ_f)) || any(isnan.(psa.ϕ_p))
+        println();
+        @show psa.a_g psa.η psa.e2c ppar psa.f_psii;
+        error("NaN detected in photosystem coefficients calculation");
+    end;
+
     return nothing
 );
 
