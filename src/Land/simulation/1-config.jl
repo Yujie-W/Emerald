@@ -29,11 +29,13 @@ function site_config(settings::Union{Dict,OrderedDict})
         config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3JmaxPi();
         config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = Namespace.ColimitJCLM(settings["FT"]);
+        config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}()
     elseif settings["C3_MODEL"] == "J3B"
         config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
         config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3VqmaxPi();
         config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = Namespace.SerialColimit{settings["FT"]}();
+        config.METHODS.FLUORESCENCE_METHOD = Namespace.CytochromeFluorescenceModel{settings["FT"]}()
     else
         pretty_display!("C3 photosynthesis model not recognized: $(settings["C3_MODEL"]), use testing setting instead...", "twarn");
     end;
