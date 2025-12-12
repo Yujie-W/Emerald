@@ -1,6 +1,6 @@
 """
 
-    site_result_tuple(spac::BulkSPAC{FT}, wd::Dict{String,Vector{FT}}, saving_setting::Vector{ParameterFunctionMapper}) where {FT}
+    site_result_tuple(spac::BulkSPAC{FT}, wd::Union{Dict{String,Vector{FT}},OrderedDict{String,Vector{FT}}}, saving_setting::Vector{ParameterFunctionMapper}) where {FT}
 
 Create a NamedTuple to store simulation results, given
 - `spac` the SPAC model
@@ -8,7 +8,7 @@ Create a NamedTuple to store simulation results, given
 - `saving_setting` the dictionary to store the settings for saving the outputs
 
 """
-function site_result_tuple(spac::BulkSPAC{FT}, wd::Dict{String,Vector{FT}}, saving_setting::Vector{ParameterFunctionMapper}) where {FT}
+function site_result_tuple(spac::BulkSPAC{FT}, wd::Union{Dict{String,Vector{FT}},OrderedDict{String,Vector{FT}}}, saving_setting::Vector{ParameterFunctionMapper}) where {FT}
     # length of the time series
     n = length(wd["FDOY"]);
 

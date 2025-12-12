@@ -1,7 +1,7 @@
 """
 
     simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; saving::Union{Nothing,String} = nothing)
-    simulation!(settings::Union{Dict,OrderedDict}, gmd::Dict{String,Any}; saving::Union{Nothing,String} = nothing)
+    simulation!(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict}; saving::Union{Nothing,String} = nothing)
 
 Run simulation on site level, given
 - `settings` Dictionary of settings
@@ -17,7 +17,7 @@ function simulation! end;
 simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; saving::Union{Nothing,String} = nothing) =
     simulation!(settings, grid_dict(LandDatasetLabels(settings["GM_VERSION"], year), lat, lon); saving = saving);
 
-simulation!(settings::Union{Dict,OrderedDict}, gmd::Dict{String,Any}; saving::Union{Nothing,String} = nothing) = (
+simulation!(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict}; saving::Union{Nothing,String} = nothing) = (
     wd = grid_weather(WeatherDriverLabels(settings["WD_VERSION"], gmd["YEAR"]), gmd["LATITUDE"], gmd["LONGITUDE"]);
     sd = parameters_to_save(settings["VARIABLES_TO_SAVE"]);
     config = site_config(settings);

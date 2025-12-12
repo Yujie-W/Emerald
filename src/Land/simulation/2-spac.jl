@@ -1,6 +1,6 @@
 """
 
-    site_spac(config::SPACConfig{FT}, gmd::Dict{String,Any}; lai_layer_strategy::Bool = true) where {FT}
+    site_spac(config::SPACConfig{FT}, gmd::Union{Dict,OrderedDict}; lai_layer_strategy::Bool = true) where {FT}
 
 Create a un-initialized SPAC using the data from a grid (CHL, VCMAX25, LAI, and CI are not prescribed as these changes with time), given
 - `config` Configurations for SPAC
@@ -8,7 +8,7 @@ Create a un-initialized SPAC using the data from a grid (CHL, VCMAX25, LAI, and 
 - `lai_layer_strategy` Whether to use LAI-based air layer strategy (default: true)
 
 """
-function site_spac(config::SPACConfig{FT}, gmd::Dict{String,Any}; lai_layer_strategy::Bool = true) where {FT}
+function site_spac(config::SPACConfig{FT}, gmd::Union{Dict,OrderedDict}; lai_layer_strategy::Bool = true) where {FT}
     # compute air layer bounds based on maximum LAI
     zc = max(FT(0.05), gmd["CANOPY_HEIGHT"]);
     air_bounds = if lai_layer_strategy
