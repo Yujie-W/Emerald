@@ -7,6 +7,7 @@ Create a dictionary of Emerald land settings, given
 
 """
 function land_model_settings(; mode::String = "testing")
+    # default settings
     settings = OrderedDict{String,Any}(
         # Emerald version
         "EMERALD_VERSION"      => "b01",
@@ -22,7 +23,7 @@ function land_model_settings(; mode::String = "testing")
 
         # SPAC settings
         "C3_MODEL"             => "FvCB",
-        "MAX_LAI_LAYERING"     => true,
+        "MAX_LAI_LAYERING"     => false,
 
         # threading settings (default is 75% of CPU cores)
         "GRID_THREADS"         => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 40),
@@ -49,6 +50,7 @@ function land_model_settings(; mode::String = "testing")
 
     # if mode contains SIF (this is meant for Christoph's SIF experiments)
     if occursin("SIF", mode)
+        settings["MAX_LAI_LAYERING"] = true;
         for vn in ["PCI", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"]
             if !(vn in settings["VARIABLES_TO_SAVE"])
                 push!(settings["VARIABLES_TO_SAVE"], vn);
@@ -57,12 +59,14 @@ function land_model_settings(; mode::String = "testing")
                 push!(settings["VARIABLES_TO_COMBINE"], vn);
             end;
         end;
+
         return settings
     end;
 
     # if mode is cytochrome
     if occursin("cytochrome", mode)
         settings["C3_MODEL"] = "J3B";
+
         return settings
     end;
 
