@@ -10,32 +10,31 @@ function land_model_settings(; mode::String = "testing")
     # default settings
     settings = OrderedDict{String,Any}(
         # Emerald version
-        "EMERALD_VERSION"      => "b01",
-        "CONFIG_TAG"           => mode,
+        "EMERALD_VERSION"   => "b01",
+        "CONFIG_TAG"        => mode,
 
         # general settings
-        "FT"                   => Float64,
-        "NX"                   => 1,
-        "GM_VERSION"           => "gm2",
-        "WD_VERSION"           => "wd1",
-        "MESSAGE_LEVEL"        => 0,
-        "TIME_STEP"            => 3600,
+        "FT"                => Float64,
+        "NX"                => 1,
+        "GM_VERSION"        => "gm2",
+        "WD_VERSION"        => "wd1",
+        "MESSAGE_LEVEL"     => 0,
+        "TIME_STEP"         => 3600,
 
         # SPAC settings
-        "C3_MODEL"             => "FvCB",
-        "MAX_LAI_LAYERING"     => false,
+        "C3_MODEL"          => "FvCB",
+        "MAX_LAI_LAYERING"  => false,
 
         # threading settings (default is 75% of CPU cores)
-        "GRID_THREADS"         => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 40),
-        "SIMU_THREADS"         => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 480),
-        "REMOVE_WHEN_DONE"     => true,
+        "GRID_THREADS"      => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 40),
+        "SIMU_THREADS"      => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 480),
+        "REMOVE_WHEN_DONE"  => true,
 
         # saving settings related to the global NetCDF output files
-        "VARIABLES_TO_SAVE"    => String["GPP", "ET", "SIF740"],
-        "VARIABLES_TO_COMBINE" => String["GPP", "ET", "SIF740"],
+        "VARIABLES_TO_SAVE" => String["GPP", "ET", "SIF740"],
 
         # testing settings (by default, run the model for 10 days in the middle of a year)
-        "SIMULATION_PERIOD"    => :,
+        "SIMULATION_PERIOD" => :,
     );
 
     # if mode is default
@@ -54,9 +53,6 @@ function land_model_settings(; mode::String = "testing")
         for vn in ["PCI", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"]
             if !(vn in settings["VARIABLES_TO_SAVE"])
                 push!(settings["VARIABLES_TO_SAVE"], vn);
-            end;
-            if !(vn in settings["VARIABLES_TO_COMBINE"])
-                push!(settings["VARIABLES_TO_COMBINE"], vn);
             end;
         end;
 
