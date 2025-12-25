@@ -1,15 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Jul-20: add alias function to fit A-Ci curve
-#     2024-Jul-23: add support to C3CytoInfApTrait
-#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
-#     2024-Aug-06: move constructor to Namespace
-#     2024-Oct-03: remove options for Rd and Γ_star fitting
-#     2025-Jul-30: improved curve fitting algorithm
-#
-#######################################################################################################################################################################################################
 """
 
     aci_fit!(config::SPACConfig{FT},

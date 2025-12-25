@@ -1,19 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Jul-19: add functions to fit A-Ci curve
-#     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
-#     2024-Jul-23: add support to C3CytoInfApTrait
-#     2024-Jul-27: fit Γ_star as well for C3 models
-#     2024-Jul-27: add initial guess to option
-#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
-#     2024-Aug-06: make initial_guess mandatory
-#     2024-Oct-03: customize the initial guess for C3 models
-#     2024-Oct-04: use max(1, p_1 - j_1) to avoid negative b6f guess
-#     2025-Jul-30: improved curve fitting algorithm
-#
-#######################################################################################################################################################################################################
 """
 
     aci_fit(config::SPACConfig{FT},
@@ -424,15 +408,6 @@ aci_fit(config::SPACConfig{FT},
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Jul-20: add functions to fit A-Ci curve with removing outliers
-#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
-#     2024-Aug-06: make initial_guess mandatory
-#
-#######################################################################################################################################################################################################
 """
 
     aci_fit_exclude_outliter(

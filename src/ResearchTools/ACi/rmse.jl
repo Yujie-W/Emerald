@@ -1,16 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Jul-19: add functions to obtain RMSE of A-Ci curve
-#     2024-Jul-22: add support to C3CLM, C3FvCB, and C3VJP
-#     2024-Jul-27: add option to turn on/off Rd fitting
-#     2024-Jul-27: fit Γ_star as well for C3 models
-#     2024-Aug-01: use GeneralC3Trait and GeneralC4Trait
-#     2024-Oct-03: remove options for Rd and Γ_star fitting
-#     2025-Jul-30: improved curve fitting algorithm
-#
-#######################################################################################################################################################################################################
 """
 
     aci_rmse(config::SPACConfig{FT},

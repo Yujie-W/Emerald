@@ -27,5 +27,8 @@ include("SPAC/SPAC.jl");
 # depends on SPAC
 include("Land/Land.jl");
 
+# research tools
+include("ResearchTools/ResearchTools.jl");
+
 
 end # module Emerald
