@@ -7,7 +7,7 @@
 #     2025-Feb-09: generalize the double adding method to work for both Fluspect and Dualspect
 #
 #######################################################################################################################################################################################################
-leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, mtd::FluspectFluorescenceSpectra) where {FT} = (
+leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}, mtd::FluspectFluorescenceSpectra) where {FT} = (
     (; ρ_leaf, τ_leaf, ρ_interface_θ, τ_interface_θ, ρ_interface_21, τ_interface_21, f_sife, mat_b, mat_f) = bio.auxil;
 
     # update the mat_b and mat_f based on the doubling adding method (which has been generalized to work for both Fluspect and Dualspect)

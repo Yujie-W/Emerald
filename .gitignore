@@ -28,5 +28,6 @@ Manifest.toml
 *.gif
 *.jld2
 *.jpg
+*.mem
 *.nc
 *.png

@@ -7,7 +7,7 @@
 #     2025-May-20: fix an bug related to the temporary mat_b and mat_f for the two layers
 #
 #######################################################################################################################################################################################################
-leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, mtd::DualspectFluorescenceSpectra) where {FT} = (
+leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}, mtd::DualspectFluorescenceSpectra) where {FT} = (
     (; IΛ_SIF, IΛ_SIFE) = config.CONSTANTS.SPECTRA;
     (; ρ_interface_θ, τ_interface_θ, ρ_interface_12, τ_interface_12, ρ_interface_21, τ_interface_21, f_sife) = bio.auxil;
     (; ρ_interface_12_eff, τ_interface_12_eff, ρ_interface_21_eff, τ_interface_21_eff) = bio.auxil;

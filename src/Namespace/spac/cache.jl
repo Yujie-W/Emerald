@@ -22,6 +22,10 @@ Base.@kwdef struct SPACCache{FT}
     "Cache vector with the length of Layer"
     cache_layer_1::Vector{FT}
 
+    # Cache vectors with the length of SIF
+    "Cache vector with the length of SIF"
+    cache_sif_1::Vector{FT}
+
     # Cache vectors with the length of SIFE
     "Cache vector with the length of SIFE"
     cache_sife_1::Vector{FT}
@@ -109,6 +113,8 @@ SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_ppar::Union{Int, 
 
     return SPACCache{FT}(
                 cache_layer_1 = zeros(FT, dim_layer),
+
+                cache_sif_1 = zeros(FT, dim_sif),
 
                 cache_sife_1 = zeros(FT, dim_sife),
                 cache_sife_2 = zeros(FT, dim_sife),

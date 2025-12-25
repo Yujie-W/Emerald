@@ -8,7 +8,7 @@ using PkgUtility.UniversalConstants: M_H₂O, ρ_H₂O
 
 using ..Namespace: DualspectFluorescenceSpectra, FluspectFluorescenceSpectra, PlatespectFluorescenceSpectra
 using ..Namespace: LeafBio, LeafBioState, LeafBioTrait
-using ..Namespace: BulkSPAC, SPACConfig
+using ..Namespace: BulkSPAC, SPACCache, SPACConfig
 
 
 include("prospect/interface.jl");
@@ -48,14 +48,14 @@ Update the interface, sublayer, layer, and leaf level reflectance and transmitta
 - `θ` Incoming radiation angle
 
 """
-function leaf_spectra!(config::SPACConfig{FT}, bio::LeafBio{FT}, lwc::FT, θ::FT = FT(40)) where {FT}
+function leaf_spectra!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}, lwc::FT, θ::FT = FT(40)) where {FT}
     leaf_interface_ρ_τ!(config, bio, θ);
     leaf_sublayer_f_τ!(config, bio, lwc);
     leaf_layer_ρ_τ!(bio);
     leaf_ρ_τ!(bio);
 
     if config.FEATURES.ENABLE_SIF
-        leaf_sif_matrices!(config, bio);
+        leaf_sif_matrices!(config, bio, cache);
     end;
 
     return nothing
@@ -90,7 +90,7 @@ plant_leaf_spectra!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     # update all leaves
     for leaf in spac.plant.leaves
-        leaf_spectra!(config, leaf.bio, leaf.capacitor.state.v_storage);
+        leaf_spectra!(config, leaf.bio, spac.cache, leaf.capacitor.state.v_storage);
     end;
 
     return nothing

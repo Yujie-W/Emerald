@@ -209,7 +209,7 @@ end;
 #######################################################################################################################################################################################################
 """
 
-    leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, N::Int) where {FT}
+    leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}, N::Int) where {FT}
 
 Update the SIF conversion matrix of the leaf, given
 - `config` SPAC configuration
@@ -219,9 +219,9 @@ Update the SIF conversion matrix of the leaf, given
 """
 function leaf_sif_matrices! end;
 
-leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}) where {FT} = leaf_sif_matrices!(config, bio, config.METHODS.FLUORESCENCE_SPECTRA_METHOD);
+leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}) where {FT} = leaf_sif_matrices!(config, bio, cache, config.METHODS.FLUORESCENCE_SPECTRA_METHOD);
 
-leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, ::PlatespectFluorescenceSpectra) where {FT} = (
+leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}, ::PlatespectFluorescenceSpectra) where {FT} = (
     (; SPECTRA) = config.CONSTANTS;
     (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 
@@ -236,14 +236,17 @@ leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, ::PlatespectFluores
     k_all_sif_1 = view(bio.auxil.k_all_1, IΛ_SIF);
     k_all_sif_2 = view(bio.auxil.k_all_2, IΛ_SIF);
     ϕ           = bio.auxil._ϕ_sif;
+    factor      = cache.cache_sif_1;
+
     for i in eachindex(IΛ_SIFE)
         ii = IΛ_SIFE[i];
 
         # read the SIF emission spectrum
         ϕ .= view(Φ_PS, IΛ_SIF);
 
-        #  tune SIF emission PDF based on the SIF excitation wavelength
-        factor = 1 ./ (1 .+ exp.(-Λ_SIF ./ 10) .* exp(Λ_SIFE[ii] / 10));
+        # tune SIF emission PDF based on the SIF excitation wavelength
+        expsife = exp(Λ_SIFE[ii] / 10);
+        @. factor = 1 / (1 + exp(-Λ_SIF / 10) * expsife);
         ϕ .*= factor;
 
         # rescale ϕ
