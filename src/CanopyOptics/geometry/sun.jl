@@ -54,18 +54,18 @@ sun_geometry_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, cansa
     sunsa.ks_stem = cansa.p_incl_stem' * sunsa.ks_incl * sunsa.ci_sun;
 
     # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
-    sunsa.sdb_leaf = 0;
-    sunsa.sdf_leaf = 0;
-    sunsa.sdb_stem = 0;
-    sunsa.sdf_stem = 0;
+    sunsa.w_sdb_leaf = 0;
+    sunsa.w_sdf_leaf = 0;
+    sunsa.w_sdb_stem = 0;
+    sunsa.w_sdf_stem = 0;
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(sunst.sza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = Θ_INCL[i] / 180;
-        sunsa.sdb_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
-        sunsa.sdf_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
-        sunsa.sdb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
-        sunsa.sdf_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
+        sunsa.w_sdb_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
+        sunsa.w_sdf_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
+        sunsa.w_sdb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
+        sunsa.w_sdf_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
     end;
 
     # compute the sunlit leaf fraction
@@ -156,10 +156,10 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         leaf = leaves[ilf];
         ρ_leaf = mask_effective ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
         τ_leaf = mask_effective ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.auxil.sdb_leaf .* ρ_leaf .+ sun_geo.auxil.sdf_leaf .* τ_leaf;
-        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.auxil.sdf_leaf .* ρ_leaf .+ sun_geo.auxil.sdb_leaf .* τ_leaf;
-        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.auxil.sdb_stem .* SPECTRA.ρ_STEM;
-        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.auxil.sdf_stem .* SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.auxil.w_sdb_leaf .* ρ_leaf .+ sun_geo.auxil.w_sdf_leaf .* τ_leaf;
+        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.auxil.w_sdf_leaf .* ρ_leaf .+ sun_geo.auxil.w_sdb_leaf .* τ_leaf;
+        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.auxil.w_sdb_stem .* SPECTRA.ρ_STEM;
+        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.auxil.w_sdf_stem .* SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)

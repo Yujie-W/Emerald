@@ -98,23 +98,23 @@ sensor_geometry_aux!(
     sensa.ko_stem = trtax.p_incl_stem' * sensa.ko_incl * sensa.ci_sensor;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    sensa.dob_leaf = 0;
-    sensa.dof_leaf = 0;
-    sensa.dob_stem = 0;
-    sensa.dof_stem = 0;
+    sensa.w_dob_leaf = 0;
+    sensa.w_dof_leaf = 0;
+    sensa.w_dob_stem = 0;
+    sensa.w_dof_stem = 0;
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = Θ_INCL[i] / 180;
-        sensa.dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * trtax.p_incl_leaf[i];
-        sensa.dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * trtax.p_incl_leaf[i];
-        sensa.dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * trtax.p_incl_stem[i];
-        sensa.dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * trtax.p_incl_stem[i];
+        sensa.w_dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * trtax.p_incl_leaf[i];
+        sensa.w_dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * trtax.p_incl_leaf[i];
+        sensa.w_dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * trtax.p_incl_stem[i];
+        sensa.w_dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * trtax.p_incl_stem[i];
     end;
-    sensa.sob_leaf = trtax.p_incl_leaf' * sensa.sb_incl;
-    sensa.sof_leaf = trtax.p_incl_leaf' * sensa.sf_incl;
-    sensa.sob_stem = trtax.p_incl_stem' * sensa.sb_incl;
-    sensa.sof_stem = trtax.p_incl_stem' * sensa.sf_incl;
+    sensa.w_sob_leaf = trtax.p_incl_leaf' * sensa.sb_incl;
+    sensa.w_sof_leaf = trtax.p_incl_leaf' * sensa.sf_incl;
+    sensa.w_sob_stem = trtax.p_incl_stem' * sensa.sb_incl;
+    sensa.w_sof_stem = trtax.p_incl_stem' * sensa.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -223,12 +223,12 @@ function sensor_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         τ_leaf_dif = mask_effective ? view(sen_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
         ρ_leaf_dir = mask_effective ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
         τ_leaf_dir = mask_effective ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.auxil.dob_leaf .* ρ_leaf_dif .+ sen_geo.auxil.dof_leaf .* τ_leaf_dif;
-        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.auxil.dof_leaf .* ρ_leaf_dif .+ sen_geo.auxil.dob_leaf .* τ_leaf_dif;
-        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.auxil.sob_leaf .* ρ_leaf_dir .+ sen_geo.auxil.sof_leaf .* τ_leaf_dir;
-        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.auxil.dob_stem .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.auxil.dof_stem .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.auxil.sob_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.auxil.w_dob_leaf .* ρ_leaf_dif .+ sen_geo.auxil.w_dof_leaf .* τ_leaf_dif;
+        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.auxil.w_dof_leaf .* ρ_leaf_dif .+ sen_geo.auxil.w_dob_leaf .* τ_leaf_dif;
+        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.auxil.w_sob_leaf .* ρ_leaf_dir .+ sen_geo.auxil.w_sof_leaf .* τ_leaf_dir;
+        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.auxil.w_dob_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.auxil.w_dof_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.auxil.w_sob_stem .* SPECTRA.ρ_STEM;
     end;
 
     return nothing

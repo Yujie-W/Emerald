@@ -56,17 +56,17 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     "Clumping index from solar zenith angle"
     ci_sun::FT = 1
 
-    # Scattering coefficients for leaf
+    # Scattering coefficients weights for leaf
     "Backward direct->diffuse scatter weight (leaf)"
-    sdb_leaf::FT = 0
+    w_sdb_leaf::FT = 0
     "Forward direct->diffuse scatter weight (leaf)"
-    sdf_leaf::FT = 0
+    w_sdf_leaf::FT = 0
 
-    # Scattering coefficients for stem
+    # Scattering coefficients weights for stem
     "Backward direct->diffuse scatter weight (stem)"
-    sdb_stem::FT = 0
+    w_sdb_stem::FT = 0
     "Forward direct->diffuse scatter weight (stem)"
-    sdf_stem::FT = 0
+    w_sdf_stem::FT = 0
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(sza) at different inclination angles"

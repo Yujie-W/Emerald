@@ -59,18 +59,18 @@ canopy_structure_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, c
     end;
 
     # compute the weighed average of the leaf inclination angle distribution
-    cansa.ddb_leaf = 0;
-    cansa.ddf_leaf = 0;
-    cansa.ddb_stem = 0;
-    cansa.ddf_stem = 0;
+    cansa.w_ddb_leaf = 0;
+    cansa.w_ddf_leaf = 0;
+    cansa.w_ddb_stem = 0;
+    cansa.w_ddf_stem = 0;
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = Θ_INCL[i] / 180;
-        cansa.ddb_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
-        cansa.ddf_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
-        cansa.ddb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
-        cansa.ddf_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
+        cansa.w_ddb_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
+        cansa.w_ddf_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
+        cansa.w_ddb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
+        cansa.w_ddf_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
     end;
 
     return nothing
@@ -144,10 +144,10 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         leaf = spac.plant.leaves[ilf];
         ρ_leaf = mask_effective ? view(can_str.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
         τ_leaf = mask_effective ? view(can_str.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
-        can_str.auxil.ddb_leaf[:,irt] .= can_str.auxil.ddb_leaf .* ρ_leaf .+ can_str.auxil.ddf_leaf .* τ_leaf;
-        can_str.auxil.ddf_leaf[:,irt] .= can_str.auxil.ddf_leaf .* ρ_leaf .+ can_str.auxil.ddb_leaf .* τ_leaf;
-        can_str.auxil.ddb_stem[:,irt] .= can_str.auxil.ddb_stem .* SPECTRA.ρ_STEM;
-        can_str.auxil.ddf_stem[:,irt] .= can_str.auxil.ddf_stem .* SPECTRA.ρ_STEM;
+        can_str.auxil.ddb_leaf[:,irt] .= can_str.auxil.w_ddb_leaf .* ρ_leaf .+ can_str.auxil.w_ddf_leaf .* τ_leaf;
+        can_str.auxil.ddf_leaf[:,irt] .= can_str.auxil.w_ddf_leaf .* ρ_leaf .+ can_str.auxil.w_ddb_leaf .* τ_leaf;
+        can_str.auxil.ddb_stem[:,irt] .= can_str.auxil.w_ddb_stem .* SPECTRA.ρ_STEM;
+        can_str.auxil.ddf_stem[:,irt] .= can_str.auxil.w_ddf_stem .* SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -207,10 +207,10 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         δlai = can_str.trait.δlai[irt];
         δsai = can_str.trait.δsai[irt];
         δpai = δlai + δsai;
-        σ_leaf_b = can_str.auxil.ddb_leaf * leaf.bio.trait.ρ_lw + can_str.auxil.ddf_leaf * leaf.bio.trait.τ_lw;
-        σ_leaf_f = can_str.auxil.ddf_leaf * leaf.bio.trait.ρ_lw + can_str.auxil.ddb_leaf * leaf.bio.trait.τ_lw;
-        σ_stem_b = can_str.auxil.ddb_stem * leaf.bio.trait.ρ_lw;
-        σ_stem_f = can_str.auxil.ddf_stem * leaf.bio.trait.ρ_lw;
+        σ_leaf_b = can_str.auxil.w_ddb_leaf * leaf.bio.trait.ρ_lw + can_str.auxil.w_ddf_leaf * leaf.bio.trait.τ_lw;
+        σ_leaf_f = can_str.auxil.w_ddf_leaf * leaf.bio.trait.ρ_lw + can_str.auxil.w_ddb_leaf * leaf.bio.trait.τ_lw;
+        σ_stem_b = can_str.auxil.w_ddb_stem * leaf.bio.trait.ρ_lw;
+        σ_stem_f = can_str.auxil.w_ddf_stem * leaf.bio.trait.ρ_lw;
         k_ρ_x = (σ_leaf_b * δlai .+ σ_stem_b * δsai) ./ δpai;
         k_τ_x = (σ_leaf_f * δlai .+ σ_stem_f * δsai) ./ δpai;
         τ_dd_lw = can_str.auxil.τ_dd_isotropic[irt];

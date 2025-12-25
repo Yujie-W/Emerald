@@ -53,25 +53,25 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     "Clumping index from sensor zenith angle"
     ci_sensor::FT = 1.0
 
-    # Scattering coefficients
+    # Scattering coefficients weights
     "Backward diffuse->observer scatter weight (leaf)"
-    dob_leaf::FT = 0
+    w_dob_leaf::FT = 0
     "Forward diffuse->observer scatter weight (leaf)"
-    dof_leaf::FT = 0
+    w_dof_leaf::FT = 0
     "Backward direct->observer scatter weight (leaf)"
-    sob_leaf::FT = 0
+    w_sob_leaf::FT = 0
     "Forward direct->observer scatter weight (leaf)"
-    sof_leaf::FT = 0
+    w_sof_leaf::FT = 0
 
-    # Scattering coefficients for stems
+    # Scattering coefficients weights for stems
     "Backward diffuse->observer scatter weight (stem)"
-    dob_stem::FT = 0
+    w_dob_stem::FT = 0
     "Forward diffuse->observer scatter weight (stem)"
-    dof_stem::FT = 0
+    w_dof_stem::FT = 0
     "Backward direct->observer scatter weight (stem)"
-    sob_stem::FT = 0
+    w_sob_stem::FT = 0
     "Forward direct->observer scatter weight (stem)"
-    sof_stem::FT = 0
+    w_sof_stem::FT = 0
 
     # Extinction coefficient related (for different inclination angles)
     "cos(inclination) * cos(vza) at different inclination angles"
