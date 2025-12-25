@@ -29,16 +29,16 @@ sensor_geometry_aux!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} =
     sensor_geometry_aux!(config, spac.canopy, min(FT(0.5), spac.plant.leaves[1].bio.trait.width / (spac.plant.zs[2] - spac.plant.zs[1])));
 
 sensor_geometry_aux!(config::SPACConfig{FT}, can::MultiLayerCanopy{FT}, lw2ch::FT) where {FT} =
-    sensor_geometry_aux!(config, can.structure.trait, can.structure.t_aux, can.sun_geometry.state, can.sun_geometry.s_aux, can.sensor_geometry.state, can.sensor_geometry.s_aux, lw2ch);
+    sensor_geometry_aux!(config, can.structure.trait, can.structure.auxil, can.sun_geometry.state, can.sun_geometry.auxil, can.sensor_geometry.state, can.sensor_geometry.auxil, lw2ch);
 
 sensor_geometry_aux!(
             config::SPACConfig{FT},
             trait::CanopyStructureTrait{FT},
-            t_aux::CanopyStructureTDAuxil{FT},
+            trtax::CanopyStructureAuxil{FT},
             sunst::SunGeometryState{FT},
-            sunsa::SunGeometrySDAuxil{FT},
+            sunsa::SunGeometryAuxil{FT},
             senst::SensorGeometryState{FT},
-            sensa::SensorGeometrySDAuxil{FT},
+            sensa::SensorGeometryAuxil{FT},
             lw2ch::FT) where {FT} = (
     # if none of REF or SIF is enabled, or sza > 89, or LAI+SAI <= 0, do nothing
     if (!config.FEATURES.ENABLE_REF && !config.FEATURES.ENABLE_SIF) || sunst.sza > 89 || (trait.lai <= 0 && trait.sai <= 0)
@@ -94,8 +94,8 @@ sensor_geometry_aux!(
         sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
         sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
     end;
-    sensa.ko_leaf = t_aux.p_incl_leaf' * sensa.ko_incl * sensa.ci_sensor;
-    sensa.ko_stem = t_aux.p_incl_stem' * sensa.ko_incl * sensa.ci_sensor;
+    sensa.ko_leaf = trtax.p_incl_leaf' * sensa.ko_incl * sensa.ci_sensor;
+    sensa.ko_stem = trtax.p_incl_stem' * sensa.ko_incl * sensa.ci_sensor;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
     sensa.dob_leaf = 0;
@@ -106,15 +106,15 @@ sensor_geometry_aux!(
         f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = Θ_INCL[i] / 180;
-        sensa.dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl_leaf[i];
-        sensa.dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl_leaf[i];
-        sensa.dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * t_aux.p_incl_stem[i];
-        sensa.dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * t_aux.p_incl_stem[i];
+        sensa.dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * trtax.p_incl_leaf[i];
+        sensa.dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * trtax.p_incl_leaf[i];
+        sensa.dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * trtax.p_incl_stem[i];
+        sensa.dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * trtax.p_incl_stem[i];
     end;
-    sensa.sob_leaf = t_aux.p_incl_leaf' * sensa.sb_incl;
-    sensa.sof_leaf = t_aux.p_incl_leaf' * sensa.sf_incl;
-    sensa.sob_stem = t_aux.p_incl_stem' * sensa.sb_incl;
-    sensa.sof_stem = t_aux.p_incl_stem' * sensa.sf_incl;
+    sensa.sob_leaf = trtax.p_incl_leaf' * sensa.sb_incl;
+    sensa.sof_leaf = trtax.p_incl_leaf' * sensa.sf_incl;
+    sensa.sob_stem = trtax.p_incl_stem' * sensa.sb_incl;
+    sensa.sof_stem = trtax.p_incl_stem' * sensa.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -134,7 +134,7 @@ sensor_geometry_aux!(
     kocipai = sensa.ko_leaf * trait.lai + sensa.ko_stem * trait.sai;
     for i in eachindex(trait.δlai)
         kociipai = sensa.ko_leaf * trait.δlai[i] + sensa.ko_stem * trait.δsai[i];
-        sensa.p_sensor[i] = sensa.ci_sensor / kociipai * (exp(kocipai * t_aux.x_bnds[i]) - exp(kocipai * t_aux.x_bnds[i+1]));
+        sensa.p_sensor[i] = sensa.ci_sensor / kociipai * (exp(kocipai * trtax.x_bnds[i]) - exp(kocipai * trtax.x_bnds[i+1]));
     end;
     sensa.p_sensor_soil = exp(-kocipai);
 
@@ -149,7 +149,7 @@ sensor_geometry_aux!(
     pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
 
     for i in eachindex(trait.δlai)
-        sensa.p_sun_sensor[i] = quadgk(pso, t_aux.x_bnds[i+1], t_aux.x_bnds[i]; rtol = 1e-4)[1] / (t_aux.x_bnds[i] - t_aux.x_bnds[i+1]);
+        sensa.p_sun_sensor[i] = quadgk(pso, trtax.x_bnds[i+1], trtax.x_bnds[i]; rtol = 1e-4)[1] / (trtax.x_bnds[i] - trtax.x_bnds[i+1]);
         sensa.p_sun_sensor[i] = min(sensa.p_sun_sensor[i], sensa.p_sensor[i], sunsa.p_sunlit[i]);
     end;
 
@@ -202,7 +202,7 @@ function sensor_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     if mask_effective
         ρ_2 = spac.cache.cache_wl_1;
         τ_2 = spac.cache.cache_wl_2;
-        n_eff = 1 / sen_geo.s_aux.ci_sensor;
+        n_eff = 1 / sen_geo.auxil.ci_sensor;
         for irt in 1:n_layer
             ilf = n_layer + 1 - irt;
             leaf = leaves[ilf];
@@ -223,12 +223,12 @@ function sensor_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         τ_leaf_dif = mask_effective ? view(sen_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
         ρ_leaf_dir = mask_effective ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
         τ_leaf_dir = mask_effective ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.s_aux.dob_leaf .* ρ_leaf_dif .+ sen_geo.s_aux.dof_leaf .* τ_leaf_dif;
-        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.s_aux.dof_leaf .* ρ_leaf_dif .+ sen_geo.s_aux.dob_leaf .* τ_leaf_dif;
-        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.s_aux.sob_leaf .* ρ_leaf_dir .+ sen_geo.s_aux.sof_leaf .* τ_leaf_dir;
-        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.s_aux.dob_stem .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.s_aux.dof_stem .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.s_aux.sob_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.auxil.dob_leaf .* ρ_leaf_dif .+ sen_geo.auxil.dof_leaf .* τ_leaf_dif;
+        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.auxil.dof_leaf .* ρ_leaf_dif .+ sen_geo.auxil.dob_leaf .* τ_leaf_dif;
+        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.auxil.sob_leaf .* ρ_leaf_dir .+ sen_geo.auxil.sof_leaf .* τ_leaf_dir;
+        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.auxil.dob_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.auxil.dof_stem .* SPECTRA.ρ_STEM;
+        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.auxil.sob_stem .* SPECTRA.ρ_STEM;
     end;
 
     return nothing

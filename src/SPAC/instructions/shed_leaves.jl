@@ -71,7 +71,7 @@ shed_leaves!(spac::BulkSPAC{FT}, lai_diff::FT) where {FT} = (
         leaf = leaves[ilf];
         leaf.xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
         w_to_junc -= sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage;
-        e_to_junc -= sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage * CP_L_MOL(FT) * leaf.energy.s_aux.t;
+        e_to_junc -= sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage * CP_L_MOL(FT) * leaf.energy.auxil.t;
     end;
 
     # update the junction state variables

@@ -33,7 +33,7 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
     if can_str.trait.lai <= 0 && can_str.trait.sai <= 0
         # 1. compute longwave radiation out from the leaves and soil
         can_str.auxil.lw_layer .= 0;
-        r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.s_aux.t ^ 4;
+        r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.auxil.t ^ 4;
 
         # 2. account for the longwave emission from bottom to up
         can_str.auxil.emitꜜ .= 0;
@@ -56,14 +56,14 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
         stem = branches[ilf];
-        # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.s_aux.t ^ 4;
+        # can_str.auxil.lw_layer[i] = K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[i] * leaf.energy.auxil.t ^ 4;
         f_leaf = can_str.trait.δlai[irt] / (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]);
         f_stem = 1 - f_leaf;
-        can_str.auxil.lw_layer_leaf[irt] = leaf.energy.s_aux.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
-        can_str.auxil.lw_layer_stem[irt] = stem.energy.s_aux.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
+        can_str.auxil.lw_layer_leaf[irt] = leaf.energy.auxil.t ^ 4 * f_leaf * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
+        can_str.auxil.lw_layer_stem[irt] = stem.energy.auxil.t ^ 4 * f_stem * K_STEFAN(FT) * can_str.auxil.ϵ_lw_layer[irt];
         can_str.auxil.lw_layer[irt] = can_str.auxil.lw_layer_leaf[irt] + can_str.auxil.lw_layer_stem[irt];
     end;
-    r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.s_aux.t ^ 4;
+    r_lw_soil = K_STEFAN(FT) * (1 - sbulk.trait.ρ_lw) * top_soil.auxil.t ^ 4;
 
     # 2. account for the longwave emission from bottom to up
     can_str.auxil.emitꜛ[end] = r_lw_soil;

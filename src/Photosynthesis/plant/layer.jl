@@ -84,14 +84,14 @@ leaf_photosynthesis!(
             β::FT;
             rd_only::Bool = false) where {FT} = (
     if rd_only
-        photosystem_temperature_dependence!(config, leaf.photosystem, air, leaf.energy.s_aux.t);
+        photosystem_temperature_dependence!(config, leaf.photosystem, air, leaf.energy.auxil.t);
         leaf.flux.auxil.a_n .= -leaf.photosystem.auxil.r_d;
         leaf.flux.auxil.a_g .= 0;
 
         return nothing
     end;
 
-    photosystem_temperature_dependence!(config, leaf.photosystem, air, leaf.energy.s_aux.t);
+    photosystem_temperature_dependence!(config, leaf.photosystem, air, leaf.energy.auxil.t);
     photosystem_electron_transport!(config, cache, leaf.photosystem, leaf.flux.auxil.ppar, leaf.flux.auxil.p_CO₂_i; β = β);
     rubisco_limited_rate!(config, cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
     light_limited_rate!(config, cache, leaf.photosystem, air, leaf.flux.auxil.g_CO₂; β = β);
@@ -99,8 +99,8 @@ leaf_photosynthesis!(
     colimit_photosynthesis!(config, leaf.photosystem; β = β);
 
     # update CO₂ partial pressures at the leaf surface and internal airspace (evaporative front)
-    leaf.flux.auxil.p_CO₂_i .= air.s_aux.ps[2] .- leaf.photosystem.auxil.a_n ./ leaf.flux.auxil.g_CO₂   .* air.state.p_air .* FT(1e-6);
-    leaf.flux.auxil.p_CO₂_s .= air.s_aux.ps[2] .- leaf.photosystem.auxil.a_n ./ leaf.flux.auxil.g_CO₂_b .* air.state.p_air .* FT(1e-6);
+    leaf.flux.auxil.p_CO₂_i .= air.auxil.ps[2] .- leaf.photosystem.auxil.a_n ./ leaf.flux.auxil.g_CO₂   .* air.state.p_air .* FT(1e-6);
+    leaf.flux.auxil.p_CO₂_s .= air.auxil.ps[2] .- leaf.photosystem.auxil.a_n ./ leaf.flux.auxil.g_CO₂_b .* air.state.p_air .* FT(1e-6);
 
     # update leaf ETR again to ensure that j_pot and e_to_c are correct for C3CytochromeModel
     photosystem_electron_transport!(config, cache, leaf.photosystem, leaf.flux.auxil.ppar, leaf.flux.auxil.p_CO₂_i; β = β);

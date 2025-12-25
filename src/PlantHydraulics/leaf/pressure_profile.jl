@@ -33,12 +33,12 @@ function leaf_pressure_profile!(config::SPACConfig{FT}, leaf::Union{CanopyLayer{
 
     # run the pressure profile calculation only if xylem area > 0
     leaf.xylem.auxil.pressure[1] = p_dos;
-    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, cache, leaf.energy.s_aux.t);
-    xylem_pressure_profile!(leaf.xylem, leaf.energy.s_aux.t);
+    leaf.xylem.auxil.e_crit = critical_flow(config, leaf.xylem, cache, leaf.energy.auxil.t);
+    xylem_pressure_profile!(leaf.xylem, leaf.energy.auxil.t);
     extraxylary_pressure_profile!(leaf);
 
     # if leaf xylem end pressure is less than the critical pressure, set the leaf to be disconnected (but not shedding)
-    f_st = relative_surface_tension(leaf.energy.s_aux.t);
+    f_st = relative_surface_tension(leaf.energy.auxil.t);
     p = leaf.xylem.auxil.pressure[end] / f_st;
     k = relative_xylem_k(leaf.xylem.trait.vc, p);
     if k <= config.FEATURES.KR_THRESHOLD && config.FEATURES.ALLOW_LEAF_SHEDDING

@@ -94,7 +94,7 @@ light_limited_rate!(
     c = pss.EFF_1;
     d = pss.EFF_2 * psa.γ_star;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
 
     qa = c * f;
@@ -135,7 +135,7 @@ light_limited_rate!(
     c = eff_1;
     d = eff_2 * psa.γ_star;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
 
     qa = c * f;
@@ -217,7 +217,7 @@ light_limited_rate!(
     a = psa.j;
     c = pss.EFF_1;
     d = pss.EFF_2 * psa.γ_star;
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
     @. b = psa.j * psa.γ_star;
     @. f = air.state.p_air / g_lc * FT(1e-6);
@@ -269,7 +269,7 @@ light_limited_rate!(
     a  = psa.j_psi;
     c  = eff_1;
     d  = eff_2 * psa.γ_star;
-    p  = air.s_aux.ps[2];
+    p  = air.auxil.ps[2];
     r  = β * psa.r_d;
     @. b = psa.j_psi * psa.γ_star;
     @. f = air.state.p_air / g_lc * FT(1e-6);

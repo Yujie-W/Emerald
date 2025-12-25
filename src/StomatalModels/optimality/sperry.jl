@@ -28,7 +28,7 @@
     dkde  = (dedp2 - dedp1) / δe;
 
     # compute maximum A
-    f_dif = relative_diffusive_coefficient(leaf.energy.s_aux.t);
+    f_dif = relative_diffusive_coefficient(leaf.energy.auxil.t);
     g_max = leaf.flux.trait.g_limits[2] * f_dif;
 
     # use the cache vars

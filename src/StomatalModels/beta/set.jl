@@ -68,7 +68,7 @@ function β_factor! end;
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
 
 β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
-    f_st = relative_surface_tension(leaf.energy.s_aux.t);
+    f_st = relative_surface_tension(leaf.energy.auxil.t);
 
     leaf.flux.auxil.β = β_factor(β.FUNC, relative_xylem_k(leaf.xylem.trait.vc, leaf.xylem.auxil.pressure[end] / f_st));
 
@@ -82,7 +82,7 @@ function β_factor! end;
     denom = 0;
     betas = false;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].s_aux.k);
+        beta = β_factor(β.FUNC, soils[i].auxil.k);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;
@@ -126,7 +126,7 @@ function β_factor! end;
     denom = 0;
     betas = false;
     for i in eachindex(roots)
-        beta = β_factor(β.FUNC, soils[i].s_aux.ψ);
+        beta = β_factor(β.FUNC, soils[i].auxil.ψ);
         f_in = flow_in(roots[i]);
         kmax = f_in > 0 ? roots[i].xylem.state.asap * roots[i].xylem.trait.k_max / roots[i].xylem.trait.l : 0;
         norm += beta * kmax;

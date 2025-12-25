@@ -18,7 +18,7 @@ Determine whether to grow new xylem or recover the old one (function-wise, not r
 """
 function recovery_or_growth end;
 
-recovery_or_growth(organ::Union{Root{FT}, Stem{FT}}, c_mol::FT) where {FT} = recovery_or_growth(organ.xylem, c_mol, organ.energy.s_aux.t);
+recovery_or_growth(organ::Union{Root{FT}, Stem{FT}}, c_mol::FT) where {FT} = recovery_or_growth(organ.xylem, c_mol, organ.energy.auxil.t);
 
 recovery_or_growth(xylem::XylemHydraulics{FT}, c_mol::FT, t::FT) where {FT} = (
     f_st = relative_surface_tension(t);

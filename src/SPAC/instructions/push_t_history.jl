@@ -18,7 +18,7 @@ function push_t_history!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     # compute the mean temperature of the leaves
     sum_t::FT = 0;
     for l in spac.plant.leaves
-        sum_t += l.energy.s_aux.t;
+        sum_t += l.energy.auxil.t;
     end;
     mean_t = sum_t / length(spac.plant.leaves);
 

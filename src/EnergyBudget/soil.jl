@@ -42,7 +42,7 @@ function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
         soils[i+1].auxil.∂e∂t += sbulk.auxil.q_layers[i];
 
         # if flow from upper to lower is positive, use temperature from upper layer; otherwise, use temperature from lower layer
-        t = sbulk.auxil.q[i] >= 0 ? soils[i].s_aux.t : soils[i+1].s_aux.t;
+        t = sbulk.auxil.q[i] >= 0 ? soils[i].auxil.t : soils[i+1].auxil.t;
         soils[i  ].auxil.∂e∂t -= sbulk.auxil.q[i] * CP_L_MOL(FT) * (t - T₀(FT));
         soils[i+1].auxil.∂e∂t += sbulk.auxil.q[i] * CP_L_MOL(FT) * (t - T₀(FT));
     end;
@@ -51,29 +51,29 @@ function soil_energy_flow!(spac::BulkSPAC{FT}) where {FT}
     # update the energy for diffusion from top soil to the first air layer
     δn1 = sbulk.auxil.dndt[1,3];
     δn4 = sbulk.auxil.dndt[1,1] + sbulk.auxil.dndt[1,2] + sbulk.auxil.dndt[1,4] + sbulk.auxil.dndt[1,5];
-    t = δn1 > 0 ? soils[1].s_aux.t : air.s_aux.t;
+    t = δn1 > 0 ? soils[1].auxil.t : air.auxil.t;
     soils[1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * (t - T₀(FT));
-    t = δn4 > 0 ? soils[1].s_aux.t : air.s_aux.t;
+    t = δn4 > 0 ? soils[1].auxil.t : air.auxil.t;
     soils[1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * (t - T₀(FT));
     # compute the latent heat here, but the actual heat fluxes are updated in the water condensation and evaporation function call
     # TODO: fix these later
-    soils[1].auxil.∂e∂t_le = -δn1 * M_H₂O(FT) * latent_heat_vapor(soils[1].s_aux.t);
+    soils[1].auxil.∂e∂t_le = -δn1 * M_H₂O(FT) * latent_heat_vapor(soils[1].auxil.t);
 
     # update the diffusion among soil layers
     N = length(sbulk.auxil.q);
     for i in 1:N
         δn1 = sbulk.auxil.dndt[i+1,3];
         δn4 = sbulk.auxil.dndt[i+1,1] + sbulk.auxil.dndt[i+1,2] + sbulk.auxil.dndt[i+1,4] + sbulk.auxil.dndt[i+1,5];
-        t = δn1 > 0 ? soils[i+1].s_aux.t : soils[i].s_aux.t;
+        t = δn1 > 0 ? soils[i+1].auxil.t : soils[i].auxil.t;
         soils[i  ].auxil.∂e∂t += δn1 * CP_V_MOL(FT) * (t - T₀(FT));
         soils[i+1].auxil.∂e∂t -= δn1 * CP_V_MOL(FT) * (t - T₀(FT));
-        t = δn4 > 0 ? soils[i+1].s_aux.t : soils[i].s_aux.t;
+        t = δn4 > 0 ? soils[i+1].auxil.t : soils[i].auxil.t;
         soils[i  ].auxil.∂e∂t += δn4 * CP_D_MOL(FT) * (t - T₀(FT));
         soils[i+1].auxil.∂e∂t -= δn4 * CP_D_MOL(FT) * (t - T₀(FT));
     end;
 
     # TODO: assume a 0.2 mol m⁻² s⁻¹ heat conductance between the first air layer and the first soil layer
-    soils[1].auxil.∂e∂t_sh = 0.2 * CP_D_MOL(FT) * (air.s_aux.t - soils[1].s_aux.t);
+    soils[1].auxil.∂e∂t_sh = 0.2 * CP_D_MOL(FT) * (air.auxil.t - soils[1].auxil.t);
     soils[1].auxil.∂e∂t += soils[1].auxil.∂e∂t_sh;
 
     return nothing

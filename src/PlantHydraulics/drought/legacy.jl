@@ -73,14 +73,14 @@ update_legacy!(
             config::SPACConfig{FT},
             spac::BulkSPAC{FT}) where {FT} = (
     for r in spac.plant.roots
-        update_legacy!(config, r.xylem, r.energy.s_aux.t);
+        update_legacy!(config, r.xylem, r.energy.auxil.t);
     end;
-    update_legacy!(config, spac.plant.trunk.xylem, spac.plant.trunk.energy.s_aux.t);
+    update_legacy!(config, spac.plant.trunk.xylem, spac.plant.trunk.energy.auxil.t);
     for s in spac.plant.branches
-        update_legacy!(config, s.xylem, s.energy.s_aux.t);
+        update_legacy!(config, s.xylem, s.energy.auxil.t);
     end;
     for l in spac.plant.leaves
-        update_legacy!(config, l.xylem, l.energy.s_aux.t);
+        update_legacy!(config, l.xylem, l.energy.auxil.t);
     end;
 
     return nothing

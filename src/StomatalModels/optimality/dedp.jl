@@ -22,8 +22,8 @@ Return the marginal hydraulic conductance, given
 function ∂E∂P(leaf::CanopyLayer{FT}, flow::FT; δe::FT = FT(1e-7)) where {FT}
     δe = max(δe, FT(1e-7));
 
-    p1 = xylem_end_pressure(leaf.xylem, flow, leaf.energy.s_aux.t);
-    p2 = xylem_end_pressure(leaf.xylem, flow + δe, leaf.energy.s_aux.t);
+    p1 = xylem_end_pressure(leaf.xylem, flow, leaf.energy.auxil.t);
+    p2 = xylem_end_pressure(leaf.xylem, flow + δe, leaf.energy.auxil.t);
     dedp = -δe / (p2 - p1);
 
     return dedp

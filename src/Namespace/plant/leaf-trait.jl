@@ -1,3 +1,4 @@
+#=
 """
 Struct that contains the trait and state variables.
 """
@@ -38,3 +39,4 @@ Base.@kwdef mutable struct LeafTraitsStates{FT<:AbstractFloat}
     "Broadband thermal transmission, related to blackbody emittance `[-]`"
     τ_lw::FT = 0.01
 end;
+=#

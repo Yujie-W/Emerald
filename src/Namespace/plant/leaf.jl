@@ -1,3 +1,4 @@
+#=
 """
 Struct that contains leaf traits and associated auxiliary vairables
 """
@@ -12,3 +13,4 @@ Base.@kwdef mutable struct LeafBio{FT<:AbstractFloat}
 end;
 
 LeafBio(config::SPACConfig{FT}) where {FT} = return LeafBio{FT}(auxil = LeafBioAuxil(config));
+=#

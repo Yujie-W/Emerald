@@ -152,7 +152,7 @@ product_limited_rate!(
     a = air.state.p_air;
     g = FT(1e6) * g_lc;
     k = β * psa.k_pep_clm * pst.v_cmax25;
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
 
     p_i = (g * p + a * r) / (a * k + g);
@@ -172,7 +172,7 @@ product_limited_rate!(
     a = β * psa.v_pmax;
     d = psa.k_pep;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
 
     qa = f;
@@ -248,7 +248,7 @@ product_limited_rate!(
 
     a = air.state.p_air;
     k = β * psa.k_pep_clm * pst.v_cmax25;
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
     @. g = FT(1e6) * g_lc;
 
@@ -274,7 +274,7 @@ product_limited_rate!(
 
     a = β * psa.v_pmax;
     d = psa.k_pep;
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
     @. f = air.state.p_air / g_lc * FT(1e-6);
 

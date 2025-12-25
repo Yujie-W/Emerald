@@ -51,25 +51,25 @@ end;
 #
 # Changes to this struct
 # General
-#     2024-Feb-25: add struct CanopyStructureTDAuxil
-#     2024-Mar-01: add field kd for diffuse radiation extinction coefficient (purely unabsorbed, not after reabsorption)
-#     2024-Sep-04: separate leaf and stem optical properties
-#     2024-Sep-07: add field ci_diffuse
-#     2024-Oct-16: change kd_leaf and kd_stem to be 90 elements long (per degree of a isotropic radiation)
+#     2023-Oct-09: add struct CanopyStructureAuxil
+#     2023-Oct-18: add fields ddb_stem, ddf_stem, lw_layer_leaf, lw_layer_stem, r_net_lw_leaf, r_net_lw_stem
+#     2024-Oct-16: add field τ_dd_isotropic
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Structure that stores canopy structural trait-dependent auxiliary variables.
+Structure that stores canopy structural auxiliary variables.
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
+Base.@kwdef mutable struct CanopyStructureAuxil{FT}
+    # those depend on trait variables only
     # Angles
     "Inclination angle distribution of leaves"
     p_incl_leaf::Vector{FT}
@@ -99,37 +99,8 @@ Base.@kwdef mutable struct CanopyStructureTDAuxil{FT}
     ddb_stem::FT = 0
     "Forward diffuse->diffuse scatter weight (stem)"
     ddf_stem::FT = 0
-end;
 
-CanopyStructureTDAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = CanopyStructureTDAuxil{FT}(
-            p_incl_leaf = ones(FT, config.DIMENSIONS.DIM_INCL) ./ config.DIMENSIONS.DIM_INCL,
-            p_incl_stem = ones(FT, config.DIMENSIONS.DIM_INCL) ./ config.DIMENSIONS.DIM_INCL,
-            x_bnds = zeros(FT, n_layer + 1),
-);
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2023-Oct-09: add struct CanopyStructureAuxil
-#     2023-Oct-18: add fields ddb_stem, ddf_stem, lw_layer_leaf, lw_layer_stem, r_net_lw_leaf, r_net_lw_stem
-#     2024-Oct-16: add field τ_dd_isotropic
-#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Structure that stores canopy structural auxiliary variables.
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct CanopyStructureAuxil{FT}
+    # others
     # Effective leaf reflectance and transmittance for solar radiation
     "Effective leaf reflectance after accounting for the CI effect"
     ρ_leaf_eff::Matrix{FT}
@@ -198,6 +169,12 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
 end;
 
 CanopyStructureAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = CanopyStructureAuxil{FT}(
+            # those depend on trait variables only
+            p_incl_leaf = ones(FT, config.DIMENSIONS.DIM_INCL) ./ config.DIMENSIONS.DIM_INCL,
+            p_incl_stem = ones(FT, config.DIMENSIONS.DIM_INCL) ./ config.DIMENSIONS.DIM_INCL,
+            x_bnds = zeros(FT, n_layer + 1),
+
+            # others
             ρ_leaf_eff     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_leaf_eff     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ddb_leaf       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
@@ -231,7 +208,7 @@ CanopyStructureAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = CanopySt
 # Changes to this struct
 # General
 #     2023-Oct-09: add struct CanopyStructure
-#     2024-Feb-25: add field trait, t_aux (remove state)
+#     2024-Feb-25: add field trait, auxil
 #
 #######################################################################################################################################################################################################
 """
@@ -248,8 +225,6 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct CanopyStructure{FT}
     "Trait variables that need to be presribed from GriddingMachine"
     trait::CanopyStructureTrait{FT}
-    "Trait-dependent variables"
-    t_aux::CanopyStructureTDAuxil{FT}
     "Auxiliary variables"
     auxil::CanopyStructureAuxil{FT}
 end;
@@ -261,10 +236,9 @@ CanopyStructure(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
     δsai = 0.5 .* ones(FT, n_layer) ./ n_layer;
 
     trait = CanopyStructureTrait{FT}(lai = lai, δlai = δlai, sai = sai, δsai = δsai);
-    t_aux = CanopyStructureTDAuxil(config, n_layer);
     auxil = CanopyStructureAuxil(config, n_layer);
-    t_aux.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
-    t_aux.p_incl_leaf = ones(FT, config.DIMENSIONS.DIM_INCL) ./ config.DIMENSIONS.DIM_INCL;
+    auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
+    auxil.p_incl_leaf = ones(FT, config.DIMENSIONS.DIM_INCL) ./ config.DIMENSIONS.DIM_INCL;
 
-    return CanopyStructure{FT}(trait = trait, t_aux = t_aux, auxil = auxil)
+    return CanopyStructure{FT}(trait = trait, auxil = auxil)
 );

@@ -30,23 +30,25 @@ end;
 #
 # Changes to the struct
 # General
-#     2024-Feb-25: add struct SensorGeometrySDAuxil
-#     2024-Sep-04: separate leaf and stem optical properties
-#     2024-Sep-07: add field ci_sensor to store clumping index from viewer zenith angle
+#     2023-Oct-09: add struct SensorGeometryAuxil
+#     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
+#     2024-Jul-27: use bined PPAR to speed up (moved sif yield here from leaf)
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct to store the state-dependetn auxiliary variables of the sensor geometry
+Struct to store the auxiliary variables of the sensor geometry.
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
+Base.@kwdef mutable struct SensorGeometryAuxil{FT}
+    # those depend on state variables only
     # Clumping index
     "Clumping index from sensor zenith angle"
     ci_sensor::FT = 1.0
@@ -108,47 +110,8 @@ Base.@kwdef mutable struct SensorGeometrySDAuxil{FT}
     fo_fs::Matrix{FT}
     "Absolute value of fo * fs"
     fo_fs_abs::Matrix{FT}
-end;
 
-SensorGeometrySDAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeometrySDAuxil{FT}(
-            Co_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            So_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            ko_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            sb_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            sf_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            βo_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            p_sensor     = zeros(FT, n_layer),
-            p_sun_sensor = zeros(FT, n_layer),
-            fo           = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-            fo_abs       = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-            fo_cos²_incl = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-            fo_fs        = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-            fo_fs_abs    = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-);
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to the struct
-# General
-#     2023-Oct-09: add struct SensorGeometryAuxil
-#     2023-Oct-18: add fields dob_stem, dof_stem, and so_stem
-#     2024-Jul-27: use bined PPAR to speed up (moved sif yield here from leaf)
-#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Struct to store the auxiliary variables of the sensor geometry.
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct SensorGeometryAuxil{FT}
+    # others
     # Effective leaf reflectance and transmittance for solar radiation
     "Effective leaf reflectance after accounting for the CI effect"
     ρ_leaf_eff::Matrix{FT}
@@ -201,6 +164,22 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
 end;
 
 SensorGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeometryAuxil{FT}(
+            # those depend on state variables only
+            Co_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+            So_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+            ko_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+            sb_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+            sf_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+            βo_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+            p_sensor     = zeros(FT, n_layer),
+            p_sun_sensor = zeros(FT, n_layer),
+            fo           = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+            fo_abs       = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+            fo_cos²_incl = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+            fo_fs        = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+            fo_fs_abs    = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+
+            # others
             ρ_leaf_eff        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_leaf_eff        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             dob_leaf          = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
@@ -230,7 +209,7 @@ SensorGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeo
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SensorGeometry
-#     2023-Oct-18: add field s_aux
+#     2023-Oct-18: add field auxil
 #
 #######################################################################################################################################################################################################
 """
@@ -247,13 +226,8 @@ $(TYPEDFIELDS)
 Base.@kwdef mutable struct SensorGeometry{FT}
     "State variables that may evolve with time"
     state::SensorGeometryState{FT} = SensorGeometryState{FT}()
-    "State-dependent variables"
-    s_aux::SensorGeometrySDAuxil{FT}
     "Auxiliary variables"
     auxil::SensorGeometryAuxil{FT}
 end;
 
-SensorGeometry(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeometry{FT}(
-            s_aux = SensorGeometrySDAuxil(config, n_layer),
-            auxil = SensorGeometryAuxil(config, n_layer)
-);
+SensorGeometry(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeometry{FT}(auxil = SensorGeometryAuxil(config, n_layer));

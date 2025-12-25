@@ -59,34 +59,6 @@ end;
 #
 # Changes to this struct
 # General
-#     2024-Feb-27: add struct JunctionCapacitorSDAuxil
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Struct that contains the state dependent auxiliary variables for junction capacitor
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct JunctionCapacitorSDAuxil{FT}
-    "Heat capacitance of the capacitor `[J K⁻¹]`"
-    cp::FT = 0
-    "Pressure of the capacitor `[MPa]`"
-    pressure::FT = 0
-    "Temperature of the capacitor `[K]`"
-    t::FT = T₂₅()
-end;
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
 #     2023-Sep-26: define the struct to store the auxiliary variables used in junction capacitor
 #     2023-Sep-30: add fields ∂e∂t and ∂w∂t
 #     2023-Oct-02: add field cp
@@ -104,6 +76,15 @@ $(TYPEDFIELDS)
 
 """
 Base.@kwdef mutable struct JunctionCapacitorAuxil{FT}
+    # those depend on state variables only
+    "Heat capacitance of the capacitor `[J K⁻¹]`"
+    cp::FT = 0
+    "Pressure of the capacitor `[MPa]`"
+    pressure::FT = 0
+    "Temperature of the capacitor `[K]`"
+    t::FT = T₂₅()
+
+    # others
     "Partial derivative of the energy per time `[J s⁻¹]`"
     ∂e∂t::FT = 0
     "Partial derivative of the water per time `[mol s⁻¹]`"
@@ -134,8 +115,6 @@ Base.@kwdef mutable struct JunctionCapacitor{FT}
     trait::JunctionCapacitorTrait{FT} = JunctionCapacitorTrait{FT}()
     "State variables of the capacitor"
     state::JunctionCapacitorState{FT} = JunctionCapacitorState{FT}()
-    "State dependent auxiliary variables of the capacitor"
-    s_aux::JunctionCapacitorSDAuxil{FT} = JunctionCapacitorSDAuxil{FT}()
     "Auxilary variables of the capacitor"
     auxil::JunctionCapacitorAuxil{FT} = JunctionCapacitorAuxil{FT}()
 end;

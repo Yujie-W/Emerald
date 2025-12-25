@@ -10,8 +10,8 @@ using PkgUtility.UniversalConstants: CP_D_MOL, CP_I, CP_I_MOL, CP_L, CP_L_MOL, C
 using ..Namespace: XylemHydraulics
 using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Root, Stem
 using ..Namespace: AirLayer, AirLayerState
-using ..Namespace: SoilLayer, SoilLayerState, SoilLayerTrait, SoilLayerTDAuxil
-using ..Namespace: ExtraXylemCapacitorState, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil, XylemHydraulicsState, XylemHydraulicsTrait
+using ..Namespace: SoilLayer, SoilLayerAuxil, SoilLayerState, SoilLayerTrait
+using ..Namespace: ExtraXylemCapacitorState, LeafBioTrait, LeafEnergyAuxil, LeafEnergyState, XylemHydraulicsState, XylemHydraulicsTrait
 using ..Namespace: BulkSPAC, SPACConfig
 using ..PlantHydraulics: flow_in, flow_out
 

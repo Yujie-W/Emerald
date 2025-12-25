@@ -56,7 +56,7 @@ leaf_flow_profiles!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT
         if leaf.xylem.state.connected
             g_ss .= 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (FT(1.35) .* leaf.flux.auxil.g_CO₂_b));
             g = g_ss' * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
-            d = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000) - airs[lindex[ilf]].s_aux.ps[3];
+            d = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.state.p_leaf * 1000000) - airs[lindex[ilf]].auxil.ps[3];
             ALLOW_LEAF_CONDENSATION ? nothing : d = max(d, 0);
             f = g * d / airs[lindex[ilf]].state.p_air * leaf.xylem.trait.area;
 

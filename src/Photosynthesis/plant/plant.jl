@@ -45,7 +45,7 @@ plant_photosynthesis!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{
         leaf_photosynthesis!(config, spac.cache, leaf, air; rd_only = rd_only);
 
         # update the OCS flux
-        leaf.flux.auxil.f_ocs .= leaf.flux.auxil.g_OCS .* air.s_aux.ps[6] ./ air.state.p_air .* FT(1e6);
+        leaf.flux.auxil.f_ocs .= leaf.flux.auxil.g_OCS .* air.auxil.ps[6] ./ air.state.p_air .* FT(1e6);
 
         # update the average rates
         leaf.flux.auxil.a_g_mean   = leaf.flux.auxil.a_g'   * view(canopy.sun_geometry.auxil.ppar_fraction,:,irt);
@@ -86,21 +86,21 @@ function plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     # TODO chemical energy change
     for r in plant.roots
         c_mol = r.xylem.trait.area * r.xylem.trait.l * r.xylem.trait.ρ * 1000 / 30; # mol C
-        resp = temperature_corrected_value(r.xylem.trait.r_wood, r.energy.s_aux.t); # μmol mol⁻¹ s⁻¹
+        resp = temperature_corrected_value(r.xylem.trait.r_wood, r.energy.auxil.t); # μmol mol⁻¹ s⁻¹
         f = resp * FT(1e-6) * c_mol * δt;
         plant.pool.c_pool -= f;
     end;
 
     # trunk respiration
     c_mol = plant.trunk.xylem.trait.area * plant.trunk.xylem.trait.l * plant.trunk.xylem.trait.ρ * 1000 / 30; # mol C
-    resp = temperature_corrected_value(plant.trunk.xylem.trait.r_wood, plant.trunk.energy.s_aux.t); # μmol mol⁻¹ s⁻¹
+    resp = temperature_corrected_value(plant.trunk.xylem.trait.r_wood, plant.trunk.energy.auxil.t); # μmol mol⁻¹ s⁻¹
     f = resp * FT(1e-6) * c_mol * δt;
     plant.pool.c_pool -= f;
 
     # branch respiration
     for s in plant.branches
         c_mol = s.xylem.trait.area * s.xylem.trait.l * s.xylem.trait.ρ * 1000 / 30; # mol C
-        resp = temperature_corrected_value(s.xylem.trait.r_wood, s.energy.s_aux.t); # μmol mol⁻¹ s⁻¹
+        resp = temperature_corrected_value(s.xylem.trait.r_wood, s.energy.auxil.t); # μmol mol⁻¹ s⁻¹
         f = resp * FT(1e-6) * c_mol * δt;
         plant.pool.c_pool -= f;
     end;

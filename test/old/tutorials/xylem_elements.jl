@@ -10,7 +10,7 @@ using Test
         spac = EmeraldLand.Namespace.BulkSPAC(config);
         stem = EmeraldLand.Namespace.Stem(config);
         stem.xylem.auxil.flow = 2.2;
-        stem.xylem.auxil.e_crit = EmeraldLand.PlantHydraulics.critical_flow(config, stem.xylem, spac.cache, stem.energy.s_aux.t);
+        stem.xylem.auxil.e_crit = EmeraldLand.PlantHydraulics.critical_flow(config, stem.xylem, spac.cache, stem.energy.auxil.t);
         EmeraldLand.PlantHydraulics.stem_pressure_profile!(config, stem, FT(-2));
         @test !isnan(stem.xylem.auxil.pressure[end]);
     end;

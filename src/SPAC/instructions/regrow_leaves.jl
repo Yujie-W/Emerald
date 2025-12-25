@@ -29,14 +29,14 @@ function regrow_leaves_flag!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {
     # set the regrow flag to true only if all roots are connected to the soil and the junction pressure is not too low
     flag = true;
     one_root = spac.plant.roots[1];
-    p_50 = xylem_pressure(one_root.xylem.trait.vc, FT(0.5)) * relative_surface_tension(one_root.energy.s_aux.t);
+    p_50 = xylem_pressure(one_root.xylem.trait.vc, FT(0.5)) * relative_surface_tension(one_root.energy.auxil.t);
     for s in spac.soils
-        if s.s_aux.ψ < p_50
+        if s.auxil.ψ < p_50
             flag = false;
             break;
         end;
     end;
-    if (spac.plant.junction.s_aux.pressure < -0.1)
+    if (spac.plant.junction.auxil.pressure < -0.1)
         flag = false;
     end;
 
@@ -62,7 +62,7 @@ function grow_leaves!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, lai_diff::FT) 
         leaf = leaves[ilf];
         leaf.xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];
         delta_w = sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage;
-        delta_e = sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage * CP_L_MOL(FT) * junc.energy.s_aux.t;
+        delta_e = sbulk.trait.area * lai_diff / n_layer * leaf.capacitor.state.v_storage * CP_L_MOL(FT) * junc.energy.auxil.t;
         junc.state.v_storage -= delta_w;
         junc.state.Σe -= delta_e;
     end;

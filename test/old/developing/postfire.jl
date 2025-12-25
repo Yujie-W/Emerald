@@ -68,17 +68,17 @@ begin
                 spac_1.canopy.structure.auxil.lwꜛ[i],
                 spac_2.canopy.structure.auxil.lwꜛ[i],
                 spac_3.canopy.structure.auxil.lwꜛ[i],
-                spac_1.plant.leaves[nlayer+1-i].energy.s_aux.t,
-                spac_2.plant.leaves[nlayer+1-i].energy.s_aux.t,
-                spac_3.plant.leaves[nlayer+1-i].energy.s_aux.t);
+                spac_1.plant.leaves[nlayer+1-i].energy.auxil.t,
+                spac_2.plant.leaves[nlayer+1-i].energy.auxil.t,
+                spac_3.plant.leaves[nlayer+1-i].energy.auxil.t);
     end;
     @printf("%.1f    %.1f    %.1f    %.1f    %.1f    %.1f\n",
             spac_1.canopy.structure.auxil.lwꜛ[end],
             spac_2.canopy.structure.auxil.lwꜛ[end],
             spac_3.canopy.structure.auxil.lwꜛ[end],
-            spac_1.soils[1].s_aux.t,
-            spac_2.soils[1].s_aux.t,
-            spac_3.soils[1].s_aux.t);
+            spac_1.soils[1].auxil.t,
+            spac_2.soils[1].auxil.t,
+            spac_3.soils[1].auxil.t);
 end;
 
 
@@ -111,6 +111,6 @@ begin
     println("LW out per layer");
     nlayer = length(spac_debug.plant.leaves);
     for i in 1:nlayer
-        @printf("%.1f    %.1f\n", spac_debug.canopy.structure.auxil.lwꜛ[i], spac_debug.plant.leaves[nlayer+1-i].energy.s_aux.t);
+        @printf("%.1f    %.1f\n", spac_debug.canopy.structure.auxil.lwꜛ[i], spac_debug.plant.leaves[nlayer+1-i].energy.auxil.t);
     end;
 end;

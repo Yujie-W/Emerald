@@ -21,5 +21,5 @@ for i in 1:10
     spac_bak2 = deepcopy(spac);
     # @info "debugging" spac_bak1.plant.leaves[1].xylem.auxil.pressure[end] spac_bak2.plant.leaves[1].xylem.auxil.pressure[end];
     # @info "debugging" [l.xylem.state.connected for l in spac.plant.leaves];
-    @info "debugging" spac.plant.junction.state.v_storage spac.plant.junction.s_aux.pressure;
+    @info "debugging" spac.plant.junction.state.v_storage spac.plant.junction.auxil.pressure;
 end;

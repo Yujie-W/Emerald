@@ -16,11 +16,11 @@ using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
 using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
 using ..Namespace: AbstractTemperatureDependency, Arrhenius, ArrheniusPeak, ArrheniusPeak2, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
 using ..Namespace: GeneralC3Trait, GeneralC4Trait
-using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBio, LeafBioTrait, LeafEnergyState, LeafEnergySDAuxil
+using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBio, LeafBioTrait, LeafEnergyAuxil, LeafEnergyState
 using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Plant, Root, Stem
-using ..Namespace: CanopyStructure, CanopyStructureTrait, CanopyStructureTDAuxil, MultiLayerCanopy
-using ..Namespace: AirLayer, AirLayerState, AirLayerSDAuxil, AirLayerTDAuxil
-using ..Namespace: SoilBulk, SoilLayer, SoilLayerState, SoilLayerSDAuxil, SoilLayerTrait, SoilLayerTDAuxil
+using ..Namespace: CanopyStructure, CanopyStructureAuxil, CanopyStructureTrait, MultiLayerCanopy
+using ..Namespace: AirLayer, AirLayerAuxil, AirLayerState
+using ..Namespace: SoilBulk, SoilLayer, SoilLayerAuxil, SoilLayerState, SoilLayerTrait
 using ..Namespace: BulkSPAC, BulkSPACStates, SPACCache, SPACConfig
 using ..Namespace: kill_plant!, sync_state!
 using ..Photosynthesis: plant_carbon_budget!, plant_photosynthesis!

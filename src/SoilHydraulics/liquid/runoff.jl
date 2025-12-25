@@ -29,14 +29,14 @@ function soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
         # if the lower layer is oversaturated, the oversaturated water will flow to the upper layer (as well as energy)
         if soilj.state.θ > soilj.trait.vc.Θ_SAT
             # compute the water flow rate and energy associated with the flow
-            v_flow = (soilj.state.θ - soilj.trait.vc.Θ_SAT) * soilj.t_aux.δz;
-            e_flow = v_flow * ρ_H₂O(FT) * CP_L(FT) * soilj.s_aux.t;
+            v_flow = (soilj.state.θ - soilj.trait.vc.Θ_SAT) * soilj.auxil.δz;
+            e_flow = v_flow * ρ_H₂O(FT) * CP_L(FT) * soilj.auxil.t;
 
             # update the water and energy in the layers
-            soili.state.θ  += v_flow / soili.t_aux.δz;
-            soilj.state.θ  -= v_flow / soilj.t_aux.δz;
-            soili.state.Σe += e_flow / soili.t_aux.δz;
-            soilj.state.Σe -= e_flow / soilj.t_aux.δz;
+            soili.state.θ  += v_flow / soili.auxil.δz;
+            soilj.state.θ  -= v_flow / soilj.auxil.δz;
+            soili.state.Σe += e_flow / soili.auxil.δz;
+            soilj.state.Σe -= e_flow / soilj.auxil.δz;
         end;
     end;
 
@@ -44,7 +44,7 @@ function soil_water_runoff!(spac::BulkSPAC{FT}) where {FT}
     # TODO: ice volume is not accounted for, so the water flow may not be correct
     top_soil = soils[1];
     if top_soil.state.θ > top_soil.trait.vc.Θ_SAT
-        sbulk.auxil.runoff = (top_soil.state.θ - top_soil.trait.vc.Θ_SAT) * top_soil.t_aux.δz * ρ_H₂O(FT) / M_H₂O(FT);
+        sbulk.auxil.runoff = (top_soil.state.θ - top_soil.trait.vc.Θ_SAT) * top_soil.auxil.δz * ρ_H₂O(FT) / M_H₂O(FT);
         top_soil.state.θ = top_soil.trait.vc.Θ_SAT;
     end;
 

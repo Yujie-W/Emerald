@@ -57,7 +57,7 @@ function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     # update the temperature for soil
     for soil in soils
         # water mass and energy flow
-        soil.state.Σe += soil.auxil.∂e∂t * δt / soil.t_aux.δz;
+        soil.state.Σe += soil.auxil.∂e∂t * δt / soil.auxil.δz;
     end;
 
     # update the energy loss related to surface runoff
@@ -66,7 +66,7 @@ function spac_energy_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
     if top_soil.state.θ > top_soil.trait.vc.Θ_SAT
         cp = heat_capacitance(top_soil; runoff = top_soil.auxil.runoff);
         t  = top_soil.state.Σe / cp + T₀(FT);
-        top_soil.state.Σe -= top_soil.auxil.runoff / top_soil.t_aux.δz * CP_L_MOL(FT) * (t - T₀(FT));
+        top_soil.state.Σe -= top_soil.auxil.runoff / top_soil.auxil.δz * CP_L_MOL(FT) * (t - T₀(FT));
     end;
 
     # update the temperature for roots

@@ -32,8 +32,8 @@ function ∂Θₙ∂E end;
     # compute the ∂Θₙ∂E when leaf xylem is connected
     (; F_FITNESS) = sm;
 
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
-    d = max(1, p_s - air.s_aux.ps[3]);
+    p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.state.p_leaf * 1000000);
+    d = max(1, p_s - air.auxil.ps[3]);
 
     # compute the A and E at the current setting
     gs = leaf.flux.state.g_H₂O_s;

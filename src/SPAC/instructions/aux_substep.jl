@@ -92,10 +92,10 @@ substep_aux!(root::Root{FT}) where {FT} = (
     x_sta = root.xylem.state;
     if x_aux isa XylemHydraulicsAuxilNSS
         N = length(x_sta.v_storage);
-        f_vis = relative_viscosity(root.energy.s_aux.t);
+        f_vis = relative_viscosity(root.energy.auxil.t);
         v_max_i = x_tra.v_max * x_tra.area * x_tra.l / N;
         for i in 1:N
-            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, root.energy.s_aux.t);
+            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, root.energy.auxil.t);
             x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_tra.pv.k_refill / f_vis * x_sta.v_storage[i];
         end;
     end;
@@ -121,10 +121,10 @@ substep_aux!(stem::Stem{FT}) where {FT} = (
     x_sta = stem.xylem.state;
     if x_aux isa XylemHydraulicsAuxilNSS
         N = length(x_sta.v_storage);
-        f_vis = relative_viscosity(stem.energy.s_aux.t);
+        f_vis = relative_viscosity(stem.energy.auxil.t);
         v_max_i = x_tra.v_max * x_tra.area * x_tra.l / N;
         for i in 1:N
-            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, stem.energy.s_aux.t);
+            x_aux.p_storage[i] = capacitance_pressure(x_tra.pv, x_sta.v_storage[i] / v_max_i, stem.energy.auxil.t);
             x_aux.flow_buffer[i] = (x_aux.p_storage[i] - (x_aux.pressure[i] + x_aux.pressure[i+1]) / 2) * x_tra.pv.k_refill / f_vis * x_sta.v_storage[i];
         end;
     end;
@@ -146,8 +146,8 @@ substep_aux!(leaf::CanopyLayer{FT}, shedded::Bool) where {FT} = (
             x_tra = leaf.xylem.trait;
             c_tra = leaf.capacitor.trait;
             c_sta = leaf.capacitor.state;
-            f_vis = relative_viscosity(leaf.energy.s_aux.t);
-            c_aux.p = capacitance_pressure(c_tra.pv, c_sta.v_storage / c_tra.v_max, leaf.energy.s_aux.t);
+            f_vis = relative_viscosity(leaf.energy.auxil.t);
+            c_aux.p = capacitance_pressure(c_tra.pv, c_sta.v_storage / c_tra.v_max, leaf.energy.auxil.t);
             c_aux.flow = (c_aux.p - x_aux.pressure[end]) * c_tra.pv.k_refill / f_vis * c_sta.v_storage * x_tra.area;
         else
             c_aux.flow = 0;

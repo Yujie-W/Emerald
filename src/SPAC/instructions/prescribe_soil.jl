@@ -41,7 +41,7 @@ function prescribe_soil!(spac::BulkSPAC{FT}; swcs::Union{Tuple,Nothing} = nothin
     # prescribe soil temperature
     if !isnothing(t_soils)
         for i in eachindex(t_soils)
-            soils[i].s_aux.t = t_soils[i];
+            soils[i].auxil.t = t_soils[i];
         end;
     end;
 

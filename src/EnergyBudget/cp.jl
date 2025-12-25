@@ -22,7 +22,7 @@ Return the heat capacitance of the organ (xylem, root, stem, and leaf)
 function heat_capacitance end;
 
 # soil
-heat_capacitance(soiltr::SoilLayerTrait{FT}, soilta::SoilLayerTDAuxil{FT}, soilst::SoilLayerState{FT}; runoff::FT = FT(0)) where {FT} = (
+heat_capacitance(soiltr::SoilLayerTrait{FT}, soilta::SoilLayerAuxil{FT}, soilst::SoilLayerState{FT}; runoff::FT = FT(0)) where {FT} = (
     cp_gas = (soilst.ns[3] * CP_V_MOL(FT) + (soilst.ns[1] + soilst.ns[2] + soilst.ns[4] + soilst.ns[5]) * CP_D_MOL(FT)) / soilta.δz;
 
     # runoff in mol m⁻² s⁻¹, convert it to kg and then
@@ -30,7 +30,7 @@ heat_capacitance(soiltr::SoilLayerTrait{FT}, soilta::SoilLayerTDAuxil{FT}, soils
     return soiltr.ρ * soiltr.cp + soilst.θ * ρ_H₂O(FT) * CP_L(FT) + soilst.θ_ice * ρ_H₂O(FT) * CP_I(FT) + cp_gas + runoff * CP_L_MOL(FT) / soilta.δz
 );
 
-heat_capacitance(soil::SoilLayer{FT}; runoff::FT = FT(0)) where {FT} = heat_capacitance(soil.trait, soil.t_aux, soil.state, runoff = runoff);
+heat_capacitance(soil::SoilLayer{FT}; runoff::FT = FT(0)) where {FT} = heat_capacitance(soil.trait, soil.auxil, soil.state, runoff = runoff);
 
 # plant
 heat_capacitance(xylem::XylemHydraulics{FT}) where {FT} = (

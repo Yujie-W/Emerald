@@ -220,7 +220,7 @@ function prescribe_traits!(
     # prescribe leaf temperature if leaf shedding flag is not true
     if !isnothing(t_leaf) && !spac.plant._leaf_shedded
         for leaf in leaves
-            leaf.energy.s_aux.t = t_leaf;
+            leaf.energy.auxil.t = t_leaf;
         end;
     end;
 

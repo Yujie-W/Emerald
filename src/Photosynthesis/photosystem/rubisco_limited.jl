@@ -119,7 +119,7 @@ rubisco_limited_rate!(
     b = β * psa.v_cmax * psa.γ_star;
     d = psa.k_m;
     f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
 
     qa = f;
@@ -188,7 +188,7 @@ rubisco_limited_rate!(
     a = β * psa.v_cmax;
     b = β * psa.v_cmax * psa.γ_star;
     d = psa.k_m;
-    p = air.s_aux.ps[2];
+    p = air.auxil.ps[2];
     r = β * psa.r_d;
     @. f = air.state.p_air / g_lc * FT(1e-6);
 

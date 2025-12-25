@@ -30,23 +30,28 @@ end;
 #
 # Changes to the struct
 # General
-#     2024-Feb-25: add struct SunGeometrySDAuxil
-#     2024-Sep-04: separate leaf and stem optical properties
-#     2024-Sep-07: add field ci_sun to store clumping index from solar zenith angle
+#     2023-Oct-09: add struct SunGeometryAuxil
+#     2023-Oct-13: add field albedo
+#     2023-Oct-18: add fields sdb_stem, sdf_stem, r_net_lw_leaf, r_net_lw_stem
+#     2024-Jul-27: use bined PPAR to speed up
+#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
+#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
+#     2025-Jul-30: add fields for APAR calculation
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct to store the the state-dependent auxiliary variables of the sun geometry
+Struct to store the auxiliary variables of the sun geometry.
 
 # Fields
 
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
+Base.@kwdef mutable struct SunGeometryAuxil{FT}
+    # those depend on state variables only
     # Clumping index from solar zenith angle
     "Clumping index from solar zenith angle"
     ci_sun::FT = 1
@@ -90,46 +95,8 @@ Base.@kwdef mutable struct SunGeometrySDAuxil{FT}
     fs_abs_mean::Vector{FT}
     "fs * cos Θ_INCL"
     fs_cos²_incl::Matrix{FT}
-end;
 
-SunGeometrySDAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SunGeometrySDAuxil{FT}(
-            Cs_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            Ss_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            βs_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            ks_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
-            p_sunlit     = zeros(FT, n_layer),
-            fs           = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-            fs_abs       = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-            fs_abs_mean  = zeros(FT, config.DIMENSIONS.DIM_AZI),
-            fs_cos²_incl = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-);
-
-
-#######################################################################################################################################################################################################
-#
-# Changes to the struct
-# General
-#     2023-Oct-09: add struct SunGeometryAuxil
-#     2023-Oct-13: add field albedo
-#     2023-Oct-18: add fields sdb_stem, sdf_stem, r_net_lw_leaf, r_net_lw_stem
-#     2024-Jul-27: use bined PPAR to speed up
-#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
-#     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
-#     2025-Jul-30: add fields for APAR calculation
-#
-#######################################################################################################################################################################################################
-"""
-
-$(TYPEDEF)
-
-Struct to store the auxiliary variables of the sun geometry.
-
-# Fields
-
-$(TYPEDFIELDS)
-
-"""
-Base.@kwdef mutable struct SunGeometryAuxil{FT}
+    # others
     # Effective leaf reflectance and transmittance for solar radiation
     "Effective leaf reflectance after accounting for the CI effect"
     ρ_leaf_eff::Matrix{FT}
@@ -287,6 +254,18 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
     cache_dim_ppar = isnothing(config.DIMENSIONS.DIM_PPAR_BINS) ? config.DIMENSIONS.DIM_INCL * config.DIMENSIONS.DIM_AZI : config.DIMENSIONS.DIM_PPAR_BINS;
 
     return SunGeometryAuxil{FT}(
+                # those depend on state variables only
+                Cs_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+                Ss_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+                βs_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+                ks_incl      = zeros(FT, config.DIMENSIONS.DIM_INCL),
+                p_sunlit     = zeros(FT, n_layer),
+                fs           = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+                fs_abs       = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+                fs_abs_mean  = zeros(FT, config.DIMENSIONS.DIM_AZI),
+                fs_cos²_incl = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+
+                # others
                 ρ_leaf_eff       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 τ_leaf_eff       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 sdb_leaf         = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
@@ -359,7 +338,7 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
 # Changes to the struct
 # General
 #     2023-Oct-09: add struct SunGeometry
-#     2024-Feb-25: add field s_aux
+#     2024-Feb-25: add field auxil
 #
 #######################################################################################################################################################################################################
 """
@@ -377,12 +356,8 @@ Base.@kwdef mutable struct SunGeometry{FT}
     "State variables"
     state::SunGeometryState{FT} = SunGeometryState{FT}()
     "State-dependent auxiliary variables"
-    s_aux::SunGeometrySDAuxil{FT} = SunGeometrySDAuxil{FT}()
     "Auxiliary variables"
     auxil::SunGeometryAuxil{FT}
 end;
 
-SunGeometry(config::SPACConfig{FT}, n_layer::Int) where {FT} = SunGeometry{FT}(
-            s_aux = SunGeometrySDAuxil(config, n_layer),
-            auxil = SunGeometryAuxil(config, n_layer)
-);
+SunGeometry(config::SPACConfig{FT}, n_layer::Int) where {FT} = SunGeometry{FT}(auxil = SunGeometryAuxil(config, n_layer));

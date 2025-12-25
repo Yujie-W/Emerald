@@ -23,7 +23,7 @@ Update the trait-dependent auxiliary variables for the SPAC system, given
 function t_aux! end;
 
 t_aux!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
-    # update the t_aux for each of the field in the bulk spac system (the order should not matter)
+    # update the tarit-dependent auxil for each of the field in the bulk spac system (the order should not matter)
     # the soil auxiliary variables
     for soil in spac.soils
         t_aux!(soil);
@@ -41,8 +41,8 @@ t_aux!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
 );
 
 t_aux!(soil::SoilLayer{FT}) where {FT} = (
-    soil.t_aux.z = abs(soil.trait.zs[1] + soil.trait.zs[2]) / 2;
-    soil.t_aux.δz = soil.trait.zs[1] - soil.trait.zs[2];
+    soil.auxil.z = abs(soil.trait.zs[1] + soil.trait.zs[2]) / 2;
+    soil.auxil.δz = soil.trait.zs[1] - soil.trait.zs[2];
 
     return nothing
 );
@@ -51,23 +51,23 @@ t_aux!(config::SPACConfig{FT}, canopy::MultiLayerCanopy{FT}, cache::SPACCache{FT
 
 t_aux!(config::SPACConfig{FT}, canstr::CanopyStructure{FT}, cache::SPACCache{FT}) where {FT} = (
     if canstr.trait.lai <= 0 && canstr.trait.sai <= 0
-        canstr.t_aux.x_bnds .= 0;
+        canstr.auxil.x_bnds .= 0;
     else
-        canstr.t_aux.x_bnds[1] = 0;
+        canstr.auxil.x_bnds[1] = 0;
         sum_pai = cache.cache_layer_1;
         for i in eachindex(sum_pai)
             sum_pai[i] = sum(view(canstr.trait.δlai,1:i)) + sum(view(canstr.trait.δsai,1:i));
         end;
-        canstr.t_aux.x_bnds[2:end] .= sum_pai ./ -(canstr.trait.lai + canstr.trait.sai);
+        canstr.auxil.x_bnds[2:end] .= sum_pai ./ -(canstr.trait.lai + canstr.trait.sai);
     end;
-    canopy_structure_aux!(config, canstr.trait, canstr.t_aux);
+    canopy_structure_aux!(config, canstr.trait, canstr.auxil);
 
     return nothing
 );
 
 t_aux!(air::AirLayer{FT}) where {FT} = (
-    air.t_aux.δz = air.trait.zs[2] - air.trait.zs[1];
-    air.t_aux.z = (air.trait.zs[1] + air.trait.zs[2]) / 2;
+    air.auxil.δz = air.trait.zs[2] - air.trait.zs[1];
+    air.auxil.z = (air.trait.zs[1] + air.trait.zs[2]) / 2;
 
     return nothing
 );

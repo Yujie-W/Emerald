@@ -1,3 +1,4 @@
+#=
 """
 Struct that contains the trait and state variables.
 """
@@ -233,3 +234,4 @@ Base.@kwdef mutable struct LeafBio{FT<:AbstractFloat}
 end;
 
 LeafBio(config::SPACConfig{FT}) where {FT} = return LeafBio{FT}(auxil = LeafBioAuxil(config));
+=#

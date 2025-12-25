@@ -21,51 +21,51 @@ function initialize_energy_states! end;
 
 initialize_energy_states!(soil::SoilLayer{FT}, air::AirLayer{FT}) where {FT} = (
     δθ = max(0, soil.trait.vc.Θ_SAT - soil.state.θ - soil.state.θ_ice);
-    rt = GAS_R(FT) * soil.s_aux.t;
-    soil.state.ns[3] = saturation_vapor_pressure(soil.s_aux.t) * soil.t_aux.δz * (δθ + FT(0.01)) / rt;
-    soil.state.ns[4] = air.state.p_air * F_N₂(FT) * soil.t_aux.δz * δθ / rt;
-    soil.state.ns[5] = air.state.p_air * F_O₂(FT) * soil.t_aux.δz * δθ / rt;
-    soil.s_aux.cp = heat_capacitance(soil);
-    soil.state.Σe = soil.s_aux.cp * (soil.s_aux.t - T₀(FT));
+    rt = GAS_R(FT) * soil.auxil.t;
+    soil.state.ns[3] = saturation_vapor_pressure(soil.auxil.t) * soil.auxil.δz * (δθ + FT(0.01)) / rt;
+    soil.state.ns[4] = air.state.p_air * F_N₂(FT) * soil.auxil.δz * δθ / rt;
+    soil.state.ns[5] = air.state.p_air * F_O₂(FT) * soil.auxil.δz * δθ / rt;
+    soil.auxil.cp = heat_capacitance(soil);
+    soil.state.Σe = soil.auxil.cp * (soil.auxil.t - T₀(FT));
 
     return nothing
 );
 
 initialize_energy_states!(root::Root{FT}) where {FT} = (
     root.xylem.state.v_storage .= (root.xylem.trait.v_max * root.xylem.trait.area * root.xylem.trait.l) / length(root.xylem.state.v_storage);
-    root.energy.s_aux.cp = heat_capacitance(root);
-    root.energy.state.Σe = root.energy.s_aux.cp * root.energy.s_aux.t;
+    root.energy.auxil.cp = heat_capacitance(root);
+    root.energy.state.Σe = root.energy.auxil.cp * root.energy.auxil.t;
 
     return nothing
 );
 
 initialize_energy_states!(stem::Stem{FT}) where {FT} = (
     stem.xylem.state.v_storage .= (stem.xylem.trait.v_max * stem.xylem.trait.area * stem.xylem.trait.l) / length(stem.xylem.state.v_storage);
-    stem.energy.s_aux.cp = heat_capacitance(stem);
-    stem.energy.state.Σe = stem.energy.s_aux.cp * stem.energy.s_aux.t;
+    stem.energy.auxil.cp = heat_capacitance(stem);
+    stem.energy.state.Σe = stem.energy.auxil.cp * stem.energy.auxil.t;
 
     return nothing
 );
 
 initialize_energy_states!(leaf::CanopyLayer{FT}) where {FT} = (
     leaf.capacitor.state.v_storage = leaf.capacitor.trait.v_max;
-    leaf.energy.s_aux.cp = heat_capacitance(leaf);
-    leaf.energy.state.Σe = leaf.energy.s_aux.cp * leaf.energy.s_aux.t;
+    leaf.energy.auxil.cp = heat_capacitance(leaf);
+    leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;
 
     return nothing
 );
 
 initialize_energy_states!(air::AirLayer{FT}) where {FT} = (
-    air.s_aux.ps[2] = air.s_aux.f_CO₂ * air.state.p_air * 1e-6;
-    air.s_aux.ps[4] = F_N₂(FT) * air.state.p_air;
-    air.s_aux.ps[5] = F_O₂(FT) * air.state.p_air;
-    air.s_aux.ps[6] = air.s_aux.f_OCS * air.state.p_air * 1e-9;
+    air.auxil.ps[2] = air.auxil.f_CO₂ * air.state.p_air * 1e-6;
+    air.auxil.ps[4] = F_N₂(FT) * air.state.p_air;
+    air.auxil.ps[5] = F_O₂(FT) * air.state.p_air;
+    air.auxil.ps[6] = air.auxil.f_OCS * air.state.p_air * 1e-9;
 
     for i in 1:6
-        air.state.ns[i] = air.s_aux.ps[i] * air.t_aux.δz / (GAS_R(FT) * air.s_aux.t);
+        air.state.ns[i] = air.auxil.ps[i] * air.auxil.δz / (GAS_R(FT) * air.auxil.t);
     end;
 
-    air.state.Σe = heat_capacitance(air) * air.s_aux.t;
+    air.state.Σe = heat_capacitance(air) * air.auxil.t;
 
     return nothing
 );

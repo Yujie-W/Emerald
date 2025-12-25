@@ -99,7 +99,7 @@ import Emerald.EmeraldLand.SPAC
         PH.root_pressure_profile!(soil, root, junc);
 
         p_target = root.xylem.auxil.pressure[end];
-        junc.s_aux.pressure = p_target;
+        junc.auxil.pressure = p_target;
         PH.root_flow_profile!(config, root, soil, junc, spac.cache);
         f_target = PH.flow_out(root);
         PH.root_pressure_profile!(soil, root, junc);

@@ -51,7 +51,7 @@ EF.prescribe!(config, spac, wdf, 1; initialize_state = true);
 spac_debug = deepcopy(spac);
 idx_debug = 1;
 for idx in eachindex(wdf.FDOY)
-    @info "Debugging at time $idx" spac.plant.junction.state.v_storage spac.plant.junction.auxil.∂w∂t spac.plant.junction.s_aux.pressure;
+    @info "Debugging at time $idx" spac.plant.junction.state.v_storage spac.plant.junction.auxil.∂w∂t spac.plant.junction.auxil.pressure;
     global spac_debug = deepcopy(spac);
     global idx_debug = idx;
     try
@@ -77,7 +77,7 @@ for l in spac.plant.leaves
 end;
 
 for idx in eachindex(wdf.FDOY)[idx_debug:end]
-    @info "Debugging at time $idx" spac.plant.junction.state.v_storage spac.plant.junction.auxil.∂w∂t spac.plant.junction.s_aux.pressure;
+    @info "Debugging at time $idx" spac.plant.junction.state.v_storage spac.plant.junction.auxil.∂w∂t spac.plant.junction.auxil.pressure;
     global spac_debug = deepcopy(spac);
     global idx_debug = idx;
     try

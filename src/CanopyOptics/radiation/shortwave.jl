@@ -160,7 +160,7 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{F
 
     # 3. compute net absorption for leaves and soil
     # 4. compute leaf level PAR, APAR, and PPAR per ground area
-    normi = 1 / mean(sun_geo.s_aux.fs_abs_mean);
+    normi = 1 / mean(sun_geo.auxil.fs_abs_mean);
     a_leaf = spac.cache.cache_wl_1;
     a_stem = spac.cache.cache_wl_2;
     f_leaf = spac.cache.cache_wl_3;
@@ -193,7 +193,7 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{F
             p_leaf = view(f_leaf, SPECTRA.IΛ_PAR);
             # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
             sun_geo.auxil._apar_shaded .= energy_to_photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt];
-            sun_geo.auxil._apar_sunlit .= energy_to_photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt] ./ sun_geo.s_aux.p_sunlit[irt];
+            sun_geo.auxil._apar_sunlit .= energy_to_photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt] ./ sun_geo.auxil.p_sunlit[irt];
             sun_geo.auxil._ppar_shaded .= sun_geo.auxil._apar_shaded .* α_apar;
             sun_geo.auxil._ppar_sunlit .= sun_geo.auxil._apar_sunlit .* α_apar;
 
@@ -201,7 +201,7 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{F
             Σ_apar_dif = sun_geo.auxil._apar_shaded' * SPECTRA.ΔΛ_PAR;
             Σ_apar_dir = sun_geo.auxil._apar_sunlit' * SPECTRA.ΔΛ_PAR * normi;
             sun_geo.auxil.apar_shaded[irt] = Σ_apar_dif;
-            sun_geo.auxil.apar_sunlit[:,:,irt] .= sun_geo.s_aux.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
+            sun_geo.auxil.apar_sunlit[:,:,irt] .= sun_geo.auxil.fs_abs .* Σ_apar_dir .+ Σ_apar_dif;
 
             # PPAR for leaves (set PPAR to be the minimum of 2PPAR_700 and PPAR_750)
             Σ_ppar_dif_700 = view(sun_geo.auxil._ppar_shaded, SPECTRA.IΛ_PAR_700)' * SPECTRA.ΔΛ_PAR_700;
@@ -211,20 +211,20 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{F
             Σ_ppar_dif = min(2Σ_ppar_dif_700, Σ_ppar_dif_750);
             Σ_ppar_dir = min(2Σ_ppar_dir_700, Σ_ppar_dir_750);
             sun_geo.auxil.ppar_shaded[irt] = Σ_ppar_dif;
-            sun_geo.auxil.ppar_sunlit[:,:,irt] .= sun_geo.s_aux.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
+            sun_geo.auxil.ppar_sunlit[:,:,irt] .= sun_geo.auxil.fs_abs .* Σ_ppar_dir .+ Σ_ppar_dif;
 
             # bin the PPAR values based on their PPAR if DIM_PPAR_BINS is not nothing
             if isnothing(DIM_PPAR_BINS)
                 for j in 1:DIM_AZI
-                    leaf.flux.auxil.apar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_apar_dir .+ Σ_apar_dif;
-                    leaf.flux.auxil.ppar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.s_aux.fs_abs,:,j) .* Σ_ppar_dir .+ Σ_ppar_dif;
+                    leaf.flux.auxil.apar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.auxil.fs_abs,:,j) .* Σ_apar_dir .+ Σ_apar_dif;
+                    leaf.flux.auxil.ppar[(j-1)*DIM_INCL+1:j*DIM_INCL] .= view(sun_geo.auxil.fs_abs,:,j) .* Σ_ppar_dir .+ Σ_ppar_dif;
                 end;
-                sun_geo.auxil.ppar_fraction[1:end-1,irt] .= 1 ./ ( DIM_INCL * DIM_AZI) .* sun_geo.s_aux.p_sunlit[irt];
+                sun_geo.auxil.ppar_fraction[1:end-1,irt] .= 1 ./ ( DIM_INCL * DIM_AZI) .* sun_geo.auxil.p_sunlit[irt];
             elseif DIM_PPAR_BINS == 0
                 # mean_ppar_sunlit = mean(view(sun_geo.auxil.ppar_sunlit,:,:,irt));
-                # leaf.flux.auxil.ppar[1] = mean_ppar_sunlit * sun_geo.s_aux.p_sunlit[irt] + Σ_ppar_dif * (1 - sun_geo.s_aux.p_sunlit[irt]);
-                leaf.flux.auxil.apar[1] = Σ_apar_dir / normi * sun_geo.s_aux.p_sunlit[irt] + Σ_apar_dif;
-                leaf.flux.auxil.ppar[1] = Σ_ppar_dir / normi * sun_geo.s_aux.p_sunlit[irt] + Σ_ppar_dif;
+                # leaf.flux.auxil.ppar[1] = mean_ppar_sunlit * sun_geo.auxil.p_sunlit[irt] + Σ_ppar_dif * (1 - sun_geo.auxil.p_sunlit[irt]);
+                leaf.flux.auxil.apar[1] = Σ_apar_dir / normi * sun_geo.auxil.p_sunlit[irt] + Σ_apar_dif;
+                leaf.flux.auxil.ppar[1] = Σ_ppar_dir / normi * sun_geo.auxil.p_sunlit[irt] + Σ_ppar_dif;
                 sun_geo.auxil.ppar_index .= 1;
             else
                 min_apar = minimum(view(sun_geo.auxil.apar_sunlit, :, :, irt));
@@ -257,11 +257,11 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{F
                         leaf.flux.auxil.ppar[i] = 0;
                     end;
                 end;
-                sun_geo.auxil.ppar_fraction[1:DIM_PPAR_BINS,irt] .= sun_geo.auxil._ppar_count ./ ( DIM_INCL * DIM_AZI) .* sun_geo.s_aux.p_sunlit[irt];
+                sun_geo.auxil.ppar_fraction[1:DIM_PPAR_BINS,irt] .= sun_geo.auxil._ppar_count ./ ( DIM_INCL * DIM_AZI) .* sun_geo.auxil.p_sunlit[irt];
             end;
             leaf.flux.auxil.apar[end] = Σ_apar_dif;
             leaf.flux.auxil.ppar[end] = Σ_ppar_dif;
-            sun_geo.auxil.ppar_fraction[end,irt] = 1 - sun_geo.s_aux.p_sunlit[irt];
+            sun_geo.auxil.ppar_fraction[end,irt] = 1 - sun_geo.auxil.p_sunlit[irt];
         else
             leaf.flux.auxil.apar .= 0;
             leaf.flux.auxil.ppar .= 0;

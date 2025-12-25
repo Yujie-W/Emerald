@@ -28,7 +28,7 @@ limit_stomatal_conductance!(leaf::CanopyLayer{FT}) where {FT} = (
     end;
 
     # update the g_H₂O_s based on the structural limits if leaf xylem is connected
-    f_dif = relative_diffusive_coefficient(leaf.energy.s_aux.t);
+    f_dif = relative_diffusive_coefficient(leaf.energy.auxil.t);
     g_min = leaf.flux.trait.g_limits[1] * f_dif;
     g_max = leaf.flux.trait.g_limits[2] * f_dif;
 
@@ -46,7 +46,7 @@ limit_stomatal_conductance!(leaf::Leaf{FT}) where {FT} = (
     end;
 
     # update the g_H₂O_s based on the structural limits if leaf xylem is connected
-    f_dif = relative_diffusive_coefficient(leaf.energy.s_aux.t);
+    f_dif = relative_diffusive_coefficient(leaf.energy.auxil.t);
     g_min = leaf.flux.trait.g_limits[1] * f_dif;
     g_max = leaf.flux.trait.g_limits[2] * f_dif;
 

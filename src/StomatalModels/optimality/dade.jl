@@ -36,8 +36,8 @@ function ∂A∂E! end;
     end;
 
     # if leaf xylem is connected
-    p_s = saturation_vapor_pressure(leaf.energy.s_aux.t, leaf.capacitor.state.p_leaf * 1000000);
-    d = max(1, p_s - air.s_aux.ps[3]);
+    p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.state.p_leaf * 1000000);
+    d = max(1, p_s - air.auxil.ps[3]);
 
     # unpack the cache vars (note do not reuse these vars in the photosynthesis_only! function)
     gh1 = cache.cache_incl_azi_1_1;
