@@ -17,16 +17,16 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_pressure_profile!(config::SPACConfig{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, cache::SPACCache{FT}, p_dos::FT) where {FT}
+    leaf_pressure_profile!(config::SPACConfig{FT}, leaf::Leaf{FT}, cache::SPACCache{FT}, p_dos::FT) where {FT}
 
 Update the leaf pressure profile, given
 - `config` `SPACConfig` type struct
-- `leaf` `CanopyLayer` or `Leaf` type struct
+- `leaf` `Leaf` type struct
 - `cache` `SPACCache` type struct
 - `p_dos` pressure at the dosing point `[MPa]`
 
 """
-function leaf_pressure_profile!(config::SPACConfig{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, cache::SPACCache{FT}, p_dos::FT) where {FT}
+function leaf_pressure_profile!(config::SPACConfig{FT}, leaf::Leaf{FT}, cache::SPACCache{FT}, p_dos::FT) where {FT}
     if leaf.xylem.trait.area <= 0
         return nothing
     end;

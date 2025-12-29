@@ -1,10 +1,35 @@
 # This file contains the state and auxil variables related to stomtal conductance (carbon and water fluxes)
+# This file contains the state and auxil variables related to stomtal conductance (carbon and water fluxes)
 
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
 # General
-#     2024-Jul-25: add CanopyLayerFluxState
+#     2024-Feb-26: add sturct LeafFluxTrait
+#
+#######################################################################################################################################################################################################
+"""
+
+$(TYPEDEF)
+
+Struct that contains leaf flux trait variables.
+
+# Fields
+
+$(TYPEDFIELDS)
+
+"""
+Base.@kwdef mutable struct LeafFluxTrait{FT}
+    "Minimal and maximum stomatal conductance for H₂O at 25 °C `[mol m⁻² s⁻¹]`"
+    g_limits::Vector{FT} = FT[0, 0.3]
+end;
+
+
+#######################################################################################################################################################################################################
+#
+# Changes to this struct
+# General
+#     2024-Jul-25: add LeafFluxState
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #
 #######################################################################################################################################################################################################
@@ -19,15 +44,15 @@ Struct that contains leaf flux state variables.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct CanopyLayerFluxState{FT}
+Base.@kwdef mutable struct LeafFluxState{FT}
     "Stomatal conductance to water vapor for sunlit and shaded (end element) leaves `[mol m⁻² s⁻¹]`"
     g_H₂O_s::Vector{FT}
 end;
 
-CanopyLayerFluxState(config::SPACConfig{FT}) where {FT} = (
+LeafFluxState(config::SPACConfig{FT}) where {FT} = (
     cache_dim_ppar = isnothing(config.DIMENSIONS.DIM_PPAR_BINS) ? config.DIMENSIONS.DIM_INCL * config.DIMENSIONS.DIM_AZI : config.DIMENSIONS.DIM_PPAR_BINS;
 
-    return CanopyLayerFluxState{FT}(0.01 .* ones(FT, cache_dim_ppar+1))
+    return LeafFluxState{FT}(0.01 .* ones(FT, cache_dim_ppar+1))
 );
 
 
@@ -35,7 +60,7 @@ CanopyLayerFluxState(config::SPACConfig{FT}) where {FT} = (
 #
 # Changes to this struct
 # General
-#     2024-Jul-25: add CanopyLayerFluxAuxil
+#     2024-Jul-25: add LeafFluxAuxil
 #     2024-Jul-30: add OCS to the trace gasses
 #     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
 #     2024-Aug-29: add field ∫∂c∂t_in for CO₂ exchange with the atmosphere
@@ -53,7 +78,7 @@ Struct that contains leaf flux auxiliary variables.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
+Base.@kwdef mutable struct LeafFluxAuxil{FT}
     # stomtal conductance
     "Boundary leaf diffusive conductance to CO₂ `[mol m⁻² s⁻¹]`"
     g_CO₂_b::FT = 3
@@ -111,10 +136,10 @@ Base.@kwdef mutable struct CanopyLayerFluxAuxil{FT}
     β::FT = NaN
 end;
 
-CanopyLayerFluxAuxil(config::SPACConfig{FT}) where {FT} = (
+LeafFluxAuxil(config::SPACConfig{FT}) where {FT} = (
     cache_dim_ppar = isnothing(config.DIMENSIONS.DIM_PPAR_BINS) ? config.DIMENSIONS.DIM_INCL * config.DIMENSIONS.DIM_AZI : config.DIMENSIONS.DIM_PPAR_BINS;
 
-    return CanopyLayerFluxAuxil{FT}(
+    return LeafFluxAuxil{FT}(
                 g_CO₂   = zeros(FT, cache_dim_ppar+1),
                 g_OCS   = zeros(FT, cache_dim_ppar+1),
                 ∂g∂t    = zeros(FT, cache_dim_ppar+1),
@@ -150,13 +175,13 @@ Struct that contains leaf flux variables.
 $(TYPEDFIELDS)
 
 """
-Base.@kwdef mutable struct CanopyLayerFlux{FT}
+Base.@kwdef mutable struct LeafFlux{FT}
     "Trait variables"
     trait::LeafFluxTrait{FT} = LeafFluxTrait{FT}()
     "Leaf flux state variables"
-    state::CanopyLayerFluxState{FT}
+    state::LeafFluxState{FT}
     "Leaf flux auxiliary variables"
-    auxil::CanopyLayerFluxAuxil{FT}
+    auxil::LeafFluxAuxil{FT}
 end;
 
-CanopyLayerFlux(config::SPACConfig{FT}) where {FT} = CanopyLayerFlux{FT}(state = CanopyLayerFluxState(config), auxil = CanopyLayerFluxAuxil(config));
+LeafFlux(config::SPACConfig{FT}) where {FT} = LeafFlux{FT}(state = LeafFluxState(config), auxil = LeafFluxAuxil(config));

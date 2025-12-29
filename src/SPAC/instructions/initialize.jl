@@ -47,7 +47,7 @@ initialize_energy_states!(stem::Stem{FT}) where {FT} = (
     return nothing
 );
 
-initialize_energy_states!(leaf::CanopyLayer{FT}) where {FT} = (
+initialize_energy_states!(leaf::Leaf{FT}) where {FT} = (
     leaf.capacitor.state.v_storage = leaf.capacitor.trait.v_max;
     leaf.energy.auxil.cp = heat_capacitance(leaf);
     leaf.energy.state.Σe = leaf.energy.auxil.cp * leaf.energy.auxil.t;

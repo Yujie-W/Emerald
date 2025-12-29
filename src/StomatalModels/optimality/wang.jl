@@ -13,16 +13,16 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂Θ∂E!(cache::SPACCache{FT}, sm::WangSM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT}
+    ∂Θ∂E!(cache::SPACCache{FT}, sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
 
 Update the ∂Θ∂E for sunlit leaves, given
 - `sm` `WangSM` type WangSM
-- `leaf` `CanopyLayer` type leaf
+- `leaf` `Leaf` type leaf
 
 """
 function ∂Θ∂E! end;
 
-∂Θ∂E!(cache::SPACCache{FT}, sm::WangSM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
+∂Θ∂E!(cache::SPACCache{FT}, sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     # if leaf xylem is not connected, do nothing
     if !leaf.xylem.state.connected
         leaf.flux.auxil.∂Θ∂E .= 0;

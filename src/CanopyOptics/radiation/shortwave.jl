@@ -37,7 +37,7 @@ function shortwave_radiation! end;
 
 shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = shortwave_radiation!(config, spac, spac.plant.leaves[1]);
 
-shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
+shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) where {FT} = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     sbulk = spac.soil_bulk;

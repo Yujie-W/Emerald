@@ -24,7 +24,7 @@ function leaf_energy_flows! end;
 
 leaf_energy_flows!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = leaf_energy_flows!(config, spac, spac.plant.leaves[1]);
 
-leaf_energy_flows!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
+leaf_energy_flows!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) where {FT} = (
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;

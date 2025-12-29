@@ -1,8 +1,8 @@
 # This file contains functions related to leaf flow profile
 
-flow_in(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = flow_in(leaf.xylem);
+flow_in(leaf::Leaf{FT}) where {FT} = flow_in(leaf.xylem);
 
-flow_out(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} = flow_out(leaf.xylem) + leaf.capacitor.auxil.flow;
+flow_out(leaf::Leaf{FT}) where {FT} = flow_out(leaf.xylem) + leaf.capacitor.auxil.flow;
 
 
 #######################################################################################################################################################################################################
@@ -29,7 +29,7 @@ function leaf_flow_profiles! end;
 
 leaf_flow_profiles!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = leaf_flow_profiles!(config, spac, spac.plant.leaves[1]);
 
-leaf_flow_profiles!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
+leaf_flow_profiles!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) where {FT} = (
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;

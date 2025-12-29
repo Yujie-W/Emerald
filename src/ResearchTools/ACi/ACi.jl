@@ -3,6 +3,7 @@ module ACi
 using DataFrames: DataFrame
 using PkgUtility.MathTools: ReduceStepMethodND, SolutionToleranceND, find_peak, nanmax, nanmin, rmse
 
+#=
 using ..Namespace: SPACConfig
 using ..Namespace: LeafPhotosystem
 using ..Namespace: GeneralC3Trait, GeneralC4Trait
@@ -16,6 +17,6 @@ include("rmse.jl");
 include("fit.jl");
 
 include("pipeline.jl");
-
+=#
 
 end # module

@@ -11,7 +11,7 @@
 #     2025-Nov-19: set min A to 0.01 when computing ∂Θ∂E
 #
 #######################################################################################################################################################################################################
-∂Θ∂E!(cache::SPACCache{FT}, sm::SperrySM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
+∂Θ∂E!(cache::SPACCache{FT}, sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     # if leaf xylem is not connected, do nothing
     if !leaf.xylem.state.connected
         leaf.flux.auxil.∂Θ∂E .= 0;

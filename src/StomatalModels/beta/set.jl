@@ -52,9 +52,9 @@ function β_factor! end;
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::AbstractStomatalConductanceModel{FT}) where {FT} = nothing;
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::AbstractStomatalConductanceModel{FT}) where {FT} = nothing;
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}) where {FT} = (
     if leaf.xylem.state.asap <= 0
         return nothing
     end;
@@ -65,9 +65,9 @@ function β_factor! end;
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}) where {FT} = β_factor!(roots, soils, leaf, β, β.PARAM_X);
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKleaf) where {FT} = (
     f_st = relative_surface_tension(leaf.energy.auxil.t);
 
     leaf.flux.auxil.β = β_factor(β.FUNC, relative_xylem_k(leaf.xylem.trait.vc, leaf.xylem.auxil.pressure[end] / f_st));
@@ -75,7 +75,7 @@ function β_factor! end;
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterKsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
@@ -113,13 +113,13 @@ function β_factor! end;
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPleaf) where {FT} = (
     leaf.flux.auxil.β = β_factor(β.FUNC, leaf.xylem.auxil.pressure[end]);
 
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterPsoil) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;
@@ -157,7 +157,7 @@ function β_factor! end;
     return nothing
 );
 
-β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
+β_factor!(roots::Vector{Root{FT}}, soils::Vector{SoilLayer{FT}}, leaf::Leaf{FT}, β::BetaFunction{FT}, param_x::BetaParameterΘ) where {FT} = (
     # weigh the beta by root Kmax for the roots with positive flow
     norm = 0;
     sumf = 0;

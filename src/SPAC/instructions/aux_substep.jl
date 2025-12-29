@@ -137,7 +137,7 @@ substep_aux!(stem::Stem{FT}) where {FT} = (
     return nothing
 );
 
-substep_aux!(leaf::CanopyLayer{FT}, shedded::Bool) where {FT} = (
+substep_aux!(leaf::Leaf{FT}, shedded::Bool) where {FT} = (
     # update the leaf buffer pressure and flow
     if !shedded
         x_aux = leaf.xylem.auxil;

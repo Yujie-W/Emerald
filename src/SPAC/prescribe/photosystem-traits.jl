@@ -1,10 +1,10 @@
 """
 
-    prescribe_ps_traits!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}; args...) where {FT}
+    prescribe_ps_traits!(leaf::Leaf{FT}; args...) where {FT}
     prescribe_ps_traits!(spac::BulkSPAC{FT}; args...) where {FT}
 
 Prescribe the photosynthetic traits for a single leaf, given
-- `leaf` `CanopyLayer` or `Leaf` object, keyword arguments:
+- `leaf` `Leaf` or `Leaf` object, keyword arguments:
     - `b6f` b6f content. Optional, default is nothing
     - `jmax` Jmax25. Optional, default is nothing
     - `rd` Dark respiration rate. Optional, default is nothing
@@ -17,7 +17,7 @@ Prescribe the photosynthetic traits for a single leaf, given
 function prescribe_ps_traits! end;
 
 # Prescribe the variables for single leaf, suggest to do this only for top canopy
-prescribe_ps_traits!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}; args...) where {FT} = prescribe_ps_traits!(leaf.photosystem.trait; args...);
+prescribe_ps_traits!(leaf::Leaf{FT}; args...) where {FT} = prescribe_ps_traits!(leaf.photosystem.trait; args...);
 
 prescribe_ps_traits!(
             pst::GeneralC3Trait{FT};

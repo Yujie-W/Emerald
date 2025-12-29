@@ -11,15 +11,15 @@
 #######################################################################################################################################################################################################
 """
 
-    extraxylary_pressure_profile!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT}
+    extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT}
 
 Update the extraxylary pressure profile, given
-- `leaf` `CanopyLayer` or `Leaf` type structure
+- `leaf` `Leaf` or `Leaf` type structure
 
 """
 function extraxylary_pressure_profile! end;
 
-extraxylary_pressure_profile!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}) where {FT} =
+extraxylary_pressure_profile!(leaf::Leaf{FT}) where {FT} =
     extraxylary_pressure_profile!(leaf.xylem.trait, leaf.xylem.auxil, leaf.capacitor.trait, leaf.capacitor.state, leaf.capacitor.auxil, leaf.energy.auxil.t);
 
 extraxylary_pressure_profile!(

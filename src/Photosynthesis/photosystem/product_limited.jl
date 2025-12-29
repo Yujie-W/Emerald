@@ -2,23 +2,14 @@
 
     product_limited_rate!(
                 cache::SPACCache{FT},
-                ps::CanopyLayerPhotosystem{FT},
+                ps::LeafPhotosystem{FT},
                 air::AirLayer{FT},
                 g_lc::Vector{FT};
-                β::FT = FT(1)) where {FT}
-    product_limited_rate!(
-                ps::LeafPhotosystem{FT},
-                p_i::FT;
-                β::FT = FT(1)) where {FT}
-    product_limited_rate!(
-                ps::LeafPhotosystem{FT},
-                air::AirLayer{FT},
-                g_lc::FT;
                 β::FT = FT(1)) where {FT}
 
 Update the product limited photosynthetic rate, given
 - `cache` `SPACCache` struct
-- `ps` `CanopyLayerPhotosystem` or `LeafPhotosystem` struct
+- `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct for environmental conditions like O₂ partial pressure
 - `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
@@ -27,44 +18,7 @@ Update the product limited photosynthetic rate, given
 """
 function product_limited_rate! end;
 
-# For Leaf
-# Pressure mode
-product_limited_rate!(
-            config::SPACConfig{FT},
-            ps::LeafPhotosystem{FT},
-            p_i::FT;
-            β::FT = FT(1)) where {FT} = product_limited_rate!(config, ps.trait, ps.auxil, p_i; β = β);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC3Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            p_i::FT;
-            β::FT = FT(1)) where {FT} = product_limited_rate!(config, pst, psa, config.METHODS.C3_AP_METHOD, p_i; β = β);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC4Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            p_i::FT;
-            β::FT = FT(1)) where {FT} = product_limited_rate!(config, pst, psa, config.METHODS.C4_AP_METHOD, p_i; β = β);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC3Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            apm::ApMethodC3Inf,
-            p_i::FT;
-            β::FT = FT(1)) where {FT} = (psa.a_p = FT(Inf); return nothing);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC3Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            apm::ApMethodC3Vcmax,
-            p_i::FT;
-            β::FT = FT(1)) where {FT} = (psa.a_p = β * psa.v_cmax / 2; return nothing);
-
+#=
 product_limited_rate!(
             config::SPACConfig{FT},
             pst::GeneralC4Trait{FT},
@@ -80,102 +34,12 @@ product_limited_rate!(
             apm::ApMethodC4VpmaxPi,
             p_i::FT;
             β::FT = FT(1)) where {FT} = (psa.a_p = β * psa.v_pmax * p_i / (p_i + psa.k_pep); return nothing);
+=#
 
-# Conductance mode
-product_limited_rate!(
-            config::SPACConfig{FT},
-            ps::LeafPhotosystem{FT},
-            air::AirLayer{FT},
-            g_lc::FT;
-            β::FT = FT(1)) where {FT} = product_limited_rate!(config, ps.trait, ps.auxil, air, g_lc; β = β);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC3Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            air::AirLayer{FT},
-            g_lc::FT;
-            β::FT = FT(1)) where {FT} = product_limited_rate!(config, pst, psa, config.METHODS.C3_AP_METHOD, air, g_lc; β = β);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC4Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            air::AirLayer{FT},
-            g_lc::FT;
-            β::FT = FT(1)) where {FT} = product_limited_rate!(config, pst, psa, config.METHODS.C4_AP_METHOD, air, g_lc; β = β);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC3Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            apm::ApMethodC3Inf,
-            air::AirLayer{FT},
-            g_lc::FT;
-            β::FT = FT(1)) where {FT} = (psa.a_p = FT(Inf); return nothing);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC3Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            ApMethodC3Vcmax,
-            air::AirLayer{FT},
-            g_lc::FT;
-            β::FT = FT(1)) where {FT} = (psa.a_p = β * psa.v_cmax / 2; return nothing);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC4Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            apm::ApMethodC4VcmaxPi,
-            air::AirLayer{FT},
-            g_lc::FT;
-            β::FT = FT(1)) where {FT} = (
-    a = air.state.p_air;
-    g = FT(1e6) * g_lc;
-    k = β * psa.k_pep_clm * pst.v_cmax25;
-    p = air.auxil.ps[2];
-    r = β * psa.r_d;
-
-    p_i = (g * p + a * r) / (a * k + g);
-    psa.a_p = k * p_i;
-
-    return nothing
-);
-
-product_limited_rate!(
-            config::SPACConfig{FT},
-            pst::GeneralC4Trait{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            apm::ApMethodC4VpmaxPi,
-            air::AirLayer{FT},
-            g_lc::FT;
-            β::FT = FT(1)) where {FT} = (
-    a = β * psa.v_pmax;
-    d = psa.k_pep;
-    f = air.state.p_air / g_lc * FT(1e-6);
-    p = air.auxil.ps[2];
-    r = β * psa.r_d;
-
-    qa = f;
-    qb = f * r - p - d - a * f;
-    qc = a * p - r * (p + d);
-    an = lower_quadratic(qa, qb, qc);
-
-    if g_lc == 0
-        psa.a_p = r;
-    else
-        psa.a_p = an + r;
-    end;
-
-    return nothing
-);
-
-# For CanopyLayer (Conductance mode only)
 product_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            ps::CanopyLayerPhotosystem{FT},
+            ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             g_lc::Vector{FT};
             β::FT = FT(1)) where {FT} = product_limited_rate!(config, cache, ps.trait, ps.auxil, air, g_lc; β = β);
@@ -184,7 +48,7 @@ product_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
             pst::GeneralC3Trait{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
+            psa::LeafPhotosystemAuxil{FT},
             air::AirLayer{FT}, g_lc::Vector{FT};
             β::FT = FT(1)) where {FT} = product_limited_rate!(config, cache, pst, psa, config.METHODS.C3_AP_METHOD, air, g_lc; β = β);
 
@@ -192,7 +56,7 @@ product_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
             pst::GeneralC4Trait{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
+            psa::LeafPhotosystemAuxil{FT},
             air::AirLayer{FT}, g_lc::Vector{FT};
             β::FT = FT(1)) where {FT} = product_limited_rate!(config, cache, pst, psa, config.METHODS.C4_AP_METHOD, air, g_lc; β = β);
 
@@ -200,7 +64,7 @@ product_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
             pst::GeneralC3Trait{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
+            psa::LeafPhotosystemAuxil{FT},
             apm::ApMethodC3Inf,
             air::AirLayer{FT},
             g_lc::Vector{FT};
@@ -210,7 +74,7 @@ product_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
             pst::GeneralC3Trait{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
+            psa::LeafPhotosystemAuxil{FT},
             apm::ApMethodC3Vcmax,
             air::AirLayer{FT}, g_lc::Vector{FT};
             β::FT = FT(1)) where {FT} = (@. psa.a_p = β * psa.v_cmax / 2; return nothing);
@@ -219,7 +83,7 @@ product_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
             pst::GeneralC4Trait{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
+            psa::LeafPhotosystemAuxil{FT},
             apm::ApMethodC4VcmaxPi,
             air::AirLayer{FT},
             g_lc::Vector{FT};
@@ -244,7 +108,7 @@ product_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
             pst::GeneralC4Trait{FT},
-            psa::CanopyLayerPhotosystemAuxil{FT},
+            psa::LeafPhotosystemAuxil{FT},
             apm::ApMethodC4VpmaxPi,
             air::AirLayer{FT},
             g_lc::Vector{FT};

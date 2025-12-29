@@ -17,7 +17,7 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂A∂E!(cache::SPACCache{FT}, leaf::Union{CanopyLayer{FT}, Leaf{FT}}, air::AirLayer{FT}) where {FT}
+    ∂A∂E!(cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
 
 Update the ∂A∂E for sunlit leaves, given
 - `cache` `SPACCache` type cache
@@ -27,7 +27,7 @@ Update the ∂A∂E for sunlit leaves, given
 """
 function ∂A∂E! end;
 
-∂A∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}) where {FT} = (
+∂A∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     # if leaf xylem is not connected, do nothing
     if !leaf.xylem.state.connected
         leaf.flux.auxil.∂A∂E .= 0;

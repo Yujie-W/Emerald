@@ -34,7 +34,7 @@ stomatal_conductance!(spac::BulkSPAC{FT}, δt::FT) where {FT} = (
     return nothing
 );
 
-stomatal_conductance!(leaf::CanopyLayer{FT}, δt::FT) where {FT} = (
+stomatal_conductance!(leaf::Leaf{FT}, δt::FT) where {FT} = (
     # if leaf xylem is not connected, do nothing
     if !leaf.xylem.state.connected
         leaf.flux.state.g_H₂O_s .= 0;
@@ -44,21 +44,6 @@ stomatal_conductance!(leaf::CanopyLayer{FT}, δt::FT) where {FT} = (
 
     # update the stomatal conductance based on ∂g∂t
     leaf.flux.state.g_H₂O_s .+= leaf.flux.auxil.∂g∂t .* δt;
-    limit_stomatal_conductance!(leaf);
-
-    return nothing
-);
-
-stomatal_conductance!(leaf::Leaf{FT}, δt::FT) where {FT} = (
-    # if leaf xylem is not connected, do nothing
-    if !leaf.xylem.state.connected
-        leaf.flux.state.g_H₂O_s = 0;
-
-        return nothing
-    end;
-
-    # update the stomatal conductance based on ∂g∂t
-    leaf.flux.state.g_H₂O_s += leaf.flux.auxil.∂g∂t * δt;
     limit_stomatal_conductance!(leaf);
 
     return nothing

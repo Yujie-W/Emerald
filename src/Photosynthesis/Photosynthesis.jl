@@ -16,8 +16,8 @@ using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4
 using ..Namespace: CytochromeFluorescenceModel, KNFluorescenceModel, QLFluorescenceModel, QLFluorescenceModelHan
 using ..Namespace: GeneralC3Trait, C3State
 using ..Namespace: GeneralC4Trait, C4State
-using ..Namespace: CanopyLayerPhotosystem, CanopyLayerPhotosystemAuxil, LeafPhotosystem, LeafPhotosystemAuxil
-using ..Namespace: CanopyLayer, Leaf
+using ..Namespace: LeafPhotosystem, LeafPhotosystemAuxil
+using ..Namespace: Leaf
 using ..Namespace: AirLayer
 using ..Namespace: BulkSPAC, SPACCache, SPACConfig
 
@@ -41,7 +41,6 @@ include("stomata/photo_only.jl");
 
 # functions to use with SPAC
 include("plant/layer.jl");
-include("plant/leaf.jl");
 include("plant/plant.jl");
 
 

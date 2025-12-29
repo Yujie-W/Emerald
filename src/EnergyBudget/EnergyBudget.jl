@@ -8,7 +8,7 @@ using PkgUtility.PhysicalChemistry: latent_heat_vapor
 using PkgUtility.UniversalConstants: CP_D_MOL, CP_I, CP_I_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GLUCOSE, M_H₂O, T₀, ρ_H₂O
 
 using ..Namespace: XylemHydraulics
-using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Root, Stem
+using ..Namespace: Leaf, JunctionCapacitor, Root, Stem
 using ..Namespace: AirLayer, AirLayerState
 using ..Namespace: SoilLayer, SoilLayerAuxil, SoilLayerState, SoilLayerTrait
 using ..Namespace: ExtraXylemCapacitorState, LeafBioTrait, LeafEnergyAuxil, LeafEnergyState, XylemHydraulicsState, XylemHydraulicsTrait

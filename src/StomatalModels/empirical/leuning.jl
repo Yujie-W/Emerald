@@ -1,6 +1,6 @@
 # This file contains the function for Leuning stomatal model
 
-empirical_equation(sm::LeuningSM{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
+empirical_equation(sm::LeuningSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; β::FT = FT(1)) where {FT} = (
     (; D0, G0, G1) = sm;
 
     γ = leaf.photosystem.auxil.γ_star;

@@ -38,7 +38,7 @@ Base.@kwdef mutable struct Plant{FT}
     "Branch hydraulic system"
     branches::Vector{Stem{FT}}
     "Leaf per layer"
-    leaves::Vector{CanopyLayer{FT}}
+    leaves::Vector{Leaf{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
     "Carbon pool `[mol]`"
@@ -108,8 +108,8 @@ mutable struct PlantStates{FT<:AbstractFloat}
     trunk::StemStates{FT}
     "Branch hydraulic system"
     branches::Vector{StemStates{FT}}
-    "CanopyLayer or Leaf per layer"
-    leaves::Vector{CanopyLayerStates{FT}}
+    "Leaf per layer"
+    leaves::Vector{LeafStates{FT}}
     "Corresponding air layer per canopy layer"
     leaves_index::Vector{Int}
     "Carbon pool `[mol]`"
@@ -125,7 +125,7 @@ PlantStates(plant::Plant{FT}) where {FT} = PlantStates{FT}(
             deepcopy(plant.junction.state),
             StemStates(plant.trunk),
             [StemStates(branch) for branch in plant.branches],
-            [CanopyLayerStates(l) for l in plant.leaves],
+            [LeafStates(l) for l in plant.leaves],
             deepcopy(plant.leaves_index),
             deepcopy(plant.pool),
             deepcopy(plant.memory)

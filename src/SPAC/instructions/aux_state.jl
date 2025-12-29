@@ -107,7 +107,7 @@ s_aux!(stem::Stem{FT}) where {FT} = (
     return nothing
 );
 
-s_aux!(leaf::CanopyLayer{FT}) where {FT} = (
+s_aux!(leaf::Leaf{FT}) where {FT} = (
     if leaf.xylem.trait.area > 0
         leaf.energy.auxil.cp = heat_capacitance(leaf);
         leaf.energy.auxil.t = leaf.energy.state.Σe / leaf.energy.auxil.cp;

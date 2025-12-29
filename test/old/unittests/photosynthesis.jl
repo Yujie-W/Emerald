@@ -176,7 +176,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Leaf photosynthesis" begin
         config = NS.SPACConfiguration(Float64);
-        leaf = NS.CanopyLayer(config);
+        leaf = NS.Leaf(config);
         leaf.xylem.trait.k_max = 0.05;
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar .= 100.0;

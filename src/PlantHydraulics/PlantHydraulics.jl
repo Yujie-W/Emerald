@@ -10,7 +10,7 @@ using ..Namespace: ComplexVC, LogisticVC, PowerVC, WeibullVC
 using ..Namespace: ExponentialPVCurve, LinearPVCurve, SegmentedPVCurve
 using ..Namespace: ExtraXylemCapacitor, ExtraXylemCapacitorAuxil, ExtraXylemCapacitorState, ExtraXylemCapacitorTrait
 using ..Namespace: XylemHydraulics, XylemHydraulicsAuxilNSS, XylemHydraulicsAuxilSS, XylemHydraulicsState, XylemHydraulicsTrait
-using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Root, Stem
+using ..Namespace: Leaf, JunctionCapacitor, Root, Stem
 using ..Namespace: SoilLayer
 using ..Namespace: BulkSPAC, SPACCache, SPACConfig
 

@@ -17,7 +17,7 @@ using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4
 using ..Namespace: AbstractTemperatureDependency, Arrhenius, ArrheniusPeak, ArrheniusPeak2, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
 using ..Namespace: GeneralC3Trait, GeneralC4Trait
 using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBio, LeafBioTrait, LeafEnergyAuxil, LeafEnergyState
-using ..Namespace: CanopyLayer, JunctionCapacitor, Leaf, Plant, Root, Stem
+using ..Namespace: Leaf, JunctionCapacitor, Plant, Root, Stem
 using ..Namespace: CanopyStructure, CanopyStructureAuxil, CanopyStructureTrait, MultiLayerCanopy
 using ..Namespace: AirLayer, AirLayerAuxil, AirLayerState
 using ..Namespace: SoilBulk, SoilLayer, SoilLayerAuxil, SoilLayerState, SoilLayerTrait

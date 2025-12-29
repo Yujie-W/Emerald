@@ -7,15 +7,15 @@
 #######################################################################################################################################################################################################
 """
 
-    xylem_conductance(organ::Union{CanopyLayer{FT}, Leaf{FT}, Root{FT}, Stem{FT}}) where {FT}
+    xylem_conductance(organ::Union{Leaf{FT}, Root{FT}, Stem{FT}}) where {FT}
 
 Return the xylem conductance, given
-- `organ` `CanopyLayer`, `Leaf`, `Root`, or `Stem` type structure
+- `organ` `Leaf`, `Root`, or `Stem` type structure
 
 """
 function xylem_conductance end;
 
-xylem_conductance(organ::Union{CanopyLayer{FT}, Leaf{FT}, Root{FT}, Stem{FT}}) where {FT} = xylem_conductance(organ.xylem);
+xylem_conductance(organ::Union{Leaf{FT},Root{FT},Stem{FT}}) where {FT} = xylem_conductance(organ.xylem);
 
 xylem_conductance(xylem::XylemHydraulics{FT}) where {FT} = xylem_conductance(xylem.trait, xylem.state);
 

@@ -12,7 +12,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Empirical equations" begin
         config = NS.SPACConfiguration(Float64);
-        leaf = NS.CanopyLayer(config);
+        leaf = NS.Leaf(config);
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar .= 100.0;
         leaf.flux.auxil.g_CO₂ .= 0.02;
@@ -33,7 +33,7 @@ import Emerald.EmeraldLand.SPAC
 
         # read the beta from stomatal models
         config = NS.SPACConfiguration(Float64);
-        leaf = NS.CanopyLayer(config);
+        leaf = NS.Leaf(config);
         SM.read_β(leaf);
         @test true;
 
@@ -68,7 +68,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "∂A∂E" begin
         config = NS.SPACConfiguration(Float64);
-        leaf = NS.CanopyLayer(config);
+        leaf = NS.Leaf(config);
         air = NS.AirLayer{Float64}();
         leaf.flux.auxil.ppar .= 100.0;
         leaf.flux.state.g_H₂O_s .= 0.02;
@@ -142,7 +142,7 @@ import Emerald.EmeraldLand.SPAC
 
     @testset "Stomatal limits" begin
         config = NS.SPACConfiguration(Float64);
-        leaf = NS.CanopyLayer(config);
+        leaf = NS.Leaf(config);
 
         leaf.flux.state.g_H₂O_s .= 0;
         SM.limit_stomatal_conductance!(leaf);

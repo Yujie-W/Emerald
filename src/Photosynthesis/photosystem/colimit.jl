@@ -61,27 +61,18 @@ colimited_rate!(
 """
 
     colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT}
-    colimit_photosynthesis!(psm::CanopyLayerPhotosystem{FT}; β::FT = FT(1)) where {FT}
 
 Colimit the photosynthesis by rubisco-, light-, and product-limited photosynthetic rates, given
-- `psm` `CanopyLayerPhotosystem` or `LeafPhotosystem` type photosynthesis model
+- `psm` `LeafPhotosystem` type photosynthesis model
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd (default is 1)
 
 """
 function colimit_photosynthesis! end;
 
-colimit_photosynthesis!(config::SPACConfig{FT}, psm::CanopyLayerPhotosystem{FT}; β::FT = FT(1)) where {FT} = (
+colimit_photosynthesis!(config::SPACConfig{FT}, psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT} = (
     colimited_rate!(psm.auxil.a_c, psm.auxil.a_j, psm.auxil.a_i, config.METHODS.COLIMIT_CJ);
     colimited_rate!(psm.auxil.a_p, psm.auxil.a_i, psm.auxil.a_g, config.METHODS.COLIMIT_IP);
     @. psm.auxil.a_n = psm.auxil.a_g - β .* psm.auxil.r_d;
-
-    return nothing
-);
-
-colimit_photosynthesis!(config::SPACConfig{FT}, psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT} = (
-    a_i = colimited_rate(psm.auxil.a_c, psm.auxil.a_j, config.METHODS.COLIMIT_CJ);
-    psm.auxil.a_g = colimited_rate(psm.auxil.a_p, a_i, config.METHODS.COLIMIT_IP);
-    psm.auxil.a_n = psm.auxil.a_g - β * psm.auxil.r_d;
 
     return nothing
 );

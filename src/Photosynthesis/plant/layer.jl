@@ -3,11 +3,6 @@
     leaf_photosynthesis!(
                 config::SPACConfig{FT},
                 cache::SPACCache{FT},
-                leaf::CanopyLayer{FT},
-                air::AirLayer{FT};
-                rd_only::Bool = false) where {FT}
-    leaf_photosynthesis!(
-                config::SPACConfig{FT},
                 leaf::Leaf{FT},
                 air::AirLayer{FT};
                 rd_only::Bool = false) where {FT}
@@ -15,7 +10,7 @@
 Updates leaf photosynthetic rates for the leaf based on leaf stomtal model, given
 - `config` `SPACConfig` type structure
 - `cache` `SPACCache` type structure
-- `leaf` `CanopyLayer` or `Leaf` structure
+- `leaf` `Leaf` or `Leaf` structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `rd_only` Whether to compute respiration rate only
 
@@ -26,7 +21,7 @@ function leaf_photosynthesis! end;
 leaf_photosynthesis!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            leaf::CanopyLayer{FT},
+            leaf::Leaf{FT},
             air::AirLayer{FT};
             rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, config.METHODS.STOMATAL_MODEL; rd_only = rd_only);
 
@@ -34,7 +29,7 @@ leaf_photosynthesis!(
 leaf_photosynthesis!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            leaf::CanopyLayer{FT},
+            leaf::Leaf{FT},
             air::AirLayer{FT},
             sm::AbstractStomatalConductanceModel{FT};
             rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, FT(1); rd_only = rd_only);
@@ -43,7 +38,7 @@ leaf_photosynthesis!(
 leaf_photosynthesis!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            leaf::CanopyLayer{FT},
+            leaf::Leaf{FT},
             air::AirLayer{FT},
             sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}};
             rd_only::Bool = false) where {FT} = leaf_photosynthesis!(config, cache, leaf, air, sm.β, sm.β.PARAM_Y; rd_only = rd_only);
@@ -51,7 +46,7 @@ leaf_photosynthesis!(
 leaf_photosynthesis!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            leaf::CanopyLayer{FT},
+            leaf::Leaf{FT},
             air::AirLayer{FT},
             β::BetaFunction{FT},
             param_y::BetaParameterG1;
@@ -60,7 +55,7 @@ leaf_photosynthesis!(
 leaf_photosynthesis!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            leaf::CanopyLayer{FT},
+            leaf::Leaf{FT},
             air::AirLayer{FT},
             β::BetaFunction{FT},
             param_y::BetaParameterVcmax;
@@ -70,7 +65,7 @@ leaf_photosynthesis!(
 leaf_photosynthesis!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            leaf::CanopyLayer{FT},
+            leaf::Leaf{FT},
             air::AirLayer{FT},
             β::FT;
             rd_only::Bool = false) where {FT} = (

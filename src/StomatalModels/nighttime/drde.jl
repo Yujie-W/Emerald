@@ -13,7 +13,7 @@
     ∂R∂E(leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT}
 
 Returns the marginal increase in leaf respiration rate per transpiration rate (per leaf area), given
-- `leaf` `Leaf`, `Leaf` type leaf
+- `leaf` `Leaf` type leaf
 - `air` `AirLayer` type environmental conditions
 - `eff_ϵ` Effective emissivity used to compute the longwave radiation emission (effective LAI * leaf emissivity)
 

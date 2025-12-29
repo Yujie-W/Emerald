@@ -1,20 +1,17 @@
-# This file contains the fields within a leaf
+# This file contains the fields within a canopy layer
 
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
 # General
-#     2023-Sep-26: add Leaf struct
-#     2023-Oct-03: add fields photosystem, flux
-#     2024-Feb-27: add the leaf cp and k_max in the constructor function
-#     2024-Sug-05: set the default B to 2 (was the same as the root and stem)
+#     2024-Jul-25: add struct Leaf
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct that contains the fields within a leaf
+Struct that contains the fields within a canopy layer
 
 # Fields
 
@@ -29,9 +26,9 @@ Base.@kwdef mutable struct Leaf{FT}
     "Leaf energy struct"
     energy::LeafEnergy{FT} = LeafEnergy{FT}()
     "Leaf flux struct"
-    flux::LeafFlux{FT} = LeafFlux{FT}()
+    flux::LeafFlux{FT}
     "Photosynthesis system struct"
-    photosystem::LeafPhotosystem{FT} = LeafPhotosystem{FT}("C3VJP")
+    photosystem::LeafPhotosystem{FT}
     "Leaf xylem hydraulics struct"
     xylem::XylemHydraulics{FT}
 end;
@@ -41,15 +38,14 @@ end;
 
     Leaf(config::SPACConfig{FT}) where {FT}
 
-Return the leaf struct with initialized energy states, given
+Return the Leaf struct with initialized energy states, given
 - `config` `SPACConfig` type struct
 
 """
 Leaf(config::SPACConfig{FT}) where {FT} = (
-    leaf = Leaf{FT}(bio = LeafBio(config), xylem = XylemHydraulics(config));
+    leaf = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), photosystem = LeafPhotosystem(config), xylem = XylemHydraulics(config));
     leaf.xylem.trait.cp = 1780;
     leaf.xylem.trait.k_max = 0.04;
-    leaf.xylem.trait.vc.B = 2;
 
     return leaf
 );
@@ -70,14 +66,14 @@ kill_plant!(st::Leaf{FT}) where {FT} = (
 #
 # Changes to this struct
 # General
-#     2024-Feb-22: add struct LeafStates
+#     2024-Jul-25: add struct LeafStates
 #
 #######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
 
-Struct to save leaf states (collections of states)
+Struct to save canopy layer states (collections of states)
 
 # Fields
 

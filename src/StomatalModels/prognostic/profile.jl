@@ -40,23 +40,12 @@ stomatal_conductance_profile!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where 
     return nothing
 );
 
-stomatal_conductance_profile!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::CanopyLayer{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
+stomatal_conductance_profile!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
     if leaf.flux.auxil.ppar[end] > 0
         ∂g∂t!(config, cache, leaf, air);
     else
         dgndt = ∂gₙ∂t(config, leaf, air, eff_ϵ);
         @. leaf.flux.auxil.∂g∂t = dgndt;
-    end;
-
-    return nothing
-);
-
-stomatal_conductance_profile!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}, eff_ϵ::FT) where {FT} = (
-    if leaf.flux.auxil.ppar > 0
-        ∂g∂t!(config, cache, leaf, air);
-    else
-        dgndt = ∂gₙ∂t(config, leaf, air, eff_ϵ);
-        leaf.flux.auxil.∂g∂t = dgndt;
     end;
 
     return nothing

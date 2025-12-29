@@ -81,7 +81,7 @@ adjusted_time(soil::SoilLayer{FT}, δt::FT) where {FT} = (
 
 adjusted_time(plant::Plant{FT}, lai::FT, δt::FT) where {FT} = adjusted_time(plant, lai, δt, plant.leaves[1]);
 
-adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::CanopyLayer{FT}) where {FT} = (
+adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::Leaf{FT}) where {FT} = (
     new_δt::FT = δt;
 
     # make sure root temperature does not change more than 1 K per time step

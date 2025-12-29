@@ -84,13 +84,13 @@ end;
 
     photosystem_temperature_dependence!(
                 config::SPACConfig{FT},
-                ps::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}},
+                ps::LeafPhotosystem{FT},
                 air::AirLayer{FT},
                 t::FT) where {FT}
 
 Update the temperature dependencies of C3 photosynthesis model, given
 - `config` `SPACConfig` structure
-- `ps` `LeafPhotosystem` or `CanopyLayerPhotosystem` structure
+- `ps` `LeafPhotosystem` structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure
 - `t` Target temperature in `K`
 
@@ -99,28 +99,28 @@ function photosystem_temperature_dependence! end;
 
 photosystem_temperature_dependence!(
             config::SPACConfig{FT},
-            ps::Union{CanopyLayerPhotosystem{FT}, LeafPhotosystem{FT}},
+            ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             t::FT) where {FT} = photosystem_temperature_dependence!(config, ps.trait, ps.auxil, air, t);
 
 photosystem_temperature_dependence!(
             config::SPACConfig{FT},
             pst::GeneralC3Trait{FT},
-            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            psa::Union{LeafPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             air::AirLayer{FT},
             t::FT) where {FT} = photosystem_temperature_dependence!(config, pst, psa, config.METHODS.C3_AC_METHOD, config.METHODS.C3_AJ_METHOD, config.METHODS.C3_AP_METHOD, air, t);
 
 photosystem_temperature_dependence!(
             config::SPACConfig{FT},
             pst::GeneralC4Trait{FT},
-            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            psa::Union{LeafPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             air::AirLayer{FT},
             t::FT) where {FT} = photosystem_temperature_dependence!(config, pst, psa, config.METHODS.C4_AC_METHOD, config.METHODS.C4_AJ_METHOD, config.METHODS.C4_AP_METHOD, air, t);
 
 photosystem_temperature_dependence!(
             config::SPACConfig{FT},
             pst::GeneralC3Trait{FT},
-            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            psa::Union{LeafPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             acm::AcMethodC3VcmaxPi,
             ajm::AjMethodC3JmaxPi,
             apm::Union{ApMethodC3Inf, ApMethodC3Vcmax},
@@ -146,7 +146,7 @@ photosystem_temperature_dependence!(
 photosystem_temperature_dependence!(
             config::SPACConfig{FT},
             pst::GeneralC3Trait{FT},
-            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            psa::Union{LeafPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             acm::AcMethodC3VcmaxPi,
             ajm::AjMethodC3VqmaxPi,
             apm::Union{ApMethodC3Inf, ApMethodC3Vcmax},
@@ -179,7 +179,7 @@ photosystem_temperature_dependence!(
 photosystem_temperature_dependence!(
             config::SPACConfig{FT},
             pst::GeneralC4Trait{FT},
-            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            psa::Union{LeafPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VcmaxPi,
@@ -201,7 +201,7 @@ photosystem_temperature_dependence!(
 photosystem_temperature_dependence!(
             config::SPACConfig{FT},
             pst::GeneralC4Trait{FT},
-            psa::Union{CanopyLayerPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
+            psa::Union{LeafPhotosystemAuxil{FT}, LeafPhotosystemAuxil{FT}},
             acm::AcMethodC4Vcmax,
             ajm::AjMethodC4JPSII,
             apm::ApMethodC4VpmaxPi,

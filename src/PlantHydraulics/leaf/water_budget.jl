@@ -10,8 +10,8 @@
 #######################################################################################################################################################################################################
 """
 
-    leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT}
-    leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT}
+    leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT}
+    leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT}
 
 Set the flow profile of the leaf, given
 - `leaf` `Leaf` type struct
@@ -21,7 +21,7 @@ Set the flow profile of the leaf, given
 """
 function leaf_water_budget! end;
 
-leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
+leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilNSS{FT}, δt::FT) where {FT} = (
     # update the integrators of the flow
     leaf.flux.auxil.∫∂w∂t_out += flow_out(leaf) * δt;
 
@@ -31,7 +31,7 @@ leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulic
     return nothing
 );
 
-leaf_water_budget!(leaf::Union{CanopyLayer{FT}, Leaf{FT}}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT} = (
+leaf_water_budget!(leaf::Leaf{FT}, x_aux::XylemHydraulicsAuxilSS{FT}, δt::FT) where {FT} = (
     leaf.flux.auxil.∫∂w∂t_out += flow_out(leaf) * δt;
 
     return nothing

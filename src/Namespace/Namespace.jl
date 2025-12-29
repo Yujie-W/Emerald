@@ -69,10 +69,8 @@ include("plant/stem/stem.jl");
 include("plant/leaf/biophysics.jl");
 include("plant/leaf/energy.jl");
 include("plant/leaf/extraxylem.jl");
-include("plant/leaf/leafflux.jl");
 include("plant/leaf/layerflux.jl");
 include("plant/leaf/photosynthesis.jl");
-include("plant/leaf/layer.jl");
 include("plant/leaf/leaf.jl");
 
 # Canopy
