@@ -458,8 +458,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3CytoInfAp"
@@ -467,8 +467,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3JB"
@@ -476,8 +476,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3JBInfAp"
@@ -485,8 +485,8 @@ LeafPhotosystem{FT}(model::String) where {FT} = (
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3VJP"
@@ -594,8 +594,8 @@ CanopyLayerPhotosystem(config::SPACConfig{FT}, model::String = "C3VJP") where {F
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3CytoInfAp"
@@ -603,8 +603,8 @@ CanopyLayerPhotosystem(config::SPACConfig{FT}, model::String = "C3VJP") where {F
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDWang(FT);
         ps.trait.TD_ηL = ηLTDWang(FT);
     elseif model == "C3JB"
@@ -612,8 +612,8 @@ CanopyLayerPhotosystem(config::SPACConfig{FT}, model::String = "C3VJP") where {F
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3JBInfAp"
@@ -621,8 +621,8 @@ CanopyLayerPhotosystem(config::SPACConfig{FT}, model::String = "C3VJP") where {F
         ps.trait.ACM = AcMethodC3VcmaxPi();
         ps.trait.AJM = AjMethodC3VqmaxPi();
         ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit{FT}();
-        ps.trait.FLM = CytochromeFluorescenceModel{FT}();
+        ps.trait.COLIMIT_J = SerialColimit();
+        ps.trait.FLM = CytochromeFluorescenceModel();
         ps.trait.TD_ηC = ηCTDJohnson(FT);
         ps.trait.TD_ηL = ηLTDJohnson(FT);
     elseif model == "C3VJP"

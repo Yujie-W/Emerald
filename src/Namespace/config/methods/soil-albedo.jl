@@ -31,3 +31,14 @@ struct SoilAlbedoHyperspectralCLM <: AbstractSoilAlbedo end;
 
 """ Hyperspectral soil albedo fitted from CLIMA broadband soil albedo """
 struct SoilAlbedoHyperspectralCLIMA <: AbstractSoilAlbedo end;
+
+
+# Union alias
+UnionSoilAlbedo = Union{
+    SoilAlbedoPrescribe,
+    SoilAlbedoBroadbandCLM,
+    SoilAlbedoBroadbandCLIMA,
+    SoilAlbedoHyperspectralCLM,
+    SoilAlbedoHyperspectralCLIMA,
+    SoilAlbedoHyperspectralAsh
+}

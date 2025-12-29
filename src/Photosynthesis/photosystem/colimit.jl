@@ -1,19 +1,6 @@
-# This file contains function to calculate colimitation of photosynthesis
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jan-14: add colimit function back
-#     2022-Feb-07: add C3Cytochrome to method (colimit j_p680 and j_p700 as well)
-#     2022-Feb-11: add colimited_rate for general purpose in ETR as well as a_gross
-#     2022-Mar-01: add colimit method for serial colimitation
-#     2022-Mar-01: add colimit method for square colimitation
-#
-#######################################################################################################################################################################################################
 """
 
-    colimited_rate(a_1::FT, a_2::FT, colim::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}}) where {FT}
+    colimited_rate(a_1::FT, a_2::FT, colim::Union{MinimumColimit,QuadraticColimit{FT},SerialColimit,SquareColimit}) where {FT}
 
 Return the minimum of two rates, given
 - `a_1` Rate 1
@@ -23,25 +10,18 @@ Return the minimum of two rates, given
 """
 function colimited_rate end;
 
-colimited_rate(a_1::FT, a_2::FT, colim::MinimumColimit{FT}) where {FT} = min(a_1, a_2);
+colimited_rate(a_1::FT, a_2::FT, ::MinimumColimit) where {FT} = min(a_1, a_2);
 
 colimited_rate(a_1::FT, a_2::FT, colim::QuadraticColimit{FT}) where {FT} = lower_quadratic(colim.CURVATURE, -(a_1 + a_2), a_1 * a_2);
 
-colimited_rate(a_1::FT, a_2::FT, colim::SerialColimit{FT}) where {FT} = a_1 * a_2 / (a_1 + a_2);
+colimited_rate(a_1::FT, a_2::FT, ::SerialColimit) where {FT} = a_1 * a_2 / (a_1 + a_2);
 
-colimited_rate(a_1::FT, a_2::FT, colim::SquareColimit{FT}) where {FT} = a_1 * a_2 / sqrt(a_1 ^ 2 + a_2 ^ 2);
+colimited_rate(a_1::FT, a_2::FT, ::SquareColimit) where {FT} = a_1 * a_2 / sqrt(a_1 ^ 2 + a_2 ^ 2);
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Aug-01: add function colimited_rate!
-#
-#######################################################################################################################################################################################################
 """
 
-    colimited_rate!(a_1::Union{FT, Vector{FT}}, a_2::Vector{FT}, a_i::Vector{FT}, colim::Union{MinimumColimit{FT}, QuadraticColimit{FT}, SerialColimit{FT}, SquareColimit{FT}}) where {FT}
+    colimited_rate!(a_1::Union{FT,Vector{FT}}, a_2::Vector{FT}, a_i::Vector{FT}, colim::Union{MinimumColimit,QuadraticColimit{FT},SerialColimit,SquareColimit}) where {FT}
 
 Colimit the rates, given
 - `a_1` Rate 1
@@ -56,7 +36,7 @@ colimited_rate!(
             a_1::Union{FT, Vector{FT}},
             a_2::Vector{FT},
             a_i::Vector{FT},
-            colim::MinimumColimit{FT}) where {FT} = (@. a_i = min(a_1, a_2); return nothing);
+            ::MinimumColimit) where {FT} = (@. a_i = min(a_1, a_2); return nothing);
 
 # a_i .= lower_quadratic.(colim.CURVATURE, -a_1 .- a_2, a_1 .* a_2);
 colimited_rate!(
@@ -69,25 +49,15 @@ colimited_rate!(
             a_1::Union{FT, Vector{FT}},
             a_2::Vector{FT},
             a_i::Vector{FT},
-            colim::SerialColimit{FT}) where {FT} = (@. a_i = a_1 * a_2 / (a_1 + a_2); return nothing);
+            ::SerialColimit) where {FT} = (@. a_i = a_1 * a_2 / (a_1 + a_2); return nothing);
 
 colimited_rate!(
             a_1::Union{FT, Vector{FT}},
             a_2::Vector{FT},
             a_i::Vector{FT},
-            colim::SquareColimit{FT}) where {FT} = (@. a_i = a_1 * a_2 / sqrt(a_1 ^ 2 + a_2 ^ 2); return nothing);
+            ::SquareColimit) where {FT} = (@. a_i = a_1 * a_2 / sqrt(a_1 ^ 2 + a_2 ^ 2); return nothing);
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jan-14: add colimit function back
-#     2022-Jan-24: use colimit from psm to abstractize the MinimumColimit and QuadraticColimit methods
-#     2022-Feb-07: add C3Cyto support
-#     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
-#
-#######################################################################################################################################################################################################
 """
 
     colimit_photosynthesis!(psm::LeafPhotosystem{FT}; β::FT = FT(1)) where {FT}

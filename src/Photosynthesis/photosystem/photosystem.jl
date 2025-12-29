@@ -1,10 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Jul-19: add photosynthesis! function to compute photosynthesis rate from Pi, PPAR, and Tleaf
-#
-#######################################################################################################################################################################################################
 """
 
     photosynthesis!(config::SPACConfig{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT}
@@ -22,11 +15,11 @@ function photosynthesis! end;
 
 photosynthesis!(config::SPACConfig{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT} = (
     photosystem_temperature_dependence!(config, ps, air, t);
-    photosystem_electron_transport!(ps, ppar, p_i);
-    rubisco_limited_rate!(ps, p_i);
+    photosystem_electron_transport!(config, ps, ppar, p_i);
+    rubisco_limited_rate!(config, ps, p_i);
     light_limited_rate!(ps);
-    product_limited_rate!(ps, p_i);
-    colimit_photosynthesis!(ps);
+    product_limited_rate!(config,ps, p_i);
+    colimit_photosynthesis!(config,ps);
     photosystem_coefficients!(config, ps, ppar);
 
     return nothing

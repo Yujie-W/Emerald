@@ -167,3 +167,17 @@ Base.@kwdef mutable struct Wang2SM{FT<:AbstractFloat} <: AbstractStomatalConduct
     "Slope constant `[mol² m⁻² s⁻¹ μmol⁻¹]`"
     K::FT = 1e-7
 end;
+
+
+# Union alias
+UnionStomatalConductanceModel{FT<:AbstractFloat} = Union{
+    AndereggSM{FT},
+    BallBerrySM{FT},
+    EllerSM{FT},
+    GentineSM{FT},
+    LeuningSM{FT},
+    MedlynSM{FT},
+    SperrySM{FT},
+    WangSM{FT},
+    Wang2SM{FT}
+}

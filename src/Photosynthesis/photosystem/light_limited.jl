@@ -1,20 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jan-14: refactor the function light_limited_rate!
-#     2022-Jan-14: add p_i to input list to make the code more modular
-#     2022-Jan-14: add g_lc to input list to make the code more modular
-#     2022-Jan-24: add C3CytochromeModel support in a Union
-#     2022-Feb-28: add C3CytochromeModel support
-#     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
-#     2023-Jun-15: set a_j to 0 when j is 0 (not a quadratic function any more)
-#     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
-# Bug fixes
-#     2023-Sep-21: if g_lc is 0, set a_j to r
-#     2025-Nov-19: set a_j per g_lc
-#
-#######################################################################################################################################################################################################
 """
 
     light_limited_rate!(

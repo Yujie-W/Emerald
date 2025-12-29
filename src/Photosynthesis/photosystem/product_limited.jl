@@ -1,21 +1,3 @@
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jan-14: refactor the function product_limited_rate!
-#     2022-Jan-14: add input variable p_i to make the code more modular
-#     2022-Jan-14: add input variable g_lc to make the code more modular
-#     2022-Jan-18: add support to C3CytochromeModel
-#     2022-Feb-28: add C3CytochromeModel support
-#     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
-#     2024-Apr-15: add support to C4CLMTrait model using CLM settings
-#     2024-Jul-22: add support to C3FvCBTrait and C3JBTrait model (infinity a_p)
-#     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
-# Bug fixes
-#     2023-Sep-21: if g_lc is 0, set a_p to r
-#     2025-Nov-19: set a_j per g_lc
-#
-#######################################################################################################################################################################################################
 """
 
     product_limited_rate!(

@@ -1,16 +1,3 @@
-# This file contains function to make temperature dependencies for photosynthesis
-
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jan-13: use ClimaCache types, which uses ΔHA, ΔHD, and ΔSV directly
-#     2022-Jan-13: add optional input t_ref to allow for manually setting reference temperature
-#     2022-Jul-29: add support to Q10Peak
-#     2024-Aug-01: add support for Q10PeakHT and Q10PeakLTHT
-#     2024-Oct-04: add support to ArrheniusPeak2
-#
-#######################################################################################################################################################################################################
 """
 
     temperature_correction(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}}, Q10PeakHT{FT}, Q10PeakLTHT{FT}, t::FT; t_ref::FT = td.T_REF) where {FT}
@@ -78,16 +65,6 @@ temperature_correction(td::Q10PeakLTHT{FT}, t::FT; t_ref::FT = td.T_REF) where {
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jan-13: use ClimaCache types, which uses ΔHA, ΔHD, and ΔSV directly
-#     2022-Jan-13: add optional input t_ref to allow for manually setting reference temperature
-#     2022-Jul-29: add support to Q10Peak
-#     2024-Oct-04: add support to ArrheniusPeak2
-#
-#######################################################################################################################################################################################################
 """
 
     temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT}, Q10{FT}, Q10Peak{FT}, Q10PeakHT{FT}, Q10PeakLTHT{FT}}, t::FT; t_ref::FT = td.T_REF) where {FT}
@@ -103,20 +80,6 @@ function temperature_corrected_value(td::Union{Arrhenius{FT}, ArrheniusPeak{FT},
 end;
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2022-Jan-14: use ClimaCache types, which saves photosystem temperature dependencies within the struct
-#     2022-Feb-07: add method for C3CytochromeModel photosynthesis model
-#     2022-Feb-07: add v_qmax without temperature dependency
-#     2022-Mar-01: add temperature dependencies for k_q, v_qmax, η_c, and η_l
-#     2024-Apr-15: add support for C4CLMTrait model
-#     2024-Jul-27: set η_c and η_l to min(η_c, η_l) to avoid η < 1
-#     2024-Aug-01: generalize the function for GeneralC3Trait and GeneralC4Trait
-#     2024-Oct-01: typo fix to set η_c and η_l to min(η_c, η_l) to avoid η < 1
-#
-#######################################################################################################################################################################################################
 """
 
     photosystem_temperature_dependence!(

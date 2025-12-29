@@ -56,8 +56,8 @@ EmeraldLand.SPAC.spac!(config, spac, 3600);
 spac = EmeraldLand.Namespace.BulkSPAC(config);
 for l in spac.plant.leaves
     l.photosystem.trait.AJM = EmeraldLand.Namespace.AjMethodC3VqmaxPi();
-    l.photosystem.trait.COLIMIT_J = EmeraldLand.Namespace.SerialColimit{FT}();
-    l.photosystem.trait.FLM = EmeraldLand.Namespace.CytochromeFluorescenceModel{FT}();
+    l.photosystem.trait.COLIMIT_J = EmeraldLand.Namespace.SerialColimit();
+    l.photosystem.trait.FLM = EmeraldLand.Namespace.CytochromeFluorescenceModel();
 end;
 EmeraldLand.SPAC.initialize_spac!(config, spac);
 EmeraldLand.SPAC.spac!(config, spac, 3600);

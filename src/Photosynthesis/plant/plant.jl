@@ -1,17 +1,3 @@
-# This file contains functions to compute leaf photosynthesis of the entire plant
-
-######################################################################################################################################################################################################
-#
-# Changes to this method
-# General
-#     2022-Jun-29: add method for BulkSPAC
-#     2022-Jul-01: add β to variable list to account for Vmax downregulation used in CLM5
-#     2023-Mar-11: only compute respiration rate if solar zenith angle >= 89
-#     2023-Mar-11: do nothing if LAI == 0
-#     2024-Jul-25: save average a_g and a_n (to use later)
-#     2024-Jul-30: compute OCS fluxes along with photosynthesis
-#
-#######################################################################################################################################################################################################
 """
 
     plant_photosynthesis!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
@@ -23,9 +9,7 @@ Updates leaf photosynthetic rates for SPAC, given
 """
 function plant_photosynthesis! end;
 
-plant_photosynthesis!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = plant_photosynthesis!(config, spac, spac.plant.leaves[1]);
-
-plant_photosynthesis!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{FT}) where {FT} = (
+plant_photosynthesis!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
     # if there is no leaf, do nothing
     if spac.canopy.structure.trait.lai <= 0
         return nothing
@@ -57,14 +41,6 @@ plant_photosynthesis!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::CanopyLayer{
 );
 
 
-######################################################################################################################################################################################################
-#
-# Changes to this function
-# General
-#     2024-Aug-29: add function to update the carbon pool budget of the plant
-#     2024-Sep-03: do not update the carbon pool if the plant is dead
-#
-#######################################################################################################################################################################################################
 """
 
     plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}

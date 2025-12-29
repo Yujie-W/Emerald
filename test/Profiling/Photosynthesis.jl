@@ -5,8 +5,8 @@
 using BenchmarkTools
 using Profile
 
-import Emerald.LeafOptics as ELO
 import Emerald.Namespace as ENS
+import Emerald.Photosynthesis as EPH
 import Emerald.SPAC as ESPAC
 
 
@@ -15,10 +15,8 @@ spac = ENS.BulkSPAC(config);
 ESPAC.initialize_spac!(config, spac);
 lbio = spac.plant.leaves[end].bio;
 
-@time ELO.leaf_spectra!(config, spac.plant.leaves[end].bio, spac.cache, 5.0);
-@time ELO.plant_leaf_spectra!(config, spac);
+@time EPH.plant_photosynthesis!(config, spac);
 
 Profile.clear_malloc_data();
 
-@time ELO.leaf_spectra!(config, lbio, spac.cache, 5.0);
-@time ELO.plant_leaf_spectra!(config, spac);
+@time EPH.plant_photosynthesis!(config, spac);

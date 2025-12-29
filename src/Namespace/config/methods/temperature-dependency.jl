@@ -128,7 +128,7 @@ Base.@kwdef mutable struct Q10PeakHT{FT<:AbstractFloat} <: AbstractTemperatureDe
     Q_10::FT
     "Reference temperature `[K]`"
     T_REF::FT
-    "Uncorrected vakye at reference temperature"
+    "Uncorrected value at reference temperature"
     VAL_REF::FT
     "Reference temperature to compute ΔT `[K]`"
     ΔT_REF::FT
@@ -162,3 +162,7 @@ Base.@kwdef mutable struct Q10PeakLTHT{FT<:AbstractFloat} <: AbstractTemperature
     "Slope for low ΔT `[K⁻¹]`"
     ΔLT_SLOPE::FT
 end;
+
+
+# Union alias
+UnionTemperatureDependency{FT<:AbstractFloat} = Union{Arrhenius{FT},ArrheniusPeak{FT},ArrheniusPeak2{FT},Q10{FT},Q10Peak{FT},Q10PeakHT{FT},Q10PeakLTHT{FT}};
