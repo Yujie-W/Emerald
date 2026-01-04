@@ -23,34 +23,35 @@ light_limited_rate!(
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             g_lc::Vector{FT};
-            β::FT = FT(1)) where {FT} = light_limited_rate!(config, cache, ps.trait, ps.state, ps.auxil, air, g_lc; β = β);
+            β::FT = FT(1)) where {FT} = light_limited_rate!(config, cache, ps.state, ps.auxil, air, g_lc; β = β);
+
+light_limited_rate!(ps::LeafPhotosystem{FT}) where {FT} = light_limited_rate!(ps.auxil);
+
+light_limited_rate!(psa::LeafPhotosystemAuxil{FT}) where {FT} = (@. psa.a_j = psa.j * psa.e2c; return nothing);
 
 light_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            pst::GeneralC3Trait{FT},
             pss::C3State{FT},
             psa::LeafPhotosystemAuxil{FT},
             air::AirLayer{FT},
             g_lc::Vector{FT};
-            β::FT = FT(1)) where {FT} = light_limited_rate!(config, cache, pss, psa, config.METHODS.C3_AJ_METHOD, air, g_lc; β = β);
+            β::FT = FT(1)) where {FT} = light_limited_rate_c3!(cache, pss, psa, config.METHODS.C3_AJ_METHOD, air, g_lc; β = β);
 
 light_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            pst::GeneralC4Trait{FT},
             pss::C4State{FT},
             psa::LeafPhotosystemAuxil{FT},
             air::AirLayer{FT},
             g_lc::Vector{FT};
-            β::FT = FT(1)) where {FT} = light_limited_rate!(config, cache, pss, psa, config.METHODS.C4_AJ_METHOD, air, g_lc; β = β);
+            β::FT = FT(1)) where {FT} = light_limited_rate!(psa);
 
-light_limited_rate!(
-            config::SPACConfig{FT},
+light_limited_rate_c3!(
             cache::SPACCache{FT},
             pss::C3State{FT},
             psa::LeafPhotosystemAuxil{FT},
-            ajm::AjMethodC3JmaxPi,
+            ::AjMethodC3JmaxPi,
             air::AirLayer{FT},
             g_lc::Vector{FT};
             β::FT = FT(1)) where {FT} = (
@@ -92,12 +93,11 @@ light_limited_rate!(
     return nothing
 );
 
-light_limited_rate!(
-            config::SPACConfig{FT},
+light_limited_rate_c3!(
             cache::SPACCache{FT},
             pss::C3State{FT},
             psa::LeafPhotosystemAuxil{FT},
-            ajm::AjMethodC3VqmaxPi,
+            ::AjMethodC3VqmaxPi,
             air::AirLayer{FT},
             g_lc::Vector{FT};
             β::FT = FT(1)) where {FT} = (
@@ -143,13 +143,3 @@ light_limited_rate!(
 
     return nothing
 );
-
-light_limited_rate!(
-            config::SPACConfig{FT},
-            cache::SPACCache{FT},
-            pss::C4State{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            ajm::AjMethodC4JPSII,
-            air::AirLayer{FT},
-            g_lc::Vector{FT};
-            β::FT = FT(1)) where {FT} = (@. psa.a_j = psa.j * psa.e2c; return nothing);

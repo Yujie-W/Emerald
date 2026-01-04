@@ -19,15 +19,6 @@ Update the RubisCO limited photosynthetic rate, given
 """
 function rubisco_limited_rate! end;
 
-#=
-rubisco_limited_rate!(
-            config::SPACConfig{FT},
-            psa::LeafPhotosystemAuxil{FT},
-            acm::AcMethodC3VcmaxPi,
-            p_i::FT;
-            β::FT = FT(1)) where {FT} = (psa.a_c = β * psa.v_cmax * (p_i - psa.γ_star) / (p_i + psa.k_m); return nothing);
-=#
-
 rubisco_limited_rate!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
@@ -43,7 +34,7 @@ rubisco_limited_rate!(
             psa::LeafPhotosystemAuxil{FT},
             air::AirLayer{FT},
             g_lc::Vector{FT};
-            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(config, cache, psa, config.METHODS.C3_AC_METHOD, air, g_lc; β = β);
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate_c3!(config, cache, psa, config.METHODS.C3_AC_METHOD, air, g_lc; β = β);
 
 rubisco_limited_rate!(
             config::SPACConfig{FT},
@@ -52,9 +43,9 @@ rubisco_limited_rate!(
             psa::LeafPhotosystemAuxil{FT},
             air::AirLayer{FT},
             g_lc::Vector{FT};
-            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(config, cache, psa, config.METHODS.C4_AC_METHOD, air, g_lc; β = β);
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate_c4!(psa, config.METHODS.C4_AC_METHOD; β = β);
 
-rubisco_limited_rate!(
+rubisco_limited_rate_c3!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
             psa::LeafPhotosystemAuxil{FT},
@@ -91,11 +82,34 @@ rubisco_limited_rate!(
     return nothing
 );
 
+rubisco_limited_rate_c4!(
+            psa::LeafPhotosystemAuxil{FT},
+            ::AcMethodC4Vcmax;
+            β::FT = FT(1)) where {FT} = (@. psa.a_c = β * psa.v_cmax; return nothing);
+
+# Pressure mode for A-Ci fiting
 rubisco_limited_rate!(
             config::SPACConfig{FT},
-            cache::SPACCache{FT},
+            ps::LeafPhotosystem{FT},
+            p_i::Vector{FT};
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate!(config, ps.trait, ps.auxil, p_i; β = β);
+
+rubisco_limited_rate!(
+            config::SPACConfig{FT},
+            ::GeneralC3Trait{FT},
             psa::LeafPhotosystemAuxil{FT},
-            acm::AcMethodC4Vcmax,
-            air::AirLayer{FT},
-            g_lc::Vector{FT};
-            β::FT = FT(1)) where {FT} = (@. psa.a_c = β * psa.v_cmax; return nothing);
+            p_i::Vector{FT};
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate_c3!(psa, config.METHODS.C3_AC_METHOD, p_i; β = β);
+
+rubisco_limited_rate!(
+            config::SPACConfig{FT},
+            ::GeneralC4Trait{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            p_i::Vector{FT};
+            β::FT = FT(1)) where {FT} = rubisco_limited_rate_c4!(psa, config.METHODS.C4_AC_METHOD; β = β);
+
+rubisco_limited_rate_c3!(
+            psa::LeafPhotosystemAuxil{FT},
+            ::AcMethodC3VcmaxPi,
+            p_i::Vector{FT};
+            β::FT = FT(1)) where {FT} = (@. psa.a_c = β * psa.v_cmax * (p_i - psa.γ_star) / (p_i + psa.k_m); return nothing);

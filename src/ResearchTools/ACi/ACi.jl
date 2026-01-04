@@ -3,7 +3,7 @@ module ACi
 using DataFrames: DataFrame
 using PkgUtility.MathTools: ReduceStepMethodND, SolutionToleranceND, find_peak, nanmax, nanmin, rmse
 
-using ..Namespace: SPACConfig
+using ..Namespace: SPACCache, SPACConfig
 using ..Namespace: LeafPhotosystem
 using ..Namespace: GeneralC3Trait, GeneralC4Trait
 using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax, AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi

@@ -2,7 +2,7 @@ using PkgUtility.DataIO: read_csv
 using Test
 
 import Emerald.Namespace as ENS
-import Emerald.ResearchTools as RTS
+import Emerald.ResearchTools as ERT
 
 
 @testset "Emerald ResearchTools" verbose = true begin
@@ -11,8 +11,55 @@ import Emerald.ResearchTools as RTS
     df3.T_LEAF .+= 273.15;  # convert to Kelvin
     df4.T_LEAF .+= 273.15;  # convert to Kelvin
 
-    @testset "C3" begin
+    @testset "C3 Jmax" begin
         config = ENS.SPACConfig(Float64);
-        result = RTS.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "Jmax25", "Γstar25", "Rd25"]);
+        config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
+        config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3JmaxPi();
+        config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
+        config.METHODS.COLIMIT_J = Namespace.ColimitJCLM(settings["FT"]);
+        config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}();
+        result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "Jmax25"]);
+        @test !any(isnan.(result[1]));
+        result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "Jmax25", "Rd25"]);
+        @test !any(isnan.(result[1]));
+        result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "Jmax25", "Γstar25", "Rd25"]);
+        @test !any(isnan.(result[1]));
+    end;
+
+    @testset "C3 Vqmax" begin
+        config = ENS.SPACConfig(Float64);
+        config.METHODS.C3_AC_METHOD = ENS.AcMethodC3VcmaxPi();
+        config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3VqmaxPi();
+        config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
+        config.METHODS.COLIMIT_J = ENS.SerialColimit();
+        config.METHODS.FLUORESCENCE_METHOD = ENS.CytochromeFluorescenceModel();
+        result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "b₆f"]);
+        @test !any(isnan.(result[1]));
+        result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "b₆f", "Rd25"]);
+        @test !any(isnan.(result[1]));
+        result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "b₆f", "Γstar25", "Rd25"]);
+        @test !any(isnan.(result[1]));
+    end;
+
+    @testset "C4 Vcmax" begin
+        config = ENS.SPACConfig(Float64);
+        config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VcmaxPi();
+        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        result = ERT.ACi.aci_fit!(config, df4, "C4", ["Vcmax25"]);
+        @test !any(isnan.(result[1]));
+        result = ERT.ACi.aci_fit!(config, df4, "C4", ["Vcmax25", "Rd25"]);
+        @test !any(isnan.(result[1]));
+    end;
+
+    @testset "C4 Vpmax" begin
+        config = ENS.SPACConfig(Float64);
+        config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VpmaxPi();
+        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        result = ERT.ACi.aci_fit!(config, df4, "C4", ["Vcmax25"]);
+        @test !any(isnan.(result[1]));
+        result = ERT.ACi.aci_fit!(config, df4, "C4", ["Vcmax25", "Vpmax25"]);
+        @test !any(isnan.(result[1]));
+        result = ERT.ACi.aci_fit!(config, df4, "C4", ["Vcmax25", "Vpmax25", "Rd25"]);
+        @test !any(isnan.(result[1]));
     end;
 end;

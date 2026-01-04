@@ -1,6 +1,7 @@
 """
 
     aci_rmse(config::SPACConfig{FT},
+             cache::SPACCache{FT},
              ps::LeafPhotosystem{FT},
              air::AirLayer{FT},
              df::DataFrame,
@@ -9,6 +10,7 @@
 
 Compute the RMSE of A-Ci curve (will be abstractized using the trait and methods embedded), given
 - `config` `SPACConfig` struct
+- `cache` `SPACCache` struct
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
@@ -19,26 +21,29 @@ Compute the RMSE of A-Ci curve (will be abstractized using the trait and methods
 function aci_rmse end;
 
 aci_rmse(config::SPACConfig{FT},
+         cache::SPACCache{FT},
          ps::LeafPhotosystem{FT},
          air::AirLayer{FT},
          df::DataFrame,
          params::Vector{String},
-         xxx::Vector) where {FT} = aci_rmse(config, ps, ps.trait, air, df, params, xxx);
+         xxx::Vector) where {FT} = aci_rmse(config, cache, ps, ps.trait, air, df, params, xxx);
 
 aci_rmse(config::SPACConfig{FT},
+         cache::SPACCache{FT},
          ps::LeafPhotosystem{FT},
          pst::GeneralC3Trait{FT},
          air::AirLayer{FT},
          df::DataFrame,
          params::Vector{String},
          xxx::Vector) where {FT} =
-    aci_rmse(config, ps, pst, config.METHODS.C3_AC_METHOD, config.METHODS.C3_AJ_METHOD, config.METHODS.C3_AP_METHOD, air, df, params, xxx);
+    aci_rmse(config, cache, ps, pst, config.METHODS.C3_AC_METHOD, config.METHODS.C3_AJ_METHOD, config.METHODS.C3_AP_METHOD, air, df, params, xxx);
 
 aci_rmse(config::SPACConfig{FT},
+         cache::SPACCache{FT},
          ps::LeafPhotosystem{FT},
          pst::GeneralC4Trait{FT},
          air::AirLayer{FT},
          df::DataFrame,
          params::Vector{String},
          xxx::Vector) where {FT} =
-    aci_rmse(config, ps, pst, config.METHODS.C4_AC_METHOD, config.METHODS.C4_AJ_METHOD, config.METHODS.C4_AP_METHOD, air, df, params, xxx);
+    aci_rmse(config, cache, ps, pst, config.METHODS.C4_AC_METHOD, config.METHODS.C4_AJ_METHOD, config.METHODS.C4_AP_METHOD, air, df, params, xxx);

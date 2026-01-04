@@ -1,4 +1,5 @@
 aci_fit(config::SPACConfig{FT},
+        cache::SPACCache{FT},
         ps::LeafPhotosystem{FT},
         pst::GeneralC4Trait{FT},
         acm::AcMethodC4Vcmax,
@@ -66,17 +67,18 @@ aci_fit(config::SPACConfig{FT},
 
     mthd = ReduceStepMethodND{FT}(x_mins = x_mins, x_maxs = x_maxs, x_inis = x_inis, Δ_inis = Δ_inis);
     stol = SolutionToleranceND{FT}(Δ_tols, 50);
-    func(x) = -aci_rmse(config, ps, pst, air, df, params, x);
+    func(x) = -aci_rmse(config, cache, ps, pst, air, df, params, x);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(config, ps, pst, air, df, params, sol);
-    aci = aci_curve(config, ps, air, df);
+    best_rmse = aci_rmse(config, cache, ps, pst, air, df, params, sol);
+    aci = aci_curve(config, cache, ps, air, df);
 
     return sol, best_rmse, aci
 );
 
 
 aci_rmse(config::SPACConfig{FT},
+         cache::SPACCache{FT},
          ps::LeafPhotosystem{FT},
          pst::GeneralC4Trait{FT},
          acm::AcMethodC4Vcmax,
@@ -99,5 +101,5 @@ aci_rmse(config::SPACConfig{FT},
         pst.r_d25 = xxx[iparam];
     end;
 
-    return rmse(aci_curve(config, ps, air, df), df.A_NET)
+    return rmse(aci_curve(config, cache, ps, air, df), df.A_NET)
 );

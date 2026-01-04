@@ -1,6 +1,7 @@
 """
 
     aci_fit(config::SPACConfig{FT},
+            cache::SPACCache{FT},
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             df::DataFrame,
@@ -9,6 +10,7 @@
 
 Fit the A-Ci curve (will be abstractized based on the trait and methods embedded), given
 - `config` `SPACConfig` struct
+- `cache` `SPACCache` struct
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `df` DataFrame with columns `P_I`, `PPAR`, `T_LEAF`, and `A_NET`
@@ -19,35 +21,39 @@ Fit the A-Ci curve (will be abstractized based on the trait and methods embedded
 function aci_fit end;
 
 aci_fit(config::SPACConfig{FT},
+        cache::SPACCache{FT},
         ps::LeafPhotosystem{FT},
         air::AirLayer{FT},
         df::DataFrame,
         params::Vector{String},
-        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, ps, ps.trait, air, df, params, initial_guess);
+        initial_guess::Union{Nothing, Vector}) where {FT} = aci_fit(config, cache, ps, ps.trait, air, df, params, initial_guess);
 
 aci_fit(config::SPACConfig{FT},
+        cache::SPACCache{FT},
         ps::LeafPhotosystem{FT},
         pst::GeneralC3Trait{FT},
         air::AirLayer{FT},
         df::DataFrame,
         params::Vector{String},
         initial_guess::Union{Nothing, Vector}) where {FT} =
-    aci_fit(config, ps, pst, config.METHODS.C3_AC_METHOD, config.METHODS.C3_AJ_METHOD, config.METHODS.C3_AP_METHOD, air, df, params, initial_guess);
+    aci_fit(config, cache, ps, pst, config.METHODS.C3_AC_METHOD, config.METHODS.C3_AJ_METHOD, config.METHODS.C3_AP_METHOD, air, df, params, initial_guess);
 
 aci_fit(config::SPACConfig{FT},
+        cache::SPACCache{FT},
         ps::LeafPhotosystem{FT},
         pst::GeneralC4Trait{FT},
         air::AirLayer{FT},
         df::DataFrame,
         params::Vector{String},
         initial_guess::Union{Nothing, Vector}) where {FT} =
-    aci_fit(config, ps, pst, config.METHODS.C4_AC_METHOD, config.METHODS.C4_AJ_METHOD, config.METHODS.C4_AP_METHOD, air, df, params, initial_guess);
+    aci_fit(config, cache, ps, pst, config.METHODS.C4_AC_METHOD, config.METHODS.C4_AJ_METHOD, config.METHODS.C4_AP_METHOD, air, df, params, initial_guess);
 
 
 """
 
     aci_fit_exclude_outliter(
                 config::SPACConfig{FT},
+                cache::SPACCache{FT},
                 ps::LeafPhotosystem{FT},
                 air::AirLayer{FT},
                 df::DataFrame,
@@ -69,6 +75,7 @@ Fit the A-Ci curve by removing outliers, given
 """
 function aci_fit_exclude_outliter(
             config::SPACConfig{FT},
+            cache::SPACCache{FT},
             ps::LeafPhotosystem{FT},
             air::AirLayer{FT},
             df::DataFrame,
@@ -83,7 +90,7 @@ function aci_fit_exclude_outliter(
     last_df = deepcopy(df);
     crnt_df = deepcopy(df);
     while true
-        sol, best_rmse, aci = aci_fit(config, ps, air, crnt_df, params, initial_guess);
+        sol, best_rmse, aci = aci_fit(config, cache, ps, air, crnt_df, params, initial_guess);
         if last_rmse - best_rmse < rmse_threshold
             break
         else
@@ -99,8 +106,8 @@ function aci_fit_exclude_outliter(
 
     # change the df and traits
     df.A_NET .= last_df.A_NET;
-    best_rmse = aci_rmse(config, ps, air, df, params, last_sol);
-    aci = aci_curve(config, ps, air, df);
+    best_rmse = aci_rmse(config, cache, ps, air, df, params, last_sol);
+    aci = aci_curve(config, cache, ps, air, df);
 
     return last_sol, best_rmse, aci
 end;
