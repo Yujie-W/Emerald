@@ -39,7 +39,7 @@ Base.@kwdef mutable struct Plant{FT}
     branches::Vector{Stem{FT}}
     "Leaf per layer"
     leaves::Vector{Leaf{FT}}
-    "Corresponding air layer per canopy layer"
+    "Corresponding air layer per leaf layer"
     leaves_index::Vector{Int}
     "Carbon pool `[mol]`"
     pool::CarbonPoolWholePlant{FT} = CarbonPoolWholePlant{FT}()
@@ -110,7 +110,7 @@ mutable struct PlantStates{FT<:AbstractFloat}
     branches::Vector{StemStates{FT}}
     "Leaf per layer"
     leaves::Vector{LeafStates{FT}}
-    "Corresponding air layer per canopy layer"
+    "Corresponding air layer per leaf layer"
     leaves_index::Vector{Int}
     "Carbon pool `[mol]`"
     pool::CarbonPoolWholePlant{FT}

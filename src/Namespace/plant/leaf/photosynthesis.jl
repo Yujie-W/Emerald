@@ -1,15 +1,3 @@
-# This file contains the state and auxiliary variables for leaf photosynthesis
-
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2024-Jul-27: use modified TD for η_C and η_L
-#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
-#     2024-Jul-31: add new GeneralC3Trait struct
-#     2024-Aug-01: add support to Q10Peak, Q10PeakHT, and Q10PeakLTHT
-#
-#######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
@@ -38,16 +26,6 @@ Base.@kwdef mutable struct GeneralC3Trait{FT}
 end;
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2024-Apr-15: add C4CLMTrait struct
-#     2024-Jul-30: add K_OCS to compute internal conductance for OCS
-#     2024-Jul-31: add new GeneralC4Trait struct
-#     2024-Aug-01: add support to Q10Peak, Q10PeakHT, and Q10PeakLTHT
-#
-#######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
@@ -74,15 +52,6 @@ Base.@kwdef mutable struct GeneralC4Trait{FT}
 end;
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2023-Oct-03: add C3State struct
-#     2023-Oct-28: add support to QLFluorescenceModel
-#     2024-Jul-22: support all C3 models
-#
-#######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
@@ -107,14 +76,6 @@ Base.@kwdef mutable struct C3State{FT}
 end;
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2023-Oct-03: add C4State struct
-#     2023-Oct-28: add support to QLFluorescenceModel
-#
-#######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
@@ -133,15 +94,6 @@ Base.@kwdef mutable struct C4State{FT}
 end;
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2024-Jul-25: define LeafPhotosystemAuxil struct to store 1D leaf photosynthesis variables (for canopy layer; Leaf will be repurposed back to elementwise)
-#     2024-Jul-30: do not bin PPAR if DIM_PPAR_BINS is nothing
-#     2025-Jun-03: add filed ϕ_d and ϕ_n
-#
-#######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
@@ -264,44 +216,39 @@ end;
 LeafPhotosystemAuxil(config::SPACConfig{FT}) where {FT} = (
     cache_dim_ppar = isnothing(config.DIMENSIONS.DIM_PPAR_BINS) ? config.DIMENSIONS.DIM_INCL * config.DIMENSIONS.DIM_AZI : config.DIMENSIONS.DIM_PPAR_BINS;
 
+    return LeafPhotosystemAuxil{FT}(cache_dim_ppar+1)
+);
+
+LeafPhotosystemAuxil{FT}(dim::Int) where {FT} = (
     return LeafPhotosystemAuxil{FT}(
-                a_c   = zeros(FT, cache_dim_ppar+1),
-                a_g   = zeros(FT, cache_dim_ppar+1),
-                a_i   = zeros(FT, cache_dim_ppar+1),
-                a_j   = zeros(FT, cache_dim_ppar+1),
-                a_n   = zeros(FT, cache_dim_ppar+1),
-                a_p   = zeros(FT, cache_dim_ppar+1),
-                e2c   = zeros(FT, cache_dim_ppar+1),
-                j     = zeros(FT, cache_dim_ppar+1),
-                j_pot = zeros(FT, cache_dim_ppar+1),
-                j_psi = zeros(FT, cache_dim_ppar+1),
-                η     = zeros(FT, cache_dim_ppar+1),
-                ϕ_d   = zeros(FT, cache_dim_ppar+1),
-                ϕ_f   = zeros(FT, cache_dim_ppar+1),
-                ϕ_n   = zeros(FT, cache_dim_ppar+1),
-                ϕ_p   = zeros(FT, cache_dim_ppar+1),
-                ϕ_f1  = zeros(FT, cache_dim_ppar+1),
-                ϕ_f2  = zeros(FT, cache_dim_ppar+1),
-                f_m′  = zeros(FT, cache_dim_ppar+1),
-                f_o′  = zeros(FT, cache_dim_ppar+1),
-                npq   = zeros(FT, cache_dim_ppar+1),
-                q_e   = zeros(FT, cache_dim_ppar+1),
-                q_p   = zeros(FT, cache_dim_ppar+1),
-                k_n   = zeros(FT, cache_dim_ppar+1),
-                k_p   = zeros(FT, cache_dim_ppar+1)
+                a_c   = zeros(FT, dim),
+                a_g   = zeros(FT, dim),
+                a_i   = zeros(FT, dim),
+                a_j   = zeros(FT, dim),
+                a_n   = zeros(FT, dim),
+                a_p   = zeros(FT, dim),
+                e2c   = zeros(FT, dim),
+                j     = zeros(FT, dim),
+                j_pot = zeros(FT, dim),
+                j_psi = zeros(FT, dim),
+                η     = zeros(FT, dim),
+                ϕ_d   = zeros(FT, dim),
+                ϕ_f   = zeros(FT, dim),
+                ϕ_n   = zeros(FT, dim),
+                ϕ_p   = zeros(FT, dim),
+                ϕ_f1  = zeros(FT, dim),
+                ϕ_f2  = zeros(FT, dim),
+                f_m′  = zeros(FT, dim),
+                f_o′  = zeros(FT, dim),
+                npq   = zeros(FT, dim),
+                q_e   = zeros(FT, dim),
+                q_p   = zeros(FT, dim),
+                k_n   = zeros(FT, dim),
+                k_p   = zeros(FT, dim)
     )
 );
 
 
-#######################################################################################################################################################################################################
-#
-# Changes to this struct
-# General
-#     2024-Jul-25: add LeafPhotosystem
-#     2024-Aug-13: add constructor for different models
-#     2025-Jul-30: fix photosynthesis model constructor
-#
-#######################################################################################################################################################################################################
 """
 
 $(TYPEDEF)
@@ -322,108 +269,26 @@ Base.@kwdef mutable struct LeafPhotosystem{FT}
     auxil::LeafPhotosystemAuxil{FT}
 end;
 
-LeafPhotosystem(config::SPACConfig{FT}, model::String = "C3") where {FT} = (
-    auxil = LeafPhotosystemAuxil(config);
-    if model == "C3"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-    elseif model == "C4"
-        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
-        ps.auxil.f_psii = 0.41;
-    else
-        return error("Unknown model: $model")
-    end;
+LeafPhotosystem(config::SPACConfig{FT}, c3c4::String = "C3") where {FT} = (
+    @assert c3c4 in ["C3", "C4"] "The model string should be either C3 or C4!";
 
-    return ps
+    return if c3c4 == "C3"
+        LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = LeafPhotosystemAuxil(config));
+    else
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = LeafPhotosystemAuxil(config));
+        ps.auxil.f_psii = 0.41;
+        ps
+    end;
 );
 
+LeafPhotosystem{FT}(c3c4::String) where {FT} = (
+    @assert c3c4 in ["C3", "C4"] "The model string should be either C3 or C4!";
 
-#=
-LeafPhotosystem(config::SPACConfig{FT}, model::String = "C3VJP") where {FT} = (
-    auxil = LeafPhotosystemAuxil(config);
-    if model == "C3Cyto"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit();
-        ps.trait.FLM = CytochromeFluorescenceModel();
-        ps.trait.TD_ηC = ηCTDWang(FT);
-        ps.trait.TD_ηL = ηLTDWang(FT);
-    elseif model == "C3CytoInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit();
-        ps.trait.FLM = CytochromeFluorescenceModel();
-        ps.trait.TD_ηC = ηCTDWang(FT);
-        ps.trait.TD_ηL = ηLTDWang(FT);
-    elseif model == "C3JB"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_J = SerialColimit();
-        ps.trait.FLM = CytochromeFluorescenceModel();
-        ps.trait.TD_ηC = ηCTDJohnson(FT);
-        ps.trait.TD_ηL = ηLTDJohnson(FT);
-    elseif model == "C3JBInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_J = SerialColimit();
-        ps.trait.FLM = CytochromeFluorescenceModel();
-        ps.trait.TD_ηC = ηCTDJohnson(FT);
-        ps.trait.TD_ηL = ηLTDJohnson(FT);
-    elseif model == "C3VJP"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3JmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-    elseif model == "C3VJPInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3JmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-    elseif model == "C3CLM"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Vcmax();
-        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
-        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
-    elseif model == "C3CLMInfAp"
-        ps = LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC3VcmaxPi();
-        ps.trait.AJM = AjMethodC3VqmaxPi();
-        ps.trait.APM = ApMethodC3Inf();
-        ps.trait.COLIMIT_CJ = ColimitCJCLMC3(FT);
-        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
-    elseif model == "C4CLM"
-        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC4Vcmax();
-        ps.trait.AJM = AjMethodC4JPSII();
-        ps.trait.APM = ApMethodC4VcmaxPi();
-        ps.auxil.f_psii = 0.41;
-    elseif model == "C4CLMSmooth"
-        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC4Vcmax();
-        ps.trait.AJM = AjMethodC4JPSII();
-        ps.trait.APM = ApMethodC4VcmaxPi();
-        ps.trait.COLIMIT_CJ = ColimitCJCLMC4(FT);
-        ps.trait.COLIMIT_IP = ColimitIPCLM(FT);
-        ps.auxil.f_psii = 0.41;
-    elseif model == "C4VJP"
-        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = auxil);
-        ps.trait.ACM = AcMethodC4Vcmax();
-        ps.trait.AJM = AjMethodC4JPSII();
-        ps.trait.APM = ApMethodC4VpmaxPi();
-        ps.auxil.f_psii = 0.41;
+    return if c3c4 == "C3"
+        LeafPhotosystem{FT}(trait = GeneralC3Trait{FT}(), state = C3State{FT}(), auxil = LeafPhotosystemAuxil{FT}(1));
     else
-        return error("Unknown model: $model")
+        ps = LeafPhotosystem{FT}(trait = GeneralC4Trait{FT}(), state = C4State{FT}(), auxil = LeafPhotosystemAuxil{FT}(1));
+        ps.auxil.f_psii = 0.41;
+        ps
     end;
-
-    return ps
 );
-=#

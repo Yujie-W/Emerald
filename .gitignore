@@ -31,3 +31,7 @@ Manifest.toml
 *.mem
 *.nc
 *.png
+
+# Exceptions for specific files
+!data/*
+!data/examples/*

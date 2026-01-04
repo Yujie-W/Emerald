@@ -12,7 +12,7 @@
 
     ∂T∂E(eff_ϵ::FT, t::FT, width::FT, wind::FT) where {FT}
 
-Returns the marginal increase in leaf temperature per transpiration rate (per canopy layer), given
+Returns the marginal increase in leaf temperature per transpiration rate (per leaf layer), given
 - `eff_ϵ` Effective emissivity used to compute the longwave radiation emission (effective LAI * leaf emissivity)
 - `t` Leaf temperature
 - `width` Leaf width

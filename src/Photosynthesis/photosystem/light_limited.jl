@@ -11,7 +11,7 @@ Update the electron transport limited photosynthetic rate, given
 - `cache` `SPACCache` struct
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct for environmental conditions like O₂ partial pressure
-- `g_lc` Canopy layer diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
+- `g_lc` Leaf diffusive conductance to CO₂ in `[mol m⁻² s⁻¹]`
 - `β` Tuning factor to downregulate effective Vmax, Jmax, and Rd
 
 """

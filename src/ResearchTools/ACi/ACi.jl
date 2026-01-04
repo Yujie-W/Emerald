@@ -3,7 +3,6 @@ module ACi
 using DataFrames: DataFrame
 using PkgUtility.MathTools: ReduceStepMethodND, SolutionToleranceND, find_peak, nanmax, nanmin, rmse
 
-#=
 using ..Namespace: SPACConfig
 using ..Namespace: LeafPhotosystem
 using ..Namespace: GeneralC3Trait, GeneralC4Trait
@@ -16,7 +15,12 @@ include("curve.jl");
 include("rmse.jl");
 include("fit.jl");
 
+include("procedure/c3-vcmax-jmax-vcmax.jl");
+include("procedure/c3-vcmax-vqmax-vcmax.jl");
+include("procedure/c4-vcmax-jpsii-vcmaxpi.jl");
+include("procedure/c4-vcmax-jpsii-vpmaxpi.jl");
+
 include("pipeline.jl");
-=#
+
 
 end # module

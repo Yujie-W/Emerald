@@ -81,7 +81,7 @@ function plant_carbon_budget!(spac::BulkSPAC{FT}, δt::FT) where {FT}
         plant.pool.c_pool -= f;
     end;
 
-    # do nothing if LAI == 0; otherwise update the carbon budget of each leaf (or canopy layer)
+    # do nothing if LAI == 0; otherwise update the carbon budget of each leaf
     if spac.canopy.structure.trait.lai <= 0
         return nothing
     end;

@@ -33,7 +33,7 @@ Base.@kwdef mutable struct BulkSPAC{FT}
     "Soil layers"
     soils::Vector{SoilLayer{FT}}
 
-    "Air for each layer (more than canopy layer)"
+    "Air for each layer (more than leaf layer)"
     airs::Vector{AirLayer{FT}}
     "Meteorology information"
     meteo::Meteorology{FT}
@@ -200,7 +200,7 @@ mutable struct BulkSPACStates{FT}
     "Soil layers"
     soils::Vector{SoilLayerState{FT}}
 
-    "Air for each layer (more than canopy layer)"
+    "Air for each layer (more than leaf layer)"
     airs::Vector{AirLayerState{FT}}
 
     "Plant information"

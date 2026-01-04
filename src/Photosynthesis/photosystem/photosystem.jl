@@ -13,14 +13,14 @@ Update the photosynthesis rate, given
 """
 function photosynthesis! end;
 
-photosynthesis!(config::SPACConfig{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT} = (
+photosynthesis!(config::SPACConfig{FT}, cache::SPACCache{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT} = (
     photosystem_temperature_dependence!(config, ps, air, t);
-    photosystem_electron_transport!(config, ps, ppar, p_i);
-    rubisco_limited_rate!(config, ps, p_i);
-    light_limited_rate!(ps);
-    product_limited_rate!(config,ps, p_i);
-    colimit_photosynthesis!(config,ps);
-    photosystem_coefficients!(config, ps, ppar);
+    photosystem_electron_transport!(config, cache, ps, ppar, p_i);
+    rubisco_limited_rate!(config, cache, ps, p_i);
+    light_limited_rate!(cache, ps);
+    product_limited_rate!(cache, ps, p_i);
+    colimit_photosynthesis!(config, ps);
+    photosystem_coefficients!(config, cache, ps, ppar);
 
     return nothing
 );

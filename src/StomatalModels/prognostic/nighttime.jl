@@ -16,7 +16,7 @@
 Return the marginal increase of stomatal conductance, given
 - `leaf` `Leaf` type struct
 - `air` `AirLayer` type environmental conditions
-- `eff_ϵ` Effective emissivity of the canopy layer (single layer value)
+- `eff_ϵ` Effective emissivity of the leaf layer (single layer value)
 
 """
 function ∂gₙ∂t end;

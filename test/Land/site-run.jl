@@ -1,6 +1,7 @@
-import Emerald.Land as ELAND
 using DataFrames
 using Test
+
+import Emerald.Land as ELAND
 
 
 @testset "Emerald Land" verbose = true begin

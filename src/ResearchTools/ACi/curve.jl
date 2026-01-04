@@ -14,7 +14,7 @@ Compute the net photosynthetic rate, given
 function aci_an(config::SPACConfig{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::Number, ppar::Number, t::Number) where {FT}
     photosynthesis!(config, ps, air, p_i, ppar, t);
 
-    return ps.auxil.a_n
+    return ps.auxil.a_n[1]
 end;
 
 

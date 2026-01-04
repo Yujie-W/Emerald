@@ -1,5 +1,3 @@
-# This file contains the fields within a canopy layer
-
 #######################################################################################################################################################################################################
 #
 # Changes to this struct
@@ -11,7 +9,7 @@
 
 $(TYPEDEF)
 
-Struct that contains the fields within a canopy layer
+Struct that contains the fields within a canopy layer (or a leaf)
 
 # Fields
 
@@ -73,7 +71,7 @@ kill_plant!(st::Leaf{FT}) where {FT} = (
 
 $(TYPEDEF)
 
-Struct to save canopy layer states (collections of states)
+Struct to save leaf states (collections of states)
 
 # Fields
 

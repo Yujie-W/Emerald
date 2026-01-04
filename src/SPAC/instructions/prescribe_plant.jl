@@ -7,7 +7,7 @@
 #     2022-Oct-19: add method to update or prescribe cab, car, lai, Vcmax and Jmax TD, t_leaf, vcmax profile
 #     2022-Nov-21: fix a bug related to Vcmax profile (no global simulations are impacted)
 #     2023-May-11: add ci to the option list
-#     2023-May-19: use δlai per canopy layer
+#     2023-May-19: use δlai per leaf layer
 #     2023-Aug-25: add option to set up hydraulic conductance profiles for root, trunk, branches, and leaves
 #     2023-Aug-27: fix a typo in the computation of k profiles (reverse the denominator and numerator)
 #     2023-Oct-02: run energy initialization when LAI or t_leaf is updated
