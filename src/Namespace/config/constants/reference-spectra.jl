@@ -43,6 +43,8 @@ Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
     # Variable features for the soil
     "A matrix of characteristic curves"
     MAT_SOIL::Matrix{FT}
+    "A matrix of the pinv of characteristic curves"
+    MAT_SOIL_PINV::Matrix{FT}
     "A new matrix for soil reflectance calculation"
     MAT_SOIL_ALBEDO::Matrix{FT}
 
@@ -215,6 +217,7 @@ ReferenceSpectra{FT}(
                     Φ_PSI           = Φ_PSI_interp,
                     Φ_PSII          = Φ_PSII_interp,
                     MAT_SOIL        = FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp],
+                    MAT_SOIL_PINV   = pinv(FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp]),
                     MAT_SOIL_ALBEDO = FT[HSA_dry_soil HSA_wet_soil HSA_dry_ash HSA_wet_ash],
                     SOLAR_RAD       = FT[E_DIR_interp E_DIFF_interp],
                     WL_PAR          = wl_par,
@@ -240,6 +243,7 @@ ReferenceSpectra{FT}(
             Φ_PSI           = df.K_PS1,
             Φ_PSII          = df.K_PS2,
             MAT_SOIL        = FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4],
+            MAT_SOIL_PINV   = pinv(FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4]),
             # MAT_SOIL_ALBEDO = FT[df.HSA_DRY_SOIL df.HSA_WET_SOIL df.HSA_DRY_ASH df.HSA_WET_ASH],
             MAT_SOIL_ALBEDO = [ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2 ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2],
             SOLAR_RAD       = FT[df.E_DIR df.E_DIFF],

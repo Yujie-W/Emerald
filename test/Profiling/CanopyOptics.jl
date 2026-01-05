@@ -19,7 +19,6 @@ ESPAC.initialize_spac!(config, spac);
 
 Profile.clear_malloc_data();
 
-# 260 allocations due to soil albedo fitting at hyperspectral mode
 @time ECO.canopy_radiation!(config, spac);
 
 

@@ -173,7 +173,7 @@ function prescribe_traits!(
         if !spac.plant._leaf_shedded || spac.plant._leaf_regrow
             # update the leaf area
             can_str.trait.lai = lai_0 + lai_diff;
-            can_str.trait.δlai = can_str.trait.lai .* ones(FT, n_layer) ./ n_layer;
+            can_str.trait.δlai .= can_str.trait.lai / n_layer;
             for irt in 1:n_layer
                 ilf = n_layer - irt + 1;
                 leaves[ilf].xylem.trait.area = sbulk.trait.area * can_str.trait.δlai[irt];

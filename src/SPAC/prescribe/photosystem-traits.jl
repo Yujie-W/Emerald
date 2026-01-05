@@ -59,7 +59,7 @@ prescribe_ps_traits!(spac::BulkSPAC{FT}, ::GeneralC3Trait{FT}; vertical_expo::Un
     # update vertical profiles
     for irt in 1:n_layer
         ilf = n_layer - irt + 1;
-        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(can_str.trait.δlai[1:irt-1]));
+        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(view(can_str.trait.δlai,1:irt-1)));
         leaf = leaves[ilf];
         leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
         leaf.photosystem.trait.j_max25 = leaves[end].photosystem.trait.j_max25 * ratio;
@@ -78,7 +78,7 @@ prescribe_ps_traits!(spac::BulkSPAC{FT}, ::GeneralC4Trait{FT}; vertical_expo::Un
     # update vertical profiles
     for irt in 1:n_layer
         ilf = n_layer - irt + 1;
-        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(can_str.trait.δlai[1:irt-1]));
+        ratio = isnothing(vertical_expo) ? 1 : exp(-vertical_expo * sum(view(can_str.trait.δlai,1:irt-1)));
         leaf = leaves[ilf];
         leaf.photosystem.trait.v_cmax25 = leaves[end].photosystem.trait.v_cmax25 * ratio;
         leaf.photosystem.trait.v_pmax25 = leaves[end].photosystem.trait.v_pmax25 * ratio;

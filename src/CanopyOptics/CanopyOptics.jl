@@ -1,6 +1,6 @@
 module CanopyOptics
 
-using LinearAlgebra: mul!, pinv
+using LinearAlgebra: mul!
 using QuadGK: quadgk
 using SpecialFunctions: beta_inc
 using Statistics: mean

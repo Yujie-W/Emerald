@@ -25,16 +25,16 @@ simulation!(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict}; sav
     driver = site_driver_tuple(gmd, wd);
     results = site_result_tuple(spac, wd, sd);
 
-    return simulation!(config, spac, driver, results; saving = saving, saving_setting = sd, selection = settings["SIMULATION_PERIOD"], δt = settings["TIME_STEP"]);
+    return simulation!(config, spac, driver, results, sd; saving = saving, selection = settings["SIMULATION_PERIOD"], δt = settings["TIME_STEP"]);
 );
 
 simulation!(config::SPACConfig{FT},
             spac::BulkSPAC{FT},
             driver::NamedTuple,
-            results::NamedTuple;
+            results::NamedTuple,
+            saving_setting::Vector{ParameterFunctionMapper} = parameters_to_save();
             saving::Union{Nothing,String} = nothing,
-            saving_setting::Vector{ParameterFunctionMapper} = parameters_to_save(),
-            selection = :,
+            selection::Union{UnitRange,Colon} = :,
             δt::Number = 3600) where {FT} = (
     (; MESSAGE_LEVEL) = config.CONFIG_INFO;
 
@@ -59,10 +59,12 @@ simulation!(config::SPACConfig{FT},
         error("MESSAGE_LEVEL should be 0, 1, or 2");
     end;
 
-    # save simulation results to hard drive
-    df = DataFrame(results);
+    # if saving is not nothing, save the results as a Netcdf file
+    if !isnothing(saving)
+        save_nc!(saving, results);
+    end;
 
-    return isnothing(saving) ? df[selection, names(df)] : save_nc!(saving, df[selection, names(df)])
+    return nothing
 );
 
 

@@ -106,6 +106,10 @@ Base.@kwdef struct SPACCache{FT}
     solver_nb::NewtonBisectionMethod{FT}
     "SolutionTolerance for NewtonBisectionMethod"
     stol_nb::SolutionTolerance{FT}
+    "ReduceStepMethodND solver for soil albedo weight fitting"
+    solver_sa::ReduceStepMethodND{FT}
+    "SolutionToleranceND for soil albedo weight fitting"
+    stol_sa::SolutionToleranceND{FT}
 end;
 
 SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_ppar::Union{Int, Nothing}, dim_sif::Int, dim_sife::Int, dim_wl::Int) where {FT} = (
@@ -156,5 +160,7 @@ SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_ppar::Union{Int, 
 
                 solver_nb = NewtonBisectionMethod{FT}(),
                 stol_nb   = SolutionTolerance{FT}(eps(FT)*100, 50),
+                solver_sa = ReduceStepMethodND{FT}(x_mins = FT[-2,-2,-2,-2], x_maxs = FT[2,2,2,2], x_inis = FT[1,1,1,1], Δ_inis = FT[0.1,0.1,0.1,0.1]),
+                stol_sa   = SolutionToleranceND{FT}(FT[0.001,0.001,0.001,0.001], 50),
     )
 );
