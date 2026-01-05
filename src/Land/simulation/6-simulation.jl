@@ -64,7 +64,7 @@ simulation!(config::SPACConfig{FT},
         save_nc!(saving, results);
     end;
 
-    return nothing
+    return results
 );
 
 
