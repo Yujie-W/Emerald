@@ -9,7 +9,7 @@ Base.@kwdef mutable struct SPACConfig{FT<:AbstractFloat}
     "Dimensions of the SPAC system"
     DIMENSIONS::SPACDimensions{FT} = SPACDimensions{FT}()
     "Features on/off/settings of the SPAC model"
-    FEATURES::SPACFeatures = SPACFeatures()
+    FEATURES::SPACFeatures{FT} = SPACFeatures{FT}()
     "Methods used in the SPAC model"
     METHODS::SPACMethods{FT} = SPACMethods{FT}()
 end;
