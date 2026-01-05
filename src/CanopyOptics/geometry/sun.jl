@@ -151,15 +151,17 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
 
     # compute the scattering coefficients for the solar radiation per leaf area
     # use effective leaf spectra if EFFECTIVE_LEAF_SPECTRA is true
+    ρ_leaf = spac.cache.cache_wl_1;
+    τ_leaf = spac.cache.cache_wl_2;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        ρ_leaf = mask_effective ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
-        τ_leaf = mask_effective ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
-        sun_geo.auxil.sdb_leaf[:,irt] .= sun_geo.auxil.w_sdb_leaf .* ρ_leaf .+ sun_geo.auxil.w_sdf_leaf .* τ_leaf;
-        sun_geo.auxil.sdf_leaf[:,irt] .= sun_geo.auxil.w_sdf_leaf .* ρ_leaf .+ sun_geo.auxil.w_sdb_leaf .* τ_leaf;
-        sun_geo.auxil.sdb_stem[:,irt] .= sun_geo.auxil.w_sdb_stem .* SPECTRA.ρ_STEM;
-        sun_geo.auxil.sdf_stem[:,irt] .= sun_geo.auxil.w_sdf_stem .* SPECTRA.ρ_STEM;
+        mask_effective ? ρ_leaf .= view(sun_geo.auxil.ρ_leaf_eff,:,irt) : ρ_leaf .= leaf.bio.auxil.ρ_leaf;
+        mask_effective ? τ_leaf .= view(sun_geo.auxil.τ_leaf_eff,:,irt) : τ_leaf .= leaf.bio.auxil.τ_leaf;
+        @. sun_geo.auxil.sdb_leaf[irt] = sun_geo.auxil.w_sdb_leaf * ρ_leaf + sun_geo.auxil.w_sdf_leaf * τ_leaf;
+        @. sun_geo.auxil.sdf_leaf[irt] = sun_geo.auxil.w_sdf_leaf * ρ_leaf + sun_geo.auxil.w_sdb_leaf * τ_leaf;
+        @. sun_geo.auxil.sdb_stem[irt] = sun_geo.auxil.w_sdb_stem * SPECTRA.ρ_STEM;
+        @. sun_geo.auxil.sdf_stem[irt] = sun_geo.auxil.w_sdf_stem * SPECTRA.ρ_STEM;
     end;
 
     # compute the transmittance and reflectance for single directions per layer (it was 1 - k*Δx, and we used exp(-k*Δx) as Δx is not infinitesmal)
@@ -181,8 +183,8 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         δsai = can_str.trait.δsai[i];
         δpai = δlai + δsai;
         kt_ss_x = sun_geo.auxil.ks_leaf * δlai + sun_geo.auxil.ks_stem * δsai;
-        kt_sd_x .= (view(sun_geo.auxil.sdf_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdf_stem,:,i) .* δsai) ./ δpai;
-        kr_sd_x .= (view(sun_geo.auxil.sdb_leaf,:,i) .* δlai .+ view(sun_geo.auxil.sdb_stem,:,i) .* δsai) ./ δpai;
+        kt_sd_x .= (sun_geo.auxil.sdf_leaf[i] .* δlai .+ sun_geo.auxil.sdf_stem[i] .* δsai) ./ δpai;
+        kr_sd_x .= (sun_geo.auxil.sdb_leaf[i] .* δlai .+ sun_geo.auxil.sdb_stem[i] .* δsai) ./ δpai;
         sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);
         sun_geo.auxil.τ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kt_sd_x;
         sun_geo.auxil.ρ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kr_sd_x;

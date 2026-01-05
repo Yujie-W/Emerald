@@ -16,7 +16,7 @@ using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoH
 using ..Namespace: SoilLayer, SoilBulk
 using ..Namespace: MultiLayerCanopy
 using ..Namespace: Leaf
-using ..Namespace: BulkSPAC, SPACConfig
+using ..Namespace: BulkSPAC, SPACCache, SPACConfig
 
 using ..LeafOptics: layer_2_ρ, layer_2_τ, leaf_ρ, leaf_τ
 

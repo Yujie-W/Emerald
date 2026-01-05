@@ -41,7 +41,7 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
     (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS) = config.DIMENSIONS;
 
     # if sza > 89, set all the radiation variables to 0
-    total_sw_rad = (rad_sw.e_dir .+ rad_sw.e_dif)' * SPECTRA.ΔΛ / 1000;
+    total_sw_rad = (rad_sw.e_dir' * SPECTRA.ΔΛ + rad_sw.e_dif' * SPECTRA.ΔΛ) / 1000;
     if sun_geo.state.sza > 89 || can_str.trait.lai <= 0 || total_sw_rad <= 0
         sun_geo.auxil.e_sif_chl .= 0;
         sun_geo.auxil.e_sifꜜ_layer .= 0;

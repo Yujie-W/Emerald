@@ -139,11 +139,13 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
 
     # compute the scattering coefficients for the solar radiation per leaf area
     # TODO: add cosine of the diffuse angle and CI impacts on the rho and tau of an effective leaf
+    ρ_leaf = spac.cache.cache_wl_1;
+    τ_leaf = spac.cache.cache_wl_2;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = spac.plant.leaves[ilf];
-        ρ_leaf = mask_effective ? view(can_str.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
-        τ_leaf = mask_effective ? view(can_str.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
+        mask_effective ? ρ_leaf .= view(can_str.auxil.ρ_leaf_eff,:,irt) : ρ_leaf .= leaf.bio.auxil.ρ_leaf;
+        mask_effective ? τ_leaf .= view(can_str.auxil.τ_leaf_eff,:,irt) : τ_leaf .= leaf.bio.auxil.τ_leaf;
         can_str.auxil.ddb_leaf[:,irt] .= can_str.auxil.w_ddb_leaf .* ρ_leaf .+ can_str.auxil.w_ddf_leaf .* τ_leaf;
         can_str.auxil.ddf_leaf[:,irt] .= can_str.auxil.w_ddf_leaf .* ρ_leaf .+ can_str.auxil.w_ddb_leaf .* τ_leaf;
         can_str.auxil.ddb_stem[:,irt] .= can_str.auxil.w_ddb_stem .* SPECTRA.ρ_STEM;

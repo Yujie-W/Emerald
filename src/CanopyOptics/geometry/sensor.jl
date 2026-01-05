@@ -216,19 +216,23 @@ function sensor_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     end;
 
     # compute the scattering coefficients per leaf area
+    ρ_leaf_dif = spac.cache.cache_wl_1;
+    τ_leaf_dif = spac.cache.cache_wl_2;
+    ρ_leaf_dir = spac.cache.cache_wl_3;
+    τ_leaf_dir = spac.cache.cache_wl_4;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
-        ρ_leaf_dif = mask_effective ? view(sen_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
-        τ_leaf_dif = mask_effective ? view(sen_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
-        ρ_leaf_dir = mask_effective ? view(sun_geo.auxil.ρ_leaf_eff,:,irt) : leaf.bio.auxil.ρ_leaf;
-        τ_leaf_dir = mask_effective ? view(sun_geo.auxil.τ_leaf_eff,:,irt) : leaf.bio.auxil.τ_leaf;
-        sen_geo.auxil.dob_leaf[:,irt] .= sen_geo.auxil.w_dob_leaf .* ρ_leaf_dif .+ sen_geo.auxil.w_dof_leaf .* τ_leaf_dif;
-        sen_geo.auxil.dof_leaf[:,irt] .= sen_geo.auxil.w_dof_leaf .* ρ_leaf_dif .+ sen_geo.auxil.w_dob_leaf .* τ_leaf_dif;
-        sen_geo.auxil.so_leaf[:,irt]  .= sen_geo.auxil.w_sob_leaf .* ρ_leaf_dir .+ sen_geo.auxil.w_sof_leaf .* τ_leaf_dir;
-        sen_geo.auxil.dob_stem[:,irt] .= sen_geo.auxil.w_dob_stem .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.dof_stem[:,irt] .= sen_geo.auxil.w_dof_stem .* SPECTRA.ρ_STEM;
-        sen_geo.auxil.so_stem[:,irt]  .= sen_geo.auxil.w_sob_stem .* SPECTRA.ρ_STEM;
+        mask_effective ? ρ_leaf_dif .= view(sen_geo.auxil.ρ_leaf_eff,:,irt) : ρ_leaf_dif .= leaf.bio.auxil.ρ_leaf;
+        mask_effective ? τ_leaf_dif .= view(sen_geo.auxil.τ_leaf_eff,:,irt) : τ_leaf_dif .= leaf.bio.auxil.τ_leaf;
+        mask_effective ? ρ_leaf_dir .= view(sun_geo.auxil.ρ_leaf_eff,:,irt) : ρ_leaf_dir .= leaf.bio.auxil.ρ_leaf;
+        mask_effective ? τ_leaf_dir .= view(sun_geo.auxil.τ_leaf_eff,:,irt) : τ_leaf_dir .= leaf.bio.auxil.τ_leaf;
+        @. sen_geo.auxil.dob_leaf[:,irt] = sen_geo.auxil.w_dob_leaf * ρ_leaf_dif + sen_geo.auxil.w_dof_leaf * τ_leaf_dif;
+        @. sen_geo.auxil.dof_leaf[:,irt] = sen_geo.auxil.w_dof_leaf * ρ_leaf_dif + sen_geo.auxil.w_dob_leaf * τ_leaf_dif;
+        @. sen_geo.auxil.so_leaf[:,irt]  = sen_geo.auxil.w_sob_leaf * ρ_leaf_dir + sen_geo.auxil.w_sof_leaf * τ_leaf_dir;
+        @. sen_geo.auxil.dob_stem[:,irt] = sen_geo.auxil.w_dob_stem * SPECTRA.ρ_STEM;
+        @. sen_geo.auxil.dof_stem[:,irt] = sen_geo.auxil.w_dof_stem * SPECTRA.ρ_STEM;
+        @. sen_geo.auxil.so_stem[:,irt]  = sen_geo.auxil.w_sob_stem * SPECTRA.ρ_STEM;
     end;
 
     return nothing

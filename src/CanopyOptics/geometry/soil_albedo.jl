@@ -57,14 +57,14 @@ soil_albedo!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     @assert 1 <= sbulk.trait.color <=20;
 
-    soil_albedo!(config, sbulk, top_soil, config.METHODS.SOIL_ALBEDO);
+    soil_albedo!(config, spac.cache, sbulk, top_soil, (config).METHODS.SOIL_ALBEDO);
 
     return nothing
 );
 
-soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoPrescribe) where {FT} = nothing;
+soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, ::SoilAlbedoPrescribe) where {FT} = nothing;
 
-soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoBroadbandCLM) where {FT} = (
+soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, ::SoilAlbedoBroadbandCLM) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)
     delta = max(0, FT(0.11) - FT(0.4) * max(top_soil.trait.vc.Θ_SAT, top_soil.state.θ + top_soil.state.θ_ice));
     par::FT = min(SOIL_ALBEDOS[sbulk.trait.color,1], SOIL_ALBEDOS[sbulk.trait.color,3] + delta);
@@ -75,7 +75,7 @@ soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT
     return nothing
 );
 
-soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoHyperspectralAsh) where {FT} = (
+soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, ::SoilAlbedoHyperspectralAsh) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)#
     #     1. dry soil
     #     2. wet soil
@@ -86,46 +86,44 @@ soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT
     alb_ash  = config.CONSTANTS.SPECTRA.MAT_SOIL_ALBEDO[:,3] * (1 - rwc) + rwc * config.CONSTANTS.SPECTRA.MAT_SOIL_ALBEDO[:,4];
     @. sbulk.auxil.ρ_sw = alb_soil * (1 - sbulk.trait.f_ash) + alb_ash * sbulk.trait.f_ash;
 
-    @info "tests";
-
     return nothing
 );
 
 
-soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoHyperspectralCLM) where {FT} = (
+soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, ::SoilAlbedoHyperspectralCLM) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)
     delta = max(0, FT(0.11) - FT(0.4) * max(top_soil.trait.vc.Θ_SAT, top_soil.state.θ + top_soil.state.θ_ice));
     par::FT = min(SOIL_ALBEDOS[sbulk.trait.color,1], SOIL_ALBEDOS[sbulk.trait.color,3] + delta);
     nir::FT = min(SOIL_ALBEDOS[sbulk.trait.color,2], SOIL_ALBEDOS[sbulk.trait.color,4] + delta);
 
-    soil_albedo!(config, sbulk, par, nir, true);
+    soil_albedo!(config, cache, sbulk, par, nir, true);
 
     return nothing
 );
 
-soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoBroadbandCLIMA) where {FT} = (
+soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, ::SoilAlbedoBroadbandCLIMA) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)
     rwc = max(top_soil.trait.vc.Θ_RES, top_soil.state.θ + top_soil.state.θ_ice) / top_soil.trait.vc.Θ_SAT;
     par::FT = SOIL_ALBEDOS[sbulk.trait.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,3];
     nir::FT = SOIL_ALBEDOS[sbulk.trait.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,4];
 
-    soil_albedo!(config, sbulk, par, nir, false);
+    soil_albedo!(config, cache, sbulk, par, nir, false);
 
     return nothing
 );
 
-soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, albedo::SoilAlbedoHyperspectralCLIMA) where {FT} = (
+soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, top_soil::SoilLayer{FT}, ::SoilAlbedoHyperspectralCLIMA) where {FT} = (
     # use linear interpolation method or CLM method (with upper limit)
     rwc = max(top_soil.trait.vc.Θ_RES, top_soil.state.θ + top_soil.state.θ_ice) / top_soil.trait.vc.Θ_SAT;
     par::FT = SOIL_ALBEDOS[sbulk.trait.color,1] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,3];
     nir::FT = SOIL_ALBEDOS[sbulk.trait.color,2] * (1 - rwc) + rwc * SOIL_ALBEDOS[sbulk.trait.color,4];
 
-    soil_albedo!(config, sbulk, par, nir, true);
+    soil_albedo!(config, cache, sbulk, par, nir, true);
 
     return nothing
 );
 
-soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, ρ_par::FT, ρ_nir::FT, hyperspectral::Bool) where {FT} = (
+soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, ρ_par::FT, ρ_nir::FT, hyperspectral::Bool) where {FT} = (
     (; SPECTRA) = config.CONSTANTS;
 
     # if not hyperspectral, use broadband
@@ -138,7 +136,7 @@ soil_albedo!(config::SPACConfig{FT}, sbulk::SoilBulk{FT}, ρ_par::FT, ρ_nir::FT
 
     # if hyperspectral, use hyperspectral method
     # TODO: use a new soil moddel for this, do not use GSV which is not process-based
-    ρ_sw = similar(sbulk.auxil.ρ_sw);
+    ρ_sw = cache.cache_wl_1;
     ρ_sw[SPECTRA.IΛ_PAR] .= ρ_par;
     ρ_sw[SPECTRA.IΛ_NIR] .= ρ_nir;
     sbulk.auxil.weight .= pinv(SPECTRA.MAT_SOIL) * ρ_sw;

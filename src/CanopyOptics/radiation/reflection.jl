@@ -39,7 +39,7 @@ function reflection_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where 
     (; SPECTRA) = config.CONSTANTS;
 
     # if sza > 89, set all the radiation variables to 0
-    total_sw_rad = (rad_sw.e_dir .+ rad_sw.e_dif)' * SPECTRA.ΔΛ / 1000;
+    total_sw_rad = (rad_sw.e_dir' * SPECTRA.ΔΛ + rad_sw.e_dif' * SPECTRA.ΔΛ) / 1000;
     if sun_geo.state.sza > 89 || total_sw_rad <= 0
         sen_geo.auxil.e_sensor_layer .= 0;
         sen_geo.auxil.e_sensor .= 0;

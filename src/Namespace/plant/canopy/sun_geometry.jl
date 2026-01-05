@@ -105,13 +105,13 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
 
     # Scattering coefficients per leaf area
     "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
-    sdb_leaf::Matrix{FT}
+    sdb_leaf::Vector{Vector{FT}}
     "Forward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of leaf"
-    sdf_leaf::Matrix{FT}
+    sdf_leaf::Vector{Vector{FT}}
     "Backward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of stem"
-    sdb_stem::Matrix{FT}
+    sdb_stem::Vector{Vector{FT}}
     "Forward scattering coefficient for solar directional->diffuse at different layers and wavelength bins of stem"
-    sdf_stem::Matrix{FT}
+    sdf_stem::Vector{Vector{FT}}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
     "Reflectance for solar directional->diffuse at each canopy layer"
@@ -268,10 +268,10 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
                 # others
                 ρ_leaf_eff       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 τ_leaf_eff       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
-                sdb_leaf         = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
-                sdf_leaf         = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
-                sdb_stem         = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
-                sdf_stem         = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+                sdb_leaf         = [zeros(FT,length(config.CONSTANTS.SPECTRA.Λ)) for _ in 1:n_layer],
+                sdf_leaf         = [zeros(FT,length(config.CONSTANTS.SPECTRA.Λ)) for _ in 1:n_layer],
+                sdb_stem         = [zeros(FT,length(config.CONSTANTS.SPECTRA.Λ)) for _ in 1:n_layer],
+                sdf_stem         = [zeros(FT,length(config.CONSTANTS.SPECTRA.Λ)) for _ in 1:n_layer],
                 ρ_sd_layer       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 τ_sd_layer       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 τ_ss_layer       = zeros(FT, n_layer),
