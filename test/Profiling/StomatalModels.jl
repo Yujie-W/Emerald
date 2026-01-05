@@ -6,23 +6,23 @@
 
 using Profile
 
-import Emerald.LeafOptics as ELO
 import Emerald.Namespace as ENS
+import Emerald.StomatalModels as ESM
 import Emerald.SPAC as ESPAC
 
 
 config = ENS.SPACConfig(Float64);
 spac = ENS.BulkSPAC(config);
 ESPAC.initialize_spac!(config, spac);
-lbio = spac.plant.leaves[end].bio;
+ESPAC.spac!(config, spac, 1);
 
-@time ELO.leaf_spectra!(config, spac.plant.leaves[end].bio, spac.cache, 5.0);
-@time ELO.plant_leaf_spectra!(config, spac);
+@time ESM.stomatal_conductance_profile!(config, spac);
+@time ESM.stomatal_conductance!(spac, 1.0);
 
 Profile.clear_malloc_data();
 
-@time ELO.leaf_spectra!(config, lbio, spac.cache, 5.0);
-@time ELO.plant_leaf_spectra!(config, spac);
+@time ESM.stomatal_conductance_profile!(config, spac);
+@time ESM.stomatal_conductance!(spac, 1.0);
 
 
 exit()

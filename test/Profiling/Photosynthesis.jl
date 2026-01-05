@@ -2,7 +2,8 @@
 #
 # julia --project --track-allocation=user
 #
-using BenchmarkTools
+
+
 using Profile
 
 import Emerald.Namespace as ENS
@@ -29,3 +30,6 @@ Profile.clear_malloc_data();
 
 @time EPH.plant_photosynthesis!(config, spac);
 @time EPH.plant_carbon_budget!(spac, 1.0);
+
+
+exit()

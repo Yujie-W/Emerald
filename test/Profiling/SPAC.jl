@@ -7,20 +7,19 @@
 using Profile
 
 import Emerald.Namespace as ENS
-import Emerald.CanopyOptics as ECO
 import Emerald.SPAC as ESPAC
 
 
 config = ENS.SPACConfig(Float64);
 spac = ENS.BulkSPAC(config);
-ESPAC.initialize_spac!(config, spac);
 
-@time ECO.canopy_radiation!(config, spac);
+@time ESPAC.initialize_spac!(config, spac);
+@time ESPAC.spac!(config, spac, 1);
 
 Profile.clear_malloc_data();
 
-# 260 allocations due to soil albedo fitting at hyperspectral mode
-@time ECO.canopy_radiation!(config, spac);
+@time ESPAC.initialize_spac!(config, spac);
+@time ESPAC.spac!(config, spac, 1);
 
 
 exit()

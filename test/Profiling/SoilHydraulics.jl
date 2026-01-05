@@ -6,23 +6,23 @@
 
 using Profile
 
-import Emerald.LeafOptics as ELO
 import Emerald.Namespace as ENS
+import Emerald.SoilHydraulics as ESH
 import Emerald.SPAC as ESPAC
 
 
 config = ENS.SPACConfig(Float64);
 spac = ENS.BulkSPAC(config);
 ESPAC.initialize_spac!(config, spac);
-lbio = spac.plant.leaves[end].bio;
+ESPAC.spac!(config, spac, 1);
 
-@time ELO.leaf_spectra!(config, spac.plant.leaves[end].bio, spac.cache, 5.0);
-@time ELO.plant_leaf_spectra!(config, spac);
+@time ESH.soil_profiles!(config, spac);
+@time ESH.soil_budgets!(config, spac, 1.0);
 
 Profile.clear_malloc_data();
 
-@time ELO.leaf_spectra!(config, lbio, spac.cache, 5.0);
-@time ELO.plant_leaf_spectra!(config, spac);
+@time ESH.soil_profiles!(config, spac);
+@time ESH.soil_budgets!(config, spac, 1.0);
 
 
 exit()

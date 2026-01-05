@@ -4,7 +4,6 @@
 #
 
 
-using BenchmarkTools
 using Profile
 
 import Emerald.Namespace as ENS
