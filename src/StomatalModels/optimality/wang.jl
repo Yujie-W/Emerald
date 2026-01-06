@@ -13,7 +13,7 @@
 #######################################################################################################################################################################################################
 """
 
-    ∂Θ∂E!(cache::SPACCache{FT}, sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
+    ∂Θ∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT}
 
 Update the ∂Θ∂E for sunlit leaves, given
 - `sm` `WangSM` type WangSM
@@ -22,7 +22,7 @@ Update the ∂Θ∂E for sunlit leaves, given
 """
 function ∂Θ∂E! end;
 
-∂Θ∂E!(cache::SPACCache{FT}, sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+∂Θ∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::WangSM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     # if leaf xylem is not connected, do nothing
     if !leaf.xylem.state.connected
         leaf.flux.auxil.∂Θ∂E .= 0;

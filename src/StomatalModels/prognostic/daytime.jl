@@ -31,7 +31,7 @@ function ∂g∂t! end;
 
 ∂g∂t!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     ∂A∂E!(config, cache, leaf, air);
-    ∂Θ∂E!(cache, sm, leaf, air);
+    ∂Θ∂E!(config, cache, sm, leaf, air);
 
     leaf.flux.auxil.∂g∂t .= sm.K .* (leaf.flux.auxil.∂A∂E .- leaf.flux.auxil.∂Θ∂E);
 
@@ -41,17 +41,17 @@ function ∂g∂t! end;
     return nothing
 );
 
-∂g∂t!(cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} =
-    ∂g∂t!(cache, sm, leaf, air, sm.β.PARAM_Y);
+∂g∂t!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} =
+    ∂g∂t!(config, cache, sm, leaf, air, sm.β.PARAM_Y);
 
-∂g∂t!(cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterG1) where {FT} = (
+∂g∂t!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterG1) where {FT} = (
     gsw = empirical_equation(sm, leaf, air; β = leaf.flux.auxil.β);
     leaf.flux.auxil.∂g∂t .= max.(-0.001, min.(0.001, (gsw .- leaf.flux.state.g_H₂O_s) ./ sm.τ));
 
     return nothing
 );
 
-∂g∂t!(cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterVcmax) where {FT} = (
+∂g∂t!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::Union{BallBerrySM{FT}, GentineSM{FT}, LeuningSM{FT}, MedlynSM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}, βt::BetaParameterVcmax) where {FT} = (
     gsw = empirical_equation(sm, leaf, air; β = FT(1));
     leaf.flux.auxil.∂g∂t .= max.(-0.001, min.(0.001, (gsw .- leaf.flux.state.g_H₂O_s) ./ sm.τ));
 

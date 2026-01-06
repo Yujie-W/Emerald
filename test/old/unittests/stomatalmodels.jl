@@ -88,7 +88,7 @@ import Emerald.EmeraldLand.SPAC
         air = spac.airs[1];
 
         for sm in [NS.WangSM{Float64}(), NS.AndereggSM{Float64}(), NS.EllerSM{Float64}(), NS.SperrySM{Float64}(), NS.Wang2SM{Float64}()]
-            SM.∂Θ∂E!(spac.cache, sm, leaf, air);
+            SM.∂Θ∂E!(config, spac.cache, sm, leaf, air);
             @test all(leaf.flux.auxil.∂Θ∂E .> 0);
         end;
     end;

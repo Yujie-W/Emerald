@@ -11,7 +11,7 @@
 #     2025-Nov-19: set min A to 0.01 when computing ∂Θ∂E
 #
 #######################################################################################################################################################################################################
-∂Θ∂E!(cache::SPACCache{FT}, sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+∂Θ∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::SperrySM{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     # if leaf xylem is not connected, do nothing
     if !leaf.xylem.state.connected
         leaf.flux.auxil.∂Θ∂E .= 0;
@@ -41,7 +41,7 @@
     gsm .= 1 ./ max.(eps(FT), 1 ./ ghm .- 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gsm .= min.(gsm, g_max);
     gcm .= 1 ./ (FT(1.6) ./ gsm .+ 1 ./ leaf.flux.auxil.g_CO₂_b);
-    am = photosynthesis_only!(cache, leaf.photosystem, air, gcm, leaf.flux.auxil.ppar);
+    am = photosynthesis_only!(config, cache, leaf.photosystem, air, gcm, leaf.flux.auxil.ppar);
 
     leaf.flux.auxil.∂Θ∂E .= dkde .* max.(FT(0.01), am) ./ dedpm;
 

@@ -10,9 +10,10 @@
 #######################################################################################################################################################################################################
 """
 
-    photosynthesis_only!(cache::SPACCache{FT}, psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}, ppar::Vector{FT}) where {FT}
+    photosynthesis_only!(config::SPACConfig{FT}, cache::SPACCache{FT}, psm::LeafPhotosystem{FT}, air::AirLayer{FT}, g_lc::Vector{FT}, ppar::Vector{FT}) where {FT}
 
 Updates leaf photosynthetic rates based on leaf diffusive conductance (for StomataModels.jl temporary use), given
+- `config` `SPACConfig` type structure
 - `cache` `SPACCache` type structure
 - `psm` `LeafPhotosystem` type structure
 - `air` `AirLayer` structure for environmental conditions like O₂ partial pressure

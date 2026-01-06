@@ -27,7 +27,9 @@ Update the ∂A∂E for sunlit leaves, given
 """
 function ∂A∂E! end;
 
-∂A∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
+∂A∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = ∂A∂E!(config, cache, config.METHODS.STOMATAL_MODEL, leaf, air);
+
+∂A∂E!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::AbstractStomatalConductanceModel{FT}, leaf::Leaf{FT}, air::AirLayer{FT}) where {FT} = (
     # if leaf xylem is not connected, do nothing
     if !leaf.xylem.state.connected
         leaf.flux.auxil.∂A∂E .= 0;
