@@ -79,9 +79,7 @@ adjusted_time(soil::SoilLayer{FT}, δt::FT) where {FT} = (
     return new_δt
 );
 
-adjusted_time(plant::Plant{FT}, lai::FT, δt::FT) where {FT} = adjusted_time(plant, lai, δt, plant.leaves[1]);
-
-adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::Leaf{FT}) where {FT} = (
+adjusted_time(plant::Plant{FT}, lai::FT, δt::FT) where {FT} = (
     new_δt::FT = δt;
 
     # make sure root temperature does not change more than 1 K per time step
@@ -154,7 +152,7 @@ adjusted_time(plant::Plant{FT}, lai::FT, δt::FT, ::Leaf{FT}) where {FT} = (
 
     # make sure leaf capacitance buffer does not drain (pressure change does not exceed 0.1 MPa per time step)
     for leaf in plant.leaves
-        if leaf.capacitor.auxil isa XylemHydraulicsAuxilNSS
+        if leaf.xylem.auxil isa XylemHydraulicsAuxilNSS
             if leaf.capacitor.auxil.flow > 0
                 new_v = capacitance_volume(leaf.capacitor.trait.pv, leaf.capacitor.auxil.p - FT(0.1), leaf.energy.auxil.t) * leaf.capacitor.trait.v_max * leaf.xylem.trait.area;
                 new_δt = min((leaf.capacitor.state.v_storage - new_v) / leaf.capacitor.auxil.flow, new_δt);
