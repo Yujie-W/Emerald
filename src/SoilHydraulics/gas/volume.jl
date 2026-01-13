@@ -1,17 +1,3 @@
-# This file contains functions to balance the air volume in the soil
-
-#######################################################################################################################################################################################################
-#
-# Changes to the function
-# General
-#     2023-Jun-30: move function out of soil_budget!
-#     2023-Jul-06: sort the order of gas volume balance and water volume balance
-#     2023-Jul-06: add PRESCRIBE_AIR mode to avoid the errors due to mass balance in air
-#     2023-Oct-07: limit the volume change from the source to 1/2 of the total dry air (soil and air)
-#     2025-Jun-05: make soil total energy relative to triple temperature for phase change purposes
-#     2025-Jun-05: account for ice volume in the calculation of air volume balance
-#
-#######################################################################################################################################################################################################
 """
 
     volume_balance!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
@@ -71,16 +57,16 @@ function volume_balance!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         # if nmax_j < ndry_j and ndry_j > 0, air needs to be transferred to the upper layer (does not matter whether upper layer is saturated or not)
         if (nmax_j < ndry_j) && (ndry_j > 0)
             n_mass = ndry_j - nmax_j;
-            soil_j.state.ns[1] -= n_mass * soil_j.state.ns[1] / ndry_j;
-            soil_j.state.ns[2] -= n_mass * soil_j.state.ns[2] / ndry_j;
-            soil_j.state.ns[4] -= n_mass * soil_j.state.ns[4] / ndry_j;
-            soil_j.state.ns[5] -= n_mass * soil_j.state.ns[5] / ndry_j;
-            soil_j.state.Σe -= n_mass * CP_D_MOL(FT) * (soil_j.auxil.t - T₀(FT)) / soil_j.auxil.δz;
             soil_i.state.ns[1] += n_mass * soil_j.state.ns[1] / ndry_j;
             soil_i.state.ns[2] += n_mass * soil_j.state.ns[2] / ndry_j;
             soil_i.state.ns[4] += n_mass * soil_j.state.ns[4] / ndry_j;
             soil_i.state.ns[5] += n_mass * soil_j.state.ns[5] / ndry_j;
             soil_i.state.Σe += n_mass * CP_D_MOL(FT) * (soil_j.auxil.t - T₀(FT)) / soil_i.auxil.δz;
+            soil_j.state.ns[1] -= n_mass * soil_j.state.ns[1] / ndry_j;
+            soil_j.state.ns[2] -= n_mass * soil_j.state.ns[2] / ndry_j;
+            soil_j.state.ns[4] -= n_mass * soil_j.state.ns[4] / ndry_j;
+            soil_j.state.ns[5] -= n_mass * soil_j.state.ns[5] / ndry_j;
+            soil_j.state.Σe -= n_mass * CP_D_MOL(FT) * (soil_j.auxil.t - T₀(FT)) / soil_j.auxil.δz;
         end;
     end;
 
@@ -112,6 +98,9 @@ function volume_balance!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         top_soil.state.ns[4] -= n_mass * top_soil.state.ns[4] / s_dry;
         top_soil.state.ns[5] -= n_mass * top_soil.state.ns[5] / s_dry;
         top_soil.state.Σe -= n_mass * CP_D_MOL(FT) * (top_soil.auxil.t - T₀(FT)) / top_soil.auxil.δz;
+        for ins in 1:5
+            top_soil.state.ns[ins] = max( top_soil.state.ns[ins], 0 );
+        end;
         if !PRESCRIBE_AIR
             air.state.ns[1] += n_mass * top_soil.state.ns[1] / s_dry;
             air.state.ns[2] += n_mass * top_soil.state.ns[2] / s_dry;

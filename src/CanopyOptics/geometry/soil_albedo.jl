@@ -145,7 +145,7 @@ soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, 
     @inline _fit(x::Vector{FT}) where {FT} = (
         mul!(ρ_sw, SPECTRA.MAT_SOIL, x);
 
-        return ( mean( view(ρ_sw,SPECTRA.IΛ_PAR) ) - ρ_par ) ^ 2 + ( mean( view(ρ_sw,SPECTRA.IΛ_NIR) ) - ρ_nir ) ^ 2
+        return -(( mean( view(ρ_sw,SPECTRA.IΛ_PAR) ) - ρ_par ) ^ 2 + ( mean( view(ρ_sw,SPECTRA.IΛ_NIR) ) - ρ_nir ) ^ 2)
     );
 
     # solve for weights
