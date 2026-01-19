@@ -40,5 +40,13 @@ function site_config(settings::Union{Dict,OrderedDict})
         pretty_display!("C3 photosynthesis model not recognized: $(settings["C3_MODEL"]), use testing setting instead...", "twarn");
     end;
 
+    # set up soil albedo model
+    if settings["SOIL_ALBEDO_MODEL"] == "HyperspectralCliMA"
+        config.METHODS.SOIL_ALBEDO = Namespace.SoilAlbedoHyperspectralCLIMA();
+    elseif settings["SOIL_ALBEDO_MODEL"] == "HyperspectralAsh"
+        config.METHODS.SOIL_ALBEDO = Namespace.SoilAlbedoHyperspectralAsh();
+        # TODO add the data for soil albedo from the ASD experiments
+    end;
+
     return config
 end;

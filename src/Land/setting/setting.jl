@@ -3,7 +3,7 @@
     land_model_settings(; mode::String = "testing")
 
 Create a dictionary of Emerald land settings, given
-- `mode` Mode of the settings, e.g., "testing", "default", or "cytochrome"
+- `mode` Mode of the settings, e.g., "testing", "default", "cytochrome", "ash"
 
 """
 function land_model_settings(; mode::String = "testing")
@@ -24,6 +24,7 @@ function land_model_settings(; mode::String = "testing")
         # SPAC settings
         "C3_MODEL"          => "FvCB",
         "MAX_LAI_LAYERING"  => false,
+        "SOIL_ALBEDO_MODEL" => "HyperspectralCliMA",
 
         # threading settings (default is 75% of CPU cores)
         "GRID_THREADS"      => min(Int(ceil(Sys.CPU_THREADS * 0.75)), 40),
@@ -47,7 +48,7 @@ function land_model_settings(; mode::String = "testing")
         settings["SIMULATION_PERIOD"] = 4321:4344;
     end;
 
-    # if mode contains SIF (this is meant for Christoph's SIF experiments)
+    # if mode contains SIF (this is meant for Christian's SIF experiments)
     if occursin("SIF", mode)
         settings["MAX_LAI_LAYERING"] = true;
         for vn in ["PCI", "PPAR", "SIF740", "ΦF", "ΦP", "ΣSIF", "ΣSIF_CHL", "ΣSIF_LEAF"]
@@ -62,6 +63,13 @@ function land_model_settings(; mode::String = "testing")
     # if mode is cytochrome
     if occursin("cytochrome", mode)
         settings["C3_MODEL"] = "J3B";
+
+        return settings
+    end;
+
+    # if mode is ash
+    if occursin("ash", mode)
+        settings["SOIL_ALBEDO_MODEL"] = "HyperspectralAsh";
 
         return settings
     end;
