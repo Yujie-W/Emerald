@@ -35,15 +35,8 @@ function aci_fit!(
     @assert c3c4 in ["C3", "C4"] "The c3c4 string should be either C3 or C4!";
 
     # create a leaf photosystem based on the c3c4 string
-    cache = SPACCache{FT}(
-                config.DIMENSIONS.DIM_AZI,
-                config.DIMENSIONS.DIM_INCL,
-                1,
-                0,
-                length(config.CONSTANTS.SPECTRA.Λ_SIF),
-                length(config.CONSTANTS.SPECTRA.Λ_SIFE),
-                length(config.CONSTANTS.SPECTRA.Λ));
-    ps = LeafPhotosystem{FT}(c3c4);
+    cache = leaf_level_spac_cache(config);
+    ps = leaf_level_photosystem(FT, c3c4);
 
     # fit the A-Ci curve with or without removing outliers
     return if remove_outlier

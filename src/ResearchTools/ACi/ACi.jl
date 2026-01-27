@@ -10,6 +10,8 @@ using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax, AjMethodC3JmaxPi, AjMetho
 using ..Namespace: AirLayer
 using ..Photosynthesis: photosynthesis!, photosystem_temperature_dependence!, temperature_correction
 
+using ..LeafLevel: leaf_level_photosystem, leaf_level_spac_cache
+
 
 include("curve.jl");
 include("rmse.jl");

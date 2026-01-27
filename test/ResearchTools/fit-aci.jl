@@ -13,11 +13,11 @@ import Emerald.ResearchTools as ERT
 
     @testset "C3 Jmax" begin
         config = ENS.SPACConfig(Float64);
-        config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
-        config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3JmaxPi();
-        config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
-        config.METHODS.COLIMIT_J = Namespace.ColimitJCLM(settings["FT"]);
-        config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}();
+        config.METHODS.C3_AC_METHOD = ENS.AcMethodC3VcmaxPi();
+        config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3JmaxPi();
+        config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
+        config.METHODS.COLIMIT_J = ENS.ColimitJCLM(Float64);
+        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
         result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "Jmax25"]);
         @test !any(isnan.(result[1]));
         result = ERT.ACi.aci_fit!(config, df3, "C3", ["Vcmax25", "Jmax25", "Rd25"]);
