@@ -155,14 +155,7 @@ BulkSPAC(config::SPACConfig{FT};
                 memory       = PlantMemory(config));
 
     # set up the cache
-    cache = SPACCache{FT}(
-                config.DIMENSIONS.DIM_AZI,
-                config.DIMENSIONS.DIM_INCL,
-                n_layer,
-                config.DIMENSIONS.DIM_PPAR_BINS,
-                length(config.CONSTANTS.SPECTRA.Λ_SIF),
-                length(config.CONSTANTS.SPECTRA.Λ_SIFE),
-                length(config.CONSTANTS.SPECTRA.Λ));
+    cache = SPACCache(config, n_layer);
 
     return BulkSPAC{FT}(
                 info      = spac_info,

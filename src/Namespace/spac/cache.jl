@@ -112,6 +112,17 @@ Base.@kwdef struct SPACCache{FT}
     stol_sa::SolutionToleranceND{FT}
 end;
 
+SPACCache(config::SPACConfig{FT}, dim_layer::Int) where {FT} = (
+    dim_azi = config.DIMENSIONS.DIM_AZI;
+    dim_incl = config.DIMENSIONS.DIM_INCL;
+    dim_ppar = config.DIMENSIONS.DIM_PPAR_BINS;
+    dim_sif = length(config.CONSTANTS.SPECTRA.Λ_SIF);
+    dim_sife = length(config.CONSTANTS.SPECTRA.Λ_SIFE);
+    dim_wl = length(config.CONSTANTS.SPECTRA.Λ);
+
+    return SPACCache{FT}(dim_azi, dim_incl, dim_layer, dim_ppar, dim_sif, dim_sife, dim_wl)
+);
+
 SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_ppar::Union{Int, Nothing}, dim_sif::Int, dim_sife::Int, dim_wl::Int) where {FT} = (
     cache_dim_ppar = isnothing(dim_ppar) ? dim_incl * dim_azi : dim_ppar;
 
