@@ -12,7 +12,7 @@ import Emerald.ResearchTools as ERT
     df4.T_LEAF .+= 273.15;  # convert to Kelvin
 
     @testset "C3 Jmax" begin
-        config = ENS.SPACConfig(Float64);
+        config = ERT.LeafLevelSetup.leaf_level_config(Float64);
         config.METHODS.C3_AC_METHOD = ENS.AcMethodC3VcmaxPi();
         config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3JmaxPi();
         config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
@@ -27,7 +27,7 @@ import Emerald.ResearchTools as ERT
     end;
 
     @testset "C3 Vqmax" begin
-        config = ENS.SPACConfig(Float64);
+        config = ERT.LeafLevelSetup.leaf_level_config(Float64);
         config.METHODS.C3_AC_METHOD = ENS.AcMethodC3VcmaxPi();
         config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3VqmaxPi();
         config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
@@ -42,7 +42,7 @@ import Emerald.ResearchTools as ERT
     end;
 
     @testset "C4 Vcmax" begin
-        config = ENS.SPACConfig(Float64);
+        config = ERT.LeafLevelSetup.leaf_level_config(Float64);
         config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VcmaxPi();
         config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
         result = ERT.ACi.aci_fit!(config, df4, "C4", ["Vcmax25"]);
@@ -52,7 +52,7 @@ import Emerald.ResearchTools as ERT
     end;
 
     @testset "C4 Vpmax" begin
-        config = ENS.SPACConfig(Float64);
+        config = ERT.LeafLevelSetup.leaf_level_config(Float64);
         config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VpmaxPi();
         config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
         result = ERT.ACi.aci_fit!(config, df4, "C4", ["Vcmax25"]);
