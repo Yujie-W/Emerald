@@ -40,7 +40,7 @@
     ghm .= gh1 .* leaf.xylem.auxil.e_crit / e;
     gsm .= 1 ./ max.(eps(FT), 1 ./ ghm .- 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     gsm .= min.(gsm, g_max);
-    gcm .= 1 ./ (FT(1.6) ./ gsm .+ 1 ./ leaf.flux.auxil.g_CO₂_b);
+    gcm .= 1 ./ (FT(1.6) ./ gsm .+ 1 ./ leaf.flux.auxil.g_CO₂_b .+ 1 ./ leaf.flux.auxil.g_m);
     am = photosynthesis_only!(config, cache, leaf.photosystem, air, gcm, leaf.flux.auxil.ppar);
 
     leaf.flux.auxil.∂Θ∂E .= dkde .* max.(FT(0.01), am) ./ dedpm;

@@ -84,6 +84,8 @@ Base.@kwdef mutable struct LeafFluxAuxil{FT}
     g_CO₂_b::FT = 3
     "Total leaf diffusive conductance to CO₂ for sunlit and shaded (end element) leaves `[mol m⁻² s⁻¹]`"
     g_CO₂::Vector{FT}
+    "Mesophyll conductance to CO₂ for sunlit and shaded (end element) leaves `[mol m⁻² s⁻¹]`"
+    g_m::Vector{FT}
     "Boundary leaf diffusive conductance to OCS `[mol m⁻² s⁻¹]`"
     g_OCS_b::FT = 3 / 1.21
     "Total leaf diffusive conductance to OCS for sunlit and shaded (end element) leaves `[mol m⁻² s⁻¹]`"
@@ -141,6 +143,7 @@ LeafFluxAuxil(config::SPACConfig{FT}) where {FT} = (
 
     return LeafFluxAuxil{FT}(
                 g_CO₂   = zeros(FT, cache_dim_ppar+1),
+                g_m     = zeros(FT, cache_dim_ppar+1) .+ Inf,
                 g_OCS   = zeros(FT, cache_dim_ppar+1),
                 ∂g∂t    = zeros(FT, cache_dim_ppar+1),
                 ∂A∂E    = zeros(FT, cache_dim_ppar+1),

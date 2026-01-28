@@ -58,7 +58,7 @@ function ∂A∂E! end;
     # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
     gs2 .= gs1 .+ FT(0.0001);
     gh2 .= 1 ./ (1 ./ gs2 .+ 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    gc2 .= 1 ./ (FT(1.6) ./ gs2 .+ 1 ./ leaf.flux.auxil.g_CO₂_b);
+    gc2 .= 1 ./ (FT(1.6) ./ gs2 .+ 1 ./ leaf.flux.auxil.g_CO₂_b .+ 1 ./ leaf.flux.auxil.g_m);
     e2  .= gh2 .* d ./ air.state.p_air;
     a2   = photosynthesis_only!(config, cache, leaf.photosystem, air, gc2, leaf.flux.auxil.ppar);
 

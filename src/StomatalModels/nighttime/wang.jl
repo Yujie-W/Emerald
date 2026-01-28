@@ -38,7 +38,7 @@ function ∂Θₙ∂E end;
     # compute the A and E at the current setting
     gs = leaf.flux.state.g_H₂O_s;
     gh = 1 / (1 / gs + 1 / (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
-    gc = 1 / (FT(1.6) / gs + 1 / leaf.flux.auxil.g_CO₂_b);
+    gc = 1 / (FT(1.6) / gs + 1 / leaf.flux.auxil.g_CO₂_b + 1 / leaf.flux.auxil.g_m);
     e  = gh * d / air.state.p_air;
     a  = photosynthesis_only!(leaf.photosystem, air, gc, leaf.flux.auxil.ppar_mem);
 

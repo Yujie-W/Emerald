@@ -155,7 +155,7 @@ substep_aux!(leaf::Leaf{FT}, shedded::Bool) where {FT} = (
     end;
 
     # update the stomatal conductance
-    leaf.flux.auxil.g_CO₂ .= 1 ./ (1 ./ leaf.flux.auxil.g_CO₂_b .+ FT(1.6) ./ leaf.flux.state.g_H₂O_s);
+    leaf.flux.auxil.g_CO₂ .= 1 ./ (1 ./ leaf.flux.auxil.g_CO₂_b .+ FT(1.6) ./ leaf.flux.state.g_H₂O_s .+ 1 ./ leaf.flux.auxil.g_m);
     leaf.flux.auxil.g_OCS .= 1 ./ (1 ./ leaf.flux.auxil.g_OCS_b .+ FT(1.934) ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (leaf.photosystem.trait.K_OCS .* leaf.photosystem.auxil.v_cmax));
 
     # clear the partial derivatives
