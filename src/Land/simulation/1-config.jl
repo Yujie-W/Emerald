@@ -30,12 +30,31 @@ function site_config(settings::Union{Dict,OrderedDict})
         config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = Namespace.ColimitJCLM(settings["FT"]);
         config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}();
+        config.METHODS.TD_VCMAX_C3.ΔHA = 63000;
+        config.METHODS.TD_VCMAX_C3.ΔHD = 204000;
+        config.METHODS.TD_JMAX.ΔHA = 50000;
+        config.METHODS.TD_JMAX.ΔHD = 201000;
+        config.METHODS.TD_Γ.VAL_REF = 4.67;
+        config.METHODS.TD_Γ.ΔHA = 11800;
     elseif settings["C3_MODEL"] == "J3B"
         config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
         config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3VqmaxPi();
         config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = Namespace.SerialColimit();
         config.METHODS.FLUORESCENCE_METHOD = Namespace.CytochromeFluorescenceModel();
+        config.METHODS.TD_VCMAX_C3.ΔHA = 63000;
+        config.METHODS.TD_VCMAX_C3.ΔHD = 204000;
+        config.METHODS.TD_KQ = Namespace.ArrheniusPeak{Float64}(298.15, 300, 28500, 223500, 700);
+        config.METHODS.TD_Γ.VAL_REF = 4.56;
+        config.METHODS.TD_Γ.ΔHA = 11800;
+        config.METHODS.TD_ηC.VAL_REF = 4 * 3 / 14;
+        config.METHODS.TD_ηC.ΔHA = 28500;
+        config.METHODS.TD_ηC.ΔHD = 223500;
+        config.METHODS.TD_ηC.ΔSV = 700;
+        config.METHODS.TD_ηL.VAL_REF = 3 * 3 / 14;
+        config.METHODS.TD_ηL.ΔHA = 28500;
+        config.METHODS.TD_ηL.ΔHD = 223500;
+        config.METHODS.TD_ηL.ΔSV = 700;
     else
         pretty_display!("C3 photosynthesis model not recognized: $(settings["C3_MODEL"]), use testing setting instead...", "twarn");
     end;
