@@ -194,11 +194,6 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         sh_θ² = local_lidf_weight(ϕ_shaded, _COS²_Θ_INCL_AZI);
         sl_θ² = local_lidf_weight(ϕ_sunlit, _COS²_Θ_INCL_AZI);
 
-        if isnan(sl_S_)
-            @show local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_abs) ϕ_shaded ϕ_sunlit sun_geo.auxil.fs_abs;
-            error("NaN detected in SIF weight computation");
-        end;
-
         # upward and downward SIF from direct and diffuse radiation per leaf area
         sun_geo.auxil._sif_shadedꜛ .= sun_geo.auxil._e_difꜜ_sif_mean .* sh_1_ .+ sun_geo.auxil._e_difꜜ_sif_diff .* sh_θ² .+
                                       sun_geo.auxil._e_difꜛ_sif_mean .* sh_1_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_θ²;
@@ -213,9 +208,9 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
 
         # update the SIF cache for the observer direction (compute it here to save time)
         sen_geo.auxil.sif_sunlit[:,irt] .= sun_geo.auxil._e_dirꜜ_sif_mean .* sl_SO .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sl_so .+
-                                           sun_geo.auxil._e_difꜜ_sif_mean .* sl_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sl_oθ .+
+                                           sun_geo.auxil._e_difꜜ_sif_mean .* sl_O_ .+ sun_geo.auxil._e_difꜜ_sif_diff .* sl_oθ .+
                                            sun_geo.auxil._e_difꜛ_sif_mean .* sl_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sl_oθ;
-        sen_geo.auxil.sif_shaded[:,irt] .= sun_geo.auxil._e_difꜜ_sif_mean .* sh_O_ .+ sun_geo.auxil._e_dirꜜ_sif_diff .* sh_oθ .+
+        sen_geo.auxil.sif_shaded[:,irt] .= sun_geo.auxil._e_difꜜ_sif_mean .* sh_O_ .+ sun_geo.auxil._e_difꜜ_sif_diff .* sh_oθ .+
                                            sun_geo.auxil._e_difꜛ_sif_mean .* sh_O_ .- sun_geo.auxil._e_difꜛ_sif_diff .* sh_oθ;
 
         # total emitted SIF for upward and downward direction (ci is already accounted for in p_sunlit, p_sun_sensor, and shortwave radiation, and thus there is no need to use CI here)
