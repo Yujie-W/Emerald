@@ -250,10 +250,10 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         # TODO: better SIF scattering algorithm
         # ciilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
         ciilai = can_str.trait.δlai[irt] * can_str.auxil.ci_diffuse;
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .* ciilai .* sun_geo.auxil.p_sunlit[irt] .+
+        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .* ciilai .+
                                              sun_geo.auxil._sif_sunlitꜜ_dif .* ciilai .* sun_geo.auxil.p_sunlit[irt] .+
                                              sun_geo.auxil._sif_shadedꜜ     .* ciilai .* (1 - sun_geo.auxil.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ_dir .* ciilai .* sun_geo.auxil.p_sunlit[irt] .+
+        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ_dir .* ciilai .+
                                              sun_geo.auxil._sif_sunlitꜛ_dif .* ciilai .* sun_geo.auxil.p_sunlit[irt] .+
                                              sun_geo.auxil._sif_shadedꜛ     .* ciilai .* (1 - sun_geo.auxil.p_sunlit[irt]);
     end;
@@ -297,6 +297,7 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
                                    view(sen_geo.auxil.dof_leaf,SPECTRA.IΛ_SIF,:) .* view(sun_geo.auxil.e_sifꜛ,:,1:n_layer);
 
     # 4. compute SIF from the observer direction (CI is accounted for in the p_sensor and p_sun_sensor already, so do NOT use CI here)
+    #    TODO: may have numerical issues because of due to the same issue with SIF conservation (might not, I do not know yet)
     vec_layer = spac.cache.cache_layer_1;
     vec_layer .= sen_geo.auxil.p_sun_sensor .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_sunlit, sen_geo.auxil.sif_sunlit, vec_layer);

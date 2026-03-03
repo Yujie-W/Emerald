@@ -14,7 +14,7 @@ spac.meteo.rad_sw.e_dif[config.CONSTANTS.SPECTRA.Λ .<= 590] .= 0;
 
 spac.meteo.rad_sw.e_dif .= 0;
 
-ESPAC.prescribe_traits!(config, spac; lai=6.0, ci=1, sai=0);
+ESPAC.prescribe_traits!(config, spac; lai=1.0, ci=1, sai=0);
 ESPAC.initialize_spac!(config, spac);
 ESPAC.spac!(config, spac, FT(360));
 
