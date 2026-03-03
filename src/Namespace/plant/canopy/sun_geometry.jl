@@ -238,10 +238,14 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     _sif_shadedꜜ::Vector{FT}
     "Upward SIF emissions from shaded leaves"
     _sif_shadedꜛ::Vector{FT}
-    "Downward SIF emissions from sunlit leaves"
-    _sif_sunlitꜜ::Vector{FT}
-    "Upward SIF emissions from sunlit leaves"
-    _sif_sunlitꜛ::Vector{FT}
+    "Downward SIF emissions from sunlit leaves from diffuse radiation"
+    _sif_sunlitꜜ_dif::Vector{FT}
+    "Upward SIF emissions from sunlit leaves from diffuse radiation"
+    _sif_sunlitꜛ_dif::Vector{FT}
+    "Downward SIF emissions from sunlit leaves from direct radiation"
+    _sif_sunlitꜜ_dir::Vector{FT}
+    "Upward SIF emissions from sunlit leaves from direct radiation"
+    _sif_sunlitꜛ_dir::Vector{FT}
 
     # cache variables
     "A temporary matrix with size of DIM_INCL and DIM_AZI"
@@ -325,8 +329,10 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
                 _e_dirꜜ_sif_diff = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _sif_shadedꜜ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _sif_shadedꜛ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
-                _sif_sunlitꜜ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
-                _sif_sunlitꜛ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _sif_sunlitꜜ_dif = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _sif_sunlitꜛ_dif = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _sif_sunlitꜜ_dir = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _sif_sunlitꜛ_dir = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _mat_incl_azi    = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
                 _vec_azi         = zeros(FT, config.DIMENSIONS.DIM_AZI),
     )
