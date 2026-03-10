@@ -33,7 +33,7 @@ photosystem_coefficients!(
             pss::Union{C3State{FT}, C4State{FT}},
             psa::LeafPhotosystemAuxil{FT},
             ppar::Vector{FT};
-            β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, cache, pss, psa, config.METHODS.FLUORESCENCE_METHOD, ppar; β = β);
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, cache, pss, psa, config.METHODS.FLUORESCENCE_METHOD_C4, ppar; β = β);
 
 photosystem_coefficients!(
             config::SPACConfig{FT},

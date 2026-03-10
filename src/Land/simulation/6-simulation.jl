@@ -1,27 +1,28 @@
 """
 
-    simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; saving::Union{Nothing,String} = nothing)
-    simulation!(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict}; saving::Union{Nothing,String} = nothing)
+    simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; c3c4::String = "C3", saving::Union{Nothing,String} = nothing)
+    simulation!(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict}; c3c4::String = "C3", saving::Union{Nothing,String} = nothing)
 
 Run simulation on site level, given
 - `settings` Dictionary of settings
 - `lat` Latitude of the site
 - `lon` Longitude of the site
 - `year` Year of the simulation
+- `c3c4` String to specify whether the leaf is C3 or C4, default to "C3"
 - `saving` If is not nothing, save the simulations as a Netcdf file in the working directory; if is nothing, return the simulated result dataframe
 - `gmd` GriddingMachine dict for site information
 
 """
 function simulation! end;
 
-simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; saving::Union{Nothing,String} = nothing) =
-    simulation!(settings, grid_dict(LandDatasetLabels(settings["GM_VERSION"], year), lat, lon); saving = saving);
+simulation!(settings::Union{Dict,OrderedDict}, lat::Number, lon::Number, year::Int; c3c4::String = "C3", saving::Union{Nothing,String} = nothing) =
+    simulation!(settings, grid_dict(LandDatasetLabels(settings["GM_VERSION"], year), lat, lon); c3c4 = c3c4, saving = saving);
 
-simulation!(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict}; saving::Union{Nothing,String} = nothing) = (
+simulation!(settings::Union{Dict,OrderedDict}, gmd::Union{Dict,OrderedDict}; c3c4::String = "C3", saving::Union{Nothing,String} = nothing) = (
     wd = grid_weather(WeatherDriverLabels(settings["WD_VERSION"], gmd["YEAR"]), gmd["LATITUDE"], gmd["LONGITUDE"]);
     sd = parameters_to_save(settings["VARIABLES_TO_SAVE"]);
     config = site_config(settings);
-    spac = site_spac(config, gmd; lai_layer_strategy = settings["MAX_LAI_LAYERING"]);
+    spac = site_spac(config, gmd; c3c4 = c3c4, lai_layer_strategy = settings["MAX_LAI_LAYERING"]);
     driver = site_driver_tuple(gmd, wd);
     results = site_result_tuple(spac, wd, sd);
 

@@ -13,7 +13,7 @@ import Emerald.ResearchTools as ERT
         config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3JmaxPi();
         config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = ENS.ColimitJCLM(Float64);
-        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        config.METHODS.FLUORESCENCE_METHOD_C3 = ENS.KNFluorescenceModel{Float64}();
         cache = ERT.LeafLevelSetup.leaf_level_spac_cache(config);
         lps = ERT.LeafLevelSetup.leaf_level_photosystem(Float64, "C3");
         air = ENS.AirLayer{Float64}();
@@ -31,7 +31,7 @@ import Emerald.ResearchTools as ERT
         config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3VqmaxPi();
         config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = ENS.SerialColimit();
-        config.METHODS.FLUORESCENCE_METHOD = ENS.CytochromeFluorescenceModel();
+        config.METHODS.FLUORESCENCE_METHOD_C3 = ENS.CytochromeFluorescenceModel();
         cache = ERT.LeafLevelSetup.leaf_level_spac_cache(config);
         lps = ERT.LeafLevelSetup.leaf_level_photosystem(Float64, "C3");
         air = ENS.AirLayer{Float64}();
@@ -48,7 +48,7 @@ import Emerald.ResearchTools as ERT
         config.METHODS.C4_AC_METHOD = ENS.AcMethodC4Vcmax();
         config.METHODS.C4_AJ_METHOD = ENS.AjMethodC4JPSII();
         config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VcmaxPi();
-        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        config.METHODS.FLUORESCENCE_METHOD_C4 = ENS.KNFluorescenceModel{Float64}();
         cache = ERT.LeafLevelSetup.leaf_level_spac_cache(config);
         lps = ERT.LeafLevelSetup.leaf_level_photosystem(Float64, "C4");
         air = ENS.AirLayer{Float64}();
@@ -65,7 +65,7 @@ import Emerald.ResearchTools as ERT
         config.METHODS.C4_AC_METHOD = ENS.AcMethodC4Vcmax();
         config.METHODS.C4_AJ_METHOD = ENS.AjMethodC4JPSII();
         config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VpmaxPi();
-        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        config.METHODS.FLUORESCENCE_METHOD_C4 = ENS.KNFluorescenceModel{Float64}();
         cache = ERT.LeafLevelSetup.leaf_level_spac_cache(config);
         lps = ERT.LeafLevelSetup.leaf_level_photosystem(Float64, "C4");
         air = ENS.AirLayer{Float64}();

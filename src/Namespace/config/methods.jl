@@ -4,7 +4,8 @@ Method configuration for the SPAC model
 Base.@kwdef mutable struct SPACMethods{FT<:AbstractFloat}
     # fluorescence methods
     "Fluorescence method"
-    FLUORESCENCE_METHOD::Union{CytochromeFluorescenceModel,KNFluorescenceModel{FT},QLFluorescenceModel{FT},QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
+    FLUORESCENCE_METHOD_C3::Union{CytochromeFluorescenceModel,KNFluorescenceModel{FT},QLFluorescenceModel{FT},QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
+    FLUORESCENCE_METHOD_C4::Union{KNFluorescenceModel{FT},QLFluorescenceModel{FT},QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
     "Fluorescence spectra method"
     FLUORESCENCE_SPECTRA_METHOD::Union{DualspectFluorescenceSpectra,FluspectFluorescenceSpectra,PlatespectFluorescenceSpectra} = PlatespectFluorescenceSpectra()
 

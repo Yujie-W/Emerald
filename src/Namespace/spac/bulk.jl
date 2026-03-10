@@ -51,6 +51,7 @@ end;
 BulkSPAC(config::SPACConfig{FT};
          air_bounds::Vector{<:Number} = collect(0:0.5:13),
          basal_area::Number = 0.15,
+         c3c4::String = "C3",
          elevation::Number = 32,
          ground_area::Number = 80,
          latitude::Number = 33.173,
@@ -128,7 +129,7 @@ BulkSPAC(config::SPACConfig{FT};
     spac_canopy = MultiLayerCanopy(config, n_layer);
 
     # set up the canopy layers
-    leaves = Leaf{FT}[Leaf(config) for i in 1:n_layer];
+    leaves = Leaf{FT}[Leaf(config, c3c4) for i in 1:n_layer];
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaves[ilf].xylem.trait.area = spac_sbulk.trait.area * spac_canopy.structure.trait.δlai[irt];

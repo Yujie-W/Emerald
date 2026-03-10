@@ -38,10 +38,11 @@ end;
 
 Return the Leaf struct with initialized energy states, given
 - `config` `SPACConfig` type struct
+- `c3c4` String to specify whether the leaf is C3 or C4, default to "C3"
 
 """
-Leaf(config::SPACConfig{FT}) where {FT} = (
-    leaf = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), photosystem = LeafPhotosystem(config), xylem = XylemHydraulics(config));
+Leaf(config::SPACConfig{FT}, c3c4::String = "C3") where {FT} = (
+    leaf = Leaf{FT}(bio = LeafBio(config), flux = LeafFlux(config), photosystem = LeafPhotosystem(config, c3c4), xylem = XylemHydraulics(config));
     leaf.xylem.trait.cp = 1780;
     leaf.xylem.trait.k_max = 0.04;
 

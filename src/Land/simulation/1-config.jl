@@ -24,31 +24,24 @@ function site_config(settings::Union{Dict,OrderedDict})
     config.METHODS.STOMATAL_MODEL = Namespace.WangSM{settings["FT"]}();
 
     # set up the photosynthesis model
-    if settings["C3_MODEL"] == "FvCB"
+    if settings["C3_MODEL"] == "Jmax"
         config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
         config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3JmaxPi();
         config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = Namespace.ColimitJCLM(settings["FT"]);
-        if settings["C3_ΦF_MODEL"] == "KN"
-            config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}();
-        elseif settings["C3_ΦF_MODEL"] == "QL"
-            config.METHODS.FLUORESCENCE_METHOD = Namespace.QLFluorescenceModelHan{settings["FT"]}();
-        else
-            error("When C3_MODEL is FvCB, C3_ΦF_MODEL must be either KN or QL, but got $(settings["C3_ΦF_MODEL"])...");
-        end;
-        config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}();
+        # TODO: these results are from the unpublished research I am working on, will make them official parameter sets when the paper is accepted
         config.METHODS.TD_VCMAX_C3.ΔHA = 63000;
         config.METHODS.TD_VCMAX_C3.ΔHD = 204000;
         config.METHODS.TD_JMAX.ΔHA = 50000;
         config.METHODS.TD_JMAX.ΔHD = 201000;
         config.METHODS.TD_Γ.VAL_REF = 4.67;
         config.METHODS.TD_Γ.ΔHA = 11800;
-    elseif settings["C3_MODEL"] == "J3B"
+    elseif settings["C3_MODEL"] == "Vqmax"
         config.METHODS.C3_AC_METHOD = Namespace.AcMethodC3VcmaxPi();
         config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3VqmaxPi();
         config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = Namespace.SerialColimit();
-        config.METHODS.FLUORESCENCE_METHOD = Namespace.CytochromeFluorescenceModel();
+        # TODO: these results are from the unpublished research I am working on, will make them official parameter sets when the paper is accepted
         config.METHODS.TD_VCMAX_C3.ΔHA = 63000;
         config.METHODS.TD_VCMAX_C3.ΔHD = 204000;
         config.METHODS.TD_KQ = Namespace.ArrheniusPeak{Float64}(298.15, 300, 28500, 223500, 700);
@@ -64,6 +57,43 @@ function site_config(settings::Union{Dict,OrderedDict})
         config.METHODS.TD_ηL.ΔSV = 700;
     else
         pretty_display!("C3 photosynthesis model not recognized: $(settings["C3_MODEL"]), use testing setting instead...", "twarn");
+    end;
+
+    # set up the C4 photosynthesis model
+    if settings["C4_MODEL"] == "Vcmax"
+        config.METHODS.C4_AC_METHOD = Namespace.AcMethodC4Vcmax();
+        config.METHODS.C4_AJ_METHOD = Namespace.AjMethodC4JPSII();
+        config.METHODS.C4_AP_METHOD = Namespace.ApMethodC4VcmaxPi();
+        config.METHODS.TD_R_C4 = Namespace.RespirationTDCLMC4(settings["FT"]);
+        config.METHODS.TD_VCMAX_C4 = Namespace.VcmaxTDCLMC4(settings["FT"]);
+    elseif settings["C4_MODEL"] == "Vpmax"
+        config.METHODS.C4_AC_METHOD = Namespace.AcMethodC4Vcmax();
+        config.METHODS.C4_AJ_METHOD = Namespace.AjMethodC4JPSII();
+        config.METHODS.C4_AP_METHOD = Namespace.ApMethodC4VpmaxPi();
+        config.METHODS.TD_R_C4 = Namespace.RespirationTDCLMC4(settings["FT"]);
+        config.METHODS.TD_VCMAX_C4 = Namespace.VcmaxTDCLMC4(settings["FT"]);
+        config.METHODS.TD_VPMAX = Namespace.VpmaxTDBoyd(settings["FT"]);
+    end;
+
+    # set up the fluorescence model for C3 plants
+    config.METHODS.FLUORESCENCE_METHOD_C3 = if settings["C3_ΦF_MODEL"] == "KN"
+        Namespace.KNFluorescenceModel{settings["FT"]}()
+    elseif settings["C3_ΦF_MODEL"] == "QL"
+        Namespace.QLFluorescenceModelHanC3(settings["FT"])
+    elseif settings["C3_ΦF_MODEL"] == "B6F"
+        @assert settings["C3_MODEL"] == "Vqmax" "The J3B fluorescence model can only be used along with the Vqmax photosynthesis model";
+        Namespace.CytochromeFluorescenceModel()
+    else
+        error("When C3_MODEL is FvCB, C3_ΦF_MODEL must be either KN, QL, or B6F, but got $(settings["C3_ΦF_MODEL"])...")
+    end;
+
+    # set up the fluorescence model for C4 plants
+    config.METHODS.FLUORESCENCE_METHOD_C4 = if settings["C4_ΦF_MODEL"] == "KN"
+        Namespace.KNFluorescenceModel{settings["FT"]}()
+    elseif settings["C4_ΦF_MODEL"] == "QL"
+        Namespace.QLFluorescenceModelHanC4(settings["FT"])
+    else
+        error("When C4_MODEL is Vcmax, C4_ΦF_MODEL must be either KN or QL, but got $(settings["C4_ΦF_MODEL"])...")
     end;
 
     # set up soil albedo model

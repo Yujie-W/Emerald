@@ -22,8 +22,10 @@ function land_model_settings(; mode::String = "testing")
         "TIME_STEP"         => 3600,
 
         # SPAC settings
-        "C3_MODEL"          => "FvCB",
-        "C3_ΦF_MODEL"       => "KN",
+        "C3_MODEL"          => "Jmax",      # can be Jmax or Vqmax
+        "C3_ΦF_MODEL"       => "KN",        # when C3_MODEL is FvCB, use either KN or QL modell when C3_MODEL is Vqmax, use one of KN, QL, or B6F
+        "C4_MODEL"          => "Vcmax",     # can be Vcmax or Vpmax
+        "C4_ΦF_MODEL"       => "KN",        # can be KN or QL
         "MAX_LAI_LAYERING"  => false,
         "SOIL_ALBEDO_MODEL" => "HyperspectralCliMA",
 
@@ -63,7 +65,7 @@ function land_model_settings(; mode::String = "testing")
 
     # if mode is cytochrome
     if occursin("cytochrome", mode)
-        settings["C3_MODEL"] = "J3B";
+        settings["C3_MODEL"] = "Vqmax";
 
         return settings
     end;

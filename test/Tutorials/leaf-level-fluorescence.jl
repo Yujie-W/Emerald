@@ -15,7 +15,7 @@ import Emerald.ResearchTools as ERT
         config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3JmaxPi();
         config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = ENS.ColimitJCLM(Float64);
-        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        config.METHODS.FLUORESCENCE_METHOD_C3 = ENS.KNFluorescenceModel{Float64}();
         cache = ERT.LeafLevelSetup.leaf_level_spac_cache(config);
         leaf = ERT.LeafLevelSetup.leaf_level_leaf(config, "C3");
         air = ENS.AirLayer{Float64}();

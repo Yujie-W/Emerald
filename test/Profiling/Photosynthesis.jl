@@ -18,7 +18,7 @@ if cyto_model
     config.METHODS.C3_AJ_METHOD = ENS.AjMethodC3VqmaxPi();
     config.METHODS.C3_AP_METHOD = ENS.ApMethodC3Vcmax();
     config.METHODS.COLIMIT_J = ENS.SerialColimit();
-    config.METHODS.FLUORESCENCE_METHOD = ENS.CytochromeFluorescenceModel();
+    config.METHODS.FLUORESCENCE_METHOD_C3 = ENS.CytochromeFluorescenceModel();
 end;
 spac = ENS.BulkSPAC(config);
 ESPAC.initialize_spac!(config, spac);
