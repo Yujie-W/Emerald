@@ -26,6 +26,7 @@ begin
     for i in eachindex(spac.plant.leaves)
         lratios = (sun_geo.auxil.e_sifꜜ_layer[:,1] .+ sun_geo.auxil.e_sifꜛ_layer[:,1]) ./ sun_geo.auxil.e_sif_chl[:,1];
         #println(lratios[end]);
-        println(lratios[end]);
+        println(lratios);
+        println();
     end;
 end;

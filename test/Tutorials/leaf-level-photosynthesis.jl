@@ -42,4 +42,38 @@ import Emerald.ResearchTools as ERT
         @test lps.auxil.a_n[1] > 0;
         @test lps.auxil.ϕ_f[1] > 0;
     end;
+
+    @testset "C4 - Vcmax" begin
+        config = ERT.LeafLevelSetup.leaf_level_config(Float64);
+        config.METHODS.C4_AC_METHOD = ENS.AcMethodC4Vcmax();
+        config.METHODS.C4_AJ_METHOD = ENS.AjMethodC4JPSII();
+        config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VcmaxPi();
+        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        cache = ERT.LeafLevelSetup.leaf_level_spac_cache(config);
+        lps = ERT.LeafLevelSetup.leaf_level_photosystem(Float64, "C4");
+        air = ENS.AirLayer{Float64}();
+        p_i = 4.0;     # Pa
+        ppar = 1000.0;  # μmol m⁻² s⁻¹
+        t = 298.15;     # K
+        EPS.photosynthesis!(config, cache, lps, air, [p_i,], [ppar,], t);
+        @test lps.auxil.a_n[1] > 0;
+        @test lps.auxil.ϕ_f[1] > 0;
+    end;
+
+    @testset "C4 - Vpmax" begin
+        config = ERT.LeafLevelSetup.leaf_level_config(Float64);
+        config.METHODS.C4_AC_METHOD = ENS.AcMethodC4Vcmax();
+        config.METHODS.C4_AJ_METHOD = ENS.AjMethodC4JPSII();
+        config.METHODS.C4_AP_METHOD = ENS.ApMethodC4VpmaxPi();
+        config.METHODS.FLUORESCENCE_METHOD = ENS.KNFluorescenceModel{Float64}();
+        cache = ERT.LeafLevelSetup.leaf_level_spac_cache(config);
+        lps = ERT.LeafLevelSetup.leaf_level_photosystem(Float64, "C4");
+        air = ENS.AirLayer{Float64}();
+        p_i = 10.0;     # Pa
+        ppar = 1000.0;  # μmol m⁻² s⁻¹
+        t = 298.15;     # K
+        EPS.photosynthesis!(config, cache, lps, air, [p_i,], [ppar,], t);
+        @test lps.auxil.a_n[1] > 0;
+        @test lps.auxil.ϕ_f[1] > 0;
+    end;
 end;
