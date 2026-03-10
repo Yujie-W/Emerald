@@ -29,6 +29,13 @@ function site_config(settings::Union{Dict,OrderedDict})
         config.METHODS.C3_AJ_METHOD = Namespace.AjMethodC3JmaxPi();
         config.METHODS.C3_AP_METHOD = Namespace.ApMethodC3Vcmax();
         config.METHODS.COLIMIT_J = Namespace.ColimitJCLM(settings["FT"]);
+        if settings["C3_ΦF_MODEL"] == "KN"
+            config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}();
+        elseif settings["C3_ΦF_MODEL"] == "QL"
+            config.METHODS.FLUORESCENCE_METHOD = Namespace.QLFluorescenceModelHan{settings["FT"]}();
+        else
+            error("When C3_MODEL is FvCB, C3_ΦF_MODEL must be either KN or QL, but got $(settings["C3_ΦF_MODEL"])...");
+        end;
         config.METHODS.FLUORESCENCE_METHOD = Namespace.KNFluorescenceModel{settings["FT"]}();
         config.METHODS.TD_VCMAX_C3.ΔHA = 63000;
         config.METHODS.TD_VCMAX_C3.ΔHD = 204000;

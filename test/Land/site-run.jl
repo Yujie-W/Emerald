@@ -5,9 +5,19 @@ import Emerald.Land as ELAND
 
 
 @testset "Emerald Land" verbose = true begin
-    @testset "Testing Mode with FvCB model" begin
+    @testset "Testing Mode with FvCB-KN model" begin
         settings = ELAND.land_model_settings(mode = "testing");
         settings["C3_MODEL"] = "FvCB";
+        settings["C3_ΦF_MODEL"] = "KN";
+        @test true;
+        nt = ELAND.simulation!(settings, 31.86389, 117.28083, 2019);
+        @test typeof(nt) <: NamedTuple;
+    end;
+
+    @testset "Testing Mode with FvCB-QL model" begin
+        settings = ELAND.land_model_settings(mode = "testing");
+        settings["C3_MODEL"] = "FvCB";
+        settings["C3_ΦF_MODEL"] = "QL";
         @test true;
         nt = ELAND.simulation!(settings, 31.86389, 117.28083, 2019);
         @test typeof(nt) <: NamedTuple;

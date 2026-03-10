@@ -23,6 +23,7 @@ function land_model_settings(; mode::String = "testing")
 
         # SPAC settings
         "C3_MODEL"          => "FvCB",
+        "C3_ΦF_MODEL"       => "KN",
         "MAX_LAI_LAYERING"  => false,
         "SOIL_ALBEDO_MODEL" => "HyperspectralCliMA",
 
