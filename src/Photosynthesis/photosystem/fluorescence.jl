@@ -29,8 +29,17 @@ photosystem_coefficients!(
 photosystem_coefficients!(
             config::SPACConfig{FT},
             cache::SPACCache{FT},
-            pst::Union{GeneralC3Trait{FT}, GeneralC4Trait{FT}},
-            pss::Union{C3State{FT}, C4State{FT}},
+            pst::GeneralC3Trait{FT},
+            pss::C3State{FT},
+            psa::LeafPhotosystemAuxil{FT},
+            ppar::Vector{FT};
+            β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, cache, pss, psa, config.METHODS.FLUORESCENCE_METHOD_C3, ppar; β = β);
+
+photosystem_coefficients!(
+            config::SPACConfig{FT},
+            cache::SPACCache{FT},
+            pst::GeneralC4Trait{FT},
+            pss::C4State{FT},
             psa::LeafPhotosystemAuxil{FT},
             ppar::Vector{FT};
             β::FT = FT(1)) where {FT} = photosystem_coefficients!(config, cache, pss, psa, config.METHODS.FLUORESCENCE_METHOD_C4, ppar; β = β);
