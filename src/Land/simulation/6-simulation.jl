@@ -62,7 +62,12 @@ simulation!(config::SPACConfig{FT},
 
     # if saving is not nothing, save the results as a Netcdf file
     if !isnothing(saving)
-        save_nc!(saving, results);
+        if selection isa Colon
+            save_nc!(saving, results);
+        else
+            newnt = NamedTuple{Tuple(Symbol.(keys(results)))}([results[k][selection] for k in keys(results)]);
+            save_nc!(saving, newnt);
+        end;
     end;
 
     return results
