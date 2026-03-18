@@ -16,5 +16,5 @@ leaf_level_leaf(FT, c3c4::String) = leaf_level_leaf(leaf_level_config(FT), c3c4)
 leaf_level_leaf(config::SPACConfig{FT}, c3c4::String) where {FT} = (
     @assert c3c4 in ["C3", "C4"] "The model string should be either C3 or C4!";
 
-    return Leaf(config)
+    return Leaf(config, c3c4)
 );

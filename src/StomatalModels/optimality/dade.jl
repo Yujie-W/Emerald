@@ -37,6 +37,8 @@ function ∂A∂E! end;
         return nothing
     end;
 
+    (; NEW_C4_STOMATAL_METHODS) = config.FEATURES;
+
     # if leaf xylem is connected
     p_s = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.state.p_leaf * 1000000);
     d = max(1, p_s - air.auxil.ps[3]);
@@ -53,7 +55,7 @@ function ∂A∂E! end;
     gs1 = leaf.flux.state.g_H₂O_s;
     gh1 .= 1 ./ (1 ./ gs1 .+ 1 ./ (FT(1.35) * leaf.flux.auxil.g_CO₂_b));
     e1  .= gh1 .* d ./ air.state.p_air;
-    a1  = leaf.flux.auxil.a_n;
+    a1  = NEW_C4_STOMATAL_METHODS ? min.(leaf.photosystem.auxil.a_p, leaf.photosystem.auxil.a_j) .- leaf.photosystem.auxil.r_d : leaf.flux.auxil.a_n;
 
     # compute the A and E when g_sw increases by 0.0001 mol m⁻² s⁻¹
     gs2 .= gs1 .+ FT(0.0001);

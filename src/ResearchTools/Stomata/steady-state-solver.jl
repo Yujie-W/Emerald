@@ -1,16 +1,22 @@
 """
 
+    steady_state_gs!(config::SPACConfig{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; timer::Number = 50000) where {FT}
     steady_state_gs!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; timer::Number = 50000) where {FT}
 
 Compute the steady-state stomatal conductance for a leaf, given
 - `config` `SPACConfig` struct
-- `cache` `SPACCache` struct
 - `leaf` `Leaf` struct
 - `air` `AirLayer` struct
 - `timer` Maximum time allowed for reaching steady state `[s]`
+- `cache` `SPACCache` struct (optional, can be generated from `config`)
 
 """
-function steady_state_gs!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; timer::Number = 50000) where {FT}
+function steady_state_gs! end;
+
+steady_state_gs!(config::SPACConfig{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; timer::Number = 50000) where {FT} =
+    steady_state_gs!(config, leaf_level_spac_cache(config), leaf, air; timer = timer);
+
+steady_state_gs!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; timer::Number = 50000) where {FT} = (
     @assert config.DIMENSIONS.DIM_PPAR_BINS == 0 "steady_state_gs! only supports leaf-level simulations (DIM_PPAR_BINS == 0)";
 
     δt_remain::FT = timer;
@@ -28,9 +34,6 @@ function steady_state_gs!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Le
         leaf_photosynthesis!(config, cache, leaf, air);
         ∂g∂t!(config, cache, leaf, air);
 
-        # @info "debugging" leaf.flux.state.g_H₂O_s[1] leaf.flux.auxil.∂g∂t[1] leaf.flux.auxil.∂A∂E[1] leaf.flux.auxil.∂Θ∂E[1] δt_remain;
-        # sleep(0.1);
-
         if abs(leaf.flux.auxil.∂g∂t[1]) <= 1e-7
             break
         end;
@@ -44,7 +47,7 @@ function steady_state_gs!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Le
     end;
 
     return nothing
-end;
+);
 
 
 """

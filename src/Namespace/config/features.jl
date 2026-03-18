@@ -34,4 +34,7 @@ Base.@kwdef mutable struct SPACFeatures{FT<:AbstractFloat}
     PRESCRIBE_AIR::Bool = true
     "Unlimited NSC pool in the plant"
     UNLIMITED_NSC_POOL::Bool = true
+
+    "New C4 ∂A∂E and ∂Θ∂E methods"
+    NEW_C4_STOMATAL_METHODS::Bool = false
 end;

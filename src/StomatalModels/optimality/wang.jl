@@ -30,8 +30,11 @@ function ∂Θ∂E! end;
         return nothing
     end;
 
+    (; NEW_C4_STOMATAL_METHODS) = config.FEATURES;
+
     # compute the ∂Θ∂E when leaf xylem is connected
-    leaf.flux.auxil.∂Θ∂E .= max.(FT(0.01), leaf.flux.auxil.a_n) ./ max(eps(FT), (leaf.xylem.auxil.e_crit - flow_out(leaf)) / leaf.xylem.trait.area);
+    new_an = NEW_C4_STOMATAL_METHODS ? min.(leaf.photosystem.auxil.a_p, leaf.photosystem.auxil.a_j) .- leaf.photosystem.auxil.r_d : leaf.flux.auxil.a_n;
+    leaf.flux.auxil.∂Θ∂E .= max.(FT(0.01), new_an) ./ max(eps(FT), (leaf.xylem.auxil.e_crit - flow_out(leaf)) / leaf.xylem.trait.area);
 
     return nothing
 );

@@ -9,7 +9,10 @@ using ..PlantHydraulics: capacitance_volume, leaf_pressure_profile!, leaf_water_
 using ..StomatalModels: stomatal_conductance!, ∂g∂t!
 using ..SPAC: substep_aux!
 
+using ..LeafLevelSetup: leaf_level_spac_cache
 
+
+include("optimality.jl");
 include("steady-state-solver.jl");
 
 

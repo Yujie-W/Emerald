@@ -170,6 +170,7 @@ function prescribe_traits!(
             end;
         end;
 
+        # TODO: if lai and sai profiles are known, do not force them here...
         if !spac.plant._leaf_shedded || spac.plant._leaf_regrow
             # update the leaf area
             can_str.trait.lai = lai_0 + lai_diff;
