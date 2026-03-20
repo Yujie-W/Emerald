@@ -29,7 +29,7 @@ function ∂g∂t! end;
 
 ∂g∂t!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = ∂g∂t!(config, cache, config.METHODS.STOMATAL_MODEL, leaf, air; δe = δe);
 
-∂g∂t!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
+∂g∂t!(config::SPACConfig{FT}, cache::SPACCache{FT}, sm::Union{AndereggSM{FT}, EllerSM{FT}, SperrySM{FT}, Sperry2SM{FT}, WangSM{FT}, Wang2SM{FT}}, leaf::Leaf{FT}, air::AirLayer{FT}; δe::FT = FT(1e-7)) where {FT} = (
     ∂A∂E!(config, cache, leaf, air);
     ∂Θ∂E!(config, cache, sm, leaf, air);
 
