@@ -193,6 +193,7 @@ UnionStomatalConductanceModel{FT<:AbstractFloat} = Union{
     LeuningSM{FT},
     MedlynSM{FT},
     SperrySM{FT},
+    Sperry2SM{FT},
     WangSM{FT},
     Wang2SM{FT}
 }
