@@ -22,7 +22,7 @@
 
     # compute the ∂Θ∂E when leaf xylem is connected
     e = flow_out(leaf);
-    δe = e / 100;
+    δe = max(min(e / 100, FT(1e-6)), FT(1e-7));
     dedp1 = ∂E∂P(leaf, e; δe = δe);
     dedp2 = ∂E∂P(leaf, e; δe = -δe);
     dkde  = (dedp2 - dedp1) / δe;
