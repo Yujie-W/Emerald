@@ -25,6 +25,7 @@ include("quantity/heat.jl");
 include("quantity/PAR.jl");
 include("quantity/SIF.jl");
 include("quantity/stomata.jl");
+include("quantity/temperature.jl");
 include("quantity/VI.jl");
 include("quantity/yield.jl");
 

@@ -40,7 +40,7 @@ steady_state_gs!(config::SPACConfig{FT}, cache::SPACCache{FT}, leaf::Leaf{FT}, a
 
         # adjust time step based on capacitance buffer and stomatal conductance change rate
         δt = dynamic_timer(leaf, δt_remain);
-        stomatal_conductance!(leaf, δt)
+        stomatal_conductance!(leaf, δt);
         leaf_water_budget!(leaf, leaf.xylem.auxil, δt);
         substep_aux!(leaf, false);
         δt_remain -= δt;
@@ -77,6 +77,7 @@ function dynamic_timer(leaf::Leaf{FT}, δt::FT) where {FT}
     # make sure each leaf stomatal conductances do not change more than 0.001 mol m⁻² s⁻¹
     for ∂g∂t in leaf.flux.auxil.∂g∂t
         new_δt = min(FT(0.001) / abs(∂g∂t), new_δt);
+        # @show ∂g∂t,new_δt;
         if isnan(new_δt)
             @error "NaN or very small δt detected when adjusting δt based on leaf stomatal conductance dYdt" ∂g∂t;
             return error("NaN detected in dynamic_timer")

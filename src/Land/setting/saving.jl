@@ -27,7 +27,9 @@ DEFAULT_SAVING_SETTINGS = ParameterFunctionMapper[
     ParameterFunctionMapper("NET_SHORTWAVE", false, NET_SHORTWAVE, []),
     ParameterFunctionMapper("SENSIBLE_HEAT", false, SENSIBLE_HEAT, []),
     ParameterFunctionMapper("SHORTWAVE_OUT", false, SHORTWAVE_OUT, []),
+
     ParameterFunctionMapper("T_SKIN", false, T_SKIN, []),
+    ParameterFunctionMapper("T_SOIL_1", false, T_SOIL, [1]),
 
     ParameterFunctionMapper("SIF683", false, TROPOMI_SIF683, []),
     ParameterFunctionMapper("SIF740", true, TROPOMI_SIF740, []),
