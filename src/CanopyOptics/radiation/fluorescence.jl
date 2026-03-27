@@ -89,6 +89,7 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
     a_leaf = spac.cache.cache_sife_1;
     a_stem = spac.cache.cache_sife_2;
     f_leaf = spac.cache.cache_sife_3;
+    phi_ps = spac.cache.cache_sif_1;
     for irt in 1:n_layer
         ϕ_sunlit = sen_geo.auxil.ϕ_f_sunlit[irt];
         ϕ_shaded = sen_geo.auxil.ϕ_f_shaded[irt];
@@ -108,8 +109,15 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         energy_to_photon!(SPECTRA.Λ_SIFE, sun_geo.auxil._e_dir_sife);
 
         # convert the excitation radiation to fluorescence components
-        sun_geo.auxil._e_dif_sif .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(sun_geo.auxil._e_dif_sife);
-        sun_geo.auxil._e_dir_sif .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF) .* sum(sun_geo.auxil._e_dir_sife);
+        sun_geo.auxil._e_dif_sif .= 0;
+        sun_geo.auxil._e_dir_sif .= 0;
+        for isife in eachindex(SPECTRA.Λ_SIFE)
+            phi_ps .= view(SPECTRA.Φ_PS,SPECTRA.IΛ_SIF);
+            phi_ps ./= (1 .+ exp.(-SPECTRA.Λ_SIF / 10) .* exp(SPECTRA.Λ_SIFE[isife] / 10));
+            phi_ps ./= (phi_ps' * SPECTRA.ΔΛ_SIF);
+            sun_geo.auxil._e_dif_sif .+= phi_ps .* sun_geo.auxil._e_dif_sife[isife];
+            sun_geo.auxil._e_dir_sif .+= phi_ps .* sun_geo.auxil._e_dir_sife[isife];
+        end;
 
         # add up the excitation radiation from direct and diffuse radiation for sunlit and shaded leaves
         sun_geo.auxil._e_dif_shaded .= sun_geo.auxil._e_dif_sif .* (1 - sun_geo.auxil.p_sunlit[irt]);

@@ -6,7 +6,7 @@ FT = Float64;
 config = ENS.SPACConfig(FT; dataset = ENS.OLD_PHI_2021_1NM);
 spac = ENS.BulkSPAC(config; air_bounds=collect(0:0.5:13));
 
-tar_wl = 600;
+tar_wl = 700;
 spac.meteo.rad_sw.e_dir .*= 100;
 spac.meteo.rad_sw.e_dif .*= 100;
 spac.meteo.rad_sw.e_dir[config.CONSTANTS.SPECTRA.Λ .!= tar_wl] .= 0;
