@@ -6,6 +6,7 @@ using NetcdfIO: read_nc, save_nc!
 using OrderedCollections: OrderedDict
 using PkgUtility.EarthGeometry: solar_azimuth_angle, solar_zenith_angle
 using PkgUtility.MathTools: interpolate_data, nanmax, nanmean, nanmin, read_spectrum, resample
+using PkgUtility.PhysicalChemistry: saturation_vapor_pressure
 using PkgUtility.PrettyDisplay: pretty_display!
 using PkgUtility.UniversalConstants: M_H₂O, K_STEFAN, T₀, ρ_H₂O, energy_to_photon
 using ProgressMeter: @showprogress

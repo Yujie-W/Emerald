@@ -94,6 +94,39 @@ ET_VEGE(spac::BulkSPAC{FT}) where {FT} = (
 
 """
 
+    ET_LEAF(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Return the transpiration rate per leaf area for sunlit and shaded leaves from top to bottom, given
+- `config` `SPACConfig` configuration
+- `spac` `BulkSPAC` SPAC
+
+"""
+function ET_LEAF(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+    airs = spac.airs;
+    leaves = spac.plant.leaves;
+    lindex = spac.plant.leaves_index;
+
+    DIM_LAYER = length(spac.canopy.structure.trait.δlai);
+    et_sunlit_3d = zeros(config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI, DIM_LAYER);
+    et_shaded_1d = zeros(DIM_LAYER);
+    for irt in 1:DIM_LAYER
+        ilf = DIM_LAYER + 1 - irt;
+        leaf = leaves[ilf];
+        air = airs[lindex[ilf]];
+        g = 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (1.35 .* leaf.flux.auxil.g_CO₂_b));
+        d = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.state.p_leaf * 1000000) - air.auxil.ps[3];
+        e = g .* d / air.state.p_air;
+        @show g e;
+        et_sunlit_3d[:,:,irt] .= reshape(e[1:end-1], size(et_sunlit_3d[:,:,irt]));
+        et_shaded_1d[irt] = e[end];
+    end;
+
+    return et_sunlit_3d, et_shaded_1d
+end;
+
+
+"""
+
     GPP(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     GPP(spac::BulkSPAC{FT}) where {FT}
 
