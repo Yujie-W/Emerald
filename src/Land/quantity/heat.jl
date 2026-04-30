@@ -149,6 +149,25 @@ SENSIBLE_HEAT(spac::BulkSPAC{FT}) where {FT} = (
 
 """
 
+    SHORTWAVE_IN(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
+
+Return the incoming shortwave radiation per ground area, given
+- `config` `SPACConfig` configuration
+- `spac` `BulkSPAC` SPAC
+
+"""
+function SHORTWAVE_IN end;
+
+SHORTWAVE_IN(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
+    dwl = config.CONSTANTS.SPECTRA.ΔΛ;
+    sw_in = spac.meteo.rad_sw.e_dir .+ spac.meteo.rad_sw.e_dif;
+
+    return (sw_in' * dwl) / 1000
+);
+
+
+"""
+
     SHORTWAVE_OUT(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
 
 Return the outgoing shortwave radiation per ground area, given

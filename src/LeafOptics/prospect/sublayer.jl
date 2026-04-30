@@ -144,7 +144,7 @@ function sublayer_τ(
           k_pro * biot.pro;
     Σkx *= x;
 
-    return (1 - Σkx) * exp(-Σkx) + Σkx^2 * expint(Σkx + eps(FT));
+    return (1 - Σkx) * exp(-Σkx) + Σkx^2 * expint(Σkx + eps(FT))
 end;
 
 
