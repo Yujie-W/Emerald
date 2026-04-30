@@ -116,7 +116,6 @@ function ET_LEAF(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         g = 1 ./ (1 ./ leaf.flux.state.g_H₂O_s .+ 1 ./ (1.35 .* leaf.flux.auxil.g_CO₂_b));
         d = saturation_vapor_pressure(leaf.energy.auxil.t, leaf.capacitor.state.p_leaf * 1000000) - air.auxil.ps[3];
         e = g .* d / air.state.p_air;
-        @show g e;
         et_sunlit_3d[:,:,irt] .= reshape(e[1:end-1], size(et_sunlit_3d[:,:,irt]));
         et_shaded_1d[irt] = e[end];
     end;
