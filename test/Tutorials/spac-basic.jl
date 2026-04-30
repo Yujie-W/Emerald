@@ -9,6 +9,8 @@ config = ENS.SPACConfig(Float64);
 spac = ENS.BulkSPAC(config);
 ESPAC.initialize_spac!(config, spac);
 spac.plant.pool.c_pool = Inf;
+ESPAC.prescribe_traits!(config, spac; sai = 0, lai = 3);
+ESPAC.spac!(config, spac, 0);
 
 
 for lai in 0.1:0.1:6.0

@@ -170,6 +170,10 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     e_sifꜛ::Matrix{FT}
 
     # PAR, APAR, PPAR flux density in each layer
+    "Mean PAR for shaded leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
+    _par_shaded::Vector{FT}
+    "PAR for sunlit leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
+    _par_sunlit::Vector{FT}
     "Mean APAR for shaded leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
     _apar_shaded::Vector{FT}
     "APAR for sunlit leaves per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
@@ -178,6 +182,10 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     _ppar_shaded::Vector{FT}
     "APAR for sunlit leaves for photosynthesis per wavelength `[μmol m⁻² s⁻¹ nm⁻¹]`"
     _ppar_sunlit::Vector{FT}
+    "Shaded PAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    par_shaded::Vector{FT}
+    "Sunlit PAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
+    par_sunlit::Array{FT,3}
     "Shaded APAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
     apar_shaded::Vector{FT}
     "Sunlit APAR for all wavelength bins of all layers `[μmol m⁻² s⁻¹]`"
@@ -298,10 +306,14 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
                 e_sifꜛ_emit      = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), n_layer + 1),
                 e_sifꜜ           = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), n_layer + 1),
                 e_sifꜛ           = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), n_layer + 1),
+                _par_shaded      = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_PAR)),
+                _par_sunlit      = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_PAR)),
                 _apar_shaded     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_PAR)),
                 _apar_sunlit     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_PAR)),
                 _ppar_shaded     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_PAR)),
                 _ppar_sunlit     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_PAR)),
+                par_shaded       = zeros(FT, n_layer),
+                par_sunlit       = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI, n_layer),
                 apar_shaded      = zeros(FT, n_layer),
                 apar_sunlit      = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI, n_layer),
                 ppar_shaded      = zeros(FT, n_layer),

@@ -46,6 +46,7 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) whe
     rad_sw = spac.meteo.rad_sw;
     (; SPECTRA) = config.CONSTANTS;
     (; DIM_AZI, DIM_INCL, DIM_PPAR_BINS) = config.DIMENSIONS;
+    (; EFFECTIVE_LEAF_SPECTRA) = config.FEATURES;
 
     # if sza > 89, set all the radiation variables to 0
     total_sw_rad = (rad_sw.e_dir' * SPECTRA.ΔΛ + rad_sw.e_dif' * SPECTRA.ΔΛ) / 1000;
@@ -160,12 +161,15 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) whe
 
     # 3. compute net absorption for leaves and soil
     # 4. compute leaf level PAR, APAR, and PPAR per ground area
+    mask_effective = EFFECTIVE_LEAF_SPECTRA && can_str.trait.lai > 0;
     normi = 1 / mean(sun_geo.auxil.fs_abs_mean);
     a_leaf = spac.cache.cache_wl_1;
     a_stem = spac.cache.cache_wl_2;
     f_leaf = spac.cache.cache_wl_3;
     f_stem = spac.cache.cache_wl_4;
     temp_p = spac.cache.cache_wl_5;
+    ρ_leaf = spac.cache.cache_wl_6;
+    τ_leaf = spac.cache.cache_wl_7;
     for irt in 1:n_layer
         ilf = n_layer + 1 - irt;
         leaf = leaves[ilf];
@@ -173,6 +177,8 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) whe
         a_stem .= (1 .- SPECTRA.ρ_STEM) .* can_str.trait.δsai[irt];
         f_leaf .= a_leaf ./ (a_leaf .+ a_stem);
         f_stem .= 1 .- f_leaf;
+        mask_effective ? ρ_leaf .= view(can_str.auxil.ρ_leaf_eff,:,irt) : ρ_leaf .= leaf.bio.auxil.ρ_leaf;
+        mask_effective ? τ_leaf .= view(can_str.auxil.τ_leaf_eff,:,irt) : τ_leaf .= leaf.bio.auxil.τ_leaf;
 
         temp_p .= view(sun_geo.auxil.e_net_dif,:,irt) .* f_leaf;
         Σ_shaded_leaf = temp_p' * SPECTRA.ΔΛ / 1000;
@@ -191,11 +197,21 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) whe
         if can_str.trait.δlai[irt] > 0
             α_apar = view(leaf.bio.auxil.f_ppar, SPECTRA.IΛ_PAR);
             p_leaf = view(f_leaf, SPECTRA.IΛ_PAR);
+            r_leaf = view(ρ_leaf, SPECTRA.IΛ_PAR);
+            t_leaf = view(τ_leaf, SPECTRA.IΛ_PAR);
             # convert energy to quantum unit for PAR, APAR and PPAR per leaf area
             sun_geo.auxil._apar_shaded .= energy_to_photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dif,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt];
             sun_geo.auxil._apar_sunlit .= energy_to_photon.(SPECTRA.Λ_PAR, view(sun_geo.auxil.e_net_dir,SPECTRA.IΛ_PAR,irt)) .* p_leaf .* 1000 ./ can_str.trait.δlai[irt] ./ sun_geo.auxil.p_sunlit[irt];
+            sun_geo.auxil._par_shaded  .= sun_geo.auxil._apar_shaded ./ (1 .- r_leaf .- t_leaf);
+            sun_geo.auxil._par_sunlit  .= sun_geo.auxil._apar_sunlit ./ (1 .- r_leaf .- t_leaf);
             sun_geo.auxil._ppar_shaded .= sun_geo.auxil._apar_shaded .* α_apar;
             sun_geo.auxil._ppar_sunlit .= sun_geo.auxil._apar_sunlit .* α_apar;
+
+            # PAR for leaves
+            Σ_par_dif = sun_geo.auxil._par_shaded' * SPECTRA.ΔΛ_PAR;
+            Σ_par_dir = sun_geo.auxil._par_sunlit' * SPECTRA.ΔΛ_PAR * normi;
+            sun_geo.auxil.par_shaded[irt] = Σ_par_dif;
+            sun_geo.auxil.par_sunlit[:,:,irt] .= sun_geo.auxil.fs_abs .* Σ_par_dir .+ Σ_par_dif;
 
             # APAR for leaves
             Σ_apar_dif = sun_geo.auxil._apar_shaded' * SPECTRA.ΔΛ_PAR;

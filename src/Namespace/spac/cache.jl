@@ -45,6 +45,10 @@ Base.@kwdef struct SPACCache{FT}
     cache_wl_4::Vector{FT}
     "Cache vector with the length of wavelength"
     cache_wl_5::Vector{FT}
+    "Cache vector with the length of wavelength"
+    cache_wl_6::Vector{FT}
+    "Cache vector with the length of wavelength"
+    cache_wl_7::Vector{FT}
 
     # Cache vectors with the length of INCL * AZI + 1
     "Cache vector with the length of INCL * AZI + 1 or DIM_PPAR_BINS + 1"
@@ -140,6 +144,8 @@ SPACCache{FT}(dim_azi::Int, dim_incl::Int, dim_layer::Int, dim_ppar::Union{Int, 
                 cache_wl_3 = zeros(FT, dim_wl),
                 cache_wl_4 = zeros(FT, dim_wl),
                 cache_wl_5 = zeros(FT, dim_wl),
+                cache_wl_6 = zeros(FT, dim_wl),
+                cache_wl_7 = zeros(FT, dim_wl),
 
                 # to used to speed up the computation (PPAR bins)
                 cache_incl_azi_1_1 = zeros(FT, cache_dim_ppar+1),
