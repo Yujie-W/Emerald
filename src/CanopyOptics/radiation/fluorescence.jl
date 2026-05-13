@@ -268,9 +268,9 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
     # 2. account for the SIF emission from bottom to up
     sun_geo.auxil.e_sifꜛ_emit[:,end] .= 0;
     for i in n_layer:-1:1
-        r__ = view(can_str.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );    # reflectance without correction
+        r__ = view(can_str.auxil.ρ_dd_layer,SPECTRA.IΛ_SIF,i  );    # reflectance of the layer without correction
         r_j = view(can_str.auxil.ρ_dd      ,SPECTRA.IΛ_SIF,i+1);    # reflectance of the lower boundary (i) for SIF
-        t_i = view(can_str.auxil.τ_dd      ,SPECTRA.IΛ_SIF,i  );    # transmittance of the layer (i) for SIF
+        t__ = view(can_str.auxil.τ_dd_layer,SPECTRA.IΛ_SIF,i  );    # transmittance of the layer without correction
 
         f_d_i = view(sun_geo.auxil.e_sifꜜ_layer    ,:,i  );            # downward emitted SIF from layer i
         f_u_i = view(sun_geo.auxil.e_sifꜛ_layer    ,:,i  );            # upward emitted SIF from layer i
@@ -280,8 +280,8 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         s_u_j = view(sun_geo.auxil.e_sifꜛ_emit     ,:,i+1);            # upward SIF from the lower layer
 
         s_d_i .= (f_d_i .+ s_u_j .* r__) ./ (1 .- r__ .* r_j);
-        s_u_i .= f_u_i .+ s_u_j .* t_i .+ s_d_i .* r_j .* t_i;
-        s_a_i .= f_u_i .+ s_d_i .* r_j .* t_i;
+        s_u_i .= f_u_i .+ s_u_j .* t__ .+ s_d_i .* r_j .* t__;
+        s_a_i .= f_u_i .+ s_d_i .* r_j .* t__;
     end;
 
     # 3. account for the SIF emission from up to bottom
