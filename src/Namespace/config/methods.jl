@@ -66,7 +66,7 @@ Base.@kwdef mutable struct SPACMethods{FT<:AbstractFloat}
     "Canopy radiative transfer method"
     CANOPY_RT_METHOD::UnionCanopyRTMethod = CanopyRTEmerald()
     "Soil albedo method"
-    SOIL_ALBEDO::UnionSoilAlbedo = SoilAlbedoHyperspectralCLIMA()
+    SOIL_ALBEDO::UnionSoilAlbedo = SoilAlbedoBroadbandCLIMA()
 
     # stomatal conductance model
     "Stomatal conductance model"
