@@ -24,9 +24,14 @@ Update the trait-dependent auxiliary variables for canopy structure, given
 """
 function canopy_structure_aux! end;
 
-canopy_structure_aux!(config::SPACConfig{FT}, can::MultiLayerCanopy{FT}) where {FT} = canopy_structure_aux!(config, can.structure.trait, can.structure.auxil);
+canopy_structure_aux!(config::SPACConfig{FT}, can::MultiLayerCanopy{FT}) where {FT} =
+    canopy_structure_aux!(config, config.METHODS.CANOPY_RT_METHOD, can.structure.trait, can.structure.auxil);
 
-canopy_structure_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, cansa::CanopyStructureAuxil{FT}) where {FT} = (
+canopy_structure_aux!(
+            config::SPACConfig{FT},
+            ::CanopyRTEmerald,
+            canst::CanopyStructureTrait{FT},
+            cansa::CanopyStructureAuxil{FT}) where {FT} = (
     (; Θ_INCL, Θ_INCL_BNDS) = config.DIMENSIONS;
 
     # update the clumping index
@@ -36,12 +41,12 @@ canopy_structure_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, c
     #     ∫_0^π/2 ci(θ) * sind(θ) dθ = ci_0 * ∫_0^π/2 sind(θ) dθ - ci_0 * ci_1 * ∫_0^π/2 cos(θ) sind(θ) dθ = ci_0 - ci_0 * ci_1 / 2
     #     ∫_0^π/2 sind(θ) dθ = 1
     #     ci = ci_0 - ci_0 * ci_1 / 2
-    cansa.ci_diffuse = trait.ci.ci_0 - trait.ci.ci_0 * trait.ci.ci_1 / 2;
+    cansa.ci_diffuse = canst.ci.ci_0 - canst.ci.ci_0 * canst.ci.ci_1 / 2;
 
     # compute the probability of leaf inclination angles based on lidf
     for i in eachindex(cansa.p_incl_leaf)
-        cansa.p_incl_leaf[i] = lidf_cdf(trait.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(trait.lidf, Θ_INCL_BNDS[i,1]);
-        cansa.p_incl_stem[i] = lidf_cdf(trait.sidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(trait.sidf, Θ_INCL_BNDS[i,1]);
+        cansa.p_incl_leaf[i] = lidf_cdf(canst.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(canst.lidf, Θ_INCL_BNDS[i,1]);
+        cansa.p_incl_stem[i] = lidf_cdf(canst.sidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(canst.sidf, Θ_INCL_BNDS[i,1]);
     end;
 
     # compute the extinction coefficients for the diffuse radiation (directions in isotropic radiation)
@@ -51,8 +56,8 @@ canopy_structure_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, c
         kd_l = 0;
         kd_s = 0;
         for i in eachindex(Θ_INCL)
-            kd_l += extinction_coefficient(θ_dif, Θ_INCL[i], trait.ci) * cansa.p_incl_leaf[i];
-            kd_s += extinction_coefficient(θ_dif, Θ_INCL[i], trait.ci) * cansa.p_incl_stem[i];
+            kd_l += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_leaf[i];
+            kd_s += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_stem[i];
         end;
         cansa.kd_leaf[i_dif] = kd_l;
         cansa.kd_stem[i_dif] = kd_s;
@@ -72,6 +77,51 @@ canopy_structure_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, c
         cansa.w_ddb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
         cansa.w_ddf_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
     end;
+
+    return nothing
+);
+
+canopy_structure_aux!(
+            config::SPACConfig{FT},
+            ::CanopyRTSCOPE,
+            canst::CanopyStructureTrait{FT},
+            cansa::CanopyStructureAuxil{FT}) where {FT} = (
+    (; Θ_INCL, Θ_INCL_BNDS) = config.DIMENSIONS;
+
+    # update the clumping index
+    cansa.ci_diffuse = canst.ci.ci_0 - canst.ci.ci_0 * canst.ci.ci_1 / 2;
+
+    # compute the probability of leaf inclination angles based on lidf
+    for i in eachindex(cansa.p_incl_leaf)
+        cansa.p_incl_leaf[i] = lidf_cdf(canst.lidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(canst.lidf, Θ_INCL_BNDS[i,1]);
+        cansa.p_incl_stem[i] = lidf_cdf(canst.sidf, Θ_INCL_BNDS[i,2]) - lidf_cdf(canst.sidf, Θ_INCL_BNDS[i,1]);
+    end;
+
+    # compute the extinction coefficients for the diffuse radiation (directions in isotropic radiation)
+    # these kd_leaf and kd_stem already account for the impact of clumping index
+    for i_dif in 1:90
+        θ_dif = i_dif - FT(0.5);
+        kd_l = 0;
+        kd_s = 0;
+        for i in eachindex(Θ_INCL)
+            kd_l += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_leaf[i];
+            kd_s += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_stem[i];
+        end;
+        cansa.kd_leaf[i_dif] = kd_l;
+        cansa.kd_stem[i_dif] = kd_s;
+    end;
+
+    # compute the weighed average of the leaf inclination angle distribution
+    cansa.bf_leaf = 0;
+    cansa.bf_stem = 0;
+    for i in eachindex(Θ_INCL)
+        cansa.bf_leaf += cansa.p_incl_leaf[i] * cosd(Θ_INCL[i]) ^ 2;
+        cansa.bf_stem += cansa.p_incl_stem[i] * cosd(Θ_INCL[i]) ^ 2;
+    end;
+    cansa.w_ddb_leaf = (1 + cansa.bf_leaf) / 2;
+    cansa.w_ddf_leaf = (1 - cansa.bf_leaf) / 2;
+    cansa.w_ddb_stem = (1 + cansa.bf_stem) / 2;
+    cansa.w_ddf_stem = (1 - cansa.bf_stem) / 2;
 
     return nothing
 );

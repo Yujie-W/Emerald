@@ -88,6 +88,12 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     "Diffuse radiation extinction coefficient (stem; weighed with leaf angle and clumping index; per direction)"
     kd_stem::Vector{FT} = zeros(FT, 90)
 
+    # canopy scattering coefficients weights (using SCOPE's algorithm)
+    "Backward and forward coefficient for leaf"
+    bf_leaf::FT = 0
+    "Backward and forward coefficient for stem"
+    bf_stem::FT = 0
+
     # canopy scattering coefficients weights (leaf)
     "Backward diffuse->diffuse scatter weight (leaf)"
     w_ddb_leaf::FT = 0

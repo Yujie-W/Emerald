@@ -3,8 +3,9 @@ Method configuration for the SPAC model
 """
 Base.@kwdef mutable struct SPACMethods{FT<:AbstractFloat}
     # fluorescence methods
-    "Fluorescence method"
+    "Fluorescence method for C3 plants"
     FLUORESCENCE_METHOD_C3::Union{CytochromeFluorescenceModel,KNFluorescenceModel{FT},QLFluorescenceModel{FT},QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
+    "Fluorescence method for C4 plants"
     FLUORESCENCE_METHOD_C4::Union{KNFluorescenceModel{FT},QLFluorescenceModel{FT},QLFluorescenceModelHan{FT}} = KNFluorescenceModel{FT}()
     "Fluorescence spectra method"
     FLUORESCENCE_SPECTRA_METHOD::Union{DualspectFluorescenceSpectra,FluspectFluorescenceSpectra,PlatespectFluorescenceSpectra} = PlatespectFluorescenceSpectra()
@@ -28,7 +29,7 @@ Base.@kwdef mutable struct SPACMethods{FT<:AbstractFloat}
     COLIMIT_CJ::Union{MinimumColimit,QuadraticColimit{FT},SerialColimit,SquareColimit} = MinimumColimit()
     "Colimitation method for Ai and Ap => Ag"
     COLIMIT_IP::Union{MinimumColimit,QuadraticColimit{FT},SerialColimit,SquareColimit} = MinimumColimit()
-    "Ccolimitation method for J (for C3 only)"
+    "Colimitation method for J (for C3 only)"
     COLIMIT_J::Union{MinimumColimit,QuadraticColimit{FT},SerialColimit,SquareColimit} = ColimitJCLM(FT)
 
     # photosynthesis models - temperature dependency methods
@@ -61,7 +62,9 @@ Base.@kwdef mutable struct SPACMethods{FT<:AbstractFloat}
     "η_L temperature dependency"
     TD_ηL::UnionTemperatureDependency{FT} = ηLTDWang(FT)
 
-    # soil albedo method
+    # canopy radiative transfer method
+    "Canopy radiative transfer method"
+    CANOPY_RT_METHOD::UnionCanopyRTMethod = CanopyRTEmerald()
     "Soil albedo method"
     SOIL_ALBEDO::UnionSoilAlbedo = SoilAlbedoHyperspectralCLIMA()
 

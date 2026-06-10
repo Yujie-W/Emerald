@@ -30,6 +30,7 @@ include("config/constants/reference-spectra.jl");
 include("config/constants.jl");
 include("config/dimensions.jl");
 include("config/features.jl");
+include("config/methods/canopy-rt-method.jl");
 include("config/methods/colimitation-method.jl");
 include("config/methods/colimitation-method-settings.jl");
 include("config/methods/fluorescence-model.jl");

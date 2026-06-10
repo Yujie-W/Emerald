@@ -27,18 +27,24 @@ function sun_geometry_aux! end;
 sun_geometry_aux!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = sun_geometry_aux!(config, spac.canopy);
 
 sun_geometry_aux!(config::SPACConfig{FT}, can::MultiLayerCanopy{FT}) where {FT} =
-    sun_geometry_aux!(config, can.structure.trait, can.structure.auxil, can.sun_geometry.state, can.sun_geometry.auxil);
+    sun_geometry_aux!(config, config.METHODS.CANOPY_RT_METHOD, can.structure.trait, can.structure.auxil, can.sun_geometry.state, can.sun_geometry.auxil);
 
-sun_geometry_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, cansa::CanopyStructureAuxil{FT}, sunst::SunGeometryState{FT}, sunsa::SunGeometryAuxil{FT}) where {FT} = (
+sun_geometry_aux!(
+            config::SPACConfig{FT},
+            ::CanopyRTEmerald,
+            canst::CanopyStructureTrait{FT},
+            cansa::CanopyStructureAuxil{FT},
+            sunst::SunGeometryState{FT},
+            sunsa::SunGeometryAuxil{FT}) where {FT} = (
     # if sza > 89 or both LAI and SAI are zero, do nothing
-    if sunst.sza > 89 || (trait.lai <= 0 && trait.sai <= 0)
+    if sunst.sza > 89 || (canst.lai <= 0 && canst.sai <= 0)
         return nothing
     end;
 
     (; Θ_AZI, Θ_INCL) = config.DIMENSIONS;
 
     # compute the clumping index from solar zenith angle
-    sunsa.ci_sun = trait.ci.ci_0 * (1 - trait.ci.ci_1 * cosd(sunst.sza));
+    sunsa.ci_sun = canst.ci.ci_0 * (1 - canst.ci.ci_1 * cosd(sunst.sza));
 
     # extinction coefficients for the solar radiation
     for i in eachindex(Θ_INCL)
@@ -69,10 +75,68 @@ sun_geometry_aux!(config::SPACConfig{FT}, trait::CanopyStructureTrait{FT}, cansa
     end;
 
     # compute the sunlit leaf fraction
-    # ps(x) = sunsa.ci_sun * exp.(sunsa.ks .* trait.lai .* cansa.x_bnds);
-    kscipai = sunsa.ks_leaf * trait.lai + sunsa.ks_stem * trait.sai;
-    for i in eachindex(trait.δlai)
-        ksciipai = sunsa.ks_leaf * trait.δlai[i] + sunsa.ks_stem * trait.δsai[i];
+    # ps(x) = sunsa.ci_sun * exp.(sunsa.ks .* canst.lai .* cansa.x_bnds);
+    kscipai = sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai;
+    for i in eachindex(canst.δlai)
+        ksciipai = sunsa.ks_leaf * canst.δlai[i] + sunsa.ks_stem * canst.δsai[i];
+        sunsa.p_sunlit[i] = sunsa.ci_sun / ksciipai * (exp(kscipai * cansa.x_bnds[i]) - exp(kscipai * cansa.x_bnds[i+1]));
+    end;
+
+    # compute the fs and fs_abs matrices
+    for i in eachindex(Θ_AZI)
+        view(sunsa.fs,:,i) .= sunsa.Cs_incl .+ sunsa.Ss_incl .* cosd(Θ_AZI[i]);
+    end;
+    sunsa.fs ./= cosd(sunst.sza);
+    sunsa.fs_abs .= abs.(sunsa.fs);
+    mul!(sunsa.fs_abs_mean, sunsa.fs_abs', cansa.p_incl_leaf);
+    for i in eachindex(Θ_INCL)
+        view(sunsa.fs_cos²_incl,i,:) .= view(sunsa.fs,i,:) .* (cosd(Θ_INCL[i]) ^ 2);
+    end;
+
+    return nothing
+);
+
+sun_geometry_aux!(
+            config::SPACConfig{FT},
+            ::CanopyRTSCOPE,
+            canst::CanopyStructureTrait{FT},
+            cansa::CanopyStructureAuxil{FT},
+            sunst::SunGeometryState{FT},
+            sunsa::SunGeometryAuxil{FT}) where {FT} = (
+    # if sza > 89 or both LAI and SAI are zero, do nothing
+    if sunst.sza > 89 || (canst.lai <= 0 && canst.sai <= 0)
+        return nothing
+    end;
+
+    (; Θ_AZI, Θ_INCL) = config.DIMENSIONS;
+
+    # compute the clumping index from solar zenith angle
+    sunsa.ci_sun = canst.ci.ci_0 * (1 - canst.ci.ci_1 * cosd(sunst.sza));
+
+    # extinction coefficients for the solar radiation
+    for i in eachindex(Θ_INCL)
+        Cs = cosd(Θ_INCL[i]) * cosd(sunst.sza);
+        Ss = sind(Θ_INCL[i]) * sind(sunst.sza);
+        βs = (Cs >= Ss ? FT(π) : acos(-Cs/Ss));
+        sunsa.Cs_incl[i] = Cs;
+        sunsa.Ss_incl[i] = Ss;
+        sunsa.βs_incl[i] = βs;
+        sunsa.ks_incl[i] = 2 / FT(π) / cosd(sunst.sza) * (Cs * (βs - FT(π)/2) + Ss * sin(βs));
+    end;
+    sunsa.ks_leaf = cansa.p_incl_leaf' * sunsa.ks_incl * sunsa.ci_sun;
+    sunsa.ks_stem = cansa.p_incl_stem' * sunsa.ks_incl * sunsa.ci_sun;
+
+    # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
+    sunsa.w_sdb_leaf = (sunsa.ks_leaf + cansa.bf_leaf) / 2;
+    sunsa.w_sdf_leaf = (sunsa.ks_leaf - cansa.bf_leaf) / 2;
+    sunsa.w_sdb_stem = (sunsa.ks_stem + cansa.bf_stem) / 2;
+    sunsa.w_sdf_stem = (sunsa.ks_stem - cansa.bf_stem) / 2;
+
+    # compute the sunlit leaf fraction
+    # ps(x) = sunsa.ci_sun * exp.(sunsa.ks .* canst.lai .* cansa.x_bnds);
+    kscipai = sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai;
+    for i in eachindex(canst.δlai)
+        ksciipai = sunsa.ks_leaf * canst.δlai[i] + sunsa.ks_stem * canst.δsai[i];
         sunsa.p_sunlit[i] = sunsa.ci_sun / ksciipai * (exp(kscipai * cansa.x_bnds[i]) - exp(kscipai * cansa.x_bnds[i+1]));
     end;
 

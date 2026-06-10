@@ -60,7 +60,7 @@ t_aux!(config::SPACConfig{FT}, canstr::CanopyStructure{FT}, cache::SPACCache{FT}
         end;
         canstr.auxil.x_bnds[2:end] .= sum_pai ./ -(canstr.trait.lai + canstr.trait.sai);
     end;
-    canopy_structure_aux!(config, canstr.trait, canstr.auxil);
+    canopy_structure_aux!(config, config.METHODS.CANOPY_RT_METHOD, canstr.trait, canstr.auxil);
 
     return nothing
 );

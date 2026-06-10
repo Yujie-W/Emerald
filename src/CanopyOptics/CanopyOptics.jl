@@ -12,6 +12,7 @@ using PkgUtility.UniversalConstants: energy_to_photon, energy_to_photon!, photon
 using ..Namespace: BetaLIDF, VerhoefLIDF
 using ..Namespace: ClumpingIndex
 using ..Namespace: CanopyStructureAuxil, CanopyStructureTrait, SensorGeometryAuxil, SensorGeometryState, SunGeometryAuxil, SunGeometryState
+using ..Namespace: CanopyRTEmerald, CanopyRTSCOPE
 using ..Namespace: SoilAlbedoBroadbandCLIMA, SoilAlbedoBroadbandCLM, SoilAlbedoHyperspectralAsh, SoilAlbedoHyperspectralCLIMA, SoilAlbedoHyperspectralCLM, SoilAlbedoPrescribe
 using ..Namespace: SoilLayer, SoilBulk
 using ..Namespace: MultiLayerCanopy
