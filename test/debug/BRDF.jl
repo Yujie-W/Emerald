@@ -24,7 +24,7 @@ SPAC.spac!(config, spac, 1);
 
 
 @info "geometry";
-for angle in [-eps(),0,eps()]
+for angle in sort([collect(-89:1:89);-0.01;0.01])
     spac.canopy.sensor_geometry.state.vza = abs(angle);
     if angle <= 0
         spac.canopy.sensor_geometry.state.vaa = 0;

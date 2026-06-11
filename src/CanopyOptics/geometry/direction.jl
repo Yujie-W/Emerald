@@ -26,7 +26,7 @@ f_adaxial(θ_sza::FT, θ_incl::FT) where {FT} = (
     end;
 
     # if sza = 0 and incl = 90, half light is from adaxial
-    if θ_sza == 0 || θ_incl == 90
+    if θ_sza == 0 && θ_incl == 90
         return FT(0.5)
     end;
 
