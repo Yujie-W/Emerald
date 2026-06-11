@@ -92,17 +92,17 @@ sensor_geometry_aux!(
         end;
 
         # 2 compute the scattering coefficients
-        Ds = (βs < pi ? Ss : Cs);
+        Ds = (abs(cos(βs)) < 1 ? Ss : Cs);
         Do = (0 < βo < pi ? So : -Co/cos(βo));
         so = cosd(sza) * cosd(vza);
         T₁ = 2 * Cs * Co + Ss * So * cosd(ψ);
         T₂ = sin(β₂) * (2 * Ds * Do + Ss * So * cos(β₁) * cos(β₃));
-        F₁ = ((FT(π) - β₂) * T₁ + T₂) / abs(so);
-        F₂ = (-β₂ * T₁ + T₂) / abs(so);
+        F₁ = ((FT(π) - β₂) * T₁ + T₂) / (2 * so * FT(π));
+        F₂ = (-β₂ * T₁ + T₂) / (2 * so * FT(π));
 
         # 3 compute the area scattering coefficient fractions (sb for backward and sf for forward)
-        sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
-        sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
+        sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂));
+        sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁));
     end;
     sensa.ko_leaf = cansa.p_incl_leaf' * sensa.ko_incl * sensa.ci_sensor;
     sensa.ko_stem = cansa.p_incl_stem' * sensa.ko_incl * sensa.ci_sensor;
@@ -112,23 +112,19 @@ sensor_geometry_aux!(
     sensa.w_dof_leaf = 0;
     sensa.w_dob_stem = 0;
     sensa.w_dof_stem = 0;
-    sensa.w_sob_leaf = 0;
-    sensa.w_sof_leaf = 0;
-    sensa.w_sob_stem = 0;
-    sensa.w_sof_stem = 0;
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = Θ_INCL[i] / 180;
-        sensa.w_dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
-        sensa.w_dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
-        sensa.w_dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
-        sensa.w_dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
-        sensa.w_sob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i] * sensa.sb_incl[i];
-        sensa.w_sof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i] * sensa.sf_incl[i];
-        sensa.w_sob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i] * sensa.sb_incl[i];
-        sensa.w_sof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i] * sensa.sf_incl[i];
+        sensa.w_dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i] * sensa.ko_incl[i];
+        sensa.w_dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i] * sensa.ko_incl[i];
+        sensa.w_dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i] * sensa.ko_incl[i];
+        sensa.w_dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i] * sensa.ko_incl[i];
     end;
+    sensa.w_sob_leaf = cansa.p_incl_leaf' * sensa.sb_incl;
+    sensa.w_sof_leaf = cansa.p_incl_leaf' * sensa.sf_incl;
+    sensa.w_sob_stem = cansa.p_incl_stem' * sensa.sb_incl;
+    sensa.w_sof_stem = cansa.p_incl_stem' * sensa.sf_incl;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -222,17 +218,17 @@ sensor_geometry_aux!(
         end;
 
         # 2 compute the scattering coefficients
-        Ds = (βs < pi ? Ss : Cs);
+        Ds = (abs(cos(βs)) < 1 ? Ss : Cs);
         Do = (0 < βo < pi ? So : -Co/cos(βo));
         so = cosd(sza) * cosd(vza);
         T₁ = 2 * Cs * Co + Ss * So * cosd(ψ);
         T₂ = sin(β₂) * (2 * Ds * Do + Ss * So * cos(β₁) * cos(β₃));
-        F₁ = ((FT(π) - β₂) * T₁ + T₂) / abs(so);
-        F₂ = (-β₂ * T₁ + T₂) / abs(so);
+        F₁ = ((FT(π) - β₂) * T₁ + T₂) / (2 * so * FT(π));
+        F₂ = (-β₂ * T₁ + T₂) / (2 * so * FT(π));
 
         # 3 compute the area scattering coefficient fractions (sb for backward and sf for forward)
-        sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂)) / (2 * FT(π));
-        sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁)) / (2 * FT(π));
+        sensa.sb_incl[i] = (F₂ >= 0 ? F₁ : abs(F₂));
+        sensa.sf_incl[i] = (F₂ >= 0 ? F₂ : abs(F₁));
     end;
     sensa.ko_leaf = cansa.p_incl_leaf' * sensa.ko_incl * sensa.ci_sensor;
     sensa.ko_stem = cansa.p_incl_stem' * sensa.ko_incl * sensa.ci_sensor;
