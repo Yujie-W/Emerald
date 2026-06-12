@@ -20,11 +20,11 @@ spac.canopy.sensor_geometry.state.vaa = 0;
 SPAC.prescribe_traits!(config, spac; sai = 0, lai = lai);
 SPAC.initialize_spac!(config, spac);
 
-SPAC.spac!(config, spac, 1);
+# SPAC.spac!(config, spac, 1);
 
 
 @info "geometry";
-for angle in sort([collect(-89:1:89);-0.01;0.01])
+for angle in collect(FT, -89.5:0.5:89.5)
     spac.canopy.sensor_geometry.state.vza = abs(angle);
     if angle <= 0
         spac.canopy.sensor_geometry.state.vaa = 0;
@@ -34,10 +34,18 @@ for angle in sort([collect(-89:1:89);-0.01;0.01])
 
     SPAC.spac!(config, spac, 0);
 
-    println(angle, "\t", spac.canopy.sensor_geometry.auxil.reflectance[54]);
+    println(angle, ",", spac.canopy.sensor_geometry.auxil.reflectance[54]);
 end;
 
 
-spac.canopy.sensor_geometry.state.vza = 89;
-spac.canopy.sensor_geometry.state.vaa = 180;
+#=
+spac.canopy.sensor_geometry.state.vza = 74;
+spac.canopy.sensor_geometry.state.vaa = 0;
 SPAC.spac!(config, spac, 0);
+println(74, ",", spac.canopy.sensor_geometry.auxil.reflectance[54]);
+
+spac.canopy.sensor_geometry.state.vza = 65;
+spac.canopy.sensor_geometry.state.vaa = 0;
+SPAC.spac!(config, spac, 0);
+println(65, ",", spac.canopy.sensor_geometry.auxil.reflectance[54]);
+=#

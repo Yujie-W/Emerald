@@ -65,18 +65,30 @@ sensor_geometry_aux!(
     sza = sunst.sza;
     raa = senst.vaa - sunst.saa;
     for i in eachindex(Θ_INCL)
+        # observer angle
         Co = cosd(Θ_INCL[i]) * cosd(vza);
         So = sind(Θ_INCL[i]) * sind(vza);
-        βo = (Co >= So ? FT(π) : acos(-Co/So));
+        cosβo = abs(So) <= 1e-6 ? FT(1) : -Co/So;
+        if abs(cosβo) < 1
+            βo = acos(cosβo);
+            Do = So;
+        elseif vza < 90
+            βo = FT(π);
+            Do = Co;
+        else
+            βo = 0;
+            Do = -Co;
+        end;
         sensa.Co_incl[i] = Co;
         sensa.So_incl[i] = So;
         sensa.βo_incl[i] = βo;
-        sensa.ko_incl[i] = 2 / FT(π) / cosd(FT(vza)) * (Co * (βo - FT(π)/2) + So * sin(βo));
+        sensa.ko_incl[i] = 2 / FT(π) / cosd(vza) * (Co * (βo - FT(π)/2) + So * sin(βo));
 
         # compute the scattering coefficients
         Cs = sunsa.Cs_incl[i];
         Ss = sunsa.Ss_incl[i];
         βs = sunsa.βs_incl[i];
+        Ds = (abs(cos(βs)) < 1 ? Ss : Cs);
 
         # 1 compute the Δ and β angles
         Δ₁ = abs(βs - βo);
@@ -92,10 +104,8 @@ sensor_geometry_aux!(
         end;
 
         # 2 compute the scattering coefficients
-        Ds = (abs(cos(βs)) < 1 ? Ss : Cs);
-        Do = (0 < βo < pi ? So : -Co/cos(βo));
         so = cosd(sza) * cosd(vza);
-        T₁ = 2 * Cs * Co + Ss * So * cosd(ψ);
+        T₁ = 2 * Cs * Co + Ss * So * cos(ψ);
         T₂ = sin(β₂) * (2 * Ds * Do + Ss * So * cos(β₁) * cos(β₃));
         F₁ = ((FT(π) - β₂) * T₁ + T₂) / (2 * so * FT(π));
         F₂ = (-β₂ * T₁ + T₂) / (2 * so * FT(π));
@@ -191,18 +201,30 @@ sensor_geometry_aux!(
     sza = sunst.sza;
     raa = senst.vaa - sunst.saa;
     for i in eachindex(Θ_INCL)
+        # observer angle
         Co = cosd(Θ_INCL[i]) * cosd(vza);
         So = sind(Θ_INCL[i]) * sind(vza);
-        βo = (Co >= So ? FT(π) : acos(-Co/So));
+        cosβo = abs(So) <= 1e-6 ? FT(1) : -Co/So;
+        if abs(cosβo) < 1
+            βo = acos(cosβo);
+            Do = So;
+        elseif vza < 90
+            βo = FT(π);
+            Do = Co;
+        else
+            βo = 0;
+            Do = -Co;
+        end;
         sensa.Co_incl[i] = Co;
         sensa.So_incl[i] = So;
         sensa.βo_incl[i] = βo;
-        sensa.ko_incl[i] = 2 / FT(π) / cosd(FT(vza)) * (Co * (βo - FT(π)/2) + So * sin(βo));
+        sensa.ko_incl[i] = 2 / FT(π) / cosd(vza) * (Co * (βo - FT(π)/2) + So * sin(βo));
 
         # compute the scattering coefficients
         Cs = sunsa.Cs_incl[i];
         Ss = sunsa.Ss_incl[i];
         βs = sunsa.βs_incl[i];
+        Ds = (abs(cos(βs)) < 1 ? Ss : Cs);
 
         # 1 compute the Δ and β angles
         Δ₁ = abs(βs - βo);
@@ -218,10 +240,8 @@ sensor_geometry_aux!(
         end;
 
         # 2 compute the scattering coefficients
-        Ds = (abs(cos(βs)) < 1 ? Ss : Cs);
-        Do = (0 < βo < pi ? So : -Co/cos(βo));
         so = cosd(sza) * cosd(vza);
-        T₁ = 2 * Cs * Co + Ss * So * cosd(ψ);
+        T₁ = 2 * Cs * Co + Ss * So * cos(ψ);
         T₂ = sin(β₂) * (2 * Ds * Do + Ss * So * cos(β₁) * cos(β₃));
         F₁ = ((FT(π) - β₂) * T₁ + T₂) / (2 * so * FT(π));
         F₂ = (-β₂ * T₁ + T₂) / (2 * so * FT(π));
