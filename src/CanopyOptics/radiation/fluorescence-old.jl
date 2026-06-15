@@ -1,3 +1,4 @@
+#=
 # This file contains functions to compute the SIF emission of the canopy
 
 #######################################################################################################################################################################################################
@@ -238,14 +239,12 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         # ciilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
         # ciilai = can_str.trait.δlai[irt] * can_str.auxil.ci_diffuse;
         ilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .+
-                                             sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .+
-                                             sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ_dir .+
-                                             sun_geo.auxil._sif_sunlitꜛ_dif .* sun_geo.auxil.p_sunlit[irt] .+
-                                             sun_geo.auxil._sif_shadedꜛ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .*= ilai;
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .*= ilai;
+        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= ilai .* sun_geo.auxil._sif_sunlitꜜ_dir .+
+                                             ilai .* sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .+
+                                             ilai .* sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
+        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= ilai .* sun_geo.auxil._sif_sunlitꜛ_dir .+
+                                             ilai .* sun_geo.auxil._sif_sunlitꜛ_dif .* sun_geo.auxil.p_sunlit[irt] .+
+                                             ilai .* sun_geo.auxil._sif_shadedꜛ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
     end;
 
     # 2. account for the SIF emission from bottom to up
@@ -322,3 +321,4 @@ lidf_weight(mat_prod::Matrix{FT}, mat_0::Matrix{FT}, mat_1::Matrix{FT}, p_incl::
     # Note that because azimuth angle is evenly distributed, so we return the mean value here; otherwise, we will need to return p_azi' * vec_azi
     return mean(vec_azi)
 );
+=#

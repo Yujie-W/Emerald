@@ -7,15 +7,15 @@ using Emerald.SPAC
 FT = Float64;
 
 config = Emerald.Namespace.SPACConfig(FT);
-#config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
-config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
+config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
+#config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
 
 lai = 3;
 
 spac = Namespace.BulkSPAC(config; air_bounds = collect(0:0.25:13));
 
-spac.canopy.structure.trait.lidf.A = 0;
-spac.canopy.structure.trait.lidf.B = 1;
+#spac.canopy.structure.trait.lidf.A = 0;
+#spac.canopy.structure.trait.lidf.B = 1;
 
 spac.canopy.sun_geometry.state.sza = 30;
 spac.canopy.sun_geometry.state.saa = 180;
