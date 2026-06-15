@@ -18,6 +18,7 @@ include("prospect/leaf.jl");
 
 include("platespect/effective.jl");
 include("platespect/fluorescence.jl");
+include("platespect/fluorescence-chl.jl");
 include("platespect/sublayer.jl");
 
 # Both Fluspect and Dualspect use the same doubling adding method
@@ -56,6 +57,7 @@ function leaf_spectra!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCach
 
     if config.FEATURES.ENABLE_SIF
         leaf_sif_matrices!(config, bio, cache);
+        leaf_sif_matrices_chl!(config, bio, cache);
     end;
 
     return nothing
