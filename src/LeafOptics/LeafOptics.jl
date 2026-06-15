@@ -25,8 +25,10 @@ include("platespect/sublayer.jl");
 include("kubelka-munk/doubling.jl");
 
 include("dualspect/fluorescence.jl");
+include("dualspect/fluorescence-chl.jl");
 
 include("fluspect/fluorescence.jl");
+include("fluspect/fluorescence-chl.jl");
 
 
 #######################################################################################################################################################################################################

@@ -1,19 +1,6 @@
-"""
-
-    leaf_sif_matrices_chl!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}) where {FT}
-
-Update the SIF conversion matrix of the leaf without reabsorption, given
-- `config` SPAC configuration
-- `bio` leaf biophysics
-
-"""
-function leaf_sif_matrices_chl! end;
-
-leaf_sif_matrices_chl!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}) where {FT} = leaf_sif_matrices_chl!(config, bio, cache, config.METHODS.FLUORESCENCE_SPECTRA_METHOD);
-
-leaf_sif_matrices_chl!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}, ::PlatespectFluorescenceSpectra) where {FT} = (
+leaf_sif_matrices_chl!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT}, ::FluspectFluorescenceSpectra) where {FT} = (
     (; SPECTRA) = config.CONSTANTS;
-    (; IΛ_SIF, IΛ_SIFE, ΔΛ_SIF, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
+    (; IΛ_SIF, IΛ_SIFE, Λ_SIF, Λ_SIFE, Φ_PS) = SPECTRA;
 
     # update the SIF emission vector per excitation wavelength
     ϕ      = bio.auxil._ϕ_sif;
@@ -29,9 +16,6 @@ leaf_sif_matrices_chl!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCach
         expsife = exp(Λ_SIFE[ii] / 10);
         @. factor = 1 / (1 + exp(-Λ_SIF / 10) * expsife);
         ϕ .*= factor;
-
-        # rescale ϕ
-        ϕ ./= ΔΛ_SIF' * ϕ;
 
         # read in the values from the auxiliary variables
         vec_b = view(bio.auxil.mat_b_chl, :, i);

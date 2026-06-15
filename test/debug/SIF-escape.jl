@@ -7,8 +7,8 @@ using Emerald.SPAC
 FT = Float64;
 
 config = Emerald.Namespace.SPACConfig(FT);
-#config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
-config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
+config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
+#config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
 
 lai = 3;
 

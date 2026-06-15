@@ -179,14 +179,6 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     α_leaf::Vector{FT}
 
     # SIF excitation to emittance matrix (before scaling with Φ_PS*)
-    "First layer SIF matrix backwards (chl level) `[-]`"
-    mat_b_1_chl::Matrix{FT}
-    "First layer SIF matrix forwards (chl level) `[-]`"
-    mat_f_1_chl::Matrix{FT}
-    "Second layer SIF matrix backwards (chl level) `[-]`"
-    mat_b_2_chl::Matrix{FT}
-    "Second layer SIF matrix forwards (chl level) `[-]`"
-    mat_f_2_chl::Matrix{FT}
     "First layer SIF matrix backwards (emission only) `[-]`"
     mat_b_1::Matrix{FT}
     "First layer SIF matrix forwards (emission only) `[-]`"
@@ -263,10 +255,6 @@ LeafBioAuxil(config::SPACConfig{FT}) where {FT} = (
                 ρ_leaf             = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ)),
                 τ_leaf             = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ)),
                 α_leaf             = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ)),
-                mat_b_1_chl        = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
-                mat_f_1_chl        = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
-                mat_b_2_chl        = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
-                mat_f_2_chl        = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 mat_b_1            = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 mat_f_1            = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 mat_b_2            = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
