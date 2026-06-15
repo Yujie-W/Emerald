@@ -14,8 +14,8 @@ leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT
     kubelka_munk_sif_matrices!(config, ρ_leaf, τ_leaf, ρ_interface_θ, τ_interface_θ, ρ_interface_21, τ_interface_21, f_sife, mtd.N, mat_b, mat_f);
 
     # compute the mean and mean diff of mat_b and mat_f
-    bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
-    bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
+    bio.auxil.matꜛ .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
+    bio.auxil.matꜜ .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
 
     return nothing
 );

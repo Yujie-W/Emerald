@@ -135,8 +135,8 @@ function leaf_sif_matrices_new!(config::SPACConfig{FT}, bio::LeafBio{FT}, ::Plat
     end;
 
     # compute the mean and mean diff of mat_b and mat_f
-    bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
-    bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
+    bio.auxil.matꜛ .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
+    bio.auxil.matꜜ .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
 
     return nothing
 end;

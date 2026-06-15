@@ -71,8 +71,8 @@ leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT
     bio.auxil.mat_f .= _mat_f_1 .* τ_2_sif ./ denom .+ _mat_b_2 .* ρ_1_sif .* τ_2_sif ./ denom .+ _mat_f_2;
 
     # compute the mean and mean diff of mat_b and mat_f
-    bio.auxil.mat_mean .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
-    bio.auxil.mat_diff .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
+    bio.auxil.matꜛ .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
+    bio.auxil.matꜜ .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
 
     return nothing
 );

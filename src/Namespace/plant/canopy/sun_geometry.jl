@@ -231,17 +231,17 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     "Downward direct radiation that can excite SIF emission per wavelength"
     _e_dirꜜ_sife::Vector{FT}
     "SIF emission from downward diffuse radiation per wavelength (mean)"
-    _e_difꜜ_sif_mean::Vector{FT}
+    _e_difꜜ_sifꜛ::Vector{FT}
     "SIF emission from downward diffuse radiation per wavelength (diff)"
-    _e_difꜜ_sif_diff::Vector{FT}
+    _e_difꜜ_sifꜜ::Vector{FT}
     "SIF emission from upward diffuse radiation per wavelength (mean)"
-    _e_difꜛ_sif_mean::Vector{FT}
+    _e_difꜛ_sifꜛ::Vector{FT}
     "SIF emission from upward diffuse radiation per wavelength (diff)"
-    _e_difꜛ_sif_diff::Vector{FT}
+    _e_difꜛ_sifꜜ::Vector{FT}
     "SIF emission from downward direct radiation per wavelength (mean)"
-    _e_dirꜜ_sif_mean::Vector{FT}
+    _e_dirꜜ_sifꜛ::Vector{FT}
     "SIF emission from downward direct radiation per wavelength (diff)"
-    _e_dirꜜ_sif_diff::Vector{FT}
+    _e_dirꜜ_sifꜜ::Vector{FT}
     "Downward SIF emissions from shaded leaves"
     _sif_shadedꜜ::Vector{FT}
     "Upward SIF emissions from shaded leaves"
@@ -333,12 +333,12 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
                 _e_difꜜ_sife     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 _e_difꜛ_sife     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 _e_dirꜜ_sife     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
-                _e_difꜜ_sif_mean = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
-                _e_difꜜ_sif_diff = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
-                _e_difꜛ_sif_mean = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
-                _e_difꜛ_sif_diff = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
-                _e_dirꜜ_sif_mean = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
-                _e_dirꜜ_sif_diff = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _e_difꜜ_sifꜛ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _e_difꜜ_sifꜜ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _e_difꜛ_sifꜛ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _e_difꜛ_sifꜜ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _e_dirꜜ_sifꜛ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
+                _e_dirꜜ_sifꜜ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _sif_shadedꜜ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _sif_shadedꜛ     = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _sif_sunlitꜜ_dif = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
