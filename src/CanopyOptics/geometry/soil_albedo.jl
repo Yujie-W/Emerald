@@ -139,11 +139,11 @@ soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, 
     ρ_sw = cache.cache_wl_1;
     ρ_sw[SPECTRA.IΛ_PAR] .= ρ_par;
     ρ_sw[SPECTRA.IΛ_NIR] .= ρ_nir;
-    mul!(sbulk.auxil.weight, SPECTRA.MAT_SOIL_PINV, ρ_sw);
+    mul!(sbulk.auxil.weight, SPECTRA.MAT_SOIL_GSV_PINV, ρ_sw);
 
     # function to solve for weights
     @inline _fit(x::Vector{FT}) where {FT} = (
-        mul!(ρ_sw, SPECTRA.MAT_SOIL, x);
+        mul!(ρ_sw, SPECTRA.MAT_SOIL_GSV, x);
 
         return -(( mean( view(ρ_sw,SPECTRA.IΛ_PAR) ) - ρ_par ) ^ 2 + ( mean( view(ρ_sw,SPECTRA.IΛ_NIR) ) - ρ_nir ) ^ 2)
     );
@@ -156,7 +156,7 @@ soil_albedo!(config::SPACConfig{FT}, cache::SPACCache{FT}, sbulk::SoilBulk{FT}, 
     sbulk.auxil.weight .= sol;
 
     # update vectors in soil
-    mul!(sbulk.auxil.ρ_sw, SPECTRA.MAT_SOIL, sbulk.auxil.weight);
+    mul!(sbulk.auxil.ρ_sw, SPECTRA.MAT_SOIL_GSV, sbulk.auxil.weight);
 
     # make sure the albedo is at least 0.01
     @. sbulk.auxil.ρ_sw = max.(sbulk.auxil.ρ_sw, FT(0.01));

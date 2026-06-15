@@ -42,9 +42,9 @@ Base.@kwdef mutable struct ReferenceSpectra{FT<:AbstractFloat}
 
     # Variable features for the soil
     "A matrix of characteristic curves"
-    MAT_SOIL::Matrix{FT}
+    MAT_SOIL_GSV::Matrix{FT}
     "A matrix of the pinv of characteristic curves"
-    MAT_SOIL_PINV::Matrix{FT}
+    MAT_SOIL_GSV_PINV::Matrix{FT}
     "A new matrix for soil reflectance calculation"
     MAT_SOIL_ALBEDO::Matrix{FT}
 
@@ -216,8 +216,8 @@ ReferenceSpectra{FT}(
                     Φ_PS            = Φ_PS_interp,
                     Φ_PSI           = Φ_PSI_interp,
                     Φ_PSII          = Φ_PSII_interp,
-                    MAT_SOIL        = FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp],
-                    MAT_SOIL_PINV   = pinv(FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp]),
+                    MAT_SOIL_GSV        = FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp],
+                    MAT_SOIL_GSV_PINV   = pinv(FT[GSV_1_interp GSV_2_interp GSV_3_interp GSV_4_interp]),
                     MAT_SOIL_ALBEDO = FT[HSA_dry_soil HSA_wet_soil HSA_dry_ash HSA_wet_ash],
                     SOLAR_RAD       = FT[E_DIR_interp E_DIFF_interp],
                     WL_PAR          = wl_par,
@@ -227,27 +227,26 @@ ReferenceSpectra{FT}(
 
     # if _wl_selection is not provided, use the default
     return ReferenceSpectra{FT}(
-            Λ               = df.WL,
-            ΔΛ              = df.WL_UPPER - df.WL_LOWER,
-            K_ANT           = df.K_ANT,
-            K_BROWN         = df.K_BROWN,
-            K_CAB           = df.K_CAB,
-            K_CAR_V         = df.K_CAR_V,
-            K_CAR_Z         = df.K_CAR_Z,
-            K_CBC           = df.K_CBC,
-            K_H₂O           = df.K_H₂O,
-            K_LMA           = df.K_LMA,
-            K_PRO           = df.K_PRO,
-            NR              = df.NR,
-            Φ_PS            = df.K_PS,
-            Φ_PSI           = df.K_PS1,
-            Φ_PSII          = df.K_PS2,
-            MAT_SOIL        = FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4],
-            MAT_SOIL_PINV   = pinv(FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4]),
-            # MAT_SOIL_ALBEDO = FT[df.HSA_DRY_SOIL df.HSA_WET_SOIL df.HSA_DRY_ASH df.HSA_WET_ASH],
-            MAT_SOIL_ALBEDO = [ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2 ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2],
-            SOLAR_RAD       = FT[df.E_DIR df.E_DIFF],
-            WL_PAR          = wl_par,
-            WL_PAR_700      = wl_par_700,
+            Λ                 = df.WL,
+            ΔΛ                = df.WL_UPPER - df.WL_LOWER,
+            K_ANT             = df.K_ANT,
+            K_BROWN           = df.K_BROWN,
+            K_CAB             = df.K_CAB,
+            K_CAR_V           = df.K_CAR_V,
+            K_CAR_Z           = df.K_CAR_Z,
+            K_CBC             = df.K_CBC,
+            K_H₂O             = df.K_H₂O,
+            K_LMA             = df.K_LMA,
+            K_PRO             = df.K_PRO,
+            NR                = df.NR,
+            Φ_PS              = df.K_PS,
+            Φ_PSI             = df.K_PS1,
+            Φ_PSII            = df.K_PS2,
+            MAT_SOIL_GSV      = FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4],
+            MAT_SOIL_GSV_PINV = pinv(FT[df.GSV_1 df.GSV_2 df.GSV_3 df.GSV_4]),
+            MAT_SOIL_ALBEDO   = [ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2 ones(FT, length(df.WL)) .* 0.3 ones(FT, length(df.WL)) .* 0.2],
+            SOLAR_RAD         = FT[df.E_DIR df.E_DIFF],
+            WL_PAR            = wl_par,
+            WL_PAR_700        = wl_par_700,
     )
 );
