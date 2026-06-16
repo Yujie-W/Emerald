@@ -257,15 +257,15 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)
     sun_geo.auxil.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
     for i in n_layer:-1:1
-        ρ_dd_layer = view(can_str.auxil.ρ_dd_layer,:,i  );
-        ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,i+1);
-        ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer,:,i  );
-        ρ_sd_i     = view(sun_geo.auxil.ρ_sd      ,:,i  );
-        ρ_sd_j     = view(sun_geo.auxil.ρ_sd      ,:,i+1);
-        τ_dd_i     = view(can_str.auxil.τ_dd      ,:,i  );
-        τ_sd_layer = view(sun_geo.auxil.τ_sd_layer,:,i  );
-        τ_sd_i     = view(sun_geo.auxil.τ_sd      ,:,i  );
         τ_ss_layer = view(sun_geo.auxil.τ_ss_layer,  i  );
+        ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer,:,i  );
+        τ_sd_layer = view(sun_geo.auxil.τ_sd_layer,:,i  );
+        ρ_dd_layer = view(can_str.auxil.ρ_dd_layer,:,i  );
+        ρ_sd_i     = view(sun_geo.auxil.ρ_sd      ,:,i  );
+        τ_sd_i     = view(sun_geo.auxil.τ_sd      ,:,i  );
+        τ_dd_i     = view(can_str.auxil.τ_dd      ,:,i  );
+        ρ_sd_j     = view(sun_geo.auxil.ρ_sd      ,:,i+1);
+        ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,i+1);
 
         τ_sd_i .= (τ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* ρ_dd_layer) ./ (1 .- ρ_dd_layer .* ρ_dd_j);    # sdit + ssit-sdjr-ddit; rescale
         ρ_sd_i .= ρ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* τ_dd_i .+ τ_sd_layer .* ρ_dd_j .* τ_dd_i;       # sdir + ssit-sdjr-ddit + sdit-ddjr-ddit

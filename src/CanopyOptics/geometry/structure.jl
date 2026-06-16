@@ -246,10 +246,10 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
     can_str.auxil.ρ_dd[:,end] .= sbulk.auxil.ρ_sw;
     for i in n_layer:-1:1
         ρ_dd_layer = view(can_str.auxil.ρ_dd_layer,:,i  );
-        ρ_dd_i     = view(can_str.auxil.ρ_dd      ,:,i  );
-        ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,i+1);
         τ_dd_layer = view(can_str.auxil.τ_dd_layer,:,i  );
+        ρ_dd_i     = view(can_str.auxil.ρ_dd      ,:,i  );
         τ_dd_i     = view(can_str.auxil.τ_dd      ,:,i  );
+        ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,i+1);
 
         τ_dd_i .= τ_dd_layer ./ (1 .- ρ_dd_layer .* ρ_dd_j);        # ddit; rescale
         ρ_dd_i .= ρ_dd_layer .+ τ_dd_layer .* ρ_dd_j .* τ_dd_i;     # ddir + ddit-ddjr-ddit

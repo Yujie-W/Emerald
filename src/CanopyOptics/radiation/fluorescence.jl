@@ -78,6 +78,8 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
                 sen_geo.auxil.ϕ_f_sunlit[irt][i,j] = leaf.photosystem.auxil.ϕ_f[ sun_geo.auxil.ppar_index[i,j,irt] ];
             end;
         end;
+        # sen_geo.auxil.ϕ_f_sunlit[irt] .= 0.01;
+        # sen_geo.auxil.ϕ_f_shaded[irt] = 0.01;
     end;
 
     # function to weight matrices by inclination angles
