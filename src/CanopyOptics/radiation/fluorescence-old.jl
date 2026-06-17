@@ -205,12 +205,12 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         sl_θ² = local_lidf_weight(ϕ_sunlit, _COS²_Θ_INCL_AZI);              # SCOPE: bsxfun(@times,etau_lidf,ctl2)
         sh_θ² = local_lidf_weight(ϕ_shaded, _COS²_Θ_INCL_AZI);              # SCOPE: bsxfun(@times,etah_lidf,ctl2)
         sl_S_ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_abs);          # SCOPE: bsxfun(@times,etau_lidf,absfs)
-        sl_sθ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_cos²_incl);    # SCOPE: bsxfun(@times,etau_lidf,fsctl)
+        sl_sθ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_cos_incl);     # SCOPE: bsxfun(@times,etau_lidf,fsctl)
 
         sh_O_ = local_lidf_weight(ϕ_shaded, sen_geo.auxil.fo_abs);          # SCOPE: bsxfun(@times,etah_lidf,absfo)
         sl_O_ = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_abs);          # SCOPE: bsxfun(@times,etau_lidf,absfo)
-        sh_oθ = local_lidf_weight(ϕ_shaded, sen_geo.auxil.fo_cos²_incl);    # SCOPE: bsxfun(@times,etah_lidf,foctl)
-        sl_oθ = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_cos²_incl);    # SCOPE: bsxfun(@times,etau_lidf,foctl)
+        sh_oθ = local_lidf_weight(ϕ_shaded, sen_geo.auxil.fo_cos_incl);     # SCOPE: bsxfun(@times,etah_lidf,foctl)
+        sl_oθ = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_cos_incl);     # SCOPE: bsxfun(@times,etau_lidf,foctl)
         sl_SO = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_fs_abs);       # SCOPE: bsxfun(@times,etau_lidf,absfsfo)
         sl_so = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_fs);           # SCOPE: bsxfun(@times,etau_lidf,fsfo)
 

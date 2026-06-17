@@ -34,7 +34,7 @@ for angle in collect(FT, -89.5:0.5:89.5)
 
     SPAC.spac!(config, spac, 0);
 
-    println(angle, ",", spac.canopy.sensor_geometry.auxil.reflectance[54]);
+    println(angle, ",", spac.canopy.sensor_geometry.auxil.reflectance[54], ",", spac.canopy.sun_geometry.auxil.albedo[54]);
 end;
 
 

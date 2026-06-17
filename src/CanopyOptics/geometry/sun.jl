@@ -90,7 +90,7 @@ sun_geometry_aux!(
     sunsa.fs_abs .= abs.(sunsa.fs);
     mul!(sunsa.fs_abs_mean, sunsa.fs_abs', cansa.p_incl_leaf);
     for i in eachindex(Θ_INCL)
-        view(sunsa.fs_cos²_incl,i,:) .= view(sunsa.fs,i,:) .* (cosd(Θ_INCL[i]) ^ 2);
+        view(sunsa.fs_cos_incl,i,:) .= view(sunsa.fs,i,:) .* cosd(Θ_INCL[i]);
     end;
 
     return nothing
@@ -148,7 +148,7 @@ sun_geometry_aux!(
     sunsa.fs_abs .= abs.(sunsa.fs);
     mul!(sunsa.fs_abs_mean, sunsa.fs_abs', cansa.p_incl_leaf);
     for i in eachindex(Θ_INCL)
-        view(sunsa.fs_cos²_incl,i,:) .= view(sunsa.fs,i,:) .* (cosd(Θ_INCL[i]) ^ 2);
+        view(sunsa.fs_cos_incl,i,:) .= view(sunsa.fs,i,:) .* cosd(Θ_INCL[i]);
     end;
 
     return nothing

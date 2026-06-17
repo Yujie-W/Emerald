@@ -50,7 +50,7 @@ sif_leaf_sum = [config.CONSTANTS.SPECTRA.ΔΛ_SIF' * energy_to_photon.(config.CO
 phi_layer = sif_chl_sum ./ e_net_sum;
 esc_leaf = sif_leaf_sum ./ sif_chl_sum;
 for i in eachindex(phi_layer)
-    @show i,phi_layer[i],esc_leaf[i];
+    println(i, "\t", round(phi_layer[i]; digits=5), "\t", round(esc_leaf[i]; digits=5));
 end;
 
 

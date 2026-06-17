@@ -104,8 +104,8 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     fo::Matrix{FT}
     "Absolute value of fo"
     fo_abs::Matrix{FT}
-    "fo * cos² Θ_INCL"
-    fo_cos²_incl::Matrix{FT}
+    "fo * cos Θ_INCL"
+    fo_cos_incl::Matrix{FT}
     "fo * fs"
     fo_fs::Matrix{FT}
     "Absolute value of fo * fs"
@@ -175,7 +175,7 @@ SensorGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeo
             p_sun_sensor = zeros(FT, n_layer),
             fo           = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
             fo_abs       = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
-            fo_cos²_incl = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+            fo_cos_incl  = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
             fo_fs        = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
             fo_fs_abs    = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
 

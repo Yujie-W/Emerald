@@ -94,7 +94,7 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     "Mean fs_abs at different azimuth angles"
     fs_abs_mean::Vector{FT}
     "fs * cos Θ_INCL"
-    fs_cos²_incl::Matrix{FT}
+    fs_cos_incl::Matrix{FT}
 
     # others
     # Effective leaf reflectance and transmittance for solar radiation
@@ -275,7 +275,7 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
                 fs           = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
                 fs_abs       = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
                 fs_abs_mean  = zeros(FT, config.DIMENSIONS.DIM_AZI),
-                fs_cos²_incl = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
+                fs_cos_incl  = zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI),
 
                 # others
                 ρ_leaf_eff       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
