@@ -71,7 +71,7 @@ canopy_structure_aux!(
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(Θ_INCL[i]);
         f_aba = 1 - f_ada;
-        f_inc = Θ_INCL[i] / 180;
+        f_inc = (1 - cosd(Θ_INCL[i])) / 2;
         cansa.w_ddb_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
         cansa.w_ddf_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
         cansa.w_ddb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
@@ -222,20 +222,16 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         δpai = δlai + δsai;
         # loop through the isotropic directions
         τ_dd_weighed = 0;
-        k_dd_weighed = 0;
         sum_sind = 0;
         for i_dif in 1:90
             θ_dif = i_dif - FT(0.5);
             kt_dd_i_dif = can_str.auxil.kd_leaf[i_dif] * δlai + can_str.auxil.kd_stem[i_dif] * δsai;
             τ_dd_i_dif = exp(-kt_dd_i_dif);
-            τ_dd_weighed += τ_dd_i_dif * sind(θ_dif);
-            k_dd_weighed += kt_dd_i_dif * sind(θ_dif);
-            sum_sind += sind(θ_dif);
+            τ_dd_weighed += τ_dd_i_dif * sind(θ_dif) * cosd(θ_dif);
+            sum_sind += sind(θ_dif) * cosd(θ_dif);
         end;
         τ_dd_weighed /= sum_sind;
-        k_dd_weighed /= sum_sind;
         can_str.auxil.τ_dd_isotropic[irt] = τ_dd_weighed;
-        can_str.auxil.k_dd_isotropic[irt] = k_dd_weighed;
         k_τ_x .= (view(can_str.auxil.ddf_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddf_stem,:,irt) .* δsai) ./ δpai;
         k_ρ_x .= (view(can_str.auxil.ddb_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddb_stem,:,irt) .* δsai) ./ δpai;
         can_str.auxil.τ_dd_layer[:,irt] .= (1 - τ_dd_weighed) .* k_τ_x .+ τ_dd_weighed;

@@ -67,7 +67,7 @@ sun_geometry_aux!(
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(sunst.sza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
-        f_inc = Θ_INCL[i] / 180;
+        f_inc = (1 - cosd(Θ_INCL[i])) / 2;
         sunsa.w_sdb_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
         sunsa.w_sdf_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
         sunsa.w_sdb_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];

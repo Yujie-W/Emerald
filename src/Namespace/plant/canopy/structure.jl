@@ -126,8 +126,6 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
     # Weight tranmittance
     "The transmittance chance that isotropic radiation will not reach any leaf surface"
     τ_dd_isotropic::Vector{FT}
-    "1 - τ_dd_isotropic in the case of old algiorithm (k * dx vs 1 - exp(-k * dx))"
-    k_dd_isotropic::Vector{FT}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
     "Reflectance for diffuse->diffuse at each canopy layer"
@@ -190,7 +188,6 @@ CanopyStructureAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = CanopySt
             ddb_stem       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ddf_stem       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_dd_isotropic = zeros(FT, n_layer),
-            k_dd_isotropic = zeros(FT, n_layer),
             ρ_dd_layer     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_dd_layer     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ρ_dd           = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer + 1),

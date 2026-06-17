@@ -125,7 +125,7 @@ sensor_geometry_aux!(
     for i in eachindex(Θ_INCL)
         f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
-        f_inc = Θ_INCL[i] / 180;
+        f_inc = (1 - cosd(Θ_INCL[i])) / 2;
         sensa.w_dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i] * sensa.ko_incl[i];
         sensa.w_dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i] * sensa.ko_incl[i];
         sensa.w_dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i] * sensa.ko_incl[i];
