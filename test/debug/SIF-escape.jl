@@ -23,8 +23,8 @@ wl = 500;
 mask = (wl - 10) .<= config.CONSTANTS.SPECTRA.Λ .<= (wl + 10);
 spac.meteo.rad_sw.e_dir[.!mask] .= 0;
 spac.meteo.rad_sw.e_dif[.!mask] .= 0;
-spac.meteo.rad_sw.e_dir .= 0;
-#spac.meteo.rad_sw.e_dif .= 0;
+# spac.meteo.rad_sw.e_dir .= 0;
+# spac.meteo.rad_sw.e_dif .= 0;
 
 spac.canopy.sun_geometry.state.sza = 30;
 spac.canopy.sun_geometry.state.saa = 180;

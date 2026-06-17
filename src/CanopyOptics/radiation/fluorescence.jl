@@ -78,8 +78,6 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
                 sen_geo.auxil.ϕ_f_sunlit[irt][i,j] = leaf.photosystem.auxil.ϕ_f[ sun_geo.auxil.ppar_index[i,j,irt] ];
             end;
         end;
-        # sen_geo.auxil.ϕ_f_sunlit[irt] .= 0.01;
-        # sen_geo.auxil.ϕ_f_shaded[irt] = 0.01;
     end;
 
     # function to weight matrices by inclination angles
@@ -154,7 +152,7 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         sl_θ² = local_lidf_weight(ϕ_sunlit, _COS²_Θ_INCL_AZI);              # SCOPE: bsxfun(@times,etau_lidf,ctl2)
         sh_θ² = local_lidf_weight(ϕ_shaded, _COS²_Θ_INCL_AZI);              # SCOPE: bsxfun(@times,etah_lidf,ctl2)
         sl_S_ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_abs);          # SCOPE: bsxfun(@times,etau_lidf,absfs)
-        sl_sθ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_cos²_incl);    # SCOPE: bsxfun(@times,etau_lidf,fsctl)
+        sl_sθ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_cos_incl);     # SCOPE: bsxfun(@times,etau_lidf,fsctl)
 
         # upward and downward SIF from direct and diffuse radiation per leaf area
         sun_geo.auxil._sif_sunlitꜛ_dif .= sun_geo.auxil._e_difꜜ_sifꜛ .* sl_1_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sl_θ² .+       # SCOPE: sigbEmin_u
@@ -173,15 +171,14 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         # TODO: better SIF scattering algorithm
         # ciilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
         # ciilai = can_str.trait.δlai[irt] * can_str.auxil.ci_diffuse;
-        ilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .+
-                                             sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .+
-                                             sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ_dir .+
-                                             sun_geo.auxil._sif_sunlitꜛ_dif .* sun_geo.auxil.p_sunlit[irt] .+
-                                             sun_geo.auxil._sif_shadedꜛ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .*= ilai;
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .*= ilai;
+        ilai_direct = (1 - sun_geo.auxil.τ_ss_layer[irt]) / sun_geo.auxil.ks_leaf;
+        ilai_diffuse = 1 - can_str.auxil.τ_dd_isotropic[irt];
+        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .* ilai_direct .+
+                                             sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .* ilai_diffuse .+
+                                             sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]) .* ilai_diffuse;
+        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ_dir .* ilai_direct .+
+                                             sun_geo.auxil._sif_sunlitꜛ_dif .* sun_geo.auxil.p_sunlit[irt] .* ilai_diffuse .+
+                                             sun_geo.auxil._sif_shadedꜛ     .* (1 - sun_geo.auxil.p_sunlit[irt]) .* ilai_diffuse;
     end;
     sun_geo.auxil.e_sif_chl .= sun_geo.auxil.e_sifꜜ_layer .+ sun_geo.auxil.e_sifꜛ_layer;
 
@@ -234,12 +231,12 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         sl_θ² = local_lidf_weight(ϕ_sunlit, _COS²_Θ_INCL_AZI);              # SCOPE: bsxfun(@times,etau_lidf,ctl2)
         sh_θ² = local_lidf_weight(ϕ_shaded, _COS²_Θ_INCL_AZI);              # SCOPE: bsxfun(@times,etah_lidf,ctl2)
         sl_S_ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_abs);          # SCOPE: bsxfun(@times,etau_lidf,absfs)
-        sl_sθ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_cos²_incl);    # SCOPE: bsxfun(@times,etau_lidf,fsctl)
+        sl_sθ = local_lidf_weight(ϕ_sunlit, sun_geo.auxil.fs_cos_incl);     # SCOPE: bsxfun(@times,etau_lidf,fsctl)
 
         sh_O_ = local_lidf_weight(ϕ_shaded, sen_geo.auxil.fo_abs);          # SCOPE: bsxfun(@times,etah_lidf,absfo)
         sl_O_ = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_abs);          # SCOPE: bsxfun(@times,etau_lidf,absfo)
-        sh_oθ = local_lidf_weight(ϕ_shaded, sen_geo.auxil.fo_cos²_incl);    # SCOPE: bsxfun(@times,etah_lidf,foctl)
-        sl_oθ = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_cos²_incl);    # SCOPE: bsxfun(@times,etau_lidf,foctl)
+        sh_oθ = local_lidf_weight(ϕ_shaded, sen_geo.auxil.fo_cos_incl);     # SCOPE: bsxfun(@times,etah_lidf,foctl)
+        sl_oθ = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_cos_incl);     # SCOPE: bsxfun(@times,etau_lidf,foctl)
         sl_SO = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_fs_abs);       # SCOPE: bsxfun(@times,etau_lidf,absfsfo)
         sl_so = local_lidf_weight(ϕ_sunlit, sen_geo.auxil.fo_fs);           # SCOPE: bsxfun(@times,etau_lidf,fsfo)
 
@@ -267,15 +264,14 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         # TODO: better SIF scattering algorithm
         # ciilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
         # ciilai = can_str.trait.δlai[irt] * can_str.auxil.ci_diffuse;
-        ilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .+
-                                             sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .+
-                                             sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ_dir .+
-                                             sun_geo.auxil._sif_sunlitꜛ_dif .* sun_geo.auxil.p_sunlit[irt] .+
-                                             sun_geo.auxil._sif_shadedꜛ     .* (1 - sun_geo.auxil.p_sunlit[irt]);
-        sun_geo.auxil.e_sifꜜ_layer[:,irt] .*= ilai;
-        sun_geo.auxil.e_sifꜛ_layer[:,irt] .*= ilai;
+        ilai_direct = (1 - sun_geo.auxil.τ_ss_layer[irt]) / sun_geo.auxil.ks_leaf;
+        ilai_diffuse = 1 - can_str.auxil.τ_dd_isotropic[irt];
+        sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .* ilai_direct .+
+                                             sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .* ilai_diffuse .+
+                                             sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]) .* ilai_diffuse;
+        sun_geo.auxil.e_sifꜛ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜛ_dir .* ilai_direct .+
+                                             sun_geo.auxil._sif_sunlitꜛ_dif .* sun_geo.auxil.p_sunlit[irt] .* ilai_diffuse .+
+                                             sun_geo.auxil._sif_shadedꜛ     .* (1 - sun_geo.auxil.p_sunlit[irt]) .* ilai_diffuse;
     end;
 
     # 2. account for the SIF emission from bottom to up

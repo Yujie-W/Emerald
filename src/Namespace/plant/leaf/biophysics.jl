@@ -205,6 +205,10 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     mat_b::Matrix{FT}
     "SIF matrix forwards `[-]`"
     mat_f::Matrix{FT}
+    "SIF matrix backwards (scaled by α) `[-]`"
+    mat_b_α::Matrix{FT}
+    "SIF matrix forwards (scaled by α) `[-]`"
+    mat_f_α::Matrix{FT}
     "Mean SIF matrix of the backward and forward SIF matrices (chl level) `[-]`"
     matꜛ_chl::Matrix{FT}
     "Diff SIF matrix of the backward and forward SIF matrices (chl level) `[-]`"
@@ -213,6 +217,10 @@ Base.@kwdef mutable struct LeafBioAuxil{FT<:AbstractFloat}
     matꜛ::Matrix{FT}
     "Diff SIF matrix of the backward and forward SIF matrices `[-]`"
     matꜜ::Matrix{FT}
+    "Mean SIF matrix of the backward and forward SIF matrices (scaled by α) `[-]`"
+    matꜛ_α::Matrix{FT}
+    "Diff SIF matrix of the backward and forward SIF matrices (scaled by α) `[-]`"
+    matꜜ_α::Matrix{FT}
 
     # cache variables
     "SIF PDF based on the wavelength of excitation `[-]`"
@@ -267,10 +275,14 @@ LeafBioAuxil(config::SPACConfig{FT}) where {FT} = (
                 mat_f_chl          = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 mat_b              = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 mat_f              = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
+                mat_b_α            = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
+                mat_f_α            = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 matꜛ_chl           = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 matꜜ_chl           = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 matꜛ               = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 matꜜ               = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
+                matꜛ_α             = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
+                matꜜ_α             = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF), length(config.CONSTANTS.SPECTRA.IΛ_SIFE)),
                 _ϕ_sif             = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _ϕ1_sif            = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
                 _ϕ2_sif            = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),

@@ -295,9 +295,17 @@ leaf_sif_matrices!(config::SPACConfig{FT}, bio::LeafBio{FT}, cache::SPACCache{FT
         vec_f .*= ϕ;
     end;
 
+    # scale the matrix by α so as to compute the spectra from net radiation
+    bio.auxil.mat_b_α .= bio.auxil.mat_b ./ view(bio.auxil.α_leaf, SPECTRA.IΛ_SIFE)';
+    bio.auxil.mat_f_α .= bio.auxil.mat_f ./ view(bio.auxil.α_leaf, SPECTRA.IΛ_SIFE)';
+
     # compute the mean and mean diff of mat_b and mat_f
     bio.auxil.matꜛ .= (bio.auxil.mat_b .+ bio.auxil.mat_f) ./ 2;
     bio.auxil.matꜜ .= (bio.auxil.mat_b .- bio.auxil.mat_f) ./ 2;
+    bio.auxil.matꜛ_α .= (bio.auxil.mat_b_α .+ bio.auxil.mat_f_α) ./ 2;
+    bio.auxil.matꜜ_α .= (bio.auxil.mat_b_α .- bio.auxil.mat_f_α) ./ 2;
+    # bio.auxil.matꜛ_α .= bio.auxil.mat_b_α;
+    # bio.auxil.matꜜ_α .= bio.auxil.mat_f_α;
 
     return nothing
 );
