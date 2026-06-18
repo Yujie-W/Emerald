@@ -127,10 +127,10 @@ sun_geometry_aux!(
     sunsa.ks_stem = cansa.p_incl_stem' * sunsa.ks_incl * sunsa.ci_sun;
 
     # compute the scattering weights for diffuse/direct -> diffuse for backward and forward scattering
-    sunsa.w_sdb_leaf = (sunsa.ks_leaf + cansa.bf_leaf) / 2;
-    sunsa.w_sdf_leaf = (sunsa.ks_leaf - cansa.bf_leaf) / 2;
-    sunsa.w_sdb_stem = (sunsa.ks_stem + cansa.bf_stem) / 2;
-    sunsa.w_sdf_stem = (sunsa.ks_stem - cansa.bf_stem) / 2;
+    sunsa.w_sdb_leaf = (1 + cansa.bf_leaf / sunsa.ks_leaf) / 2;
+    sunsa.w_sdf_leaf = (1 - cansa.bf_leaf / sunsa.ks_leaf) / 2;
+    sunsa.w_sdb_stem = (1 + cansa.bf_stem / sunsa.ks_stem) / 2;
+    sunsa.w_sdf_stem = (1 - cansa.bf_stem / sunsa.ks_stem) / 2;
 
     # compute the sunlit leaf fraction
     # ps(x) = sunsa.ci_sun * exp.(sunsa.ks .* canst.lai .* cansa.x_bnds);

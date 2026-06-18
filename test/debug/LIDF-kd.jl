@@ -27,11 +27,16 @@ for b in -1:0.1:1
     spac.canopy.structure.trait.lidf.A = 0;
     spac.canopy.structure.trait.lidf.B = b;
     SPAC.t_aux!(config, spac);
-    SPAC.spac!(config, spac, 0);
-    # @show spac.canopy.structure.auxil.p_incl_leaf;
-    @show b;
-    @show spac.canopy.structure.auxil.τ_dd_isotropic[1];
-    @show spac.canopy.sun_geometry.auxil.e_difꜛ[1:10,1];
+end;
+for a in -1:0.1:1
+    spac.canopy.structure.trait.lidf.A = a;
+    spac.canopy.structure.trait.lidf.B = 0;
+    SPAC.t_aux!(config, spac);
+end;
+for l in lidfs
+    spac.canopy.structure.trait.lidf.A = l[1];
+    spac.canopy.structure.trait.lidf.B = l[2];
+    SPAC.t_aux!(config, spac);
 end;
 
 

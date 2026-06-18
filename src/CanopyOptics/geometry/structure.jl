@@ -8,7 +8,7 @@
 #     2024-Mar-01: compute the extinction coefficients for the diffuse radiation (isotropic)
 #     2024-Mar-01: compute the fraction of ddb and ddf (relative fraction of purely backward and forward scattering)
 #     2024-Sep-04: separate leaf and stem optical properties
-#     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf and kd_stem)
+#     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf_za and kd_stem_za)
 #     2024-Sep-09: compute the CI for the diffuse radiation based on the angle dependent CI
 #     2024-Oct-16: compute the diffuse light extinction coefficient per 1 degree (so no need to weigh it here)
 #
@@ -50,7 +50,7 @@ canopy_structure_aux!(
     end;
 
     # compute the extinction coefficients for the diffuse radiation (directions in isotropic radiation)
-    # these kd_leaf and kd_stem already account for the impact of clumping index
+    # these kd_leaf_za and kd_stem_za already account for the impact of clumping index
     for i_dif in 1:90
         θ_dif = i_dif - FT(0.5);
         kd_l = 0;
@@ -59,8 +59,8 @@ canopy_structure_aux!(
             kd_l += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_leaf[i];
             kd_s += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_stem[i];
         end;
-        cansa.kd_leaf[i_dif] = kd_l;
-        cansa.kd_stem[i_dif] = kd_s;
+        cansa.kd_leaf_za[i_dif] = kd_l;
+        cansa.kd_stem_za[i_dif] = kd_s;
     end;
 
     # compute the weighed average of the leaf inclination angle distribution
@@ -98,7 +98,7 @@ canopy_structure_aux!(
     end;
 
     # compute the extinction coefficients for the diffuse radiation (directions in isotropic radiation)
-    # these kd_leaf and kd_stem already account for the impact of clumping index
+    # these kd_leaf_za and kd_stem_za already account for the impact of clumping index
     for i_dif in 1:90
         θ_dif = i_dif - FT(0.5);
         kd_l = 0;
@@ -107,8 +107,8 @@ canopy_structure_aux!(
             kd_l += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_leaf[i];
             kd_s += extinction_coefficient(θ_dif, Θ_INCL[i], canst.ci) * cansa.p_incl_stem[i];
         end;
-        cansa.kd_leaf[i_dif] = kd_l;
-        cansa.kd_stem[i_dif] = kd_s;
+        cansa.kd_leaf_za[i_dif] = kd_l;
+        cansa.kd_stem_za[i_dif] = kd_s;
     end;
 
     # compute the weighed average of the leaf inclination angle distribution
@@ -137,7 +137,7 @@ canopy_structure_aux!(
 #     2023-Oct-18: account for SAI in the canopy structure calculation
 #     2024-Mar-01: compute the layer shortwave and longwave scattering coefficients based on the new theory
 #     2024-Sep-04: separate leaf and stem optical properties
-#     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf and kd_stem)
+#     2024-Sep-07: compute CI weighted extinction coefficients for the diffuse radiation (so no need to multiply by CI in the equations when using kd_leaf_za and kd_stem_za)
 #     2024-Oct-16: weigh the extinction coefficient for diffuse radiation when computing the transmittance
 #     2024-Oct-16: add option to compute effective leaf spectra based on CI
 #     2024-Nov-08: when using EFFECTIVE_LEAF_SPECTRA make sure LAI > 0
@@ -211,7 +211,7 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
     #     can_str.auxil.ρ_dd_layer = ∫_0^iCIPAI (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddb_leaf * δLAI + ddb_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
     #     can_str.auxil.τ_dd_layer = ∫_0^iCIPAI (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * kd * exp(-kd * x) * dx = (ddf_leaf * δLAI + ddf_stem * δSAI) / δPAI * (1 - exp(-kd * iCIPAI))
     # Then, the total transmitted radiation need to plus the radiation that has not passed though any leaf, namely τ_dd_solar.
-    # As of 2024-Sep-07, we account CI's angular dependency along with kd_leaf and kd_stem, and thus CI is removed here from the equations below.
+    # As of 2024-Sep-07, we account CI's angular dependency along with kd_leaf_za and kd_stem_za, and thus CI is removed here from the equations below.
     # As of 2024-Oct-16, we realized that the extinction coefficient for diffuse radiation (weighted with sind(θ_za)) may overestimate the extinction coefficient for the diffuse radiation.
     # Therefore, we compute the extinction coefficient per 1 degree and weigh the final transmittance (that do not reach any leaf surface).
     k_τ_x = spac.cache.cache_wl_1;
@@ -225,7 +225,7 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         sum_sind = 0;
         for i_dif in 1:90
             θ_dif = i_dif - FT(0.5);
-            kt_dd_i_dif = can_str.auxil.kd_leaf[i_dif] * δlai + can_str.auxil.kd_stem[i_dif] * δsai;
+            kt_dd_i_dif = can_str.auxil.kd_leaf_za[i_dif] * δlai + can_str.auxil.kd_stem_za[i_dif] * δsai;
             τ_dd_i_dif = exp(-kt_dd_i_dif);
             τ_dd_weighed += τ_dd_i_dif * sind(θ_dif) * cosd(θ_dif);
             sum_sind += sind(θ_dif) * cosd(θ_dif);

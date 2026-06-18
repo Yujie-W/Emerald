@@ -6,52 +6,48 @@ using Emerald.SPAC
 
 FT = Float64;
 
-config = Emerald.Namespace.SPACConfig(FT);
-config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
-#config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
+configs = Emerald.Namespace.SPACConfig(FT);
+configs.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
+confige = Emerald.Namespace.SPACConfig(FT);
+confige.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
 
 lai = 3;
 
-spac = Namespace.BulkSPAC(config; air_bounds = collect(0:0.25:13));
+spacs = Namespace.BulkSPAC(configs; air_bounds = collect(0:0.05:13));
+spacs.canopy.sun_geometry.state.sza = 30;
+spacs.canopy.sun_geometry.state.saa = 180;
+spacs.canopy.sensor_geometry.state.vza = 0;
+spacs.canopy.sensor_geometry.state.vaa = 0;
+SPAC.prescribe_traits!(configs, spacs; sai = 0, lai = lai);
+SPAC.initialize_spac!(configs, spacs);
 
-#spac.canopy.structure.trait.lidf.A = 0;
-#spac.canopy.structure.trait.lidf.B = 1;
-
-spac.canopy.sun_geometry.state.sza = 30;
-spac.canopy.sun_geometry.state.saa = 180;
-spac.canopy.sensor_geometry.state.vza = 0;
-spac.canopy.sensor_geometry.state.vaa = 0;
-SPAC.prescribe_traits!(config, spac; sai = 0, lai = lai);
-SPAC.initialize_spac!(config, spac);
-SPAC.spac!(config, spac, 1);
-
-for f in spac.canopy.sensor_geometry.auxil.ϕ_f_sunlit f .= 0.01 end;
-spac.canopy.sensor_geometry.auxil.ϕ_f_shaded .= 0.01;
+space = Namespace.BulkSPAC(confige; air_bounds = collect(0:0.05:13));
+space.canopy.sun_geometry.state.sza = 30;
+space.canopy.sun_geometry.state.saa = 180;
+space.canopy.sensor_geometry.state.vza = 0;
+space.canopy.sensor_geometry.state.vaa = 0;
+SPAC.prescribe_traits!(confige, space; sai = 0, lai = lai);
+SPAC.initialize_spac!(confige, space);
 
 
-@info "geometry";
+SPAC.spac!(configs, spacs, 1);
+SPAC.spac!(confige, space, 1);
+
+
+@info "SCOPE and Emerald SIF geometry";
 for angle in collect(FT, -89.5:0.5:89.5)
-    spac.canopy.sensor_geometry.state.vza = abs(angle);
+    spacs.canopy.sensor_geometry.state.vza = abs(angle);
+    space.canopy.sensor_geometry.state.vza = abs(angle);
     if angle <= 0
-        spac.canopy.sensor_geometry.state.vaa = 0;
+        spacs.canopy.sensor_geometry.state.vaa = 0;
+        space.canopy.sensor_geometry.state.vaa = 0;
     else
-        spac.canopy.sensor_geometry.state.vaa = 180;
+        spacs.canopy.sensor_geometry.state.vaa = 180;
+        space.canopy.sensor_geometry.state.vaa = 180;
     end;
 
-    SPAC.spac!(config, spac, 0);
+    SPAC.spac!(configs, spacs, 0);
+    SPAC.spac!(confige, space, 0);
 
-    println(angle, ",", spac.canopy.sensor_geometry.auxil.sif_obs[20]);
+    println(angle, ",", spacs.canopy.sensor_geometry.auxil.sif_obs[20], ",", space.canopy.sensor_geometry.auxil.sif_obs[20]);
 end;
-
-
-#=
-spac.canopy.sensor_geometry.state.vza = 74;
-spac.canopy.sensor_geometry.state.vaa = 0;
-SPAC.spac!(config, spac, 0);
-println(74, ",", spac.canopy.sensor_geometry.auxil.reflectance[54]);
-
-spac.canopy.sensor_geometry.state.vza = 65;
-spac.canopy.sensor_geometry.state.vaa = 0;
-SPAC.spac!(config, spac, 0);
-println(65, ",", spac.canopy.sensor_geometry.auxil.reflectance[54]);
-=#
