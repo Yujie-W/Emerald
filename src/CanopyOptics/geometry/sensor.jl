@@ -126,10 +126,10 @@ sensor_geometry_aux!(
         f_ada = f_adaxial(senst.vza, Θ_INCL[i]);
         f_aba = 1 - f_ada;
         f_inc = (1 - cosd(Θ_INCL[i])) / 2;
-        sensa.w_dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i] * sensa.ko_incl[i];
-        sensa.w_dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i] * sensa.ko_incl[i];
-        sensa.w_dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i] * sensa.ko_incl[i];
-        sensa.w_dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i] * sensa.ko_incl[i];
+        sensa.w_dob_leaf += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_leaf[i];
+        sensa.w_dof_leaf += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_leaf[i];
+        sensa.w_dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
+        sensa.w_dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
     end;
     sensa.w_sob_leaf = cansa.p_incl_leaf' * sensa.sb_incl;
     sensa.w_sof_leaf = cansa.p_incl_leaf' * sensa.sf_incl;
@@ -165,7 +165,7 @@ sensor_geometry_aux!(
     ag = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
     Σk = (sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai + sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai);
     Πk = sqrt((sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai) * (sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai));
-    sl = lw2ch * 2 * pai / Σk;
+    sl = lw2ch / 2 * pai / Σk;
     pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
 
     for i in eachindex(canst.δlai)
@@ -254,10 +254,10 @@ sensor_geometry_aux!(
     sensa.ko_stem = cansa.p_incl_stem' * sensa.ko_incl * sensa.ci_sensor;
 
     # compute the scattering weights for diffuse/direct -> sensor for backward and forward scattering
-    sensa.w_dob_leaf = (sensa.ko_leaf + cansa.bf_leaf) / 2;
-    sensa.w_dof_leaf = (sensa.ko_leaf - cansa.bf_leaf) / 2;
-    sensa.w_dob_stem = (sensa.ko_stem + cansa.bf_stem) / 2;
-    sensa.w_dof_stem = (sensa.ko_stem - cansa.bf_stem) / 2;
+    sensa.w_dob_leaf = (1 + cansa.bf_leaf / sensa.ko_leaf) / 2;
+    sensa.w_dof_leaf = (1 - cansa.bf_leaf / sensa.ko_leaf) / 2;
+    sensa.w_dob_stem = (1 + cansa.bf_stem / sensa.ko_stem) / 2;
+    sensa.w_dof_stem = (1 - cansa.bf_stem / sensa.ko_stem) / 2;
     sensa.w_sob_leaf = cansa.p_incl_leaf' * sensa.sb_incl;
     sensa.w_sof_leaf = cansa.p_incl_leaf' * sensa.sf_incl;
     sensa.w_sob_stem = cansa.p_incl_stem' * sensa.sb_incl;
@@ -292,7 +292,7 @@ sensor_geometry_aux!(
     ag = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
     Σk = (sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai + sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai);
     Πk = sqrt((sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai) * (sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai));
-    sl = lw2ch * 2 * pai / Σk;
+    sl = lw2ch / 2 * pai / Σk;
     pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
 
     for i in eachindex(canst.δlai)
