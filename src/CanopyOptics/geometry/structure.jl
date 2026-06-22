@@ -142,7 +142,7 @@ canopy_structure_aux!(
 #     2024-Oct-16: add option to compute effective leaf spectra based on CI
 #     2024-Nov-08: when using EFFECTIVE_LEAF_SPECTRA make sure LAI > 0
 # Bug fixes
-#     2025-Oct-16: τ_dd_isotropic was already the tranmittance of longwave, so do not use exp(-τ_dd_isotropic)
+#     2025-Oct-16: τ_dd_diffuse was already the tranmittance of longwave, so do not use exp(-τ_dd_diffuse)
 #
 #######################################################################################################################################################################################################
 """
@@ -231,11 +231,26 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
             sum_sind += sind(θ_dif) * cosd(θ_dif);
         end;
         τ_dd_weighed /= sum_sind;
-        can_str.auxil.τ_dd_isotropic[irt] = τ_dd_weighed;
+        can_str.auxil.τ_dd_diffuse[irt] = τ_dd_weighed;
+        can_str.auxil.k_dd_diffuse[irt] = -log(τ_dd_weighed) / δpai;
         k_τ_x .= (view(can_str.auxil.ddf_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddf_stem,:,irt) .* δsai) ./ δpai;
         k_ρ_x .= (view(can_str.auxil.ddb_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddb_stem,:,irt) .* δsai) ./ δpai;
-        can_str.auxil.τ_dd_layer[:,irt] .= (1 - τ_dd_weighed) .* k_τ_x .+ τ_dd_weighed;
-        can_str.auxil.ρ_dd_layer[:,irt] .= (1 - τ_dd_weighed) .* k_ρ_x;
+        # can_str.auxil.τ_dd_layer[:,irt] .= (1 - τ_dd_weighed) .* k_τ_x .+ τ_dd_weighed;
+        # can_str.auxil.ρ_dd_layer[:,irt] .= (1 - τ_dd_weighed) .* k_ρ_x;
+        kd = can_str.auxil.k_dd_diffuse[irt];
+        can_str.auxil.τ_dd_layer_0[:,irt] .= (1 - τ_dd_weighed) .* k_τ_x;
+        can_str.auxil.ρ_dd_layer_0[:,irt] .= (1 - τ_dd_weighed) .* k_ρ_x;
+        can_str.auxil.τ_dd_layer_1[:,irt] .= kd * exp(-kd * δpai) * k_τ_x * δpai;
+        can_str.auxil.ρ_dd_layer_1[:,irt] .= FT(0.5) * (1 - exp(-2 * kd * δpai)) * k_ρ_x;
+        r0 = view(can_str.auxil.ρ_dd_layer_0,:,irt);
+        t0 = view(can_str.auxil.τ_dd_layer_0,:,irt);
+        r1 = view(can_str.auxil.ρ_dd_layer_1,:,irt);
+        t1 = view(can_str.auxil.τ_dd_layer_1,:,irt);
+        ff = (r1 .+ t1) ./ (r0 .+ t0);
+        # can_str.auxil.τ_dd_layer[:,irt] .= t1 .+ (t0 .- t1) .* k_τ_x .* t1 ./ t0 .+ (r0 .- r1) .* k_ρ_x .* r1 ./ r0 .+ τ_dd_weighed;
+        # can_str.auxil.ρ_dd_layer[:,irt] .= r1 .+ (r0 .- r1) .* k_τ_x .* r1 ./ r0 .+ (t0 .- t1) .* k_ρ_x .* t1 ./ t0;
+        can_str.auxil.τ_dd_layer[:,irt] .= t1 .+ (t0 .- t1) .* k_τ_x .* ff .+ (r0 .- r1) .* k_ρ_x .* ff .+ τ_dd_weighed;
+        can_str.auxil.ρ_dd_layer[:,irt] .= r1 .+ (r0 .- r1) .* k_τ_x .* ff .+ (t0 .- t1) .* k_ρ_x .* ff;
     end;
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)
@@ -263,11 +278,18 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         σ_leaf_f = can_str.auxil.w_ddf_leaf * leaf.bio.trait.ρ_lw + can_str.auxil.w_ddb_leaf * leaf.bio.trait.τ_lw;
         σ_stem_b = can_str.auxil.w_ddb_stem * leaf.bio.trait.ρ_lw;
         σ_stem_f = can_str.auxil.w_ddf_stem * leaf.bio.trait.ρ_lw;
-        k_ρ_x = (σ_leaf_b * δlai .+ σ_stem_b * δsai) ./ δpai;
-        k_τ_x = (σ_leaf_f * δlai .+ σ_stem_f * δsai) ./ δpai;
-        τ_dd_lw = can_str.auxil.τ_dd_isotropic[irt];
-        can_str.auxil.τ_lw_layer[irt] = (1 - τ_dd_lw) .* k_τ_x .+ τ_dd_lw;
-        can_str.auxil.ρ_lw_layer[irt] = (1 - τ_dd_lw) .* k_ρ_x;
+        k_ρ_x = (σ_leaf_b * δlai + σ_stem_b * δsai) / δpai;
+        k_τ_x = (σ_leaf_f * δlai + σ_stem_f * δsai) / δpai;
+        τ_dd_lw = can_str.auxil.τ_dd_diffuse[irt];
+        # can_str.auxil.τ_lw_layer[irt] = (1 - τ_dd_lw) * k_τ_x + τ_dd_lw;
+        # can_str.auxil.ρ_lw_layer[irt] = (1 - τ_dd_lw) * k_ρ_x;
+        kd = can_str.auxil.k_dd_diffuse[irt];
+        t0 = (1 - τ_dd_lw) * k_τ_x;
+        r0 = (1 - τ_dd_lw) * k_ρ_x;
+        t1 = kd * exp(-kd * δpai) * k_τ_x * δpai;
+        r1 = FT(0.5) * (1 - exp(-2 * kd * δpai)) * k_ρ_x;
+        can_str.auxil.τ_lw_layer[irt] = t1 + (t0 - t1) * k_τ_x .+ (r0 - r1) * k_ρ_x + τ_dd_lw;
+        can_str.auxil.ρ_lw_layer[irt] = r1 + (r0 - r1) * k_τ_x .+ (t0 - t1) * k_ρ_x;
         can_str.auxil.ϵ_lw_layer[irt] = 1 - can_str.auxil.τ_lw_layer[irt] - can_str.auxil.ρ_lw_layer[irt];
     end;
 

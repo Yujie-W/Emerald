@@ -114,9 +114,17 @@ Base.@kwdef mutable struct SunGeometryAuxil{FT}
     sdf_stem::Vector{Vector{FT}}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
-    "Reflectance for solar directional->diffuse at each canopy layer"
+    "Reflectance for solar directional->diffuse at each canopy layer before reabsorption"
+    ρ_sd_layer_0::Matrix{FT}
+    "Tranmittance for solar directional->diffuse at each canopy layer before reabsorption"
+    τ_sd_layer_0::Matrix{FT}
+    "Reflectance for solar directional->diffuse at each canopy layer after reabsorption"
+    ρ_sd_layer_1::Matrix{FT}
+    "Tranmittance for solar directional->diffuse at each canopy layer after reabsorption"
+    τ_sd_layer_1::Matrix{FT}
+    "Reflectance for solar directional->diffuse at each canopy layer after reabsorption and denominator correction"
     ρ_sd_layer::Matrix{FT}
-    "Tranmittance for solar directional->diffuse at each canopy layer"
+    "Tranmittance for solar directional->diffuse at each canopy layer after reabsorption and denominator correction"
     τ_sd_layer::Matrix{FT}
     "Tranmittance for solar directional->directional at each canopy layer (wavelength independent)"
     τ_ss_layer::Vector{FT}
@@ -284,6 +292,10 @@ SunGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
                 sdf_leaf         = [zeros(FT,length(config.CONSTANTS.SPECTRA.Λ)) for _ in 1:n_layer],
                 sdb_stem         = [zeros(FT,length(config.CONSTANTS.SPECTRA.Λ)) for _ in 1:n_layer],
                 sdf_stem         = [zeros(FT,length(config.CONSTANTS.SPECTRA.Λ)) for _ in 1:n_layer],
+                ρ_sd_layer_0     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+                τ_sd_layer_0     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+                ρ_sd_layer_1     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+                τ_sd_layer_1     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 ρ_sd_layer       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 τ_sd_layer       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
                 τ_ss_layer       = zeros(FT, n_layer),

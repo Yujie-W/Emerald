@@ -53,7 +53,7 @@ end;
 # General
 #     2023-Oct-09: add struct CanopyStructureAuxil
 #     2023-Oct-18: add fields ddb_stem, ddf_stem, lw_layer_leaf, lw_layer_stem, r_net_lw_leaf, r_net_lw_stem
-#     2024-Oct-16: add field τ_dd_isotropic
+#     2024-Oct-16: add field τ_dd_diffuse
 #     2024-Oct-16: add fields ρ_leaf_eff and τ_leaf_eff
 #
 #######################################################################################################################################################################################################
@@ -125,12 +125,22 @@ Base.@kwdef mutable struct CanopyStructureAuxil{FT}
 
     # Weight tranmittance
     "The transmittance chance that isotropic radiation will not reach any leaf surface"
-    τ_dd_isotropic::Vector{FT}
+    τ_dd_diffuse::Vector{FT}
+    "Effective extinction coefficient for diffuse radiation"
+    k_dd_diffuse::Vector{FT}
 
     # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
-    "Reflectance for diffuse->diffuse at each canopy layer"
+    "Reflectance for diffuse->diffuse at each canopy layer before reabsorption"
+    ρ_dd_layer_0::Matrix{FT}
+    "Tranmittance for diffuse->diffuse at each canopy layer before reabsorption"
+    τ_dd_layer_0::Matrix{FT}
+    "Reflectance for diffuse->diffuse at each canopy layer after reabsorption"
+    ρ_dd_layer_1::Matrix{FT}
+    "Tranmittance for diffuse->diffuse at each canopy layer after reabsorption"
+    τ_dd_layer_1::Matrix{FT}
+    "Reflectance for diffuse->diffuse at each canopy layer after reabsorption and denominator correction"
     ρ_dd_layer::Matrix{FT}
-    "Tranmittance for diffuse->diffuse at each canopy layer"
+    "Tranmittance for diffuse->diffuse at each canopy layer after reabsorption and denominator correction"
     τ_dd_layer::Matrix{FT}
 
     # Effective reflectance and tranmittance per canopy layer (including the denominator correction)
@@ -187,7 +197,12 @@ CanopyStructureAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = CanopySt
             ddf_leaf       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ddb_stem       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ddf_stem       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
-            τ_dd_isotropic = zeros(FT, n_layer),
+            τ_dd_diffuse   = zeros(FT, n_layer),
+            k_dd_diffuse   = zeros(FT, n_layer),
+            ρ_dd_layer_0     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            τ_dd_layer_0     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            ρ_dd_layer_1     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            τ_dd_layer_1     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ρ_dd_layer     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_dd_layer     = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ρ_dd           = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer + 1),

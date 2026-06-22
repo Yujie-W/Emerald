@@ -173,7 +173,7 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         # ciilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
         # ciilai = can_str.trait.δlai[irt] * can_str.auxil.ci_diffuse;
         ilai_direct = (1 - sun_geo.auxil.τ_ss_layer[irt]) / sun_geo.auxil.ks_leaf;
-        ilai_diffuse = 1 - can_str.auxil.τ_dd_isotropic[irt];
+        ilai_diffuse = 1 - can_str.auxil.τ_dd_diffuse[irt];
         sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .* ilai_direct .+
                                              sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .* ilai_diffuse .+
                                              sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]) .* ilai_diffuse;
@@ -259,7 +259,7 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
         # ciilai = (1 - exp(-can_str.trait.δlai[irt])) * can_str.auxil.ci_diffuse;
         # ciilai = can_str.trait.δlai[irt] * can_str.auxil.ci_diffuse;
         ilai_direct = (1 - sun_geo.auxil.τ_ss_layer[irt]) / sun_geo.auxil.ks_leaf;
-        ilai_diffuse = 1 - can_str.auxil.τ_dd_isotropic[irt];
+        ilai_diffuse = 1 - can_str.auxil.τ_dd_diffuse[irt];
         sun_geo.auxil.e_sifꜜ_layer[:,irt] .= sun_geo.auxil._sif_sunlitꜜ_dir .* ilai_direct .+
                                              sun_geo.auxil._sif_sunlitꜜ_dif .* sun_geo.auxil.p_sunlit[irt] .* ilai_diffuse .+
                                              sun_geo.auxil._sif_shadedꜜ     .* (1 - sun_geo.auxil.p_sunlit[irt]) .* ilai_diffuse;
