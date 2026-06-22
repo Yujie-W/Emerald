@@ -1,3 +1,4 @@
+#=
 # This file contains functions to compute the SIF emission of the canopy
 
 #######################################################################################################################################################################################################
@@ -267,12 +268,11 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
                                              sun_geo.auxil._sif_shadedꜛ     .* (1 - sun_geo.auxil.p_sunlit[irt]) .* ilai_diffuse;
 
         # update the SIF cache for the observer direction (compute it here to save time)
-        f_direct = irt > 1 ? prod(view(sun_geo.auxil.τ_ss_layer, 1:(irt-1))) : 1;
-        sen_geo.auxil.sif_sunlit[:,irt] .= (sun_geo.auxil._e_dirꜜ_sifꜛ .* sl_SO .+ sun_geo.auxil._e_dirꜜ_sifꜜ .* sl_so) ./ f_direct .+  # SCOPE: wfEs
-                                           (sun_geo.auxil._e_difꜜ_sifꜛ .* sl_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sl_oθ) .+              # SCOPE: vbEmin_u
-                                           (sun_geo.auxil._e_difꜛ_sifꜛ .* sl_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sl_oθ);                # SCOPE: vfEplu_u
-        sen_geo.auxil.sif_shaded[:,irt] .= (sun_geo.auxil._e_difꜜ_sifꜛ .* sh_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sh_oθ) .+              # SCOPE: vbEmin_h
-                                           (sun_geo.auxil._e_difꜛ_sifꜛ .* sh_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sh_oθ);                # SCOPE: vfEplu_h
+        sen_geo.auxil.sif_sunlit[:,irt] .= sun_geo.auxil._e_dirꜜ_sifꜛ .* sl_SO .+ sun_geo.auxil._e_dirꜜ_sifꜜ .* sl_so .+      # SCOPE: wfEs
+                                           sun_geo.auxil._e_difꜜ_sifꜛ .* sl_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sl_oθ .+      # SCOPE: vbEmin_u
+                                           sun_geo.auxil._e_difꜛ_sifꜛ .* sl_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sl_oθ;        # SCOPE: vfEplu_u
+        sen_geo.auxil.sif_shaded[:,irt] .= sun_geo.auxil._e_difꜜ_sifꜛ .* sh_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sh_oθ .+      # SCOPE: vbEmin_h
+                                           sun_geo.auxil._e_difꜛ_sifꜛ .* sh_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sh_oθ;        # SCOPE: vfEplu_h
     end;
 
     # 2. account for the SIF emission from bottom to up
@@ -349,3 +349,4 @@ lidf_weight(mat_prod::Matrix{FT}, mat_0::Matrix{FT}, mat_1::Matrix{FT}, p_incl::
     # Note that because azimuth angle is evenly distributed, so we return the mean value here; otherwise, we will need to return p_azi' * vec_azi
     return mean(vec_azi)
 );
+=#
