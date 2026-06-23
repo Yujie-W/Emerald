@@ -264,10 +264,10 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         r_sd_2 = view(sun_geo.auxil.ρ_sd_layer_1,:,i);
         t_sd_2 = view(sun_geo.auxil.τ_sd_layer_1,:,i);
         flai_10 = FT(2 ^ -10);
-        r_dd .= kt_dd_x .* flai_10 .* δpai;
-        t_dd .= kr_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
-        r_sd .= kt_sd_x .* flai_10 .* kt_ss_x;
-        t_sd .= kr_sd_x .* flai_10 .* kt_ss_x;
+        r_dd .= kr_dd_x .* flai_10 .* δpai;
+        t_dd .= kt_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
+        r_sd .= kr_sd_x .* flai_10 .* kt_ss_x;
+        t_sd .= kt_sd_x .* flai_10 .* kt_ss_x;
         t_ss  = 1 - kt_ss_x .* flai_10;
         for idb in 1:10
             r_dd_2 .= r_dd .+ t_dd .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd);

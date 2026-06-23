@@ -242,8 +242,8 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         r_dd_2 = view(can_str.auxil.ρ_dd_layer_1,:,irt);
         t_dd_2 = view(can_str.auxil.τ_dd_layer_1,:,irt);
         flai_10 = FT(2 ^ -10);
-        r_dd .= kt_dd_x .* flai_10 .* δpai;
-        t_dd .= kr_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
+        r_dd .= kr_dd_x .* flai_10 .* δpai;
+        t_dd .= kt_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
         for idb in 1:10
             r_dd_2 .= r_dd .+ t_dd .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd);
             t_dd_2 .= t_dd .* t_dd ./ (1 .- r_dd .* r_dd);
@@ -284,8 +284,8 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
 
         # double adding algorithm with ndb = 10
         flai_10 = FT(2 ^ -10);
-        r_lw = kt_lw_x * flai_10 * δpai;
-        t_lw = kr_lw_x * flai_10 * δpai + 1 - flai_10 * δpai;
+        r_lw = kr_lw_x * flai_10 * δpai;
+        t_lw = kt_lw_x * flai_10 * δpai + 1 - flai_10 * δpai;
         for idb in 1:10
             r_lw_2 = r_lw + t_lw * r_lw * t_lw / (1 - r_lw * r_lw);
             t_lw_2 = t_lw * t_lw / (1 - r_lw * r_lw);
