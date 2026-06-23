@@ -258,7 +258,7 @@ CanopyStructure(config::SPACConfig{FT}, n_layer::Int) where {FT} = (
 
     trait = CanopyStructureTrait{FT}(lai = lai, δlai = δlai, sai = sai, δsai = δsai);
     auxil = CanopyStructureAuxil(config, n_layer);
-    auxil.x_bnds .= ([0; [sum(δlai[1:i]) + sum(δsai[1:i]) for i in 1:n_layer]] ./ -(lai + sai));
+    auxil.x_bnds .= ([0; [sum(δlai[1:irt]) + sum(δsai[1:irt]) for irt in 1:n_layer]] ./ -(lai + sai));
     auxil.p_incl_leaf = ones(FT, config.DIMENSIONS.DIM_INCL) ./ config.DIMENSIONS.DIM_INCL;
 
     return CanopyStructure{FT}(trait = trait, auxil = auxil)

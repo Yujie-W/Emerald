@@ -132,6 +132,22 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     "Bidirectional from solar to observer scattering coefficient at different layers and wavelength bins of stem"
     so_stem::Matrix{FT}
 
+    # Reflectance and tranmittance per canopy layer (no denominator correction made yet)
+    "Reflectance for diffuse->observer at each canopy layer before reabsorption"
+    ρ_do_layer_0::Matrix{FT}
+    "Tranmittance for diffuse->observer at each canopy layer before reabsorption"
+    τ_do_layer_0::Matrix{FT}
+    "Reflectance for diffuse->observer at each canopy layer after reabsorption"
+    ρ_do_layer_1::Matrix{FT}
+    "Tranmittance for diffuse->observer at each canopy layer after reabsorption"
+    τ_do_layer_1::Matrix{FT}
+    "Reflectance for diffuse->observer at each canopy layer after reabsorption and denominator correction"
+    ρ_do_layer::Matrix{FT}
+    "Tranmittance for diffuse->observer at each canopy layer after reabsorption and denominator correction"
+    τ_do_layer::Matrix{FT}
+    "Reflectance for solar directional->observer at each canopy layer (wavelength independent)"
+    ρ_so_layer::Vector{FT}
+
     # Canopy reflection
     "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
     e_sensor_layer::Matrix{FT}
@@ -188,6 +204,13 @@ SensorGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeo
             dob_stem          = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             dof_stem          = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             so_stem           = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            ρ_do_layer_0      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            τ_do_layer_0      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            ρ_do_layer_1      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            τ_do_layer_1      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            ρ_do_layer        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            τ_do_layer        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            ρ_so_layer        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             e_sensor_layer    = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer + 1),
             e_sensor          = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ)),
             reflectance       = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ)),
@@ -200,7 +223,7 @@ SensorGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeo
             sif_obs_soil      = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
             sif_obs           = zeros(FT, length(config.CONSTANTS.SPECTRA.IΛ_SIF)),
             ϕ_f_shaded        = zeros(FT, n_layer),
-            ϕ_f_sunlit        = Matrix{FT}[ zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI) for i in 1:n_layer],
+            ϕ_f_sunlit        = Matrix{FT}[ zeros(FT, config.DIMENSIONS.DIM_INCL, config.DIMENSIONS.DIM_AZI) for _ in 1:n_layer],
 );
 
 

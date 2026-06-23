@@ -60,5 +60,6 @@ for nl in 5:200
     SPAC.prescribe_traits!(config, spac; sai = 0, lai = lai);
     SPAC.initialize_spac!(config, spac);
     SPAC.spac!(config, spac, 1);
-    println(spac.canopy.sun_geometry.auxil.e_difꜛ[26,1], ",", spac.canopy.structure.auxil.lwꜛ[1]);
+    println(spac.canopy.sensor_geometry.auxil.reflectance[26], ",", spac.canopy.sun_geometry.auxil.e_sifꜛ[20]);
+    # println(spac.canopy.sensor_geometry.auxil.reflectance[26], ",", spac.canopy.sensor_geometry.auxil.sif_obs[20]);
 end;

@@ -31,8 +31,8 @@ shed_leaves!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
 
     can_str.trait.lai = 0;
     can_str.trait.δlai .= 0;
-    for i in 1:n_layer
-        leaf = leaves[i];
+    for ilf in 1:n_layer
+        leaf = leaves[ilf];
         leaf.xylem.trait.area = 0;
         leaf.xylem.state.asap = 0;
         leaf.flux.state.g_H₂O_s .= 0;

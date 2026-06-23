@@ -244,25 +244,25 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     kr_sd_x = spac.cache.cache_wl_2;
     kt_dd_x = spac.cache.cache_wl_3;
     kr_dd_x = spac.cache.cache_wl_4;
-    for i in 1:n_layer
-        δlai = can_str.trait.δlai[i];
-        δsai = can_str.trait.δsai[i];
+    for irt in 1:n_layer
+        δlai = can_str.trait.δlai[irt];
+        δsai = can_str.trait.δsai[irt];
         δpai = δlai + δsai;
         kt_ss_x = sun_geo.auxil.ks_leaf * δlai + sun_geo.auxil.ks_stem * δsai;
-        kt_sd_x .= (sun_geo.auxil.sdf_leaf[i] .* δlai .+ sun_geo.auxil.sdf_stem[i] .* δsai) ./ δpai;
-        kr_sd_x .= (sun_geo.auxil.sdb_leaf[i] .* δlai .+ sun_geo.auxil.sdb_stem[i] .* δsai) ./ δpai;
-        kt_dd_x .= (view(can_str.auxil.ddf_leaf,:,i) .* δlai .+ view(can_str.auxil.ddf_stem,:,i) .* δsai) ./ δpai;
-        kr_dd_x .= (view(can_str.auxil.ddb_leaf,:,i) .* δlai .+ view(can_str.auxil.ddb_stem,:,i) .* δsai) ./ δpai;
+        kt_sd_x .= (sun_geo.auxil.sdf_leaf[irt] .* δlai .+ sun_geo.auxil.sdf_stem[irt] .* δsai) ./ δpai;
+        kr_sd_x .= (sun_geo.auxil.sdb_leaf[irt] .* δlai .+ sun_geo.auxil.sdb_stem[irt] .* δsai) ./ δpai;
+        kt_dd_x .= (view(can_str.auxil.ddf_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddf_stem,:,irt) .* δsai) ./ δpai;
+        kr_dd_x .= (view(can_str.auxil.ddb_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddb_stem,:,irt) .* δsai) ./ δpai;
 
         # double adding algorithm with ndb = 10
-        r_dd = view(can_str.auxil.ρ_dd_layer_0,:,i);
-        t_dd = view(can_str.auxil.τ_dd_layer_0,:,i);
-        r_sd = view(sun_geo.auxil.ρ_sd_layer_0,:,i);
-        t_sd = view(sun_geo.auxil.τ_sd_layer_0,:,i);
-        r_dd_2 = view(can_str.auxil.ρ_dd_layer_1,:,i);
-        t_dd_2 = view(can_str.auxil.τ_dd_layer_1,:,i);
-        r_sd_2 = view(sun_geo.auxil.ρ_sd_layer_1,:,i);
-        t_sd_2 = view(sun_geo.auxil.τ_sd_layer_1,:,i);
+        r_dd = view(can_str.auxil.ρ_dd_layer_0,:,irt);
+        t_dd = view(can_str.auxil.τ_dd_layer_0,:,irt);
+        r_sd = view(sun_geo.auxil.ρ_sd_layer_0,:,irt);
+        t_sd = view(sun_geo.auxil.τ_sd_layer_0,:,irt);
+        r_dd_2 = view(can_str.auxil.ρ_dd_layer_1,:,irt);
+        t_dd_2 = view(can_str.auxil.τ_dd_layer_1,:,irt);
+        r_sd_2 = view(sun_geo.auxil.ρ_sd_layer_1,:,irt);
+        t_sd_2 = view(sun_geo.auxil.τ_sd_layer_1,:,irt);
         flai_10 = FT(2 ^ -10);
         r_dd .= kr_dd_x .* flai_10 .* δpai;
         t_dd .= kt_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
@@ -281,23 +281,23 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
             t_sd .= t_sd_2;
             t_ss  = t_ss_2;
         end;
-        sun_geo.auxil.τ_sd_layer[:,i] .= t_sd;
-        sun_geo.auxil.ρ_sd_layer[:,i] .= r_sd;
-        sun_geo.auxil.τ_ss_layer[i] = t_ss;
+        sun_geo.auxil.τ_sd_layer[:,irt] .= t_sd;
+        sun_geo.auxil.ρ_sd_layer[:,irt] .= r_sd;
+        sun_geo.auxil.τ_ss_layer[irt] = t_ss;
     end;
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)
     sun_geo.auxil.ρ_sd[:,end] .= sbulk.auxil.ρ_sw;
-    for i in n_layer:-1:1
-        τ_ss_layer = view(sun_geo.auxil.τ_ss_layer,  i  );
-        ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer,:,i  );
-        τ_sd_layer = view(sun_geo.auxil.τ_sd_layer,:,i  );
-        ρ_dd_layer = view(can_str.auxil.ρ_dd_layer,:,i  );
-        ρ_sd_i     = view(sun_geo.auxil.ρ_sd      ,:,i  );
-        τ_sd_i     = view(sun_geo.auxil.τ_sd      ,:,i  );
-        τ_dd_i     = view(can_str.auxil.τ_dd      ,:,i  );
-        ρ_sd_j     = view(sun_geo.auxil.ρ_sd      ,:,i+1);
-        ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,i+1);
+    for irt in n_layer:-1:1
+        τ_ss_layer = view(sun_geo.auxil.τ_ss_layer,  irt  );
+        ρ_sd_layer = view(sun_geo.auxil.ρ_sd_layer,:,irt  );
+        τ_sd_layer = view(sun_geo.auxil.τ_sd_layer,:,irt  );
+        ρ_dd_layer = view(can_str.auxil.ρ_dd_layer,:,irt  );
+        ρ_sd_i     = view(sun_geo.auxil.ρ_sd      ,:,irt  );
+        τ_sd_i     = view(sun_geo.auxil.τ_sd      ,:,irt  );
+        τ_dd_i     = view(can_str.auxil.τ_dd      ,:,irt  );
+        ρ_sd_j     = view(sun_geo.auxil.ρ_sd      ,:,irt+1);
+        ρ_dd_j     = view(can_str.auxil.ρ_dd      ,:,irt+1);
 
         τ_sd_i .= (τ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* ρ_dd_layer) ./ (1 .- ρ_dd_layer .* ρ_dd_j);    # sdit + ssit-sdjr-ddit; rescale
         ρ_sd_i .= ρ_sd_layer .+ τ_ss_layer .* ρ_sd_j .* τ_dd_i .+ τ_sd_layer .* ρ_dd_j .* τ_dd_i;       # sdir + ssit-sdjr-ddit + sdit-ddjr-ddit

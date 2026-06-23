@@ -79,23 +79,23 @@ function longwave_radiation!(spac::BulkSPAC{FT}) where {FT}
 
     # 3. account for the longwave emission from up to bottom
     can_str.auxil.lwꜜ[1] = meteo.rad_lw;
-    for i in 1:n_layer
-        r_i = can_str.auxil.ρ_lw[i];
-        t_i = can_str.auxil.τ_lw[i];
+    for irt in 1:n_layer
+        r_i = can_str.auxil.ρ_lw[irt];
+        t_i = can_str.auxil.τ_lw[irt];
 
-        can_str.auxil.lwꜛ[i] = can_str.auxil.lwꜜ[i] * r_i + can_str.auxil.emitꜛ[i];
-        can_str.auxil.lwꜜ[i+1] = can_str.auxil.lwꜜ[i] * t_i + can_str.auxil.emitꜜ[i];
+        can_str.auxil.lwꜛ[irt] = can_str.auxil.lwꜜ[irt] * r_i + can_str.auxil.emitꜛ[irt];
+        can_str.auxil.lwꜜ[irt+1] = can_str.auxil.lwꜜ[irt] * t_i + can_str.auxil.emitꜜ[irt];
     end;
     can_str.auxil.lwꜛ[end] = can_str.auxil.lwꜜ[end] * sbulk.trait.ρ_lw + r_lw_soil;
 
     # 4. compute the net longwave radiation per canopy layer and soil
-    for i in 1:n_layer
+    for irt in 1:n_layer
         # can_str.auxil.r_net_lw[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] - 2 * can_str.auxil.lw_layer[i];
         # can_str.auxil.r_net_lw[i] /= can_str.trait.δlai[i];
-        f_leaf = can_str.trait.δlai[i] / (can_str.trait.δlai[i] + can_str.trait.δsai[i]);
+        f_leaf = can_str.trait.δlai[irt] / (can_str.trait.δlai[irt] + can_str.trait.δsai[irt]);
         f_stem = 1 - f_leaf;
-        can_str.auxil.r_net_lw_leaf[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] * f_leaf - 2 * can_str.auxil.lw_layer_leaf[i];
-        can_str.auxil.r_net_lw_stem[i] = (can_str.auxil.lwꜜ[i] + can_str.auxil.lwꜛ[i+1]) * can_str.auxil.ϵ_lw_layer[i] * f_stem - 2 * can_str.auxil.lw_layer_stem[i];
+        can_str.auxil.r_net_lw_leaf[irt] = (can_str.auxil.lwꜜ[irt] + can_str.auxil.lwꜛ[irt+1]) * can_str.auxil.ϵ_lw_layer[irt] * f_leaf - 2 * can_str.auxil.lw_layer_leaf[irt];
+        can_str.auxil.r_net_lw_stem[irt] = (can_str.auxil.lwꜜ[irt] + can_str.auxil.lwꜛ[irt+1]) * can_str.auxil.ϵ_lw_layer[irt] * f_stem - 2 * can_str.auxil.lw_layer_stem[irt];
     end;
 
     sbulk.auxil.r_net_lw = can_str.auxil.lwꜜ[end] * (1 - sbulk.trait.ρ_lw) - r_lw_soil;

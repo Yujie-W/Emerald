@@ -114,21 +114,21 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) whe
     # 1. update upward and downward direct and diffuse radiation profiles
     sun_geo.auxil.e_dirꜜ[:,1] .= rad_sw.e_dir;
     sun_geo.auxil.e_difꜜ[:,1] .= rad_sw.e_dif;
-    for i in 1:n_layer
-        e_d_i = view(sun_geo.auxil.e_difꜜ      ,:,i  );    # downward diffuse radiation at upper boundary
-        e_d_j = view(sun_geo.auxil.e_difꜜ      ,:,i+1);    # downward diffuse radiation at lower boundary
-        e_s_i = view(sun_geo.auxil.e_dirꜜ      ,:,i  );    # direct radiation at upper boundary
-        e_s_j = view(sun_geo.auxil.e_dirꜜ      ,:,i+1);    # direct radiation at lower boundary
-        e_u_i = view(sun_geo.auxil.e_difꜛ      ,:,i  );    # upward diffuse radiation at upper boundary
-        e_a_i = view(sun_geo.auxil.e_difꜛ_layer,:,i  );    # upward diffuse radiation at upper boundary (contribution from the layer only)
+    for irt in 1:n_layer
+        e_d_i = view(sun_geo.auxil.e_difꜜ      ,:,irt  );    # downward diffuse radiation at upper boundary
+        e_d_j = view(sun_geo.auxil.e_difꜜ      ,:,irt+1);    # downward diffuse radiation at lower boundary
+        e_s_i = view(sun_geo.auxil.e_dirꜜ      ,:,irt  );    # direct radiation at upper boundary
+        e_s_j = view(sun_geo.auxil.e_dirꜜ      ,:,irt+1);    # direct radiation at lower boundary
+        e_u_i = view(sun_geo.auxil.e_difꜛ      ,:,irt  );    # upward diffuse radiation at upper boundary
+        e_a_i = view(sun_geo.auxil.e_difꜛ_layer,:,irt  );    # upward diffuse radiation at upper boundary (contribution from the layer only)
 
-        r_dd_i = view(can_str.auxil.ρ_dd      ,:,i);       # reflectance of the upper boundary (i)
-        r_sd_i = view(sun_geo.auxil.ρ_sd      ,:,i);       # reflectance of the upper boundary (i)
-        t_dd_i = view(can_str.auxil.τ_dd      ,:,i);       # transmittance of the layer (i)
-        t_sd_i = view(sun_geo.auxil.τ_sd      ,:,i);       # transmittance of the layer (i)
-        t_ss__ = view(sun_geo.auxil.τ_ss_layer,  i);       # transmittance for directional->directional
-        r_sd__ = view(sun_geo.auxil.ρ_sd_layer,:,i);       # reflectance for directional->diffuse
-        r_dd__ = view(can_str.auxil.ρ_dd_layer,:,i);       # reflectance for diffuse->diffuse
+        r_dd_i = view(can_str.auxil.ρ_dd      ,:,irt);       # reflectance of the upper boundary (i)
+        r_sd_i = view(sun_geo.auxil.ρ_sd      ,:,irt);       # reflectance of the upper boundary (i)
+        t_dd_i = view(can_str.auxil.τ_dd      ,:,irt);       # transmittance of the layer (i)
+        t_sd_i = view(sun_geo.auxil.τ_sd      ,:,irt);       # transmittance of the layer (i)
+        t_ss__ = view(sun_geo.auxil.τ_ss_layer,  irt);       # transmittance for directional->directional
+        r_sd__ = view(sun_geo.auxil.ρ_sd_layer,:,irt);       # reflectance for directional->diffuse
+        r_dd__ = view(can_str.auxil.ρ_dd_layer,:,irt);       # reflectance for diffuse->diffuse
 
         e_s_j .= t_ss__ .* e_s_i;
         e_d_j .= t_sd_i .* e_s_i .+ t_dd_i .* e_d_i;
@@ -141,19 +141,19 @@ shortwave_radiation!(config::SPACConfig{FT}, spac::BulkSPAC{FT}, ::Leaf{FT}) whe
     sun_geo.auxil.albedo .= view(sun_geo.auxil.e_difꜛ,:,1) ./ (rad_sw.e_dir .+ rad_sw.e_dif);
 
     # 2. update the sunlit and shaded sum radiation and total absorbed radiation per layer and for soil
-    for i in 1:n_layer
-        e_d_i = view(sun_geo.auxil.e_difꜜ,:,i  );       # downward diffuse radiation at upper boundary
-        e_s_i = view(sun_geo.auxil.e_dirꜜ,:,i  );       # direct radiation at upper boundary
-        e_u_j = view(sun_geo.auxil.e_difꜛ,:,i+1);       # upward diffuse radiation at upper boundary
+    for irt in 1:n_layer
+        e_d_i = view(sun_geo.auxil.e_difꜜ,:,irt  );       # downward diffuse radiation at upper boundary
+        e_s_i = view(sun_geo.auxil.e_dirꜜ,:,irt  );       # direct radiation at upper boundary
+        e_u_j = view(sun_geo.auxil.e_difꜛ,:,irt+1);       # upward diffuse radiation at upper boundary
 
-        a_s_i = view(sun_geo.auxil.e_net_dir,:,i);      # net absorbed direct radiation
-        a_d_i = view(sun_geo.auxil.e_net_dif,:,i);      # net absorbed diffuse radiation
+        a_s_i = view(sun_geo.auxil.e_net_dir,:,irt);      # net absorbed direct radiation
+        a_d_i = view(sun_geo.auxil.e_net_dif,:,irt);      # net absorbed diffuse radiation
 
-        r_dd = view(can_str.auxil.ρ_dd_layer,:,i);      # reflectance of the upper boundary (i)
-        r_sd = view(sun_geo.auxil.ρ_sd_layer,:,i);      # reflectance of the upper boundary (i)
-        t_dd = view(can_str.auxil.τ_dd_layer,:,i);      # transmittance of the layer (i)
-        t_sd = view(sun_geo.auxil.τ_sd_layer,:,i);      # transmittance of the layer (i)
-        t_ss = view(sun_geo.auxil.τ_ss_layer,  i);      # transmittance for directional->directional
+        r_dd = view(can_str.auxil.ρ_dd_layer,:,irt);      # reflectance of the upper boundary (i)
+        r_sd = view(sun_geo.auxil.ρ_sd_layer,:,irt);      # reflectance of the upper boundary (i)
+        t_dd = view(can_str.auxil.τ_dd_layer,:,irt);      # transmittance of the layer (i)
+        t_sd = view(sun_geo.auxil.τ_sd_layer,:,irt);      # transmittance of the layer (i)
+        t_ss = view(sun_geo.auxil.τ_ss_layer,  irt);      # transmittance for directional->directional
 
         a_s_i .= e_s_i .* (1 .- t_ss .- t_sd .- r_sd);
         a_d_i .= (e_d_i .+ e_u_j) .* (1 .- t_dd .- r_dd);
