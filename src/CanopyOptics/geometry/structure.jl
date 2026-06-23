@@ -279,19 +279,22 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         σ_leaf_f = can_str.auxil.w_ddf_leaf * leaf.bio.trait.ρ_lw + can_str.auxil.w_ddb_leaf * leaf.bio.trait.τ_lw;
         σ_stem_b = can_str.auxil.w_ddb_stem * leaf.bio.trait.ρ_lw;
         σ_stem_f = can_str.auxil.w_ddf_stem * leaf.bio.trait.ρ_lw;
-        k_ρ_x = (σ_leaf_b * δlai + σ_stem_b * δsai) / δpai;
-        k_τ_x = (σ_leaf_f * δlai + σ_stem_f * δsai) / δpai;
-        τ_dd_lw = can_str.auxil.τ_dd_diffuse[irt];
-        # can_str.auxil.τ_lw_layer[irt] = (1 - τ_dd_lw) * k_τ_x + τ_dd_lw;
-        # can_str.auxil.ρ_lw_layer[irt] = (1 - τ_dd_lw) * k_ρ_x;
-        kd = can_str.auxil.k_dd_diffuse[irt];
-        t0 = (1 - τ_dd_lw) * k_τ_x;
-        r0 = (1 - τ_dd_lw) * k_ρ_x;
-        t1 = kd * exp(-kd * δpai) * k_τ_x * δpai;
-        r1 = FT(0.5) * (1 - exp(-2 * kd * δpai)) * k_ρ_x;
-        can_str.auxil.τ_lw_layer[irt] = t1 + (t0 - t1) * k_τ_x .+ (r0 - r1) * k_ρ_x + τ_dd_lw;
-        can_str.auxil.ρ_lw_layer[irt] = r1 + (r0 - r1) * k_τ_x .+ (t0 - t1) * k_ρ_x;
-        can_str.auxil.ϵ_lw_layer[irt] = 1 - can_str.auxil.τ_lw_layer[irt] - can_str.auxil.ρ_lw_layer[irt];
+        kr_lw_x = (σ_leaf_b * δlai + σ_stem_b * δsai) / δpai;
+        kt_lw_x = (σ_leaf_f * δlai + σ_stem_f * δsai) / δpai;
+
+        # double adding algorithm with ndb = 10
+        flai_10 = FT(2 ^ -10);
+        r_lw = kt_lw_x * flai_10 * δpai;
+        t_lw = kr_lw_x * flai_10 * δpai + 1 - flai_10 * δpai;
+        for idb in 1:10
+            r_lw_2 = r_lw + t_lw * r_lw * t_lw / (1 - r_lw * r_lw);
+            t_lw_2 = t_lw * t_lw / (1 - r_lw * r_lw);
+            r_lw = r_lw_2;
+            t_lw = t_lw_2;
+        end;
+        can_str.auxil.τ_lw_layer[irt] = t_lw;
+        can_str.auxil.ρ_lw_layer[irt] = r_lw;
+        can_str.auxil.ϵ_lw_layer[irt] = 1 - t_lw - r_lw;
     end;
 
     # update the effective longwave reflectance and transmittance
