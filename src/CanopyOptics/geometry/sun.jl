@@ -242,8 +242,8 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
     # As of 2014-Sep-09: we accounted for CI impact through ks_leaf and ks_stem, so we do not need to multiply ks by ci_sun in the code below.
     kt_sd_x = spac.cache.cache_wl_1;
     kr_sd_x = spac.cache.cache_wl_2;
-    k_τ_x = spac.cache.cache_wl_3;
-    k_ρ_x = spac.cache.cache_wl_4;
+    kt_dd_x = spac.cache.cache_wl_3;
+    kr_dd_x = spac.cache.cache_wl_4;
     for i in 1:n_layer
         δlai = can_str.trait.δlai[i];
         δsai = can_str.trait.δsai[i];
@@ -251,38 +251,39 @@ function sun_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         kt_ss_x = sun_geo.auxil.ks_leaf * δlai + sun_geo.auxil.ks_stem * δsai;
         kt_sd_x .= (sun_geo.auxil.sdf_leaf[i] .* δlai .+ sun_geo.auxil.sdf_stem[i] .* δsai) ./ δpai;
         kr_sd_x .= (sun_geo.auxil.sdb_leaf[i] .* δlai .+ sun_geo.auxil.sdb_stem[i] .* δsai) ./ δpai;
-        sun_geo.auxil.τ_ss_layer[i] = exp(-kt_ss_x);
-        # sun_geo.auxil.τ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kt_sd_x;
-        # sun_geo.auxil.ρ_sd_layer[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kr_sd_x;
-        ks = kt_ss_x / δpai;
-        kd = can_str.auxil.k_dd_diffuse[i];
-        sun_geo.auxil.τ_sd_layer_0[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kt_sd_x;
-        sun_geo.auxil.ρ_sd_layer_0[:,i] .= (1 - sun_geo.auxil.τ_ss_layer[i]) .* kr_sd_x;
-        if kt_ss_x == can_str.auxil.k_dd_diffuse[i] * δpai
-            sun_geo.auxil.τ_sd_layer_1[:,i] .= kd * exp(-kd * δpai) * kt_sd_x * δpai;
-            sun_geo.auxil.ρ_sd_layer_1[:,i] .= FT(0.5) * (1 - exp(-2 * kd * δpai)) * kr_sd_x;
-        else
-            sun_geo.auxil.τ_sd_layer_1[:,i] .= ks / (kd - ks) * exp(-kd * δpai) * kt_sd_x * (1 - exp(-(kd - ks) * δpai));
-            sun_geo.auxil.ρ_sd_layer_1[:,i] .= ks / (kd + ks) * kr_sd_x * (1 - exp(-(kd + ks) * δpai));
+        kt_dd_x .= (view(can_str.auxil.ddf_leaf,:,i) .* δlai .+ view(can_str.auxil.ddf_stem,:,i) .* δsai) ./ δpai;
+        kr_dd_x .= (view(can_str.auxil.ddb_leaf,:,i) .* δlai .+ view(can_str.auxil.ddb_stem,:,i) .* δsai) ./ δpai;
+
+        # double adding algorithm with ndb = 10
+        r_dd = view(can_str.auxil.ρ_dd_layer_0,:,i);
+        t_dd = view(can_str.auxil.τ_dd_layer_0,:,i);
+        r_sd = view(sun_geo.auxil.ρ_sd_layer_0,:,i);
+        t_sd = view(sun_geo.auxil.τ_sd_layer_0,:,i);
+        r_dd_2 = view(can_str.auxil.ρ_dd_layer_1,:,i);
+        t_dd_2 = view(can_str.auxil.τ_dd_layer_1,:,i);
+        r_sd_2 = view(sun_geo.auxil.ρ_sd_layer_1,:,i);
+        t_sd_2 = view(sun_geo.auxil.τ_sd_layer_1,:,i);
+        flai_10 = FT(2 ^ -10);
+        r_dd .= kt_dd_x .* flai_10 .* δpai;
+        t_dd .= kr_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
+        r_sd .= kt_sd_x .* flai_10 .* kt_ss_x;
+        t_sd .= kr_sd_x .* flai_10 .* kt_ss_x;
+        t_ss  = 1 - kt_ss_x .* flai_10;
+        for idb in 1:10
+            r_dd_2 .= r_dd .+ t_dd .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            t_dd_2 .= t_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            r_sd_2 .= r_sd .+ t_sd .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd) .+ t_ss .* r_sd .* t_dd ./ (1 .- r_dd .* r_dd);
+            t_sd_2 .= t_sd .* t_dd ./ (1 .- r_dd .* r_dd) .+ t_ss .* t_sd .+ t_ss .* r_sd .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            t_ss_2  = t_ss  * t_ss;
+            r_dd .= r_dd_2;
+            t_dd .= t_dd_2;
+            r_sd .= r_sd_2;
+            t_sd .= t_sd_2;
+            t_ss  = t_ss_2;
         end;
-        ρ0 = view(sun_geo.auxil.ρ_sd_layer_0,:,i);
-        τ0 = view(sun_geo.auxil.τ_sd_layer_0,:,i);
-        ρ1 = view(sun_geo.auxil.ρ_sd_layer_1,:,i);
-        τ1 = view(sun_geo.auxil.τ_sd_layer_1,:,i);
-        r0 = view(can_str.auxil.ρ_dd_layer_0,:,i);
-        t0 = view(can_str.auxil.τ_dd_layer_0,:,i);
-        r1 = view(can_str.auxil.ρ_dd_layer_1,:,i);
-        t1 = view(can_str.auxil.τ_dd_layer_1,:,i);
-        ff = (r1 .+ t1) ./ (r0 .+ t0);
-        # ff = (ρ1 .+ τ1) ./ (ρ0 .+ τ0);
-        k_τ_x .= (view(can_str.auxil.ddf_leaf,:,i) .* δlai .+ view(can_str.auxil.ddf_stem,:,i) .* δsai) ./ δpai;
-        k_ρ_x .= (view(can_str.auxil.ddb_leaf,:,i) .* δlai .+ view(can_str.auxil.ddb_stem,:,i) .* δsai) ./ δpai;
-        # sun_geo.auxil.τ_sd_layer[:,i] .= τ1 .+ (τ0 .- τ1) .* k_τ_x .* τ1 ./ τ0 .+ (ρ0 .- ρ1) .* k_ρ_x .* ρ1 ./ ρ0;
-        # sun_geo.auxil.ρ_sd_layer[:,i] .= ρ1 .+ (ρ0 .- ρ1) .* k_τ_x .* ρ1 ./ ρ0 .+ (τ0 .- τ1) .* k_ρ_x .* τ1 ./ τ0;
-        sun_geo.auxil.τ_sd_layer[:,i] .= τ1 .+ (τ0 .- τ1) .* k_τ_x .* ff .+ (ρ0 .- ρ1) .* k_ρ_x .* ff;
-        sun_geo.auxil.ρ_sd_layer[:,i] .= ρ1 .+ (ρ0 .- ρ1) .* k_τ_x .* ff .+ (τ0 .- τ1) .* k_ρ_x .* ff;
-        # sun_geo.auxil.τ_sd_layer[:,i] .= τ1;
-        # sun_geo.auxil.ρ_sd_layer[:,i] .= ρ1;
+        sun_geo.auxil.τ_sd_layer[:,i] .= t_sd;
+        sun_geo.auxil.ρ_sd_layer[:,i] .= r_sd;
+        sun_geo.auxil.τ_ss_layer[i] = t_ss;
     end;
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)

@@ -214,8 +214,8 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
     # As of 2024-Sep-07, we account CI's angular dependency along with kd_leaf_za and kd_stem_za, and thus CI is removed here from the equations below.
     # As of 2024-Oct-16, we realized that the extinction coefficient for diffuse radiation (weighted with sind(θ_za)) may overestimate the extinction coefficient for the diffuse radiation.
     # Therefore, we compute the extinction coefficient per 1 degree and weigh the final transmittance (that do not reach any leaf surface).
-    k_τ_x = spac.cache.cache_wl_1;
-    k_ρ_x = spac.cache.cache_wl_2;
+    kt_dd_x = spac.cache.cache_wl_1;
+    kr_dd_x = spac.cache.cache_wl_2;
     for irt in 1:n_layer
         δlai = can_str.trait.δlai[irt];
         δsai = can_str.trait.δsai[irt];
@@ -233,24 +233,25 @@ function canopy_structure!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT
         τ_dd_weighed /= sum_sind;
         can_str.auxil.τ_dd_diffuse[irt] = τ_dd_weighed;
         can_str.auxil.k_dd_diffuse[irt] = -log(τ_dd_weighed) / δpai;
-        k_τ_x .= (view(can_str.auxil.ddf_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddf_stem,:,irt) .* δsai) ./ δpai;
-        k_ρ_x .= (view(can_str.auxil.ddb_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddb_stem,:,irt) .* δsai) ./ δpai;
-        # can_str.auxil.τ_dd_layer[:,irt] .= (1 - τ_dd_weighed) .* k_τ_x .+ τ_dd_weighed;
-        # can_str.auxil.ρ_dd_layer[:,irt] .= (1 - τ_dd_weighed) .* k_ρ_x;
-        kd = can_str.auxil.k_dd_diffuse[irt];
-        can_str.auxil.τ_dd_layer_0[:,irt] .= (1 - τ_dd_weighed) .* k_τ_x;
-        can_str.auxil.ρ_dd_layer_0[:,irt] .= (1 - τ_dd_weighed) .* k_ρ_x;
-        can_str.auxil.τ_dd_layer_1[:,irt] .= kd * exp(-kd * δpai) * k_τ_x * δpai;
-        can_str.auxil.ρ_dd_layer_1[:,irt] .= FT(0.5) * (1 - exp(-2 * kd * δpai)) * k_ρ_x;
-        r0 = view(can_str.auxil.ρ_dd_layer_0,:,irt);
-        t0 = view(can_str.auxil.τ_dd_layer_0,:,irt);
-        r1 = view(can_str.auxil.ρ_dd_layer_1,:,irt);
-        t1 = view(can_str.auxil.τ_dd_layer_1,:,irt);
-        ff = (r1 .+ t1) ./ (r0 .+ t0);
-        # can_str.auxil.τ_dd_layer[:,irt] .= t1 .+ (t0 .- t1) .* k_τ_x .* t1 ./ t0 .+ (r0 .- r1) .* k_ρ_x .* r1 ./ r0 .+ τ_dd_weighed;
-        # can_str.auxil.ρ_dd_layer[:,irt] .= r1 .+ (r0 .- r1) .* k_τ_x .* r1 ./ r0 .+ (t0 .- t1) .* k_ρ_x .* t1 ./ t0;
-        can_str.auxil.τ_dd_layer[:,irt] .= t1 .+ (t0 .- t1) .* k_τ_x .* ff .+ (r0 .- r1) .* k_ρ_x .* ff .+ τ_dd_weighed;
-        can_str.auxil.ρ_dd_layer[:,irt] .= r1 .+ (r0 .- r1) .* k_τ_x .* ff .+ (t0 .- t1) .* k_ρ_x .* ff;
+        kt_dd_x .= (view(can_str.auxil.ddf_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddf_stem,:,irt) .* δsai) ./ δpai;
+        kr_dd_x .= (view(can_str.auxil.ddb_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddb_stem,:,irt) .* δsai) ./ δpai;
+
+        # double adding algorithm with ndb = 10
+        r_dd = view(can_str.auxil.ρ_dd_layer_0,:,irt);
+        t_dd = view(can_str.auxil.τ_dd_layer_0,:,irt);
+        r_dd_2 = view(can_str.auxil.ρ_dd_layer_1,:,irt);
+        t_dd_2 = view(can_str.auxil.τ_dd_layer_1,:,irt);
+        flai_10 = FT(2 ^ -10);
+        r_dd .= kt_dd_x .* flai_10 .* δpai;
+        t_dd .= kr_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
+        for idb in 1:10
+            r_dd_2 .= r_dd .+ t_dd .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            t_dd_2 .= t_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            r_dd .= r_dd_2;
+            t_dd .= t_dd_2;
+        end;
+        can_str.auxil.ρ_dd_layer[:,irt] .= r_dd;
+        can_str.auxil.τ_dd_layer[:,irt] .= t_dd;
     end;
 
     # compute the effective tranmittance and reflectance per layer from lowest to highest layer (including the denominator correction)
