@@ -24,8 +24,6 @@ Base.@kwdef mutable struct SPACFeatures{FT<:AbstractFloat}
     ENABLE_REF::Bool = true
     "Whether to compute fluorescence"
     ENABLE_SIF::Bool = true
-    "Fix the TD of η for Johnson-Berry model"
-    FIX_ETA_TD::Bool = true
     "Threshold of the critical pressure or flow that trigger root disconnection"
     KR_ROOT_DISCONNECTION::FT = 0.5
     "Threshold of the critical pressure or flow that trigger a remainder of conductance"

@@ -20,7 +20,7 @@ function prescribe_ps_traits! end;
 prescribe_ps_traits!(leaf::Leaf{FT}; args...) where {FT} = prescribe_ps_traits!(leaf.photosystem.trait; args...);
 
 prescribe_ps_traits!(
-            pst::GeneralC3Trait{FT};
+            pst::C3Trait{FT};
             b6f::Union{Nothing,Number} = nothing,
             jmax::Union{Nothing,Number} = nothing,
             rd::Union{Nothing,Number} = nothing,
@@ -35,7 +35,7 @@ prescribe_ps_traits!(
 );
 
 prescribe_ps_traits!(
-            pst::GeneralC4Trait{FT};
+            pst::C4Trait{FT};
             b6f::Union{Nothing,Number} = nothing,
             jmax::Union{Nothing,Number} = nothing,
             rd::Union{Nothing,Number} = nothing,
@@ -51,7 +51,7 @@ prescribe_ps_traits!(
 # Method to apply the exponential tuning factor to Vcmax25...
 prescribe_ps_traits!(spac::BulkSPAC{FT}; args...) where {FT} = prescribe_ps_traits!(spac, spac.plant.leaves[end].photosystem.trait; args...);
 
-prescribe_ps_traits!(spac::BulkSPAC{FT}, ::GeneralC3Trait{FT}; vertical_expo::Union{Nothing,Number} = nothing) where {FT} = (
+prescribe_ps_traits!(spac::BulkSPAC{FT}, ::C3Trait{FT}; vertical_expo::Union{Nothing,Number} = nothing) where {FT} = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);
@@ -70,7 +70,7 @@ prescribe_ps_traits!(spac::BulkSPAC{FT}, ::GeneralC3Trait{FT}; vertical_expo::Un
     return nothing
 );
 
-prescribe_ps_traits!(spac::BulkSPAC{FT}, ::GeneralC4Trait{FT}; vertical_expo::Union{Nothing,Number} = nothing) where {FT} = (
+prescribe_ps_traits!(spac::BulkSPAC{FT}, ::C4Trait{FT}; vertical_expo::Union{Nothing,Number} = nothing) where {FT} = (
     can_str = spac.canopy.structure;
     leaves = spac.plant.leaves;
     n_layer = length(leaves);

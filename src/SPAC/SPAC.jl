@@ -6,16 +6,18 @@ using PkgUtility.MathTools: interpolate_data, read_spectrum
 using PkgUtility.PhysicalChemistry: latent_heat_melt, relative_surface_tension, relative_viscosity, saturation_vapor_pressure
 using PkgUtility.UniversalConstants: CP_L_MOL, F_N₂, F_O₂, GAS_R, T₀, Λ_THERMAL_H₂O, ρ_H₂O, energy_to_photon
 
+
+using Photosynthesis: AcMethodC3VcmaxPi, AcMethodC4Vcmax
+using Photosynthesis: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
+using Photosynthesis: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
+using Photosynthesis: AbstractTemperatureDependency, Arrhenius, ArrheniusPeak, ArrheniusPeak2, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
+using Photosynthesis: C3Trait, C4Trait
+
 using ..CanopyOptics: canopy_structure!, canopy_structure_aux!, longwave_radiation!, shortwave_radiation!, soil_albedo!, sun_geometry!, sun_geometry_aux!
 using ..CanopyOptics: fluorescence_spectrum!, reflection_spectrum!, sensor_geometry!, sensor_geometry_aux!
 using ..EnergyBudget: heat_capacitance, spac_energy_budget!, spac_energy_flow!
 using ..LeafOptics: plant_leaf_spectra!
 using ..Namespace: ReferenceSpectra, ShortwaveRadiation
-using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax
-using ..Namespace: AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII
-using ..Namespace: ApMethodC3Inf, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
-using ..Namespace: AbstractTemperatureDependency, Arrhenius, ArrheniusPeak, ArrheniusPeak2, Q10, Q10Peak, Q10PeakHT, Q10PeakLTHT
-using ..Namespace: GeneralC3Trait, GeneralC4Trait
 using ..Namespace: ExtraXylemCapacitorState, XylemHydraulicsAuxilNSS, XylemHydraulicsTrait, LeafBio, LeafBioTrait, LeafEnergyAuxil, LeafEnergyState
 using ..Namespace: Leaf, JunctionCapacitor, Plant, Root, Stem
 using ..Namespace: CanopyStructure, CanopyStructureAuxil, CanopyStructureTrait, MultiLayerCanopy
@@ -23,9 +25,9 @@ using ..Namespace: AirLayer, AirLayerAuxil, AirLayerState
 using ..Namespace: SoilBulk, SoilLayer, SoilLayerAuxil, SoilLayerState, SoilLayerTrait
 using ..Namespace: BulkSPAC, BulkSPACStates, SPACCache, SPACConfig
 using ..Namespace: kill_plant!, sync_state!
-using ..Photosynthesis: plant_carbon_budget!, plant_photosynthesis!
 using ..PlantHydraulics: capacitance_pressure, capacitance_volume, flow_out, set_flow_profile!, xylem_conductance, xylem_pressure
 using ..PlantHydraulics: clear_legacy!, plant_flow_profile!, plant_growth!, plant_pressure_profile!, plant_water_budget!, xylem_recovery!, update_legacy!
+using ..EPhotosynthesis: plant_carbon_budget!, plant_photosynthesis!
 using ..SoilHydraulics: relative_soil_k, soil_budgets!, soil_profiles!, soil_ψ_25
 using ..StomatalModels: limit_stomatal_conductance!, stomatal_conductance!, stomatal_conductance_profile!, β_factor!
 

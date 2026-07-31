@@ -1,10 +1,9 @@
 """
 
-    aci_an(config::SPACConfig{FT}, cache::SPACCache{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::Number, ppar::Number, t::Number) where {FT}
+    aci_an(config::SPACConfig{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::Number, ppar::Number, t::Number) where {FT}
 
 Compute the net photosynthetic rate, given
 - `config` `SPACConfig` struct
-- `cache` `SPACCache` struct
 - `ps` `LeafPhotosystem` struct
 - `air` `AirLayer` struct
 - `p_i` Internal CO₂ partial pressure in `Pa`
@@ -12,8 +11,8 @@ Compute the net photosynthetic rate, given
 - `t` Leaf temperature in `K`
 
 """
-function aci_an(config::SPACConfig{FT}, cache::SPACCache{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT}
-    photosynthesis!(config, cache, ps, air, [p_i,], [ppar,], t);
+function aci_an(config::SPACConfig{FT}, ps::LeafPhotosystem{FT}, air::AirLayer{FT}, p_i::FT, ppar::FT, t::FT) where {FT}
+    photosynthesis!(config.METHODS.PS_METHODS, ps, air.state.p_air, [ppar,], t, [p_i,]);
 
     return ps.auxil.a_n[1]
 end;
@@ -48,15 +47,13 @@ Compute the net photosynthetic rates, given
 function aci_curve end;
 
 aci_curve(config::SPACConfig{FT},
-          cache::SPACCache{FT},
           ps::LeafPhotosystem{FT},
           air::AirLayer{FT},
           pis::Vector,
           ppars::Vector,
-          ts::Vector) where {FT} = aci_an.((config,), (cache,), (ps,), (air,), pis, ppars, ts);
+          ts::Vector) where {FT} = aci_an.((config,), (ps,), (air,), pis, ppars, ts);
 
 aci_curve(config::SPACConfig{FT},
-          cache::SPACCache{FT},
           ps::LeafPhotosystem{FT},
           air::AirLayer{FT},
-          df::DataFrame) where {FT} = aci_curve(config, cache, ps, air, df.P_I, df.PPAR, df.T_LEAF);
+          df::DataFrame) where {FT} = aci_curve(config, ps, air, df.P_I, df.PPAR, df.T_LEAF);

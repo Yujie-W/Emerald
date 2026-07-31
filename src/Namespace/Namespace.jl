@@ -9,6 +9,12 @@ using PkgUtility.RecursiveTools: sync_struct!
 using PkgUtility.UniversalConstants: TraceGasAir, TraceGasCH₄, TraceGasCO₂, TraceGasH₂O, TraceGasN₂, TraceGasO₂, TraceLiquidH₂O
 using PkgUtility.UniversalConstants: CP_D_MOL, CP_L, CP_L_MOL, CP_V_MOL, GAS_R, GRAVITY, M_H₂O, P_ATM, T₀, T₂₅, ρ_H₂O
 
+using Photosynthesis: Q10, Q10TDAngiosperm
+using Photosynthesis: C3State, C3Trait, C4State, C4Trait, LeafPhotosystemAuxil
+using Photosynthesis: PhotosynthesisMethods
+
+import Photosynthesis: LeafPhotosystem
+
 
 # Please do not use V1/V2/V3 files here as they do not contain the Phi_PSI and Phi_PSII variables
 const LAND_ARTIFACT    = artifact"land_model_spectrum_V8" * "/land_model_spectrum_V8.jld2";
@@ -25,23 +31,15 @@ const SOIL_TEXTURE     = read_csv("$(@__DIR__)/../../data/SOIL-TEXTURE.csv");
 
 # Configurations
 include("config/config-info.jl");
-include("config/constants/photosynthesis-rate-constant.jl");
 include("config/constants/reference-spectra.jl");
 include("config/constants.jl");
 include("config/dimensions.jl");
 include("config/features.jl");
 include("config/methods/canopy-rt-method.jl");
-include("config/methods/colimitation-method.jl");
-include("config/methods/colimitation-method-settings.jl");
-include("config/methods/fluorescence-model.jl");
-include("config/methods/fluorescence-model-settings.jl");
 include("config/methods/fluorescence-spectra.jl");
-include("config/methods/photosynthesis-model.jl");
 include("config/methods/soil-albedo.jl");
 include("config/methods/stomatal-model-beta.jl");
 include("config/methods/stomatal-model.jl");
-include("config/methods/temperature-dependency.jl");
-include("config/methods/temperature-dependency-settings.jl");
 include("config/methods.jl");
 include("config.jl");
 

@@ -1,7 +1,7 @@
 module ResearchTools
 
 using ..Namespace
-using ..Photosynthesis
+using ..EPhotosynthesis
 using ..PlantHydraulics
 using ..StomatalModels
 using ..SPAC

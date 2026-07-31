@@ -8,9 +8,9 @@ Prescribe the photosystem temperature dependence, given
 
 """
 function prescribe_ps_td!(config::SPACConfig{FT}; args...) where {FT}
-    prescribe_ps_td_vcmax!(config, config.METHODS.TD_VCMAX_C3; args...);
-    prescribe_ps_td_vcmax!(config, config.METHODS.TD_VCMAX_C4; args...);
-    prescribe_ps_td_jmax!(config, config.METHODS.TD_JMAX; args...);
+    prescribe_ps_td_vcmax!(config, config.METHODS.PS_METHODS.TD_VCMAX_C3; args...);
+    prescribe_ps_td_vcmax!(config, config.METHODS.PS_METHODS.TD_VCMAX_C4; args...);
+    prescribe_ps_td_jmax!(config, config.METHODS.PS_METHODS.TD_JMAX; args...);
 
     return nothing
 end;

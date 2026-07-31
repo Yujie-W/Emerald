@@ -8,7 +8,7 @@ include("Namespace/Namespace.jl");
 
 # depends on Namespace
 include("LeafOptics/LeafOptics.jl");
-include("Photosynthesis/Photosynthesis.jl");
+include("Photosynthesis/EPhotosynthesis.jl");
 include("SoilHydraulics/SoilHydraulics.jl");
 
 # depends on LeafOptics

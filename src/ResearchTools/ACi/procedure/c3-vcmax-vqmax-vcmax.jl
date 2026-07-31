@@ -1,7 +1,6 @@
 aci_fit(config::SPACConfig{FT},
-        cache::SPACCache{FT},
         ps::LeafPhotosystem{FT},
-        pst::GeneralC3Trait{FT},
+        pst::C3Trait{FT},
         acm::AcMethodC3VcmaxPi,
         ajm::AjMethodC3VqmaxPi,
         apm::ApMethodC3Vcmax,
@@ -65,7 +64,7 @@ aci_fit(config::SPACConfig{FT},
         ps.trait.r_d25 = rd_lim_min * 1.2;
         config.METHODS.TD_Γ.VAL_REF = γ_lim_max * 0.8;
         for dfr in eachrow(df)
-            photosynthesis!(config, cache, ps, air, [dfr.P_I,], [dfr.PPAR,], dfr.T_LEAF);
+            photosynthesis!(config.METHODS.PS_METHODS, ps, air.state.p_air, [dfr.PPAR,], dfr.T_LEAF, [dfr.P_I,]);
             vcmax = (dfr.A_NET + ps.auxil.r_d) * (dfr.P_I + ps.auxil.k_m) / (dfr.P_I - ps.auxil.γ_star) / temperature_correction(config.METHODS.TD_VCMAX_C3, dfr.T_LEAF);
             vcmax_guess = nanmax([vcmax_guess, vcmax]);
             vcmax_guess = nanmin([vcmax_guess, 100]);
@@ -108,20 +107,19 @@ aci_fit(config::SPACConfig{FT},
     mthd = ReduceStepMethodND{FT}(x_mins = x_mins, x_maxs = x_maxs, x_inis = x_inis, Δ_inis = Δ_inis);
     stol = SolutionToleranceND{FT}(Δ_tols, 50);
     # func(x) = (rme = aci_rmse(config, ps, pst, air, df, x); @info "C3JB model" x rme; -rme);
-    func(x) = -aci_rmse(config, cache, ps, pst, air, df, params, x);
+    func(x) = -aci_rmse(config, ps, pst, air, df, params, x);
     sol = find_peak(func, mthd, stol);
 
-    best_rmse = aci_rmse(config, cache, ps, pst, air, df, params, sol);
-    aci = aci_curve(config, cache, ps, air, df);
+    best_rmse = aci_rmse(config, ps, pst, air, df, params, sol);
+    aci = aci_curve(config, ps, air, df);
 
     return sol, best_rmse, aci
 );
 
 
 aci_rmse(config::SPACConfig{FT},
-         cache::SPACCache{FT},
          ps::LeafPhotosystem{FT},
-         pst::GeneralC3Trait{FT},
+         pst::C3Trait{FT},
          acm::AcMethodC3VcmaxPi,
          ajm::AjMethodC3VqmaxPi,
          apm::ApMethodC3Vcmax,
@@ -146,5 +144,5 @@ aci_rmse(config::SPACConfig{FT},
         pst.r_d25 = xxx[iparam];
     end;
 
-    return rmse(aci_curve(config, cache, ps, air, df), df.A_NET)
+    return rmse(aci_curve(config, ps, air, df), df.A_NET)
 );

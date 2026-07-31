@@ -26,7 +26,7 @@ plant_photosynthesis!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT} = (
         irt = n_layer + 1 - ilf;
         leaf = leaves[ilf];
         air = airs[lindex[ilf]];
-        leaf_photosynthesis!(config, spac.cache, leaf, air; rd_only = rd_only);
+        leaf_photosynthesis!(config, leaf, air; rd_only = rd_only);
 
         # update the OCS flux
         leaf.flux.auxil.f_ocs .= leaf.flux.auxil.g_OCS .* air.auxil.ps[6] ./ air.state.p_air .* FT(1e6);

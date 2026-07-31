@@ -11,7 +11,7 @@ using ..Namespace: Leaf, Root
 using ..Namespace: AirLayer, SoilLayer
 using ..Namespace: BulkSPAC, SPACCache, SPACConfig
 
-using ..Photosynthesis: photosynthesis_only!, ∂R∂T
+using ..EPhotosynthesis: photosynthesis_only!, ∂R∂T
 using ..PlantHydraulics: flow_in, flow_out, relative_xylem_k, xylem_end_pressure
 
 

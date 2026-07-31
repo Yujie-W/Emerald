@@ -3,12 +3,13 @@ module ACi
 using DataFrames: DataFrame
 using PkgUtility.MathTools: ReduceStepMethodND, SolutionToleranceND, find_peak, nanmax, nanmin, rmse
 
-using ..Namespace: SPACCache, SPACConfig
-using ..Namespace: LeafPhotosystem
-using ..Namespace: GeneralC3Trait, GeneralC4Trait
-using ..Namespace: AcMethodC3VcmaxPi, AcMethodC4Vcmax, AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
+using Photosynthesis: LeafPhotosystem
+using Photosynthesis: C3Trait, C4Trait
+using Photosynthesis: AcMethodC3VcmaxPi, AcMethodC4Vcmax, AjMethodC3JmaxPi, AjMethodC3VqmaxPi, AjMethodC4JPSII, ApMethodC3Vcmax, ApMethodC4VcmaxPi, ApMethodC4VpmaxPi
+using Photosynthesis: photosynthesis!, photosystem_temperature_dependence!, temperature_correction
+
+using ..Namespace: SPACConfig
 using ..Namespace: AirLayer
-using ..Photosynthesis: photosynthesis!, photosystem_temperature_dependence!, temperature_correction
 
 using ..LeafLevelSetup: leaf_level_photosystem, leaf_level_spac_cache
 
