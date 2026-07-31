@@ -61,10 +61,27 @@ function reflection_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where 
 
     # compute the spectra at the observer direction
     for irt in 1:n_layer
-        e_d_i = view(sun_geo.auxil.e_difꜜ,:,irt);         # downward diffuse radiation at upper boundary
-        e_u_i = view(sun_geo.auxil.e_difꜛ,:,irt);         # upward diffuse radiation at upper boundary
-        sen_i = view(sen_geo.auxil.e_sensor_layer,:,irt); # radiation towards the viewing direction per layer (including soil)
+        s_d_i = view(sun_geo.auxil.e_dirꜜ,:,irt);           # direct radiation at upper boundary
+        e_d_i = view(sun_geo.auxil.e_difꜜ,:,irt);           # downward diffuse radiation at upper boundary
+        e_u_j = view(sun_geo.auxil.e_difꜛ,:,irt+1);         # upward diffuse radiation at upper boundary
+        sen_i = view(sen_geo.auxil.e_sensor_layer,:,irt);   # radiation towards the viewing direction per layer (including soil)
 
+        #=
+        ρ_do_layer = view(sen_geo.auxil.ρ_do_layer,:,irt);  # scattering coefficient from diffuse->observer
+        τ_do_layer = view(sen_geo.auxil.τ_do_layer,:,irt);  # transmission coefficient from diffuse->observer
+        ρ_so_layer = view(sen_geo.auxil.ρ_so_layer,:,irt);  # scattering coefficient from solar->observer
+
+        Σlai = sum(view(can_str.trait.δlai,1:irt-1));
+        Σsai = sum(view(can_str.trait.δsai,1:irt-1));
+        kt_oo_x = sen_geo.auxil.ko_leaf * Σlai + sen_geo.auxil.ko_stem * Σsai;
+        do_escape = exp(-kt_oo_x);
+        do_escape = sen_geo.auxil.p_sensor[irt];
+        sen_i .= do_escape .* (s_d_i .* ρ_so_layer .+ e_d_i .* ρ_do_layer) .+ sen_geo.auxil.p_sun_sensor[irt] ./ sun_geo.auxil.p_sunlit[irt] .* e_u_j .* τ_do_layer;
+        =#
+
+
+
+        # #=
         dob_l = view(sen_geo.auxil.dob_leaf,:,irt);       # scattering coefficient backward for diffuse->observer
         dof_l = view(sen_geo.auxil.dof_leaf,:,irt);       # scattering coefficient forward for diffuse->observer
         so_l  = view(sen_geo.auxil.so_leaf ,:,irt);       # bidirectional from solar to observer
@@ -75,9 +92,13 @@ function reflection_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where 
         # note here that ci is already accounted for in the p_sensor, so remove it from the equation here
         ilai = can_str.trait.δlai[irt];
         isai = can_str.trait.δsai[irt];
-        sen_i .= sen_geo.auxil.p_sensor[irt] .* ilai .* sen_geo.auxil.ko_leaf .* (dob_l .* e_d_i .+ dof_l .* e_u_i) .+ sen_geo.auxil.p_sun_sensor[irt] .* ilai .* so_l .* rad_sw.e_dir .+
-                 sen_geo.auxil.p_sensor[irt] .* isai .* sen_geo.auxil.ko_stem .* (dob_s .* e_d_i .+ dof_s .* e_u_i) .+ sen_geo.auxil.p_sun_sensor[irt] .* isai .* so_s .* rad_sw.e_dir;
+        sen_i .= sen_geo.auxil.p_sensor[irt] .* ilai .* sen_geo.auxil.ko_leaf .* (dob_l .* e_d_i .+ dof_l .* e_u_j) .+ sen_geo.auxil.p_sun_sensor[irt] .* ilai .* so_l .* rad_sw.e_dir .+
+                 sen_geo.auxil.p_sensor[irt] .* isai .* sen_geo.auxil.ko_stem .* (dob_s .* e_d_i .+ dof_s .* e_u_j) .+ sen_geo.auxil.p_sun_sensor[irt] .* isai .* so_s .* rad_sw.e_dir;
+        # =#
     end;
+
+
+
     sen_geo.auxil.e_sensor_layer[:,end] .= sen_geo.auxil.p_sensor_soil .* view(sun_geo.auxil.e_difꜛ,:,n_layer+1);
 
     # compute the spectra at the sensor

@@ -382,5 +382,67 @@ function sensor_geometry!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where {FT}
         @. sen_geo.auxil.so_stem[:,irt]  = sen_geo.auxil.w_sob_stem * SPECTRA.ρ_STEM;
     end;
 
+    # compute the transmittance and reflectance for single directions per layer for observer direction
+    kt_do_x = spac.cache.cache_wl_1;
+    kr_do_x = spac.cache.cache_wl_2;
+    kt_dd_x = spac.cache.cache_wl_3;
+    kr_dd_x = spac.cache.cache_wl_4;
+    kr_so_x = spac.cache.cache_wl_5;
+    for irt in 1:n_layer
+        δlai = can_str.trait.δlai[irt];
+        δsai = can_str.trait.δsai[irt];
+        δpai = δlai + δsai;
+        kt_oo_x = sen_geo.auxil.ko_leaf * δlai + sen_geo.auxil.ko_stem * δsai;
+        kt_ss_x = sun_geo.auxil.ks_leaf * δlai + sun_geo.auxil.ks_stem * δsai;
+        kt_do_x .= (view(sen_geo.auxil.dof_leaf,:,irt) .* δlai .+ view(sen_geo.auxil.dof_stem,:,irt) .* δsai) ./ δpai;
+        kr_do_x .= (view(sen_geo.auxil.dob_leaf,:,irt) .* δlai .+ view(sen_geo.auxil.dob_stem,:,irt) .* δsai) ./ δpai;
+        kr_so_x .= (view(sen_geo.auxil.so_leaf ,:,irt) .* δlai .+ view(sen_geo.auxil.so_stem ,:,irt) .* δsai) ./ δpai;
+        kt_dd_x .= (view(can_str.auxil.ddf_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddf_stem,:,irt) .* δsai) ./ δpai;
+        kr_dd_x .= (view(can_str.auxil.ddb_leaf,:,irt) .* δlai .+ view(can_str.auxil.ddb_stem,:,irt) .* δsai) ./ δpai;
+
+        # double adding algorithm with ndb = 10
+        r_dd = view(can_str.auxil.ρ_dd_layer_0,:,irt);
+        t_dd = view(can_str.auxil.τ_dd_layer_0,:,irt);
+        r_do = view(sen_geo.auxil.ρ_do_layer_0,:,irt);
+        t_do = view(sen_geo.auxil.τ_do_layer_0,:,irt);
+        r_so = view(sen_geo.auxil.ρ_so_layer_0,:,irt);
+        r_dd_2 = view(can_str.auxil.ρ_dd_layer_1,:,irt);
+        t_dd_2 = view(can_str.auxil.τ_dd_layer_1,:,irt);
+        r_do_2 = view(sen_geo.auxil.ρ_do_layer_1,:,irt);
+        t_do_2 = view(sen_geo.auxil.τ_do_layer_1,:,irt);
+        r_so_2 = view(sen_geo.auxil.ρ_so_layer_1,:,irt);
+        flai_10 = FT(2 ^ -10);
+        r_dd .= kr_dd_x .* flai_10 .* δpai;
+        t_dd .= kt_dd_x .* flai_10 .* δpai .+ 1 .- flai_10 .* δpai;
+        r_do .= kr_do_x .* flai_10 .* kt_oo_x;
+        t_do .= kt_do_x .* flai_10 .* kt_oo_x;
+        r_so .= kr_so_x .* flai_10 .* δpai;
+        t_oo  = 1 - kt_oo_x .* flai_10;
+        t_ss  = 1 - kt_ss_x .* flai_10;
+        for idb in 1:10
+            r_dd_2 .= r_dd .+ t_dd .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            t_dd_2 .= t_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            r_do_2 .= r_do .+ t_do .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd) .+ t_oo .* r_do .* t_dd ./ (1 .- r_dd .* r_dd);
+            t_do_2 .= t_do .* t_dd ./ (1 .- r_dd .* r_dd) .+ t_oo .* t_do .+ t_oo .* r_do .* r_dd .* t_dd ./ (1 .- r_dd .* r_dd);
+            r_so_2 .= r_so .+ t_ss .* r_so .* t_oo;
+            t_oo_2  = t_oo  * t_oo;
+            t_ss_2  = t_ss  * t_ss;
+
+            # @info "deugging" idb r_so[26] r_so_2[26] r_do[26] r_do_2[26] t_do[26] t_do_2[26] t_oo t_oo_2;
+            # sleep(1);
+
+            r_dd .= r_dd_2;
+            t_dd .= t_dd_2;
+            r_do .= r_do_2;
+            t_do .= t_do_2;
+            r_so .= r_so_2;
+            t_oo  = t_oo_2;
+            t_ss  = t_ss_2;
+        end;
+        sen_geo.auxil.τ_do_layer[:,irt] .= t_do;
+        sen_geo.auxil.ρ_do_layer[:,irt] .= r_do;
+        sen_geo.auxil.ρ_so_layer[:,irt] .= r_so;
+    end;
+
     return nothing
 end;

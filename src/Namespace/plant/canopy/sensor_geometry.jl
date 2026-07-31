@@ -137,16 +137,20 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     ρ_do_layer_0::Matrix{FT}
     "Tranmittance for diffuse->observer at each canopy layer before reabsorption"
     τ_do_layer_0::Matrix{FT}
+    "Reflectance for directional->observer at each canopy layer before reabsorption"
+    ρ_so_layer_0::Matrix{FT}
     "Reflectance for diffuse->observer at each canopy layer after reabsorption"
     ρ_do_layer_1::Matrix{FT}
     "Tranmittance for diffuse->observer at each canopy layer after reabsorption"
     τ_do_layer_1::Matrix{FT}
+    "Reflectance for directional->observer at each canopy layer after reabsorption"
+    ρ_so_layer_1::Matrix{FT}
     "Reflectance for diffuse->observer at each canopy layer after reabsorption and denominator correction"
     ρ_do_layer::Matrix{FT}
     "Tranmittance for diffuse->observer at each canopy layer after reabsorption and denominator correction"
     τ_do_layer::Matrix{FT}
     "Reflectance for solar directional->observer at each canopy layer (wavelength independent)"
-    ρ_so_layer::Vector{FT}
+    ρ_so_layer::Matrix{FT}
 
     # Canopy reflection
     "Radiation towards the viewing direction per layer (including soil) `[mW m⁻² nm⁻¹]`"
@@ -206,8 +210,10 @@ SensorGeometryAuxil(config::SPACConfig{FT}, n_layer::Int) where {FT} = SensorGeo
             so_stem           = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ρ_do_layer_0      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_do_layer_0      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            ρ_so_layer_0      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ρ_do_layer_1      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_do_layer_1      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
+            ρ_so_layer_1      = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ρ_do_layer        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             τ_do_layer        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),
             ρ_so_layer        = zeros(FT, length(config.CONSTANTS.SPECTRA.Λ), n_layer),

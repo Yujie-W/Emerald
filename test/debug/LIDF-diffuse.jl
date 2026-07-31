@@ -7,23 +7,30 @@ using Emerald.SPAC
 FT = Float64;
 
 
-#=
-config = Emerald.Namespace.SPACConfig(FT);
-config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
-#config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
+config_dbug = Emerald.Namespace.SPACConfig(FT);
+config_dbug.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
+#config_dbug.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
 lai = 3;
-spac = Namespace.BulkSPAC(config; air_bounds = collect(0:0.25:13));
-spac.canopy.sun_geometry.state.sza = 30;
-spac.canopy.sun_geometry.state.saa = 180;
-spac.canopy.sensor_geometry.state.vza = 0;
-spac.canopy.sensor_geometry.state.vaa = 0;
-spac.meteo.rad_sw.e_dir .= 0;
-SPAC.prescribe_traits!(config, spac; sai = 0, lai = lai);
+spac_dbug = Namespace.BulkSPAC(config_dbug; air_bounds = collect(0:1:13));
+spac_dbug.canopy.sun_geometry.state.sza = 30;
+spac_dbug.canopy.sun_geometry.state.saa = 180;
+spac_dbug.canopy.sensor_geometry.state.vza = 0;
+spac_dbug.canopy.sensor_geometry.state.vaa = 0;
+# spac_dbug.meteo.rad_sw.e_dir .= 0;
+SPAC.prescribe_traits!(config_dbug, spac_dbug; sai = 0, lai = lai);
 
-SPAC.initialize_spac!(config, spac);
-SPAC.spac!(config, spac, 1);
+SPAC.initialize_spac!(config_dbug, spac_dbug);
+SPAC.spac!(config_dbug, spac_dbug, 1);
+
+can_str = spac_dbug.canopy.structure;
+sun_geo = spac_dbug.canopy.sun_geometry;
+sen_geo = spac_dbug.canopy.sensor_geometry;
 
 
+
+
+
+#=
 # 1, 5, 6
 lidfs = [[0,0], [-0.35,-0.15], [-1,0], [1,0], [0,-1], [0,1]];
 for b in -1:0.1:1
@@ -44,8 +51,8 @@ end;
 
 
 config = Emerald.Namespace.SPACConfig(FT);
-#config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
-config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
+config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTEmerald();
+# config.METHODS.CANOPY_RT_METHOD = Namespace.CanopyRTSCOPE();
 lai = 3;
 
 for nl in 5:200
@@ -61,5 +68,7 @@ for nl in 5:200
     SPAC.initialize_spac!(config, spac);
     SPAC.spac!(config, spac, 1);
     println(spac.canopy.sensor_geometry.auxil.reflectance[26], ",", spac.canopy.sun_geometry.auxil.e_sifꜛ[20]);
-    # println(spac.canopy.sensor_geometry.auxil.reflectance[26], ",", spac.canopy.sensor_geometry.auxil.sif_obs[20]);
+    # these passed the tests
+    #     spac.canopy.sun_geometry.auxil.e_difꜛ[26]
+    #     spac.canopy.structure.auxil.lwꜛ[1]
 end;
