@@ -322,7 +322,11 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
     vec_layer .= (sen_geo.auxil.p_sensor .- sen_geo.auxil.p_sun_sensor) .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_shaded, sen_geo.auxil.sif_shaded, vec_layer);
 
-    vec_layer .= sen_geo.auxil.p_sensor .* can_str.trait.δlai .* sen_geo.auxil.ko_leaf ./ FT(π);
+    # used to be this:
+    # vec_layer .= sen_geo.auxil.p_sensor .* can_str.trait.δlai .* sen_geo.auxil.ko_leaf ./ FT(π);
+    # should use the escape ratio but not the viewed part...
+    vec_layer .= sen_geo.auxil.p_sensor ./ sen_geo.auxil.ci_sensor .* can_str.trait.δlai .* sen_geo.auxil.ko_leaf ./ FT(π) .+
+                 sen_geo.auxil.p_sensor ./ sen_geo.auxil.ci_sensor .* can_str.trait.δsai .* sen_geo.auxil.ko_stem ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_scattered, sen_geo.auxil.sif_scattered, vec_layer);
 
     sen_geo.auxil.sif_obs_soil .= view(sun_geo.auxil.e_sifꜛ,:,n_layer+1) .* sen_geo.auxil.p_sensor_soil ./ FT(π);
