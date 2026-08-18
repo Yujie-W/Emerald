@@ -92,11 +92,11 @@ Base.@kwdef mutable struct SensorGeometryAuxil{FT}
     ko_leaf::FT = 0
     "Observer direction beam extinction coefficient weight (diffuse) (stem)"
     ko_stem::FT = 0
-    "Probability of directly viewing a leaf in observer direction at different layer boundaries"
+    "Probability of reflected radiation or SIF that could escape at the observer direction at different layer boundaries"
     p_sensor::Vector{FT}
     "Probability of directly viewing soil in observer direction at different layer boundaries"
     p_sensor_soil::FT = 0
-    "Bi-directional probability of directly viewing at different layer boundaries (solar->canopy->observer)"
+    "Bi-directional probability of directly radiation and then escaped at observation direction at different layer boundaries (solar->canopy->observer)"
     p_sun_sensor::Vector{FT}
 
     # Matrix used for radiation to sensor

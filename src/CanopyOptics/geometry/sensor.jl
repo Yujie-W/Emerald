@@ -151,22 +151,32 @@ sensor_geometry_aux!(
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
+    # Notes on 2026-Aug-19:
+    # After discussions with Ke Liu, the p_sensor should be defeined as the escape ratio of reflected radiation or SIF.
+    # The calculation for soil is correct, as there is no CI term for soil anyhow.
+    # Therefore, we should remove the ci term from the canopy layers, it used to be.
+    #     sensa.p_sensor[i] = sensa.ci_sensor / kociipai * (exp(kocipai * cansa.x_bnds[i]) - exp(kocipai * cansa.x_bnds[i+1]));
     kocipai = sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai;
     for i in eachindex(canst.δlai)
         kociipai = sensa.ko_leaf * canst.δlai[i] + sensa.ko_stem * canst.δsai[i];
-        sensa.p_sensor[i] = sensa.ci_sensor / kociipai * (exp(kocipai * cansa.x_bnds[i]) - exp(kocipai * cansa.x_bnds[i+1]));
+        sensa.p_sensor[i] = 1 / kociipai * (exp(kocipai * cansa.x_bnds[i]) - exp(kocipai * cansa.x_bnds[i+1]));
     end;
     sensa.p_sensor_soil = exp(-kocipai);
 
     # TODO: the pso function could lead to pso > ps or pso > po, redo the calculation without using the min function
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
     # equations from Appendix C of the mSCOPE paper (Yang et al., 2018)
+    # Notes on 2026-Aug-19:
+    # Following the notes above, the p_sun_sensor should be defined as the escape ratio of the reflected radiation of SIF caused by direct radiation.
+    # Therefore, the ci term should be removed from the pso function as well. It used to be:
+    #     pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
+    # Accordingly,
     pai = canst.lai + canst.sai;
     ag = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
     Σk = (sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai + sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai);
     Πk = sqrt((sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai) * (sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai));
     sl = lw2ch / 2 * pai / Σk;
-    pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
+    pso(x) = ag == 0 ? exp(Σk * x - Πk * x) : exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
 
     for i in eachindex(canst.δlai)
         sensa.p_sun_sensor[i] = quadgk(pso, cansa.x_bnds[i+1], cansa.x_bnds[i]; rtol = 1e-4)[1] / (cansa.x_bnds[i] - cansa.x_bnds[i+1]);
@@ -278,22 +288,27 @@ sensor_geometry_aux!(
 
     # compute fractions of leaves/soil that can be viewed from the sensor direction
     #     it is different from the SCOPE model that we compute the po directly for canopy layers rather than the boundaries (last one is still soil though)
+    # Notes on 2026-Aug-19:
+    # See notes above, the p_sensor should be defined as the escape ratio of reflected radiation or SIF.
+    # Thus, ci term is removed from the p_sensor calculation.
     kocipai = sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai;
     for i in eachindex(canst.δlai)
         kociipai = sensa.ko_leaf * canst.δlai[i] + sensa.ko_stem * canst.δsai[i];
-        sensa.p_sensor[i] = sensa.ci_sensor / kociipai * (exp(kocipai * cansa.x_bnds[i]) - exp(kocipai * cansa.x_bnds[i+1]));
+        sensa.p_sensor[i] = 1 / kociipai * (exp(kocipai * cansa.x_bnds[i]) - exp(kocipai * cansa.x_bnds[i+1]));
     end;
     sensa.p_sensor_soil = exp(-kocipai);
 
     # TODO: the pso function could lead to pso > ps or pso > po, redo the calculation without using the min function
     # compute the fraction of sunlit leaves that can be viewed from the sensor direction (for hot spot)
     # equations from Appendix C of the mSCOPE paper (Yang et al., 2018)
+    # See notes above, the p_sun_sensor should be defined as the escape ratio of the reflected radiation of SIF caused by direct radiation.
+    # Thus, the ci term is removed from the pso function as well.
     pai = canst.lai + canst.sai;
     ag = sqrt( tand(sunst.sza) ^ 2 + tand(senst.vza) ^ 2 - 2 * tand(sunst.sza) * tand(senst.vza) * cosd(senst.vaa - sunst.saa) );
     Σk = (sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai + sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai);
     Πk = sqrt((sunsa.ks_leaf * canst.lai + sunsa.ks_stem * canst.sai) * (sensa.ko_leaf * canst.lai + sensa.ko_stem * canst.sai));
     sl = lw2ch / 2 * pai / Σk;
-    pso(x) = ag == 0 ? sensa.ci_sensor * exp(Σk * x - Πk * x) : sensa.ci_sensor * exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
+    pso(x) = ag == 0 ? exp(Σk * x - Πk * x) : exp(Σk * x + Πk * sl / ag * (1 - exp(ag / sl * x)));
 
     for i in eachindex(canst.δlai)
         sensa.p_sun_sensor[i] = quadgk(pso, cansa.x_bnds[i+1], cansa.x_bnds[i]; rtol = 1e-4)[1] / (cansa.x_bnds[i] - cansa.x_bnds[i+1]);
