@@ -268,11 +268,13 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
 
         # update the SIF cache for the observer direction (compute it here to save time)
         f_direct = irt > 1 ? prod(view(sun_geo.auxil.τ_ss_layer, 1:(irt-1))) : 1;
-        sen_geo.auxil.sif_sunlit[:,irt] .= (sun_geo.auxil._e_dirꜜ_sifꜛ .* sl_SO .+ sun_geo.auxil._e_dirꜜ_sifꜜ .* sl_so) ./ f_direct .+  # SCOPE: wfEs
-                                           (sun_geo.auxil._e_difꜜ_sifꜛ .* sl_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sl_oθ) .+              # SCOPE: vbEmin_u
-                                           (sun_geo.auxil._e_difꜛ_sifꜛ .* sl_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sl_oθ);                # SCOPE: vfEplu_u
-        sen_geo.auxil.sif_shaded[:,irt] .= (sun_geo.auxil._e_difꜜ_sifꜛ .* sh_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sh_oθ) .+              # SCOPE: vbEmin_h
-                                           (sun_geo.auxil._e_difꜛ_sifꜛ .* sh_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sh_oθ);                # SCOPE: vfEplu_h
+        kk_dir = (1 - sun_geo.auxil.τ_ss_layer[irt]) / (sun_geo.auxil.ks_leaf * can_str.trait.δlai[irt] + sun_geo.auxil.ks_stem * can_str.trait.δsai[irt]);
+        kk_dif = (1 - can_str.auxil.τ_dd_isotropic[irt]) / (can_str.auxil.kd_leaf * can_str.trait.δlai[irt] + can_str.auxil.kd_stem * can_str.trait.δsai[irt]);
+        sen_geo.auxil.sif_sunlit[:,irt] .= kk_dir .* (sun_geo.auxil._e_dirꜜ_sifꜛ .* sl_SO .+ sun_geo.auxil._e_dirꜜ_sifꜜ .* sl_so) ./ f_direct .+  # SCOPE: wfEs
+                                           kk_dif .* (sun_geo.auxil._e_difꜜ_sifꜛ .* sl_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sl_oθ) .+              # SCOPE: vbEmin_u
+                                           kk_dif .* (sun_geo.auxil._e_difꜛ_sifꜛ .* sl_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sl_oθ);                # SCOPE: vfEplu_u
+        sen_geo.auxil.sif_shaded[:,irt] .= kk_dif .* (sun_geo.auxil._e_difꜜ_sifꜛ .* sh_O_ .+ sun_geo.auxil._e_difꜜ_sifꜜ .* sh_oθ) .+              # SCOPE: vbEmin_h
+                                           kk_dif .* (sun_geo.auxil._e_difꜛ_sifꜛ .* sh_O_ .- sun_geo.auxil._e_difꜛ_sifꜜ .* sh_oθ);                # SCOPE: vfEplu_h
     end;
 
     # 2. account for the SIF emission from bottom to up
@@ -322,7 +324,8 @@ function fluorescence_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) wher
     vec_layer .= (sen_geo.auxil.p_sensor .- sen_geo.auxil.p_sun_sensor) .* can_str.trait.δlai ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_shaded, sen_geo.auxil.sif_shaded, vec_layer);
 
-    vec_layer .= sen_geo.auxil.p_sensor .* can_str.trait.δlai .* sen_geo.auxil.ko_leaf ./ FT(π);
+    vec_layer .= sen_geo.auxil.p_sensor .* can_str.trait.δlai .* sen_geo.auxil.ko_leaf ./ FT(π) .+
+                 sen_geo.auxil.p_sensor .* can_str.trait.δsai .* sen_geo.auxil.ko_stem ./ FT(π);
     mul!(sen_geo.auxil.sif_obs_scattered, sen_geo.auxil.sif_scattered, vec_layer);
 
     sen_geo.auxil.sif_obs_soil .= view(sun_geo.auxil.e_sifꜛ,:,n_layer+1) .* sen_geo.auxil.p_sensor_soil ./ FT(π);

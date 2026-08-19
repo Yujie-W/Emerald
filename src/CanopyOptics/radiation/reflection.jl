@@ -92,9 +92,10 @@ function reflection_spectrum!(config::SPACConfig{FT}, spac::BulkSPAC{FT}) where 
         # note here that ci is already accounted for in the p_sensor, so remove it from the equation here
         ilai = can_str.trait.δlai[irt];
         isai = can_str.trait.δsai[irt];
-        sen_i .= sen_geo.auxil.p_sensor[irt] .* ilai .* sen_geo.auxil.ko_leaf .* (dob_l .* e_d_i .+ dof_l .* e_u_j) .+ sen_geo.auxil.p_sun_sensor[irt] .* ilai .* so_l .* rad_sw.e_dir .+
-                 sen_geo.auxil.p_sensor[irt] .* isai .* sen_geo.auxil.ko_stem .* (dob_s .* e_d_i .+ dof_s .* e_u_j) .+ sen_geo.auxil.p_sun_sensor[irt] .* isai .* so_s .* rad_sw.e_dir;
-        # =#
+        sen_i .= sen_geo.auxil.p_sensor[irt] .* ilai .* sen_geo.auxil.ko_leaf .* (dob_l .* e_d_i .+ dof_l .* e_u_j) .+
+                 sen_geo.auxil.p_sensor[irt] .* isai .* sen_geo.auxil.ko_stem .* (dob_s .* e_d_i .+ dof_s .* e_u_j) .+
+                 sen_geo.auxil.p_sun_sensor[irt] .* ilai .* so_l .* rad_sw.e_dir .+
+                 sen_geo.auxil.p_sun_sensor[irt] .* isai .* so_s .* rad_sw.e_dir;
     end;
 
 
