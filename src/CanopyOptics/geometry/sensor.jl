@@ -131,10 +131,10 @@ sensor_geometry_aux!(
         sensa.w_dob_stem += (f_ada * (1 - f_inc) + f_aba * f_inc) * cansa.p_incl_stem[i];
         sensa.w_dof_stem += (f_ada * f_inc + f_aba * (1 - f_inc)) * cansa.p_incl_stem[i];
     end;
-    sensa.w_sob_leaf = cansa.p_incl_leaf' * sensa.sb_incl;
-    sensa.w_sof_leaf = cansa.p_incl_leaf' * sensa.sf_incl;
-    sensa.w_sob_stem = cansa.p_incl_stem' * sensa.sb_incl;
-    sensa.w_sof_stem = cansa.p_incl_stem' * sensa.sf_incl;
+    sensa.w_sob_leaf = cansa.p_incl_leaf' * sensa.sb_incl * sunsa.ci_sun;
+    sensa.w_sof_leaf = cansa.p_incl_leaf' * sensa.sf_incl * sunsa.ci_sun;
+    sensa.w_sob_stem = cansa.p_incl_stem' * sensa.sb_incl * sunsa.ci_sun;
+    sensa.w_sof_stem = cansa.p_incl_stem' * sensa.sf_incl * sunsa.ci_sun;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -180,7 +180,7 @@ sensor_geometry_aux!(
 
     for i in eachindex(canst.δlai)
         sensa.p_sun_sensor[i] = quadgk(pso, cansa.x_bnds[i+1], cansa.x_bnds[i]; rtol = 1e-4)[1] / (cansa.x_bnds[i] - cansa.x_bnds[i+1]);
-        sensa.p_sun_sensor[i] = min(sensa.p_sun_sensor[i], sensa.p_sensor[i], sunsa.p_sunlit[i]);
+        sensa.p_sun_sensor[i] = min(sensa.p_sun_sensor[i], sensa.p_sensor[i]);
     end;
 
     return nothing
@@ -268,10 +268,10 @@ sensor_geometry_aux!(
     sensa.w_dof_leaf = (1 - cansa.bf_leaf / sensa.ko_leaf) / 2;
     sensa.w_dob_stem = (1 + cansa.bf_stem / sensa.ko_stem) / 2;
     sensa.w_dof_stem = (1 - cansa.bf_stem / sensa.ko_stem) / 2;
-    sensa.w_sob_leaf = cansa.p_incl_leaf' * sensa.sb_incl;
-    sensa.w_sof_leaf = cansa.p_incl_leaf' * sensa.sf_incl;
-    sensa.w_sob_stem = cansa.p_incl_stem' * sensa.sb_incl;
-    sensa.w_sof_stem = cansa.p_incl_stem' * sensa.sf_incl;
+    sensa.w_sob_leaf = cansa.p_incl_leaf' * sensa.sb_incl * sunsa.ci_sun;
+    sensa.w_sof_leaf = cansa.p_incl_leaf' * sensa.sf_incl * sunsa.ci_sun;
+    sensa.w_sob_stem = cansa.p_incl_stem' * sensa.sb_incl * sunsa.ci_sun;
+    sensa.w_sof_stem = cansa.p_incl_stem' * sensa.sf_incl * sunsa.ci_sun;
 
     # compute the fo and fo_abs matrices
     for i in eachindex(Θ_AZI)
@@ -312,7 +312,7 @@ sensor_geometry_aux!(
 
     for i in eachindex(canst.δlai)
         sensa.p_sun_sensor[i] = quadgk(pso, cansa.x_bnds[i+1], cansa.x_bnds[i]; rtol = 1e-4)[1] / (cansa.x_bnds[i] - cansa.x_bnds[i+1]);
-        sensa.p_sun_sensor[i] = min(sensa.p_sun_sensor[i], sensa.p_sensor[i], sunsa.p_sunlit[i]);
+        sensa.p_sun_sensor[i] = min(sensa.p_sun_sensor[i], sensa.p_sensor[i]);
     end;
 
     return nothing
