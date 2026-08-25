@@ -9,7 +9,7 @@ const HOTSPOT_Q   = nothing   # nothing = Emerald default (leaf width / canopy h
 const N_MU, N_PHI = 24, 24    # hemisphere quadrature (24x24 agrees with 72x72 to <0.01%)
 # --- canopy structure ---
 const LAI         = 3.0
-const CI          = 0.62
+const CI          = 0.9
 const SAI         = 0.0
 const SZA         = 30.0
 const LIDF_AB     = (0.0, 0.0)    # Verhoef (A,B): uniform (0,0) | planophile (1,0) | erectophile (-1,0) | plagiophile (0,-1) | extremophile (0,1) | spherical (-0.35,-0.15)
@@ -28,7 +28,7 @@ const G1          = 130.0         # Medlyn slope
 const SPECTRA_SET = :new          # :new = NEW_PHI_2021, :old = OLD_PHI_2021
 # ====================================================================
 
-cd("/home/klliu/SIFEsc/EmeraldTestV2"); using Pkg; Pkg.activate("."; io = devnull)
+# cd("/home/klliu/SIFEsc/EmeraldTestV2"); using Pkg; Pkg.activate("."; io = devnull)
 using Emerald
 import Emerald.SPAC as ESPAC
 import Emerald.Namespace as ENS
@@ -39,15 +39,15 @@ const FT = Float64
 # ── canopy builder (mirrors the forest-default spac_traits) ──────────────────────
 function build()
     config = ENS.SPACConfig(FT; dataset = SPECTRA_SET == :new ? ENS.NEW_PHI_2021 : ENS.OLD_PHI_2021)
-    config.FEATURES.ENABLE_LEAF_SIF_SIGMOID = true
-    config.FEATURES.ENABLE_LEAF_SIF_RESCALE = true
-    config.FEATURES.ENABLE_CHL_SIF_SIGMOID = true
-    config.FEATURES.ENABLE_CHL_SIF_RESCALE = true
+    #config.FEATURES.ENABLE_LEAF_SIF_SIGMOID = true
+    #config.FEATURES.ENABLE_LEAF_SIF_RESCALE = true
+    #config.FEATURES.ENABLE_CHL_SIF_SIGMOID = true
+    #config.FEATURES.ENABLE_CHL_SIF_RESCALE = true
     config.METHODS.SOIL_ALBEDO = ENS.SoilAlbedoPrescribe()
     config.METHODS.STOMATAL_MODEL = ENS.MedlynSM{FT}()
     config.METHODS.STOMATAL_MODEL.G1 = G1
     config.FEATURES.EFFECTIVE_LEAF_SPECTRA = false
-    config.FEATURES.CI_IN_EXTINCTION_ONLY = CI_FLAG
+    #config.FEATURES.CI_IN_EXTINCTION_ONLY = CI_FLAG
 
     # conserving test: zero every pigment/water/dry-matter absorption cross-section in the band
     if CONSERVING
